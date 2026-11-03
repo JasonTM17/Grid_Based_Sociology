@@ -53,8 +53,9 @@ def main(argv: list[str]) -> int:
 
     ok_rows = n_rows >= MIN_ROWS
     ok_cols = n_cols >= MIN_COLS
-    verdict = "PASS" if (ok_rows and ok_cols) else "FAIL"
-    print(f"Yêu cầu: >= {MIN_ROWS} hàng và >= {MIN_COLS} cột -> {verdict}")
+    ok_numeric = n_numeric >= MIN_COLS
+    verdict = "PASS" if (ok_rows and ok_cols and ok_numeric) else "FAIL"
+    print(f"Yêu cầu: >= {MIN_ROWS} hàng, >= {MIN_COLS} cột tổng, >= {MIN_COLS} cột số -> {verdict}")
     return 0 if verdict == "PASS" else 1
 
 
