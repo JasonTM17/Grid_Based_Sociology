@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
+venv/
+
+# AgentKit & công cụ agent (theo quy định: không commit)
+.agentkit/
+.agents/
+.claude/
+.codex/
+plans/
+AGENTS.md
+
+# Dữ liệu tham chiếu bên thứ ba (tải lại theo DOI trong README — không commit)
+data/raw/mendeley/
+
+# Hệ điều hành
+Thumbs.db
+Desktop.ini
