@@ -120,6 +120,22 @@ def test_predict_before_cluster_raises():
         model.predict(np.array([[0.0, 0.0]]))
 
 
+def test_predict_out_of_support_returns_noise():
+    """Điểm ngoài vùng dữ liệu huấn luyện KHÔNG được kẹp vào ô biên — nhận -1."""
+    X, _ = make_blobs(
+        n_samples=240, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=42
+    )
+    model = STING(n_levels=3, factor=4, min_count=3).fit(X)
+    model.cluster(level=2, connectivity=1)
+
+    far = np.array([[-50.0, -50.0], [0.0, -80.0]])
+    assert np.array_equal(model.predict(far), np.array([-1, -1]))
+
+    # điểm trong vùng huấn luyện vẫn dự đoán bình thường
+    inside = np.array([[6.0, 6.0]])
+    assert model.predict(inside)[0] != -1
+
+
 def test_save_load_roundtrip(tmp_path):
     """Model lưu ra file rồi nạp lại phải cho kết quả dự đoán y hệt."""
     X, _ = make_blobs(

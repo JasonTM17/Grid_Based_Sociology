@@ -43,16 +43,32 @@ Ghi chú: `jupyter` CLI chưa vào PATH — dùng `python -m jupyter` / `python 
 
 ## Dự đoán (train quá khứ → dự đoán năm mới)
 
-STING sau khi huấn luyện là một "model" lưu hoàn toàn local (không cần dịch vụ ngoài):
+Toàn bộ chạy **local, không cần dịch vụ ngoài**. Ba bước:
 
 ```powershell
-python scripts/predict_demo.py
+python scripts/predict_sweep.py        # 1) chốt cấu hình (train-only, KHÔNG nhìn 2024)
+python scripts/predict_demo.py         # 2) STING: học 2011–2023 → dự đoán cụm 2024
+python scripts/predict_supervised.py   # 3) model ML có giám sát (scikit-learn)
 ```
 
-- Huấn luyện trên PAPI 2011–2023 (cặp chỉ tiêu `sd_5_4` × `sd_6_2`), lưu model vào `models/sting_papi_sd54_sd62.pkl`, rồi nạp lại và dự đoán cụm cho 63 tỉnh năm 2024 (năm chưa từng thấy).
-- Kết quả: `results/predict_all_years.csv` (cụm dự đoán mọi năm), `results/predict_summary.md`, `results/figs/predict_2024.png`.
+1. **`predict_sweep.py`** — quét ứng viên cặp chỉ tiêu đã audit thang đo + cấu hình lưới;
+   chọn bằng CV trên dữ liệu ≤2020, kiểm trên tương lai giả 2021–2022, rồi đóng băng vào
+   `models/predict_config.json` (tránh "chọn theo kết quả test"). Bảng đầy đủ:
+   `results/predict_config_search.csv`.
+2. **`predict_demo.py`** — STING `fit → save → load → predict`: lưu model local
+   (`models/sting_predict_model.pkl`) rồi nạp lại để dự đoán cụm cho 63 tỉnh năm 2024
+   (năm chưa từng thấy). Kết quả: `results/predict_all_years.csv`,
+   `results/predict_summary.md` (gồm độ nhạy theo `min_count` và chuyển cụm tách riêng
+   "chuyển thật" vs "chuyển sang/từ nhiễu"), `results/figs/predict_2024.png`.
+3. **`predict_supervised.py`** — model có giám sát, lưu local bằng joblib:
+   - **Hồi quy (chính):** dự báo *6.1 Y tế công lập* năm t+1 từ 8 chỉ tiêu năm t —
+     Ridge/RandomForest vượt baseline carry-forward ~10% MAE trên holdout 2023→2024.
+     Lưu `models/sup_ridge.joblib`, `models/sup_rf.joblib`; kết quả
+     `results/supervised_metrics.csv` + `results/supervised_summary.md`.
+   - **Phân loại (phụ, kết quả âm tính):** dự báo "thuộc vùng cấu trúc hay ngoại vi"
+     năm sau — không vượt baseline đủ tin cậy; ghi lại trung thực.
 
-Nạp model để dự đoán điểm mới (cần chuẩn hóa z bằng tham số trong `models/sting_papi_scaler.json`):
+Nạp model để dự đoán điểm mới:
 
 ```python
 import json, sys
@@ -60,11 +76,20 @@ sys.path.insert(0, "src")
 import numpy as np
 from sting import STING
 
-model = STING.load("models/sting_papi_sd54_sd62.pkl")
-info = json.load(open("models/sting_papi_scaler.json", encoding="utf-8"))
+model = STING.load("models/sting_predict_model.pkl")
+info = json.load(open("models/sting_predict_scaler.json", encoding="utf-8"))
 mean, scale = np.array(info["mean"]), np.array(info["scale"])
 
-x = np.array([[2.4, 1.9]])          # [sd_5_4, sd_6_2] của tỉnh mới
+x = np.array([[1.9, 1.9]])           # [sd_4_2, sd_6_1] của tỉnh mới
 z = (x - mean) / scale
-print(model.predict(z))              # -> cụm dự đoán (hoặc -1 nếu chưa từng gặp)
+print(model.predict(z))               # -> cụm dự đoán (hoặc -1: nhiễu/ngoài vùng học)
+
+import joblib
+ridge = joblib.load("models/sup_ridge.joblib")
+print(ridge.predict(np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])))  # dự báo 6.1 năm sau
 ```
+
+**Lưu ý thang đo:** nhiều sub-dimension PAPI đổi thang điểm giữa các năm (ví dụ `sd_5_4`
+đổi từ 0.25–2.5 lên 0.33–3.33 tại 2021; `sd_2_1` đổi tại 2018). `scripts/check_data.py`
+in danh sách cảnh báo gãy thang đo (bước nhảy trung bình năm > 0.25 điểm); pipeline dự đoán
+chỉ dùng các chỉ tiêu nằm ngoài danh sách này.

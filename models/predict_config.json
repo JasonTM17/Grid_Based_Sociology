@@ -1,0 +1,27 @@
+{
+  "frozen_at": "2026-11-04",
+  "selection_protocol": "Fit ≤2020; chấm trên tương lai giả 2021–2022; 2024 không tham gia chọn. Lọc: k 2–6, noise≤0.25, largest≤0.85, coverage≥0.75. Điểm = coverage - 0.5*noise - 0.15*largest - 0.02*|k-3| + 0.03*stable(mc±1).",
+  "features": [
+    "sd_4_2",
+    "sd_6_1"
+  ],
+  "feature_labels": {
+    "sd_4_2": "4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công",
+    "sd_6_1": "6.1 Y tế công lập"
+  },
+  "sting": {
+    "n_levels": 3,
+    "factor": 4,
+    "min_count": 5,
+    "cluster_level": 2,
+    "connectivity": 1
+  },
+  "selection_metrics": {
+    "k": 3,
+    "sizes_top5": "[453, 16, 5]",
+    "noise_train": 0.243,
+    "coverage_2021_2022": 0.851,
+    "stable_mc_pm1": false,
+    "score": 0.6213
+  }
+}

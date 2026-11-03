@@ -1,0 +1,30 @@
+{
+  "features": [
+    "sd_4_2",
+    "sd_6_1"
+  ],
+  "feature_labels": {
+    "sd_4_2": "4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công",
+    "sd_6_1": "6.1 Y tế công lập"
+  },
+  "mean": [
+    1.8969497148497365,
+    1.9056550125934868
+  ],
+  "scale": [
+    0.18228477071150406,
+    0.13893330611459542
+  ],
+  "sting": {
+    "n_levels": 3,
+    "factor": 4,
+    "min_count": 5,
+    "cluster_level": 2,
+    "connectivity": 1
+  },
+  "provenance": {
+    "config": "models/predict_config.json",
+    "frozen_via": "scripts/predict_sweep.py (train-only, không nhìn 2024)",
+    "trained_on": "PAPI 2011–2023"
+  }
+}

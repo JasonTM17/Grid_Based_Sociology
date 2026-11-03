@@ -1,25 +1,21 @@
 """Huấn luyện STING trên PAPI 2011–2023 và DỰ ĐOÁN cụm cho 63 tỉnh năm 2024.
 
-Ý tưởng: mô hình "học" cấu trúc lưới từ dữ liệu quá khứ (811 dòng, 2011–2023),
-lưu xuống file local, rồi dự đoán cụm cho năm mới nhất (2024) mà KHÔNG cần
-huấn luyện lại — minh hoạ khả năng predict() của STING.
+Cấu hình (cặp chỉ tiêu + tham số STING) được ĐÓNG BĂNG TRƯỚC khi đánh giá:
+`models/predict_config.json` do `scripts/predict_sweep.py` sinh theo quy trình
+train-only (chọn trên ≤2020, kiểm trên tương lai giả 2021–2022; năm 2024 KHÔNG
+tham gia bước chọn — tránh selection-on-test).
 
-Cặp chỉ tiêu (chọn qua quét các cặp sub-dimension phủ đủ 2011–2023, xem
-plans/.../phase-02 — tiêu chí: k=3 cụm, nhiễu thấp, phủ dự đoán cao):
-  - sd_5_4 = "5.4 Dịch vụ hành chính cấp xã/phường" (thang 0,33–3,33)
-  - sd_6_2 = "6.2 Giáo dục tiểu học công lập"        (thang 0,25–2,5)
+Quy trình:
+  fit 2011–2023 → save() → load() lại từ file → predict() 2024 (out-of-sample).
 
-Cấu hình: STING(n_levels=3, factor=3, min_count=5), gom cụm ở mức lưới 2
-(mức 0 là lưới thô 3×3 ô). Kiểm tra độ ổn định: min_count 5 và 6 cho kết quả
-dự đoán giống hệt nhau.
+Đầu ra:
+  models/sting_predict_model.pkl   — model đã huấn luyện (pickle)
+  models/sting_predict_scaler.json — tham số chuẩn hóa z-score + provenance
+  results/predict_all_years.csv    — cụm dự đoán cho 63 tỉnh × mọi năm
+  results/predict_summary.md       — tóm tắt số liệu (cho báo cáo/slide)
+  results/figs/predict_2024.png    — scatter: train + dự đoán 2024
 
 Chạy: python scripts/predict_demo.py
-Đầu ra:
-  models/sting_papi_sd54_sd62.pkl  — model đã huấn luyện (STING.save)
-  models/sting_papi_scaler.json    — tham số chuẩn hóa z-score của huấn luyện
-  results/predict_all_years.csv    — cụm dự đoán cho 63 tỉnh × mọi năm
-  results/predict_summary.md       — tóm tắt số liệu cho báo cáo/slide
-  results/figs/predict_2024.png    — scatter: train + dự đoán 2024
 """
 from __future__ import annotations
 
@@ -33,54 +29,52 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from sting import STING  # noqa: E402
+from papi_pred_common import ROOT, load_config, load_panel  # noqa: E402
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
     pass
 
-ROOT = Path(__file__).resolve().parent.parent
-PANEL = ROOT / "data" / "processed" / "papi_panel_63_2011_2024.csv"
 MODELS = ROOT / "models"
 RESULTS = ROOT / "results"
 FIGS = RESULTS / "figs"
 
-FEATS = ["sd_5_4", "sd_6_2"]
-FEAT_LABELS = {
-    "sd_5_4": "5.4 Dịch vụ hành chính cấp xã/phường",
-    "sd_6_2": "6.2 Giáo dục tiểu học công lập",
-}
 TRAIN_MAX_YEAR = 2023
 TEST_YEAR = 2024
-# Cấu hình chính (chọn qua quét ở Phase 2; ổn định: mc 5 ≡ mc 6)
-N_LEVELS, FACTOR, MIN_COUNT, LEVEL = 3, 3, 5, 2
-
-MODEL_PATH = MODELS / "sting_papi_sd54_sd62.pkl"
-SCALER_PATH = MODELS / "sting_papi_scaler.json"
+MODEL_PATH = MODELS / "sting_predict_model.pkl"
+SCALER_PATH = MODELS / "sting_predict_scaler.json"
 CSV_PATH = RESULTS / "predict_all_years.csv"
 SUMMARY_PATH = RESULTS / "predict_summary.md"
 FIG_PATH = FIGS / "predict_2024.png"
 
 
 def main() -> int:
+    cfg = load_config()
+    feats = cfg["features"]
+    labels_map = cfg["feature_labels"]
+    sp = cfg["sting"]
     for d in (MODELS, RESULTS, FIGS):
         d.mkdir(parents=True, exist_ok=True)
 
-    df = pd.read_csv(PANEL)
+    df = load_panel()
     train = df[df.year <= TRAIN_MAX_YEAR]
     test = df[df.year == TEST_YEAR]
-
-    ptr = train[FEATS].dropna()
-    pte = test[["province_code", "province_vi"] + FEATS].dropna()
+    ptr = train[feats].dropna()
+    pte = test[["province_code", "province_vi"] + feats].dropna()
 
     scaler = StandardScaler().fit(ptr)
     Xtr = scaler.transform(ptr)
-    Xte = scaler.transform(pte[FEATS])
+    Xte = scaler.transform(pte[feats])
 
     # 1) Huấn luyện + gom cụm
-    model = STING(n_levels=N_LEVELS, factor=FACTOR, min_count=MIN_COUNT).fit(Xtr)
-    labels = model.cluster(level=LEVEL, connectivity=1)
+    model = STING(
+        n_levels=sp["n_levels"], factor=sp["factor"], min_count=sp["min_count"]
+    ).fit(Xtr)
+    labels = model.cluster(level=sp["cluster_level"], connectivity=sp["connectivity"])
     sizes = sorted(
         [int((labels == c).sum()) for c in range(model.n_clusters_)], reverse=True
     )
@@ -89,33 +83,33 @@ def main() -> int:
     # 2) Lưu model local + tham số chuẩn hóa
     model.save(MODEL_PATH)
     scaler_info = {
-        "features": FEATS,
-        "feature_labels": FEAT_LABELS,
+        "features": feats,
+        "feature_labels": labels_map,
         "mean": scaler.mean_.tolist(),
         "scale": scaler.scale_.tolist(),
-        "sting": {
-            "n_levels": N_LEVELS,
-            "factor": FACTOR,
-            "min_count": MIN_COUNT,
-            "cluster_level": LEVEL,
+        "sting": sp,
+        "provenance": {
+            "config": "models/predict_config.json",
+            "frozen_via": "scripts/predict_sweep.py (train-only, không nhìn 2024)",
+            "trained_on": f"PAPI 2011–{TRAIN_MAX_YEAR}",
         },
     }
-    SCALER_PATH.write_text(json.dumps(scaler_info, ensure_ascii=False, indent=2), encoding="utf-8")
+    SCALER_PATH.write_text(
+        json.dumps(scaler_info, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
-    # 3) Nạp lại model TỪ FILE và dự đoán — chứng minh không cần huấn luyện lại
+    # 3) Nạp lại TỪ FILE và dự đoán — không cần huấn luyện lại
     loaded = STING.load(MODEL_PATH)
-    assert np.array_equal(loaded.predict(Xtr), labels), "load() phải cho kết quả y hệt"
+    assert np.array_equal(loaded.predict(Xtr), labels), "load() phải khôi phục đúng"
     pred_te = loaded.predict(Xte)
 
-    # 4) Dự đoán cụm cho mọi năm (2024 là năm out-of-sample thật sự)
+    # 4) Dự đoán cụm cho mọi năm (2024 là năm out-of-sample duy nhất)
     rows = []
     for y in sorted(df.year.unique()):
-        sub = df[df.year == y]
-        mask = sub[FEATS].notna().all(axis=1)
-        sub = sub[mask]
+        sub = df[df.year == y].dropna(subset=feats)
         if sub.empty:
             continue
-        pred = loaded.predict(scaler.transform(sub[FEATS]))
+        pred = loaded.predict(scaler.transform(sub[feats]))
         split = "train" if y <= TRAIN_MAX_YEAR else "test"
         for (_, r), c in zip(sub.iterrows(), pred):
             rows.append(
@@ -123,8 +117,8 @@ def main() -> int:
                     "year": int(y),
                     "province_code": int(r["province_code"]),
                     "province_vi": r["province_vi"],
-                    "sd_5_4": round(float(r["sd_5_4"]), 3),
-                    "sd_6_2": round(float(r["sd_6_2"]), 3),
+                    feats[0]: round(float(r[feats[0]]), 3),
+                    feats[1]: round(float(r[feats[1]]), 3),
                     "pred_cluster": int(c),
                     "split": split,
                 }
@@ -132,59 +126,96 @@ def main() -> int:
     out = pd.DataFrame(rows)
     out.to_csv(CSV_PATH, index=False, encoding="utf-8-sig")
 
-    # 5) Tóm tắt
+    # 5) Tóm tắt trung thực
     cov = float((pred_te != -1).mean())
     dist = dict(sorted(Counter(pred_te.tolist()).items()))
     te2 = pte.copy()
     te2["pred_cluster"] = pred_te
+
+    # hồ sơ cụm train — KHÔNG trộn dòng nhiễu (-1) vào bảng cụm
+    prof = ptr.copy()
+    prof["cluster"] = labels
+    profile = (
+        prof[prof.cluster >= 0]
+        .groupby("cluster")
+        .agg(n=(feats[0], "size"), **{feats[0]: (feats[0], "mean"), feats[1]: (feats[1], "mean")})
+        .round(2)
+    )
+
     comp = (
-        te2.groupby("pred_cluster")
+        te2[te2.pred_cluster >= 0]
+        .groupby("pred_cluster")
         .agg(
             n=("province_vi", "size"),
-            sd_5_4_mean=("sd_5_4", "mean"),
-            sd_6_2_mean=("sd_6_2", "mean"),
             vi_du=("province_vi", lambda s: ", ".join(list(s)[:6])),
         )
-        .round(2)
     )
 
-    labels_2023 = out[(out.year == 2023)][["province_code", "pred_cluster"]]
-    labels_2024 = out[(out.year == 2024)][["province_code", "pred_cluster"]]
-    merged = labels_2023.merge(labels_2024, on="province_code", suffixes=("_23", "_24"))
-    changed = int((merged.pred_cluster_23 != merged.pred_cluster_24).sum())
+    # chuyển cụm 2023 → 2024, TÁCH RÕ chuyển thật vs chuyển sang/từ nhiễu
+    a = out[out.year == TRAIN_MAX_YEAR][["province_code", "pred_cluster"]]
+    b = out[out.year == TEST_YEAR][["province_code", "pred_cluster"]]
+    m = a.merge(b, on="province_code", suffixes=("_prev", "_test"))
+    real_move = int(((m.pred_cluster_prev >= 0) & (m.pred_cluster_test >= 0) &
+                     (m.pred_cluster_prev != m.pred_cluster_test)).sum())
+    to_noise = int(((m.pred_cluster_prev >= 0) & (m.pred_cluster_test == -1)).sum())
+    from_noise = int(((m.pred_cluster_prev == -1) & (m.pred_cluster_test >= 0)).sum())
+    stay_same = int((m.pred_cluster_prev == m.pred_cluster_test).sum())
+    n_common = len(m)
+    n_excluded = int(test[feats].isna().any(axis=1).sum()
+                     + train[train.year == TRAIN_MAX_YEAR][feats].isna().any(axis=1).sum())
+
+    # độ nhạy coverage theo min_count (coverage là ngưỡng-phụ thuộc — nói rõ)
+    sens = []
+    for mc2 in sorted({max(1, sp["min_count"] - 2), sp["min_count"], sp["min_count"] + 3}):
+        m2 = STING(n_levels=sp["n_levels"], factor=sp["factor"], min_count=mc2).fit(Xtr)
+        m2.cluster(level=sp["cluster_level"], connectivity=sp["connectivity"])
+        p2 = m2.predict(Xte)
+        sens.append((mc2, round(float((p2 != -1).mean()), 2), m2.n_clusters_))
+
     crosstab = pd.crosstab(
-        merged.pred_cluster_23, merged.pred_cluster_24, margins=True
-    )
-
-    train_profile = ptr.copy()
-    train_profile["cluster"] = labels
-    profile = (
-        train_profile.groupby("cluster")
-        .agg(n=(FEATS[0], "size"), sd_5_4=("sd_5_4", "mean"), sd_6_2=("sd_6_2", "mean"))
-        .round(2)
+        m.pred_cluster_prev, m.pred_cluster_test, margins=True
     )
 
     lines = []
-    lines.append("# Dự đoán cụm PAPI 2024 bằng STING (train 2011–2023)\n")
-    lines.append(f"- Cặp chỉ tiêu: {FEAT_LABELS['sd_5_4']} × {FEAT_LABELS['sd_6_2']}")
+    lines.append("# Dự đoán cụm PAPI bằng STING — train 2011–2023, dự đoán 2024\n")
+    lines.append(f"- Cặp chỉ tiêu: **{labels_map[feats[0]]}** × **{labels_map[feats[1]]}**")
     lines.append(
-        f"- Cấu hình: STING(L={N_LEVELS}, factor={FACTOR}, min_count={MIN_COUNT}), "
-        f"cluster level={LEVEL}; train n={len(ptr)}, test n={len(pte)}"
+        f"- Cấu hình (đóng băng trước đánh giá qua `predict_sweep.py`): "
+        f"STING(L={sp['n_levels']}, factor={sp['factor']}, min_count={sp['min_count']}), "
+        f"level={sp['cluster_level']}; train n={len(ptr)}, test n={len(pte)}"
     )
     lines.append(
-        f"- Kết quả train: {model.n_clusters_} cụm, kích thước {sizes}, nhiễu {noise_tr:.0%}"
+        f"- Kết quả train: {model.n_clusters_} cụm {sizes}, nhiễu {noise_tr:.0%} "
+        f"(nhiễu = ô không đủ dày, KHÔNG nằm trong bảng hồ sơ cụm bên dưới)"
     )
-    lines.append(f"- Dự đoán 2024: phủ {cov:.0%} ({dist}); {changed}/{len(merged)} tỉnh đổi cụm so với 2023\n")
-    lines.append("## Hồ sơ cụm (train)\n")
+    lines.append(f"- Dự đoán 2024 (đánh giá MỘT LẦN sau khi chốt cấu hình): phủ {cov:.0%}, phân bố {dist}\n")
+    lines.append("## Hồ sơ cụm (train, chỉ điểm thuộc cụm)\n")
     lines.append(profile.to_markdown())
-    lines.append("\n## Thành phần dự đoán 2024\n")
-    lines.append(comp.to_markdown())
-    lines.append("\n## Chuyển cụm 2023 → 2024 (chỉ tỉnh có đủ 2 chỉ tiêu cả 2 năm)\n")
+    lines.append("\n## Thành phần dự đoán 2024 (chỉ điểm thuộc cụm)\n")
+    lines.append(comp.to_markdown() if len(comp) else "(không có)")
+    lines.append("\n## Chuyển cụm 2023 → 2024\n")
     lines.append(crosstab.to_markdown())
     lines.append(
-        "\nLưu ý: nhãn 2023 ở đây cũng do model gán (in-sample); các thay đổi sát "
-        "ranh giới ô lưới có thể nhạy với ngưỡng cố định — không nên diễn giải "
-        "quá mức các dịch chuyển nhỏ."
+        f"\n- **Chuyển thật giữa 2 cụm**: {real_move}/{n_common} tỉnh; "
+        f"sang nhiễu: {to_noise}; từ nhiễu ra: {from_noise}; giữ nguyên (kể cả nhiễu): {stay_same}."
+    )
+    lines.append(
+        f"- Loại khỏi so sánh (thiếu chỉ tiêu): {n_excluded} dòng (2023 và/hoặc 2024)."
+    )
+    lines.append("\n## Độ nhạy coverage theo min_count (cảnh báo: coverage là ngưỡng-phụ thuộc)\n")
+    lines.append("| min_count | coverage 2024 | số cụm |")
+    lines.append("|---|---|---|")
+    for mc2, cv2, k2 in sens:
+        lines.append(f"| {mc2} | {cv2:.0%} | {k2} |")
+    lines.append(
+        "\n## Lưu ý phương pháp\n"
+        "- Một lưới TOÀN CỤC cho mọi năm (nhãn so sánh được giữa các năm; các năm không độc lập — "
+        "phù hợp cho mục tiêu dự đoán). Phân tích per-year ở Phase 5 là phương pháp KHÁC, không trộn số liệu.\n"
+        "- Năm 2024 KHÔNG tham gia bước chọn cấu hình (xem `predict_sweep.py`); kết quả 2024 ở trên là out-of-sample.\n"
+        "- Cặp chỉ tiêu nằm trong nhóm ĐÃ QUA AUDIT thang đo (xem `scripts/check_data.py`); các sub-dim có bước nhảy "
+        "(sd_5_4 tại 2021, sd_2_1 tại 2018, …) đã bị loại khỏi pipeline dự đoán.\n"
+        "- Nhãn 2023 cũng do model gán (in-sample); dịch chuyển sát ranh giới ô lưới có thể nhạy với ngưỡng cố định — "
+        "không diễn giải quá mức các dịch chuyển nhỏ."
     )
     lines.append("")
     SUMMARY_PATH.write_text("\n".join(lines), encoding="utf-8")
@@ -196,39 +227,40 @@ def main() -> int:
     import matplotlib.pyplot as plt
 
     colors = {0: "#4c72b0", 1: "#dd8452", 2: "#55a868", 3: "#8172b3", 4: "#937860"}
+    xa, ya = ptr[feats[0]].to_numpy(), ptr[feats[1]].to_numpy()
     fig, ax = plt.subplots(figsize=(9.5, 6.5))
-    xa, ya = ptr[FEATS[0]].to_numpy(), ptr[FEATS[1]].to_numpy()
     noise_mask = labels == -1
     ax.scatter(xa[noise_mask], ya[noise_mask], s=14, c="#bbbbbb", alpha=0.5,
                label=f"train – nhiễu ({int(noise_mask.sum())})")
     for c in range(model.n_clusters_):
-        m = labels == c
-        if not m.any():
+        mm = labels == c
+        if not mm.any():
             continue
-        ax.scatter(xa[m], ya[m], s=14, c=colors[c % 5], alpha=0.35,
-                   label=f"train – cụm {c} ({int(m.sum())})")
-    xt, yt = pte[FEATS[0]].to_numpy(), pte[FEATS[1]].to_numpy()
+        ax.scatter(xa[mm], ya[mm], s=14, c=colors[c % 5], alpha=0.35,
+                   label=f"train – cụm {c} ({int(mm.sum())})")
+    xt, yt = pte[feats[0]].to_numpy(), pte[feats[1]].to_numpy()
     te_noise = pred_te == -1
     ax.scatter(xt[te_noise], yt[te_noise], s=55, marker="x", c="#666666", linewidths=1.6,
                label=f"2024 – nhiễu ({int(te_noise.sum())})")
     for c in range(model.n_clusters_):
-        m = pred_te == c
-        if not m.any():
+        mm = pred_te == c
+        if not mm.any():
             continue
-        ax.scatter(xt[m], yt[m], s=55, marker="o", c=colors[c % 5], edgecolors="black",
-                   linewidths=0.7, label=f"2024 → cụm {c} ({int(m.sum())})")
-    ax.set_xlabel(FEAT_LABELS["sd_5_4"] + " (thang 0,33–3,33)")
-    ax.set_ylabel(FEAT_LABELS["sd_6_2"] + " (thang 0,25–2,5)")
+        ax.scatter(xt[mm], yt[mm], s=55, marker="o", c=colors[c % 5], edgecolors="black",
+                   linewidths=0.7, label=f"2024 → cụm {c} ({int(mm.sum())})")
+    ax.set_xlabel(labels_map[feats[0]])
+    ax.set_ylabel(labels_map[feats[1]])
     ax.set_title("STING học 2011–2023 → dự đoán cụm cho 2024 (out-of-sample)")
-    ax.legend(loc="lower right", fontsize=8, framealpha=0.9)
+    ax.legend(loc="best", fontsize=8, framealpha=0.9)
     ax.grid(alpha=0.25)
     fig.tight_layout()
     fig.savefig(FIG_PATH, dpi=150)
     plt.close(fig)
 
-    print(f"train n={len(ptr)} | test n={len(pte)}")
+    print(f"features={feats} | train n={len(ptr)} | test n={len(pte)}")
     print(f"train: k={model.n_clusters_} sizes={sizes} noise={noise_tr:.0%}")
-    print(f"du doan 2024: coverage={cov:.0%} dist={dist} doi cum 2023->2024: {changed}/{len(merged)}")
+    print(f"du doan 2024: coverage={cov:.0%} dist={dist} | chuyen that {real_move}/{n_common}"
+          f" | sang nhieu {to_noise} | tu nhieu {from_noise} | loai {n_excluded}")
     print(f"da luu: {MODEL_PATH.name}, {SCALER_PATH.name}, {CSV_PATH.name}, {SUMMARY_PATH.name}, {FIG_PATH.name}")
     return 0
 

@@ -23,6 +23,35 @@ def load(path: Path) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def scale_audit(df: pd.DataFrame) -> list[tuple[str, float, int]]:
+    """Cột nghi GÃY THANG ĐO: bước nhảy trung bình năm > 0.25 điểm.
+
+    Đã xác minh bằng chuỗi thang điểm trong workbook gốc (ví dụ sd_5_4:
+    "0.25-2.5 điểm" đến 2020 → "0.33-3.33 điểm" từ 2021; bước nhảy mean
+    khớp hệ số đổi thang 1.333). Các cột trong danh sách này KHÔNG nên dùng
+    cho phân tích xuyên năm mà không xử lý thang đo — pipeline dự đoán
+    (scripts/predict_sweep.py) chỉ dùng cột ngoài danh sách.
+    """
+    num = [
+        c for c in df.columns
+        if (c.startswith("d") or c.startswith("sd_")) and df[c].dtype.kind in "fi"
+    ]
+    if "year" not in df.columns or not num:
+        return []
+    means = df.groupby("year")[num].mean()
+    flags = []
+    for c in num:
+        m = means[c].dropna()
+        if len(m) < 5:
+            continue
+        jumps = m.diff().abs()
+        j = float(jumps.max())
+        if j > 0.25:
+            flags.append((c, round(j, 3), int(jumps.idxmax())))
+    flags.sort(key=lambda t: -t[1])
+    return flags
+
+
 def main(argv: list[str]) -> int:
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -50,6 +79,16 @@ def main(argv: list[str]) -> int:
     missing = df.isna().mean().sort_values(ascending=False).head(8)
     print("Thiếu nhiều nhất (%):")
     print((missing * 100).round(2).to_string())
+
+    flags = scale_audit(df)
+    if flags:
+        print("CẢNH BÁO gãy thang đo (bước nhảy trung bình năm > 0.25 điểm — kiểm tra trước khi phân tích xuyên năm):")
+        for c, j, y in flags[:15]:
+            print(f"  {c}: +{j} tại {y}")
+        print(f"  Tổng {len(flags)}/{len([c for c in df.columns if c.startswith(('d','sd_'))])} cột chỉ tiêu bị đánh dấu.")
+        print("  Pipeline dự đoán (predict_sweep/predict_demo) chỉ dùng cột ngoài danh sách này.")
+    else:
+        print("Audit thang đo: không phát hiện gãy thang.")
 
     ok_rows = n_rows >= MIN_ROWS
     ok_cols = n_cols >= MIN_COLS

@@ -158,7 +158,9 @@ class STING:
         """Dự đoán cụm cho các điểm MỚI sau khi đã fit() + cluster().
 
         Điểm mới được gán vào cụm của ô chứa nó tại mức lưới dùng trong cluster();
-        nhận -1 nếu ô đó không thuộc cụm nào (nhiễu hoặc ô chưa từng có dữ liệu).
+        nhận -1 nếu ô đó không thuộc cụm nào (nhiễu hoặc ô chưa từng có dữ liệu),
+        HOẶC nếu điểm nằm ngoài vùng dữ liệu huấn luyện (out-of-support) — không
+        âm thầm kẹp vào ô biên.
         """
         if not hasattr(self, "_cell_comp_"):
             raise RuntimeError("Hãy gọi fit(X) rồi cluster() trước khi predict()")
@@ -167,9 +169,16 @@ class STING:
             X = X.reshape(1, -1)
         if X.ndim != 2 or X.shape[1] != self.n_dims_:
             raise ValueError(f"X cần đúng {self.n_dims_} chiều, nhận shape={X.shape}")
+        out_of_support = np.any(
+            (X < self.bounds_min_) | (X > self.bounds_max_), axis=1
+        )
         res = self.factor ** self.cluster_level_
         _, flat = self._assign(X, res)
-        return np.array([self._cell_comp_.get(int(f), -1) for f in flat], dtype=int)
+        preds = np.array(
+            [self._cell_comp_.get(int(f), -1) for f in flat], dtype=int
+        )
+        preds[out_of_support] = -1
+        return preds
 
     def save(self, path) -> None:
         """Lưu model đã huấn luyện thành file local (pickle)."""
