@@ -3,6 +3,7 @@
 Chạy: python -m pytest tests -q
 """
 import numpy as np
+import pytest
 from sklearn.datasets import make_blobs
 from sklearn.metrics import adjusted_rand_score
 
@@ -93,3 +94,44 @@ def test_query_rect_basic():
     assert 0 < res["count"] <= 400
     assert res["mean"].shape == (2,)
     assert res["std"].shape == (2,)
+
+
+def test_predict_assigns_new_points_to_clusters():
+    """predict() gán điểm mới vào cụm của ô chứa nó (dự đoán cho dữ liệu chưa thấy)."""
+    X, _ = make_blobs(
+        n_samples=240, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=42
+    )
+    model = STING(n_levels=3, factor=4, min_count=3).fit(X)
+    model.cluster(level=2, connectivity=1)
+
+    new_points = np.array([[5.9, 6.1], [-6.1, -5.9]])  # gần tâm hai cụm
+    pred = model.predict(new_points)
+
+    assert pred.shape == (2,)
+    assert -1 not in pred  # không rơi vào nhiễu
+    assert pred[0] != pred[1]  # hai điểm thuộc hai cụm khác nhau
+
+
+def test_predict_before_cluster_raises():
+    """Gọi predict() trước cluster() phải báo lỗi rõ ràng."""
+    X = np.random.default_rng(0).normal(size=(50, 2))
+    model = STING(n_levels=2, factor=4, min_count=2).fit(X)
+    with pytest.raises(RuntimeError):
+        model.predict(np.array([[0.0, 0.0]]))
+
+
+def test_save_load_roundtrip(tmp_path):
+    """Model lưu ra file rồi nạp lại phải cho kết quả dự đoán y hệt."""
+    X, _ = make_blobs(
+        n_samples=200, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=7
+    )
+    model = STING(n_levels=3, factor=4, min_count=3).fit(X)
+    labels = model.cluster(level=2, connectivity=1)
+
+    path = tmp_path / "sting_model.pkl"
+    model.save(path)
+    loaded = STING.load(path)
+
+    assert np.array_equal(loaded.predict(X), labels)
+    new_points = np.array([[6.0, 6.0]])
+    assert np.array_equal(model.predict(new_points), loaded.predict(new_points))

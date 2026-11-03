@@ -23,6 +23,7 @@ Ví dụ
 from __future__ import annotations
 
 import itertools
+import pickle
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
@@ -149,7 +150,40 @@ class STING:
 
         self.label_of_ = label_of
         self.n_clusters_ = comp
+        self.cluster_level_ = level
+        self._cell_comp_ = cell_to_comp
         return labels
+
+    def predict(self, X) -> np.ndarray:
+        """Dự đoán cụm cho các điểm MỚI sau khi đã fit() + cluster().
+
+        Điểm mới được gán vào cụm của ô chứa nó tại mức lưới dùng trong cluster();
+        nhận -1 nếu ô đó không thuộc cụm nào (nhiễu hoặc ô chưa từng có dữ liệu).
+        """
+        if not hasattr(self, "_cell_comp_"):
+            raise RuntimeError("Hãy gọi fit(X) rồi cluster() trước khi predict()")
+        X = np.asarray(X, dtype=float)
+        if X.ndim == 1:
+            X = X.reshape(1, -1)
+        if X.ndim != 2 or X.shape[1] != self.n_dims_:
+            raise ValueError(f"X cần đúng {self.n_dims_} chiều, nhận shape={X.shape}")
+        res = self.factor ** self.cluster_level_
+        _, flat = self._assign(X, res)
+        return np.array([self._cell_comp_.get(int(f), -1) for f in flat], dtype=int)
+
+    def save(self, path) -> None:
+        """Lưu model đã huấn luyện thành file local (pickle)."""
+        with open(path, "wb") as fh:
+            pickle.dump(self, fh)
+
+    @classmethod
+    def load(cls, path) -> "STING":
+        """Nạp model đã lưu bằng save() — dự đoán không cần huấn luyện lại."""
+        with open(path, "rb") as fh:
+            obj = pickle.load(fh)
+        if not isinstance(obj, cls):
+            raise TypeError("File không chứa đối tượng STING")
+        return obj
 
     # ------------------------------------------------------------------ #
     # Truy vấn & tiện ích
