@@ -217,6 +217,15 @@ def main() -> int:
     df["province_vi"] = df["province_code"].map(lambda c: code2info.get(c, {}).get("province_vi", ""))
     df["province_ascii"] = df["province_code"].map(lambda c: code2info.get(c, {}).get("province_ascii", ""))
 
+    # Làm sạch: 0.0 trong cột điểm = "không được xếp hạng" (không phải điểm thật —
+    # thang chiều là 1–10, thang tiểu-chiều bắt đầu từ 0.25). Gói Mendeley lưu các ô
+    # này là NaN; ta chuyển về NaN để đồng nhất trước khi phân tích.
+    score_cols = [c for c in df.columns if re.fullmatch(r"d[1-8]", c) or c.startswith("sd_")]
+    n_zero = int((df[score_cols] == 0).sum().sum())
+    df[score_cols] = df[score_cols].mask(df[score_cols] == 0)
+    if n_zero:
+        print(f"[clean] chuyển {n_zero} giá trị 0.0 -> NaN (tỉnh không được xếp hạng năm đó)")
+
     # Cột chuẩn: id trước, d1..d8, rồi các sub-dim đã sắp xếp
     id_cols = ["province_code", "province_ascii", "province_vi", "year"]
     dim_cols = [f"d{i}" for i in range(1, 9)]
