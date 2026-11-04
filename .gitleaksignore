@@ -1,0 +1,6 @@
+# gitleaks exceptions — mỗi dòng là một fingerprint đã được review thủ công.
+# Chỉ thêm fingerprint khi đã xác minh là false positive (không phải credential thật).
+#
+# '2018PAPI-ALLDimentions' là TÊN SHEET công khai trong workbook PAPI 2018
+# (dữ liệu công bố chính thức, không phải credential); khớp nhầm với rule generic-api-key.
+scripts/build_report.py:generic-api-key:357
