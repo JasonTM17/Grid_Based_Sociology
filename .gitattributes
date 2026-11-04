@@ -1,0 +1,25 @@
+# Chuẩn hóa line endings cho repo chạy chủ yếu trên Windows
+# (tránh diff ảo chỉ do CRLF/LF).
+* text=auto
+
+*.sh text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.txt text eol=lf
+*.csv text eol=lf
+*.json text eol=lf
+*.geojson text eol=lf
+
+# Binary — không được chuẩn hóa/line-ending
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pptx binary
+*.docx binary
+*.xlsx binary
+*.pkl binary
+*.joblib binary
+*.rar binary
+*.zip binary

@@ -38,8 +38,12 @@
 # Kiểm tra môi trường
 python -c "import pandas, openpyxl, plotly, sklearn; print('ok')"
 
-# Unit test STING
+# Unit test STING (22 tests, ~99% coverage cho src/sting.py)
 python -m pytest tests -q
+python -m pytest tests --cov=src -q
+
+# Lint (tùy chọn): python -m pip install -r requirements-dev.txt
+python -m ruff check src scripts tests
 
 # Kiểm tra dữ liệu (sau khi panel được tạo ở Phase 2)
 python scripts/check_data.py

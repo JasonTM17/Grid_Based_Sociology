@@ -1,0 +1,4 @@
+# Công cụ phát triển (không cần cho người dùng cuối): lint + coverage
+-r requirements.txt
+ruff==0.12.9
+pytest-cov==7.1.0
