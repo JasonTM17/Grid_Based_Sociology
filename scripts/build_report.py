@@ -232,9 +232,9 @@ p("BÁO CÁO CUỐI KỲ", 20, True, NAVY, WD_ALIGN_PARAGRAPH.CENTER, space_afte
 p("Topic 6 — Grid-based (clustering)", 14, True, TEAL, WD_ALIGN_PARAGRAPH.CENTER, space_after=30)
 p("PHÂN CỤM 63 TỈNH VIỆT NAM\nVỚI STING TRÊN DỮ LIỆU PAPI 2011–2024", 20, True, NAVY, WD_ALIGN_PARAGRAPH.CENTER, space_after=50)
 p("Môn học: Học Máy (Machine Learning)", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
-p("Nhóm: 13–15   ·   Nhóm 2 người", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
-p("Sinh viên 1: ....................................... MSSV: ................", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
-p("Sinh viên 2: ....................................... MSSV: ................", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
+p("Nhóm: 13–15", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
+p("Sinh viên 1: Nguyễn Tiến Sơn — MSSV: 24110054", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
+p("Sinh viên 2: Trần Thị Ngọc Quyên — MSSV: 24110051", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
 p("Thành phố Hồ Chí Minh, tháng 11 năm 2026", 11, False, GREY, WD_ALIGN_PARAGRAPH.CENTER)
 doc.add_page_break()
 

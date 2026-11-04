@@ -4,6 +4,8 @@ title: "Phân cụm 63 tỉnh Việt Nam với STING trên dữ liệu PAPI 2011
 authors:
   - family-names: Son
     given-names: Nguyen Tien
+  - family-names: Quyen
+    given-names: Tran Thi Ngoc
 repository-code: "https://github.com/JasonTM17/Grid_Based_Sociology"
 url: "https://github.com/JasonTM17/Grid_Based_Sociology"
 version: 1.0.0

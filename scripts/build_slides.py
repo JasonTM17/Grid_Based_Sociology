@@ -71,7 +71,7 @@ def header(slide, kicker, title, page_no):
     text(slide, 0.55, 0.58, 12.2, 0.75, [(title, 26, True, NAVY)])
     # footer
     rect(slide, 0.55, SH - 0.42, SW - 1.1, 0.012, RGBColor(0xD8, 0xD5, 0xCC))
-    text(slide, 0.55, SH - 0.36, 9.5, 0.3, [("Topic 6 · STING × PAPI 2011–2024 · Nhóm 2 người", 9, False, GREY)])
+    text(slide, 0.55, SH - 0.36, 9.5, 0.3, [("Topic 6 · STING × PAPI 2011–2024 · Nhóm 13–15", 9, False, GREY)])
     text(slide, SW - 1.6, SH - 0.36, 1.1, 0.3, [(f"{page_no:02d} / 15", 9, True, GREY)], align=PP_ALIGN.RIGHT)
 
 
@@ -127,8 +127,8 @@ text(s, 0.85, 1.75, 8.6, 2.6, [("Phân cụm 63 tỉnh", 44, True, WHITE),
                                ("với STING trên dữ liệu PAPI 2011–2024", 30, True, WHITE)])
 text(s, 0.85, 4.65, 8.4, 1.6, [
     ("Topic 6 · Grid-based (clustering) · Domain: Sociology / History", 15, True, GOLD),
-    ("STING cài đặt từ đầu · dự đoán 2024 · scikit-learn chỉ cho baselines", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
-    ("Nhóm 2 người · 15' trình bày + 5' Q&A", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
+    ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
+    ("15' trình bày + 5' Q&A", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
 ])
 note(s, "Mở đầu: giới thiệu đề tài 20s; nêu thesis: dữ liệu PAPI khá đồng nhất — nhóm xin trình bày trung thực cả kết quả thuận lẫn âm tính.")
 
