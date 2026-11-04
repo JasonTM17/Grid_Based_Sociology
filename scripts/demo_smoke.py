@@ -125,7 +125,7 @@ for name, ok, detail in RESULTS:
 n_fail = sum(1 for _, ok, _ in RESULTS if not ok)
 print("=" * 64)
 if n_fail == 0:
-    print(f"KET LUAN: SAN SANG DEMO ({len(RESULTS)}/{len(RESULTS)} muc dat). Chuc ban buon thi!")
+    print(f"KET LUAN: SAN SANG DEMO ({len(RESULTS)}/{len(RESULTS)} muc dat). Chuc ban buoi thi thanh cong!")
     print("Goi y: chay 'python -m nbconvert --to notebook --execute --inplace notebooks/midterm_demo.ipynb'")
     print("       truoc buoi thi neu bat dau tu may khac.")
     raise SystemExit(0)
