@@ -71,7 +71,7 @@ def header(slide, kicker, title, page_no):
     text(slide, 0.55, 0.58, 12.2, 0.75, [(title, 26, True, NAVY)])
     # footer
     rect(slide, 0.55, SH - 0.42, SW - 1.1, 0.012, RGBColor(0xD8, 0xD5, 0xCC))
-    text(slide, 0.55, SH - 0.36, 9.5, 0.3, [("Topic 6 · STING × PAPI 2011–2024 · Nhóm 13–15", 9, False, GREY)])
+    text(slide, 0.55, SH - 0.36, 9.5, 0.3, [("Topic 6 · STING × PAPI 2011–2024 · Nhóm 15", 9, False, GREY)])
     text(slide, SW - 1.6, SH - 0.36, 1.1, 0.3, [(f"{page_no:02d} / 15", 9, True, GREY)], align=PP_ALIGN.RIGHT)
 
 

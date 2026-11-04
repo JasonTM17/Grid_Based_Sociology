@@ -31,7 +31,7 @@ _Cập nhật: 2026-11-04 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 ## Cách tạo gói nộp (default đến khi GV chốt khác)
 
 ```
-Nhom13-15_HocMay_Topic6_STING_CuoiKy/
+Nhom15_HocMay_Topic6_STING_CuoiKy/
 ├── bao-cao.docx                 (copy từ reports/final_report.docx, đổi tên)
 ├── notebooks/final_analysis.ipynb
 └── data/panel.csv               (nếu GV yêu cầu kèm dữ liệu)
