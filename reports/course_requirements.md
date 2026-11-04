@@ -11,12 +11,14 @@ _Cập nhật: 2026-11-04 · Chủ sở hữu: B · Hạn chốt: 2026-11-10 (P4
 
 ## Quyết định cần chốt (hỏi GV trước 10/11 — xem `open-questions.md`)
 
-- [ ] **Template `.docx`:** có template môn không? Chưa có → tự soạn (học thuật, 12pt, tiếng Việt, 7 mục:
-      Mở đầu · Dữ liệu · Phương pháp (STING) · Kết quả · Thảo luận · Hạn chế & bài học · Tài liệu tham khảo).
-- [ ] **Template slide:** chưa có → tự thiết kế, 12–15 trang, hình từ `results/figs/`.
+- [x] **Template `.docx`:** môn chưa cung cấp template riêng → tự soạn theo ghi chú định dạng chắt lọc từ
+      tài liệu mẫu của nhóm (`reports/report_format_notes.md`): A4, lề 2.5/2.0/2.0/2.0 cm, Title 20pt bold,
+      Heading 1/2/3 = 16/14/12pt bold, front matter đầy đủ (TÓM TẮT → bảng → nội dung 7 chương → TLTK).
+- [x] **Template slide:** chưa có → tự thiết kế, 12–15 trang, hình từ `results/figs/`.
+- [x] **Nhóm: 2 người** — giữ kế hoạch đầy đủ, không áp cut-lines.
 - [ ] **Định dạng nộp (tên file/cấu trúc/zip/nơi nộp):** đề xuất dưới đây, chốt P4.
-- [ ] **Người trình bày & Q&A:** nhóm 1 người → 1 người; nhóm 2 người → chia phần (A: thuật toán/demo, B: kết quả/ý nghĩa), thống nhất trước rehearsal.
-- [ ] **Nhóm 1 hay 2 người** (ảnh hưởng cut-lines).
+- [ ] **Người trình bày & Q&A:** nhóm 2 người → A (thuật toán/demo/code), B (kết quả/ý nghĩa/báo cáo); thống nhất trước rehearsal.
+- [ ] **Ngày giữa kỳ: 24/11–01/12** (mặc định user xác nhận 2026-11-04) → freeze 20/11 đứng.
 
 ## Định dạng nộp đề xuất (default đến khi GV chốt khác)
 
