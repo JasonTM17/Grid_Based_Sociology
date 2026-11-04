@@ -7,6 +7,8 @@
 
 Đồ án môn Học máy · Chủ đề 6: **Grid-based (clustering)** · Domain: Sociology / History.
 
+**Sắp demo/thi?** Xem [`DEMO.md`](DEMO.md) — một lệnh kiểm tra sẵn sàng: `python scripts/demo_smoke.py` (phải in "SAN SANG DEMO (33/33)").
+
 ## Cấu trúc dự án
 
 | Thư mục | Nội dung |
