@@ -34,7 +34,7 @@ _Soạn mới hoàn toàn theo dàn ý môn, bám yêu cầu báo cáo ML; chỉ
 6. CHƯƠNG 1. TỔNG QUAN — bối cảnh PAPI & quản trị công; mục tiêu; phạm vi (14 năm, 63 tỉnh); đóng góp.
 7. CHƯƠNG 2. CƠ SỞ LÝ THUYẾT — grid-based clustering; STING (lưới phân cấp, thống kê ô, phân cụm, O(n)); baselines k-means/DBSCAN; chỉ số đánh giá; PAPI & các chỉ tiêu.
 8. CHƯƠNG 3. DỮ LIỆU & TIỀN XỬ LÝ — nguồn + PROVENANCE; panel 882×41; kiểm tra chất lượng (PASS); **audit gãy thang đo**; chuẩn hóa/mã hóa tên tỉnh.
-9. CHƯƠNG 4. PHƯƠNG PHÁP — STING tự cài chi tiết; chọn cấu hình (quy trình train-only, `predict_sweep.py`); mô hình giám sát dự báo năm sau; kiểm thử (12 test).
+9. CHƯƠNG 4. PHƯƠNG PHÁP — STING tự cài chi tiết; chọn cấu hình (quy trình train-only, `predict_sweep.py`); mô hình giám sát dự báo năm sau; kiểm thử (22 test).
 10. CHƯƠNG 5. KẾT QUẢ — phân cụm theo năm; so sánh STING vs k-means/DBSCAN (bảng metrics, tách noise); robustness (PCA d1–d6 + nhánh 8 chiều); bản đồ 63 tỉnh; **pipeline dự đoán** (STING.predict OUT-of-sample 2024; hồi quy Ridge vượt carry-forward; phân loại ngoại vi — kết quả ÂM TÍNH); hình dịch chuyển cụm.
 11. CHƯƠNG 6. THẢO LUẬN & HẠN CHẾ — gãy thang đo xuyên năm (23/37 cột); nhiễu −1; lưới song song trục; dữ liệu khá đồng nhất; ngoại suy giữa các năm nhạy với thang đo; kết quả âm tính giữ nguyên.
 12. CHƯƠNG 7. KẾT LUẬN & HƯỚNG PHÁT TRIỂN — tổng kết; hướng tiếp theo (rank-based normalization, mở rộng chỉ tiêu, dự báo nhiều năm).

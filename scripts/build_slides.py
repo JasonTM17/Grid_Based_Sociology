@@ -198,7 +198,7 @@ bullets(s, 7.4, 1.6, 5.1, 4.2, [
     ("Dữ liệu.", "2 blob Gauss, 240 điểm, seed 42."),
     ("Kết quả.", "ARI = 0.950 · nhiễu 2.5% · đúng 2 cụm."),
     ("Lưới.", "Factor=4, 3 mức; ô dày → gom cụm."),
-    ("Kiểm thử.", "12 unit test (pytest) xanh — chính xác thống kê ô từng ô."),
+    ("Kiểm thử.", "22 unit test (pytest) xanh — chính xác thống kê ô từng ô."),
 ], size=12)
 note(s, "Show hình bên trái; nói ARI và tests.")
 
@@ -346,7 +346,7 @@ bullets(s, 0.55, 1.3, 12.1, 5.0, [
     ("Gói replication.", "Le et al., Mendeley Data — DOI 10.17632/wbk42j9wc8.1 · CC BY 4.0 (4 file dùng trực tiếp đã commit)."),
     ("STING gốc.", "Wang, Yang & Muntz (1997), “STING: A Statistical Information Grid Approach to Spatial Data Mining”, VLDB."),
     ("GeoJSON ranh giới.", "Open Development Vietnam (OD Mekong) — CC-BY-SA 4.0."),
-    ("Code & dữ liệu.", "Repo gồm: src/sting.py · scripts/ · tests/ (12 test xanh) · models/ · results/ · PROVENANCE.md từng nguồn."),
+    ("Code & dữ liệu.", "Repo gồm: src/sting.py · scripts/ · tests/ (22 test xanh) · models/ · results/ · PROVENANCE.md từng nguồn."),
 ], size=11.5)
 note(s, "Nếu GV hỏi về nguồn: chỉ PROVENANCE.md trong repo.")
 

@@ -321,7 +321,7 @@ bullets([
 body("Phạm vi: 63 tỉnh/thành Việt Nam, 2011–2024, cấp tỉnh/năm. Không phân tích cấp huyện, không dữ liệu khảo sát khác, không dự đoán sau 2024.")
 h2("1.3. Đóng góp của đồ án")
 bullets([
-    ("Kỹ thuật.", "STING tự cài (src/sting.py) + 12 unit tests; pipeline dự đoán hai mô hình local; quy trình chọn cấu hình chống selection-on-test."),
+    ("Kỹ thuật.", "STING tự cài (src/sting.py) + 22 unit tests; pipeline dự đoán hai mô hình local; quy trình chọn cấu hình chống selection-on-test."),
     ("Dữ liệu.", "Panel 882×41; audit gãy thang đo xuyên năm (23/37 cột) — lần đầu được hệ thống hóa cho PAPI trong phạm vi đồ án; PROVENANCE + hash cho mọi nguồn."),
     ("Khoa học.", "Phát hiện trung thực: PAPI cấp tỉnh/năm gần như một khối đồng nhất; cấu trúc tách biệt chỉ ở nhóm ngoại vi nhỏ; robustness 8 chiều không nhận diện được cấu trúc."),
 ])
@@ -383,7 +383,7 @@ h1("CHƯƠNG 4. PHƯƠNG PHÁP")
 h2("4.1. Cấu hình STING và quy trình chọn train-only")
 body("Ứng viên cặp chỉ tiêu được giới hạn ở các cột qua audit thang đo (8 sub-dim sạch + 15 cặp chiều d1–d6 tham chiếu): 43 cặp × 8 cấu hình lưới (n_levels ∈ {2,3}, factor ∈ {3,4}, min_count ∈ {4,5,8,12}, level tương ứng) = 344 tổ hợp. Tiêu chí chọn đặt TRƯỚC khi nhìn năm 2024: fit trên dữ liệu ≤ 2020, chấm điểm trên “tương lai giả” 2021–2022 (coverage + k + nhiễu + độ vững khi mc±1); bộ lọc k ∈ [2,6], noise ≤ 25%, cụm lớn nhất ≤ 85%, coverage ≥ 75%; điểm = coverage − 0.5·noise − 0.15·largest − 0.02·|k−3| + 0.03·stable. Kết quả đóng băng vào models/predict_config.json: cặp sd_4_2 (4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công) × sd_6_1 (6.1 Y tế công lập); STING(L=3, factor=4, min_count=5, cluster level=2, connectivity=1); coverage 2021–2022 = 0.851. Năm 2024 không tham gia bất kỳ bước chọn nào; đánh giá cuối chỉ thực hiện MỘT LẦN sau khi đóng băng: coverage 2024 = 79%, phân bố {nhiễu: 13, cụm 2: 48}.")
 h2("4.2. Kiểm thử")
-body("src/sting.py có 12 unit tests (pytest, tất cả xanh): thống kê ô khớp với numpy (tol 1e-9); phục hồi 2 Gaussian blobs (ARI ≥ 0.8); biên (điểm trên biên, 1 điểm, ô rỗng); predict trước cluster → RuntimeError; out-of-support → −1; save/load khôi phục chính xác nhãn. Runtime: ~18 giây cho notebook giữa kỳ.")
+body("src/sting.py có 22 unit tests (pytest, tất cả xanh): thống kê ô khớp với numpy (tol 1e-9); phục hồi 2 Gaussian blobs (ARI ≥ 0.8); biên (điểm trên biên, 1 điểm, ô rỗng); predict trước cluster → RuntimeError; out-of-support → −1; save/load khôi phục chính xác nhãn. Runtime: ~18 giây cho notebook giữa kỳ.")
 h2("4.3. Baselines")
 bullets([
     ("k-means.", "k ∈ {2, 3, 4, 5}; n_init=10; seed=42. Ép mọi điểm vào cụm (không có nhiễu)."),
@@ -479,7 +479,7 @@ figure("map_2024.png", "Bản đồ centroid tô màu theo cụm — 2024 (nhãn
 
 h2("5.7. Kiểm thử & tái lập")
 bullets([
-    ("Unit tests.", "python -m pytest tests -q → 12/12 xanh."),
+    ("Unit tests.", "python -m pytest tests -q → 22/22 xanh."),
     ("Dữ liệu.", "python scripts/check_data.py → PASS (882×41) + danh sách audit thang đo."),
     ("Tái lập.", "Mọi notebook execute sạch; mọi số liệu trong báo cáo truy được về results/*.csv; seeds cố định; PROVENANCE cho mọi nguồn."),
 ])
@@ -520,7 +520,7 @@ bullets([
 h1("CHƯƠNG 7. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN")
 h2("7.1. Kết luận")
 bullets([
-    ("STING tự viết hoạt động đúng.", "ARI 0.950 trên dữ liệu giả lập; 12/12 test xanh; truy vấn vùng O(n); predict/save/load local."),
+    ("STING tự viết hoạt động đúng.", "ARI 0.950 trên dữ liệu giả lập; 22/22 test xanh; truy vấn vùng O(n); predict/save/load local."),
     ("Dữ liệu PAPI rất đồng nhất.", "phân cụm theo năm đa số k=1; cấu trúc tách biệt chỉ ở ngoại vi nhỏ; robustness 8 chiều không nhận diện được cấu trúc (âm tính, báo cáo)."),
     ("Pipeline dự đoán hợp lệ phương pháp.", "chọn cấu hình train-only; 2024 out-of-sample một lần; STING.predict phủ 79%; Ridge/RF thắng carry-forward ~10% MAE; phân loại ngoại vi âm tính giữ lại."),
     ("Chất lượng dữ liệu là bài học cốt lõi.", "audit gãy thang đo (23/37 cột) tách biệt “cấu trúc thật” và artifact đổi thang — áp dụng được cho bất kỳ dữ liệu chuỗi thời gian đa phiên bản nào."),

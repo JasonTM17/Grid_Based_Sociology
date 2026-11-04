@@ -4,7 +4,7 @@ _Quy tắc: ≤60 giây/câu; người trả lời A (thuật toán/dữ liệu)
 
 ## Trọng tâm khoa học
 
-1. **Bạn chứng minh được STING chạy đúng như thế nào?** — 12 unit tests: thống kê ô khớp numpy (tol 1e-9); blobs ARI=0.950; predict/save/load roundtrip; out-of-support → −1; biên/ô rỗng. Chạy `python -m pytest tests -q` ngay trong bảo vệ nếu được yêu cầu.
+1. **Bạn chứng minh được STING chạy đúng như thế nào?** — 22 unit tests: thống kê ô khớp numpy (tol 1e-9); blobs ARI=0.950; predict/save/load roundtrip; out-of-support → −1; biên/ô rỗng. Chạy `python -m pytest tests -q` ngay trong bảo vệ nếu được yêu cầu.
 2. **Vì sao silhouette không dùng để chọn model?** — Metric hình học không bản địa với lưới song song trục (lưới vuông không hiểu “khoảng cách Euclide giữa cụm”); nhóm dùng silhouette chỉ để so sánh thô, luôn kèm noise tách riêng và độ nhạy min_count; quy tắc chọn cấu hình là train-only dựa trên coverage + độ vững.
 3. **“Cấu trúc 3 cụm” ban đầu của bạn hóa ra là artifact thang đo — kể lại.** — cặp sd_5_4×sd_6_2 cho 3 cụm “đẹp” tách hoàn toàn theo giai đoạn 2011–2020 vs 2021–2024; audit chỉ ra sd_5_4 đổi thang tại 2021 (0.25–2.5→0.33–3.33; bước nhảy mean +0.576, hệ số đổi thang 1.333 khớp); mọi kết quả trên cặp đó bị loại; pipeline chuyển sang chỉ tiêu qua audit.
 4. **Xử lý gãy thang đo thế nào trong thực nghiệm?** — Audit bước nhảy trung bình năm > 0.25 (23/37 cột bị đánh dấu); phân tích xuyên năm chỉ dùng 8 chỉ tiêu sạch; trong-năm z cho PCA/baselines; báo cáo luôn kèm danh sách audit trong check_data.py.
