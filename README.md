@@ -1,6 +1,9 @@
 # Đồ án Học máy — Phân cụm 63 tỉnh Việt Nam bằng STING (PAPI 2011–2024)
 
 [![CI](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+<p align="center"><img src="assets/social_preview.png" alt="STING × PAPI — Grid-based clustering on Vietnam PAPI 2011-2024" width="100%"></p>
 
 Đồ án môn Học máy · Chủ đề 6: **Grid-based (clustering)** · Domain: Sociology / History.
 
@@ -96,3 +99,9 @@ print(ridge.predict(np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])))  # d�
 đổi từ 0.25–2.5 lên 0.33–3.33 tại 2021; `sd_2_1` đổi tại 2018). `scripts/check_data.py`
 in danh sách cảnh báo gãy thang đo (bước nhảy trung bình năm > 0.25 điểm); pipeline dự đoán
 chỉ dùng các chỉ tiêu nằm ngoài danh sách này.
+
+## Giấy phép
+
+- **Mã nguồn** (`src/`, `scripts/`, `notebooks/`, `tests/`): **MIT** — xem [`LICENSE`](LICENSE).
+- **Dữ liệu** (`data/raw/*/`): giữ giấy phép gốc từng nguồn — xem `PROVENANCE.md` trong từng thư mục (PAPI: dữ liệu công khai CECODES/VFF-CRT/RTA/UNDP; Mendeley: CC BY 4.0, DOI 10.17632/wbk42j9wc8.1; GeoJSON: CC-BY-SA 4.0) — không thuộc MIT.
+- **Tác giả:** Nguyen Tien Son và thành viên nhóm (đồ án môn Học máy, Topic 6).

@@ -1,0 +1,32 @@
+MIT License
+
+Copyright (c) 2026 Nguyen Tien Son
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Lưu ý phạm vi giấy phép / Scope of license:
+
+- Giấy phép MIT này áp dụng cho MÃ NGUỒN của dự án (thư mục `src/`, `scripts/`, `notebooks/`, `tests/`).
+- Dữ liệu trong `data/raw/` KHÔNG thuộc giấy phép MIT — từng nguồn giữ nguyên giấy phép gốc,
+  xem `data/raw/papi/PROVENANCE.md`, `data/raw/mendeley/PROVENANCE.md`, `data/raw/boundaries/PROVENANCE.md`
+  (PAPI: dữ liệu công khai của CECODES/VFF-CRT/RTA/UNDP; Mendeley replication: CC BY 4.0, DOI 10.17632/wbk42j9wc8.1;
+  GeoJSON: Open Development Vietnam, CC-BY-SA 4.0).
+- This MIT license covers the SOURCE CODE only. Third-party data under `data/raw/` keeps its original licenses (see the PROVENANCE files).
