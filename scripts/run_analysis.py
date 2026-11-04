@@ -14,11 +14,9 @@ Tái lập, seed cố định. Chạy từ thư mục gốc dự án:
 """
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.decomposition import PCA
@@ -245,7 +243,8 @@ def main() -> int:
                             fontsize=5.5, xytext=(3, 1), textcoords="offset points", alpha=0.8)
         ax.set_title(f"Cụm STING — {yr}")
         ax.legend(loc="lower left", fontsize=7)
-        ax.set_xlabel("longitude"); ax.set_ylabel("latitude")
+        ax.set_xlabel("longitude")
+        ax.set_ylabel("latitude")
         ax.grid(alpha=0.25)
         fig.tight_layout()
         fig.savefig(FIGS / f"map_{yr}.png", dpi=150)

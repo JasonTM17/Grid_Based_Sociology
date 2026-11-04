@@ -7,7 +7,7 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
-from pptx.util import Emu, Inches, Pt
+from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -217,12 +217,17 @@ note(s, "Đây là phát hiện quan trọng nhất về dữ liệu — trình 
 # ---------- Slide 7 — Pipeline dự đoán ----------
 s = slide_new()
 header(s, "DỰ ĐOÁN", "Hai mô hình local, cùng nạp từ file", 7)
-rect(s, 0.6, 1.5, 3.1, 0.72, TEAL); text(s, 0.6, 1.56, 3.1, 0.4, [("TRAIN 2011–2023", 14, True, WHITE)], align=PP_ALIGN.CENTER)
-rect(s, 4.5, 1.3, 3.3, 1.1, LIGHT); text(s, 4.5, 1.42, 3.3, 0.9, [("models/", 13, True, NAVY), ("sting_predict_model.pkl\nsup_ridge.joblib", 10, False, GREY)], align=PP_ALIGN.CENTER)
-rect(s, 8.6, 1.5, 3.1, 0.72, GOLD); text(s, 8.6, 1.56, 3.1, 0.4, [("PREDICT 2024", 14, True, NAVY)], align=PP_ALIGN.CENTER)
+rect(s, 0.6, 1.5, 3.1, 0.72, TEAL)
+text(s, 0.6, 1.56, 3.1, 0.4, [("TRAIN 2011–2023", 14, True, WHITE)], align=PP_ALIGN.CENTER)
+rect(s, 4.5, 1.3, 3.3, 1.1, LIGHT)
+text(s, 4.5, 1.42, 3.3, 0.9, [("models/", 13, True, NAVY), ("sting_predict_model.pkl\nsup_ridge.joblib", 10, False, GREY)], align=PP_ALIGN.CENTER)
+rect(s, 8.6, 1.5, 3.1, 0.72, GOLD)
+text(s, 8.6, 1.56, 3.1, 0.4, [("PREDICT 2024", 14, True, NAVY)], align=PP_ALIGN.CENTER)
 for x0 in (3.7, 7.8):
     a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, Inches(x0), Inches(1.65), Inches(0.8), Inches(0.4))
-    a.fill.solid(); a.fill.fore_color.rgb = TEAL; a.line.fill.background()
+    a.fill.solid()
+    a.fill.fore_color.rgb = TEAL
+    a.line.fill.background()
 bullets(s, 0.6, 3.3, 12.1, 3.4, [
     ("STING.predict (không giám sát).", "Gán tỉnh vào ô lưới đã học; điểm ngoài vùng học → −1. 2024 là năm out-of-sample duy nhất khi chọn cấu hình."),
     ("Chọn cấu hình train-only.", "Quét ứng viên ≤2020; kiểm trên tương lai giả 2021–2022; 2024 không tham gia chọn (tránh selection-on-test) — `predict_sweep.py`."),
@@ -281,10 +286,12 @@ for i, row in enumerate(rows):
         if i == 0:
             r.font.bold = True
             r.font.color.rgb = WHITE
-            cell.fill.solid(); cell.fill.fore_color.rgb = TEAL
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = TEAL
         else:
             r.font.color.rgb = INK
-            cell.fill.solid(); cell.fill.fore_color.rgb = WHITE if i % 2 else LIGHT
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = WHITE if i % 2 else LIGHT
 text(s, 0.6, 5.35, 12, 0.8, [
     ("* Metric hình học tính trên điểm thuộc cụm (loại −1). k-means ép mọi điểm vào cụm.", 10.5, False, GREY),
     ("STING ≈ DBSCAN khi eps nhỏ (ARI 0.65); k-means tách khác nhau — dữ liệu gần như một khối.", 10.5, False, GREY),

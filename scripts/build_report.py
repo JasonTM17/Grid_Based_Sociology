@@ -9,10 +9,10 @@ Cách dùng: python scripts/build_report.py
 from pathlib import Path
 
 from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
-from docx.shared import Cm, Inches, Pt, RGBColor
+from docx.shared import Cm, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parent.parent
 FIGS = ROOT / "results" / "figs"
@@ -77,9 +77,13 @@ def add_page_number_footer():
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r = p.add_run("Trang ")
     set_run(r, 10, False, GREY)
-    fld1 = OxmlElement("w:fldChar"); fld1.set(qn("w:fldCharType"), "begin")
-    it = OxmlElement("w:instrText"); it.set(qn("xml:space"), "preserve"); it.text = "PAGE"
-    fld2 = OxmlElement("w:fldChar"); fld2.set(qn("w:fldCharType"), "end")
+    fld1 = OxmlElement("w:fldChar")
+    fld1.set(qn("w:fldCharType"), "begin")
+    it = OxmlElement("w:instrText")
+    it.set(qn("xml:space"), "preserve")
+    it.text = "PAGE"
+    fld2 = OxmlElement("w:fldChar")
+    fld2.set(qn("w:fldCharType"), "end")
     r2 = p.add_run()
     r2._element.append(fld1)
     r2._element.append(it)
@@ -201,10 +205,13 @@ def figure(fname, caption, width_cm=12.5):
 
 def toc_field():
     p1 = doc.add_paragraph()
-    fld1 = OxmlElement("w:fldChar"); fld1.set(qn("w:fldCharType"), "begin")
-    it = OxmlElement("w:instrText"); it.set(qn("xml:space"), "preserve")
+    fld1 = OxmlElement("w:fldChar")
+    fld1.set(qn("w:fldCharType"), "begin")
+    it = OxmlElement("w:instrText")
+    it.set(qn("xml:space"), "preserve")
     it.text = 'TOC \\o "1-2" \\h \\z \\u'
-    fld2 = OxmlElement("w:fldChar"); fld2.set(qn("w:fldCharType"), "end")
+    fld2 = OxmlElement("w:fldChar")
+    fld2.set(qn("w:fldCharType"), "end")
     r = p1.add_run()
     r._element.append(fld1)
     r._element.append(it)

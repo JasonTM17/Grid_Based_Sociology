@@ -141,7 +141,7 @@ def parse_new(year: int, fname: str, rows: list):
     ws = wb[target]
     it = ws.iter_rows(values_only=True)
     row1 = next(it)   # mã tỉnh
-    row2 = next(it)   # tên tỉnh
+    next(it)          # dòng 2: tên tỉnh — bỏ qua, dữ liệu bắt đầu từ dòng 3
 
     col_code = {}
     for j in range(3, len(row1)):
@@ -204,7 +204,6 @@ def main() -> int:
     # Gắn mã tỉnh cho các hàng định dạng cũ (map từ tên ASCII qua crosswalk)
     if "province_code" not in df.columns:
         df["province_code"] = np.nan
-    mask_old = df["province_code"].isna() & df["province_ascii"].notna()
     df["province_code"] = df["province_code"].astype("float64").fillna(
         df["province_ascii"].map(lambda a: lookup_code(a, ascii2code))
     )
