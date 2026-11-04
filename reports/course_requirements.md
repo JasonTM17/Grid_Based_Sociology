@@ -15,9 +15,9 @@ _Cập nhật: 2026-11-04 · Chủ sở hữu: B · Hạn chốt: 2026-11-10 (P4
       tài liệu mẫu của nhóm (`reports/report_format_notes.md`): A4, lề 2.5/2.0/2.0/2.0 cm, Title 20pt bold,
       Heading 1/2/3 = 16/14/12pt bold, front matter đầy đủ (TÓM TẮT → bảng → nội dung 7 chương → TLTK).
 - [x] **Template slide:** chưa có → tự thiết kế, 12–15 trang, hình từ `results/figs/`.
-- [x] **Nhóm: 2 người** — giữ kế hoạch đầy đủ, không áp cut-lines.
+- [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051); giữ kế hoạch đầy đủ, không áp cut-lines.
 - [ ] **Định dạng nộp (tên file/cấu trúc/zip/nơi nộp):** đề xuất dưới đây, chốt P4.
-- [ ] **Người trình bày & Q&A:** nhóm 2 người → A (thuật toán/demo/code), B (kết quả/ý nghĩa/báo cáo); thống nhất trước rehearsal.
+- [ ] **Người trình bày & Q&A:** đề xuất Sơn (thuật toán/demo/code) + Quyên (kết quả/ý nghĩa/báo cáo) — chốt trước rehearsal.
 - [ ] **Ngày giữa kỳ: 24/11–01/12** (mặc định user xác nhận 2026-11-04) → freeze 20/11 đứng.
 
 ## Định dạng nộp đề xuất (default đến khi GV chốt khác)
