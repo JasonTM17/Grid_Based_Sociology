@@ -1,0 +1,11 @@
+﻿scope,method,k,noise_ratio,silhouette,davies_bouldin,calinski_harabasz,ari_vs_sting,note
+pooled 2011-2023,STING (frozen),3,0.196,0.361,0.472,62.0,,"k=3: [629,16,5]; noise tách khỏi metric hình học"
+pooled 2011-2023,k-means k=2,2,0.0,0.445,0.876,812.3,0.166,tất cả điểm được gán cụm
+pooled 2011-2023,k-means k=3,3,0.0,0.336,1.05,665.7,0.139,tất cả điểm được gán cụm
+pooled 2011-2023,k-means k=4,4,0.0,0.364,0.879,669.1,0.082,tất cả điểm được gán cụm
+pooled 2011-2023,k-means k=5,5,0.0,0.334,0.945,647.9,0.07,tất cả điểm được gán cụm
+pooled 2011-2023,DBSCAN eps=0.2,5,0.142,0.218,0.505,35.3,0.647,
+pooled 2011-2023,DBSCAN eps=0.4,1,0.027,,,,0.135,metric n/a khi <2 cụm
+pooled 2011-2023,DBSCAN eps=0.6,1,0.009,,,,0.043,metric n/a khi <2 cụm
+pooled 2011-2023,DBSCAN eps=0.8,1,0.002,,,,0.012,metric n/a khi <2 cụm
+pooled 2011-2023,DBSCAN eps=1.0,1,0.001,,,,0.006,metric n/a khi <2 cụm

@@ -1,0 +1,4 @@
+﻿branch,n,explained_var_total,k,noise_ratio,silhouette,db,ch,ari_vs_2d,verdict
+"PCA(2) d1–d6, within-year z, pooled",869,0.632,1,0.062,,,,0.008,không nhận diện
+"8 chiều 2018–2024, within-year z, L=3 f=2 mc=10 lv=1",430,,3,0.605,,,,,không nhận diện
+"8 chiều 2018–2024, within-year z, L=3 f=3 mc=2 lv=2",430,,1,0.995,,,,,không nhận diện

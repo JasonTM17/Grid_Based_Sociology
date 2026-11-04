@@ -8,3 +8,4 @@ plotly==6.5.0
 openpyxl==3.1.5
 pytest==8.4.2
 jupyter==1.1.1
+python-pptx==1.0.2
