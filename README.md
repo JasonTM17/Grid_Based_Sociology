@@ -7,9 +7,9 @@
 | Thư mục | Nội dung |
 |---|---|
 | `plans/` | Kế hoạch triển khai (không commit theo quy định công cụ) |
-| `data/raw/papi/` | 14 workbook PAPI 2011–2024 (nguồn: papi.org.vn, dữ liệu công khai) |
-| `data/raw/mendeley/` | Gói replication CC BY 4.0 (panel đối chiếu, crosswalk, centroid) |
-| `data/raw/boundaries/` | GeoJSON 63 tỉnh (Open Development Vietnam, CC-BY-SA 4.0) |
+| `data/raw/papi/` | 14 workbook PAPI 2011–2024 (nguồn: papi.org.vn, dữ liệu công khai; manifest+hash: `PROVENANCE.md`) |
+| `data/raw/mendeley/` | Gói replication CC BY 4.0 — 4 file nhỏ dùng trực tiếp được commit (+`PROVENANCE.md`); phần còn lại tải theo DOI |
+| `data/raw/boundaries/` | GeoJSON 63 tỉnh (Open Development Vietnam, CC-BY-SA 4.0; lưu ý join: xem `PROVENANCE.md`) |
 | `data/processed/` | Panel sạch (kết quả Phase 2) |
 | `src/` | Thư viện STING (tự viết từ đầu) |
 | `scripts/` | Script dữ liệu & phân tích |
@@ -25,6 +25,7 @@
 - **PAPI 2011–2024** — CECODES / VFF-CRT / RTA / UNDP. Tải từ <https://papi.org.vn/du-lieu-papi/>.
 - **Gói replication** — Le et al., Mendeley Data, CC BY 4.0. DOI: 10.17632/wbk42j9wc8.1.
 - **GeoJSON tỉnh** — Open Development Vietnam (OD Mekong), CC-BY-SA 4.0.
+- Bằng chứng nguồn gốc (URL, ngày tải, giấy phép, SHA-256): các file `PROVENANCE.md` trong `data/raw/*/`.
 
 ## Chạy nhanh
 
