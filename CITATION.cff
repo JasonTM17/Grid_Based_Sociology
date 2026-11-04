@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "Nếu bạn sử dụng phần mềm này, vui lòng trích dẫn theo thông tin dưới đây.\nIf you use this software, please cite it as below."
+title: "Phân cụm 63 tỉnh Việt Nam với STING trên dữ liệu PAPI 2011-2024"
+authors:
+  - family-names: Son
+    given-names: Nguyen Tien
+repository-code: "https://github.com/JasonTM17/Grid_Based_Sociology"
+url: "https://github.com/JasonTM17/Grid_Based_Sociology"
+version: 1.0.0
+date-released: 2026-11-04
+license: MIT
+keywords:
+  - sting
+  - grid-based clustering
+  - papi
+  - machine-learning
+  - vietnam
