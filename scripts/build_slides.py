@@ -88,7 +88,7 @@ def bullets(slide, x, y, w, h, items, size=13, color=INK, gap_pt=6, bold_first=T
         p.space_after = Pt(gap_pt)
         if lead:
             r1 = p.add_run()
-            r1.text = "▸  " + lead
+            r1.text = "▸  " + lead + " "
             r1.font.bold = bold_first
             r1.font.size = Pt(size)
             r1.font.color.rgb = TEAL
@@ -193,8 +193,8 @@ note(s, "Nhấn mạnh: khác biệt dữ liệu thật so với dữ liệu là
 # ---------- Slide 5 — Demo synthetic ----------
 s = slide_new()
 header(s, "DEMO 1", "STING thực thi đúng trên dữ liệu giả lập", 5)
-pic(s, "00_synthetic_sting.png", 0.7, 1.35, h=4.7)
-bullets(s, 7.4, 1.6, 5.1, 4.2, [
+pic(s, "00_synthetic_sting.png", 0.55, 1.5, h=3.19)
+bullets(s, 8.0, 1.6, 4.8, 4.2, [
     ("Dữ liệu.", "2 blob Gauss, 240 điểm, seed 42."),
     ("Kết quả.", "ARI = 0.950 · nhiễu 2.5% · đúng 2 cụm."),
     ("Lưới.", "Factor=4, 3 mức; ô dày → gom cụm."),
@@ -205,8 +205,8 @@ note(s, "Show hình bên trái; nói ARI và tests.")
 # ---------- Slide 6 — Dữ liệu thật 2023 ----------
 s = slide_new()
 header(s, "DEMO 2", "Kết quả thật: dữ liệu rất đồng nhất", 6)
-pic(s, "sting_first_real.png", 0.6, 1.3, h=4.9)
-bullets(s, 7.6, 1.6, 5.0, 4.2, [
+pic(s, "sting_first_real.png", 0.55, 1.5, h=3.23)
+bullets(s, 8.1, 1.6, 4.7, 4.2, [
     ("61 điểm/năm", "— không thể đòi cấu trúc tách biệt rõ."),
     ("(a) Lưới thô 3×3:", "k=1 · 55/61 trong vùng dày · nhiễu 10%."),
     ("(b) Lưới mịn 9×9:", "k=3 · nhiễu 31% — độ phân giải đổi quyết định!"),
@@ -250,8 +250,8 @@ note(s, "Đọc 4 con số chính; kết thúc: 2024 là năm test thật sự."
 # ---------- Slide 9 — Model giám sát ----------
 s = slide_new()
 header(s, "MODEL GIÁM SÁT", "Ridge dự báo 6.1 Y tế công lập năm sau", 9)
-pic(s, "supervised_regression.png", 0.55, 1.35, h=4.4)
-bullets(s, 7.6, 1.5, 5.2, 4.7, [
+pic(s, "supervised_regression.png", 0.55, 1.6, h=3.07)
+bullets(s, 8.2, 1.5, 4.6, 4.7, [
     ("Đặc trưng.", "8 chỉ tiêu sạch năm t (sd 2011–2024 ổn định)."),
     ("CV train-only.", "GroupKFold theo năm; chọn Ridge (R²≈0.45)."),
     ("Holdout 2023→2024.", "MAE 0.064 (Ridge) / 0.062 (RF) vs carry-forward 0.068 → tốt hơn ~10%."),
