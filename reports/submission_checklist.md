@@ -12,7 +12,7 @@ _Cập nhật: 2026-11-04 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 
 ## Tái lập / chất lượng mã
 
-- [x] 22/22 unit test xanh (`python -m pytest tests -q`)
+- [x] Toàn bộ test xanh (`python -m pytest tests -q`)
 - [x] Đối chiếu chéo Mendeley: max |diff| = 0.0
 - [x] Mọi số liệu trong báo cáo/slide truy được về `results/*.csv` (metrics.csv, per_year.csv, robustness.csv, predict_summary.md, supervised_summary.md)
 - [x] PROVENANCE + SHA-256 cho 3 nguồn dữ liệu (`data/raw/*/PROVENANCE.md`)

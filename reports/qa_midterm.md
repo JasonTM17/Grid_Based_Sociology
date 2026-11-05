@@ -27,4 +27,4 @@ _Quy tắc trả lời: ≤60 giây/câu; không chắc → nói "chưa chắc, 
 
 - *"Bạn có chọn cấu hình theo kết quả test không?"* — Không; quy trình train-only, 2024 không tham gia chọn cấu hình.
 - *"Tại sao không dùng Silhouette cao nhất để chốt model?"* — Silhouette không bản địa với lưới song song trục; nhóm dùng nó chỉ để so sánh thô, tách noise.
-- *"Model dự đoán 2024 có chắc không?"* — Ridge/RF thắng baseline ~10% MAE trên holdout 2023→2024, nhưng chỉ MỘT holdout duy nhất — cần thêm nhiều năm; nhóm nêu rõ độ bất định.
+- *"Model dự đoán 2024 có chắc không?"* — Ridge (chọn theo CV) đạt MAE 0.064 so với carry-forward 0.0683 = giảm 6.3%; RF 0.0616 = giảm 9.8% trên holdout 2023→2024, nhưng chỉ MỘT holdout duy nhất — cần thêm nhiều năm; nhóm nêu rõ độ bất định.
