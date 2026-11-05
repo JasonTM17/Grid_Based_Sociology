@@ -38,11 +38,11 @@ Môi trường đã kiểm chứng: Python 3.14.2, Windows 11.
 | 5–6 | Slide 6 + notebook §3–4 | Kết quả thật: đồng nhất (k≈1); độ nhạy lưới |
 | 6–8 | Slide 7 | Pipeline dự đoán: train ≤2023 → predict 2024 (out-of-sample duy nhất) |
 | 8–9 | Slide 8 | 2024: 48 tỉnh cụm lớn / 13 tỉnh ngoại vi (coverage 79%) |
-| 9–10 | Slide 9 | Ridge dự báo 6.1 Y tế công lập năm sau — tốt hơn baseline ~10% MAE |
+| 9–10 | Slide 9 | Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau — MAE 0.064, giảm 6.3% so với carry-forward 0.0683 |
 | 10–11 | Slide 10 | STING vs k-means vs DBSCAN (noise tách khỏi metric) |
 | 11–12 | Slide 11 | Bản đồ centroid 2024 |
 | 12–13 | Slide 12 | Hạn chế trung thực (robustness âm tính, gãy thang đo) |
-| 13–14 | Slide 13 | Lộ trình cuối kỳ (M5–M7) |
+| 13–14 | Slide 13 | Lộ trình cuối kỳ (P5–P7) |
 | 14–15 | Slide 14–15 | Nguồn dữ liệu · Q&A |
 
 Mẹo: notebook đã **execute sẵn** (0 lỗi, ~18s) — chiếu thẳng không cần chạy live; muốn chạy lại live: `python -m nbconvert --to notebook --execute --inplace notebooks/midterm_demo.ipynb`.
@@ -67,7 +67,7 @@ Mẹo: notebook đã **execute sẵn** (0 lỗi, ~18s) — chiếu thẳng khôn
 | STING synthetic | ARI = **0.950** · nhiễu 2.5% · 22 unit tests xanh · coverage 99% cho `src/sting.py` |
 | Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột gãy thang đo (check_data audit) |
 | Dự đoán 2024 | Train ≤2023 (frozen, train-only) · phủ **79%** · {nhiễu: 13, cụm lớn: 48} · 0 chuyển thật 2023→2024 |
-| Model giám sát | Ridge/RF dự báo 6.1 Y tế công lập năm sau: **thắng carry-forward ~10% MAE** (0.062–0.064 vs 0.068) |
+| Model giám sát | Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau: MAE 0.064 vs carry-forward 0.0683 = **giảm 6.3%**; RF 0.0616 = giảm 9.8% |
 | Robustness | PCA d1–d6 (63% phương sai) và 8 chiều 2018–2024 → **không nhận diện cấu trúc** (âm tính, báo cáo trung thực) |
 | So sánh | STING ≈ DBSCAN(eps=0.2) (ARI 0.65) · k-means ép k, silhouette 0.445 (k=2) |
 | Bài học lớn | Audit gãy thang đo (sd_5_4 đổi thang 2021, hệ số 1.333 ≈ bước nhảy mean +0.576) |

@@ -21,7 +21,7 @@ _Quy tắc: ≤60 giây/câu; người trả lời A (thuật toán/dữ liệu)
 
 10. **Vì sao STING ≈ DBSCAN (ARI 0.65) nhưng ≠ k-means (ARI 0.16)?** — STING và DBSCAN cùng họ mật độ-lưới (điểm thuộc vùng đặc); k-means tối ưu centroid toàn cục và ép mọi điểm vào k cụm — hai phân vùng khác bản chất trên gần như một khối điểm; minh chứng: k-means k=2 silhouette 0.445 nhưng sizes [498,310] giả tạo so với dữ liệu 1 lõi + vệ tinh.
 11. **“Chuyển cụm 2023→2024”: 0 chuyển thật?** — Sau khi loại noise khỏi bài toán gán, 43 tỉnh giữ nguyên cụm 2, 9 đổi sang nhiễu hoặc từ nhiễu ra; không có tỉnh nào đổi giữa hai cụm thật; kết hợp với “dữ liệu đồng nhất”, điều này là kỳ vọng chứ không mâu thuẫn.
-12. **Model giám sát thắng carry-forward ~10% — có ý nghĩa gì?** — Ridge/RF dự báo 6.1 Y tế công lập năm sau tốt hơn “giữ nguyên giá trị năm nay” ~10% MAE (0.064/0.062 vs 0.068) trên holdout 2023→2024; nhưng MỘT holdout duy nhất — cần backtest cuốn chiếu nhiều mốc để khẳng định; nhóm không tuyên bố vượt quá bằng chứng.
+12. **Model giám sát giảm MAE 6.3% so với carry-forward — có ý nghĩa gì?** — Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau đạt MAE 0.064 so với carry-forward 0.0683 = giảm 6.3% (RF 0.0616 = giảm 9.8%) trên holdout 2023→2024; nhưng MỘT holdout duy nhất — cần backtest cuốn chiếu nhiều mốc để khẳng định; nhóm không tuyên bố vượt quá bằng chứng.
 13. **Vì sao phân loại ngoại vi âm tính?** — Cả LogReg lẫn RF chỉ đạt 0.814–0.831 (đa số baseline 0.814); thay đổi trạng thái ngoại vi gần như không dự báo được từ chỉ số năm trước (tỉnh ổn định theo thời gian); kết quả được giữ nguyên, không tô vẽ.
 
 ## Cuối cùng
