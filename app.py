@@ -17,7 +17,7 @@ from scripts.dashboard_data import (
     prepare_sting_view,
     select_regression_model,
 )
-from scripts.papi_pred_common import FEATURE_LABELS
+from scripts.papi_pred_common import FEATURE_LABELS, ROOT
 
 
 st.set_page_config(
@@ -52,13 +52,40 @@ st.markdown(
 )
 
 
+_ASSET_FILES = (
+    "data/processed/papi_panel_63_2011_2024.csv",
+    "models/predict_config.json",
+    "results/predict_all_years.csv",
+    "results/supervised_metrics.csv",
+)
+_REGRESSION_MODEL_FILES = (
+    "models/sup_ridge.joblib",
+    "models/sup_rf.joblib",
+)
+
+
+def artifact_identity(relative_paths: tuple[str, ...]) -> tuple[tuple[str, int | None, int | None], ...]:
+    """(path, mtime_ns, size) for each file, including paths that are missing."""
+    identity: list[tuple[str, int | None, int | None]] = []
+    for relative in relative_paths:
+        path = ROOT / relative
+        if path.is_file():
+            stat = path.stat()
+            identity.append((relative, stat.st_mtime_ns, stat.st_size))
+        else:
+            identity.append((relative, None, None))
+    return tuple(identity)
+
+
 @st.cache_resource(show_spinner="Đang đọc dữ liệu PAPI đã lưu…")
-def get_assets() -> dict:
+def get_assets(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
+    del artifact_identity
     return load_dashboard_assets(include_models=False)
 
 
 @st.cache_resource(show_spinner="Đang nạp model hồi quy…")
-def get_regression_models() -> dict:
+def get_regression_models(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
+    del artifact_identity
     return load_regression_models()
 
 
@@ -90,12 +117,12 @@ st.caption(
 )
 
 try:
-    assets = get_assets()
+    assets = get_assets(artifact_identity(_ASSET_FILES))
 except DashboardDataError as exc:
     st.error(str(exc))
     st.stop()
-except Exception:
-    st.error("Không đọc được artifact local. Hãy kiểm tra các file kết quả và chạy lại pipeline tương ứng.")
+except Exception as exc:
+    st.error(f"Không đọc được artifact local: {exc}")
     st.stop()
 
 panel = assets["panel"]
@@ -158,7 +185,7 @@ with overview_tab:
     coverage = sting_counts["covered_rows"] / eligible if eligible else 0.0
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Tỉnh trong panel", f"{sting_counts['source_rows']}")
-    col2.metric("Có assignment", f"{eligible}", help="Dòng đủ feature có trong artifact STING.")
+    col2.metric("Có assignment", f"{eligible}", help="Dòng có assignment trong artifact STING.")
     col3.metric("Nằm trong cụm", f"{coverage:.0%}", help="Không tính điểm nhiễu -1 là covered.")
     col4.metric("Nhiễu (-1)", f"{sting_counts['noise_rows']}")
 
@@ -205,7 +232,7 @@ with sting_tab:
             plot_data["Cụm"] = plot_data.pred_cluster.map(
                 lambda value: "Nhiễu (-1)" if int(value) == -1 else f"Cụm {int(value)}"
             )
-            palette = {"Nhiễu (-1)": "#94a3b8"}
+            palette = {"Nhiễu (-1)": "#64748b"}
             palette.update(
                 {f"Cụm {code}": color for code, color in zip(sorted(year_clusters), px.colors.qualitative.Safe)}
             )
@@ -224,6 +251,10 @@ with sting_tab:
                 title="Mỗi điểm là một tỉnh có feature và assignment",
             )
             figure.update_traces(marker={"size": 11, "opacity": 0.82, "line": {"width": 0.7, "color": "white"}})
+            figure.update_traces(
+                marker={"line": {"width": 0.7, "color": "#172033"}},
+                selector={"name": "Nhiễu (-1)"},
+            )
             figure.update_layout(
                 template="plotly_white",
                 height=470,
@@ -260,7 +291,7 @@ with sting_tab:
 if regression_tab.open:
     with regression_tab:
         try:
-            regression_models = get_regression_models()
+            regression_models = get_regression_models(artifact_identity(_REGRESSION_MODEL_FILES))
             regression, regression_counts = prepare_regression_holdout(
                 panel,
                 assignments,
@@ -270,126 +301,125 @@ if regression_tab.open:
         except DashboardDataError as exc:
             st.error(str(exc))
             st.info("Phần STING và Tổng quan vẫn dùng được. Làm theo hướng dẫn trong thông báo rồi làm mới ứng dụng.")
-            st.stop()
-        except Exception:
-            st.error("Không thể nạp hoặc áp dụng model hồi quy local. Hãy kiểm tra model trong thư mục `models/`.")
+        except Exception as exc:
+            st.error(f"Không thể nạp hoặc áp dụng model hồi quy local: {exc}")
             st.info("Phần STING và Tổng quan vẫn dùng được. Chạy lại `python scripts/predict_supervised.py`, rồi làm mới ứng dụng.")
-            st.stop()
-
-        st.subheader("Holdout hồi quy cố định: 2023 → 2024")
-        st.caption(
-            "Bộ lọc dưới đây chỉ chọn nhóm để xem bảng/biểu đồ. Các metric trong artifact "
-            "luôn tính trên toàn bộ holdout và không được tính lại từ nhóm đã lọc."
-        )
-        holdout_names = province_name_map(regression)
-        reg_col1, reg_col2 = st.columns([2, 1])
-        with reg_col1:
-            regression_provinces = st.multiselect(
-                "Tỉnh / thành phố (holdout)",
-                options=sorted(int(code) for code in regression.province_code.unique()),
-                default=[],
-                format_func=lambda code: holdout_names.get(int(code), str(code)),
-                help="Để trống để xem tất cả cặp holdout.",
-            )
-        with reg_col2:
-            origin_clusters = sorted(
-                int(code) for code in regression.origin_cluster_2023.dropna().unique()
-            )
-            regression_clusters = st.multiselect(
-                "Cụm STING tại năm gốc 2023",
-                options=origin_clusters,
-                default=[],
-                format_func=cluster_label,
-                help="Chỉ dùng assignment năm 2023; không lọc theo cụm 2024 vì có thể điều kiện hóa trên target.",
-            )
-        regression_view, filter_counts = filter_regression_holdout(
-            regression,
-            province_codes=set(regression_provinces) if regression_provinces else None,
-            origin_clusters=set(regression_clusters) if regression_clusters else None,
-        )
-
-        overall_regression = metrics.loc[
-            metrics.task.eq("regression")
-            & metrics.model.isin(["carry-forward (giữ giá trị năm nay)", "ridge", "random forest"])
-        ].copy()
-        overall_regression["Được chọn theo CV"] = overall_regression.model.eq(selected_model)
-        st.markdown("#### So sánh trên toàn bộ holdout")
-        st.dataframe(
-            overall_regression[["model", "value_cv", "holdout_mae", "holdout_rmse", "holdout_r2", "Được chọn theo CV"]],
-            hide_index=True,
-            width="stretch",
-            column_config={
-                "model": "Mô hình / baseline",
-                "value_cv": st.column_config.NumberColumn("CV train-only · R²", format="%.3f"),
-                "holdout_mae": st.column_config.NumberColumn("MAE · 59 cặp", format="%.4f"),
-                "holdout_rmse": st.column_config.NumberColumn("RMSE · 59 cặp", format="%.4f"),
-                "holdout_r2": st.column_config.NumberColumn("R² · 59 cặp", format="%.3f"),
-                "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
-            },
-        )
-        st.warning(
-            "R² CV hồi quy là điểm chọn họ model bằng GroupKFold theo origin trong train, "
-            "không phải backtest expanding. Chỉ có một holdout 2023→2024."
-        )
-
-        reg_m1, reg_m2, reg_m3, reg_m4 = st.columns(4)
-        reg_m1.metric("Cặp holdout sau lọc", f"{len(regression_view)}")
-        reg_m2.metric("Thiếu feature origin", f"{regression_counts['missing_origin_feature_rows']}")
-        reg_m3.metric("Thiếu target 2024", f"{regression_counts['missing_target_for_complete_origin']}")
-        reg_m4.metric("Thiếu cụm origin 2023", f"{filter_counts['missing_origin_cluster_after_province_filter']}")
-
-        if regression_view.empty:
-            render_empty("0 cặp tỉnh phù hợp. Hãy mở rộng bộ lọc tỉnh hoặc cụm origin năm 2023.")
         else:
-            values = pd.concat(
-                [regression_view.actual_2024, regression_view.prediction_ridge, regression_view.prediction_random_forest]
+            st.subheader("Holdout hồi quy cố định: 2023 → 2024")
+            st.caption(
+                "Bộ lọc dưới đây chỉ chọn nhóm để xem bảng/biểu đồ. Các metric trong artifact "
+                "luôn tính trên toàn bộ holdout và không được tính lại từ nhóm đã lọc."
             )
-            low, high = float(values.min()), float(values.max())
-            figure = go.Figure()
-            figure.add_trace(go.Scatter(
-                x=[low, high], y=[low, high], mode="lines", name="Dự báo hoàn hảo (y=x)",
-                line={"color": "#94a3b8", "dash": "dash"},
-            ))
-            for column, label, color in [
-                ("prediction_ridge", "Ridge · chọn bằng CV", "#2563eb"),
-                ("prediction_random_forest", "Random Forest", "#d97706"),
-            ]:
+            holdout_names = province_name_map(regression)
+            reg_col1, reg_col2 = st.columns([2, 1])
+            with reg_col1:
+                regression_provinces = st.multiselect(
+                    "Tỉnh / thành phố (holdout)",
+                    options=sorted(int(code) for code in regression.province_code.unique()),
+                    default=[],
+                    format_func=lambda code: holdout_names.get(int(code), str(code)),
+                    help="Để trống để xem tất cả cặp holdout.",
+                )
+            with reg_col2:
+                origin_clusters = sorted(
+                    int(code) for code in regression.origin_cluster_2023.dropna().unique()
+                )
+                regression_clusters = st.multiselect(
+                    "Cụm STING tại năm gốc 2023",
+                    options=origin_clusters,
+                    default=[],
+                    format_func=cluster_label,
+                    help="Chỉ dùng assignment năm 2023; không lọc theo cụm 2024 vì có thể điều kiện hóa trên target.",
+                )
+            regression_view, filter_counts = filter_regression_holdout(
+                regression,
+                province_codes=set(regression_provinces) if regression_provinces else None,
+                origin_clusters=set(regression_clusters) if regression_clusters else None,
+            )
+
+            overall_regression = metrics.loc[
+                metrics.task.eq("regression")
+                & metrics.model.isin(["carry-forward (giữ giá trị năm nay)", "ridge", "random forest"])
+            ].copy()
+            overall_regression["Được chọn theo CV"] = overall_regression.model.eq(selected_model)
+            st.markdown("#### So sánh trên toàn bộ holdout")
+            st.dataframe(
+                overall_regression[["model", "value_cv", "holdout_mae", "holdout_rmse", "holdout_r2", "Được chọn theo CV"]],
+                hide_index=True,
+                width="stretch",
+                column_config={
+                    "model": "Mô hình / baseline",
+                    "value_cv": st.column_config.NumberColumn("CV train-only · R²", format="%.3f"),
+                    "holdout_mae": st.column_config.NumberColumn("MAE · 59 cặp", format="%.4f"),
+                    "holdout_rmse": st.column_config.NumberColumn("RMSE · 59 cặp", format="%.4f"),
+                    "holdout_r2": st.column_config.NumberColumn("R² · 59 cặp", format="%.3f"),
+                    "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
+                },
+            )
+            st.warning(
+                "R² CV hồi quy là điểm chọn họ model bằng GroupKFold theo origin trong train, "
+                "không phải backtest expanding. Chỉ có một holdout 2023→2024."
+            )
+
+            reg_m1, reg_m2, reg_m3, reg_m4 = st.columns(4)
+            reg_m1.metric("Cặp holdout sau lọc", f"{len(regression_view)}")
+            reg_m2.metric("Thiếu feature origin", f"{regression_counts['missing_origin_feature_rows']}")
+            reg_m3.metric("Thiếu target 2024", f"{regression_counts['missing_target_for_complete_origin']}")
+            reg_m4.metric("Thiếu cụm origin 2023", f"{filter_counts['missing_origin_cluster_after_province_filter']}")
+
+            if regression_view.empty:
+                render_empty("0 cặp tỉnh phù hợp. Hãy mở rộng bộ lọc tỉnh hoặc cụm origin năm 2023.")
+            else:
+                values = pd.concat(
+                    [regression_view.actual_2024, regression_view.prediction_ridge, regression_view.prediction_random_forest]
+                )
+                low, high = float(values.min()), float(values.max())
+                figure = go.Figure()
                 figure.add_trace(go.Scatter(
-                    x=regression_view.actual_2024,
-                    y=regression_view[column],
-                    mode="markers",
-                    name=label,
-                    marker={"color": color, "size": 10, "opacity": 0.8},
-                    text=regression_view.province_vi,
-                    customdata=regression_view[["province_code", "origin_cluster_label"]],
-                    hovertemplate=(
-                        "%{text}<br>Thực tế 2024: %{x:.3f}<br>Dự báo: %{y:.3f}"
-                        "<br>Mã tỉnh: %{customdata[0]}<br>Cụm gốc: %{customdata[1]}<extra></extra>"
-                    ),
+                    x=[low, high], y=[low, high], mode="lines", name="Dự báo hoàn hảo (y=x)",
+                    line={"color": "#94a3b8", "dash": "dash"},
                 ))
-            figure.update_layout(
-                template="plotly_white",
-                height=460,
-                xaxis_title="Giá trị thực sd_6_1 năm 2024",
-                yaxis_title="Giá trị dự báo sd_6_1",
-                legend_title_text="Model",
-                margin={"t": 30, "r": 20, "b": 20, "l": 20},
-            )
-            st.plotly_chart(figure, width="stretch")
-            table = regression_view[[
-                "province_code", "province_vi", "origin_cluster_label", "sd_6_1",
-                "actual_2024", "carry_forward", "prediction_ridge", "prediction_random_forest",
-            ]].rename(columns={
-                "province_code": "Mã tỉnh",
-                "province_vi": "Tỉnh / thành phố",
-                "origin_cluster_label": "Cụm STING 2023",
-                "sd_6_1": "sd_6_1 thực 2023",
-                "actual_2024": "sd_6_1 thực 2024",
-                "carry_forward": "Baseline giữ nguyên 2023",
-                "prediction_ridge": "Dự báo Ridge",
-                "prediction_random_forest": "Dự báo Random Forest",
-            })
-            st.dataframe(table, hide_index=True, width="stretch")
+                for column, base_label, model_name, color in [
+                    ("prediction_ridge", "Ridge", "ridge", "#2563eb"),
+                    ("prediction_random_forest", "Random Forest", "random forest", "#d97706"),
+                ]:
+                    label = f"{base_label} · chọn bằng CV" if selected_model == model_name else base_label
+                    figure.add_trace(go.Scatter(
+                        x=regression_view.actual_2024,
+                        y=regression_view[column],
+                        mode="markers",
+                        name=label,
+                        marker={"color": color, "size": 10, "opacity": 0.8},
+                        text=regression_view.province_vi,
+                        customdata=regression_view[["province_code", "origin_cluster_label"]],
+                        hovertemplate=(
+                            "%{text}<br>Thực tế 2024: %{x:.3f}<br>Dự báo: %{y:.3f}"
+                            "<br>Mã tỉnh: %{customdata[0]}<br>Cụm gốc: %{customdata[1]}<extra></extra>"
+                        ),
+                    ))
+                figure.update_layout(
+                    template="plotly_white",
+                    height=460,
+                    xaxis_title="Giá trị thực sd_6_1 năm 2024",
+                    yaxis_title="Giá trị dự báo sd_6_1",
+                    legend_title_text="Model",
+                    margin={"t": 30, "r": 20, "b": 20, "l": 20},
+                )
+                st.plotly_chart(figure, width="stretch")
+                table = regression_view[[
+                    "province_code", "province_vi", "origin_cluster_label", "sd_6_1",
+                    "actual_2024", "carry_forward", "prediction_ridge", "prediction_random_forest",
+                ]].rename(columns={
+                    "province_code": "Mã tỉnh",
+                    "province_vi": "Tỉnh / thành phố",
+                    "origin_cluster_label": "Cụm STING 2023",
+                    "sd_6_1": "sd_6_1 thực 2023",
+                    "actual_2024": "sd_6_1 thực 2024",
+                    "carry_forward": "Baseline giữ nguyên 2023",
+                    "prediction_ridge": "Dự báo Ridge",
+                    "prediction_random_forest": "Dự báo Random Forest",
+                })
+                st.dataframe(table, hide_index=True, width="stretch")
 
 with audit_tab:
     st.subheader("Feature, missingness và giới hạn thang đo")
