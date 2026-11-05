@@ -17,7 +17,7 @@ Hai bài toán minh hoạ (khác với `predict_demo.py` — STING.predict khôn
   models/sup_ridge.joblib, models/sup_rf.joblib           — model local (joblib)
   results/supervised_metrics.csv, results/supervised_summary.md
   results/figs/supervised_regression.png                  — dự báo vs thực tế + độ quan trọng
-  results/figs/supervised_confusion.png                   — confusion (bài toán 2, âm tính)
+  results/figs/supervised_confusion.png                   — confusion (bài toán 2, model chọn bằng CV)
 
 Chạy: python scripts/predict_supervised.py
 """
@@ -338,13 +338,30 @@ def main() -> int:
     plt.close(fig)
 
     # ================================================================== #
-    # Hình (b): confusion của bài toán phân loại (âm tính)
+    # Hình (b): confusion của bài toán phân loại (model chọn bằng CV)
     # ================================================================== #
+    _clf_rows = met[met.task == "classification"]
+    _clf = _clf_rows.set_index("model")
+    _clf_models = _clf_rows[_clf_rows.model != "majority (lớp đa số)"]
+    _selected_clf_name = select_model_by_cv(_clf_models)
+    _selected_clf = _clf.loc[_selected_clf_name]
+    _majority_clf = _clf.loc["majority (lớp đa số)"]
+    _clf_grids = {
+        "logistic regression": grid_lr,
+        "random forest": grid_rfc,
+    }
+    _selected_clf_grid = _clf_grids[_selected_clf_name]
     classes = sorted(set(yc_tr.tolist()) | set(yc_te.tolist()))
     fig, ax = plt.subplots(figsize=(5.2, 4.4))
-    cm = confusion_matrix(yc_te, grid_rfc.best_estimator_.predict(Xc_te), labels=classes)
+    cm = confusion_matrix(
+        yc_te, _selected_clf_grid.best_estimator_.predict(Xc_te), labels=classes
+    )
     ax.imshow(cm, cmap="Blues")
-    ax.set_title("Phân loại ngoại vi/vùng dày (2023→2024)\nKẾT QUẢ ÂM TÍNH ≈ baseline")
+    ax.set_title(
+        "Phân loại ngoại vi/vùng dày (2023→2024)\n"
+        f"{_selected_clf_name}: macro-F1 {_selected_clf['holdout_macro_f1']:.3f}"
+        f" vs majority {_majority_clf['holdout_macro_f1']:.3f}"
+    )
     ax.set_xlabel("dự báo")
     ax.set_ylabel("thực tế")
     ax.set_xticks(range(len(classes)), [str(c) for c in classes])
@@ -381,12 +398,6 @@ def main() -> int:
     _selected_reg_name = select_model_by_cv(_reg_models)
     _selected_reg = _reg.loc[_selected_reg_name]
     _impr = (1 - _selected_reg["holdout_mae"] / _carry["holdout_mae"]) * 100
-    _clf_rows = met[met.task == "classification"]
-    _clf = _clf_rows.set_index("model")
-    _clf_models = _clf_rows[_clf_rows.model != "majority (lớp đa số)"]
-    _selected_clf_name = select_model_by_cv(_clf_models)
-    _selected_clf = _clf.loc[_selected_clf_name]
-    _majority_clf = _clf.loc["majority (lớp đa số)"]
     _acc_delta = (_selected_clf["holdout_acc"] - _majority_clf["holdout_acc"]) * 100
     _f1_delta = (_selected_clf["holdout_macro_f1"] - _majority_clf["holdout_macro_f1"]) * 100
     lines.append(
