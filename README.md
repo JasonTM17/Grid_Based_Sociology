@@ -38,7 +38,7 @@
 
 ```powershell
 # Kiểm tra môi trường
-python -c "import pandas, openpyxl, plotly, sklearn; print('ok')"
+python -c "import pandas, openpyxl, plotly, sklearn, streamlit; print('ok')"
 
 # Unit test STING (22 tests, ~99% coverage cho src/sting.py)
 python -m pytest tests -q
@@ -63,22 +63,47 @@ python scripts/predict_demo.py         # 2) STING: học 2011–2023 → dự đ
 python scripts/predict_supervised.py   # 3) model ML có giám sát (scikit-learn)
 ```
 
-1. **`predict_sweep.py`** — quét ứng viên cặp chỉ tiêu đã audit thang đo + cấu hình lưới;
-   chọn bằng CV trên dữ liệu ≤2020, kiểm trên tương lai giả 2021–2022, rồi đóng băng vào
-   `models/predict_config.json` (tránh "chọn theo kết quả test"). Bảng đầy đủ:
+1. **`predict_sweep.py`** — quét cặp sub-dimension trong allowlist đã sàng lọc;
+   mean-jump heuristic chỉ dùng giai đoạn train ≤2020 để xét eligibility, sau đó
+   chọn cấu hình bằng train/validation 2021–2022. Dimension-level `d1–d6` chưa vào
+   sweep vì thang 1–10 không tự chứng minh tính tương đương xuyên năm. Bảng đầy đủ:
    `results/predict_config_search.csv`.
 2. **`predict_demo.py`** — STING `fit → save → load → predict`: lưu model local
-   (`models/sting_predict_model.pkl`) rồi nạp lại để dự đoán cụm cho 63 tỉnh năm 2024
-   (năm chưa từng thấy). Kết quả: `results/predict_all_years.csv`,
+   (`models/sting_predict_model.pkl`) rồi nạp lại để gán cụm ngoài mẫu năm 2024.
+   Chỉ hàng đủ hai feature được dự đoán (hiện 61/63 tỉnh; tỉnh thiếu bị loại,
+   không nội suy). `-1` nghĩa là điểm nằm ngoài ô dày đã học, không phải cụm thường.
+   Kết quả: `results/predict_all_years.csv`,
    `results/predict_summary.md` (gồm độ nhạy theo `min_count` và chuyển cụm tách riêng
    "chuyển thật" vs "chuyển sang/từ nhiễu"), `results/figs/predict_2024.png`.
 3. **`predict_supervised.py`** — model có giám sát, lưu local bằng joblib:
-   - **Hồi quy (chính):** dự báo *6.1 Y tế công lập* năm t+1 từ 8 chỉ tiêu năm t —
-     Ridge/RandomForest vượt baseline carry-forward ~10% MAE trên holdout 2023→2024.
+   - **Hồi quy (chính):** dự báo *6.1 Y tế công lập* năm t+1 từ 8 sub-dimension năm t.
+     Chọn họ model theo R² CV train-only (GroupKFold theo origin): hiện Ridge được chọn
+     với R²=0.451; MAE holdout 2023→2024 là 0.0640 so với carry-forward 0.0683
+     (giảm 6.3%). Random Forest có MAE holdout thấp hơn (0.0616) nhưng CV thấp hơn,
+     nên không chọn bằng cách nhìn holdout. Đây vẫn chỉ là một năm holdout.
      Lưu `models/sup_ridge.joblib`, `models/sup_rf.joblib`; kết quả
      `results/supervised_metrics.csv` + `results/supervised_summary.md`.
-   - **Phân loại (phụ, kết quả âm tính):** dự báo "thuộc vùng cấu trúc hay ngoại vi"
-     năm sau — không vượt baseline đủ tin cậy; ghi lại trung thực.
+   - **Phân loại phụ:** dự báo pseudo-label STING cutoff-local cho năm sau, với expanding
+     CV theo origin 2017–2022 (warm-up 2011–2016). CV chọn Logistic Regression
+     (macro-F1 0.434; majority baseline 0.228). Trên holdout 2023→2024, macro-F1 là
+     0.541 so với baseline 0.157. Đây là mức khớp với nhãn do STING sinh, không phải
+     accuracy so với ground truth xã hội; một holdout không chứng minh tổng quát hóa.
+
+## Dashboard phân tích local
+
+Cài dependency và chạy từ thư mục gốc dự án:
+
+```powershell
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
+```
+
+Dashboard chỉ đọc panel, cấu hình, kết quả và model local đã lưu; không huấn luyện lại,
+không sửa artifact và không gửi dữ liệu ra ngoài. Nếu artifact bị thiếu, app báo file và
+lệnh pipeline cần chạy để tạo lại. Bộ lọc năm/tỉnh/cụm ở phần STING không áp dụng cho hồi
+quy: holdout luôn là 2023→2024; phần hồi quy chỉ lọc theo tỉnh và assignment cụm ở năm gốc
+2023. Kết quả 2024 của STING là assignment vào lưới train trước đó, không phải accuracy có
+nhãn chuẩn. Metric hồi quy có một năm holdout; classifier đo khớp pseudo-label STING.
 
 Nạp model để dự đoán điểm mới:
 
@@ -101,10 +126,12 @@ ridge = joblib.load("models/sup_ridge.joblib")
 print(ridge.predict(np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])))  # dự báo 6.1 năm sau
 ```
 
-**Lưu ý thang đo:** nhiều sub-dimension PAPI đổi thang điểm giữa các năm (ví dụ `sd_5_4`
-đổi từ 0.25–2.5 lên 0.33–3.33 tại 2021; `sd_2_1` đổi tại 2018). `scripts/check_data.py`
-in danh sách cảnh báo gãy thang đo (bước nhảy trung bình năm > 0.25 điểm); pipeline dự đoán
-chỉ dùng các chỉ tiêu nằm ngoài danh sách này.
+**Lưu ý thang đo:** `scripts/check_data.py` đánh dấu cột có bước nhảy mean năm >0.25;
+đây là heuristic cần đối chiếu workbook/codebook, không tự chứng minh đổi thang. Ví dụ
+`sd_5_4` có thay đổi khoảng điểm được ghi trong workbook. Sweep chỉ dùng allowlist
+sub-dimension không bị flag trong giai đoạn train; dimension-level scores không được
+đưa vào cho tới khi chứng minh được tính so sánh xuyên năm. [PAPI 2024 One Pager](https://papi.org.vn/wp-content/uploads/2025/04/26_Thanh_Hoa_ENG.pdf) ghi thang dimension
+1–10 và đánh dấu thay đổi sub-dimension/indicator ở một số dimension năm 2021.
 
 ## Giấy phép
 

@@ -2,16 +2,16 @@
 
 Hai bài toán minh hoạ (khác với `predict_demo.py` — STING.predict không giám sát):
 
-(1) CHÍNH — HỒI QUY dự báo: "6.1 Y tế công lập năm t+1" từ 8 chỉ số năm t
-    (các sub-dim đã audit thang đo 2011–2024: 1.3, 1.4, 4.1–4.4, 6.1, 6.3).
+(1) CHÍNH — HỒI QUY dự báo: "6.1 Y tế công lập năm t+1" từ 8 sub-dimension năm t
+    trong allowlist đã sàng lọc của pipeline.
     Model: Ridge + RandomForest; đối chứng: carry-forward (giữ nguyên giá trị
     năm nay) và trung bình năm. Bài toán + bộ đặc trưng + mô hình được chọn
     bằng CV train-only (GroupKFold theo năm); holdout 2023 → 2024 chỉ đánh
     giá MỘT LẦN.
 
-(2) PHỤ — PHÂN LOẠI "trạng thái cấu trúc năm sau" (thuộc ô dày của STING
-    hay rơi vào ngoại vi/nhiễu −1): KẾT QUẢ ÂM TÍNH — mọi mô hình ≈ baseline
-    lớp đa số. Giữ lại làm bằng chứng trung thực, không dùng cho tuyên bố.
+(2) PHỤ — PHÂN LOẠI pseudo-label: dự báo target năm t+1 có được STING fit
+    đến cutoff t gán vào vùng dày hay không. Nhãn cho từng origin được dựng
+    riêng theo cutoff; CV expanding theo thời gian. Đây không phải ground truth.
 
 Đầu ra:
   models/sup_ridge.joblib, models/sup_rf.joblib           — model local (joblib)
@@ -23,7 +23,6 @@ Chạy: python scripts/predict_supervised.py
 """
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
@@ -39,6 +38,7 @@ from sklearn.metrics import (
     mean_absolute_error,
     mean_squared_error,
     r2_score,
+    make_scorer,
 )
 from sklearn.model_selection import GridSearchCV, GroupKFold
 from sklearn.pipeline import Pipeline
@@ -48,7 +48,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from sting import STING  # noqa: E402
-from papi_pred_common import ROOT, load_config, load_panel  # noqa: E402
+from papi_pred_common import (
+    REGRESSION_FEATURES,
+    REGRESSION_TARGET,
+    ROOT,
+    load_config,
+    load_panel,
+    select_model_by_cv,
+)  # noqa: E402
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -60,15 +67,21 @@ RESULTS = ROOT / "results"
 FIGS = RESULTS / "figs"
 HOLDOUT_YEAR = 2023          # cặp (2023 → 2024) là holdout duy nhất
 SEED = 42
+CLASSIFICATION_CV_FIRST_YEAR = 2017  # warm-up cố định: origins 2011–2016
+CLASSIFICATION_CV_YEARS = tuple(range(CLASSIFICATION_CV_FIRST_YEAR, HOLDOUT_YEAR))
+CLASSIFICATION_SCORER = make_scorer(
+    f1_score, average="macro", labels=[0, 1], zero_division=0
+)
 
-DIMS = ["d1", "d2", "d3", "d4", "d5", "d6"]
-SUBS = ["sd_1_3", "sd_1_4", "sd_4_1", "sd_4_2", "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3"]
-TARGET = "sd_6_1"            # chọn bằng CV (R² 0.44) vs d6 (0.17) — train-only
-FEATURES = SUBS              # chỉ dùng cột qua audit thang đo (CV tốt hơn cả bộ +chiều)
+SUBS = REGRESSION_FEATURES
+TARGET = REGRESSION_TARGET
+FEATURES = REGRESSION_FEATURES
 
 
 def build_regression_pairs(df: pd.DataFrame) -> pd.DataFrame:
     """Cặp (đặc trưng năm t, giá trị đích năm t+1, carry-forward)."""
+    if df.duplicated(["province_code", "year"]).any():
+        raise ValueError("Panel có province_code/year trùng; không thể ghép cặp an toàn.")
     base = df[["province_code", "year"] + FEATURES].copy()  # TARGET nằm trong FEATURES
     rows = []
     for t in range(2011, 2024):
@@ -89,38 +102,108 @@ def build_regression_pairs(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).dropna()
 
 
-def build_classification_pairs(df: pd.DataFrame, feats) -> pd.DataFrame:
-    """Cặp (đặc trưng năm t) → nhãn "năm t+1 thuộc ô dày hay ngoại vi (-1)".
-
-    Nhãn lấy từ model STING đã lưu (không train lại).
-    """
-    model = STING.load(MODELS / "sting_predict_model.pkl")
-    si = json.loads(
-        (MODELS / "sting_predict_scaler.json").read_text(encoding="utf-8")
+def fit_sting_labeler(
+    df: pd.DataFrame, cutoff_year: int, feats, sting_params: dict
+):
+    """Fit scaler/STING usando đúng dữ liệu có tại cutoff, bao gồm năm origin."""
+    if df.duplicated(["province_code", "year"]).any():
+        raise ValueError("Panel có province_code/year trùng; không thể tạo nhãn an toàn.")
+    history = df[df.year <= cutoff_year].dropna(subset=feats)
+    if history.empty:
+        raise ValueError(f"Không có feature đủ dữ liệu tới cutoff {cutoff_year}.")
+    scaler = StandardScaler().fit(history[feats])
+    model = STING(
+        n_levels=sting_params["n_levels"],
+        factor=sting_params["factor"],
+        min_count=sting_params["min_count"],
+    ).fit(scaler.transform(history[feats]))
+    model.cluster(
+        level=sting_params["cluster_level"],
+        connectivity=sting_params["connectivity"],
     )
-    mean, scale = np.array(si["mean"]), np.array(si["scale"])
-    labels_by_year: dict[int, dict[int, int]] = {}
-    for y in sorted(df.year.unique()):
-        sub = df[df.year == y].dropna(subset=feats)
-        pred = model.predict((sub[feats].to_numpy() - mean) / scale)
-        labels_by_year[int(y)] = {
-            int(pc): int(lb) for pc, lb in zip(sub["province_code"], pred)
-        }
+    return scaler, model
+
+
+def predict_sting_labels_for_origin(
+    df: pd.DataFrame, origin_year: int, feats, sting_params: dict
+) -> dict[int, int]:
+    """Gán nhãn t+1 bằng STING/scaler chỉ fit trên dữ liệu ≤ origin t."""
+    scaler, model = fit_sting_labeler(df, origin_year, feats, sting_params)
+    target = df[df.year == origin_year + 1].dropna(subset=feats)
+    if target.empty:
+        return {}
+    pred = model.predict(scaler.transform(target[feats]))
+    return {
+        int(pc): int(label)
+        for pc, label in zip(target["province_code"], pred)
+    }
+
+
+def build_classification_pairs(
+    df: pd.DataFrame, feats, sting_params: dict
+) -> pd.DataFrame:
+    """Cặp X(t) → pseudo-label STING(t+1) với labeler fit tới cutoff t."""
+    if df.duplicated(["province_code", "year"]).any():
+        raise ValueError("Panel có province_code/year trùng; không thể ghép cặp an toàn.")
     rows = []
-    for t in range(2012, 2024):
+    years = sorted(int(year) for year in df.year.dropna().unique())
+    for t in years:
+        if t + 1 not in years:
+            continue
+        labels = predict_sting_labels_for_origin(df, t, feats, sting_params)
         cur = df[df.year == t].dropna(subset=FEATURES)
         for _, r in cur.iterrows():
             pc = int(r["province_code"])
-            if pc not in labels_by_year.get(t + 1, {}):
+            if pc not in labels:
                 continue
             rows.append(
                 {
                     "year_t": t,
                     **{c: float(r[c]) for c in FEATURES},
-                    "y": int(labels_by_year[t + 1][pc] != -1),
+                    "y": int(labels[pc] != -1),
                 }
             )
     return pd.DataFrame(rows).dropna()
+
+
+def expanding_year_splits(year_t, y) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Tạo forward validation theo origin; validation chỉ ở 2017–2022."""
+    years = np.asarray(year_t, dtype=int)
+    target = np.asarray(y, dtype=int)
+    splits = []
+    present_years = set(years.tolist())
+    missing = [year for year in CLASSIFICATION_CV_YEARS if year not in present_years]
+    if missing:
+        raise ValueError(f"Thiếu origin years cho classification CV: {missing}.")
+    for validation_year in CLASSIFICATION_CV_YEARS:
+        train_idx = np.flatnonzero(years < validation_year)
+        validation_idx = np.flatnonzero(years == validation_year)
+        if np.unique(target[train_idx]).size < 2:
+            raise ValueError(
+                f"Classification CV tới origin {validation_year} chỉ có một lớp train."
+            )
+        if validation_idx.size == 0:
+            raise ValueError(f"Không có dòng validation ở origin {validation_year}.")
+        splits.append((train_idx, validation_idx))
+    return splits
+
+
+def expanding_majority_f1(y, splits) -> float:
+    """Macro-F1 baseline dùng mode của riêng training history trong mỗi fold."""
+    target = np.asarray(y, dtype=int)
+    scores = []
+    for train_idx, validation_idx in splits:
+        majority = int(pd.Series(target[train_idx]).mode().iloc[0])
+        prediction = np.full(validation_idx.size, majority, dtype=int)
+        scores.append(
+            f1_score(
+                target[validation_idx], prediction,
+                average="macro", labels=[0, 1], zero_division=0,
+            )
+        )
+    if not scores:
+        raise ValueError("Không có fold để tính majority baseline.")
+    return float(np.mean(scores))
 
 
 def main() -> int:
@@ -129,7 +212,7 @@ def main() -> int:
 
     cfg = load_config()
     df = load_panel()
-    cv = GroupKFold(n_splits=5)
+    reg_cv = GroupKFold(n_splits=5)
 
     met_rows: list[dict] = []
 
@@ -146,12 +229,12 @@ def main() -> int:
     ridge = Pipeline([("sc", StandardScaler()), ("m", Ridge(random_state=SEED))])
     rf_reg = RandomForestRegressor(n_estimators=300, random_state=SEED, n_jobs=1)
     grid_ridge = GridSearchCV(
-        ridge, {"m__alpha": [0.1, 1.0, 10.0]}, cv=cv, scoring="r2", n_jobs=1
+        ridge, {"m__alpha": [0.1, 1.0, 10.0]}, cv=reg_cv, scoring="r2", n_jobs=1
     )
     grid_rf = GridSearchCV(
         rf_reg,
         {"max_depth": [4, 6, None], "min_samples_leaf": [1, 2]},
-        cv=cv, scoring="r2", n_jobs=1,
+        cv=reg_cv, scoring="r2", n_jobs=1,
     )
     grid_ridge.fit(Xtr, ytr, groups=tr["year_t"])
     grid_rf.fit(Xtr, ytr, groups=tr["year_t"])
@@ -182,34 +265,38 @@ def main() -> int:
     joblib.dump(grid_rf.best_estimator_, MODELS / "sup_rf.joblib")
 
     # ================================================================== #
-    # (2) PHÂN LOẠI (âm tính): trạng thái cấu trúc năm sau
+    # (2) PHÂN LOẠI pseudo-label STING, với forward CV
     # ================================================================== #
-    C = build_classification_pairs(df, cfg["features"])
+    C = build_classification_pairs(df, cfg["features"], cfg["sting"])
     ctr = C[C.year_t < HOLDOUT_YEAR]
     cte = C[C.year_t == HOLDOUT_YEAR]
     Xc_tr, yc_tr = ctr[FEATURES].to_numpy(), ctr["y"].to_numpy()
     Xc_te, yc_te = cte[FEATURES].to_numpy(), cte["y"].to_numpy()
+    clf_cv = expanding_year_splits(ctr["year_t"].to_numpy(), yc_tr)
+    majority_cv = expanding_majority_f1(yc_tr, clf_cv)
     lr = Pipeline([("sc", StandardScaler()),
                    ("clf", LogisticRegression(max_iter=3000, random_state=SEED))])
     rf_clf = RandomForestClassifier(n_estimators=300, random_state=SEED, n_jobs=1)
-    grid_lr = GridSearchCV(lr, {"clf__C": [0.1, 0.3, 1.0]}, cv=cv,
-                           scoring="f1_macro", n_jobs=1)
+    grid_lr = GridSearchCV(lr, {"clf__C": [0.1, 0.3, 1.0]}, cv=clf_cv,
+                           scoring=CLASSIFICATION_SCORER, n_jobs=1)
     grid_rfc = GridSearchCV(rf_clf, {"max_depth": [3, 6, None], "min_samples_leaf": [1, 2]},
-                            cv=cv, scoring="f1_macro", n_jobs=1)
-    grid_lr.fit(Xc_tr, yc_tr, groups=ctr["year_t"])
-    grid_rfc.fit(Xc_tr, yc_tr, groups=ctr["year_t"])
+                            cv=clf_cv, scoring=CLASSIFICATION_SCORER, n_jobs=1)
+    grid_lr.fit(Xc_tr, yc_tr)
+    grid_rfc.fit(Xc_tr, yc_tr)
     maj = int(pd.Series(yc_tr).mode().iloc[0])
 
     def clf_metrics(y, yp, cv_score):
         return {
-            "metric_cv": "f1_macro (GroupKFold theo năm)",
+            "metric_cv": "f1_macro (expanding origin 2017–2022)",
             "value_cv": round(float(cv_score), 3) if not np.isnan(cv_score) else np.nan,
             "holdout_acc": round(float(accuracy_score(y, yp)), 3),
-            "holdout_macro_f1": round(float(f1_score(y, yp, average="macro")), 3),
+            "holdout_macro_f1": round(
+                float(f1_score(y, yp, average="macro", labels=[0, 1], zero_division=0)), 3
+            ),
         }
 
     met_rows.append({"task": "classification", "model": "majority (lớp đa số)",
-                     **clf_metrics(yc_te, np.full_like(yc_te, maj), np.nan)})
+                     **clf_metrics(yc_te, np.full_like(yc_te, maj), majority_cv)})
     met_rows.append({"task": "classification", "model": "logistic regression",
                      **clf_metrics(yc_te, grid_lr.best_estimator_.predict(Xc_te),
                                    grid_lr.best_score_)})
@@ -282,20 +369,38 @@ def main() -> int:
     lines.append("")
     lines.append(met[met.task == "regression"].to_markdown(index=False))
     lines.append("")
-    lines.append("## 2) Phân loại — trạng thái cấu trúc năm sau (bài toán phụ, KẾT QUẢ ÂM TÍNH)\n")
+    lines.append("## 2) Phân loại — pseudo-label STING năm sau (bài toán phụ)\n")
     lines.append(met[met.task == "classification"].to_markdown(index=False))
     lines.append("")
-    _reg = met[met.task == "regression"].set_index("model")
+    _reg_rows = met[met.task == "regression"]
+    _reg = _reg_rows.set_index("model")
     _carry = _reg.loc["carry-forward (giữ giá trị năm nay)"]
-    _best_model = _reg.drop(index=["carry-forward (giữ giá trị năm nay)", "trung bình train"])["holdout_mae"].min()
-    _impr = (1 - _best_model / _carry["holdout_mae"]) * 100
+    _reg_models = _reg_rows[~_reg_rows.model.isin(
+        ["carry-forward (giữ giá trị năm nay)", "trung bình train"]
+    )]
+    _selected_reg_name = select_model_by_cv(_reg_models)
+    _selected_reg = _reg.loc[_selected_reg_name]
+    _impr = (1 - _selected_reg["holdout_mae"] / _carry["holdout_mae"]) * 100
+    _clf_rows = met[met.task == "classification"]
+    _clf = _clf_rows.set_index("model")
+    _clf_models = _clf_rows[_clf_rows.model != "majority (lớp đa số)"]
+    _selected_clf_name = select_model_by_cv(_clf_models)
+    _selected_clf = _clf.loc[_selected_clf_name]
+    _majority_clf = _clf.loc["majority (lớp đa số)"]
+    _acc_delta = (_selected_clf["holdout_acc"] - _majority_clf["holdout_acc"]) * 100
+    _f1_delta = (_selected_clf["holdout_macro_f1"] - _majority_clf["holdout_macro_f1"]) * 100
     lines.append(
         "## Lưu ý trung thực\n"
-        f"- Hồi quy có tín hiệu thật: mô hình tốt nhất giảm ~{_impr:.0f}% MAE so với baseline "
-        "carry-forward (giữ nguyên giá trị năm nay) trên holdout — nhưng vẫn là một holdout duy nhất.\n"
-        "- Phân loại trạng thái ngoại vi chỉ nhích nhẹ so với baseline lớp đa số (≤~2 điểm phần trăm) — "
-        "không đủ cơ sở kết luận có tín hiệu thật; giữ lại làm bằng chứng trung thực.\n"
-        "- Nhãn phân loại do STING sinh (model không giám sát) → sai số lan truyền, đã khai báo.\n"
+        f"- Chọn hồi quy theo CV train-only ({_selected_reg_name}, R²={_selected_reg['value_cv']:.3f}); "
+        f"trên holdout 2023→2024 MAE={_selected_reg['holdout_mae']:.4f} so với carry-forward "
+        f"{_carry['holdout_mae']:.4f} ({_impr:.1f}% thấp hơn). RF có MAE holdout thấp hơn nhưng không được "
+        "chọn vì R² CV thấp hơn; một holdout không chứng minh tổng quát hóa.\n"
+        "- Regression CV là GroupKFold theo origin trong train, không phải backtest expanding; xem R² là điểm chọn mô hình trong train.\n"
+        f"- Chọn classifier theo forward CV ({_selected_clf_name}, macro-F1={_selected_clf['value_cv']:.3f}; "
+        f"majority={_majority_clf['value_cv']:.3f}); so với baseline majority có chênh lệch holdout "
+        f"accuracy {_acc_delta:+.1f} điểm % và macro-F1 {_f1_delta:+.1f} điểm %; CV dùng expanding origins "
+        "2017–2022, warm-up origins 2011–2016. Đây là nhãn do STING fit tại từng cutoff sinh, không phải ground truth.\n"
+        "- Một holdout 2023→2024 và pseudo-label không đủ để khẳng định năng lực dự báo xã hội tổng quát.\n"
         "- Nạp lại dự báo không cần train lại:\n"
         "  `import joblib; m = joblib.load('models/sup_ridge.joblib')` rồi truyền vector 8 chỉ số."
     )

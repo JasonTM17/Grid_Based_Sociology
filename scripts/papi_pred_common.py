@@ -16,6 +16,12 @@ ROOT = Path(__file__).resolve().parent.parent
 PANEL_PATH = ROOT / "data" / "processed" / "papi_panel_63_2011_2024.csv"
 CONFIG_PATH = ROOT / "models" / "predict_config.json"
 
+REGRESSION_FEATURES = [
+    "sd_1_3", "sd_1_4", "sd_4_1", "sd_4_2",
+    "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3",
+]
+REGRESSION_TARGET = "sd_6_1"
+
 # Nhãn tiếng Việt của các chỉ tiêu ỨNG VIÊN đạt audit thang đo (xem check_data.py).
 FEATURE_LABELS = {
     "sd_1_3": "1.3 Chất lượng bầu cử",
@@ -49,3 +55,12 @@ def year_frame(df: pd.DataFrame, year: int, feats: list[str]) -> pd.DataFrame:
     sub = df[df["year"] == year]
     sub = sub.dropna(subset=feats)
     return sub[["province_code", "province_vi", "year"] + feats].reset_index(drop=True)
+
+
+def select_model_by_cv(metrics: pd.DataFrame) -> str:
+    """Choose a model using CV scores only; holdout columns are not consulted."""
+    candidates = metrics.dropna(subset=["value_cv"])
+    if candidates.empty:
+        raise ValueError("Không có CV score để chọn model.")
+    best_index = candidates["value_cv"].idxmax()
+    return str(candidates.loc[best_index, "model"])
