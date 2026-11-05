@@ -24,13 +24,11 @@ def load(path: Path) -> pd.DataFrame:
 
 
 def scale_audit(df: pd.DataFrame) -> list[tuple[str, float, int]]:
-    """Cột nghi GÃY THANG ĐO: bước nhảy trung bình năm > 0.25 điểm.
+    """Cột có bước nhảy trung bình năm > 0.25 điểm cần được kiểm tra thêm.
 
-    Đã xác minh bằng chuỗi thang điểm trong workbook gốc (ví dụ sd_5_4:
-    "0.25-2.5 điểm" đến 2020 → "0.33-3.33 điểm" từ 2021; bước nhảy mean
-    khớp hệ số đổi thang 1.333). Các cột trong danh sách này KHÔNG nên dùng
-    cho phân tích xuyên năm mà không xử lý thang đo — pipeline dự đoán
-    (scripts/predict_sweep.py) chỉ dùng cột ngoài danh sách.
+    Đây là heuristic từ dữ liệu, không tự chứng minh gãy thang đo: thay đổi
+    điểm trung bình có thể là biến động thực. Một ví dụ đã được đối chiếu với
+    workbook gốc là sd_5_4 (0.25–2.5 đến 2020, 0.33–3.33 từ 2021).
     """
     num = [
         c for c in df.columns
@@ -82,13 +80,13 @@ def main(argv: list[str]) -> int:
 
     flags = scale_audit(df)
     if flags:
-        print("CẢNH BÁO gãy thang đo (bước nhảy trung bình năm > 0.25 điểm — kiểm tra trước khi phân tích xuyên năm):")
+        print("CẢNH BÁO biến động trung bình năm > 0.25 điểm (heuristic; không tự kết luận gãy thang đo):")
         for c, j, y in flags[:15]:
             print(f"  {c}: +{j} tại {y}")
         print(f"  Tổng {len(flags)}/{len([c for c in df.columns if c.startswith(('d','sd_'))])} cột chỉ tiêu bị đánh dấu.")
-        print("  Pipeline dự đoán (predict_sweep/predict_demo) chỉ dùng cột ngoài danh sách này.")
+        print("  Đối chiếu workbook/codebook trước khi kết luận nguyên nhân hoặc chọn feature xuyên năm.")
     else:
-        print("Audit thang đo: không phát hiện gãy thang.")
+        print("Không có mean-jump flag theo heuristic; kết quả này không tự chứng minh thang đo tương đương.")
 
     ok_rows = n_rows >= MIN_ROWS
     ok_cols = n_cols >= MIN_COLS

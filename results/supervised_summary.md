@@ -13,17 +13,18 @@
 | regression | ridge                               | r2 (GroupKFold theo năm) |      0.451 |        0.064  |         0.0768 |        0.382 |           nan |                nan |
 | regression | random forest                       | r2 (GroupKFold theo năm) |      0.432 |        0.0616 |         0.0742 |        0.423 |           nan |                nan |
 
-## 2) Phân loại — trạng thái cấu trúc năm sau (bài toán phụ, KẾT QUẢ ÂM TÍNH)
+## 2) Phân loại — pseudo-label STING năm sau (bài toán phụ)
 
-| task           | model                | metric_cv                      |   value_cv |   holdout_mae |   holdout_rmse |   holdout_r2 |   holdout_acc |   holdout_macro_f1 |
-|:---------------|:---------------------|:-------------------------------|-----------:|--------------:|---------------:|-------------:|--------------:|-------------------:|
-| classification | majority (lớp đa số) | f1_macro (GroupKFold theo năm) |    nan     |           nan |            nan |          nan |         0.814 |              0.449 |
-| classification | logistic regression  | f1_macro (GroupKFold theo năm) |      0.525 |           nan |            nan |          nan |         0.814 |              0.449 |
-| classification | random forest        | f1_macro (GroupKFold theo năm) |      0.589 |           nan |            nan |          nan |         0.831 |              0.536 |
+| task           | model                | metric_cv                             |   value_cv |   holdout_mae |   holdout_rmse |   holdout_r2 |   holdout_acc |   holdout_macro_f1 |
+|:---------------|:---------------------|:--------------------------------------|-----------:|--------------:|---------------:|-------------:|--------------:|-------------------:|
+| classification | majority (lớp đa số) | f1_macro (expanding origin 2017–2022) |      0.228 |           nan |            nan |          nan |         0.186 |              0.157 |
+| classification | logistic regression  | f1_macro (expanding origin 2017–2022) |      0.434 |           nan |            nan |          nan |         0.644 |              0.541 |
+| classification | random forest        | f1_macro (expanding origin 2017–2022) |      0.397 |           nan |            nan |          nan |         0.678 |              0.6   |
 
 ## Lưu ý trung thực
-- Hồi quy có tín hiệu thật: mô hình tốt nhất giảm ~10% MAE so với baseline carry-forward (giữ nguyên giá trị năm nay) trên holdout — nhưng vẫn là một holdout duy nhất.
-- Phân loại trạng thái ngoại vi chỉ nhích nhẹ so với baseline lớp đa số (≤~2 điểm phần trăm) — không đủ cơ sở kết luận có tín hiệu thật; giữ lại làm bằng chứng trung thực.
-- Nhãn phân loại do STING sinh (model không giám sát) → sai số lan truyền, đã khai báo.
+- Chọn hồi quy theo CV train-only (ridge, R²=0.451); trên holdout 2023→2024 MAE=0.0640 so với carry-forward 0.0683 (6.3% thấp hơn). RF có MAE holdout thấp hơn nhưng không được chọn vì R² CV thấp hơn; một holdout không chứng minh tổng quát hóa.
+- Regression CV là GroupKFold theo origin trong train, không phải backtest expanding; xem R² là điểm chọn mô hình trong train.
+- Chọn classifier theo forward CV (logistic regression, macro-F1=0.434; majority=0.228); so với baseline majority có chênh lệch holdout accuracy +45.8 điểm % và macro-F1 +38.4 điểm %; CV dùng expanding origins 2017–2022, warm-up origins 2011–2016. Đây là nhãn do STING fit tại từng cutoff sinh, không phải ground truth.
+- Một holdout 2023→2024 và pseudo-label không đủ để khẳng định năng lực dự báo xã hội tổng quát.
 - Nạp lại dự báo không cần train lại:
   `import joblib; m = joblib.load('models/sup_ridge.joblib')` rồi truyền vector 8 chỉ số.

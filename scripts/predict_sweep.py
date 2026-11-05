@@ -5,9 +5,11 @@ Mục đích: đóng băng lựa chọn TRƯỚC khi nhìn dữ liệu 2024 đ�
 cách nhìn coverage 2024 — không hợp lệ).
 
 Quy trình:
-  1. Ứng viên = các cặp chỉ tiêu ĐÃ QUA AUDIT GÃY THANG ĐO (check_data.py):
-     - 8 sub-dimension ổn định 2011–2024 (nhóm 1.x, 4.x, 6.x chọn lọc);
-     - 15 cặp chiều d1..d6 (thang 1–10 cố định theo thiết kế) làm tham chiếu.
+  1. Ứng viên = các cặp trong allowlist sub-dimension đã sàng lọc; chỉ dùng
+     cột không bị mean-jump heuristic flag trong giai đoạn train ≤2020.
+     Không đưa dimension d1..d6 vào sweep: thang danh nghĩa 1–10 không chứng
+     minh tính tương đương cấu trúc; tài liệu PAPI cũng ghi nhận thay đổi
+     sub-dimension/indicator ở một số chiều năm 2021.
      Loại vì bước nhảy thang điểm: sd_5_1/5_3/5_4 (2021), sd_2_1 (2018),
      sd_1_1 (2019), sd_1_2 (2016), sd_3_2 (2016/2018/2021), sd_6_4...
   2. Fit trên dữ liệu ≤ 2020; chấm điểm trên "tương lai giả" 2021–2022:
@@ -33,6 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from sting import STING  # noqa: E402
+from check_data import scale_audit  # noqa: E402
 from papi_pred_common import FEATURE_LABELS, ROOT, load_panel  # noqa: E402
 
 try:
@@ -40,9 +43,8 @@ try:
 except Exception:
     pass
 
-# --- Ứng viên ---
+# --- Ứng viên đã sàng lọc trước, không bao gồm dimension-level scores ---
 STABLE_SUBDIMS = ["sd_1_3", "sd_1_4", "sd_4_1", "sd_4_2", "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3"]
-DIM_PAIRS = [(f"d{a}", f"d{b}") for a, b in combinations(range(1, 7), 2)]
 CONFIGS = [
     (3, 3, 4, 2), (3, 3, 5, 2), (3, 3, 8, 2), (3, 3, 12, 2),
     (3, 4, 5, 2), (3, 4, 8, 2), (2, 3, 12, 1), (2, 4, 8, 1),
@@ -57,6 +59,21 @@ COV_MIN = 0.75
 
 OUTC_CSV = ROOT / "results" / "predict_config_search.csv"
 OUT_JSON = ROOT / "models" / "predict_config.json"
+
+
+def candidate_pairs(train: pd.DataFrame) -> list[list[str]]:
+    """Cặp feature từ allowlist, lọc heuristic chỉ trên giai đoạn train.
+
+    Không dùng validation/holdout years để quyết định eligibility.
+    """
+    flagged = {feature for feature, _, _ in scale_audit(train)}
+    eligible = [
+        feature for feature in STABLE_SUBDIMS
+        if feature in train.columns and feature not in flagged
+    ]
+    if len(eligible) < 2:
+        raise ValueError("Ít hơn hai sub-dimension đủ điều kiện trong giai đoạn train.")
+    return [list(pair) for pair in combinations(eligible, 2)]
 
 
 def evaluate(ptr: pd.DataFrame, pva: pd.DataFrame, feats, nl, f, mc, lv):
@@ -94,8 +111,7 @@ def main() -> int:
     ptr = df[df.year <= SELECT_MAX_YEAR]
     pva = df[df.year.isin(VALIDATE_YEARS)]
 
-    candidates = [list(p) for p in combinations(STABLE_SUBDIMS, 2)] + \
-                 [list(p) for p in DIM_PAIRS]
+    candidates = candidate_pairs(ptr)
     rows = []
     for feats in candidates:
         ptr_f = ptr[feats + ["year"]].dropna()
@@ -146,6 +162,8 @@ def main() -> int:
     cfg = {
         "frozen_at": "2026-11-04",
         "selection_protocol": (
+            "Candidates: pairwise allowlist of screened sub-dimensions; mean-jump heuristic checked on train years ≤2020; "
+            "dimension-level d1–d6 excluded pending cross-year comparability evidence. "
             "Fit ≤2020; chấm trên tương lai giả 2021–2022; 2024 không tham gia chọn. "
             "Lọc: k 2–6, noise≤0.25, largest≤0.85, coverage≥0.75. "
             "Điểm = coverage - 0.5*noise - 0.15*largest - 0.02*|k-3| + 0.03*stable(mc±1)."

@@ -1,0 +1,455 @@
+"""Local, read-only Streamlit dashboard for the saved PAPI/STING results."""
+from __future__ import annotations
+
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import streamlit as st
+
+from scripts.check_data import scale_audit
+from scripts.dashboard_data import (
+    DashboardDataError,
+    filter_regression_holdout,
+    load_dashboard_assets,
+    load_regression_models,
+    select_classification_model,
+    prepare_regression_holdout,
+    prepare_sting_view,
+    select_regression_model,
+)
+from scripts.papi_pred_common import FEATURE_LABELS
+
+
+st.set_page_config(
+    page_title="PAPI · Phân tích STING",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.markdown(
+    """
+    <style>
+      .stApp { background: #f7f9fc; color: #172033; }
+      [data-testid="stMetric"] {
+        background: #ffffff; border: 1px solid #e5eaf2; border-radius: 14px;
+        padding: 14px 16px;
+      }
+      [data-testid="stMetricLabel"] { color: #536179 !important; }
+      [data-testid="stMetricValue"] { color: #172033 !important; }
+      .block-container { padding-top: 1.8rem; padding-bottom: 2.5rem; }
+      div[data-testid="stAlert"] { border-radius: 12px; }
+      div[data-testid="stAlert"] [data-testid="stMarkdownContainer"],
+      div[data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {
+        color: #172033 !important;
+      }
+      .eyebrow { color: #2563eb; font-weight: 700; letter-spacing: .08em;
+        text-transform: uppercase; font-size: .78rem; }
+      .muted { color: #64748b; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+@st.cache_resource(show_spinner="Đang đọc dữ liệu PAPI đã lưu…")
+def get_assets() -> dict:
+    return load_dashboard_assets(include_models=False)
+
+
+@st.cache_resource(show_spinner="Đang nạp model hồi quy…")
+def get_regression_models() -> dict:
+    return load_regression_models()
+
+
+def feature_label(feature: str, config: dict) -> str:
+    return config.get("feature_labels", {}).get(feature, FEATURE_LABELS.get(feature, feature))
+
+
+def province_name_map(panel: pd.DataFrame) -> dict[int, str]:
+    names = panel[["province_code", "province_vi"]].drop_duplicates()
+    return {int(row.province_code): str(row.province_vi) for row in names.itertuples()}
+
+
+def cluster_label(value: int | str) -> str:
+    if value == "Tất cả":
+        return value
+    cluster = int(value)
+    return "Nhiễu (-1)" if cluster == -1 else f"Cụm {cluster}"
+
+
+def render_empty(message: str) -> None:
+    st.info(message)
+
+
+st.markdown('<div class="eyebrow">PAPI · 63 tỉnh · 2011–2024</div>', unsafe_allow_html=True)
+st.title("Khám phá kết quả STING và dự báo PAPI")
+st.caption(
+    "Dashboard local chỉ đọc dữ liệu và model đã lưu. App không huấn luyện lại, "
+    "không ghi artifact và không gửi dữ liệu ra ngoài."
+)
+
+try:
+    assets = get_assets()
+except DashboardDataError as exc:
+    st.error(str(exc))
+    st.stop()
+except Exception:
+    st.error("Không đọc được artifact local. Hãy kiểm tra các file kết quả và chạy lại pipeline tương ứng.")
+    st.stop()
+
+panel = assets["panel"]
+config = assets["config"]
+assignments = assets["assignments"]
+metrics = assets["metrics"]
+features = list(config["features"])
+names = province_name_map(panel)
+years = sorted(int(year) for year in assignments.year.dropna().unique())
+
+with st.sidebar:
+    st.header("Bộ lọc STING")
+    selected_year = st.selectbox("Năm assignment", years, index=years.index(max(years)))
+    province_options = sorted(
+        int(code)
+        for code in panel.loc[panel.year.eq(selected_year), "province_code"].dropna().unique()
+    )
+    selected_provinces = st.multiselect(
+        "Tỉnh / thành phố",
+        options=province_options,
+        default=[],
+        format_func=lambda code: names.get(int(code), str(code)),
+        help="Để trống để xem tất cả tỉnh trong năm đang chọn.",
+    )
+    year_clusters = sorted(
+        int(cluster)
+        for cluster in assignments.loc[
+            assignments.year.eq(selected_year), "pred_cluster"
+        ].dropna().unique()
+    )
+    selected_cluster = st.selectbox(
+        "Cụm STING",
+        options=["Tất cả", *year_clusters],
+        format_func=cluster_label,
+        help="-1 là điểm nhiễu, không phải một cụm thông thường.",
+    )
+    st.divider()
+    st.caption("Năm và cụm ở đây chỉ lọc các mục STING; không lọc holdout hồi quy.")
+
+sting_view, sting_counts = prepare_sting_view(
+    panel,
+    assignments,
+    selected_year,
+    province_codes=set(selected_provinces) if selected_provinces else None,
+    cluster_codes=None if selected_cluster == "Tất cả" else {int(selected_cluster)},
+    required_features=features,
+)
+
+_, regression_counts = prepare_regression_holdout(panel, assignments)
+selected_model = select_regression_model(metrics)
+overview_tab, sting_tab, regression_tab, audit_tab = st.tabs(
+    ["Tổng quan", "STING theo năm", "Hồi quy 2023 → 2024", "Audit dữ liệu"],
+    key="dashboard_tabs",
+    on_change="rerun",
+)
+
+with overview_tab:
+    st.subheader(f"Ảnh chụp dữ liệu năm {selected_year}")
+    eligible = sting_counts["eligible_assignments"]
+    coverage = sting_counts["covered_rows"] / eligible if eligible else 0.0
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Tỉnh trong panel", f"{sting_counts['source_rows']}")
+    col2.metric("Có assignment", f"{eligible}", help="Dòng đủ feature có trong artifact STING.")
+    col3.metric("Nằm trong cụm", f"{coverage:.0%}", help="Không tính điểm nhiễu -1 là covered.")
+    col4.metric("Nhiễu (-1)", f"{sting_counts['noise_rows']}")
+
+    if selected_year == 2024:
+        st.info(
+            "Kết quả STING 2024 là assignment ngoài mẫu vào lưới đã fit bằng dữ liệu đến 2023. "
+            "Đây không phải accuracy dự báo so với nhãn xã hội chuẩn."
+        )
+    else:
+        st.caption("Các năm 2011–2023 là dữ liệu train/in-sample của lưới STING đã lưu.")
+
+    st.markdown("#### Phạm vi đang xem")
+    st.write(
+        f"Bộ lọc STING hiện giữ **{sting_counts['filtered_rows']}** dòng. "
+        f"Có **{sting_counts['filtered_missing_feature_rows']}** dòng thiếu feature và "
+        f"**{sting_counts['filtered_unassigned_artifact_rows']}** dòng đủ feature nhưng không có assignment "
+        "trong artifact."
+    )
+    st.markdown("#### Hồi quy được đánh giá riêng")
+    st.write(
+        f"Holdout cố định: **2023 → 2024**, {regression_counts['holdout_pairs']} cặp tỉnh. "
+        f"Chọn theo CV train-only: **{selected_model.title()}**. "
+        "Bộ lọc năm/cụm STING ở sidebar không áp dụng cho holdout."
+    )
+    st.warning(
+        "Kết quả hồi quy chỉ có một năm holdout; nhãn phân loại là pseudo-label STING. "
+        "Không dùng các chỉ số này để khẳng định năng lực dự báo xã hội tổng quát."
+    )
+
+with sting_tab:
+    st.subheader(f"Phân bố assignment STING · {selected_year}")
+    st.caption(
+        f"Trục X: {feature_label(features[0], config)} · "
+        f"Trục Y: {feature_label(features[1], config)}. "
+        "Bảng bên dưới giữ cả dòng thiếu feature hoặc thiếu assignment."
+    )
+    if sting_view.empty:
+        render_empty("0 dòng phù hợp. Hãy mở rộng bộ lọc tỉnh hoặc chọn một cụm khác.")
+    else:
+        plot_data = sting_view.dropna(subset=features + ["pred_cluster"]).copy()
+        if plot_data.empty:
+            render_empty("Các dòng đang lọc chưa có đủ feature và assignment để vẽ biểu đồ.")
+        else:
+            plot_data["Cụm"] = plot_data.pred_cluster.map(
+                lambda value: "Nhiễu (-1)" if int(value) == -1 else f"Cụm {int(value)}"
+            )
+            palette = {"Nhiễu (-1)": "#94a3b8"}
+            palette.update(
+                {f"Cụm {code}": color for code, color in zip(sorted(year_clusters), px.colors.qualitative.Safe)}
+            )
+            figure = px.scatter(
+                plot_data,
+                x=features[0],
+                y=features[1],
+                color="Cụm",
+                color_discrete_map=palette,
+                hover_name="province_vi",
+                hover_data={"province_code": True, "year": True, "Cụm": True},
+                labels={
+                    features[0]: feature_label(features[0], config),
+                    features[1]: feature_label(features[1], config),
+                },
+                title="Mỗi điểm là một tỉnh có feature và assignment",
+            )
+            figure.update_traces(marker={"size": 11, "opacity": 0.82, "line": {"width": 0.7, "color": "white"}})
+            figure.update_layout(
+                template="plotly_white",
+                height=470,
+                legend_title_text="Assignment",
+                margin={"t": 70, "r": 20, "b": 20, "l": 20},
+            )
+            st.plotly_chart(figure, width="stretch")
+
+        st.caption(
+            f"{sting_counts['filtered_rows']} dòng sau lọc · "
+            f"{sting_counts['filtered_noise_rows']} nhiễu · "
+            f"{sting_counts['filtered_missing_feature_rows']} thiếu feature · "
+            f"{sting_counts['filtered_unassigned_artifact_rows']} không có assignment trong artifact."
+        )
+        display_columns = [
+            "province_code", "province_vi", "year", *features,
+            "pred_cluster", "cluster_label", "assignment_state", "split",
+        ]
+        st.dataframe(
+            sting_view[[column for column in display_columns if column in sting_view.columns]],
+            hide_index=True,
+            width="stretch",
+            column_config={
+                "province_code": st.column_config.NumberColumn("Mã tỉnh", format="%d"),
+                "province_vi": "Tỉnh / thành phố",
+                "year": st.column_config.NumberColumn("Năm", format="%d"),
+                "pred_cluster": st.column_config.NumberColumn("Mã cụm", format="%d"),
+                "cluster_label": "Nhãn hiển thị",
+                "assignment_state": "Trạng thái dữ liệu",
+                "split": "Tập STING",
+            },
+        )
+
+if regression_tab.open:
+    with regression_tab:
+        try:
+            regression_models = get_regression_models()
+            regression, regression_counts = prepare_regression_holdout(
+                panel,
+                assignments,
+                regression_models["ridge"],
+                regression_models["random_forest"],
+            )
+        except DashboardDataError as exc:
+            st.error(str(exc))
+            st.info("Phần STING và Tổng quan vẫn dùng được. Làm theo hướng dẫn trong thông báo rồi làm mới ứng dụng.")
+            st.stop()
+        except Exception:
+            st.error("Không thể nạp hoặc áp dụng model hồi quy local. Hãy kiểm tra model trong thư mục `models/`.")
+            st.info("Phần STING và Tổng quan vẫn dùng được. Chạy lại `python scripts/predict_supervised.py`, rồi làm mới ứng dụng.")
+            st.stop()
+
+        st.subheader("Holdout hồi quy cố định: 2023 → 2024")
+        st.caption(
+            "Bộ lọc dưới đây chỉ chọn nhóm để xem bảng/biểu đồ. Các metric trong artifact "
+            "luôn tính trên toàn bộ holdout và không được tính lại từ nhóm đã lọc."
+        )
+        holdout_names = province_name_map(regression)
+        reg_col1, reg_col2 = st.columns([2, 1])
+        with reg_col1:
+            regression_provinces = st.multiselect(
+                "Tỉnh / thành phố (holdout)",
+                options=sorted(int(code) for code in regression.province_code.unique()),
+                default=[],
+                format_func=lambda code: holdout_names.get(int(code), str(code)),
+                help="Để trống để xem tất cả cặp holdout.",
+            )
+        with reg_col2:
+            origin_clusters = sorted(
+                int(code) for code in regression.origin_cluster_2023.dropna().unique()
+            )
+            regression_clusters = st.multiselect(
+                "Cụm STING tại năm gốc 2023",
+                options=origin_clusters,
+                default=[],
+                format_func=cluster_label,
+                help="Chỉ dùng assignment năm 2023; không lọc theo cụm 2024 vì có thể điều kiện hóa trên target.",
+            )
+        regression_view, filter_counts = filter_regression_holdout(
+            regression,
+            province_codes=set(regression_provinces) if regression_provinces else None,
+            origin_clusters=set(regression_clusters) if regression_clusters else None,
+        )
+
+        overall_regression = metrics.loc[
+            metrics.task.eq("regression")
+            & metrics.model.isin(["carry-forward (giữ giá trị năm nay)", "ridge", "random forest"])
+        ].copy()
+        overall_regression["Được chọn theo CV"] = overall_regression.model.eq(selected_model)
+        st.markdown("#### So sánh trên toàn bộ holdout")
+        st.dataframe(
+            overall_regression[["model", "value_cv", "holdout_mae", "holdout_rmse", "holdout_r2", "Được chọn theo CV"]],
+            hide_index=True,
+            width="stretch",
+            column_config={
+                "model": "Mô hình / baseline",
+                "value_cv": st.column_config.NumberColumn("CV train-only · R²", format="%.3f"),
+                "holdout_mae": st.column_config.NumberColumn("MAE · 59 cặp", format="%.4f"),
+                "holdout_rmse": st.column_config.NumberColumn("RMSE · 59 cặp", format="%.4f"),
+                "holdout_r2": st.column_config.NumberColumn("R² · 59 cặp", format="%.3f"),
+                "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
+            },
+        )
+        st.warning(
+            "R² CV hồi quy là điểm chọn họ model bằng GroupKFold theo origin trong train, "
+            "không phải backtest expanding. Chỉ có một holdout 2023→2024."
+        )
+
+        reg_m1, reg_m2, reg_m3, reg_m4 = st.columns(4)
+        reg_m1.metric("Cặp holdout sau lọc", f"{len(regression_view)}")
+        reg_m2.metric("Thiếu feature origin", f"{regression_counts['missing_origin_feature_rows']}")
+        reg_m3.metric("Thiếu target 2024", f"{regression_counts['missing_target_for_complete_origin']}")
+        reg_m4.metric("Thiếu cụm origin 2023", f"{filter_counts['missing_origin_cluster_after_province_filter']}")
+
+        if regression_view.empty:
+            render_empty("0 cặp tỉnh phù hợp. Hãy mở rộng bộ lọc tỉnh hoặc cụm origin năm 2023.")
+        else:
+            values = pd.concat(
+                [regression_view.actual_2024, regression_view.prediction_ridge, regression_view.prediction_random_forest]
+            )
+            low, high = float(values.min()), float(values.max())
+            figure = go.Figure()
+            figure.add_trace(go.Scatter(
+                x=[low, high], y=[low, high], mode="lines", name="Dự báo hoàn hảo (y=x)",
+                line={"color": "#94a3b8", "dash": "dash"},
+            ))
+            for column, label, color in [
+                ("prediction_ridge", "Ridge · chọn bằng CV", "#2563eb"),
+                ("prediction_random_forest", "Random Forest", "#d97706"),
+            ]:
+                figure.add_trace(go.Scatter(
+                    x=regression_view.actual_2024,
+                    y=regression_view[column],
+                    mode="markers",
+                    name=label,
+                    marker={"color": color, "size": 10, "opacity": 0.8},
+                    text=regression_view.province_vi,
+                    customdata=regression_view[["province_code", "origin_cluster_label"]],
+                    hovertemplate=(
+                        "%{text}<br>Thực tế 2024: %{x:.3f}<br>Dự báo: %{y:.3f}"
+                        "<br>Mã tỉnh: %{customdata[0]}<br>Cụm gốc: %{customdata[1]}<extra></extra>"
+                    ),
+                ))
+            figure.update_layout(
+                template="plotly_white",
+                height=460,
+                xaxis_title="Giá trị thực sd_6_1 năm 2024",
+                yaxis_title="Giá trị dự báo sd_6_1",
+                legend_title_text="Model",
+                margin={"t": 30, "r": 20, "b": 20, "l": 20},
+            )
+            st.plotly_chart(figure, width="stretch")
+            table = regression_view[[
+                "province_code", "province_vi", "origin_cluster_label", "sd_6_1",
+                "actual_2024", "carry_forward", "prediction_ridge", "prediction_random_forest",
+            ]].rename(columns={
+                "province_code": "Mã tỉnh",
+                "province_vi": "Tỉnh / thành phố",
+                "origin_cluster_label": "Cụm STING 2023",
+                "sd_6_1": "sd_6_1 thực 2023",
+                "actual_2024": "sd_6_1 thực 2024",
+                "carry_forward": "Baseline giữ nguyên 2023",
+                "prediction_ridge": "Dự báo Ridge",
+                "prediction_random_forest": "Dự báo Random Forest",
+            })
+            st.dataframe(table, hide_index=True, width="stretch")
+
+with audit_tab:
+    st.subheader("Feature, missingness và giới hạn thang đo")
+    flags = scale_audit(panel)
+    indicator_columns = [
+        column for column in panel.columns
+        if column.startswith(("d", "sd_")) and pd.api.types.is_numeric_dtype(panel[column])
+    ]
+    flag_col1, flag_col2, flag_col3 = st.columns(3)
+    flag_col1.metric("Mean-jump heuristic", f"{len(flags)} / {len(indicator_columns)}")
+    flag_col2.metric("Feature STING đang dùng", f"{len(features)}")
+    flag_col3.metric(f"Thiếu feature toàn năm {selected_year}", f"{sting_counts['missing_feature_rows']}")
+    st.warning(
+        "Mean-jump > 0.25 điểm là heuristic để rà soát; nó không tự chứng minh gãy thang đo. "
+        "Danh sách dưới đây tính trên toàn panel 2011–2024; quy tắc sweep eligibility dùng train đến 2020."
+    )
+
+    st.markdown("#### Cặp feature STING đã chốt")
+    feature_rows = []
+    for feature in features:
+        feature_rows.append({
+            "Feature": feature,
+            "Chỉ tiêu": feature_label(feature, config),
+            "Mean-jump flag toàn panel": any(row[0] == feature for row in flags),
+            "Thiếu trong panel": int(panel[feature].isna().sum()),
+        })
+    st.dataframe(pd.DataFrame(feature_rows), hide_index=True, width="stretch")
+    st.caption(f"Cấu hình đóng băng: STING(L={config['sting']['n_levels']}, factor={config['sting']['factor']}, min_count={config['sting']['min_count']}); không tối ưu từ giao diện.")
+
+    flag_frame = pd.DataFrame(flags, columns=["Feature", "Max mean jump", "Năm lớn nhất"])
+    if flag_frame.empty:
+        render_empty("Không có cột nào vượt heuristic trên panel hiện tại.")
+    else:
+        st.markdown("#### Các cột có cờ heuristic")
+        st.dataframe(flag_frame, hide_index=True, width="stretch")
+
+    classification = metrics.loc[metrics.task.eq("classification")].copy()
+    if not classification.empty:
+        classifier = select_classification_model(metrics)
+        classification["Được chọn theo CV"] = classification.model.eq(classifier)
+        st.markdown("#### Phân loại pseudo-label STING")
+        st.caption(
+            "Nhãn được dựng tại từng cutoff; CV expanding 2017–2022 sau warm-up 2011–2016. "
+            "Điểm đo mức khớp nhãn STING, không phải ground truth xã hội."
+        )
+        st.dataframe(
+            classification[["model", "value_cv", "holdout_acc", "holdout_macro_f1", "Được chọn theo CV"]],
+            hide_index=True,
+            width="stretch",
+            column_config={
+                "model": "Mô hình / baseline",
+                "value_cv": st.column_config.NumberColumn("CV · macro-F1", format="%.3f"),
+                "holdout_acc": st.column_config.NumberColumn("Accuracy pseudo-label", format="%.3f"),
+                "holdout_macro_f1": st.column_config.NumberColumn("Macro-F1 pseudo-label", format="%.3f"),
+                "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
+            },
+        )
+
+st.divider()
+st.caption(
+    "Nguồn local: `data/processed/papi_panel_63_2011_2024.csv`, "
+    "`results/predict_all_years.csv`, `results/supervised_metrics.csv` và model trong `models/`."
+)
