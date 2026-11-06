@@ -164,7 +164,7 @@ md(nbf.v4.new_markdown_cell("""## 5. Pipeline dự đoán (2 mô hình local)
 
 1. **STING.predict** (không giám sát): gán tỉnh vào ô lưới đã học; điểm ngoài vùng học → −1.
 2. **Model giám sát Ridge/RF**: dự báo *6.1 Y tế công lập* năm sau từ 8 chỉ tiêu sạch năm nay
-   — Ridge thắng baseline carry-forward ~10% MAE trên holdout 2023→2024 (xem `results/supervised_summary.md`).
+   — Ridge được chọn theo CV; MAE holdout 2023→2024 thấp hơn carry-forward 6.3% (xem `results/supervised_summary.md`).
 
 Cả hai lưu **local** (`models/`), nạp lại để dự báo mà không cần huấn luyện lại."""))
 

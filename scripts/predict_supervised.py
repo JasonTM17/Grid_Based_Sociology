@@ -5,9 +5,9 @@ Hai bài toán minh hoạ (khác với `predict_demo.py` — STING.predict khôn
 (1) CHÍNH — HỒI QUY dự báo: "6.1 Y tế công lập năm t+1" từ 8 sub-dimension năm t
     trong allowlist đã sàng lọc của pipeline.
     Model: Ridge + RandomForest; đối chứng: carry-forward (giữ nguyên giá trị
-    năm nay) và trung bình năm. Bài toán + bộ đặc trưng + mô hình được chọn
-    bằng CV train-only (GroupKFold theo năm); holdout 2023 → 2024 chỉ đánh
-    giá MỘT LẦN.
+    năm nay) và trung bình năm. Chọn model bằng CV train-only expanding origin
+    2017–2022, warm-up 2011–2016; metric `r2 (expanding origin 2017–2022)`.
+    Holdout 2023 → 2024 chỉ đánh giá MỘT LẦN và không dùng để chọn model.
 
 (2) PHỤ — PHÂN LOẠI pseudo-label: dự báo target năm t+1 có được STING fit
     đến cutoff t gán vào vùng dày hay không. Nhãn cho từng origin được dựng
@@ -40,7 +40,7 @@ from sklearn.metrics import (
     r2_score,
     make_scorer,
 )
-from sklearn.model_selection import GridSearchCV, GroupKFold
+from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -100,6 +100,33 @@ def build_regression_pairs(df: pd.DataFrame) -> pd.DataFrame:
                 }
             )
     return pd.DataFrame(rows).dropna()
+
+
+def expanding_origin_folds(
+    origin_years, first_validation_origin: int
+) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Create expanding folds with one validation origin per year."""
+    years = np.asarray(origin_years, dtype=int)
+    validation_years = tuple(range(first_validation_origin, HOLDOUT_YEAR))
+    present_years = set(years.tolist())
+    missing = [year for year in validation_years if year not in present_years]
+    if missing:
+        raise ValueError(f"Thiếu origin years cho regression CV: {missing}.")
+
+    splits = []
+    for validation_year in validation_years:
+        train_idx = np.flatnonzero(years < validation_year)
+        validation_idx = np.flatnonzero(years == validation_year)
+        if train_idx.size == 0:
+            raise ValueError(
+                f"Không có origin train trước năm validation {validation_year}."
+            )
+        if validation_idx.size == 0:
+            raise ValueError(
+                f"Không có dòng validation ở origin {validation_year}."
+            )
+        splits.append((train_idx, validation_idx))
+    return splits
 
 
 def fit_sting_labeler(
@@ -212,7 +239,6 @@ def main() -> int:
 
     cfg = load_config()
     df = load_panel()
-    reg_cv = GroupKFold(n_splits=5)
 
     met_rows: list[dict] = []
 
@@ -224,6 +250,9 @@ def main() -> int:
     te = P[P.year_t == HOLDOUT_YEAR]
     Xtr, ytr = tr[FEATURES].to_numpy(), tr["y"].to_numpy()
     Xte, yte = te[FEATURES].to_numpy(), te["y"].to_numpy()
+    reg_cv = expanding_origin_folds(
+        tr["year_t"].to_numpy(), first_validation_origin=CLASSIFICATION_CV_FIRST_YEAR
+    )
     print(f"[Hồi quy] train {len(tr)} cặp (2011–2022) · holdout {len(te)} cặp (2023→2024)")
 
     ridge = Pipeline([("sc", StandardScaler()), ("m", Ridge(random_state=SEED))])
@@ -236,14 +265,14 @@ def main() -> int:
         {"max_depth": [4, 6, None], "min_samples_leaf": [1, 2]},
         cv=reg_cv, scoring="r2", n_jobs=1,
     )
-    grid_ridge.fit(Xtr, ytr, groups=tr["year_t"])
-    grid_rf.fit(Xtr, ytr, groups=tr["year_t"])
+    grid_ridge.fit(Xtr, ytr)
+    grid_rf.fit(Xtr, ytr)
     print(f"[Hồi quy] CV R² Ridge={grid_ridge.best_score_:.3f} {grid_ridge.best_params_}")
     print(f"[Hồi quy] CV R² RF   ={grid_rf.best_score_:.3f} {grid_rf.best_params_}")
 
     def reg_metrics(y, yp, cv_score):
         return {
-            "metric_cv": "r2 (GroupKFold theo năm)",
+            "metric_cv": "r2 (expanding origin 2017–2022)",
             "value_cv": round(float(cv_score), 3),
             "holdout_mae": round(float(mean_absolute_error(y, yp)), 4),
             "holdout_rmse": round(float(np.sqrt(mean_squared_error(y, yp))), 4),
@@ -406,7 +435,7 @@ def main() -> int:
         f"trên holdout 2023→2024 MAE={_selected_reg['holdout_mae']:.4f} so với carry-forward "
         f"{_carry['holdout_mae']:.4f} ({_impr:.1f}% thấp hơn). RF có MAE holdout thấp hơn nhưng không được "
         "chọn vì R² CV thấp hơn; một holdout không chứng minh tổng quát hóa.\n"
-        "- Regression CV là GroupKFold theo origin trong train, không phải backtest expanding; xem R² là điểm chọn mô hình trong train.\n"
+        "- Regression CV là expanding origin 2017–2022 với warm-up 2011–2016; holdout không được dùng để chọn mô hình.\n"
         f"- Chọn classifier theo forward CV ({_selected_clf_name}, macro-F1={_selected_clf['value_cv']:.3f}; "
         f"majority={_majority_clf['value_cv']:.3f}); so với baseline majority có chênh lệch holdout "
         f"accuracy {_acc_delta:+.1f} điểm % và macro-F1 {_f1_delta:+.1f} điểm %; CV dùng expanding origins "
