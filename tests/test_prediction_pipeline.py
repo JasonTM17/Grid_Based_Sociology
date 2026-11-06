@@ -1,19 +1,30 @@
 """Regression checks for time-safe PAPI model labels and feature eligibility."""
 
+import joblib
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.linear_model import Ridge
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 from scripts.predict_supervised import (
     CLASSIFICATION_CV_YEARS,
     STING,
+    build_regression_pairs,
     build_classification_pairs,
+    expanding_origin_folds,
     expanding_majority_f1,
     expanding_year_splits,
     fit_sting_labeler,
     predict_sting_labels_for_origin,
 )
-from scripts.papi_pred_common import REGRESSION_FEATURES, select_model_by_cv
+from scripts.papi_pred_common import (
+    REGRESSION_FEATURES,
+    ROOT,
+    load_panel,
+    select_model_by_cv,
+)
 from scripts.dashboard_data import (
     DashboardDataError,
     filter_regression_holdout,
@@ -129,6 +140,65 @@ def test_expanding_year_splits_never_train_on_validation_or_future_origins():
     ):
         assert set(years[validation_indices]) == {validation_year}
         assert years[train_indices].max() < validation_year
+
+
+def test_expanding_origin_folds_are_nonempty_and_exclude_future_origins():
+    years = np.repeat(np.array([2011, 2016, *CLASSIFICATION_CV_YEARS, 2023]), 2)
+    splits = expanding_origin_folds(years, first_validation_origin=2017)
+
+    assert len(splits) == len(CLASSIFICATION_CV_YEARS) == 6
+    for validation_year, (train_indices, validation_indices) in zip(
+        CLASSIFICATION_CV_YEARS, splits
+    ):
+        assert train_indices.size > 0
+        assert validation_indices.size > 0
+        assert years[train_indices].max() < years[validation_indices].min()
+        assert np.unique(years[validation_indices]).tolist() == [validation_year]
+        future_indices = np.flatnonzero(years > validation_year)
+        assert np.intersect1d(train_indices, future_indices).size == 0
+
+    later_2017_indices = np.flatnonzero(years == 2022)
+    assert later_2017_indices.size > 0
+    assert np.intersect1d(splits[0][0], later_2017_indices).size == 0
+
+
+def test_expanding_origin_folds_cover_production_validation_years():
+    pairs = build_regression_pairs(load_panel())
+    train = pairs[pairs.year_t < 2023]
+    splits = expanding_origin_folds(
+        train.year_t.to_numpy(), first_validation_origin=2017
+    )
+
+    validation_years = [int(train.year_t.iloc[val_indices[0]]) for _, val_indices in splits]
+    assert validation_years == list(CLASSIFICATION_CV_YEARS)
+
+
+def test_expanding_origin_folds_require_every_validation_year():
+    years = np.repeat(
+        np.array([2011, 2016, 2017, 2018, 2020, 2021, 2022]), 2
+    )
+
+    with pytest.raises(ValueError, match="2019"):
+        expanding_origin_folds(years, first_validation_origin=2017)
+
+
+def test_ridge_pipeline_joblib_roundtrip_and_saved_model_prediction(tmp_path):
+    matrix = np.arange(96, dtype=float).reshape(12, 8) / 10
+    target = np.linspace(0.2, 0.9, len(matrix))
+    probe = np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])
+    model = Pipeline(
+        [("sc", StandardScaler()), ("m", Ridge(random_state=42))]
+    ).fit(matrix, target)
+    model_path = tmp_path / "ridge.joblib"
+    joblib.dump(model, model_path)
+    loaded = joblib.load(model_path)
+
+    np.testing.assert_allclose(loaded.predict(probe), model.predict(probe))
+
+    saved_model = joblib.load(ROOT / "models" / "sup_ridge.joblib")
+    prediction = saved_model.predict(probe)
+    assert prediction.shape == (1,)
+    assert np.isfinite(prediction).all()
 
 
 def test_expanding_year_splits_require_both_classes_in_training_history():

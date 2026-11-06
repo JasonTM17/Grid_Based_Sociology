@@ -357,8 +357,9 @@ if regression_tab.open:
                 },
             )
             st.warning(
-                "R² CV hồi quy là điểm chọn họ model bằng GroupKFold theo origin trong train, "
-                "không phải backtest expanding. Chỉ có một holdout 2023→2024."
+                "R² CV hồi quy là điểm chọn họ model bằng expanding origin 2017–2022 "
+                "(warm-up 2011–2016); holdout không tham gia chọn model. "
+                "Holdout 2023→2024 chỉ đánh giá một lần."
             )
 
             reg_m1, reg_m2, reg_m3, reg_m4 = st.columns(4)

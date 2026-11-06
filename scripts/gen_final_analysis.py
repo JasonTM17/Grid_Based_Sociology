@@ -105,12 +105,47 @@ trong mọi năm; một số tỉnh vào/ra vùng ngoại vi theo thời gian.""
 md(nbf.v4.new_markdown_cell("""## 6. Pipeline dự đoán (năm 2024 — out-of-sample)
 
 1. **STING.predict:** gán tỉnh vào ô lưới đã học — 48/61 tỉnh đủ chỉ tiêu → cụm lớn, 13 → nhiễu.
-2. **Model giám sát (Ridge/RF):** dự báo *6.1 Y tế công lập* năm sau; Ridge/RF **vượt baseline carry-forward ~10% MAE**
-   trên holdout 2023→2024 (xem `results/supervised_metrics.csv`).
+2. **Model giám sát:** Ridge được chọn theo CV để dự báo *6.1 Y tế công lập* năm sau; MAE holdout 2023→2024 thấp hơn carry-forward **6.3%**
+   (xem `results/supervised_metrics.csv`).
 3. **Phân loại ngoại vi (âm tính):** không vượt baseline đủ tin cậy — giữ lại trung thực."""))
 
 cd(nbf.v4.new_code_cell("""sup = pd.read_csv("../results/supervised_metrics.csv")
 show_md(sup.to_markdown(index=False))"""))
+
+cd(nbf.v4.new_code_cell("""import joblib
+import sys
+sys.path.insert(0, str(Path("../scripts").resolve()))
+from papi_pred_common import REGRESSION_FEATURES
+from predict_supervised import build_regression_pairs, expanding_origin_folds
+
+print("8 regression features:", REGRESSION_FEATURES)
+regression_pairs = build_regression_pairs(panel)
+training_origins = regression_pairs.loc[
+    regression_pairs.year_t < 2023, "year_t"
+].to_numpy()
+print("Regression folds use training origins only (year_t < 2023).")
+folds = expanding_origin_folds(training_origins, first_validation_origin=2017)
+for fold_number, (train_idx, val_idx) in enumerate(folds, start=1):
+    print(
+        f"Fold {fold_number}: max train origin={training_origins[train_idx].max()}, "
+        f"validation origin={training_origins[val_idx][0]}"
+    )
+
+regression_metrics = pd.read_csv("../results/supervised_metrics.csv")
+regression_models = regression_metrics[
+    (regression_metrics.task == "regression")
+    & ~regression_metrics.model.isin(
+        ["carry-forward (giữ giá trị năm nay)", "trung bình train"]
+    )
+].dropna(subset=["value_cv"])
+chosen = regression_models.loc[regression_models.value_cv.idxmax()]
+print(f"CV-selected regression model: {chosen.model} (R²={chosen.value_cv:.3f})")
+
+print("Loading ../models/sup_ridge.joblib")
+ridge = joblib.load("../models/sup_ridge.joblib")
+probe = np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])
+print("Fixed 8-feature probe:", probe.tolist()[0])
+print("Ridge prediction:", ridge.predict(probe).tolist())"""))
 
 cd(nbf.v4.new_code_cell("""display(Image(filename="../results/figs/predict_2024.png"))"""))
 

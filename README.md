@@ -78,10 +78,11 @@ python scripts/predict_supervised.py   # 3) model ML có giám sát (scikit-lear
    "chuyển thật" vs "chuyển sang/từ nhiễu"), `results/figs/predict_2024.png`.
 3. **`predict_supervised.py`** — model có giám sát, lưu local bằng joblib:
    - **Hồi quy (chính):** dự báo *6.1 Y tế công lập* năm t+1 từ 8 sub-dimension năm t.
-     Chọn họ model theo R² CV train-only (GroupKFold theo origin): hiện Ridge được chọn
-     với R²=0.451; MAE holdout 2023→2024 là 0.0640 so với carry-forward 0.0683
-     (giảm 6.3%). Random Forest có MAE holdout thấp hơn (0.0616) nhưng CV thấp hơn,
-     nên không chọn bằng cách nhìn holdout. Đây vẫn chỉ là một năm holdout.
+     Chọn model bằng metric `r2 (expanding origin 2017–2022)` train-only (warm-up 2011–2016):
+     hiện Ridge được chọn với R²=0.265; MAE holdout 2023→2024 là 0.0640 so với
+     carry-forward 0.0683 (giảm 6.3%). Random Forest có R² CV thấp hơn (0.197) và
+     MAE holdout thấp hơn (0.0616); việc chọn model không dựa vào holdout. Đây vẫn
+     chỉ là một năm holdout.
      Lưu `models/sup_ridge.joblib`, `models/sup_rf.joblib`; kết quả
      `results/supervised_metrics.csv` + `results/supervised_summary.md`.
    - **Phân loại phụ:** dự báo pseudo-label STING cutoff-local cho năm sau, với expanding
