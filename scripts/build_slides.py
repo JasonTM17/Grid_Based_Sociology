@@ -130,7 +130,7 @@ text(s, 0.85, 4.65, 8.4, 1.6, [
     ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
     ("15' trình bày + 5' Q&A", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
 ])
-note(s, "Mở đầu: giới thiệu đề tài 20s; nêu thesis: dữ liệu PAPI khá đồng nhất — nhóm xin trình bày trung thực cả kết quả thuận lẫn âm tính.")
+note(s, "Mở đầu: giới thiệu đề tài 20s; nêu thesis: dữ liệu PAPI khá đồng nhất — nhóm xin trình bày trung thực cả kết quả thuận lẫn robustness âm tính (PCA và nhánh 8 chiều không nhận diện cấu trúc).")
 
 # ---------- Slide 2 — Vì sao grid-based? ----------
 s = slide_new()
@@ -198,7 +198,7 @@ bullets(s, 8.0, 1.6, 4.8, 4.2, [
     ("Dữ liệu.", "2 blob Gauss, 240 điểm, seed 42."),
     ("Kết quả.", "ARI = 0.950 · nhiễu 2.5% · đúng 2 cụm."),
     ("Lưới.", "Factor=4, 3 mức; ô dày → gom cụm."),
-    ("Kiểm thử.", "22 unit test (pytest) xanh — chính xác thống kê ô từng ô."),
+    ("Kiểm thử.", "src/sting.py: 22 unit test (pytest) xanh — chính xác thống kê ô từng ô."),
 ], size=12)
 note(s, "Show hình bên trái; nói ARI và tests.")
 
@@ -231,7 +231,7 @@ for x0 in (3.7, 7.8):
 bullets(s, 0.6, 3.3, 12.1, 3.4, [
     ("STING.predict (không giám sát).", "Gán tỉnh vào ô lưới đã học; điểm ngoài vùng học → −1. 2024 là năm out-of-sample duy nhất khi chọn cấu hình."),
     ("Chọn cấu hình train-only.", "Quét ứng viên ≤2020; kiểm trên tương lai giả 2021–2022; 2024 không tham gia chọn (tránh selection-on-test) — `predict_sweep.py`."),
-    ("Model giám sát (Ridge/RF).", "Dự báo “6.1 Y tế công lập” năm sau từ 8 chỉ tiêu sạch năm nay; Ridge/RF thắng carry-forward ~10% MAE (holdout 2023→2024)."),
+    ("Model giám sát (Ridge/RF).", "Dự báo “6.1 Y tế công lập” năm sau từ 8 chỉ tiêu sạch năm nay; Ridge được chọn, MAE thấp hơn carry-forward 6.3%; RF 9.8% nhưng CV R² thấp hơn nên không chọn (holdout 2023→2024)."),
 ], size=11.5)
 note(s, "Vẽ tay sơ đồ 3 khối; nhấn: không có dịch vụ ngoài — mọi model lưu local.")
 
@@ -253,9 +253,9 @@ header(s, "MODEL GIÁM SÁT", "Ridge dự báo 6.1 Y tế công lập năm sau",
 pic(s, "supervised_regression.png", 0.55, 1.6, h=3.07)
 bullets(s, 8.2, 1.5, 4.6, 4.7, [
     ("Đặc trưng.", "8 chỉ tiêu sạch năm t (sd 2011–2024 ổn định)."),
-    ("CV train-only.", "GroupKFold theo năm; chọn Ridge (R²≈0.45)."),
-    ("Holdout 2023→2024.", "MAE 0.064 (Ridge) / 0.062 (RF) vs carry-forward 0.068 → tốt hơn ~10%."),
-    ("Phân loại ngoại vi.", "Âm tính — không vượt baseline; giữ lại trung thực."),
+    ("CV train-only.", "Expanding origin 2017–2022; chọn Ridge (CV R² 0.265; RF 0.197)."),
+    ("Holdout 2023→2024.", "MAE 0.0640 (Ridge, −6.3%) / 0.0616 (RF, −9.8%, không chọn) vs carry-forward 0.0683."),
+    ("Phân loại pseudo-label STING.", "LR/RF vượt majority trên một holdout (acc 0.644/0.678 vs 0.186; F1 0.541/0.600 vs 0.157); một năm không kết luận tổng quát."),
 ], size=11.5)
 note(s, "Nhấn: cải thiện khiêm tốn, honest; 1 holdout duy nhất — cần thêm năm để chắc chắn.")
 
@@ -318,7 +318,7 @@ bullets(s, 0.55, 1.3, 12.2, 5.4, [
     ("Gãy thang đo.", "23/37 cột đổi thang giữa các năm; phân tích xuyên năm chỉ dùng chỉ tiêu qua audit."),
     ("Robustness âm tính.", "PCA d1–d6 (63% phương sai) và 8 chiều 2018–2024 → không nhận diện cấu trúc — báo cáo."),
     ("Metrics không bản địa.", "Silhouette/DB/CH với lưới song song trục chỉ để so sánh thô; noise tách riêng."),
-    ("Một holdout.", "2024 là năm test duy nhất; cải thiện ~10% MAE cần thêm nhiều năm để khẳng định."),
+    ("Một holdout.", "2024 là năm test duy nhất; Ridge (được chọn) thấp hơn carry-forward 6.3% MAE — cần thêm năm để khẳng định."),
 ], size=12)
 note(s, "Đây là slide ghi điểm: tự nêu hạn chế trước, Q&A sẽ dễ trả lời.")
 
@@ -346,7 +346,7 @@ bullets(s, 0.55, 1.3, 12.1, 5.0, [
     ("Gói replication.", "Le et al., Mendeley Data — DOI 10.17632/wbk42j9wc8.1 · CC BY 4.0 (4 file dùng trực tiếp đã commit)."),
     ("STING gốc.", "Wang, Yang & Muntz (1997), “STING: A Statistical Information Grid Approach to Spatial Data Mining”, VLDB."),
     ("GeoJSON ranh giới.", "Open Development Vietnam (OD Mekong) — CC-BY-SA 4.0."),
-    ("Code & dữ liệu.", "Repo gồm: src/sting.py · scripts/ · tests/ (22 test xanh) · models/ · results/ · PROVENANCE.md từng nguồn."),
+    ("Code & dữ liệu.", "Repo gồm: src/sting.py (22 unit test) · scripts/ · tests/ · models/ · results/ · PROVENANCE.md từng nguồn."),
 ], size=11.5)
 note(s, "Nếu GV hỏi về nguồn: chỉ PROVENANCE.md trong repo.")
 
