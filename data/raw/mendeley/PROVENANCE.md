@@ -4,7 +4,7 @@
   **DOI: 10.17632/wbk42j9wc8.1**
 - **Ngày tải:** 2026-11-03. **Giấy phép: CC BY 4.0** theo trang dữ liệu Mendeley (gói tải về
   không kèm file LICENSE riêng) — dùng lại phải ghi nguồn + DOI.
-- **Gói gốc:** `mendeley_replication.zip` (71,139 B, sha256 `02d4fce6…33b04d`) chứa README + `Replication_package.rar`.
+- **Gói gốc:** `mendeley_replication.zip` (711,397 B, sha256 `02d4fce6…33b04d`) chứa README + `Replication_package.rar`.
 
 ## File được COMMIT vào repo (4 file nhỏ dùng trực tiếp)
 
