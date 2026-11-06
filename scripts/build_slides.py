@@ -176,7 +176,7 @@ s = slide_new()
 header(s, "DỮ LIỆU", "PAPI: 14 năm × 63 tỉnh, sạch và đã audit", 4)
 bullets(s, 0.55, 1.3, 6.7, 4.6, [
     ("Nguồn.", "PAPI 2011–2024 (papi.org.vn) — 14 workbook, 2 định dạng (tỉnh-hàng / ma trận chuyển vị)."),
-    ("Panel.", "882 × 41: d1–d6 (mọi năm) + d7/d8 (2018+) + 30 sub-dim; 39 cột số."),
+    ("Panel.", "882 × 41: d1–d6 (mọi năm) + d7/d8 (2018+) + 29 sub-dim; 39 cột số."),
     ("0.0 → NaN.", "“Không có dữ liệu” theo quy ước gói replication Mendeley (đối chiếu khớp 100%)."),
     ("PROVENANCE.", "URL + hash SHA-256 mọi nguồn trong repo — tái lập được."),
 ], size=12.5)

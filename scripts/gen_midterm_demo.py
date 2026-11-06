@@ -98,7 +98,7 @@ print(f"Tổng: {len(cells)} ô có dữ liệu; STING quét mỗi mức 1 lư�
 
 md(nbf.v4.new_markdown_cell("""## 3. Dữ liệu thật: PAPI 2011–2024
 
-- 14 workbook gốc (papi.org.vn) → panel sạch `province × year × d1..d8 + 30 sub-dim`.
+- 14 workbook gốc (papi.org.vn) → panel sạch `province × year × d1..d8 + 29 sub-dim`.
 - **Cảnh báo quan trọng phát hiện khi làm sạch:** 23/37 cột chỉ tiêu có **gãy thang đo**
   giữa các năm (vd `sd_5_4` đổi 0.25–2.5 → 0.33–3.33 tại 2021) — `check_data.py` tự audit;
   phân tích xuyên năm chỉ dùng chỉ tiêu qua audit (hoặc ghi rõ cách xử lý).

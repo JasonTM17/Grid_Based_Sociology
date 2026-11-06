@@ -367,7 +367,7 @@ bullets([
     ("0.0 → NaN.", "PAPI mã hóa “không đủ dữ liệu” bằng 0.0 ở một số năm; quy về NaN theo quy ước Mendeley; đối chiếu chéo lệch 0.0."),
 ])
 h2("3.3. Chất lượng dữ liệu")
-body("Panel cuối: 882 hàng × 41 cột (province_code, province_ascii/vi, year, d1–d8 + 30 sub-dim); 39 cột số; đủ 63 tỉnh mọi năm. Thiếu nhiều nhất: các chỉ tiêu d7/d8 (~51%, chỉ có từ 2018), sd_8_3 (58%), sd_2_4 (51%). check_data.py in PASS và danh sách audit thang đo.")
+body("Panel cuối: 882 hàng × 41 cột (province_code, province_ascii/vi, year, d1–d8 + 29 sub-dim); 39 cột số; đủ 63 tỉnh mọi năm. Thiếu nhiều nhất: các chỉ tiêu d7/d8 (~51%, chỉ có từ 2018), sd_8_3 (58%), sd_2_4 (51%). check_data.py in PASS và danh sách audit thang đo.")
 table(["Tiêu chí yêu cầu", "Kết quả"], [
     ["≥ 500 hàng", "882 (63 × 14 năm)"],
     ["≥ 10 cột (tổng / số)", "41 tổng / 39 cột số"],
