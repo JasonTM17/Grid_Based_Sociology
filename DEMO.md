@@ -34,7 +34,7 @@ Môi trường đã kiểm chứng: Python 3.14.2, Windows 11.
 | 1–2 | Slide 2 | Vì sao grid-based (O(n), không giả định hình dạng) |
 | 2–3 | Slide 3 | STING 3 bước: lưới phân cấp → thống kê ô → gom cụm |
 | 3–4 | Slide 4 | Dữ liệu 882×41; audit thang đo 23/37 cột |
-| 4–5 | Slide 5 + notebook §2 | Demo synthetic — ARI 0.950, 22 test xanh |
+| 4–5 | Slide 5 + notebook §2 | Demo synthetic — ARI 0.950, 22 test trong `tests/test_sting.py` xanh |
 | 5–6 | Slide 6 + notebook §3–4 | Kết quả thật: đồng nhất (k≈1); độ nhạy lưới |
 | 6–8 | Slide 7 | Pipeline dự đoán: train ≤2023 → predict 2024 (out-of-sample duy nhất) |
 | 8–9 | Slide 8 | 2024: 48 tỉnh cụm lớn / 13 tỉnh ngoại vi (coverage 79%) |
@@ -64,13 +64,13 @@ Mẹo: notebook đã **execute sẵn** (0 lỗi, ~18s) — chiếu thẳng khôn
 |---|---|
 | Dataset | 882 × 41 (đáp ứng ≥500×10) · 63 tỉnh × 14 năm · 39 cột số |
 | Nguồn | PAPI 2011–2024 (papi.org.vn) · Mendeley CC BY 4.0 (DOI 10.17632/wbk42j9wc8.1, crosscheck lệch 0.0) |
-| STING synthetic | ARI = **0.950** · nhiễu 2.5% · 22 unit tests xanh · coverage 99% cho `src/sting.py` |
+| STING synthetic | ARI = **0.950** · nhiễu 2.5% · 22 unit test trong `tests/test_sting.py` xanh · coverage 99% cho `src/sting.py` |
 | Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột gãy thang đo (check_data audit) |
 | Dự đoán 2024 | Train ≤2023 (frozen, train-only) · phủ **79%** · {nhiễu: 13, cụm lớn: 48} · 0 chuyển thật 2023→2024 |
 | Model giám sát | Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau: MAE 0.064 vs carry-forward 0.0683 = **giảm 6.3%**; RF 0.0616 = giảm 9.8% |
 | Robustness | PCA d1–d6 (63% phương sai) và 8 chiều 2018–2024 → **không nhận diện cấu trúc** (âm tính, báo cáo trung thực) |
 | So sánh | STING ≈ DBSCAN(eps=0.2) (ARI 0.65) · k-means ép k, silhouette 0.445 (k=2) |
-| Bài học lớn | Audit gãy thang đo (sd_5_4 đổi thang 2021, hệ số 1.333 ≈ bước nhảy mean +0.576) |
+| Bài học lớn | Audit gãy thang đo: sd_5_4 đổi 0.25–2.5 → 0.33–3.33 tại 2021; mean 2020 = 1.897, bước nhảy +0.576, còn ×1.333 cộng +0.632 — cùng hướng đổi thang, workbook không chứng minh chỉ do hệ số đó |
 
 ## 5. Sau khi thi
 
