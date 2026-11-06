@@ -45,7 +45,7 @@ python -m pytest tests -q
 python -m pytest tests --cov=src -q
 
 # Lint (tùy chọn): python -m pip install -r requirements-dev.txt
-python -m ruff check src scripts tests
+python -m ruff check .
 
 # Kiểm tra dữ liệu (sau khi panel được tạo ở Phase 2)
 python scripts/check_data.py
