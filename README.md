@@ -130,8 +130,12 @@ print(ridge.predict(np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])))  # d�
 đây là heuristic cần đối chiếu workbook/codebook, không tự chứng minh đổi thang. Ví dụ
 `sd_5_4` có thay đổi khoảng điểm được ghi trong workbook. Sweep chỉ dùng allowlist
 sub-dimension không bị flag trong giai đoạn train; dimension-level scores không được
-đưa vào cho tới khi chứng minh được tính so sánh xuyên năm. [PAPI 2024 One Pager](https://papi.org.vn/wp-content/uploads/2025/04/26_Thanh_Hoa_ENG.pdf) ghi thang dimension
-1–10 và đánh dấu thay đổi sub-dimension/indicator ở một số dimension năm 2021.
+đưa vào cho tới khi chứng minh được tính so sánh xuyên năm. Thang dimension 1–10 và các đánh dấu thay đổi năm 2021 đều có trong workbook gốc:
+`data/raw/papi/2024PAPI_ProvincialIndicators_BangChiTieuCapTinh.xlsx` sheet `2024_PAPI_VIE_ENG`
+cột C (dòng 7, 31, 55, 72, 92, 108, 134, 148 ghi `1-10 điểm`) và sheet `2021_VIE_ENG` dòng 166
+(`* Những nội dung có thay đổi năm 2021`; dòng 98 đánh dấu Dimension 5);
+[`PAPI 2024 One Pager`](https://papi.org.vn/wp-content/uploads/2025/04/26_Thanh_Hoa_ENG.pdf)
+chỉ là tham khảo ngoài (máy chủ chặn truy cập tự động; chưa kiểm tự động).
 
 ## Giấy phép
 
