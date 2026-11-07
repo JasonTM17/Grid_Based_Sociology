@@ -5,7 +5,7 @@ Yêu cầu: Word + PowerPoint (COM), pymupdf. Chạy:
 
 Đầu ra (xem bằng mắt):
     C:\\Users\\Admin\\AppData\\Local\\Temp\\opencode\\demo_render\\
-        slides\\slide_01.png ... slide_15.png   — mỗi slide
+        slides\\slide_01.png ... slide_16.png   — mỗi slide
         report_p01.png ...                      — từng trang báo cáo (PDF render)
 """
 from __future__ import annotations
@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = Path(os.environ.get("TEMP", "/tmp")) / "opencode" / "demo_render"
 REPORT = ROOT / "reports" / "final_report.docx"
-SLIDES = ROOT / "slides" / "midterm.pptx"
+SLIDES = ROOT / "slides" / "final.pptx"
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")

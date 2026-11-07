@@ -25,19 +25,31 @@ lưới phân cấp → thống kê từng ô → ô "dày" → gom cụm liền
 cells.append(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
 
-# Cho phép import `sting` dù kernel chạy từ notebooks/ hay từ gốc repo
+# Cho phép import `sting` / `fig_style` dù kernel chạy từ notebooks/ hay từ gốc repo
+ROOT = None
 for cand in (Path.cwd(), Path.cwd().parent):
     if (cand / "src" / "sting.py").exists():
+        ROOT = cand
         sys.path.insert(0, str(cand / "src"))
+        sys.path.insert(0, str(cand / "scripts"))
         break
 
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from sklearn.datasets import make_blobs
 from sklearn.metrics import adjusted_rand_score
 
 from sting import STING
+from fig_style import (PALETTE, CLUSTER_COLORS, CLUSTER_LABELS,
+                       apply_style, new_fig, add_source, save_png)
+
+# rcParams trình bày chuẩn repo (font/palette/DPI) — chỉ tác động lớp vẽ hình
+apply_style()
+
+# Hình lưu results/figs/ theo gốc repo, không phụ thuộc cwd của kernel
+OUT_FIG = (ROOT or Path.cwd()) / "results" / "figs" / "00_synthetic_sting.png"
 
 print("import OK")"""))
 
@@ -49,11 +61,13 @@ cells.append(nbf.v4.new_code_cell("""X, y_true = make_blobs(
     n_samples=240, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=42
 )
 
-fig, ax = plt.subplots(figsize=(5, 5))
-ax.scatter(X[:, 0], X[:, 1], c=y_true, s=12, cmap="coolwarm")
+# Palette chuẩn repo: cụm 0 = xanh dương, cụm 1 = cam (Okabe-Ito, CVD-safe)
+fig, ax = new_fig(target=None, figsize=(5, 5))
+ax.scatter(X[:, 0], X[:, 1], c=[CLUSTER_COLORS[int(v)] for v in y_true], s=12)
 ax.set_title("Dữ liệu giả lập: 2 cụm")
-ax.set_xlabel("x1"); ax.set_ylabel("x2")
-plt.tight_layout()
+# make_blobs không có đơn vị vật lý — ghi rõ "đơn vị tùy ý" trên nhãn trục
+ax.set_xlabel("x1 (đơn vị tùy ý)"); ax.set_ylabel("x2 (đơn vị tùy ý)")
+fig.tight_layout()
 plt.show()
 
 print("shape:", X.shape)"""))
@@ -79,15 +93,15 @@ cells.append(nbf.v4.new_code_cell("""level = 2
 step_x = (model.bounds_max_[0] - model.bounds_min_[0]) / (model.factor ** level)
 step_y = (model.bounds_max_[1] - model.bounds_min_[1]) / (model.factor ** level)
 
-fig, ax = plt.subplots(figsize=(6, 6))
+fig, ax = new_fig(target=None, figsize=(6, 6))
 for cell in model.cells_[level].values():
     x0, y0 = cell.bounds_min
     ax.add_patch(plt.Rectangle((x0, y0), step_x, step_y,
-                               facecolor="tab:blue", alpha=min(0.08 * cell.count, 0.9),
-                               edgecolor="gray", linewidth=0.4))
+                               facecolor=PALETTE["blue"], alpha=min(0.08 * cell.count, 0.9),
+                               edgecolor=PALETTE["gray"], linewidth=0.4))
 ax.scatter(X[:, 0], X[:, 1], s=8, c="black")
 ax.set_title(f"Lưới mức {level} (màu đậm = nhiều điểm hơn)")
-plt.tight_layout()
+fig.tight_layout()
 plt.show()"""))
 
 cells.append(nbf.v4.new_markdown_cell("""## 4. Gom cụm và đối chiếu nhãn thật
@@ -100,15 +114,35 @@ ari = adjusted_rand_score(y_true, labels)
 noise = (labels == -1).mean()
 print(f"ARI = {ari:.3f} | tỷ lệ nhiễu = {noise:.1%} | số cụm = {model.n_clusters_}")
 
-fig, axes = plt.subplots(1, 2, figsize=(11, 5))
-axes[0].scatter(X[:, 0], X[:, 1], c=y_true, s=12, cmap="coolwarm")
+# Palette chuẩn repo: -1 = xám (nhiễu), 0 = xanh dương, 1 = cam
+fig, axes = new_fig(target="docx", ncols=2)
+axes[0].scatter(X[:, 0], X[:, 1], c=[CLUSTER_COLORS[int(v)] for v in y_true], s=12)
 axes[0].set_title("Nhãn thật")
-axes[1].scatter(X[:, 0], X[:, 1], c=labels, s=12, cmap="viridis")
+axes[1].scatter(X[:, 0], X[:, 1], c=[CLUSTER_COLORS[int(v)] for v in labels], s=12)
 axes[1].set_title(f"STING (ARI={ari:.3f})")
+
+def legend_clusters(ax, values):
+    # Chú giải palette/nhãn chuẩn repo — chỉ gồm nhãn thật sự có trong dữ liệu
+    handles = [
+        Line2D([0], [0], marker="o", linestyle="", markersize=5,
+               color=CLUSTER_COLORS.get(int(v), "#333333"),
+               label=CLUSTER_LABELS.get(int(v), str(int(v))))
+        for v in sorted({int(v) for v in values})
+    ]
+    ax.legend(handles=handles, loc="best", handletextpad=0.2, borderaxespad=0.4)
+
+legend_clusters(axes[0], y_true)
+legend_clusters(axes[1], labels)
+# make_blobs không có đơn vị vật lý — ghi rõ "đơn vị tùy ý" trên cả 4 nhãn trục
 for ax in axes:
-    ax.set_xlabel("x1"); ax.set_ylabel("x2")
-plt.tight_layout()
-fig.savefig("../results/figs/00_synthetic_sting.png", dpi=120, bbox_inches="tight")
+    ax.set_xlabel("x1 (đơn vị tùy ý)"); ax.set_ylabel("x2 (đơn vị tùy ý)")
+
+# Dòng nguồn: dữ liệu giả lập sinh tại chỗ (seed 42), không có PROVENANCE.md
+# nên KHÔNG truyền `retrieved` — helper cấm tự điền ngày lấy dữ liệu.
+add_source(fig, "Dữ liệu giả lập 2 cụm Gauss (make_blobs, seed 42)",
+           extra="STING tự viết — src/sting.py")
+fig.tight_layout(rect=(0, 0.05, 1, 1))
+save_png(fig, OUT_FIG, dpi=300)  # chuẩn in sắc nét: >= 300 DPI (trước đây 120, rồi 200)
 plt.show()"""))
 
 cells.append(nbf.v4.new_markdown_cell("""## 5. Xem trước độ nhạy tham số

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime
 from itertools import combinations
 from pathlib import Path
 
@@ -160,7 +161,7 @@ def main() -> int:
     best = ok.iloc[0]
     feats = best["features"].split("+")
     cfg = {
-        "frozen_at": "2026-11-04",
+        "frozen_at": datetime.now().date().isoformat(),  # sinh lúc chạy, không hardcode
         "selection_protocol": (
             "Candidates: pairwise allowlist of screened sub-dimensions; mean-jump heuristic checked on train years ≤2020; "
             "dimension-level d1–d6 excluded pending cross-year comparability evidence. "

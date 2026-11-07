@@ -38,6 +38,13 @@
 | 5 | 79% | 3 |
 | 8 | 70% | 1 |
 
+## Hạn chế diễn giải
+
+- Cấu trúc “k=3” thực chất là 1 cụm khổng lồ + 2 cụm li ti: 96.8% điểm non-noise thuộc cụm lớn nhất (629/650). selection_metrics trong predict_config.json (fit ≤ 2020, sizes [453, 16, 5]) ghi 95.6% — metadata đó mô tả fit ≤ 2020, còn model.pkl đóng gói là fit 2011–2023 ([629, 16, 5]).
+- Hai cụm li ti (nhãn [0, 1]) chỉ có điểm trong 2011–2018 và không nhận điểm nào từ 2019 trở đi: vùng đặc trưng tạo cụm nhỏ không còn điểm mới — model fit 2011–2023 dùng cho 2024 phải đọc theo ý đó (concept drift).
+- “Chuyển thật giữa 2 cụm: 0/59” là phát biểu rỗng (vacuous): cả 2023 lẫn 2024 không có điểm nào thuộc cụm 0, 1 (0 điểm) — không phải bằng chứng về độ ổn định nhãn.
+- 13/61 tỉnh 2024 vào nhiễu do ô lưới thưa (count < min_count), không phải do scaler: STING bất biến với biến đổi affine từng chiều (z-score mỗi chiều), nguồn −1 là ô không đủ mật độ.
+
 ## Lưu ý phương pháp
 - Một lưới TOÀN CỤC cho mọi năm (nhãn so sánh được giữa các năm; các năm không độc lập — phù hợp cho mục tiêu dự đoán). Phân tích per-year ở Phase 5 là phương pháp KHÁC, không trộn số liệu.
 - Năm 2024 KHÔNG tham gia bước chọn cấu hình (xem `predict_sweep.py`); kết quả 2024 ở trên là out-of-sample.

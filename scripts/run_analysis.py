@@ -17,6 +17,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.decomposition import PCA
@@ -33,6 +34,24 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from sting import STING  # noqa: E402
 from papi_pred_common import ROOT, load_config, load_panel  # noqa: E402
+from fig_style import (  # noqa: E402
+    AX_KINH_DO,
+    AX_VI_DO,
+    CLUSTER_COLORS,
+    CLUSTER_LABELS,
+    PALETTE,
+    add_source,
+    apply_style,
+    new_fig,
+    save_png,
+)
+
+# Dòng nguồn: tên nguồn + ngày tải lấy từ PROVENANCE.md của từng dữ liệu
+# (KHÔNG phải ngày render hình).
+PAPI_SOURCE = "PAPI — CECODES, VFF-CRT, RTA & UNDP"
+PAPI_RETRIEVED = "2026-11-03"  # data/raw/papi/PROVENANCE.md
+CENTROID_SOURCE = "Le et al. — Mendeley Data, DOI 10.17632/wbk42j9wc8.1 (CC BY 4.0)"
+CENTROID_RETRIEVED = "2026-11-03"  # data/raw/mendeley/PROVENANCE.md
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -65,6 +84,86 @@ def safe_metrics(X, labels):
     db = davies_bouldin_score(X[mask], labels[mask])
     ch = calinski_harabasz_score(X[mask], labels[mask])
     return sil, db, ch
+
+
+def label_noise_points(ax, fig, sub, nmap, fontsize: float = 5.5) -> None:
+    """Đặt nhãn các điểm nhiễu trên bản đồ, chọn vị trí ít chồng chéo nhất.
+
+    Lớp trình bày thuần: với mỗi điểm nhiễu thử 8 ứng viên vị trí quanh
+    marker, chấm điểm theo khoảng cách gần nhất tới marker khác và tới nhãn
+    đã đặt (tính trong hệ toạ độ point nên bất biến theo DPI), ưu tiên ứng
+    viên sớm hơn khi bằng điểm. Không đổi dữ liệu hay thứ tự điểm.
+    """
+    k = fig.dpi / 72.0  # px hiển thị trên 1 point
+    xy = sub[["longitude", "latitude"]].to_numpy()
+    centers = ax.transData.transform(xy) / k  # -> point
+    r_mark = float(np.sqrt(110 / np.pi)) + 0.6  # bán kính marker (point)
+    bb = ax.get_window_extent()
+    ax_bb = (bb.x0 / k, bb.y0 / k, bb.x1 / k, bb.y1 / k)
+    # 8 ứng viên (dx, dy, ha, va) theo point: phải, trái, trên, dưới, 4 chéo.
+    cands = (
+        (8, -2, "left", "center"), (-8, -2, "right", "center"),
+        (0, 8, "center", "bottom"), (0, -10, "center", "top"),
+        (7, 6, "left", "bottom"), (-7, 6, "right", "bottom"),
+        (7, -11, "left", "top"), (-7, -11, "right", "top"),
+    )
+    placed = []  # hộp (x0, x1, y0, y1) các nhãn đã đặt, theo point
+
+    def rect(cx, cy, cand, w, h):
+        dx, dy, ha, va = cand
+        if ha == "left":
+            x0, x1 = cx + dx, cx + dx + w
+        elif ha == "right":
+            x0, x1 = cx + dx - w, cx + dx
+        else:
+            x0, x1 = cx + dx - w / 2, cx + dx + w / 2
+        if va == "bottom":
+            y0, y1 = cy + dy, cy + dy + h
+        elif va == "top":
+            y0, y1 = cy + dy - h, cy + dy
+        else:
+            y0, y1 = cy + dy - h / 2, cy + dy + h / 2
+        return x0, x1, y0, y1
+
+    def gap_rect(a, b):
+        dx = max(b[0] - a[1], a[0] - b[1], 0.0)
+        dy = max(b[2] - a[3], a[2] - b[3], 0.0)
+        return float(np.hypot(dx, dy))
+
+    def gap_point(r, px, py):
+        dx = max(r[0] - px, px - r[1], 0.0)
+        dy = max(r[2] - py, py - r[3], 0.0)
+        return float(np.hypot(dx, dy))
+
+    lon = sub.longitude.to_numpy()
+    lat = sub.latitude.to_numpy()
+    clu = sub.cluster.to_numpy()
+    code = sub.province_code.to_numpy()
+    for i in sorted(range(len(sub)), key=lambda j: (-lat[j], lon[j])):
+        if int(clu[i]) != -1:
+            continue
+        text = nmap.get(int(code[i]), "")
+        if not text:
+            continue
+        w = 0.62 * fontsize * len(text)  # ước lượng bề rộng chữ (point)
+        h = 1.7 * fontsize  # đủ chứa dấu tiếng Việt chồng (ế, ị, ữ)
+        best, best_score = None, -np.inf
+        for rank, cand in enumerate(cands):
+            r = rect(centers[i, 0], centers[i, 1], cand, w, h)
+            out = (r[0] < ax_bb[0] - 2 or r[1] > ax_bb[2] + 2
+                   or r[2] < ax_bb[1] - 2 or r[3] > ax_bb[3] + 2)
+            others = (gap_point(r, *centers[j]) - r_mark
+                      for j in range(len(centers)) if j != i)
+            gap_l = min((gap_rect(r, p) for p in placed), default=99.0)
+            # chấm điểm theo khoảng cách hẹp nhất (marker hoặc nhãn đã đặt)
+            score = min(min(others), gap_l) - (50.0 if out else 0.0) \
+                - 0.01 * rank
+            if score > best_score:
+                best, best_score = cand, score
+        ax.annotate(text, (lon[i], lat[i]), fontsize=fontsize,
+                    xytext=(best[0], best[1]), textcoords="offset points",
+                    ha=best[2], va=best[3], alpha=0.8)
+        placed.append(rect(centers[i, 0], centers[i, 1], best, w, h))
 
 
 def main() -> int:
@@ -193,14 +292,17 @@ def main() -> int:
     import matplotlib
 
     matplotlib.use("Agg")
+    apply_style()
     import matplotlib.pyplot as plt
 
     pred = pd.read_csv(RES / "predict_all_years.csv")
     piv = pred.pivot(index="province_vi", columns="year", values="pred_cluster")
     order = piv.sort_values([2024, 2023], na_position="last").index
     piv = piv.loc[order]
-    fig, ax = plt.subplots(figsize=(11, 17))
-    cmap = plt.matplotlib.colors.ListedColormap(["#d4d4d4", "#4c72b0", "#dd8452", "#55a868"])
+    fig, ax = new_fig(target=None, figsize=(11, 17))
+    cmap = plt.matplotlib.colors.ListedColormap(
+        [PALETTE["gray"], PALETTE["blue"], PALETTE["orange"], PALETTE["green"]]
+    )
     cmap.set_bad("white")
     bounds = [-1.5, -0.5, 0.5, 1.5, 2.5]
     norm = plt.matplotlib.colors.BoundaryNorm(bounds, cmap.N)
@@ -209,12 +311,21 @@ def main() -> int:
     ax.set_xticklabels(list(piv.columns), rotation=0)
     ax.set_yticks(range(len(piv.index)))
     ax.set_yticklabels(list(piv.index), fontsize=6)
+    ax.set_xlabel("Năm")
+    ax.set_ylabel("Tỉnh/Thành phố")
     ax.set_title("Dịch chuyển cụm STING 2011–2024 (lưới toàn cục; xám = nhiễu/–1)")
     cbar = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, pad=0.01)
     cbar.set_ticks([-1, 0, 1, 2])
-    cbar.set_ticklabels(["nhiễu", "cụm 0", "cụm 1", "cụm 2"])
-    fig.tight_layout()
-    fig.savefig(FIGS / "evolution.png", dpi=150)
+    cbar.set_ticklabels([CLUSTER_LABELS[c] for c in (-1, 0, 1, 2)])
+    cbar.set_label("Cụm STING")
+    add_source(fig, PAPI_SOURCE, retrieved=PAPI_RETRIEVED)
+    # Ô trắng trong lưới là (tỉnh, năm) không có dự đoán — thiếu dữ liệu đầu
+    # vào năm đó (không nằm trong predict_all_years.csv); chú giải rõ để
+    # người đọc không phải đoán.
+    fig.text(0.01, 0.032, "Ô trắng = không có dự đoán (thiếu dữ liệu năm đó)",
+             fontsize=8, color="#555555")
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    save_png(fig, FIGS / "evolution.png", dpi=200)
     plt.close(fig)
     print("4) evolution ->", FIGS / "evolution.png")
 
@@ -224,30 +335,34 @@ def main() -> int:
     cent = pd.read_csv(ROOT / "data" / "raw" / "mendeley" / "Replication_package" / "data"
                        / "centroids_63_naturalearth.csv")
     cent["province_code"] = cent["province_code"].astype(int)
-    colors = {0: "#4c72b0", 1: "#dd8452", 2: "#55a868", -1: "#bbbbbb"}
+    colors = CLUSTER_COLORS  # {-1: xám nhiễu, 0: xanh dương, 1: cam, 2: xanh lá}
     for yr in (2020, 2024):
         labels = dict(zip(pred[pred.year == yr].province_code, pred[pred.year == yr].pred_cluster))
         sub = cent[cent.province_code.isin(labels)].copy()
         sub["cluster"] = sub.province_code.map(labels)
-        fig, ax = plt.subplots(figsize=(6.2, 9.5))
+        fig, ax = new_fig(target=None, figsize=(6.2, 9.5))
         for c in sorted(sub.cluster.unique()):
             m = sub.cluster == c
             ax.scatter(sub.longitude[m], sub.latitude[m], s=110,
                        c=colors.get(int(c), "#937860"), edgecolors="black", linewidths=0.6,
-                       label=f"cụm {c}" if c >= 0 else "nhiễu (–1)")
+                       label=CLUSTER_LABELS.get(int(c), f"cụm {c}"))
         prow = df[df.year == yr][["province_code", "province_vi"]]
         nmap = dict(zip(prow.province_code, prow.province_vi))
-        for _, r in sub.iterrows():
-            if r.cluster == -1:
-                ax.annotate(nmap.get(int(r.province_code), ""), (r.longitude, r.latitude),
-                            fontsize=5.5, xytext=(3, 1), textcoords="offset points", alpha=0.8)
         ax.set_title(f"Cụm STING — {yr}")
         ax.legend(loc="lower left", fontsize=7)
-        ax.set_xlabel("longitude")
-        ax.set_ylabel("latitude")
+        # Đơn vị độ bắt buộc với trục toạ độ địa lý.
+        ax.set_xlabel(f"{AX_KINH_DO} (°)")
+        ax.set_ylabel(f"{AX_VI_DO} (°)")
         ax.grid(alpha=0.25)
-        fig.tight_layout()
-        fig.savefig(FIGS / f"map_{yr}.png", dpi=150)
+        fig.tight_layout(rect=(0, 0.05, 1, 1))
+        add_source(fig, f"{PAPI_SOURCE}; toạ độ centroid: {CENTROID_SOURCE}",
+                   retrieved=PAPI_RETRIEVED, fontsize=9)
+        # Nhãn tỉnh nhiễu: chọn vị trí ít chồng chéo nhất sau khi bố cục chốt
+        # (thử 8 hướng quanh marker, chấm điểm theo khoảng cách tới marker/
+        # nhãn khác) — chỉ lớp trình bày, không đổi dữ liệu.
+        fig.canvas.draw()
+        label_noise_points(ax, fig, sub, nmap, fontsize=5.5)
+        save_png(fig, FIGS / f"map_{yr}.png", dpi=300)
         plt.close(fig)
         print(f"5) map {yr} ->", FIGS / f"map_{yr}.png")
 
@@ -266,7 +381,7 @@ def main() -> int:
     lines.append(
         "\n## Ghi chú trung thực\n"
         "- Dữ liệu PAPI cấp tỉnh/năm **rất đồng nhất**: STING per-year đa số cho 1 vùng dày; "
-        "cấu trúc tách biệt chỉ xuất hiện ở nhóm ngoại vi nhỏ (ví dụ cụm 14–16 điểm trong pooled).\n"
+        "cấu trúc tách biệt chỉ xuất hiện ở hai cụm ngoại vi nhỏ (ví dụ cụm 16 và 5 điểm, tổng 21, trong pooled).\n"
         "- Metric hình học tính trên điểm thuộc cụm (loại −1); khi k<2 metric = n/a.\n"
         "- ARIt vs k-means thấp (≈0.07–0.17): hai phương pháp phân vùng khác nhau trên dữ liệu gần như một khối.\n"
         "- STING ≈ DBSCAN(eps=0.2) đồng thuận hơn (ARI≈0.65) — cùng họ mật độ-lưới.\n"

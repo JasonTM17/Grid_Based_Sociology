@@ -207,6 +207,53 @@ def main() -> int:
     lines.append("|---|---|---|")
     for mc2, cv2, k2 in sens:
         lines.append(f"| {mc2} | {cv2:.0%} | {k2} |")
+
+    # --- Hạn chế diễn giải: số liệu tính từ chính artifacts của script này ---
+    import ast
+
+    nn_total = int((labels >= 0).sum())
+    share_largest_nn = sizes[0] / nn_total if nn_total else float("nan")
+    largest_id = int(
+        max(range(model.n_clusters_), key=lambda c: int((labels == c).sum()))
+    )
+    small_ids = [c for c in range(model.n_clusters_) if c != largest_id]
+    small_pts = out[(out.pred_cluster >= 0) & (out.pred_cluster.isin(small_ids))]
+    small_years = sorted(int(y) for y in small_pts.year.unique())
+    small_in_2324 = int((small_pts.year >= TRAIN_MAX_YEAR - 1).sum())
+    sel_sizes: list[int] = []
+    sel_raw = cfg.get("selection_metrics", {}).get("sizes_top5")
+    if isinstance(sel_raw, str):
+        try:
+            sel_sizes = [int(v) for v in ast.literal_eval(sel_raw)]
+        except (ValueError, SyntaxError):
+            sel_sizes = []
+    lines.append("\n## Hạn chế diễn giải\n")
+    _sel_note = (
+        f"selection_metrics trong predict_config.json (fit ≤ 2020, sizes {sel_sizes}) ghi "
+        f"{sel_sizes[0] / sum(sel_sizes):.1%} — metadata đó mô tả fit ≤ 2020, còn model.pkl đóng gói là "
+        f"fit 2011–{TRAIN_MAX_YEAR} ({sizes})."
+        if sel_sizes
+        else ""
+    )
+    lines.append(
+        f"- Cấu trúc “k=3” thực chất là 1 cụm khổng lồ + 2 cụm li ti: {share_largest_nn:.1%} điểm non-noise "
+        f"thuộc cụm lớn nhất ({sizes[0]}/{nn_total}). {_sel_note}"
+    )
+    if small_years:
+        lines.append(
+            f"- Hai cụm li ti (nhãn {small_ids}) chỉ có điểm trong {small_years[0]}–{small_years[-1]} "
+            f"và không nhận điểm nào từ {small_years[-1] + 1} trở đi: vùng đặc trưng tạo cụm nhỏ không còn "
+            f"điểm mới — model fit 2011–{TRAIN_MAX_YEAR} dùng cho {TEST_YEAR} phải đọc theo ý đó (concept drift)."
+        )
+    lines.append(
+        f"- “Chuyển thật giữa 2 cụm: {real_move}/{n_common}” là phát biểu rỗng (vacuous): cả {TRAIN_MAX_YEAR} lẫn "
+        f"{TEST_YEAR} không có điểm nào thuộc cụm {", ".join(map(str, small_ids))} "
+        f"({small_in_2324} điểm) — không phải bằng chứng về độ ổn định nhãn."
+    )
+    lines.append(
+        f"- {dist.get(-1, 0)}/{len(pte)} tỉnh {TEST_YEAR} vào nhiễu do ô lưới thưa (count < min_count), không phải "
+        "do scaler: STING bất biến với biến đổi affine từng chiều (z-score mỗi chiều), nguồn −1 là ô không đủ mật độ."
+    )
     lines.append(
         "\n## Lưu ý phương pháp\n"
         "- Một lưới TOÀN CỤC cho mọi năm (nhãn so sánh được giữa các năm; các năm không độc lập — "
@@ -220,42 +267,68 @@ def main() -> int:
     lines.append("")
     SUMMARY_PATH.write_text("\n".join(lines), encoding="utf-8")
 
-    # 6) Hình scatter
+    # 6) Hình scatter — trình bày theo chuẩn scripts/fig_style.py (palette
+    #    Okabe–Ito, font/tiêu đề chuẩn, dòng nguồn PAPI, DPI in ấn 300).
+    #    Chỉ đổi lớp trình bày; toàn bộ số liệu lấy từ kết quả tính phía trên.
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    colors = {0: "#4c72b0", 1: "#dd8452", 2: "#55a868", 3: "#8172b3", 4: "#937860"}
-    xa, ya = ptr[feats[0]].to_numpy(), ptr[feats[1]].to_numpy()
-    fig, ax = plt.subplots(figsize=(9.5, 6.5))
-    noise_mask = labels == -1
-    ax.scatter(xa[noise_mask], ya[noise_mask], s=14, c="#bbbbbb", alpha=0.5,
-               label=f"train – nhiễu ({int(noise_mask.sum())})")
-    for c in range(model.n_clusters_):
-        mm = labels == c
-        if not mm.any():
-            continue
-        ax.scatter(xa[mm], ya[mm], s=14, c=colors[c % 5], alpha=0.35,
-                   label=f"train – cụm {c} ({int(mm.sum())})")
-    xt, yt = pte[feats[0]].to_numpy(), pte[feats[1]].to_numpy()
-    te_noise = pred_te == -1
-    ax.scatter(xt[te_noise], yt[te_noise], s=55, marker="x", c="#666666", linewidths=1.6,
-               label=f"2024 – nhiễu ({int(te_noise.sum())})")
-    for c in range(model.n_clusters_):
-        mm = pred_te == c
-        if not mm.any():
-            continue
-        ax.scatter(xt[mm], yt[mm], s=55, marker="o", c=colors[c % 5], edgecolors="black",
-                   linewidths=0.7, label=f"2024 → cụm {c} ({int(mm.sum())})")
-    ax.set_xlabel(labels_map[feats[0]])
-    ax.set_ylabel(labels_map[feats[1]])
-    ax.set_title("STING học 2011–2023 → dự đoán cụm cho 2024 (out-of-sample)")
-    ax.legend(loc="best", fontsize=8, framealpha=0.9)
-    ax.grid(alpha=0.25)
-    fig.tight_layout()
-    fig.savefig(FIG_PATH, dpi=150)
-    plt.close(fig)
+    from fig_style import (CLUSTER_COLORS, CLUSTER_LABELS, PALETTE,
+                           add_source, new_fig, save_png, style_context)
+
+    def cluster_color(c: int) -> str:
+        """Màu cụm chuẩn: 0/1/2 theo CLUSTER_COLORS; k>3 dùng chuỗi phụ."""
+        if c in CLUSTER_COLORS:
+            return CLUSTER_COLORS[c]
+        extras = [PALETTE["purple"], PALETTE["sky"]]
+        return extras[(c - 3) % len(extras)]
+
+    # Nhãn nhiễu cho legend: bỏ đuôi "(–1)" vì số điểm đã nằm trong ngoặc kế bên
+    noise_name = CLUSTER_LABELS[-1].replace(" (–1)", "")
+
+    with style_context():
+        xa, ya = ptr[feats[0]].to_numpy(), ptr[feats[1]].to_numpy()
+        fig, ax = new_fig(target="docx")  # 6.5 x 4.3 in — khớp cột docx + slide
+        noise_mask = labels == -1
+        ax.scatter(xa[noise_mask], ya[noise_mask], s=14, c=PALETTE["gray"], alpha=0.5,
+                   label=f"train – {noise_name} ({int(noise_mask.sum())})")
+        for c in range(model.n_clusters_):
+            mm = labels == c
+            if not mm.any():
+                continue
+            ax.scatter(xa[mm], ya[mm], s=14, c=cluster_color(c), alpha=0.35,
+                       label=f"train – {CLUSTER_LABELS[c]} ({int(mm.sum())})")
+        xt, yt = pte[feats[0]].to_numpy(), pte[feats[1]].to_numpy()
+        te_noise = pred_te == -1
+        ax.scatter(xt[te_noise], yt[te_noise], s=55, marker="x", c="#444444", linewidths=1.6,
+                   label=f"2024 – {noise_name} ({int(te_noise.sum())})")
+        for c in range(model.n_clusters_):
+            mm = pred_te == c
+            if not mm.any():
+                continue
+            ax.scatter(xt[mm], yt[mm], s=55, marker="o", c=cluster_color(c), edgecolors="black",
+                       linewidths=0.7, label=f"2024 → {CLUSTER_LABELS[c]} ({int(mm.sum())})")
+        # Nhãn trục theo cấu hình đóng băng. Điểm vẽ là GIÁ TRỊ GỐC của panel
+        # (ptr/pte phía trên), KHÔNG phải z-score — STING chỉ chuẩn hóa bên trong
+        # và bất biến với biến đổi affine từng chiều, nên tọa độ hiển thị giữ
+        # nguyên điểm gốc. Cặp sd_* CHƯA đối chiếu workbook
+        # (data/processed/papi_panel_scale_metadata.csv) nên KHÔNG được gắn thang
+        # số ("thang điểm 1–10" chỉ xác nhận cho d1..d8); ghi rõ "điểm thành phần
+        # PAPI" để người đọc không nhầm với điểm chiều chính d1..d8 (0–10) cũng
+        # như với điểm chuẩn hóa.
+        ax.set_xlabel(f"{labels_map[feats[0]]} (điểm thành phần PAPI)")
+        ax.set_ylabel(f"{labels_map[feats[1]]} (điểm thành phần PAPI)")
+        ax.set_title("STING học 2011–2023 → dự đoán cụm cho 2024 (out-of-sample)")
+        ax.legend(loc="best", frameon=True, framealpha=0.9)
+        ax.grid(alpha=0.25)
+        # Nguồn/ngày tải theo data/raw/papi/PROVENANCE.md (không tự điền ngày render)
+        add_source(fig, "PAPI — CECODES, VFF-CRT, RTA & UNDP", retrieved="2026-11-03")
+        fig.tight_layout(rect=(0, 0.05, 1, 1))  # chừa lề dưới cho dòng nguồn
+        # 300 DPI: 6.5 in × 300 ≈ 1950 px → ≥ 300 DPI hiệu dụng ở cột báo cáo ~16 cm
+        save_png(fig, FIG_PATH, dpi=300)
+        plt.close(fig)
 
     print(f"features={feats} | train n={len(ptr)} | test n={len(pte)}")
     print(f"train: k={model.n_clusters_} sizes={sizes} noise={noise_tr:.0%}")

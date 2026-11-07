@@ -26,9 +26,13 @@ không "cherry-pick" theo hình đẹp. Chi tiết: `results/predict_config_sear
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
 
+# Cho phép import `sting` / `fig_style` dù kernel chạy từ notebooks/ hay từ gốc repo
+ROOT = None
 for cand in (Path.cwd(), Path.cwd().parent):
     if (cand / "src" / "sting.py").exists():
+        ROOT = cand
         sys.path.insert(0, str(cand / "src"))
+        sys.path.insert(0, str(cand / "scripts"))
         break
 
 import numpy as np
@@ -39,8 +43,14 @@ from sklearn.metrics import adjusted_rand_score
 from sklearn.preprocessing import StandardScaler
 
 from sting import STING
+from fig_style import apply_style, new_fig, add_source, save_png
 
-plt.rcParams["figure.dpi"] = 110
+# rcParams trình bày chuẩn repo (font/palette/DPI) — chỉ tác động lớp vẽ hình
+apply_style()
+
+# Hình lưu results/figs/ theo gốc repo, không phụ thuộc cwd của kernel
+OUT_FIG = (ROOT or Path.cwd()) / "results" / "figs" / "params_sweep.png"
+
 print("import OK")"""))
 
 md(nbf.v4.new_markdown_cell("## 1. Sweep trên dữ liệu giả lập (có ground truth)"))
@@ -66,18 +76,26 @@ best = df[df.ari >= 0.9].sort_values(["ari", "noise"], ascending=[False, True]).
 print("Cấu hình tốt nhất (ARI ≥ 0.9):")
 print(best.to_string(index=False))
 
-fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
+# Kích thước chuẩn cột docx (6.5 x 4.3 in); chuỗi mc lấy màu theo COLOR_CYCLE rcParams
+fig, axes = new_fig(target="docx", ncols=2)
 for ax, grp in zip(axes, [(2, 3), (3, 3)]):
     nl, factor = grp
     sub = df[(df.n_levels == nl) & (df.factor == factor)]
     for mc in sorted(sub.min_count.unique()):
         s = sub[sub.min_count == mc]
         ax.plot(s.min_count, s.ari, "o-", label=f"mc={mc}")
-    ax.set_title(f"L={nl}, factor={factor}: ARI theo min_count")
+    ax.set_title(f"L={nl}, factor={factor}:\\nARI theo min_count")
     ax.set_xlabel("min_count"); ax.set_ylabel("ARI"); ax.set_ylim(0, 1.02); ax.grid(alpha=0.3)
-    ax.legend(fontsize=7)
-plt.tight_layout()
-plt.savefig("../results/figs/params_sweep.png", bbox_inches="tight")
+    # Tick tại đúng các giá trị min_count đã quét — lấy từ dữ liệu, không hardcode
+    ax.set_xticks(sorted(sub.min_count.unique()))
+    ax.legend()
+
+# Dòng nguồn: dữ liệu giả lập sinh tại chỗ (seed 42), không có PROVENANCE.md
+# nên KHÔNG truyền `retrieved` — helper cấm tự điền ngày lấy dữ liệu.
+add_source(fig, "Dữ liệu giả lập 3 cụm Gauss (make_blobs, seed 42)",
+           extra="STING tự viết — src/sting.py")
+fig.tight_layout(rect=(0, 0.05, 1, 1))
+save_png(fig, OUT_FIG)  # chuẩn repo: DPI >= 200 (trước đây lưu theo figure.dpi=110)
 plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("""## 2. Sweep trên dữ liệu PAPI thật (3 năm đại diện)

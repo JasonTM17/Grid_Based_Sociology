@@ -21,7 +21,7 @@ chcp 65001
 
 # mở sẵn 2 thứ
 notebooks\midterm_demo.ipynb   # notebook đã có output sẵn (chiếu trực tiếp không cần chạy)
-slides\midterm.pptx            # 15 trang, có speaker notes từng trang
+slides\final.pptx              # 16 trang, có speaker notes từng trang
 ```
 
 Môi trường đã kiểm chứng: Python 3.14.2, Windows 11.
@@ -34,7 +34,7 @@ Môi trường đã kiểm chứng: Python 3.14.2, Windows 11.
 | 1–2 | Slide 2 | Vì sao grid-based (O(n), không giả định hình dạng) |
 | 2–3 | Slide 3 | STING 3 bước: lưới phân cấp → thống kê ô → gom cụm |
 | 3–4 | Slide 4 | Dữ liệu 882×41; audit thang đo 23/37 cột |
-| 4–5 | Slide 5 + notebook §2 | Demo synthetic — ARI 0.950, 22 test trong `tests/test_sting.py` xanh |
+| 4–5 | Slide 5 + notebook §2 | Demo synthetic — ARI 0.950, 28 test trong `tests/test_sting.py` xanh |
 | 5–6 | Slide 6 + notebook §3–4 | Kết quả thật: đồng nhất (k≈1); độ nhạy lưới |
 | 6–8 | Slide 7 | Pipeline dự đoán: train ≤2023 → predict 2024 (out-of-sample duy nhất) |
 | 8–9 | Slide 8 | 2024: 48 tỉnh cụm lớn / 13 tỉnh ngoại vi (coverage 79%) |
@@ -42,8 +42,8 @@ Môi trường đã kiểm chứng: Python 3.14.2, Windows 11.
 | 10–11 | Slide 10 | STING vs k-means vs DBSCAN (noise tách khỏi metric) |
 | 11–12 | Slide 11 | Bản đồ centroid 2024 |
 | 12–13 | Slide 12 | Hạn chế trung thực (robustness âm tính, gãy thang đo) |
-| 13–14 | Slide 13 | Lộ trình cuối kỳ (P5–P7) |
-| 14–15 | Slide 14–15 | Nguồn dữ liệu · Q&A |
+| 13–14 | Slide 13 | Lộ trình cuối kỳ — ĐÃ HOÀN THÀNH (P5/P6 xong; còn tag v1.0-final) |
+| 14–15 | Slide 14–16 | Kiểm chứng ngoại lai (PCI theo cụm) · Nguồn dữ liệu · Q&A |
 
 Mẹo: notebook đã **execute sẵn** (0 lỗi, ~18s) — chiếu thẳng không cần chạy live; muốn chạy lại live: `python -m nbconvert --to notebook --execute --inplace notebooks/midterm_demo.ipynb`.
 
@@ -64,9 +64,10 @@ Mẹo: notebook đã **execute sẵn** (0 lỗi, ~18s) — chiếu thẳng khôn
 |---|---|
 | Dataset | 882 × 41 (đáp ứng ≥500×10) · 63 tỉnh × 14 năm · 39 cột số |
 | Nguồn | PAPI 2011–2024 (papi.org.vn) · Mendeley CC BY 4.0 (DOI 10.17632/wbk42j9wc8.1, crosscheck lệch 0.0) |
-| STING synthetic | ARI = **0.950** · nhiễu 2.5% · 22 unit test trong `tests/test_sting.py` xanh · coverage 99% cho `src/sting.py` |
+| STING synthetic | ARI = **0.950** · nhiễu 2.5% · 28 unit test trong `tests/test_sting.py` xanh (55 test toàn suite) · coverage 98% cho `src/sting.py` (đo bằng `pytest --cov`) |
 | Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột gãy thang đo (check_data audit) |
-| Dự đoán 2024 | Train ≤2023 (frozen, train-only) · phủ **79%** · {nhiễu: 13, cụm lớn: 48} · 0 chuyển thật 2023→2024 |
+| Dự đoán 2024 | Train ≤2023 (frozen, train-only) · phủ **79%** · {nhiễu: 13, cụm lớn: 48} · 0 chuyển thật 2023→2024 — phát biểu rỗng/vacuous (cả 2023 lẫn 2024 không có điểm cụm 0/1), không chứng minh độ ổn định nhãn |
+| Kiểm chứng ngoại lai | PCI theo cụm STING: ANOVA F(3,743)=9.04, p=6.9e-06 · Kruskal–Wallis H=31.78, p=5.8e-07 · nhóm {nhiễu: 149, cụm 0: 5, cụm 1: 16, cụm 2: 577} · không chứng minh nhân quả (`results/external_validation.md`) |
 | Model giám sát | Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau: MAE 0.064 vs carry-forward 0.0683 = **giảm 6.3%**; RF 0.0616 = giảm 9.8% |
 | Robustness | PCA d1–d6 (63% phương sai) và 8 chiều 2018–2024 → **không nhận diện cấu trúc** (âm tính, báo cáo trung thực) |
 | So sánh | STING ≈ DBSCAN(eps=0.2) (ARI 0.65) · k-means ép k, silhouette 0.445 (k=2) |

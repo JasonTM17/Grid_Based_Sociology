@@ -43,7 +43,7 @@
 | 8 chiều 2018–2024, within-year z, L=3 f=3 mc=2 lv=2  | 430 |               nan     |   1 |         0.995 |              |      |      |     nan     | không nhận diện |
 
 ## Ghi chú trung thực
-- Dữ liệu PAPI cấp tỉnh/năm **rất đồng nhất**: STING per-year đa số cho 1 vùng dày; cấu trúc tách biệt chỉ xuất hiện ở nhóm ngoại vi nhỏ (ví dụ cụm 14–16 điểm trong pooled).
+- Dữ liệu PAPI cấp tỉnh/năm **rất đồng nhất**: STING per-year đa số cho 1 vùng dày; cấu trúc tách biệt chỉ xuất hiện ở hai cụm ngoại vi nhỏ (ví dụ cụm 16 và 5 điểm, tổng 21, trong pooled).
 - Metric hình học tính trên điểm thuộc cụm (loại −1); khi k<2 metric = n/a.
 - ARIt vs k-means thấp (≈0.07–0.17): hai phương pháp phân vùng khác nhau trên dữ liệu gần như một khối.
 - STING ≈ DBSCAN(eps=0.2) đồng thuận hơn (ARI≈0.65) — cùng họ mật độ-lưới.

@@ -32,7 +32,7 @@ FEATURE_LABELS = {
     "sd_4_4": "4.4 Quyết tâm chống tham nhũng của chính quyền địa phương",
     "sd_6_1": "6.1 Y tế công lập",
     "sd_6_3": "6.3 Cơ sở hạ tầng căn bản",
-    # tham chiếu cấp chiều (1–10 điểm, ổn định theo thiết kế)
+    # d6 jump +0.715 tại 2021 — được loại khỏi mô hình
     "d1": "Chiều 1 – Tham gia ở cấp cơ sở",
     "d2": "Chiều 2 – Minh bạch",
     "d3": "Chiều 3 – Trách nhiệm giải trình",

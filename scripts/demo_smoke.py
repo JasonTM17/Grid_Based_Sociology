@@ -75,7 +75,7 @@ for f in [
 for f in [
     "notebooks/midterm_demo.ipynb",
     "notebooks/final_analysis.ipynb",
-    "slides/midterm.pptx",
+    "slides/final.pptx",
     "reports/final_report.docx",
     "reports/qa_midterm.md",
     "reports/qa_final.md",
@@ -94,11 +94,11 @@ except Exception as e:  # noqa: BLE001
 try:
     from pptx import Presentation  # noqa: E402
 
-    p = Presentation(ROOT / "slides" / "midterm.pptx")
+    p = Presentation(ROOT / "slides" / "final.pptx")
     n = len(p.slides._sldIdLst)
-    check("midterm.pptx mo duoc 15 trang", n == 15, f"{n} trang")
+    check("final.pptx mo duoc 16 trang", n == 16, f"{n} trang")
 except Exception as e:  # noqa: BLE001
-    check("midterm.pptx mo duoc", False, str(e))
+    check("final.pptx mo duoc", False, str(e))
 
 # --- 5) Notebook execute san --- #
 import nbformat  # noqa: E402

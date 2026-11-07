@@ -243,3 +243,126 @@ def test_connectivity_2_runs():
     labels = model.cluster(level=2, connectivity=2)
     assert labels.shape == (len(X),)
     assert model.n_clusters_ >= 1
+
+
+def test_connectivity_semantics():
+    """Hai ô dày kề CHÉO: connectivity=1 → 2 cụm riêng; connectivity=2 → gộp 1.
+
+    Khóa tính chất kề mặt/kề góc mà docstring cluster() tuyên bố — một sửa sai
+    bỏ qua giới hạn connectivity trong _neighbors() phải làm test này đỏ.
+    """
+    X = np.array([[0.1, 0.1]] * 3 + [[0.9, 0.9]] * 3)  # ô (0,0) và ô (1,1) chéo nhau
+    model = STING(n_levels=2, factor=2, min_count=2).fit(X)
+
+    lab_face = model.cluster(level=1, connectivity=1)
+    assert np.all(lab_face >= 0)  # mọi điểm thuộc ô dày
+    assert sorted(set(lab_face.tolist())) == [0, 1]  # kề chéo KHÔNG gom: 2 cụm
+
+    lab_diag = model.cluster(level=1, connectivity=2)
+    assert np.all(lab_diag >= 0)
+    assert sorted(set(lab_diag.tolist())) == [0]  # kề cả góc: gộp thành 1 cụm
+
+
+def test_cluster_invalid_level():
+    """level ngoài [0, n_levels-1] phải ValueError thân thiện (không KeyError thô)."""
+    model = STING(n_levels=3, factor=2, min_count=2).fit(
+        np.random.default_rng(0).normal(size=(60, 2))
+    )
+    with pytest.raises(ValueError):
+        model.cluster(level=3)  # == n_levels
+    with pytest.raises(ValueError):
+        model.cluster(level=-1)
+
+
+def test_connectivity_zero_rejected():
+    """connectivity=0 vô nghĩa (không ô nào kề được) → ValueError."""
+    model = STING(n_levels=2, factor=2, min_count=2).fit(
+        np.random.default_rng(0).normal(size=(60, 2))
+    )
+    with pytest.raises(ValueError):
+        model.cluster(connectivity=0)
+
+
+def test_query_rect_boundary():
+    """Semantics query_rect đã tài liệu hóa: chỉ đếm ô nằm TRON trong vùng.
+
+    Vùng thẳng lưới: count phải khớp đếm trực tiếp bằng numpy. Vùng lệch biên:
+    query_rect bỏ điểm ở ô bị cắt biên nên count <= đếm trực tiếp, và sai lệch
+    bị chặn trên bởi tổng count các ô cắt biên.
+    """
+    rng = np.random.default_rng(11)
+    X = rng.uniform(-5, 5, size=(500, 2))
+    model = STING(n_levels=3, factor=4, min_count=1).fit(X)
+    level = 2
+
+    def direct_count(rect):
+        rect = np.asarray(rect, dtype=float)
+        lo, hi = rect[:, 0], rect[:, 1]
+        return int(np.sum(np.all((X >= lo) & (X <= hi), axis=1)))
+
+    def cut_points(rect):
+        """Tổng count các ô cắt biên: giao vùng nhưng không nằm trọn trong vùng."""
+        rect = np.asarray(rect, dtype=float)
+        lo, hi = rect[:, 0], rect[:, 1]
+        total = 0
+        for cell in model.cells_[level].values():
+            fully = np.all(cell.bounds_min >= lo) and np.all(cell.bounds_max <= hi)
+            overlaps = np.all(cell.bounds_max > lo) and np.all(cell.bounds_min < hi)
+            if overlaps and not fully:
+                total += cell.count
+        return total
+
+    # (a) vùng thẳng lưới — rect trùng đúng biên của một ô có dữ liệu
+    cell = max(model.cells_[level].values(), key=lambda c: c.count)
+    rect_aligned = [
+        (cell.bounds_min[0], cell.bounds_max[0]),
+        (cell.bounds_min[1], cell.bounds_max[1]),
+    ]
+    res = model.query_rect(rect_aligned, level=level)
+    assert res["count"] == direct_count(rect_aligned)
+
+    # (b) vùng lệch biên — dịch 30% bước ô so với lưới 3x3 ô
+    res_grid = model.factor ** level
+    step = (model.bounds_max_ - model.bounds_min_) / res_grid
+    base_lo = model.bounds_min_ + 4 * step
+    base_hi = model.bounds_min_ + 7 * step
+    shift = 0.3 * step
+    rect_off = [
+        (base_lo[0] + shift[0], base_hi[0] + shift[0]),
+        (base_lo[1] + shift[1], base_hi[1] + shift[1]),
+    ]
+    res_off = model.query_rect(rect_off, level=level)
+    assert res_off["count"] <= direct_count(rect_off)
+    assert abs(res_off["count"] - direct_count(rect_off)) <= cut_points(rect_off)
+
+
+def test_determinism(tmp_path):
+    """STING tất định: fit lại cho cùng nhãn; load(model) ≡ refit khi predict."""
+    X, _ = make_blobs(
+        n_samples=200, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=7
+    )
+    m1 = STING(n_levels=3, factor=4, min_count=3).fit(X)
+    l1 = m1.cluster(level=2, connectivity=1)
+    m2 = STING(n_levels=3, factor=4, min_count=3).fit(X)
+    l2 = m2.cluster(level=2, connectivity=1)
+    assert np.array_equal(l1, l2)
+
+    path = tmp_path / "determinism.pkl"
+    m1.save(path)
+    loaded = STING.load(path)
+    assert np.array_equal(loaded.predict(X), l2)
+    assert np.array_equal(loaded.cluster(level=2, connectivity=1), l2)
+
+
+def test_significance_z_collapses():
+    """z rất lớn loại mọi ô dày → k=0, 100% nhiễu, và cluster() cảnh báo rõ ràng.
+
+    Dữ liệu không phương sai (mọi điểm trùng nhau): parent.std = 0 nên điều kiện
+    z không bao giờ thỏa với z > 0 — tất định, không phụ thuộc dữ liệu ngẫu nhiên.
+    """
+    X = np.zeros((20, 2))
+    model = STING(n_levels=2, factor=2, min_count=1, significance_z=50).fit(X)
+    with pytest.warns(UserWarning, match="significance_z"):
+        labels = model.cluster(level=1, connectivity=1)
+    assert model.n_clusters_ == 0
+    assert np.all(labels == -1)

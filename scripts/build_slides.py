@@ -1,4 +1,4 @@
-"""Build slides/midterm.pptx — 15 trang 16:9, tiếng Việt, có ghi chú người nói.
+"""Build slides/final.pptx — 16 trang 16:9, tiếng Việt, có ghi chú người nói.
 
 Cách dùng: python scripts/build_slides.py
 """
@@ -12,7 +12,7 @@ from pptx.enum.text import PP_ALIGN
 
 ROOT = Path(__file__).resolve().parent.parent
 FIGS = ROOT / "results" / "figs"
-OUT = ROOT / "slides" / "midterm.pptx"
+OUT = ROOT / "slides" / "final.pptx"
 
 NAVY = RGBColor(0x0F, 0x2B, 0x46)
 TEAL = RGBColor(0x1B, 0x6E, 0x77)
@@ -72,7 +72,7 @@ def header(slide, kicker, title, page_no):
     # footer
     rect(slide, 0.55, SH - 0.42, SW - 1.1, 0.012, RGBColor(0xD8, 0xD5, 0xCC))
     text(slide, 0.55, SH - 0.36, 9.5, 0.3, [("Topic 6 · STING × PAPI 2011–2024 · Nhóm 15", 9, False, GREY)])
-    text(slide, SW - 1.6, SH - 0.36, 1.1, 0.3, [(f"{page_no:02d} / 15", 9, True, GREY)], align=PP_ALIGN.RIGHT)
+    text(slide, SW - 1.6, SH - 0.36, 1.1, 0.3, [(f"{page_no:02d} / 16", 9, True, GREY)], align=PP_ALIGN.RIGHT)
 
 
 def note(slide, text_md):
@@ -179,6 +179,7 @@ bullets(s, 0.55, 1.3, 6.7, 4.6, [
     ("Panel.", "882 × 41: d1–d6 (mọi năm) + d7/d8 (2018+) + 29 sub-dim; 39 cột số."),
     ("0.0 → NaN.", "“Không có dữ liệu” theo quy ước gói replication Mendeley (đối chiếu khớp 100%)."),
     ("PROVENANCE.", "URL + hash SHA-256 mọi nguồn trong repo — tái lập được."),
+    ("Nguồn ngoài (kiểm chứng).", "PCI VCCI–USAID · GSO (dân số, GRDP) · OD Mekong y tế 2020 · WDI — chỉ dùng kiểm chứng ngoại lai, không đưa vào feature."),
 ], size=12.5)
 rect(s, 7.55, 1.35, 5.2, 2.35, RGBColor(0xFD, 0xF3, 0xDC))
 text(s, 7.85, 1.55, 4.7, 0.35, [("⚠ GÃY THANG ĐO (phát hiện khi làm sạch)", 12, True, RGBColor(0x8A, 0x5A, 0x00))])
@@ -198,7 +199,7 @@ bullets(s, 8.0, 1.6, 4.8, 4.2, [
     ("Dữ liệu.", "2 blob Gauss, 240 điểm, seed 42."),
     ("Kết quả.", "ARI = 0.950 · nhiễu 2.5% · đúng 2 cụm."),
     ("Lưới.", "Factor=4, 3 mức; ô dày → gom cụm."),
-    ("Kiểm thử.", "src/sting.py: 22 unit test (pytest) xanh — chính xác thống kê ô từng ô."),
+    ("Kiểm thử.", "src/sting.py: 28 unit test (pytest) xanh — chính xác thống kê ô từng ô."),
 ], size=12)
 note(s, "Show hình bên trái; nói ARI và tests.")
 
@@ -243,9 +244,9 @@ bullets(s, 8.15, 1.6, 4.6, 4.6, [
     ("Phủ 79%", "(48/61 có đủ chỉ tiêu)."),
     ("13 tỉnh", "rơi vào ô thưa → nhiễu (không ép vào cụm)."),
     ("Độ nhạy", "coverage 82% (mc=3) → 79% (mc=5) → 70% (mc=8) — ngưỡng-phụ thuộc, báo cáo bảng."),
-    ("Chuyển cụm", "0 “chuyển thật”, 7 sang nhiễu, 5 từ nhiễu ra (2023→2024)."),
+    ("Chuyển cụm", "0 “chuyển thật” (phát biểu rỗng — cả 2023 lẫn 2024 không có điểm cụm 0/1), 7 sang nhiễu, 5 từ nhiễu ra."),
 ], size=11.5)
-note(s, "Đọc 4 con số chính; kết thúc: 2024 là năm test thật sự.")
+note(s, "Đọc 4 con số chính; kết thúc: 2024 là năm test thật sự. Caveat: “0 chuyển thật” là phát biểu rỗng (vacuous) — cả 2023 lẫn 2024 không có điểm nào thuộc cụm 0/1, nên 0/59 không chứng minh độ ổn định nhãn (báo cáo §5.5).")
 
 # ---------- Slide 9 — Model giám sát ----------
 s = slide_new()
@@ -338,19 +339,33 @@ for i, (a, b) in enumerate(steps):
     text(s, 4.0, y + 0.14, 8.4, 1.0, [(b, 11.5, False, INK)])
 note(s, "Nói ngắn: cuối kỳ làm gì, khi nào, deliverable gì.")
 
-# ---------- Slide 14 — Tài liệu ----------
+# ---------- Slide 14 — Kiểm chứng ngoại lai ----------
 s = slide_new()
-header(s, "NGUỒN", "Tài liệu tham khảo & dữ liệu mở", 14)
+header(s, "KIỂM CHỨNG NGOẠI LAI", "Cụm STING khớp PCI — thước đo độc lập", 14)
+pic(s, "external_pci_by_cluster.png", 0.55, 1.45, h=4.75)
+bullets(s, 8.0, 1.5, 4.8, 4.8, [
+    ("PCI.", "Khảo sát DOANH NGHIỆP (VCCI–USAID) — tách khỏi PAPI (hộ dân); chưa từng dùng khi học."),
+    ("756 ô 2011–2022.", "Join 747 điểm có nhãn — {nhiễu: 149, cụm 0: 5, cụm 1: 16, cụm 2: 577}."),
+    ("Ý nghĩa thống kê.", "ANOVA F(3,743) = 9.04, p = 6.9e-06 · Kruskal–Wallis H = 31.78, p = 5.8e-07."),
+    ("Đọc thận trọng.", "Tương phản đáng tin: nhiễu vs cụm 2 (hai cụm nhỏ n=5/16); không chứng minh nhân quả."),
+    ("Nguồn khác.", "Y tế/1.000 dân 2020 · GRDP 2018–2024 · WDI — results/external_validation.md."),
+], size=11.5)
+note(s, "External validation đúng nghĩa: cấu trúc học không giám sát khớp một thước đo độc lập chưa từng dùng khi học. Nhấn: PCI là khảo sát doanh nghiệp, PAPI là khảo sát hộ dân — hai đường ống dữ liệu khác nhau. Cụm 0/1 quá nhỏ để tự kết luận; đọc cặp nhiễu vs cụm 2; không chứng minh nhân quả. Chi tiết: results/external_validation.md; provenance: data/processed/external_provenance.md.")
+
+# ---------- Slide 15 — Tài liệu ----------
+s = slide_new()
+header(s, "NGUỒN", "Tài liệu tham khảo & dữ liệu mở", 15)
 bullets(s, 0.55, 1.3, 12.1, 5.0, [
     ("PAPI 2011–2024.", "CECODES/VFF-CRT/RTA/UNDP — papi.org.vn."),
     ("Gói replication.", "Le et al., Mendeley Data — DOI 10.17632/wbk42j9wc8.1 · CC BY 4.0 (4 file dùng trực tiếp đã commit)."),
     ("STING gốc.", "Wang, Yang & Muntz (1997), “STING: A Statistical Information Grid Approach to Spatial Data Mining”, VLDB."),
     ("GeoJSON ranh giới.", "Open Development Vietnam (OD Mekong) — CC-BY-SA 4.0."),
-    ("Code & dữ liệu.", "Repo gồm: src/sting.py (22 unit test) · scripts/ · tests/ · models/ · results/ · PROVENANCE.md từng nguồn."),
+    ("Nguồn ngoài kiểm chứng.", "PCI VCCI–USAID (công khai) · GSO PX-Web (“Bản quyền: Không”) · OD Mekong Health 2020 (ODbL) · WDI (CC BY 4.0) — data/processed/external_provenance.md."),
+    ("Code & dữ liệu.", "Repo gồm: src/sting.py (28 unit test) · scripts/ · tests/ · models/ · results/ · PROVENANCE.md từng nguồn."),
 ], size=11.5)
-note(s, "Nếu GV hỏi về nguồn: chỉ PROVENANCE.md trong repo.")
+note(s, "Nếu GV hỏi về nguồn: chỉ PROVENANCE.md trong repo (data/raw/*/PROVENANCE.md + data/processed/external_provenance.md).")
 
-# ---------- Slide 15 — Q&A ----------
+# ---------- Slide 16 — Q&A ----------
 s = slide_new()
 rect(s, 0, 0, SW, SH, NAVY)
 rect(s, 0, SH - 0.18, SW, 0.18, GOLD)

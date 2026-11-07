@@ -5,6 +5,8 @@
 
 <p align="center"><img src="assets/social_preview.png" alt="STING × PAPI — Grid-based clustering on Vietnam PAPI 2011-2024" width="100%"></p>
 
+_Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên (`scripts/build_banner.py`, rng seed 11, mật độ giả định), không phải dữ liệu/kết quả thật. Mọi hình kết quả trong `results/figs/` sinh từ dữ liệu thật._
+
 Đồ án môn Học máy · Chủ đề 6: **Grid-based (clustering)** · Domain: Sociology / History.
 
 **Sắp demo/thi?** Xem [`DEMO.md`](DEMO.md) — một lệnh kiểm tra sẵn sàng: `python scripts/demo_smoke.py` (phải in "SAN SANG DEMO (33/33)").
@@ -17,7 +19,11 @@
 | `data/raw/papi/` | 14 workbook PAPI 2011–2024 (nguồn: papi.org.vn, dữ liệu công khai; manifest+hash: `PROVENANCE.md`) |
 | `data/raw/mendeley/` | Gói replication CC BY 4.0 — 4 file nhỏ dùng trực tiếp được commit (+`PROVENANCE.md`); phần còn lại tải theo DOI |
 | `data/raw/boundaries/` | GeoJSON 63 tỉnh (Open Development Vietnam, CC-BY-SA 4.0; lưu ý join: xem `PROVENANCE.md`) |
-| `data/processed/` | Panel sạch (kết quả Phase 2) |
+| `data/raw/pci/` | PCI VCCI–USAID — workbook + trang xếp hạng 2011/2023/2024, báo cáo PDF (dữ liệu công khai, ghi nguồn VCCI–USAID; `PROVENANCE.md`) |
+| `data/raw/gso/` | GSO/NSO — HTML PX-Web (GRDP, dân số) + PDF Niên giám Thống kê (thống kê chính thức công khai; `PROVENANCE.md`) |
+| `data/raw/odmekong/` | OD Mekong — nghèo 6 vùng 1998–2016 (CC BY-SA), bệnh viện 2020 (ODbL; `PROVENANCE.md`) |
+| `data/raw/worldbank/` | World Bank WDI — 4 chỉ số vĩ mô VNM 2010–2024 (CC BY 4.0; `PROVENANCE.md`) |
+| `data/processed/` | Panel sạch (kết quả Phase 2) + các file `external_*` (nguồn ngoài; ma trận độ phủ: `reports/external_data_expansion.md`) |
 | `src/` | Thư viện STING (tự viết từ đầu) |
 | `scripts/` | Script dữ liệu & phân tích |
 | `models/` | Model STING đã huấn luyện + tham số chuẩn hóa (dùng cho dự đoán) |
@@ -33,7 +39,13 @@
 - Báo cáo tường thuật PAPI 2024 nêu khảo sát 18.894 người dân ở 61 tỉnh, thành phố (trang 10), trong khi panel của repo này là workbook 63 tỉnh theo câu “toàn bộ 63 tỉnh/thành phố từ năm 2011” (trang 15; data/raw/papi/PROVENANCE.md).
 - **Gói replication** — Le et al., Mendeley Data, CC BY 4.0. DOI: 10.17632/wbk42j9wc8.1.
 - **GeoJSON tỉnh** — Open Development Vietnam (OD Mekong), CC-BY-SA 4.0.
-- Bằng chứng nguồn gốc (URL, ngày tải, giấy phép, SHA-256): các file `PROVENANCE.md` trong `data/raw/*/`.
+- **PCI (Chỉ số Năng lực cạnh tranh cấp tỉnh)** — VCCI – USAID, dữ liệu công khai <https://pcivietnam.vn>; tái sử dụng ghi nguồn VCCI–USAID ([chính sách trích dẫn dữ liệu](https://pcivietnam.vn/gioi-thieu/chinh-sach-trich-dan-du-lieu.html)).
+- **GSO/NSO** — PX-Web <https://pxweb.nso.gov.vn> và Niên giám Thống kê <https://www.nso.gov.vn>; dữ liệu thống kê chính thức công khai (trang bảng ghi "Bản quyền: Không").
+- **OD Mekong (thêm)** — nghèo theo 6 vùng 1998–2016 và COVID: CC BY-SA 4.0 (<https://vietnam.opendevelopmentmekong.net/terms-of-use/>); *Health Facilities in Mekong Countries 2020*: ODbL.
+- **World Bank WDI** — CC BY 4.0 ([Terms of Use for Datasets](https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets)).
+- Chi tiết từng nguồn (cách tải, schema, độ phủ, hạn chế) và ma trận độ phủ: [`reports/external_data_expansion.md`](reports/external_data_expansion.md).
+- Kết quả kiểm chứng ngoại lai bằng các nguồn này (ANOVA/Kruskal–Wallis PCI theo cụm STING, mật độ y tế 2020, GRDP 2018–2024, WDI): [`results/external_validation.md`](results/external_validation.md).
+- Bằng chứng nguồn gốc (URL, ngày tải, giấy phép, SHA-256): các file `PROVENANCE.md` trong `data/raw/*/` và [`data/processed/external_provenance.md`](data/processed/external_provenance.md).
 
 ## Chạy nhanh
 
@@ -41,7 +53,7 @@
 # Kiểm tra môi trường
 python -c "import pandas, openpyxl, plotly, sklearn, streamlit; print('ok')"
 
-# Unit test STING (22 tests, ~99% coverage cho src/sting.py)
+# Unit test (28 tests STING — tests/test_sting.py; 55 tests toàn suite; coverage 98% cho src/sting.py)
 python -m pytest tests -q
 python -m pytest tests --cov=src -q
 
@@ -68,7 +80,13 @@ python scripts/predict_supervised.py   # 3) model ML có giám sát (scikit-lear
    mean-jump heuristic chỉ dùng giai đoạn train ≤2020 để xét eligibility, sau đó
    chọn cấu hình bằng train/validation 2021–2022. Dimension-level `d1–d6` chưa vào
    sweep vì thang 1–10 không tự chứng minh tính tương đương xuyên năm. Bảng đầy đủ:
-   `results/predict_config_search.csv`.
+   `results/predict_config_search.csv`. Giao thức, nói trung thực: hàm điểm
+   (coverage − 0.5·noise − 0.15·largest − 0.02·|k−3| + 0.03·stable) là heuristic
+   chỉnh tay, không có dẫn xuất — cấu hình thoái hóa k=1 đạt điểm cao hơn (0.84 so
+   với 0.6213) và chỉ bị chặn bởi bộ lọc cứng (k 2–6, noise ≤ 25%, largest ≤ 85%,
+   coverage ≥ 75%); margin top-1/top-2 = 0.018; `stable_mc_pm1` của cấu hình thắng
+   là false (được đo, không dùng làm gate); allowlist gồm cả kiến thức ngoại sinh
+   PAPI 2021 (loại sd_5_1/5_3/5_4 vì bước nhảy 2021 nằm ngoài giai đoạn train).
 2. **`predict_demo.py`** — STING `fit → save → load → predict`: lưu model local
    (`models/sting_predict_model.pkl`) rồi nạp lại để gán cụm ngoài mẫu năm 2024.
    Chỉ hàng đủ hai feature được dự đoán (hiện 61/63 tỉnh; tỉnh thiếu bị loại,
@@ -138,6 +156,16 @@ cột C (dòng 7, 31, 55, 72, 92, 108, 134, 148 ghi `1-10 điểm`) và sheet `2
 (`* Những nội dung có thay đổi năm 2021`; dòng 98 đánh dấu Dimension 5);
 [`PAPI 2024 One Pager`](https://papi.org.vn/wp-content/uploads/2025/04/26_Thanh_Hoa_ENG.pdf)
 chỉ là tham khảo ngoài (máy chủ chặn truy cập tự động; chưa kiểm tự động).
+
+Metadata thang đo theo từng cột của panel (khoảng thang 2011–2020 so với 2021–2024, năm đổi thang, năm ngừng thu thập, nguồn đối chiếu) được lưu kèm panel để bộ dữ liệu tự mô tả:
+[`data/processed/papi_panel_scale_metadata.csv`](data/processed/papi_panel_scale_metadata.csv).
+Panel giữ nguyên giá trị của cột đổi thang (`sd_5_1`/`sd_5_3`/`sd_5_4`) và cột ngừng thu thập
+(`sd_5_2`) trong cùng một tên cột, không có tín hiệu nào trong CSV — đọc metadata này trước
+khi học xuyên năm trên panel.
+
+## Khai báo sử dụng công cụ hỗ trợ
+
+Nhóm sử dụng trợ lý AI lập trình cho một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, và dry-run đo thời gian chuẩn bị demo (`reports/rehearsal_log.md` mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Mọi quyết định phương pháp, quy trình chọn cấu hình, đánh giá và kết luận do hai thành viên quyết định và kiểm chứng lại; cả hai thành viên chịu trách nhiệm giải thích mọi phần của đồ án. Môn học chưa quy định rubric khai báo cụ thể — nhóm chủ động khai báo theo thông lệ liêm chính học thuật.
 
 ## Giấy phép
 

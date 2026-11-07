@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import itertools
 import pickle
+import warnings
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
@@ -73,6 +74,8 @@ class STING:
         X = np.asarray(X, dtype=float)
         if X.ndim != 2 or X.shape[0] == 0:
             raise ValueError("X phải là mảng 2 chiều (n_samples, n_dims) không rỗng")
+        if not np.all(np.isfinite(X)):
+            raise ValueError("X chứa NaN/inf; xử lý trước khi fit")
 
         n, d = X.shape
         self.n_samples_, self.n_dims_ = n, d
@@ -115,6 +118,14 @@ class STING:
             raise RuntimeError("Hãy gọi fit(X) trước khi cluster()")
         if level is None:
             level = self.n_levels - 1
+        if not (0 <= level < self.n_levels):
+            raise ValueError(
+                f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
+            )
+        if connectivity < 1:
+            raise ValueError(
+                "connectivity phải >= 1 (1 = kề mặt/4 hướng; số chiều = kề cả góc/8 hướng)"
+            )
         res = self.factor ** level
 
         dense_set = {
@@ -122,6 +133,11 @@ class STING:
             for key, cell in self.cells_[level].items()
             if self._is_dense(cell, level)
         }
+        if self.significance_z is not None and not dense_set:
+            warnings.warn(
+                "significance_z loại mọi ô dày → k=0 (toàn bộ điểm nhận -1); "
+                "hãy giảm significance_z hoặc min_count."
+            )
 
         # Gom thành phần liên thông trên các ô dày (DFS lặp, thứ tự ổn định).
         label_of: Dict[Tuple[int, ...], int] = {}
@@ -159,8 +175,8 @@ class STING:
 
         Điểm mới được gán vào cụm của ô chứa nó tại mức lưới dùng trong cluster();
         nhận -1 nếu ô đó không thuộc cụm nào (nhiễu hoặc ô chưa từng có dữ liệu),
-        HOẶC nếu điểm nằm ngoài vùng dữ liệu huấn luyện (out-of-support) — không
-        âm thầm kẹp vào ô biên.
+        HOẶC nếu điểm nằm ngoài vùng dữ liệu huấn luyện (out-of-support) hoặc
+        chứa NaN/inf (không finite) — không âm thầm kẹp vào ô biên.
         """
         if not hasattr(self, "_cell_comp_"):
             raise RuntimeError("Hãy gọi fit(X) rồi cluster() trước khi predict()")
@@ -169,7 +185,7 @@ class STING:
             X = X.reshape(1, -1)
         if X.ndim != 2 or X.shape[1] != self.n_dims_:
             raise ValueError(f"X cần đúng {self.n_dims_} chiều, nhận shape={X.shape}")
-        out_of_support = np.any(
+        out_of_support = ~np.isfinite(X).all(axis=1) | np.any(
             (X < self.bounds_min_) | (X > self.bounds_max_), axis=1
         )
         res = self.factor ** self.cluster_level_
@@ -280,7 +296,13 @@ class STING:
         return cells
 
     def _is_dense(self, cell: Cell, level: int) -> bool:
-        """Ô dày nếu đủ số điểm; tùy chọn thêm kiểm định ý nghĩa so với ô cha."""
+        """Ô dày nếu đủ số điểm; tùy chọn thêm kiểm định ý nghĩa so với ô cha.
+
+        Thứ tự điều kiện: ``count >= min_count`` là ngưỡng CẦN; khi
+        ``significance_z`` được đặt và level > 0, kiểm định z so với ô cha là
+        điều kiện CUỐI CÙNG — có thể loại cả những ô đã đủ min_count, nên z
+        đủ lớn sẽ làm KHÔNG còn ô dày nào (k=0; ``cluster()`` cảnh báo khi vậy).
+        """
         if cell.count < self.min_count_:
             return False
         if self.significance_z is None or level == 0:

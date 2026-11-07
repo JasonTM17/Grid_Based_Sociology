@@ -24,6 +24,7 @@ Chạy: python scripts/predict_supervised.py
 from __future__ import annotations
 
 import sys
+import textwrap
 from pathlib import Path
 
 import joblib
@@ -49,6 +50,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from sting import STING  # noqa: E402
 from papi_pred_common import (
+    FEATURE_LABELS,
+    PANEL_PATH,
     REGRESSION_FEATURES,
     REGRESSION_TARGET,
     ROOT,
@@ -76,6 +79,21 @@ CLASSIFICATION_SCORER = make_scorer(
 SUBS = REGRESSION_FEATURES
 TARGET = REGRESSION_TARGET
 FEATURES = REGRESSION_FEATURES
+
+# Dòng nguồn cho hình — theo data/raw/papi/PROVENANCE.md (ngày tải của dữ liệu
+# gốc, KHÔNG phải ngày render hình); panel dùng để train là file phái sinh.
+FIG_SOURCE = "PAPI — CECODES, VFF-CRT, RTA & UNDP"
+FIG_RETRIEVED = "2026-11-03"  # data/raw/papi/PROVENANCE.md
+FIG_EXTRA = f"panel phái sinh: {PANEL_PATH.name}"
+# DPI khi lưu PNG: chuẩn in là ~300 DPI hiệu dụng ở chiều rộng chữ A4 (~16 cm).
+# Sau tight bbox hình còn ~5.9–9 inch, nên dùng 330 DPI để mọi hình của script
+# này đạt >= 300 DPI hiệu dụng ở 16 cm khi in (chuẩn in báo cáo).
+FIG_DPI = 330
+# Tên hiển thị hai lớp pseudo-label của bài toán (2): nhãn sinh trong
+# `build_classification_pairs` là `y = int(labels[pc] != -1)` — STING gán điểm
+# vào cụm (vùng dày) => 1, còn lại nhãn nhiễu (ngoại vi) => 0. Chỉ là tên
+# hiển thị cho ngữ nghĩa đã có trong code, không đổi dữ liệu.
+CLASS_NAMES = {0: "ngoại vi", 1: "vùng dày"}
 
 
 def build_regression_pairs(df: pd.DataFrame) -> pd.DataFrame:
@@ -343,28 +361,69 @@ def main() -> int:
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from fig_style import (
+        PALETTE,
+        add_source,
+        new_fig,
+        save_png,
+        style_context,
+    )
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6))
-    ax = axes[0]
-    ax.scatter(yte, pred_ridge, s=34, c="#4c72b0", label="Ridge", alpha=0.85)
-    ax.scatter(yte, pred_rf, s=34, c="#dd8452", label="Random forest", alpha=0.6, marker="^")
-    lo, hi = float(min(yte.min(), pred_ridge.min())) - 0.05, float(max(yte.max(), pred_rf.max())) + 0.05
-    ax.plot([lo, hi], [lo, hi], "k--", lw=1, label="y = x")
-    ax.set_xlabel(f"{TARGET} thực tế năm 2024")
-    ax.set_ylabel("dự báo từ chỉ số năm 2023")
-    ax.set_title("Hồi quy: dự báo 6.1 Y tế công lập năm sau")
-    ax.legend(fontsize=8)
-    ax.grid(alpha=0.25)
+    # Hình (a) — bố cục 2 panel ngang, đặt trên slide 16:9 (build_slides.py)
+    # nên dùng preset "slide" (9 x 5.0625 in) cho đủ chỗ cho tiêu đề panel.
+    with style_context():
+        fig, axes = new_fig(target="slide", ncols=2)
+        ax = axes[0]
+        ax.scatter(yte, pred_ridge, s=34, c=PALETTE["blue"], label="Ridge", alpha=0.85)
+        # Random forest: cam đặc (không alpha) để RGB của marker khớp ĐÚNG màu
+        # thanh độ quan trọng ở panel phải — một đối tượng một màu trong hình.
+        ax.scatter(
+            yte, pred_rf, s=34, c=PALETTE["orange"],
+            label="Random forest", marker="^",
+        )
+        lo, hi = float(min(yte.min(), pred_ridge.min())) - 0.05, float(max(yte.max(), pred_rf.max())) + 0.05
+        ax.plot([lo, hi], [lo, hi], "k--", lw=1, label="y = x")
+        # Đơn vị trục: sd_* là điểm chỉ số PAPI nhưng thang đo CHƯA đối chiếu
+        # workbook (data/processed/papi_panel_scale_metadata.csv), nên chỉ ghi
+        # họ đơn vị "điểm PAPI", không gắn thang điểm cụ thể.
+        # Nhãn xuống 2 dòng: nhãn 1 dòng (~4.3 in) rộng hơn panel trái mà
+        # tight_layout ép hẹp (panel phải chiếm chỗ cho tên đặc trưng dài), nên
+        # nhãn tràn qua mép trái canvas và bbox_inches="tight" cắt mất ký tự đầu
+        # (matplotlib chỉ tính tâm nhãn trục, không tính bề ngang, khi gộp
+        # tight bbox — Axes.get_tightbbox gọi _get_tightbbox_for_layout_only).
+        # Wrap 30 ký tự như tên đặc trưng panel phải, giữ nguyên nội dung + đơn vị.
+        ax.set_xlabel(
+            textwrap.fill(
+                f"{FEATURE_LABELS[TARGET]} ({TARGET}) thực tế năm {HOLDOUT_YEAR + 1}"
+                " (điểm PAPI)",
+                30,
+            )
+        )
+        ax.set_ylabel(f"Dự báo từ chỉ số năm {HOLDOUT_YEAR} (điểm PAPI)")
+        ax.set_title("Hồi quy: dự báo 6.1 Y tế công lập năm sau")
+        ax.legend()
+        ax.grid(alpha=0.25)
 
-    ax = axes[1]
-    imp = grid_rf.best_estimator_.feature_importances_
-    order = np.argsort(imp)
-    ax.barh(np.array(FEATURES)[order], imp[order], color="#55a868")
-    ax.set_title("Độ quan trọng đặc trưng (Random forest)")
-    ax.grid(alpha=0.25, axis="x")
-    fig.tight_layout()
-    fig.savefig(FIGS / "supervised_regression.png", dpi=150)
-    plt.close(fig)
+        ax = axes[1]
+        imp = grid_rf.best_estimator_.feature_importances_
+        order = np.argsort(imp)
+        # Màu cam = màu Random forest ở panel trái: cùng một đối tượng dùng
+        # một màu trong cùng hình (palette Okabe–Ito, scripts/fig_style.py).
+        ax.barh(np.arange(len(imp)), imp[order], color=PALETTE["orange"])
+        # Tên hiển thị tiếng Việt của từng mã chỉ tiêu (papi_pred_common.py).
+        imp_names = [FEATURE_LABELS[c] for c in np.array(FEATURES)[order]]
+        ax.set_yticks(
+            np.arange(len(imp)), [textwrap.fill(name, 30) for name in imp_names]
+        )
+        ax.set_title("Độ quan trọng đặc trưng (Random forest)")
+        # Đơn vị trục x: feature_importances_ của sklearn (MDI — Mean Decrease
+        # in Impurity), chuẩn hoá để tổng trên tất cả đặc trưng bằng 1.
+        ax.set_xlabel("Tầm quan trọng (MDI chuẩn hoá, tổng = 1)")
+        ax.grid(alpha=0.25, axis="x")
+        add_source(fig, FIG_SOURCE, retrieved=FIG_RETRIEVED, extra=FIG_EXTRA)
+        fig.tight_layout(rect=(0, 0.05, 1, 1))
+        save_png(fig, FIGS / "supervised_regression.png", dpi=FIG_DPI)
+        plt.close(fig)
 
     # ================================================================== #
     # Hình (b): confusion của bài toán phân loại (model chọn bằng CV)
@@ -381,27 +440,34 @@ def main() -> int:
     }
     _selected_clf_grid = _clf_grids[_selected_clf_name]
     classes = sorted(set(yc_tr.tolist()) | set(yc_te.tolist()))
-    fig, ax = plt.subplots(figsize=(5.2, 4.4))
-    cm = confusion_matrix(
-        yc_te, _selected_clf_grid.best_estimator_.predict(Xc_te), labels=classes
-    )
-    ax.imshow(cm, cmap="Blues")
-    ax.set_title(
-        "Phân loại ngoại vi/vùng dày (2023→2024)\n"
-        f"{_selected_clf_name}: macro-F1 {_selected_clf['holdout_macro_f1']:.3f}"
-        f" vs majority {_majority_clf['holdout_macro_f1']:.3f}"
-    )
-    ax.set_xlabel("dự báo")
-    ax.set_ylabel("thực tế")
-    ax.set_xticks(range(len(classes)), [str(c) for c in classes])
-    ax.set_yticks(range(len(classes)), [str(c) for c in classes])
-    for i in range(len(classes)):
-        for j in range(len(classes)):
-            ax.text(j, i, str(cm[i, j]), ha="center", va="center",
-                    color="black" if cm[i, j] < cm.max() / 2 else "white")
-    fig.tight_layout()
-    fig.savefig(FIGS / "supervised_confusion.png", dpi=150)
-    plt.close(fig)
+    with style_context():
+        fig, ax = new_fig()  # preset "docx": 6.5 x 4.3 in — đủ chỗ cho tiêu đề 2 dòng
+        cm = confusion_matrix(
+            yc_te, _selected_clf_grid.best_estimator_.predict(Xc_te), labels=classes
+        )
+        im = ax.imshow(cm, cmap="Blues")
+        ax.set_title(
+            "Phân loại ngoại vi/vùng dày (2023→2024)\n"
+            f"{_selected_clf_name}: macro-F1 {_selected_clf['holdout_macro_f1']:.3f}"
+            f" vs majority {_majority_clf['holdout_macro_f1']:.3f}"
+        )
+        ax.set_xlabel("dự báo")
+        ax.set_ylabel("thực tế")
+        # Nối tick số với tên lớp (xem CLASS_NAMES): 0 = ngoại vi (nhãn nhiễu
+        # STING), 1 = vùng dày (được STING gán vào cụm).
+        class_tick = [f"{c} – {CLASS_NAMES.get(c, str(c))}" for c in classes]
+        ax.set_xticks(range(len(classes)), class_tick)
+        ax.set_yticks(range(len(classes)), class_tick)
+        for i in range(len(classes)):
+            for j in range(len(classes)):
+                ax.text(j, i, str(cm[i, j]), ha="center", va="center",
+                        color="black" if cm[i, j] < cm.max() / 2 else "white")
+        # Đơn vị của giá trị trong ô: số tỉnh (thể hiện bằng colorbar có nhãn).
+        fig.colorbar(im, ax=ax, label="Số tỉnh", fraction=0.046, pad=0.04)
+        add_source(fig, FIG_SOURCE, retrieved=FIG_RETRIEVED, extra=FIG_EXTRA)
+        fig.tight_layout(rect=(0, 0.05, 1, 1))
+        save_png(fig, FIGS / "supervised_confusion.png", dpi=FIG_DPI)
+        plt.close(fig)
 
     # ================================================================== #
     # Tóm tắt
@@ -410,7 +476,11 @@ def main() -> int:
     lines.append("# Model local có giám sát (scikit-learn, huấn luyện hoàn toàn local)\n")
     lines.append("## 1) Hồi quy — dự báo 6.1 Y tế công lập năm t+1 (bài toán chính)\n")
     lines.append(f"- Đặc trưng: 8 chỉ số năm t (sub-dim sạch thang đo: {', '.join(SUBS[1:4])}, …)")
-    lines.append("- Chọn bài toán/đặc trưng/mô hình bằng CV train-only; holdout 2023→2024 đánh giá một lần.")
+    lines.append(
+        "- Hồi quy: chọn model bằng CV expanding origin 2017–2022 thuần train; holdout 2023→2024 đánh giá "
+        "một lần. Phân loại: đặc trưng (2 cột) và tham số STING của nhãn do predict_sweep.py chọn bằng cách "
+        "chấm coverage trên 2021–2022 — trùng 2 fold CV cuối của phân loại, nên CV score phân loại hơi lạc quan."
+    )
     lines.append(f"- Train: {len(tr)} cặp (2011–2022) · Holdout: {len(te)} cặp")
     lines.append("")
     lines.append(met[met.task == "regression"].to_markdown(index=False))
@@ -429,6 +499,41 @@ def main() -> int:
     _impr = (1 - _selected_reg["holdout_mae"] / _carry["holdout_mae"]) * 100
     _acc_delta = (_selected_clf["holdout_acc"] - _majority_clf["holdout_acc"]) * 100
     _f1_delta = (_selected_clf["holdout_macro_f1"] - _majority_clf["holdout_macro_f1"]) * 100
+
+    # --- Số liệu cho phần disclosure: tính từ chính dữ liệu/fold/grid của script này ---
+    _prev = C.groupby("year_t")["y"].mean()
+    _val_prev = _prev.loc[list(CLASSIFICATION_CV_YEARS)]
+    _train_majority: list[int] = []
+    _always_one: list[float] = []
+    for _tr_idx, _va_idx in clf_cv:
+        _train_majority.append(int(pd.Series(yc_tr[_tr_idx]).mode().iloc[0]))
+        _always_one.append(
+            f1_score(
+                yc_tr[_va_idx],
+                np.ones(_va_idx.size, dtype=int),
+                average="macro",
+                labels=[0, 1],
+                zero_division=0,
+            )
+        )
+    _always1_f1 = float(np.mean(_always_one))
+    _tm_txt = (
+        f"{_train_majority[0]} ở cả {len(_train_majority)} fold"
+        if len(set(_train_majority)) == 1
+        else str(_train_majority)
+    )
+    _ridge_spread = float(
+        grid_ridge.cv_results_["mean_test_score"].max()
+        - grid_ridge.cv_results_["mean_test_score"].min()
+    )
+    _feats_no_target = [f for f in FEATURES if f != TARGET]
+    _grid_no_target = GridSearchCV(
+        ridge, {"m__alpha": [0.1, 1.0, 10.0]}, cv=reg_cv, scoring="r2", n_jobs=1
+    )
+    _grid_no_target.fit(tr[_feats_no_target].to_numpy(), ytr)
+    _cv_no_target = float(_grid_no_target.best_score_)
+    _corr_carry = float(np.corrcoef(pred_ridge, te["carry"].to_numpy())[0, 1])
+
     lines.append(
         "## Lưu ý trung thực\n"
         f"- Chọn hồi quy theo CV train-only ({_selected_reg_name}, R²={_selected_reg['value_cv']:.3f}); "
@@ -440,6 +545,21 @@ def main() -> int:
         f"majority={_majority_clf['value_cv']:.3f}); so với baseline majority có chênh lệch holdout "
         f"accuracy {_acc_delta:+.1f} điểm % và macro-F1 {_f1_delta:+.1f} điểm %; CV dùng expanding origins "
         "2017–2022, warm-up origins 2011–2016. Đây là nhãn do STING fit tại từng cutoff sinh, không phải ground truth.\n"
+        "- Nhãn phân loại phụ thuộc allowlist + tham số STING do predict_sweep.py chọn bằng cách chấm coverage "
+        f"trên đúng 2021–2022 — trùng 2 fold CV cuối, nên macro-F1 CV {_selected_clf['value_cv']:.3f} hơi lạc quan.\n"
+        f"- Prevalence nhãn 1 trôi mạnh theo năm: {_prev.min():.3f} ({_prev.idxmin()}) → {_prev.max():.3f} "
+        f"({_prev.idxmax()}); trong mọi fold CV ({min(CLASSIFICATION_CV_YEARS)}–{max(CLASSIFICATION_CV_YEARS)}) "
+        f"lớp đa số train là {_tm_txt} còn validation luôn đa số 1 (prevalence {_val_prev.min():.0%}–"
+        f"{_val_prev.max():.0%}), nên macro-F1 CV phần lớn phản ánh việc model học drift độ phủ; baseline mù "
+        f"thời gian “always dự đoán 1” đạt macro-F1 {_always1_f1:.3f} (chỉ thấp hơn LR "
+        f"{_selected_clf['value_cv'] - _always1_f1:.3f}).\n"
+        f"- value_cv là best_score_ của GridSearchCV — hiệu năng CV trung bình của combo TỐT NHẤT được chọn trên "
+        f"chính các fold đó (không nested CV), nên hơi lạc quan; bias nhỏ vì lưới thô (spread điểm trong lưới "
+        f"Ridge alpha {{0.1, 1, 10}} ≈ {_ridge_spread:.3f}).\n"
+        f"- REGRESSION_TARGET (sd_6_1) nằm trong REGRESSION_FEATURES (scripts/papi_pred_common.py:19-23): không "
+        f"leakage thời gian (target lấy từ năm t+1) nhưng lợi thế {_impr:.1f}% so với carry-forward chủ yếu là "
+        f"thông tin lag-1 của chính target — bỏ sd_6_1 khỏi features, CV R² {_selected_reg['value_cv']:.3f} → "
+        f"{_cv_no_target:.3f}; corr(dự báo, carry-forward) holdout = {_corr_carry:.2f}.\n"
         "- Một holdout 2023→2024 và pseudo-label không đủ để khẳng định năng lực dự báo xã hội tổng quát.\n"
         "- Nạp lại dự báo không cần train lại:\n"
         "  `import joblib; m = joblib.load('models/sup_ridge.joblib')` rồi truyền vector 8 chỉ số."

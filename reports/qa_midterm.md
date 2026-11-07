@@ -20,7 +20,7 @@ _Quy tắc trả lời: ≤60 giây/câu; không chắc → nói "chưa chắc, 
 
 ## Kết quả & ý nghĩa
 
-11. **Kết quả chính là gì? Vì sao 1 cụm lớn?** — Dữ liệu quản trị công PAPI cấp tỉnh/năm **rất đồng nhất** — đại đa số tỉnh-năm rơi vào một vùng dày; chỉ một nhóm ngoại vi nhỏ (~14–16 điểm pooled) tách được. Đây là phát hiện nghiên cứu trung thực, không phải lỗi thuật toán; nhóm trình bày kèm độ nhạy theo min_count (phủ 79–82%).
+11. **Kết quả chính là gì? Vì sao 1 cụm lớn?** — Dữ liệu quản trị công PAPI cấp tỉnh/năm **rất đồng nhất** — đại đa số tỉnh-năm rơi vào một vùng dày; chỉ hai cụm ngoại vi nhỏ (16 và 5 điểm, tổng 21) tách được. Đây là phát hiện nghiên cứu trung thực, không phải lỗi thuật toán; nhóm trình bày kèm độ nhạy theo min_count (phủ 79–82%).
 12. **Nhóm ngoại vi có ý nghĩa gì?** — Gợi ý "hai tốc độ" quản trị dịch vụ công giữa các tỉnh; tuy nhiên với dữ liệu chỉ số tổng hợp, không nên suy ra nguyên nhân — cần dữ liệu định tính/phỏng vấn để diễn giải chính sách. Nhóm đề xuất hướng nghiên cứu tiếp theo.
 
 ## Bẫy thường gặp (trả lời gọn)

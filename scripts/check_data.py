@@ -4,7 +4,8 @@ Cách dùng (chạy từ thư mục gốc dự án):
     python scripts/check_data.py [duong_dan_csv_hoac_parquet]
 
 Mặc định: data/processed/papi_panel_63_2011_2024.csv
-Kết quả: in shape, số cột số, tỷ lệ thiếu, số tỉnh, khoảng năm → PASS/FAIL.
+Kết quả: in shape, số cột số, tỷ lệ thiếu, số tỉnh, khoảng năm, coverage 8 feature
+dự đoán theo năm → PASS/FAIL (PASS chỉ xác nhận shape — xem dòng ghi chú cuối).
 """
 from __future__ import annotations
 
@@ -15,6 +16,13 @@ import pandas as pd
 
 MIN_ROWS = 500
 MIN_COLS = 10
+
+# 8 sub-dimension allowlist của pipeline dự đoán — đồng bộ với
+# REGRESSION_FEATURES trong scripts/papi_pred_common.py (sửa cả hai nếu đổi).
+PRED_FEATURES_8 = [
+    "sd_1_3", "sd_1_4", "sd_4_1", "sd_4_2",
+    "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3",
+]
 
 
 def load(path: Path) -> pd.DataFrame:
@@ -88,11 +96,17 @@ def main(argv: list[str]) -> int:
     else:
         print("Không có mean-jump flag theo heuristic; kết quả này không tự chứng minh thang đo tương đương.")
 
+    if key and "year" in df.columns and all(c in df.columns for c in PRED_FEATURES_8):
+        cov = df.dropna(subset=PRED_FEATURES_8).groupby("year")[key].nunique()
+        print("Coverage điểm theo năm — số tỉnh đủ 8 feature dự đoán (allowlist):")
+        print("  " + ", ".join(f"{int(y)}: {int(n)}" for y, n in cov.items()))
+
     ok_rows = n_rows >= MIN_ROWS
     ok_cols = n_cols >= MIN_COLS
     ok_numeric = n_numeric >= MIN_COLS
     verdict = "PASS" if (ok_rows and ok_cols and ok_numeric) else "FAIL"
     print(f"Yêu cầu: >= {MIN_ROWS} hàng, >= {MIN_COLS} cột tổng, >= {MIN_COLS} cột số -> {verdict}")
+    print("PASS chỉ xác nhận shape theo yêu cầu môn; tương đương thang đo xem scale_audit + workbook.")
     return 0 if verdict == "PASS" else 1
 
 
