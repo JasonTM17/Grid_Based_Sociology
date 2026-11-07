@@ -6,6 +6,7 @@ Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/f
 from pathlib import Path
 
 import nbformat as nbf
+import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "notebooks" / "final_analysis.ipynb"
@@ -78,12 +79,20 @@ show_md(py.to_markdown(index=False))
 print()
 print("Đa số năm: k=1 (một vùng dày) — cấu trúc tách biệt chỉ xuất hiện ở 2017 (nhóm 7 tỉnh, mc=5).")"""))
 
-md(nbf.v4.new_markdown_cell("""## 4. Robustness đa chỉ tiêu (bước bắt buộc)
+_rob = pd.read_csv(ROOT / "results" / "robustness.csv")
+_pca = _rob[_rob["branch"].str.startswith("PCA")].iloc[0]
+_goc = _rob[_rob["branch"].str.contains("(gốc OFAT)", regex=False)].iloc[0]
+_f3 = _rob[_rob["branch"].str.contains("OFAT f=3")].iloc[0]
+_mc2 = _rob[_rob["branch"].str.contains("OFAT mc=2")].iloc[0]
+_lv2 = _rob[_rob["branch"].str.contains("OFAT lv=2")].iloc[0]
+md(nbf.v4.new_markdown_cell(f"""## 4. Robustness đa chỉ tiêu (bước bắt buộc)
 
 - **Nhánh chính:** PCA ≥2 thành phần trên d1–d6 toàn panel (trong-năm z để khử bước nhảy).
-  Kết quả: 2 PC đầu chỉ giữ 63.2% phương sai; STING trên không gian PCA → k=1 → **không nhận diện cấu trúc** (trung thực).
-- **Nhánh phụ:** 8 chiều, chỉ 2018–2024 (430 điểm) — lưới 8-D quá thưa (curse of dimensionality):
-  `f=2, mc=10, lv=1` → k=3 nhưng noise=60%; `f=3, mc=2, lv=2` → k=1, noise=100%. → **không nhận diện cấu trúc**.
+  Kết quả: 2 PC đầu chỉ giữ {_pca.explained_var_total:.1%} phương sai; STING trên không gian PCA → k={_pca.k:.0f} → **không nhận diện cấu trúc** (trung thực).
+- **Nhánh 8 chiều OFAT** (chỉ 2018–2024, 430 điểm — lưới 8-D quá thưa; đổi MỘT tham số mỗi lần từ gốc `{_goc.branch.split(", ")[-1]}`):
+  gốc → k={_goc.k:.0f}, noise={_goc.noise_ratio:.1%} (silhouette {_goc.silhouette:.3f});
+  chỉ f=3 → k={_f3.k:.0f}, noise={_f3.noise_ratio:.1%}; chỉ mc=2 → k={_mc2.k:.0f}, noise={_mc2.noise_ratio:.1%} (verdict "{_mc2.verdict}" — silhouette {_mc2.silhouette:.3f}, tách yếu); chỉ lv=2 → k={_lv2.k:.0f}, noise={_lv2.noise_ratio:.0%}.
+  → ablation chỉ ra **factor và cluster_level là thủ phạm**; nhánh mc=2 tuy verdict "có cấu trúc" nhưng silhouette âm nên không phải cụm dùng được.
 - Kết luận: không tìm thấy cụm ổn định khi mở rộng chiều; cluster hóa hiện hữu chỉ có ý nghĩa ở không gian 2D cục bộ.
   Đây là **kết quả âm tính đáng báo cáo** — dữ liệu quản trị công PAPI ở cấp tỉnh/năm khá đồng nhất."""))
 

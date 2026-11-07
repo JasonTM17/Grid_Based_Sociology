@@ -267,22 +267,43 @@ def main() -> int:
 
     X8 = df[df.year >= 2018][[f"d{i}" for i in range(1, 9)]].dropna()
     Z8 = X8.groupby(df[df.year >= 2018]["year"].loc[X8.index]).transform(lambda s: (s - s.mean()) / s.std(ddof=0))
-    m8a = STING(n_levels=3, factor=2, min_count=10).fit(Z8.to_numpy())
-    lab8a = m8a.cluster(level=1, connectivity=1)
-    m8b = STING(n_levels=3, factor=3, min_count=2).fit(Z8.to_numpy())
-    lab8b = m8b.cluster(level=2, connectivity=1)
-    print(f"3b) 8 chiều 2018–2024 (n={len(X8)}): mc=10/lv=1 k={m8a.n_clusters_} noise={(lab8a == -1).mean():.0%} | mc=2/lv=2 k={m8b.n_clusters_} noise={(lab8b == -1).mean():.0%}")
-    sil8, db8, ch8 = safe_metrics(Z8.to_numpy(), lab8b)
-    robust.append({"branch": "8 chiều 2018–2024, within-year z, L=3 f=2 mc=10 lv=1", "n": len(X8),
-                   "explained_var_total": None, "k": m8a.n_clusters_,
-                   "noise_ratio": round(float((lab8a == -1).mean()), 3),
-                   "silhouette": None, "db": None, "ch": None, "ari_vs_2d": None,
-                   "verdict": "không nhận diện" if m8a.n_clusters_ < 2 or (lab8a == -1).mean() > 0.5 else "có cấu trúc"})
-    robust.append({"branch": "8 chiều 2018–2024, within-year z, L=3 f=3 mc=2 lv=2", "n": len(X8),
-                   "explained_var_total": None, "k": m8b.n_clusters_,
-                   "noise_ratio": round(float((lab8b == -1).mean()), 3),
-                   "silhouette": sil8, "db": db8, "ch": ch8, "ari_vs_2d": None,
-                   "verdict": "không nhận diện" if m8b.n_clusters_ < 2 or (lab8b == -1).mean() > 0.5 else "có cấu trúc"})
+    Z8v = Z8.to_numpy()
+
+    def run_8dim(fit_over, level):
+        """Một nhánh 8 chiều; OFAT: ``fit_over``/``level`` đổi MỘT tham số so với gốc.
+
+        Gốc (8a) = n_levels=3, factor=2, min_count=10, cluster(level=1).
+        Metric hình học tính ngay tại đây — k>=2 thì có số, k<2 thì None.
+        """
+        params = {"n_levels": 3, "factor": 2, "min_count": 10}  # nhánh gốc 8a
+        params.update(fit_over)
+        mm = STING(**params).fit(Z8v)
+        ll = mm.cluster(level=level, connectivity=1)
+        sil, db, ch = safe_metrics(Z8v, ll)
+        noise = float((ll == -1).mean())
+        row = {"n": len(X8), "explained_var_total": None, "k": mm.n_clusters_,
+               "noise_ratio": round(noise, 3), "silhouette": sil, "db": db, "ch": ch,
+               "ari_vs_2d": None,
+               "verdict": "không nhận diện" if mm.n_clusters_ < 2 or noise > 0.5
+               else "có cấu trúc"}
+        return mm, ll, row
+
+    m8a, lab8a, row8a = run_8dim({}, 1)
+    robust.append({"branch": "8 chiều 2018–2024, within-year z, L=3 f=2 mc=10 lv=1 (gốc OFAT)",
+                   **row8a})
+    print(f"3b) 8 chiều 2018–2024 (n={len(X8)}): gốc mc=10/lv=1 k={m8a.n_clusters_} "
+          f"noise={(lab8a == -1).mean():.0%}")
+    ofat_parts = []
+    for tag, rest, fit_over, lv in (
+        ("f=3", "L=3 mc=10 lv=1", {"factor": 3}, 1),
+        ("mc=2", "L=3 f=2 lv=1", {"min_count": 2}, 1),
+        ("lv=2", "L=3 f=2 mc=10", {}, 2),
+    ):
+        _, _, row = run_8dim(fit_over, lv)
+        robust.append({"branch": f"8 chiều 2018–2024, within-year z, OFAT {tag} "
+                                 f"(còn như gốc: {rest})", **row})
+        ofat_parts.append(f"{tag}: k={row['k']}, noise={row['noise_ratio']} → {row['verdict']}")
+    print("   OFAT:", " | ".join(ofat_parts))
     pd.DataFrame(robust).to_csv(RES / "robustness.csv", index=False, encoding="utf-8-sig")
     print("   xong ->", RES / "robustness.csv")
 
@@ -385,7 +406,8 @@ def main() -> int:
         "- Metric hình học tính trên điểm thuộc cụm (loại −1); khi k<2 metric = n/a.\n"
         "- ARIt vs k-means thấp (≈0.07–0.17): hai phương pháp phân vùng khác nhau trên dữ liệu gần như một khối.\n"
         "- STING ≈ DBSCAN(eps=0.2) đồng thuận hơn (ARI≈0.65) — cùng họ mật độ-lưới.\n"
-        "- 8 chiều chỉ 2018–2024: cấu trúc không nhận diện được (ghi nhận âm tính)."
+        f"- 8 chiều chỉ 2018–2024, OFAT đổi một tham số mỗi lần so với gốc mc=10/lv=1: "
+        f"{'; '.join(ofat_parts)}."
     )
     (RES / "analysis_summary.md").write_text("\n".join(lines), encoding="utf-8")
     print("6) summary ->", RES / "analysis_summary.md")

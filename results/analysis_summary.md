@@ -36,15 +36,17 @@
 
 ## 3) Robustness đa chỉ tiêu
 
-| branch                                               |   n |   explained_var_total |   k |   noise_ratio | silhouette   | db   | ch   |   ari_vs_2d | verdict         |
-|:-----------------------------------------------------|----:|----------------------:|----:|--------------:|:-------------|:-----|:-----|------------:|:----------------|
-| PCA(2) d1–d6, within-year z, pooled                  | 869 |                 0.632 |   1 |         0.062 |              |      |      |       0.008 | không nhận diện |
-| 8 chiều 2018–2024, within-year z, L=3 f=2 mc=10 lv=1 | 430 |               nan     |   3 |         0.605 |              |      |      |     nan     | không nhận diện |
-| 8 chiều 2018–2024, within-year z, L=3 f=3 mc=2 lv=2  | 430 |               nan     |   1 |         0.995 |              |      |      |     nan     | không nhận diện |
+| branch                                                                   |   n |   explained_var_total |   k |   noise_ratio |   silhouette |        db |        ch |   ari_vs_2d | verdict         |
+|:-------------------------------------------------------------------------|----:|----------------------:|----:|--------------:|-------------:|----------:|----------:|------------:|:----------------|
+| PCA(2) d1–d6, within-year z, pooled                                      | 869 |                 0.632 |   1 |         0.062 |  nan         | nan       | nan       |       0.008 | không nhận diện |
+| 8 chiều 2018–2024, within-year z, L=3 f=2 mc=10 lv=1 (gốc OFAT)          | 430 |               nan     |   3 |         0.605 |    0.297194  |   1.13107 |  83.8316  |     nan     | không nhận diện |
+| 8 chiều 2018–2024, within-year z, OFAT f=3 (còn như gốc: L=3 mc=10 lv=1) | 430 |               nan     |   1 |         0.919 |  nan         | nan       | nan       |     nan     | không nhận diện |
+| 8 chiều 2018–2024, within-year z, OFAT mc=2 (còn như gốc: L=3 f=2 lv=1)  | 430 |               nan     |   2 |         0.109 |   -0.0886574 |   1.49983 |   1.14207 |     nan     | có cấu trúc     |
+| 8 chiều 2018–2024, within-year z, OFAT lv=2 (còn như gốc: L=3 f=2 mc=10) | 430 |               nan     |   0 |         1     |  nan         | nan       | nan       |     nan     | không nhận diện |
 
 ## Ghi chú trung thực
 - Dữ liệu PAPI cấp tỉnh/năm **rất đồng nhất**: STING per-year đa số cho 1 vùng dày; cấu trúc tách biệt chỉ xuất hiện ở hai cụm ngoại vi nhỏ (ví dụ cụm 16 và 5 điểm, tổng 21, trong pooled).
 - Metric hình học tính trên điểm thuộc cụm (loại −1); khi k<2 metric = n/a.
 - ARIt vs k-means thấp (≈0.07–0.17): hai phương pháp phân vùng khác nhau trên dữ liệu gần như một khối.
 - STING ≈ DBSCAN(eps=0.2) đồng thuận hơn (ARI≈0.65) — cùng họ mật độ-lưới.
-- 8 chiều chỉ 2018–2024: cấu trúc không nhận diện được (ghi nhận âm tính).
+- 8 chiều chỉ 2018–2024, OFAT đổi một tham số mỗi lần so với gốc mc=10/lv=1: f=3: k=1, noise=0.919 → không nhận diện; mc=2: k=2, noise=0.109 → có cấu trúc; lv=2: k=0, noise=1.0 → không nhận diện.

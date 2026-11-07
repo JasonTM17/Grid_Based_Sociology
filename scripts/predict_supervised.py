@@ -288,6 +288,24 @@ def main() -> int:
     print(f"[Hồi quy] CV R² Ridge={grid_ridge.best_score_:.3f} {grid_ridge.best_params_}")
     print(f"[Hồi quy] CV R² RF   ={grid_rf.best_score_:.3f} {grid_rf.best_params_}")
 
+    # Baseline hồi quy chấm CV THẬT trên CÙNG fold expanding origin 2017–2022
+    # (reg_cv) thay vì để trống: quy ước điểm trùng GridSearchCV scoring="r2" —
+    # R² trên từng fold validation, lấy mean làm value_cv. Trong mỗi fold,
+    # "train" là phần lịch sử của fold nên trung bình train là mean của
+    # ytr[train_idx] (song song với expanding_majority_f1 của phân loại).
+    # Baseline vẫn không tranh selection (vẫn bị loại khỏi select_model_by_cv).
+    _carry_all = tr["carry"].to_numpy()
+    _carry_fold_r2 = []
+    _mean_fold_r2 = []
+    for _tr_idx, _va_idx in reg_cv:
+        _y_val = ytr[_va_idx]
+        _carry_fold_r2.append(r2_score(_y_val, _carry_all[_va_idx]))
+        _mean_fold_r2.append(
+            r2_score(_y_val, np.full_like(_y_val, ytr[_tr_idx].mean()))
+        )
+    carry_cv = float(np.mean(_carry_fold_r2))
+    mean_train_cv = float(np.mean(_mean_fold_r2))
+
     def reg_metrics(y, yp, cv_score):
         return {
             "metric_cv": "r2 (expanding origin 2017–2022)",
@@ -300,9 +318,9 @@ def main() -> int:
     pred_ridge = grid_ridge.best_estimator_.predict(Xte)
     pred_rf = grid_rf.best_estimator_.predict(Xte)
     met_rows.append({"task": "regression", "model": "carry-forward (giữ giá trị năm nay)",
-                     **reg_metrics(yte, te["carry"].to_numpy(), np.nan)})
+                     **reg_metrics(yte, te["carry"].to_numpy(), carry_cv)})
     met_rows.append({"task": "regression", "model": "trung bình train",
-                     **reg_metrics(yte, np.full_like(yte, ytr.mean()), np.nan)})
+                     **reg_metrics(yte, np.full_like(yte, ytr.mean()), mean_train_cv)})
     met_rows.append({"task": "regression", "model": "ridge",
                      **reg_metrics(yte, pred_ridge, grid_ridge.best_score_)})
     met_rows.append({"task": "regression", "model": "random forest",
@@ -484,6 +502,11 @@ def main() -> int:
     lines.append(f"- Train: {len(tr)} cặp (2011–2022) · Holdout: {len(te)} cặp")
     lines.append("")
     lines.append(met[met.task == "regression"].to_markdown(index=False))
+    lines.append("")
+    lines.append(
+        "- Baseline hồi quy có CV thật trên cùng fold, không tranh selection: "
+        f"(CV: carry {carry_cv:.3f} vs ridge {grid_ridge.best_score_:.3f})."
+    )
     lines.append("")
     lines.append("## 2) Phân loại — pseudo-label STING năm sau (bài toán phụ)\n")
     lines.append(met[met.task == "classification"].to_markdown(index=False))

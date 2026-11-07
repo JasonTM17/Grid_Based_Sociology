@@ -32,11 +32,13 @@
 
 ## Độ nhạy coverage theo min_count (cảnh báo: coverage là ngưỡng-phụ thuộc)
 
-| min_count | coverage 2024 | số cụm |
-|---|---|---|
-| 3 | 82% | 3 |
-| 5 | 79% | 3 |
-| 8 | 70% | 1 |
+| min_count | coverage 2024 | số cụm | ARI vs cấu hình chốt (2024) | đổi cụm↔nhiễu vs chốt (tỉnh) |
+|---|---|---|---|---|
+| 3 | 82% | 3 | 0.852 | 2 |
+| 5 | 79% | 3 | 1.000 | 0 |
+| 8 | 70% | 1 | 0.678 | 5 |
+
+*Lưu ý phương pháp*: so khớp nhãn chính xác (exact agreement) giữa mc=3 và cấu hình chốt mc=5 chỉ đạt 18% — thấp do HOÁN VỊ NHÃN (nhãn 0/1/2 là quy ước gán theo thứ tự ô dày; đổi min_count là đổi lưới nên nhãn bị xáo trộn), còn ARI bất biến với hoán vị nhãn nên là thước đúng — không đọc nhầm thành gãy model.
 
 ## Hạn chế diễn giải
 

@@ -26,6 +26,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import adjusted_rand_score
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -164,13 +165,21 @@ def main() -> int:
     n_excluded = int(test[feats].isna().any(axis=1).sum()
                      + train[train.year == TRAIN_MAX_YEAR][feats].isna().any(axis=1).sum())
 
-    # độ nhạy coverage theo min_count (coverage là ngưỡng-phụ thuộc — nói rõ)
+    # độ nhạy coverage + ổn định nhãn theo min_count (coverage là ngưỡng-phụ thuộc —
+    # nói rõ). Ổn định nhãn so với dự đoán 2024 của cấu hình chốt (pred_te) trên cùng
+    # len(pte) tỉnh đủ dữ liệu 2024: (i) ARI — bất biến với hoán vị nhãn, bắt buộc vì
+    # nhãn cụm do thuật toán gán theo thứ tự ô dày và đổi min_count là đổi lưới;
+    # (ii) số tỉnh đổi TRẠNG THÁI cụm↔nhiễu (p == -1 khác dấu với cấu hình chốt).
     sens = []
+    te_by_mc: dict[int, np.ndarray] = {}
     for mc2 in sorted({max(1, sp["min_count"] - 2), sp["min_count"], sp["min_count"] + 3}):
         m2 = STING(n_levels=sp["n_levels"], factor=sp["factor"], min_count=mc2).fit(Xtr)
         m2.cluster(level=sp["cluster_level"], connectivity=sp["connectivity"])
         p2 = m2.predict(Xte)
-        sens.append((mc2, round(float((p2 != -1).mean()), 2), m2.n_clusters_))
+        te_by_mc[mc2] = p2
+        ari2 = float(adjusted_rand_score(p2, pred_te))
+        flip2 = int(((p2 == -1) != (pred_te == -1)).sum())
+        sens.append((mc2, round(float((p2 != -1).mean()), 2), m2.n_clusters_, ari2, flip2))
 
     crosstab = pd.crosstab(
         m.pred_cluster_prev, m.pred_cluster_test, margins=True
@@ -203,10 +212,21 @@ def main() -> int:
         f"- Loại khỏi so sánh (thiếu chỉ tiêu): {n_excluded} dòng (2023 và/hoặc 2024)."
     )
     lines.append("\n## Độ nhạy coverage theo min_count (cảnh báo: coverage là ngưỡng-phụ thuộc)\n")
-    lines.append("| min_count | coverage 2024 | số cụm |")
-    lines.append("|---|---|---|")
-    for mc2, cv2, k2 in sens:
-        lines.append(f"| {mc2} | {cv2:.0%} | {k2} |")
+    lines.append(
+        "| min_count | coverage 2024 | số cụm | ARI vs cấu hình chốt (2024) "
+        "| đổi cụm↔nhiễu vs chốt (tỉnh) |"
+    )
+    lines.append("|---|---|---|---|---|")
+    for mc2, cv2, k2, ari2, flip2 in sens:
+        lines.append(f"| {mc2} | {cv2:.0%} | {k2} | {ari2:.3f} | {flip2} |")
+    mc_lo = sens[0][0]
+    lines.append(
+        f"\n*Lưu ý phương pháp*: so khớp nhãn chính xác (exact agreement) giữa mc={mc_lo} "
+        f"và cấu hình chốt mc={sp['min_count']} chỉ đạt {(te_by_mc[mc_lo] == pred_te).mean():.0%} "
+        "— thấp do HOÁN VỊ NHÃN (nhãn 0/1/2 là quy ước gán theo thứ tự ô dày; đổi min_count là "
+        "đổi lưới nên nhãn bị xáo trộn), còn ARI bất biến với hoán vị nhãn nên là thước đúng — "
+        "không đọc nhầm thành gãy model."
+    )
 
     # --- Hạn chế diễn giải: số liệu tính từ chính artifacts của script này ---
     import ast
@@ -334,6 +354,16 @@ def main() -> int:
     print(f"train: k={model.n_clusters_} sizes={sizes} noise={noise_tr:.0%}")
     print(f"du doan 2024: coverage={cov:.0%} dist={dist} | chuyen that {real_move}/{n_common}"
           f" | sang nhieu {to_noise} | tu nhieu {from_noise} | loai {n_excluded}")
+    # Chẩn đoán cặp đôi giữa các biến thể min_count (chỉ stdout): ARI + đổi trạng thái
+    # cụm↔nhiễu giữa từng cặp biến thể — kiểm chứng chéo độc lập với bảng so-cấu-hình-chốt.
+    _mc_list = sorted(te_by_mc)
+    _pair_diag = "; ".join(
+        f"mc{a}-mc{b}: ARI={adjusted_rand_score(te_by_mc[a], te_by_mc[b]):.3f}, "
+        f"doi trang thai={int(((te_by_mc[a] == -1) != (te_by_mc[b] == -1)).sum())} tỉnh"
+        for i, a in enumerate(_mc_list)
+        for b in _mc_list[i + 1:]
+    )
+    print(f"so sanh cap doi theo min_count: {_pair_diag}")
     print(f"da luu: {MODEL_PATH.name}, {SCALER_PATH.name}, {CSV_PATH.name}, {SUMMARY_PATH.name}, {FIG_PATH.name}")
     return 0
 

@@ -8,10 +8,12 @@
 
 | task       | model                               | metric_cv                       |   value_cv |   holdout_mae |   holdout_rmse |   holdout_r2 |   holdout_acc |   holdout_macro_f1 |
 |:-----------|:------------------------------------|:--------------------------------|-----------:|--------------:|---------------:|-------------:|--------------:|-------------------:|
-| regression | carry-forward (giữ giá trị năm nay) | r2 (expanding origin 2017–2022) |    nan     |        0.0683 |         0.0875 |        0.198 |           nan |                nan |
-| regression | trung bình train                    | r2 (expanding origin 2017–2022) |    nan     |        0.0814 |         0.1027 |       -0.105 |           nan |                nan |
+| regression | carry-forward (giữ giá trị năm nay) | r2 (expanding origin 2017–2022) |      0.145 |        0.0683 |         0.0875 |        0.198 |           nan |                nan |
+| regression | trung bình train                    | r2 (expanding origin 2017–2022) |     -0.77  |        0.0814 |         0.1027 |       -0.105 |           nan |                nan |
 | regression | ridge                               | r2 (expanding origin 2017–2022) |      0.265 |        0.064  |         0.0769 |        0.381 |           nan |                nan |
 | regression | random forest                       | r2 (expanding origin 2017–2022) |      0.197 |        0.0616 |         0.0742 |        0.423 |           nan |                nan |
+
+- Baseline hồi quy có CV thật trên cùng fold, không tranh selection: (CV: carry 0.145 vs ridge 0.265).
 
 ## 2) Phân loại — pseudo-label STING năm sau (bài toán phụ)
 

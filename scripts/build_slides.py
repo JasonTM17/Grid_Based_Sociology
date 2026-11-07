@@ -2,6 +2,7 @@
 
 Cách dùng: python scripts/build_slides.py
 """
+import csv
 from pathlib import Path
 
 from pptx import Presentation
@@ -13,6 +14,48 @@ from pptx.enum.text import PP_ALIGN
 ROOT = Path(__file__).resolve().parent.parent
 FIGS = ROOT / "results" / "figs"
 OUT = ROOT / "slides" / "final.pptx"
+
+# ==== Số liệu đọc từ artifact do script khác sinh (không hardcode số đo) ====
+
+
+def _read_results_csv(name):
+    with open(ROOT / "results" / name, encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def _pct(v):
+    s = f"{float(v) * 100:.1f}".rstrip("0").rstrip(".")
+    return s + "%"
+
+
+ROBUSTNESS = _read_results_csv("robustness.csv")
+
+
+def _rob(branch_sub):
+    for r in ROBUSTNESS:
+        if branch_sub in r["branch"]:
+            return r
+    raise KeyError(branch_sub)
+
+
+R_PCA = _rob("PCA(2)")
+R_GOC = _rob("(gốc OFAT)")
+R_F3 = _rob("OFAT f=3")
+R_MC2 = _rob("OFAT mc=2")
+R_LV2 = _rob("OFAT lv=2")
+
+SUP_ROWS = _read_results_csv("supervised_metrics.csv")
+
+
+def _reg_cv(model_sub):
+    for r in SUP_ROWS:
+        if r["task"] == "regression" and model_sub in r["model"]:
+            return r["value_cv"].strip()
+    raise KeyError(model_sub)
+
+
+CV_CARRY = _reg_cv("carry-forward")
+CV_RIDGE = _reg_cv("ridge")
 
 NAVY = RGBColor(0x0F, 0x2B, 0x46)
 TEAL = RGBColor(0x1B, 0x6E, 0x77)
@@ -130,7 +173,7 @@ text(s, 0.85, 4.65, 8.4, 1.6, [
     ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
     ("15' trình bày + 5' Q&A", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
 ])
-note(s, "Mở đầu: giới thiệu đề tài 20s; nêu thesis: dữ liệu PAPI khá đồng nhất — nhóm xin trình bày trung thực cả kết quả thuận lẫn robustness âm tính (PCA và nhánh 8 chiều không nhận diện cấu trúc).")
+note(s, "Mở đầu: giới thiệu đề tài 20s; nêu thesis: dữ liệu PAPI khá đồng nhất — nhóm xin trình bày trung thực cả kết quả thuận lẫn robustness mở rộng chiều (PCA không nhận diện; nhánh 8 chiều đọc theo ablation OFAT — mc=2 đạt ngưỡng k/noise nhưng silhouette âm).")
 
 # ---------- Slide 2 — Vì sao grid-based? ----------
 s = slide_new()
@@ -254,11 +297,11 @@ header(s, "MODEL GIÁM SÁT", "Ridge dự báo 6.1 Y tế công lập năm sau",
 pic(s, "supervised_regression.png", 0.55, 1.6, h=3.07)
 bullets(s, 8.2, 1.5, 4.6, 4.7, [
     ("Đặc trưng.", "8 chỉ tiêu sạch năm t (sd 2011–2024 ổn định)."),
-    ("CV train-only.", "Expanding origin 2017–2022; chọn Ridge (CV R² 0.265; RF 0.197)."),
+    ("CV train-only.", f"Expanding origin 2017–2022; chọn Ridge (CV R² 0.265; RF 0.197); hai baseline cũng có CV thật trên cùng fold — carry {CV_CARRY} vs ridge {CV_RIDGE}."),
     ("Holdout 2023→2024.", "MAE 0.0640 (Ridge, −6.3%) / 0.0616 (RF, −9.8%, không chọn) vs carry-forward 0.0683."),
     ("Phân loại pseudo-label STING.", "LR/RF vượt majority trên một holdout (acc 0.644/0.678 vs 0.186; F1 0.541/0.600 vs 0.157); một năm không kết luận tổng quát."),
 ], size=11.5)
-note(s, "Nhấn: cải thiện khiêm tốn, honest; 1 holdout duy nhất — cần thêm năm để chắc chắn.")
+note(s, f"Nhấn: cải thiện khiêm tốn, honest; 1 holdout duy nhất — cần thêm năm để chắc chắn. Nếu hỏi 'baseline có chạy CV không?': có — cùng 6 fold, carry {CV_CARRY} vs ridge {CV_RIDGE} (trung bình train âm), Ridge vẫn được chọn; caveat: một holdout không chứng minh tổng quát.")
 
 # ---------- Slide 10 — Baselines ----------
 s = slide_new()
@@ -317,7 +360,7 @@ header(s, "TRUNG THỰC", "Hạn chế — nói rõ trước khi được hỏi"
 bullets(s, 0.55, 1.3, 12.2, 5.4, [
     ("Đồng nhất.", "Dữ liệu PAPI cấp tỉnh/năm gần như một khối — cấu trúc tách biệt chỉ ở ngoại vi nhỏ."),
     ("Gãy thang đo.", "23/37 cột đổi thang giữa các năm; phân tích xuyên năm chỉ dùng chỉ tiêu qua audit."),
-    ("Robustness âm tính.", "PCA d1–d6 (63% phương sai) và 8 chiều 2018–2024 → không nhận diện cấu trúc — báo cáo."),
+    ("Robustness OFAT.", f"PCA d1–d6 ({_pct(R_PCA['explained_var_total'])} phương sai) → không nhận diện; 8 chiều 2018–2024 so với gốc (k={R_GOC['k']}, nhiễu {_pct(R_GOC['noise_ratio'])}): f=3 → k={R_F3['k']}/{_pct(R_F3['noise_ratio'])}, lv=2 → k={R_LV2['k']}/100% → không nhận diện; mc=2 → k={R_MC2['k']}/{_pct(R_MC2['noise_ratio'])} đạt ngưỡng k/noise NHƯNG silhouette âm — tách yếu."),
     ("Metrics không bản địa.", "Silhouette/DB/CH với lưới song song trục chỉ để so sánh thô; noise tách riêng."),
     ("Một holdout.", "2024 là năm test duy nhất; Ridge (được chọn) thấp hơn carry-forward 6.3% MAE — cần thêm năm để khẳng định."),
 ], size=12)
