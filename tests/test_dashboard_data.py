@@ -1,14 +1,23 @@
 import numpy as np
 import pandas as pd
 import pytest
+from scipy import stats as scipy_stats
 
 from scripts.dashboard_data import (
     DashboardDataError,
+    ensure_external_pci_consistency,
+    external_pci_group_stats,
+    external_pci_tests,
+    external_section_frame,
     filter_regression_holdout,
+    format_p_value,
     load_dashboard_assets,
+    load_external_validation_assets,
     load_regression_models,
+    prepare_external_pci_view,
     prepare_regression_holdout,
     prepare_sting_view,
+    published_external_pci_tests,
     select_classification_model,
 )
 from scripts.papi_pred_common import REGRESSION_FEATURES, REGRESSION_TARGET
@@ -360,3 +369,369 @@ def test_regression_holdout_unassigned_origin_province():
 
     assert pd.isna(row2.origin_cluster_2023)
     assert row2.origin_cluster_label == "Không có assignment trong artifact"
+
+
+# --------------------------------------------------------------------- #
+# Kiểm chứng ngoại lai — PCI · y tế 2020 · GRDP 2018–2024
+# --------------------------------------------------------------------- #
+
+
+def _make_pci_frame():
+    # 2011–2022 đủ ô; (2022, tỉnh 4) thiếu điểm; 2023–2024 kiểu Top-30.
+    return pd.DataFrame({
+        "papi_province_code": [1, 2, 3, 4, 5, 6],
+        "province_code": [1, 2, 3, 4, 5, 6],
+        "province_ascii": ["A", "B", "C", "D", "E", "F"],
+        "province_vi": ["Tỉnh A", "Tỉnh B", "Tỉnh C", "Tỉnh D", "Tỉnh E", "Tỉnh F"],
+        "year": [2011, 2011, 2022, 2022, 2023, 2024],
+        "pci_weighted_score": [50.0, 60.0, 55.0, np.nan, 70.0, 71.0],
+        "source": ["pci"] * 6,
+    })
+
+
+def _make_external_assignments():
+    # Tỉnh 999 chỉ tồn tại trong assignments (phantom) — phải bị bỏ qua.
+    return pd.DataFrame({
+        "province_code": [1, 2, 3, 5, 999],
+        "year": [2011, 2011, 2022, 2023, 2011],
+        "pred_cluster": [-1, 2, 2, -1, 0],
+        "split": ["test"] * 5,
+    })
+
+
+def _validation_row(section, group, n="", note="", **cells):
+    row = {
+        "section": section, "group": group, "year": "", "n": n,
+        "mean": "", "median": "", "std": "", "min": "", "max": "", "note": note,
+    }
+    row.update(cells)
+    return row
+
+
+def test_load_external_validation_assets_missing_files_point_to_rebuild(tmp_path):
+    with pytest.raises(DashboardDataError, match=r"python scripts/external_validation\.py"):
+        load_external_validation_assets(tmp_path)
+
+    pci_file = tmp_path / "data" / "processed" / "external_pci_63_full.csv"
+    pci_file.parent.mkdir(parents=True, exist_ok=True)
+    _make_pci_frame().to_csv(pci_file, index=False, encoding="utf-8")
+
+    with pytest.raises(DashboardDataError, match=r"python scripts/external_validation\.py"):
+        load_external_validation_assets(tmp_path)
+
+
+def _write_validation_csv(tmp_path):
+    validation = pd.DataFrame([
+        _validation_row("pci_2011_2022", "nhiễu (–1)", n=149, mean=59.798),
+        _validation_row("pci_2011_2022", "ANOVA F(3,743)", n=747, note="F = 9.0426; p = 6.93e-06"),
+        _validation_row("pci_2011_2022", "Kruskal–Wallis", n=747, note="H = 31.7751; p = 5.84e-07"),
+        _validation_row("pci_2011_2022", "eta squared", n=747, note="eta² = 0.0352 (SS giữa / SS tổng)"),
+        _validation_row("pci_top30_2023_2024", "ANOVA F(1,56)", n=58, note="F = 0.8880; p = 0.35"),
+        _validation_row("odm_health_2020", "nhiễu (–1)", n=6, year=2020, mean=0.00174),
+        _validation_row("grdp_2018_2024", "cụm 2", n=58, year=2018, mean=60.36),
+    ])
+    path = tmp_path / "results" / "external_validation.csv"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    validation.to_csv(path, index=False, encoding="utf-8")
+    return validation
+
+
+def test_load_external_validation_assets_validates_schema(tmp_path):
+    pci_file = tmp_path / "data" / "processed" / "external_pci_63_full.csv"
+    validation_file = tmp_path / "results" / "external_validation.csv"
+    pci_file.parent.mkdir(parents=True, exist_ok=True)
+
+    _make_pci_frame().drop(columns=["province_vi"]).to_csv(
+        pci_file, index=False, encoding="utf-8"
+    )
+    _write_validation_csv(tmp_path)
+    with pytest.raises(DashboardDataError, match="external_pci_63_full.csv thiếu cột"):
+        load_external_validation_assets(tmp_path)
+
+    _make_pci_frame().to_csv(pci_file, index=False, encoding="utf-8")
+    ok = load_external_validation_assets(tmp_path)
+    assert set(ok) == {"pci", "validation"}
+    assert ok["pci"].province_vi.tolist() == _make_pci_frame().province_vi.tolist()
+
+    _write_validation_csv(tmp_path).drop(columns=["note"]).to_csv(
+        validation_file, index=False, encoding="utf-8"
+    )
+    with pytest.raises(DashboardDataError, match="external_validation.csv thiếu cột"):
+        load_external_validation_assets(tmp_path)
+
+    validation = _write_validation_csv(tmp_path)
+    validation.loc[validation.section.ne("grdp_2018_2024")].to_csv(
+        validation_file, index=False, encoding="utf-8"
+    )
+    with pytest.raises(DashboardDataError, match="external_validation.csv thiếu section"):
+        load_external_validation_assets(tmp_path)
+
+    pd.concat([_make_pci_frame(), _make_pci_frame().iloc[[0]]]).to_csv(
+        pci_file, index=False, encoding="utf-8"
+    )
+    _write_validation_csv(tmp_path)
+    with pytest.raises(DashboardDataError, match="PCI external có khóa trùng"):
+        load_external_validation_assets(tmp_path)
+
+
+def test_prepare_external_pci_view_counts_and_labels():
+    pci = _make_pci_frame()
+    assignments = _make_external_assignments()
+
+    view, counts = prepare_external_pci_view(pci, assignments)
+    assert counts["year_min"] == 2011
+    assert counts["year_max"] == 2022
+    assert counts["window_cells"] == 3  # 2011×2 + 2022×1; ô (2022, 4) thiếu điểm
+    assert counts["missing_label_cells"] == 0
+    assert counts["tested_points"] == 3
+    assert counts["clusters"] == [-1, 2]
+    assert counts["n_by_cluster"] == {-1: 1, 2: 2}
+    assert view[["year", "province_code"]].values.tolist() == [
+        [2011, 1], [2011, 2], [2022, 3],
+    ]
+    assert view.cluster_label.tolist() == ["Nhiễu (-1)", "Cụm 2", "Cụm 2"]
+    assert view.pci_weighted_score.tolist() == [50.0, 60.0, 55.0]
+    # Tỉnh 999 chỉ có trong assignments — không được lọt vào view
+    assert 999 not in view.province_code.values
+
+    top_view, top_counts = prepare_external_pci_view(pci, assignments, 2023, 2024)
+    assert top_counts["window_cells"] == 2
+    assert top_counts["missing_label_cells"] == 1  # tỉnh 6 năm 2024 không có nhãn
+    assert top_counts["tested_points"] == 1
+    assert top_counts["n_by_cluster"] == {-1: 1}
+    assert top_view.cluster_label.tolist() == ["Nhiễu (-1)"]
+
+
+def test_prepare_external_pci_view_rejects_bad_inputs():
+    pci = _make_pci_frame()
+    assignments = _make_external_assignments()
+
+    duplicated_pci = pd.concat([pci, pci.iloc[[0]]])
+    with pytest.raises(DashboardDataError, match="PCI external có khóa trùng"):
+        prepare_external_pci_view(duplicated_pci, assignments)
+
+    duplicated_assignments = pd.concat([assignments, assignments.iloc[[0]]])
+    with pytest.raises(DashboardDataError, match="STING assignments có khóa trùng"):
+        prepare_external_pci_view(pci, duplicated_assignments)
+
+    with pytest.raises(DashboardDataError, match="thiếu cột pred_cluster"):
+        prepare_external_pci_view(pci, assignments.drop(columns=["pred_cluster"]))
+
+    with pytest.raises(DashboardDataError, match="thiếu cột bắt buộc"):
+        prepare_external_pci_view(pci.drop(columns=["province_vi"]), assignments)
+
+
+def test_external_pci_tests_hand_computed_values():
+    # Ba nhóm [1,2,3], [4,5,6], [7,8,9]: F = MS giữa / MS trong = 54/2 / 1 = 27;
+    # Kruskal không tie: H = 12/90 × (6²+15²+24²)/3 − 30 = 7.2; eta² = 54/60 = 0.9.
+    view = pd.DataFrame({
+        "pred_cluster": [0] * 3 + [1] * 3 + [2] * 3,
+        "pci_weighted_score": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
+    })
+
+    tests = external_pci_tests(view)
+
+    assert tests["f"] == pytest.approx(27.0)
+    assert tests["h"] == pytest.approx(7.2)
+    assert tests["df1"] == 2
+    assert tests["df2"] == 6
+    assert tests["eta_sq"] == pytest.approx(0.9)
+    assert tests["n"] == 9
+    assert tests["p_anova"] == pytest.approx(scipy_stats.f.sf(27.0, 2, 6))
+    assert tests["p_kw"] == pytest.approx(scipy_stats.chi2.sf(7.2, 2))
+
+
+def test_external_pci_tests_rejects_incomplete_input():
+    one_group = pd.DataFrame({
+        "pred_cluster": [0, 0, 0],
+        "pci_weighted_score": [1.0, 2.0, 3.0],
+    })
+    with pytest.raises(DashboardDataError, match="ít nhất 2 nhóm"):
+        external_pci_tests(one_group)
+
+    with_nan = pd.DataFrame({
+        "pred_cluster": [0, 1],
+        "pci_weighted_score": [1.0, np.nan],
+    })
+    with pytest.raises(DashboardDataError, match="thiếu điểm"):
+        external_pci_tests(with_nan)
+
+
+def test_format_p_value_matches_artifact_style():
+    assert format_p_value(1e-13) == "p < 1e-12"
+    assert format_p_value(1e-12) == "p = 1e-12"
+    assert format_p_value(6.93e-06) == "p = 6.93e-06"
+    assert format_p_value(0.35) == "p = 0.35"
+
+
+def test_published_external_pci_tests_parses_published_rows():
+    validation = pd.DataFrame([
+        _validation_row("pci_2011_2022", "nhiễu (–1)", n=149, mean=59.798),
+        _validation_row("pci_2011_2022", "cụm 0", n=5, mean=58.996),
+        _validation_row("pci_2011_2022", "ANOVA F(3,743)", n=747, note="F = 9.0426; p = 6.93e-06"),
+        _validation_row("pci_2011_2022", "Kruskal–Wallis", n=747, note="H = 31.7751; p = 5.84e-07"),
+        _validation_row("pci_2011_2022", "eta squared", n=747, note="eta² = 0.0352 (SS giữa / SS tổng)"),
+    ])
+
+    tests = published_external_pci_tests(validation, "pci_2011_2022")
+
+    assert tests == {
+        "df1": 3,
+        "df2": 743,
+        "f": 9.0426,
+        "p_anova": 6.93e-06,
+        "h": 31.7751,
+        "p_kw": 5.84e-07,
+        "eta_sq": 0.0352,
+        "n": 747,
+    }
+
+
+def test_published_external_pci_tests_rejects_malformed_rows():
+    base = [
+        _validation_row("pci_2011_2022", "nhiễu (–1)", n=149, mean=59.798),
+        _validation_row("pci_2011_2022", "ANOVA F(3,743)", n=747, note="F = 9.0426; p = 6.93e-06"),
+        _validation_row("pci_2011_2022", "Kruskal–Wallis", n=747, note="H = 31.7751; p = 5.84e-07"),
+        _validation_row("pci_2011_2022", "eta squared", n=747, note="eta² = 0.0352 (SS giữa / SS tổng)"),
+    ]
+
+    with pytest.raises(DashboardDataError, match="không có section"):
+        published_external_pci_tests(pd.DataFrame(base), "pci_2020")
+
+    duplicated_anova = pd.DataFrame(
+        base + [_validation_row("pci_2011_2022", "ANOVA F(3,743)", n=747, note="F = 1.0; p = 0.5")]
+    )
+    with pytest.raises(DashboardDataError, match="cần đúng 1 dòng"):
+        published_external_pci_tests(duplicated_anova, "pci_2011_2022")
+
+    broken_note = pd.DataFrame([
+        _validation_row("pci_2011_2022", "nhiễu (–1)", n=149),
+        _validation_row("pci_2011_2022", "ANOVA F(3,743)", n=747, note="F-đọc-không-ra"),
+        _validation_row("pci_2011_2022", "Kruskal–Wallis", n=747, note="H = 31.7751; p = 5.84e-07"),
+        _validation_row("pci_2011_2022", "eta squared", n=747, note="eta² = 0.0352"),
+    ])
+    with pytest.raises(DashboardDataError, match="không đọc được định dạng"):
+        published_external_pci_tests(broken_note, "pci_2011_2022")
+
+    missing_n = pd.DataFrame([
+        _validation_row("pci_2011_2022", "nhiễu (–1)", mean=59.798),
+        _validation_row("pci_2011_2022", "ANOVA F(3,743)", note="F = 9.0426; p = 6.93e-06"),
+        _validation_row("pci_2011_2022", "Kruskal–Wallis", note="H = 31.7751; p = 5.84e-07"),
+        _validation_row("pci_2011_2022", "eta squared", note="eta² = 0.0352"),
+    ])
+    with pytest.raises(DashboardDataError, match="thiếu n"):
+        published_external_pci_tests(missing_n, "pci_2011_2022")
+
+
+def _published_rows_for(view, section):
+    """Artifact giả lập đúng định dạng results/external_validation.csv."""
+    tests = external_pci_tests(view)
+    rows = []
+    for code, sub in view.groupby("pred_cluster"):
+        values = sub.pci_weighted_score
+        group = "nhiễu (–1)" if int(code) == -1 else f"cụm {int(code)}"
+        rows.append(_validation_row(
+            section, group, n=len(sub),
+            mean=round(float(values.mean()), 3),
+            median=round(float(values.median()), 3),
+            std=round(float(values.std(ddof=1)), 3) if len(sub) > 1 else "",
+            min=round(float(values.min()), 3),
+            max=round(float(values.max()), 3),
+        ))
+    rows.append(_validation_row(
+        section, f"ANOVA F({tests['df1']},{tests['df2']})", n=tests["n"],
+        note=f"F = {tests['f']:.4f}; {format_p_value(tests['p_anova'])}",
+    ))
+    rows.append(_validation_row(
+        section, "Kruskal–Wallis", n=tests["n"],
+        note=f"H = {tests['h']:.4f}; {format_p_value(tests['p_kw'])}",
+    ))
+    rows.append(_validation_row(
+        section, "eta squared", n=tests["n"],
+        note=f"eta² = {tests['eta_sq']:.4f} (SS giữa / SS tổng)",
+    ))
+    return pd.DataFrame(rows)
+
+
+def test_ensure_external_pci_consistency_passes_then_flags_drift():
+    # Nhóm -1 chỉ 1 điểm: std trống hai phía phải được chấp nhận.
+    view = pd.DataFrame({
+        "pred_cluster": [-1, 0, 0, 0, 2, 2, 2],
+        "pci_weighted_score": [60.0, 1.0, 2.0, 3.0, 7.0, 8.0, 9.0],
+    })
+    validation = _published_rows_for(view, "pci_main")
+
+    result = ensure_external_pci_consistency(view, validation, section="pci_main")
+    assert result["f"] == pytest.approx(external_pci_tests(view)["f"])
+    assert result["n"] == 7
+
+    drifted_f = validation.copy()
+    drifted_f.loc[drifted_f.group.str.startswith("ANOVA"), "note"] = "F = 99.0000; p = 0.001"
+    with pytest.raises(DashboardDataError, match="KHÔNG khớp artifact"):
+        ensure_external_pci_consistency(view, drifted_f, section="pci_main")
+
+    drifted_n = validation.copy()
+    drifted_n.loc[drifted_n.group.eq("cụm 0"), "n"] = 99
+    with pytest.raises(DashboardDataError, match="n nhóm 'cụm 0'"):
+        ensure_external_pci_consistency(view, drifted_n, section="pci_main")
+
+    drifted_mean = validation.copy()
+    drifted_mean.loc[drifted_mean.group.eq("cụm 2"), "mean"] = 42.0
+    with pytest.raises(DashboardDataError, match="mean nhóm 'cụm 2'"):
+        ensure_external_pci_consistency(view, drifted_mean, section="pci_main")
+
+
+def test_external_pci_group_stats_summary_and_labels():
+    view = pd.DataFrame({
+        "pred_cluster": [-1, 0, 0, 0],
+        "pci_weighted_score": [60.0, 10.0, 20.0, 30.0],
+    })
+
+    stats_frame = external_pci_group_stats(view)
+
+    assert stats_frame.pred_cluster.tolist() == [-1, 0]
+    assert stats_frame.cluster_label.tolist() == ["Nhiễu (-1)", "Cụm 0"]
+    noise = stats_frame.iloc[0]
+    assert noise["n"] == 1
+    assert pd.isna(noise["std"])
+    cluster = stats_frame.iloc[1]
+    assert cluster["n"] == 3
+    assert cluster["mean"] == pytest.approx(20.0)
+    assert cluster["median"] == pytest.approx(20.0)
+    assert cluster["std"] == pytest.approx(10.0)
+    assert cluster["min"] == pytest.approx(10.0)
+    assert cluster["max"] == pytest.approx(30.0)
+
+
+def test_external_section_frame_maps_labels_and_sorts():
+    validation = pd.DataFrame([
+        _validation_row("odm_health_2020", "cụm 2", n=57, year=2020, mean=0.003924),
+        _validation_row("odm_health_2020", "nhiễu (–1)", n=6, year=2020, mean=0.00174),
+        _validation_row("grdp_2018_2024", "cụm 2", n=58, year=2018, mean=60.36),
+        _validation_row("grdp_2018_2024", "cụm 2", n=56, year=2019, mean=67.21),
+        _validation_row("grdp_2018_2024", "nhiễu (–1)", n=2, year=2018, mean=61.08),
+    ])
+
+    health = external_section_frame(validation, "odm_health_2020")
+    assert health.cluster_label.tolist() == ["Nhiễu (-1)", "Cụm 2"]
+    assert health.n.tolist() == [6, 57]
+    assert [int(y) for y in health.year] == [2020, 2020]
+
+    grdp = external_section_frame(validation, "grdp_2018_2024")
+    assert [[int(c), int(y)] for c, y in grdp[["pred_cluster", "year"]].values] == [
+        [-1, 2018], [2, 2018], [2, 2019],
+    ]
+
+    with pytest.raises(DashboardDataError, match="không có section"):
+        external_section_frame(validation, "missing")
+
+    unknown_group = pd.DataFrame([_validation_row("khác", "???", n=1)])
+    with pytest.raises(DashboardDataError, match="Không hiểu tên nhóm"):
+        external_section_frame(unknown_group, "khác")
+
+    pci_like = pd.DataFrame([
+        _validation_row("pci_2011_2022", "cụm 2", n=577),
+        _validation_row("pci_2011_2022", "ANOVA F(3,743)", n=747, note="F = 9.0426; p = 6.93e-06"),
+    ])
+    with pytest.raises(DashboardDataError, match="Không hiểu tên nhóm"):
+        external_section_frame(pci_like, "pci_2011_2022")

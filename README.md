@@ -20,7 +20,8 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 | `data/raw/mendeley/` | Gói replication CC BY 4.0 — 4 file nhỏ dùng trực tiếp được commit (+`PROVENANCE.md`); phần còn lại tải theo DOI |
 | `data/raw/boundaries/` | GeoJSON 63 tỉnh (Open Development Vietnam, CC-BY-SA 4.0; lưu ý join: xem `PROVENANCE.md`) |
 | `data/raw/pci/` | PCI VCCI–USAID — workbook + trang xếp hạng 2011/2023/2024, báo cáo PDF (dữ liệu công khai, ghi nguồn VCCI–USAID; `PROVENANCE.md`) |
-| `data/raw/gso/` | GSO/NSO — HTML PX-Web (GRDP, dân số) + PDF Niên giám Thống kê (thống kê chính thức công khai; `PROVENANCE.md`) |
+| `data/raw/gso/` | GSO/NSO — HTML PX-Web (GRDP, dân số, **nghèo cấp tỉnh V14.47**) + PDF Niên giám Thống kê (thống kê chính thức công khai; `PROVENANCE.md`) |
+| `data/processed/external_poverty_63.csv` | Nghèo cấp tỉnh: tỷ lệ hộ nghèo 63 tỉnh × 14 năm (2006, 2008, 2010, 2012–2016, 2020–2025) từ bảng pxweb GSO **V14.47** (raw: `pxweb_V14.47_poverty_step2.html`; builder: `scripts/build_poverty_63.py`); 881/882 ô có số (thiếu TP.HCM 2016 — nguồn ghi ".."), 2017–2019 bảng nguồn không có → để trống, không nội suy (`reports/external_data_expansion.md` §3.6) |
 | `data/raw/odmekong/` | OD Mekong — nghèo 6 vùng 1998–2016 (CC BY-SA), bệnh viện 2020 (ODbL; `PROVENANCE.md`) |
 | `data/raw/worldbank/` | World Bank WDI — 4 chỉ số vĩ mô VNM 2010–2024 (CC BY 4.0; `PROVENANCE.md`) |
 | `data/processed/` | Panel sạch (kết quả Phase 2) + các file `external_*` (nguồn ngoài; ma trận độ phủ: `reports/external_data_expansion.md`) |
@@ -41,6 +42,7 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 - **GeoJSON tỉnh** — Open Development Vietnam (OD Mekong), CC-BY-SA 4.0.
 - **PCI (Chỉ số Năng lực cạnh tranh cấp tỉnh)** — VCCI – USAID, dữ liệu công khai <https://pcivietnam.vn>; tái sử dụng ghi nguồn VCCI–USAID ([chính sách trích dẫn dữ liệu](https://pcivietnam.vn/gioi-thieu/chinh-sach-trich-dan-du-lieu.html)).
 - **GSO/NSO** — PX-Web <https://pxweb.nso.gov.vn> và Niên giám Thống kê <https://www.nso.gov.vn>; dữ liệu thống kê chính thức công khai (trang bảng ghi "Bản quyền: Không").
+- **Nghèo cấp tỉnh (pxweb GSO V14.47 "Tỷ lệ hộ nghèo phân theo địa phương")** — Cục Thống kê, database "Y tế, văn hóa và MSDC" trên <https://pxweb.nso.gov.vn> (database này không mở qua API `/api/v1` — tải qua giao diện PX-Web); cùng điều kiện GSO: dữ liệu thống kê chính thức công khai, trang bảng ghi "Bản quyền: Không" (cập nhật lần cuối 21/08/2026). Độ phủ 63 tỉnh × 14 năm (2006, 2008, 2010, 2012–2016, 2020–2025); 2017–2019 nguồn không công bố — để trống, không nội suy; lưu ý chuẩn nghèo theo thu nhập (2010–2016) khác chuẩn đa chiều — chi tiết `reports/external_data_expansion.md` §3.6.
 - **OD Mekong (thêm)** — nghèo theo 6 vùng 1998–2016 và COVID: CC BY-SA 4.0 (<https://vietnam.opendevelopmentmekong.net/terms-of-use/>); *Health Facilities in Mekong Countries 2020*: ODbL.
 - **World Bank WDI** — CC BY 4.0 ([Terms of Use for Datasets](https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets)).
 - Chi tiết từng nguồn (cách tải, schema, độ phủ, hạn chế) và ma trận độ phủ: [`reports/external_data_expansion.md`](reports/external_data_expansion.md).

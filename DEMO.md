@@ -47,6 +47,8 @@ Môi trường đã kiểm chứng: Python 3.14.2, Windows 11.
 
 Mẹo: notebook đã **execute sẵn** (0 lỗi, ~18s) — chiếu thẳng không cần chạy live; muốn chạy lại live: `python -m nbconvert --to notebook --execute --inplace notebooks/midterm_demo.ipynb`.
 
+Ngoài 15′ (khi Q&A hoặc GV muốn xem thêm): mở dashboard — `python -m streamlit run app.py` → tab **"Kiểm chứng ngoại lai"** (`app.py:193`) hiển thị PCI theo cụm STING + ANOVA/Kruskal/eta² tính lại trực tiếp từ CSV và tự đối chiếu `results/external_validation.csv` — lệch quá sai số làm tròn thì tab dừng thay vì hiện số khác số đã công bố.
+
 ## 3. Dự phòng sự cố
 
 | Sự cố | Xử lý |

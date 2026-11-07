@@ -8,10 +8,17 @@ import streamlit as st
 
 from scripts.check_data import scale_audit
 from scripts.dashboard_data import (
+    PCI_TOP30_WINDOW,
     DashboardDataError,
+    ensure_external_pci_consistency,
+    external_pci_group_stats,
+    external_section_frame,
     filter_regression_holdout,
+    format_p_value,
     load_dashboard_assets,
+    load_external_validation_assets,
     load_regression_models,
+    prepare_external_pci_view,
     select_classification_model,
     prepare_regression_holdout,
     prepare_sting_view,
@@ -62,6 +69,10 @@ _REGRESSION_MODEL_FILES = (
     "models/sup_ridge.joblib",
     "models/sup_rf.joblib",
 )
+_EXTERNAL_FILES = (
+    "data/processed/external_pci_63_full.csv",
+    "results/external_validation.csv",
+)
 
 
 def artifact_identity(relative_paths: tuple[str, ...]) -> tuple[tuple[str, int | None, int | None], ...]:
@@ -87,6 +98,12 @@ def get_assets(artifact_identity: tuple[tuple[str, int | None, int | None], ...]
 def get_regression_models(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
     del artifact_identity
     return load_regression_models()
+
+
+@st.cache_resource(show_spinner="Đang đọc artifact kiểm chứng ngoại lai…")
+def get_external_assets(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
+    del artifact_identity
+    return load_external_validation_assets()
 
 
 def feature_label(feature: str, config: dict) -> str:
@@ -173,8 +190,14 @@ sting_view, sting_counts = prepare_sting_view(
 
 _, regression_counts = prepare_regression_holdout(panel, assignments)
 selected_model = select_regression_model(metrics)
-overview_tab, sting_tab, regression_tab, audit_tab = st.tabs(
-    ["Tổng quan", "STING theo năm", "Hồi quy 2023 → 2024", "Audit dữ liệu"],
+overview_tab, sting_tab, regression_tab, external_tab, audit_tab = st.tabs(
+    [
+        "Tổng quan",
+        "STING theo năm",
+        "Hồi quy 2023 → 2024",
+        "Kiểm chứng ngoại lai",
+        "Audit dữ liệu",
+    ],
     key="dashboard_tabs",
     on_change="rerun",
 )
@@ -421,6 +444,242 @@ if regression_tab.open:
                     "prediction_random_forest": "Dự báo Random Forest",
                 })
                 st.dataframe(table, hide_index=True, width="stretch")
+
+if external_tab.open:
+    with external_tab:
+        try:
+            external_assets = get_external_assets(artifact_identity(_EXTERNAL_FILES))
+            pci_view, pci_counts = prepare_external_pci_view(
+                external_assets["pci"], assignments
+            )
+            pci_tests = ensure_external_pci_consistency(
+                pci_view, external_assets["validation"]
+            )
+            top_view, top_counts = prepare_external_pci_view(
+                external_assets["pci"], assignments, *PCI_TOP30_WINDOW
+            )
+            top_tests = ensure_external_pci_consistency(
+                top_view, external_assets["validation"], section="pci_top30_2023_2024"
+            )
+        except DashboardDataError as exc:
+            st.error(str(exc))
+            st.info(
+                "Phần STING, Tổng quan và Hồi quy vẫn dùng được. "
+                "Chạy lại `python scripts/external_validation.py`, rồi làm mới ứng dụng."
+            )
+        except Exception as exc:
+            st.error(f"Không đọc được artifact kiểm chứng ngoại lai: {exc}")
+            st.info("Phần còn lại của dashboard vẫn dùng được.")
+        else:
+            st.subheader("Kiểm chứng ngoại lai bằng nguồn độc lập với PAPI")
+            st.caption(
+                "PCI (VCCI–USAID, khảo sát **doanh nghiệp**) và các nguồn GSO / OD Mekong tách "
+                "hoàn toàn khỏi PAPI (khảo sát hộ dân). Nhãn cụm lấy từ model STING đóng băng "
+                "(`results/predict_all_years.csv`). Bộ lọc sidebar không áp dụng cho tab này — "
+                "số liệu luôn tính trên toàn bộ lưới để khớp artifact đã công bố."
+            )
+
+            ext_m1, ext_m2, ext_m3, ext_m4 = st.columns(4)
+            ext_m1.metric("Ô PCI có điểm 2011–2022", f"{pci_counts['window_cells']}")
+            ext_m2.metric(
+                "Điểm vào kiểm định",
+                f"{pci_counts['tested_points']}",
+                help="Ô có điểm PCI và có nhãn cụm từ model đóng băng.",
+            )
+            ext_m3.metric(
+                "Có điểm nhưng thiếu nhãn",
+                f"{pci_counts['missing_label_cells']}",
+                help="Panel PAPI thiếu sd_4_2/sd_6_1 các năm đó nên không có nhãn — không nội suy.",
+            )
+            ext_m4.metric("Nhóm so sánh", f"{len(pci_counts['clusters'])}")
+
+            palette = {"Nhiễu (-1)": "#64748b"}
+            palette.update(
+                {
+                    f"Cụm {code}": color
+                    for code, color in zip(sorted(pci_counts["clusters"]), px.colors.qualitative.Safe)
+                }
+            )
+            cluster_order = [cluster_label(code) for code in sorted(pci_counts["clusters"])]
+            pci_figure = px.box(
+                pci_view,
+                x="cluster_label",
+                y="pci_weighted_score",
+                color="cluster_label",
+                category_orders={"cluster_label": cluster_order},
+                color_discrete_map=palette,
+                points="all",
+                hover_name="province_vi",
+                hover_data={"province_code": True, "year": True, "cluster_label": False},
+                labels={"cluster_label": "Nhãn cụm STING", "pci_weighted_score": "PCI điểm tổng"},
+                title="PCI (VCCI–USAID) theo cụm STING — lưới đầy 2011–2022",
+            )
+            pci_figure.update_traces(
+                marker={"size": 5, "opacity": 0.45, "line": {"width": 0.5, "color": "white"}}
+            )
+            pci_figure.update_layout(
+                template="plotly_white",
+                height=470,
+                showlegend=False,
+                xaxis_title="Nhãn cụm STING (pred_cluster)",
+                yaxis_title="PCI điểm tổng (VCCI–USAID)",
+                margin={"t": 70, "r": 20, "b": 20, "l": 20},
+            )
+            st.plotly_chart(pci_figure, width="stretch")
+
+            st.markdown("#### Kiểm định khác biệt PCI giữa các nhóm")
+            tests_table = pd.DataFrame([
+                {
+                    "Kiểm định": f"One-way ANOVA F({pci_tests['df1']},{pci_tests['df2']})",
+                    "Giá trị": f"{pci_tests['f']:.4f}",
+                    "p-value": format_p_value(pci_tests["p_anova"]),
+                    "n": pci_tests["n"],
+                },
+                {
+                    "Kiểm định": "Kruskal–Wallis H",
+                    "Giá trị": f"{pci_tests['h']:.4f}",
+                    "p-value": format_p_value(pci_tests["p_kw"]),
+                    "n": pci_tests["n"],
+                },
+                {
+                    "Kiểm định": "Eta² (SS giữa / SS tổng)",
+                    "Giá trị": f"{pci_tests['eta_sq']:.4f}",
+                    "p-value": "—",
+                    "n": pci_tests["n"],
+                },
+            ])
+            st.dataframe(tests_table, hide_index=True, width="stretch")
+            st.caption(
+                "Tính lại bằng scipy trên chính các điểm ở biểu đồ trên, rồi tự đối chiếu với "
+                "`results/external_validation.csv` — nếu lệch vượt sai số làm tròn, tab này dừng "
+                "thay vì hiển thị một số khác số đã công bố."
+            )
+
+            st.markdown("#### Thống kê theo nhóm")
+            pci_group_table = external_pci_group_stats(pci_view)
+            st.dataframe(
+                pci_group_table[["cluster_label", "n", "mean", "median", "std", "min", "max"]],
+                hide_index=True,
+                width="stretch",
+                column_config={
+                    "cluster_label": "Nhóm",
+                    "n": st.column_config.NumberColumn("n", format="%d"),
+                    "mean": st.column_config.NumberColumn("Mean", format="%.3f"),
+                    "median": st.column_config.NumberColumn("Median", format="%.3f"),
+                    "std": st.column_config.NumberColumn("Std (ddof=1)", format="%.3f"),
+                    "min": st.column_config.NumberColumn("Min", format="%.2f"),
+                    "max": st.column_config.NumberColumn("Max", format="%.2f"),
+                },
+            )
+
+            pci_all = external_assets["pci"]
+            top_window = pci_all.year.isin(PCI_TOP30_WINDOW)
+            top_scored = int((top_window & pci_all.pci_weighted_score.notna()).sum())
+            top_empty = int((top_window & pci_all.pci_weighted_score.isna()).sum())
+            st.warning(
+                f"**Caveat chọn mẫu:** PCI 2023–2024 nhà xuất bản chỉ công bố Top-30 tỉnh tốt — "
+                f"{top_empty} ô trống trong hai năm đó, KHÔNG nội suy; {top_scored} ô có điểm chỉ "
+                "dùng cho kiểm tra phụ bên dưới và không được ghép vào kiểm định chính 2011–2022."
+            )
+
+            st.markdown("#### Kiểm tra phụ: Top-30 2023–2024")
+            top_sets = {
+                year: set(
+                    pci_all.loc[
+                        pci_all.year.eq(year) & pci_all.pci_weighted_score.notna(),
+                        "province_ascii",
+                    ]
+                )
+                for year in PCI_TOP30_WINDOW
+            }
+            st.caption(
+                "Chỉ đọc như kiểm tra phụ: mẫu chọn theo thành tích nên mean bị kéo lên; "
+                f"{top_counts['window_cells']} ô có điểm, {top_counts['tested_points']} ô có nhãn "
+                f"(thiếu nhãn {top_counts['missing_label_cells']}); "
+                f"{len(top_sets[2023] & top_sets[2024])} tỉnh chung hai năm; chỉ 2023 có: "
+                f"{', '.join(sorted(top_sets[2023] - top_sets[2024])) or '—'}; chỉ 2024 có: "
+                f"{', '.join(sorted(top_sets[2024] - top_sets[2023])) or '—'}."
+            )
+            top_table = pd.DataFrame([
+                {
+                    "Kiểm định": f"One-way ANOVA F({top_tests['df1']},{top_tests['df2']})",
+                    "Giá trị": f"{top_tests['f']:.4f}",
+                    "p-value": format_p_value(top_tests["p_anova"]),
+                    "n": top_tests["n"],
+                },
+                {
+                    "Kiểm định": "Kruskal–Wallis H",
+                    "Giá trị": f"{top_tests['h']:.4f}",
+                    "p-value": format_p_value(top_tests["p_kw"]),
+                    "n": top_tests["n"],
+                },
+            ])
+            st.dataframe(top_table, hide_index=True, width="stretch")
+
+            st.markdown("#### Mật độ cơ sở y tế 2020 theo cụm")
+            health = external_section_frame(external_assets["validation"], "odm_health_2020")
+            st.dataframe(
+                health[["cluster_label", "n", "mean", "median", "std", "min", "max", "note"]],
+                hide_index=True,
+                width="stretch",
+                column_config={
+                    "cluster_label": "Nhóm",
+                    "n": st.column_config.NumberColumn("Số tỉnh", format="%d"),
+                    "mean": st.column_config.NumberColumn("Mean · cơ sở/1.000 dân", format="%.6f"),
+                    "median": st.column_config.NumberColumn("Median", format="%.6f"),
+                    "std": st.column_config.NumberColumn("Std", format="%.6f"),
+                    "min": st.column_config.NumberColumn("Min", format="%.6f"),
+                    "max": st.column_config.NumberColumn("Max", format="%.6f"),
+                    "note": "Quy mô nhóm (tổng cơ sở / dân số → tỷ trọng)",
+                },
+            )
+            st.caption(
+                "Mean/Median tính trên các tỉnh trong nhóm; cột 'Quy mô nhóm' là tỷ trọng tính trên "
+                "tổng quy mô nhóm. Nguồn: ODM Health Facilities 2020 (ODbL) point-in-polygon trên "
+                "ranh giới 63 tỉnh + dân số GSO 2020. Snapshot một năm, đếm số ĐIỂM y tế chứ không "
+                "phải số giường; các tỉnh có count = 0 là 0-thật (nguồn điểm không phủ — xem "
+                "`results/external_validation.md`). Chỉ dùng làm external check một lần, không đưa vào feature."
+            )
+
+            st.markdown("#### GRDP/người theo cụm — chỉ cửa sổ 2018–2024")
+            grdp = external_section_frame(external_assets["validation"], "grdp_2018_2024")
+            grdp = grdp.loc[grdp.year.notna()].copy()
+            grdp["year"] = grdp.year.astype(int)
+            grdp_figure = px.line(
+                grdp,
+                x="year",
+                y="median",
+                color="cluster_label",
+                markers=True,
+                color_discrete_map=palette,
+                hover_data={"n": True, "mean": True, "cluster_label": False},
+                labels={
+                    "cluster_label": "Nhóm",
+                    "year": "Năm",
+                    "median": "GRDP/người (triệu đồng, trung vị)",
+                },
+                title="GRDP/người theo cụm STING — trung vị nhóm",
+            )
+            grdp_figure.update_layout(
+                template="plotly_white",
+                height=430,
+                xaxis={"dtick": 1, "title": "Năm"},
+                yaxis_title="GRDP/người (triệu đồng, trung vị nhóm)",
+                legend_title_text="Nhóm",
+                margin={"t": 70, "r": 20, "b": 20, "l": 20},
+            )
+            st.plotly_chart(grdp_figure, width="stretch")
+            st.caption(
+                "Nguồn GSO pxweb V03.12 chỉ phủ 2018–2024 — không nội suy 2011–2017; 2024 = Sơ bộ "
+                "(chưa chính thức, có thể được sửa sau). Trong cửa sổ này gần như chỉ còn nhiễu vs "
+                "cụm 2 (cụm 0 rỗng, cụm 1 còn ít điểm)."
+            )
+
+            st.caption(
+                "Nguồn local: `data/processed/external_pci_63_full.csv` (PCI VCCI–USAID — provenance "
+                "`data/processed/external_provenance.md`, `data/raw/*/PROVENANCE.md`) và "
+                "`results/external_validation.csv`; tạo lại bằng `python scripts/external_validation.py`."
+            )
 
 with audit_tab:
     st.subheader("Feature, missingness và giới hạn thang đo")

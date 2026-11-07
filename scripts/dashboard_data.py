@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import json
+import math
+import re
 from pathlib import Path
 
 import joblib
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from .papi_pred_common import (
     REGRESSION_FEATURES,
@@ -281,3 +284,339 @@ def select_classification_model(metrics: pd.DataFrame) -> str:
         & metrics.model.isin(["logistic regression", "random forest"])
     ]
     return select_model_by_cv(candidates)
+
+
+# --------------------------------------------------------------------- #
+# Kiểm chứng ngoại lai — PCI (VCCI–USAID) · y tế 2020 · GRDP 2018–2024.
+# Nguồn: data/processed/external_pci_63_full.csv + results/external_validation.csv
+# (sinh bởi scripts/external_validation.py, provenance trong
+# data/processed/external_provenance.md). Mọi số tính lại từ CSV — không
+# hardcode, không nội suy ô thiếu.
+# --------------------------------------------------------------------- #
+
+_EXTERNAL_PCI_CSV = Path("data/processed/external_pci_63_full.csv")
+_EXTERNAL_VALIDATION_CSV = Path("results/external_validation.csv")
+_EXTERNAL_REBUILD_COMMAND = "python scripts/external_validation.py"
+
+# Cửa sổ của kiểm định CHÍNH (§1) và kiểm tra PHỤ Top-30 (§2) trong artifact.
+PCI_MAIN_WINDOW = (2011, 2022)
+PCI_TOP30_WINDOW = (2023, 2024)
+
+_REQUIRED_PCI_COLUMNS = {"province_code", "year", "province_vi", "pci_weighted_score"}
+_REQUIRED_VALIDATION_COLUMNS = {
+    "section", "group", "year", "n", "mean", "median", "std", "min", "max", "note",
+}
+_REQUIRED_VALIDATION_SECTIONS = (
+    "pci_2011_2022",
+    "pci_top30_2023_2024",
+    "odm_health_2020",
+    "grdp_2018_2024",
+)
+
+
+def load_external_validation_assets(root: Path = ROOT) -> dict:
+    """Load the two external-validation artifacts used by the dashboard tab."""
+    root = Path(root)
+    for label, relative_path in {
+        "pci": _EXTERNAL_PCI_CSV,
+        "validation": _EXTERNAL_VALIDATION_CSV,
+    }.items():
+        if not (root / relative_path).is_file():
+            raise DashboardDataError(
+                f"Thiếu artifact {relative_path.as_posix()} ({label}). "
+                f"Tạo lại bằng `{_EXTERNAL_REBUILD_COMMAND}`."
+            )
+    pci = pd.read_csv(root / _EXTERNAL_PCI_CSV, encoding="utf-8-sig")
+    validation = pd.read_csv(root / _EXTERNAL_VALIDATION_CSV, encoding="utf-8-sig")
+
+    missing_pci = _REQUIRED_PCI_COLUMNS - set(pci.columns)
+    if missing_pci:
+        raise DashboardDataError(
+            f"{_EXTERNAL_PCI_CSV.as_posix()} thiếu cột: {', '.join(sorted(missing_pci))}."
+        )
+    _require_unique_keys(pci, ["province_code", "year"], "PCI external")
+    missing_validation = _REQUIRED_VALIDATION_COLUMNS - set(validation.columns)
+    if missing_validation:
+        raise DashboardDataError(
+            f"{_EXTERNAL_VALIDATION_CSV.as_posix()} thiếu cột: "
+            f"{', '.join(sorted(missing_validation))}."
+        )
+    present_sections = set(validation.section.dropna().astype(str).str.strip())
+    missing_sections = set(_REQUIRED_VALIDATION_SECTIONS) - present_sections
+    if missing_sections:
+        raise DashboardDataError(
+            f"{_EXTERNAL_VALIDATION_CSV.as_posix()} thiếu section: "
+            f"{', '.join(sorted(missing_sections))}."
+        )
+    return {"pci": pci, "validation": validation}
+
+
+def prepare_external_pci_view(
+    pci: pd.DataFrame,
+    assignments: pd.DataFrame,
+    year_min: int = PCI_MAIN_WINDOW[0],
+    year_max: int = PCI_MAIN_WINDOW[1],
+) -> tuple[pd.DataFrame, dict]:
+    """Join PCI province-year cells with frozen STING labels on a year window.
+
+    Mirror của scripts/external_validation.py §1/§2: giữ ô có điểm PCI, nối
+    trái `pred_cluster`, chỉ kiểm định trên ô CÓ nhãn; ô thiếu nhãn được đếm,
+    không nội suy. `year_min/year_max` = 2023–2024 cho kiểm tra phụ Top-30.
+    """
+    keys = ["province_code", "year"]
+    _require_unique_keys(pci, keys, "PCI external")
+    _require_unique_keys(assignments, keys, "STING assignments")
+    if not _REQUIRED_PCI_COLUMNS <= set(pci.columns):
+        raise DashboardDataError("PCI external thiếu cột bắt buộc để nối nhãn cụm.")
+    if not {"pred_cluster"} <= set(assignments.columns):
+        raise DashboardDataError("STING assignments thiếu cột pred_cluster.")
+
+    window = pci.loc[
+        pci.year.between(year_min, year_max) & pci.pci_weighted_score.notna()
+    ].copy()
+    labels = assignments.loc[:, keys + ["pred_cluster"]]
+    joined = window.merge(
+        labels, on=keys, how="left", validate="one_to_one", indicator=True
+    )
+    missing_label = joined["_merge"].eq("left_only")
+    joined = joined.drop(columns="_merge")
+
+    view = joined.loc[joined.pred_cluster.notna()].copy()
+    view["pred_cluster"] = view["pred_cluster"].astype(int)
+    view["cluster_label"] = view.pred_cluster.map(_cluster_label)
+    view = view.sort_values(["year", "province_code"]).reset_index(drop=True)
+
+    n_by_cluster = {
+        int(code): int(size) for code, size in view.groupby("pred_cluster").size().items()
+    }
+    counts = {
+        "year_min": int(year_min),
+        "year_max": int(year_max),
+        "window_cells": int(len(window)),
+        "missing_label_cells": int(missing_label.sum()),
+        "tested_points": int(len(view)),
+        "clusters": sorted(n_by_cluster),
+        "n_by_cluster": n_by_cluster,
+    }
+    return view, counts
+
+
+def external_pci_group_stats(view: pd.DataFrame) -> pd.DataFrame:
+    """Per-cluster PCI summary, cùng quy ước bảng nhóm trong artifact."""
+    rows = []
+    for code, sub in view.groupby("pred_cluster"):
+        values = sub.pci_weighted_score
+        rows.append({
+            "pred_cluster": int(code),
+            "cluster_label": _cluster_label(code),
+            "n": int(len(sub)),
+            "mean": float(values.mean()),
+            "median": float(values.median()),
+            "std": float(values.std(ddof=1)) if len(sub) > 1 else float("nan"),
+            "min": float(values.min()),
+            "max": float(values.max()),
+        })
+    return pd.DataFrame(rows).sort_values("pred_cluster").reset_index(drop=True)
+
+
+def external_pci_tests(view: pd.DataFrame) -> dict:
+    """Recompute one-way ANOVA + Kruskal–Wallis trên các điểm PCI đã nối nhãn.
+
+    Cùng estimator với scripts/external_validation.py (scipy `f_oneway`,
+    `kruskal`, eta² = SS giữa / SS tổng) — không đọc lại số đã công bố.
+    """
+    if view.pci_weighted_score.isna().any():
+        raise DashboardDataError("PCI view còn ô thiếu điểm — không đưa vào kiểm định.")
+    groups = [sub.pci_weighted_score.to_numpy() for _, sub in view.groupby("pred_cluster")]
+    if len(groups) < 2:
+        raise DashboardDataError("Kiểm định ngoại lai cần ít nhất 2 nhóm cụm.")
+    f_stat, p_anova = stats.f_oneway(*groups)
+    h_stat, p_kw = stats.kruskal(*groups)
+    grand = view.pci_weighted_score.to_numpy()
+    ss_total = float(((grand - grand.mean()) ** 2).sum())
+    ss_between = float(sum(len(g) * (g.mean() - grand.mean()) ** 2 for g in groups))
+    return {
+        "f": float(f_stat),
+        "p_anova": float(p_anova),
+        "df1": len(groups) - 1,
+        "df2": len(view) - len(groups),
+        "h": float(h_stat),
+        "p_kw": float(p_kw),
+        "eta_sq": ss_between / ss_total if ss_total > 0 else float("nan"),
+        "n": int(len(view)),
+    }
+
+
+def format_p_value(p: float) -> str:
+    """Format p-value đúng quy ước cột note trong results/external_validation.csv."""
+    return "p < 1e-12" if p < 1e-12 else f"p = {p:.3g}"
+
+
+def _published_group_code(group) -> int:
+    """Map tên nhóm trong artifact ("nhiễu (–1)", "cụm 2") về mã cụm."""
+    text = str(group).strip()
+    if text.startswith("nhiễu"):
+        return -1
+    match = re.fullmatch(r"cụm\s+(-?\d+)", text)
+    if match:
+        return int(match.group(1))
+    raise DashboardDataError(
+        f"Không hiểu tên nhóm '{group}' trong {_EXTERNAL_VALIDATION_CSV.as_posix()}."
+    )
+
+
+def published_external_pci_tests(validation: pd.DataFrame, section: str) -> dict:
+    """Parse các dòng kiểm định đã công bố của một section PCI trong artifact."""
+    rows = validation.loc[validation.section.eq(section)]
+    if rows.empty:
+        raise DashboardDataError(
+            f"{_EXTERNAL_VALIDATION_CSV.as_posix()} không có section '{section}'."
+        )
+
+    def _single_row(prefix: str) -> pd.Series:
+        hits = rows.loc[rows.group.astype(str).str.strip().str.startswith(prefix)]
+        if len(hits) != 1:
+            raise DashboardDataError(
+                f"Section '{section}' cần đúng 1 dòng '{prefix}…', thấy {len(hits)}."
+            )
+        return hits.iloc[0]
+
+    anova_row = _single_row("ANOVA F(")
+    anova_df = re.fullmatch(
+        r"ANOVA F\((\d+),\s*(\d+)\)", str(anova_row.group).strip()
+    )
+    anova_note = re.fullmatch(
+        r"F\s*=\s*([0-9.eE+-]+)\s*;\s*p\s*=\s*([0-9.eE+-]+)",
+        str(anova_row.note).strip(),
+    )
+    kruskal_note = re.fullmatch(
+        r"H\s*=\s*([0-9.eE+-]+)\s*;\s*p\s*=\s*([0-9.eE+-]+)",
+        str(_single_row("Kruskal").note).strip(),
+    )
+    eta_note = re.fullmatch(
+        r"eta²\s*=\s*([0-9.eE+-]+)(?:\s*\(.*\))?",
+        str(_single_row("eta").note).strip(),
+    )
+    if not (anova_df and anova_note and kruskal_note and eta_note):
+        raise DashboardDataError(
+            f"Section '{section}' có dòng kiểm định không đọc được định dạng."
+        )
+    artifact_n = anova_row["n"]
+    if pd.isna(artifact_n) or str(artifact_n).strip() == "":
+        raise DashboardDataError(f"Section '{section}' thiếu n cho dòng kiểm định.")
+    try:
+        published_n = int(float(artifact_n))
+    except (TypeError, ValueError) as exc:
+        raise DashboardDataError(
+            f"Section '{section}' có n không đọc được cho dòng kiểm định."
+        ) from exc
+    return {
+        "df1": int(anova_df.group(1)),
+        "df2": int(anova_df.group(2)),
+        "f": float(anova_note.group(1)),
+        "p_anova": float(anova_note.group(2)),
+        "h": float(kruskal_note.group(1)),
+        "p_kw": float(kruskal_note.group(2)),
+        "eta_sq": float(eta_note.group(1)),
+        "n": published_n,
+    }
+
+
+def ensure_external_pci_consistency(
+    view: pd.DataFrame,
+    validation: pd.DataFrame,
+    section: str = "pci_2011_2022",
+) -> dict:
+    """Tính lại kiểm định PCI và TỪ CHỐI mọi lệch vượt sai số làm tròn.
+
+    Số công bố (ANOVA F=9.04, Kruskal H=31.78, …) không được đổi: nếu số tính
+    lại từ CSV lệch artifact nhiều hơn độ làm tròn (4 số lẻ cho F/H/eta², 3 chữ
+    số có nghĩa cho p, giá trị nguyên cho n/df), raise thay vì hiển thị số khác
+    một cách âm thầm. Trả về dict số tính lại để dashboard hiển thị.
+    """
+    recomputed = external_pci_tests(view)
+    published = published_external_pci_tests(validation, section)
+    problems: list[str] = []
+    for key in ("df1", "df2", "n"):
+        if recomputed[key] != published[key]:
+            problems.append(f"{key}: tính lại {recomputed[key]} ≠ artifact {published[key]}")
+    for key in ("f", "h", "eta_sq"):
+        if abs(recomputed[key] - published[key]) > 5.1e-5:
+            problems.append(
+                f"{key}: tính lại {recomputed[key]:.6f} ≠ artifact {published[key]}"
+            )
+    for key in ("p_anova", "p_kw"):
+        if not math.isclose(recomputed[key], published[key], rel_tol=0.006):
+            problems.append(
+                f"{key}: tính lại {recomputed[key]:.3g} ≠ artifact {published[key]:.3g}"
+            )
+
+    group_stats = external_pci_group_stats(view).set_index("pred_cluster")
+    section_rows = validation.loc[validation.section.eq(section)]
+    for _, row in section_rows.iterrows():
+        try:
+            code = _published_group_code(row.group)
+        except DashboardDataError:
+            continue  # dòng kiểm định (ANOVA/Kruskal/eta), không phải nhóm cụm
+        if code not in group_stats.index:
+            problems.append(f"nhóm '{row.group}' không có trong dữ liệu tính lại.")
+            continue
+        recomputed_row = group_stats.loc[code]
+        for key in ("n", "mean", "median", "std", "min", "max"):
+            artifact_value = row[key]
+            artifact_missing = pd.isna(artifact_value) or str(artifact_value).strip() == ""
+            recomputed_value = recomputed_row[key]
+            if artifact_missing:
+                if not pd.isna(recomputed_value):
+                    problems.append(
+                        f"{key} nhóm '{row.group}': artifact trống nhưng tính lại có giá trị."
+                    )
+                continue
+            try:
+                artifact_number = float(artifact_value)
+            except (TypeError, ValueError):
+                problems.append(
+                    f"{key} nhóm '{row.group}': artifact không đọc được '{artifact_value}'."
+                )
+                continue
+            if pd.isna(recomputed_value):
+                problems.append(
+                    f"{key} nhóm '{row.group}': tính lại trống nhưng artifact = {artifact_value}."
+                )
+            elif key == "n":
+                if int(recomputed_value) != int(artifact_number):
+                    problems.append(
+                        f"n nhóm '{row.group}': tính lại {int(recomputed_value)} "
+                        f"≠ artifact {int(artifact_number)}."
+                    )
+            elif abs(float(recomputed_value) - artifact_number) > 5.01e-4:
+                problems.append(
+                    f"{key} nhóm '{row.group}': tính lại {float(recomputed_value):.4f} "
+                    f"≠ artifact {artifact_value}."
+                )
+
+    if problems:
+        raise DashboardDataError(
+            "Số PCI tính lại KHÔNG khớp artifact đã công bố ("
+            + "; ".join(problems)
+            + f"). Chạy lại `{_EXTERNAL_REBUILD_COMMAND}` rồi làm mới dashboard."
+        )
+    return recomputed
+
+
+def external_section_frame(validation: pd.DataFrame, section: str) -> pd.DataFrame:
+    """Rows của một section nhóm cụm (y tế 2020, GRDP 2018–2024) + nhãn dashboard.
+
+    Chỉ dùng cho section mà mọi dòng là nhóm cụm; section PCI có thêm các dòng
+    kiểm định nên sẽ bị từ chối bởi `_published_group_code`.
+    """
+    rows = validation.loc[validation.section.eq(section)].copy()
+    if rows.empty:
+        raise DashboardDataError(
+            f"{_EXTERNAL_VALIDATION_CSV.as_posix()} không có section '{section}'."
+        )
+    rows["pred_cluster"] = [_published_group_code(group) for group in rows.group]
+    rows["cluster_label"] = rows.pred_cluster.map(_cluster_label)
+    rows["year"] = rows.year.astype("Int64")
+    rows["n"] = rows.n.astype("Int64")
+    return rows.sort_values(["pred_cluster", "year"]).reset_index(drop=True)

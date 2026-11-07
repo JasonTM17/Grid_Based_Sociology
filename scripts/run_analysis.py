@@ -100,14 +100,26 @@ def label_noise_points(ax, fig, sub, nmap, fontsize: float = 5.5) -> None:
     r_mark = float(np.sqrt(110 / np.pi)) + 0.6  # bán kính marker (point)
     bb = ax.get_window_extent()
     ax_bb = (bb.x0 / k, bb.y0 / k, bb.x1 / k, bb.y1 / k)
-    # 8 ứng viên (dx, dy, ha, va) theo point: phải, trái, trên, dưới, 4 chéo.
-    cands = (
+    # Ứng viên (dx, dy, ha, va) theo point: phải, trái, trên, dưới, 4 chéo —
+    # 2 vòng (gần + 1.9x xa) để chữ lớn vẫn có lối thoát ở vùng dày đặc.
+    # Khoảng neo gốc đặt cho fontsize 5.5 — co giãn theo cỡ chữ để mép chữ
+    # luôn cách marker một khoảng tương đương (lớp trình bày thuần).
+    s_f = fontsize / 5.5
+    ring1 = (
         (8, -2, "left", "center"), (-8, -2, "right", "center"),
         (0, 8, "center", "bottom"), (0, -10, "center", "top"),
         (7, 6, "left", "bottom"), (-7, 6, "right", "bottom"),
         (7, -11, "left", "top"), (-7, -11, "right", "top"),
     )
+    ring2 = tuple((dx * 1.9, dy * 1.9, ha, va) for dx, dy, ha, va in ring1)
+    cands = tuple((dx * s_f, dy * s_f, ha, va) for dx, dy, ha, va in ring1 + ring2)
     placed = []  # hộp (x0, x1, y0, y1) các nhãn đã đặt, theo point
+    # Legend cũng là vật cản: seed bbox của nó vào `placed` để nhãn không đè
+    # lên chú giải ở góc trái-dưới (draw đã chạy trước khi gọi hàm này).
+    leg = ax.get_legend()
+    if leg is not None:
+        lb = leg.get_window_extent(fig.canvas.get_renderer())
+        placed.append((lb.x0 / k, lb.x1 / k, lb.y0 / k, lb.y1 / k))
 
     def rect(cx, cy, cand, w, h):
         dx, dy, ha, va = cand
@@ -361,7 +373,11 @@ def main() -> int:
         labels = dict(zip(pred[pred.year == yr].province_code, pred[pred.year == yr].pred_cluster))
         sub = cent[cent.province_code.isin(labels)].copy()
         sub["cluster"] = sub.province_code.map(labels)
-        fig, ax = new_fig(target=None, figsize=(6.2, 9.5))
+        # Cỡ chữ trình bày cần bản đồ đủ lớn trên slide (slide 11 đặt h≈5.75in):
+        # canvas 8.0×9.2in + font lớn (title 20 / legend 13 / nhãn 12pt) cho
+        # cỡ hiệu dụng ~7.5-12.5pt khi thu về slide; 12 là cỡ nhãn lớn nhất
+        # không gây chồng nhãn trong vùng delta dày đặc (đo bằng probe bbox).
+        fig, ax = new_fig(target=None, figsize=(8.0, 9.2))
         for c in sorted(sub.cluster.unique()):
             m = sub.cluster == c
             ax.scatter(sub.longitude[m], sub.latitude[m], s=110,
@@ -369,8 +385,8 @@ def main() -> int:
                        label=CLUSTER_LABELS.get(int(c), f"cụm {c}"))
         prow = df[df.year == yr][["province_code", "province_vi"]]
         nmap = dict(zip(prow.province_code, prow.province_vi))
-        ax.set_title(f"Cụm STING — {yr}")
-        ax.legend(loc="lower left", fontsize=7)
+        ax.set_title(f"Cụm STING — {yr}", fontsize=20)
+        ax.legend(loc="lower left", fontsize=13)
         # Đơn vị độ bắt buộc với trục toạ độ địa lý.
         ax.set_xlabel(f"{AX_KINH_DO} (°)")
         ax.set_ylabel(f"{AX_VI_DO} (°)")
@@ -382,7 +398,7 @@ def main() -> int:
         # (thử 8 hướng quanh marker, chấm điểm theo khoảng cách tới marker/
         # nhãn khác) — chỉ lớp trình bày, không đổi dữ liệu.
         fig.canvas.draw()
-        label_noise_points(ax, fig, sub, nmap, fontsize=5.5)
+        label_noise_points(ax, fig, sub, nmap, fontsize=12)
         save_png(fig, FIGS / f"map_{yr}.png", dpi=300)
         plt.close(fig)
         print(f"5) map {yr} ->", FIGS / f"map_{yr}.png")

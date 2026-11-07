@@ -9,7 +9,7 @@ from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.util import Inches, Pt
-from pptx.enum.text import PP_ALIGN
+from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 
 ROOT = Path(__file__).resolve().parent.parent
 FIGS = ROOT / "results" / "figs"
@@ -110,19 +110,19 @@ def text(slide, x, y, w, h, runs, align=PP_ALIGN.LEFT, space_after=4):
 
 def header(slide, kicker, title, page_no):
     rect(slide, 0, 0, SW, 0.16, TEAL)
-    text(slide, 0.55, 0.32, 10.5, 0.3, [(kicker, 10.5, True, TEAL)])
+    text(slide, 0.55, 0.32, 10.5, 0.3, [(kicker, 12, True, TEAL)])
     text(slide, 0.55, 0.58, 12.2, 0.75, [(title, 26, True, NAVY)])
     # footer
     rect(slide, 0.55, SH - 0.42, SW - 1.1, 0.012, RGBColor(0xD8, 0xD5, 0xCC))
-    text(slide, 0.55, SH - 0.36, 9.5, 0.3, [("Topic 6 · STING × PAPI 2011–2024 · Nhóm 15", 9, False, GREY)])
-    text(slide, SW - 1.6, SH - 0.36, 1.1, 0.3, [(f"{page_no:02d} / 16", 9, True, GREY)], align=PP_ALIGN.RIGHT)
+    text(slide, 0.55, SH - 0.36, 9.5, 0.3, [("Topic 6 · STING × PAPI 2011–2024 · Nhóm 15", 10, False, GREY)])
+    text(slide, SW - 1.6, SH - 0.36, 1.1, 0.3, [(f"{page_no:02d} / 16", 10, True, GREY)], align=PP_ALIGN.RIGHT)
 
 
 def note(slide, text_md):
     slide.notes_slide.notes_text_frame.text = text_md
 
 
-def bullets(slide, x, y, w, h, items, size=13, color=INK, gap_pt=6, bold_first=True):
+def bullets(slide, x, y, w, h, items, size=13, color=INK, gap_pt=6, bold_first=True, lead_color=TEAL):
     tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = tb.text_frame
     tf.word_wrap = True
@@ -134,7 +134,7 @@ def bullets(slide, x, y, w, h, items, size=13, color=INK, gap_pt=6, bold_first=T
             r1.text = "▸  " + lead + " "
             r1.font.bold = bold_first
             r1.font.size = Pt(size)
-            r1.font.color.rgb = TEAL
+            r1.font.color.rgb = lead_color
             r1.font.name = "Calibri"
         r2 = p.add_run()
         r2.text = rest
@@ -203,47 +203,47 @@ steps = [
     ("3", "GOM CỤM", "Ô “dày” (count ≥ min_count)\nliền kề → cụm;\nđiểm ở ô thưa → nhiễu (−1)."),
 ]
 for i, (n, title, body) in enumerate(steps):
-    x0 = 0.62 + i * 4.35
-    rect(s, x0, 1.5, 3.9, 0.62, TEAL)
-    text(s, x0, 1.56, 3.9, 0.4, [(f"BƯỚC {n} — {title}", 14, True, WHITE)], align=PP_ALIGN.CENTER)
-    rect(s, x0, 2.12, 3.9, 2.25, LIGHT)
-    text(s, x0 + 0.22, 2.35, 3.5, 1.9, [(body, 11, False, INK)])
-text(s, 0.62, 4.75, 12.1, 1.6, [
-    ("Chi phí xây lưới O(n) · truy vấn vùng dùng thống kê ô · không cần gán cụm trước", 12, True, NAVY),
-    ("Nhược điểm: lưới song song trục, nhạy độ phân giải & min_count — nhóm đo độ nhạy, báo cáo trung thực.", 10.5, False, GREY),
+    x0 = 0.55 + i * 4.19
+    rect(s, x0, 1.5, 3.85, 0.62, TEAL)
+    text(s, x0, 1.56, 3.85, 0.4, [(f"BƯỚC {n} — {title}", 14, True, WHITE)], align=PP_ALIGN.CENTER)
+    rect(s, x0, 2.12, 3.85, 2.25, LIGHT)
+    text(s, x0 + 0.22, 2.88, 3.41, 1.3, [(body, 12, False, INK)])
+text(s, 0.55, 5.15, 12.23, 1.6, [
+    ("Chi phí xây lưới O(n) · truy vấn vùng dùng thống kê ô · không cần gán cụm trước", 13, True, NAVY),
+    ("Nhược điểm: lưới song song trục, nhạy độ phân giải & min_count — nhóm đo độ nhạy, báo cáo trung thực.", 11.5, False, GREY),
 ])
 note(s, "Vẽ 1 lần, chỉ tay 3 ô. Nhấn mạnh O(n) và tách nhiễu.")
 
 # ---------- Slide 4 — Dữ liệu ----------
 s = slide_new()
 header(s, "DỮ LIỆU", "PAPI: 14 năm × 63 tỉnh, sạch và đã audit", 4)
-bullets(s, 0.55, 1.3, 6.7, 4.6, [
+bullets(s, 0.55, 1.45, 6.7, 4.6, [
     ("Nguồn.", "PAPI 2011–2024 (papi.org.vn) — 14 workbook, 2 định dạng (tỉnh-hàng / ma trận chuyển vị)."),
     ("Panel.", "882 × 41: d1–d6 (mọi năm) + d7/d8 (2018+) + 29 sub-dim; 39 cột số."),
     ("0.0 → NaN.", "“Không có dữ liệu” theo quy ước gói replication Mendeley (đối chiếu khớp 100%)."),
     ("PROVENANCE.", "URL + hash SHA-256 mọi nguồn trong repo — tái lập được."),
     ("Nguồn ngoài (kiểm chứng).", "PCI VCCI–USAID · GSO (dân số, GRDP) · OD Mekong y tế 2020 · WDI — chỉ dùng kiểm chứng ngoại lai, không đưa vào feature."),
-], size=12.5)
-rect(s, 7.55, 1.35, 5.2, 2.35, RGBColor(0xFD, 0xF3, 0xDC))
-text(s, 7.85, 1.55, 4.7, 0.35, [("⚠ GÃY THANG ĐO (phát hiện khi làm sạch)", 12, True, RGBColor(0x8A, 0x5A, 0x00))])
-text(s, 7.85, 2.05, 4.8, 1.5, [("23/37 cột chỉ tiêu có bước nhảy trung bình năm > 0.25 điểm (vd sd_5_4 đổi thang 2021; sd_2_1 đổi 2018).", 11, False, INK),
-                               ("→ Pipeline xuyên năm chỉ dùng chỉ tiêu qua audit; báo cáo ghi rõ.", 10, True, RGBColor(0x8A, 0x5A, 0x00))])
-rect(s, 7.55, 3.95, 5.2, 1.65, LIGHT)
-text(s, 7.85, 4.15, 4.7, 0.3, [("VÍ DỤ CHỈ TIÊU SẠCH (dùng để phân cụm)", 11, True, TEAL)])
-text(s, 7.85, 4.6, 4.8, 0.9, [("sd_4_2 · Kiểm soát tham nhũng dịch vụ công", 10.5, False, INK),
-                              ("sd_6_1 · Y tế công lập — ổn định 2011–2024", 10.5, False, INK)])
+], size=14, gap_pt=12)
+rect(s, 7.55, 1.35, 5.2, 2.45, RGBColor(0xFD, 0xF3, 0xDC))
+text(s, 7.85, 1.55, 4.7, 0.35, [("⚠ GÃY THANG ĐO (phát hiện khi làm sạch)", 13, True, RGBColor(0x8A, 0x5A, 0x00))])
+text(s, 7.85, 2.1, 4.8, 1.6, [("23/37 cột chỉ tiêu có bước nhảy trung bình năm > 0.25 điểm (vd sd_5_4 đổi thang 2021; sd_2_1 đổi 2018).", 12.5, False, INK),
+                              ("→ Pipeline xuyên năm chỉ dùng chỉ tiêu qua audit; báo cáo ghi rõ.", 12, True, RGBColor(0x8A, 0x5A, 0x00))])
+rect(s, 7.55, 4.15, 5.2, 1.85, LIGHT)
+text(s, 7.85, 4.4, 4.7, 0.35, [("VÍ DỤ CHỈ TIÊU SẠCH (dùng để phân cụm)", 12, True, TEAL)])
+text(s, 7.85, 4.9, 4.8, 0.9, [("sd_4_2 · Kiểm soát tham nhũng dịch vụ công", 12, False, INK),
+                              ("sd_6_1 · Y tế công lập — ổn định 2011–2024", 12, False, INK)])
 note(s, "Nhấn mạnh: khác biệt dữ liệu thật so với dữ liệu làm sẵn — audit bắt buộc.")
 
 # ---------- Slide 5 — Demo synthetic ----------
 s = slide_new()
 header(s, "DEMO 1", "STING thực thi đúng trên dữ liệu giả lập", 5)
-pic(s, "00_synthetic_sting.png", 0.55, 1.5, h=3.19)
-bullets(s, 8.0, 1.6, 4.8, 4.2, [
+pic(s, "00_synthetic_sting.png", 0.55, 1.7, h=4.55)
+bullets(s, 7.9, 2.5, 4.85, 4.0, [
     ("Dữ liệu.", "2 blob Gauss, 240 điểm, seed 42."),
     ("Kết quả.", "ARI = 0.950 · nhiễu 2.5% · đúng 2 cụm."),
     ("Lưới.", "Factor=4, 3 mức; ô dày → gom cụm."),
     ("Kiểm thử.", "src/sting.py: 28 unit test (pytest) xanh — chính xác thống kê ô từng ô."),
-], size=12)
+], size=13.5, gap_pt=14)
 note(s, "Show hình bên trái; nói ARI và tests.")
 
 # ---------- Slide 6 — Dữ liệu thật 2023 ----------
@@ -261,22 +261,22 @@ note(s, "Đây là phát hiện quan trọng nhất về dữ liệu — trình 
 # ---------- Slide 7 — Pipeline dự đoán ----------
 s = slide_new()
 header(s, "DỰ ĐOÁN", "Hai mô hình local, cùng nạp từ file", 7)
-rect(s, 0.6, 1.5, 3.1, 0.72, TEAL)
-text(s, 0.6, 1.56, 3.1, 0.4, [("TRAIN 2011–2023", 14, True, WHITE)], align=PP_ALIGN.CENTER)
-rect(s, 4.5, 1.3, 3.3, 1.1, LIGHT)
-text(s, 4.5, 1.42, 3.3, 0.9, [("models/", 13, True, NAVY), ("sting_predict_model.pkl\nsup_ridge.joblib", 10, False, GREY)], align=PP_ALIGN.CENTER)
-rect(s, 8.6, 1.5, 3.1, 0.72, GOLD)
-text(s, 8.6, 1.56, 3.1, 0.4, [("PREDICT 2024", 14, True, NAVY)], align=PP_ALIGN.CENTER)
+rect(s, 0.6, 1.6, 3.1, 0.72, TEAL)
+text(s, 0.6, 1.66, 3.1, 0.4, [("TRAIN 2011–2023", 14, True, WHITE)], align=PP_ALIGN.CENTER)
+rect(s, 4.5, 1.4, 3.3, 1.1, LIGHT)
+text(s, 4.5, 1.52, 3.3, 0.9, [("models/", 13, True, NAVY), ("sting_predict_model.pkl\nsup_ridge.joblib", 11.5, False, GREY)], align=PP_ALIGN.CENTER)
+rect(s, 8.6, 1.6, 3.1, 0.72, GOLD)
+text(s, 8.6, 1.66, 3.1, 0.4, [("PREDICT 2024", 14, True, NAVY)], align=PP_ALIGN.CENTER)
 for x0 in (3.7, 7.8):
-    a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, Inches(x0), Inches(1.65), Inches(0.8), Inches(0.4))
+    a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, Inches(x0), Inches(1.75), Inches(0.8), Inches(0.4))
     a.fill.solid()
     a.fill.fore_color.rgb = TEAL
     a.line.fill.background()
-bullets(s, 0.6, 3.3, 12.1, 3.4, [
-    ("STING.predict (không giám sát).", "Gán tỉnh vào ô lưới đã học; điểm ngoài vùng học → −1. 2024 là năm out-of-sample duy nhất khi chọn cấu hình."),
-    ("Chọn cấu hình train-only.", "Quét ứng viên ≤2020; kiểm trên tương lai giả 2021–2022; 2024 không tham gia chọn (tránh selection-on-test) — `predict_sweep.py`."),
+bullets(s, 0.6, 3.6, 12.1, 3.2, [
+    ("STING.predict (không giám sát).", "Gán tính vào ô lưới đã học; điểm ngoài vùng học → −1. 2024 là năm out-of-sample duy nhất khi chọn cấu hình."),
+    ("Chọn cấu hình train-only.", "Quét ứng viên ≤2020; kiểm trên tương lai giả 2021–2022; 2024 không tham gia chọn (tránh selection-on-test) — predict_sweep.py."),
     ("Model giám sát (Ridge/RF).", "Dự báo “6.1 Y tế công lập” năm sau từ 8 chỉ tiêu sạch năm nay; Ridge được chọn, MAE thấp hơn carry-forward 6.3%; RF 9.8% nhưng CV R² thấp hơn nên không chọn (holdout 2023→2024)."),
-], size=11.5)
+], size=13.5, gap_pt=12)
 note(s, "Vẽ tay sơ đồ 3 khối; nhấn: không có dịch vụ ngoài — mọi model lưu local.")
 
 # ---------- Slide 8 — Kết quả dự đoán ----------
@@ -314,18 +314,24 @@ rows = [
     ("DBSCAN eps=0.2", "5", "14%", "0.218*", "0.647"),
     ("DBSCAN eps=0.4+", "1", "≤3%", "n/a", "≤0.135"),
 ]
-tb = s.shapes.add_table(len(rows), 5, Inches(0.6), Inches(1.4), Inches(12.1), Inches(3.6)).table
-tb.columns[0].width = Inches(3.6)
+tb = s.shapes.add_table(len(rows), 5, Inches(0.6), Inches(1.5), Inches(12.18), Inches(3.7)).table
+tb.columns[0].width = Inches(3.3)
+for c in range(1, 5):
+    tb.columns[c].width = Inches(2.22)
+tb.rows[0].height = Inches(0.6)
+for r_i in range(1, len(rows)):
+    tb.rows[r_i].height = Inches(0.62)
 for i, row in enumerate(rows):
     for j, v in enumerate(row):
         cell = tb.cell(i, j)
         cell.margin_left = Inches(0.06)
         cell.margin_top = Inches(0.02)
+        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
         tf = cell.text_frame
         tf.text = v
         p = tf.paragraphs[0]
         r = p.runs[0]
-        r.font.size = Pt(11.5)
+        r.font.size = Pt(13)
         r.font.name = "Calibri"
         if i == 0:
             r.font.bold = True
@@ -336,34 +342,34 @@ for i, row in enumerate(rows):
             r.font.color.rgb = INK
             cell.fill.solid()
             cell.fill.fore_color.rgb = WHITE if i % 2 else LIGHT
-text(s, 0.6, 5.35, 12, 0.8, [
-    ("* Metric hình học tính trên điểm thuộc cụm (loại −1). k-means ép mọi điểm vào cụm.", 10.5, False, GREY),
-    ("STING ≈ DBSCAN khi eps nhỏ (ARI 0.65); k-means tách khác nhau — dữ liệu gần như một khối.", 10.5, False, GREY),
+text(s, 0.6, 5.6, 12, 0.8, [
+    ("* Metric hình học tính trên điểm thuộc cụm (loại −1). k-means ép mọi điểm vào cụm.", 12, False, GREY),
+    ("STING ≈ DBSCAN khi eps nhỏ (ARI 0.65); k-means tách khác nhau — dữ liệu gần như một khối.", 12, False, GREY),
 ])
 note(s, "Chỉ vào hàng STING; giải thích vì sao noise được tách.")
 
 # ---------- Slide 11 — Bản đồ ----------
 s = slide_new()
-header(s, "BẢN ĐỒ", "63 tỉnh trên bản đồ — ngoại vi rải rác", 11)
-pic(s, "map_2024.png", 0.6, 1.25, h=4.95)
-bullets(s, 7.3, 1.5, 5.4, 4.6, [
-    ("Join qua code.", "GeoJSON `code` hằng 'AD01' → nối qua centroids theo `province_code` (đúng 63/63)."),
+header(s, "BẢN ĐỒ", "61/63 tỉnh có điểm 2024 — 13 ngoại vi rải rác", 11)
+pic(s, "map_2024.png", 0.55, 1.3, h=5.75)
+bullets(s, 5.6, 1.9, 7.15, 4.6, [
+    ("Join qua code.", "GeoJSON 'AD01' → centroids theo province_code (63/63). Vĩnh Phúc, Tiền Giang thiếu điểm 2024."),
     ("2024.", "48 tỉnh cụm lớn (xanh), 13 tỉnh nhiễu (xám, chú thích tên)."),
     ("2020 vs 2024.", "Hai mốc — cùng lưới toàn cục nên nhãn so sánh được giữa các năm."),
     ("Ý nghĩa.", "Nhóm ngoại vi rải đều các miền — không phải một vùng địa lý riêng."),
-], size=11.5)
-note(s, "Chỉ tay 2–3 tỉnh ngoại vi (Lào Cai, Điện Biên).")
+], size=13.5, gap_pt=12)
+note(s, "Chỉ tay 2–3 tỉnh nhiễu rải rác (Quảng Ninh, Hà Nội, Cà Mau). 61 dot = 48 cụm lớn + 13 nhiễu; Vĩnh Phúc/Tiền Giang không có điểm 2024. Lào Cai, Điện Biên thuộc cụm lớn (xanh).")
 
 # ---------- Slide 12 — Hạn chế ----------
 s = slide_new()
 header(s, "TRUNG THỰC", "Hạn chế — nói rõ trước khi được hỏi", 12)
-bullets(s, 0.55, 1.3, 12.2, 5.4, [
+bullets(s, 0.55, 2.6, 12.2, 4.4, [
     ("Đồng nhất.", "Dữ liệu PAPI cấp tỉnh/năm gần như một khối — cấu trúc tách biệt chỉ ở ngoại vi nhỏ."),
     ("Gãy thang đo.", "23/37 cột đổi thang giữa các năm; phân tích xuyên năm chỉ dùng chỉ tiêu qua audit."),
     ("Robustness OFAT.", f"PCA d1–d6 ({_pct(R_PCA['explained_var_total'])} phương sai) → không nhận diện; 8 chiều 2018–2024 so với gốc (k={R_GOC['k']}, nhiễu {_pct(R_GOC['noise_ratio'])}): f=3 → k={R_F3['k']}/{_pct(R_F3['noise_ratio'])}, lv=2 → k={R_LV2['k']}/100% → không nhận diện; mc=2 → k={R_MC2['k']}/{_pct(R_MC2['noise_ratio'])} đạt ngưỡng k/noise NHƯNG silhouette âm — tách yếu."),
     ("Metrics không bản địa.", "Silhouette/DB/CH với lưới song song trục chỉ để so sánh thô; noise tách riêng."),
     ("Một holdout.", "2024 là năm test duy nhất; Ridge (được chọn) thấp hơn carry-forward 6.3% MAE — cần thêm năm để khẳng định."),
-], size=12)
+], size=14, gap_pt=14)
 note(s, "Đây là slide ghi điểm: tự nêu hạn chế trước, Q&A sẽ dễ trả lời.")
 
 # ---------- Slide 13 — Kế hoạch cuối kỳ ----------
@@ -413,11 +419,11 @@ s = slide_new()
 rect(s, 0, 0, SW, SH, NAVY)
 rect(s, 0, SH - 0.18, SW, 0.18, GOLD)
 text(s, 0.85, 1.6, 11, 0.8, [("Q & A", 64, True, GOLD)])
-text(s, 0.85, 3.2, 11.5, 0.5, [("5 phút phản biện — nhóm sẵn sàng cho mọi câu hỏi.", 17, True, WHITE)])
-bullets(s, 0.85, 4.15, 11.5, 2.6, [
+text(s, 0.85, 3.2, 11.5, 0.5, [("5 phút phản biện — nhóm sẵn sàng cho mọi câu hỏi.", 20, True, WHITE)])
+bullets(s, 0.85, 4.3, 11.5, 2.6, [
     ("Câu hỏi đầu tiên.", "“Vì sao grid-based?”"),
     ("Nghi thức phản biện.", "Nếu không chắc — nhóm nói thẳng “chưa chắc, sẽ kiểm và trả lời”."),
-], size=13, color=WHITE, bold_first=True)
+], size=16, color=WHITE, bold_first=True, lead_color=GOLD)
 note(s, "Kết thúc: cảm ơn + mời GV hỏi. Không đọc slide.")
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
