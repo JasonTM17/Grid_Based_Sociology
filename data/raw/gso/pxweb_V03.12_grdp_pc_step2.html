@@ -1,0 +1,924 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+
+<style type="text/css">
+
+.auto-style2 {
+	font-weight:bold;
+	font-style:italic;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+	text-align: center;
+	border-style: none;
+	border-color: inherit;
+	border-width: 0;
+	margin: 0;
+	padding: 0;
+}
+.auto-style5 {
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+	border-style: none;
+	border-color: inherit;
+	border-width: 0;
+	margin: 0;
+	padding: 0;
+}
+</style>
+
+
+<!--[if lt IE 7 ]> <html xmlns="http://www.w3.org/1999/xhtml" class="ie6"> <![endif]-->
+<!--[if IE 7 ]> <html xmlns="http://www.w3.org/1999/xhtml" class="ie7"> <![endif]-->
+<!--[if IE 8 ]> <html xmlns="http://www.w3.org/1999/xhtml" class="ie8"> <![endif]-->
+<!--[if IE 9 ]> <html xmlns="http://www.w3.org/1999/xhtml" class="ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html xmlns="http://www.w3.org/1999/xhtml"> <!--<![endif]-->
+<head><link href="../../../../../../../Resources/Styles/reset.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/PxWeb.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/CommandBar.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/variableselector.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/datasort.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/excel.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/footnote.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/tablequery.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/hierarchical.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/information.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/searchvalues.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/table.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/tableinformation.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/tablelist.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/tableofcontent.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/textsearch.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/TreeView.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/navigationFlow.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/breadcrumb.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/search.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/jQuery/redmond/jquery-ui-1.10.3.custom.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/jQuery/tablesorter/style.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/Custom.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../../../../Resources/Styles/savequery.css" rel="stylesheet" type="text/css" media="screen" />
+    <script src="/Resources/Scripts/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/pcaxis.web.client.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/pcaxis.web.controls.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/jquery.tablesorter.min.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/jquery.metadata.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/format.20110630-1100.min.js" type="text/javascript"></script>
+
+    
+    
+    <link rel="stylesheet" href='/Resources/Styles/print.css' type="text/css" media="print" />
+
+
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7CPQ921LE0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-7CPQ921LE0');
+</script>
+<title>
+	PX-Web - Table
+</title></head>
+<body>
+    <form method="post" action="./?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b" id="aspnetForm">
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKMTM3MDk0MjEzNQ9kFgJmD2QWAmYPZBYCAgMPZBYIAgcPZBYCZg9kFgoCAw8PFgIeC05hdmlnYXRlVXJsBTQvcHh3ZWIvdmkvP3J4aWQ9Nzk4OTUxMzItZmY1MC00ZDYxLWIyZmUtZmRmOGYyOTRlNjliZBYCZg8PFgYeCEltYWdlVXJsBb8BL1dlYlJlc291cmNlLmF4ZD9kPW01QmtqUGtVMVE5SUZvQVVJcUluYi1pbVlBNjdJMWNGMUtFN1J5WHJ5TGhxNEZuaXJUeHJhUWw1bWZPNURDaTJaOGZQbHVvYXVkMTNHYW1YZ0hMbnJoVVpjZXlZR1NJSnNhT2w1VFIxZWVLS0R2MlN4S3JVb3BFZ1loVHFZck9za05Qam8xai1Nc0tIOUpCeHgwWWw0dzImdD02MzU2ODQ0MTUwNjM1OTAwMDAeDUFsdGVybmF0ZVRleHQFF1Phu5EgbGnhu4d1IHRo4buRbmcga8OqHgdUb29sVGlwBRdT4buRIGxp4buHdSB0aOG7kW5nIGvDqmRkAgUPDxYCHgdWaXNpYmxlZ2RkAgcPDxYEHgRUZXh0BRdUw6BpIGtob+G6o24gcXXhu5FjIGdpYR8ABUwvcHh3ZWIvdmkvVMOgaSBraG/huqNuIHF14buRYyBnaWEvP3J4aWQ9Nzk4OTUxMzItZmY1MC00ZDYxLWIyZmUtZmRmOGYyOTRlNjliZGQCFQ8PFgIfBGdkZAIXDw8WBh8FBVxU4buVbmcgc+G6o24gcGjhuqltIHRyw6puIMSR4buLYSBiw6BuIGLDrG5oIHF1w6JuIMSR4bqndSBuZ8aw4budaSBwaMOibiB0aGVvIMSR4buLYSBwaMawxqFuZx8ABW4vcHh3ZWIvdmkvVMOgaSBraG/huqNuIHF14buRYyBnaWEvVMOgaSBraG/huqNuIHF14buRYyBnaWEvVjAzLjEyLnB4Lz9yeGlkPTc5ODk1MTMyLWZmNTAtNGQ2MS1iMmZlLWZkZjhmMjk0ZTY5Yh8EZ2RkAgkPDxYCHwRnZBYCZg9kFgJmD2QWBgIBDw8WAh8ABWQvcHh3ZWIvdmkvVMOgaSBraG/huqNuIHF14buRYyBnaWEvVMOgaSBraG/huqNuIHF14buRYyBnaWEvP3J4aWQ9Nzk4OTUxMzItZmY1MC00ZDYxLWIyZmUtZmRmOGYyOTRlNjliZBYCZg8PFgQeCENzc0NsYXNzBQxjb2wxIHBhc3NpdmUeBF8hU0ICAmQWAgIBDw8WAh8FBQxDaG9vc2UgdGFibGVkZAIDDw8WAh8ABW4vcHh3ZWIvdmkvVMOgaSBraG/huqNuIHF14buRYyBnaWEvVMOgaSBraG/huqNuIHF14buRYyBnaWEvVjAzLjEyLnB4Lz9yeGlkPTc5ODk1MTMyLWZmNTAtNGQ2MS1iMmZlLWZkZjhmMjk0ZTY5YmQWAmYPDxYEHwYFDGNvbDIgcGFzc2l2ZR8HAgJkFgICAQ8PFgIfBQUPQ2hvb3NlIHZhcmlhYmxlZGQCBQ8PFgQfBgUMY29sMyBhY3RpdmUgHwcCAmQWAgIBDw8WAh8FBQpTaG93IHRhYmxlZGQCCw9kFhQCAQ8PFgIfBGhkZAIDD2QWAmYPZBYCZg9kFggCAQ8PFgIfBGdkFggCAQ8QZBAVDx1DaOG7iW5oIHPhu61hIHbDoCB0w61uaCB0b8OhbhdYb2F5IGLhuqNuZyB0aOG7pyBjw7RuZyJYb2F5IHRoZW8gY2hp4buBdSBraW0gxJHhu5NuZyBo4buTJlhvYXkgbmfGsOG7o2MgY2hp4buBdSBraW0gxJHhu5NuZyBo4buTIVRoYXkgxJHhu5VpIHRo4bupIHThu7EgZ2nDoSB0cuG7ix1UaGF5IMSR4buVaSBz4buRIHRo4bqtcCBwaMOibg9Yw7NhIGdpw6EgdHLhu4sLWMOzYSBiaeG6v24WVGhheSDEkeG7lWkgbuG7mWkgZHVuZyZUaGF5IMSR4buVaSBu4buZaSBkdW5nL23DoyB0csOsbmggYsOgeRZU4bu3IGzhu4cgcGjhuqduIHRyxINtKlThu4luaCB04buVbmcgY8OhYyBnacOhIHRy4buLIGPhu6dhIGJp4bq/biNIaeG7h3UgY8OhYyBnacOhIHRy4buLIGPhu6dhIGJp4bq/biFDaGlhIGPDoWMgZ2nDoSB0cuG7iyBj4bunYSBiaeG6v24iTmjDom4gY8OhYyBnacOhIHRy4buLIGPhu6dhIGJp4bq/bhUPHUNo4buJbmggc+G7rWEgdsOgIHTDrW5oIHRvw6FuC3Bpdm90TWFudWFsB3Bpdm90Q1cIcGl2b3RDQ1cQY2hhbmdlVmFsdWVPcmRlcg1jaGFuZ2VEZWNpbWFsC2RlbGV0ZVZhbHVlDmRlbGV0ZVZhcmlhYmxlFmNoYW5nZVRleHRQcmVzZW50YXRpb24aY2hhbmdlVGV4dENvZGVQcmVzZW50YXRpb24HcGVyUGFydANzdW0Ic3VidHJhY3QGZGl2aWRlCG11bHRpcGx5FCsDD2dnZ2dnZ2dnZ2dnZ2dnZxYBZmQCBQ8QD2QWAh4Ib25jaGFuZ2UFInJldHVybiBkb3dubG9hZFNlbGVjdGVkRmlsZSh0aGlzKTsQFQkTTMawdSBkxrDhu5tpIGThuqFuZw1U4buHcCBQQy1BWElTL1Bow6JuIHTDoWNoIGLhu5tpIGThuqV1IHBo4bqpeSBrw6htIHRpw6p1IMSR4buBPVBow6JuIHTDoWNoIGLhu5tpIGThuqV1IGNo4bqlbSBwaOG6qXkga2jDtG5nIGvDqG0gdGnDqnUgxJHhu4EQVOG7h3AgSFRNTCAoaHRtKRVU4buHcCBxdWFuIGjhu4cgKHNjYikMRXhjZWwgKHhsc3gpJkV4Y2VsICh4bHN4KSB3aXRoIGNvZGUgYW5kIHRleHQgY29sdW1uFUpTT04tc3RhdCBmaWxlIChqc29uKRUJE0zGsHUgZMaw4bubaSBk4bqhbmedAS9weHdlYi92aS9Uw6BpIGtob+G6o24gcXXhu5FjIGdpYS9Uw6BpIGtob+G6o24gcXXhu5FjIGdpYS9WMDMuMTIucHgvdGFibGUvdGFibGVWaWV3TGF5b3V0MS8/cnhpZD03OTg5NTEzMi1mZjUwLTRkNjEtYjJmZS1mZGY4ZjI5NGU2OWImZG93bmxvYWRmaWxlPUZpbGVUeXBlUFixAS9weHdlYi92aS9Uw6BpIGtob+G6o24gcXXhu5FjIGdpYS9Uw6BpIGtob+G6o24gcXXhu5FjIGdpYS9WMDMuMTIucHgvdGFibGUvdGFibGVWaWV3TGF5b3V0MS8/cnhpZD03OTg5NTEzMi1mZjUwLTRkNjEtYjJmZS1mZGY4ZjI5NGU2OWImZG93bmxvYWRmaWxlPUZpbGVUeXBlQ3N2V2l0aEhlYWRpbmdBbmRDb21tYbgBL3B4d2ViL3ZpL1TDoGkga2hv4bqjbiBxdeG7kWMgZ2lhL1TDoGkga2hv4bqjbiBxdeG7kWMgZ2lhL1YwMy4xMi5weC90YWJsZS90YWJsZVZpZXdMYXlvdXQxLz9yeGlkPTc5ODk1MTMyLWZmNTAtNGQ2MS1iMmZlLWZkZjhmMjk0ZTY5YiZkb3dubG9hZGZpbGU9RmlsZVR5cGVDc3ZXaXRob3V0SGVhZGluZ0FuZFNlbWlDb2xvbp8BL3B4d2ViL3ZpL1TDoGkga2hv4bqjbiBxdeG7kWMgZ2lhL1TDoGkga2hv4bqjbiBxdeG7kWMgZ2lhL1YwMy4xMi5weC90YWJsZS90YWJsZVZpZXdMYXlvdXQxLz9yeGlkPTc5ODk1MTMyLWZmNTAtNGQ2MS1iMmZlLWZkZjhmMjk0ZTY5YiZkb3dubG9hZGZpbGU9RmlsZVR5cGVIdG1spQEvcHh3ZWIvdmkvVMOgaSBraG/huqNuIHF14buRYyBnaWEvVMOgaSBraG/huqNuIHF14buRYyBnaWEvVjAzLjEyLnB4L3RhYmxlL3RhYmxlVmlld0xheW91dDEvP3J4aWQ9Nzk4OTUxMzItZmY1MC00ZDYxLWIyZmUtZmRmOGYyOTRlNjliJmRvd25sb2FkZmlsZT1GaWxlVHlwZVJlbGF0aW9uYWyhAS9weHdlYi92aS9Uw6BpIGtob+G6o24gcXXhu5FjIGdpYS9Uw6BpIGtob+G6o24gcXXhu5FjIGdpYS9WMDMuMTIucHgvdGFibGUvdGFibGVWaWV3TGF5b3V0MS8/cnhpZD03OTg5NTEzMi1mZjUwLTRkNjEtYjJmZS1mZGY4ZjI5NGU2OWImZG93bmxvYWRmaWxlPUZpbGVUeXBlRXhjZWxYrQEvcHh3ZWIvdmkvVMOgaSBraG/huqNuIHF14buRYyBnaWEvVMOgaSBraG/huqNuIHF14buRYyBnaWEvVjAzLjEyLnB4L3RhYmxlL3RhYmxlVmlld0xheW91dDEvP3J4aWQ9Nzk4OTUxMzItZmY1MC00ZDYxLWIyZmUtZmRmOGYyOTRlNjliJmRvd25sb2FkZmlsZT1GaWxlVHlwZUV4Y2VsWERvdWJsZUNvbHVtbqMBL3B4d2ViL3ZpL1TDoGkga2hv4bqjbiBxdeG7kWMgZ2lhL1TDoGkga2hv4bqjbiBxdeG7kWMgZ2lhL1YwMy4xMi5weC90YWJsZS90YWJsZVZpZXdMYXlvdXQxLz9yeGlkPTc5ODk1MTMyLWZmNTAtNGQ2MS1iMmZlLWZkZjhmMjk0ZTY5YiZkb3dubG9hZGZpbGU9RmlsZVR5cGVKc29uU3RhdBQrAwlnZ2dnZ2dnZ2cWAWZkAgkPEGQQFRIWQuG6o25nIC0gR2lhbyBkaeG7h24gMRZC4bqjbmcgLSBHaWFvIGRp4buHbiAyFELhuqNuZyAtIFPhuq9wIHjhur9wG0Jp4buDdSDEkeG7kyAtIEThuqFuZyBj4buZdClCaeG7g3UgxJHhu5MgLSBE4bqhbmcgY+G7mXQgeOG6v3AgY2jhu5NuZy5CaeG7g3UgxJHhu5MgLSBE4bqhbmcgY+G7mXQgeOG6v3AgY2jhu5NuZyAxMDAlG0Jp4buDdSDEkeG7kyAtIEThuqFuZyB0aGFuaClCaeG7g3UgxJHhu5MgLSBE4bqhbmcgdGhhbmggeOG6v3AgY2jhu5NuZy5CaeG7g3UgxJHhu5MgLSBE4bqhbmcgdGhhbmggeOG6v3AgY2jhu5NuZyAxMDAlIEJp4buDdSDEkeG7kyAtIEThuqFuZyBkw7JuZyBr4bq7KkJp4buDdSDEkeG7kyAtIEThuqFuZyBj4buZdCB2w6AgZMOybmcga+G6uxtCaeG7g3UgxJHhu5MgLSBE4bqhbmcgdsO5bmcpQmnhu4N1IMSR4buTIC0gROG6oW5nIHbDuW5nIHjhur9wIGNo4buTbmcuQmnhu4N1IMSR4buTIC0gROG6oW5nIHbDuW5nIHjhur9wIGNo4buTbmcgMTAwJR1CaeG7g3UgxJHhu5MgLSBE4bqhbmcgxJFp4buDbRpCaeG7g3UgxJHhu5MgLSBE4bqhbmcgUmFkYQtDaMO6IHRow61jaApUaMO0bmcgdGluFRIQdGFibGVWaWV3TGF5b3V0MRB0YWJsZVZpZXdMYXlvdXQyD3RhYmxlVmlld1NvcnRlZA9jaGFydFZpZXdDb2x1bW4WY2hhcnRWaWV3Q29sdW1uU3RhY2tlZBljaGFydFZpZXdDb2x1bW5TdGFja2VkMTAwDGNoYXJ0Vmlld0JhchNjaGFydFZpZXdCYXJTdGFja2VkFmNoYXJ0Vmlld0JhclN0YWNrZWQxMDANY2hhcnRWaWV3TGluZRNjaGFydFZpZXdDb2x1bW5MaW5lDWNoYXJ0Vmlld0FyZWEUY2hhcnRWaWV3QXJlYVN0YWNrZWQXY2hhcnRWaWV3QXJlYVN0YWNrZWQxMDAOY2hhcnRWaWV3UG9pbnQOY2hhcnRWaWV3UmFkYXIMZm9vdG5vdGVWaWV3D2luZm9ybWF0aW9uVmlldxQrAxJnZ2dnZ2dnZ2dnZ2dnZ2dnZ2cWAWZkAg8PDxYCHwUFBUfhu61pZGQCAw8PFgIfBGhkZAIJDw8WAh8EaGRkAgsPFgIeBXRpdGxlBQlTYXZlIGZpbGUWAgIBD2QWBAIBDw8WAh8FBUZDbGljayB0aGUgJ1NhdmUgZmlsZScgbGluayBiZWxvdyB0byBkb3dubG9hZCB0aGUgZmlsZSB0byB5b3VyIGNvbXB1dGVyZGQCAw8PFgIfBQUJU2F2ZSBmaWxlZGQCBQ9kFgRmDw8WAh8ABcwBL3B4d2ViL3ZpL1QlQzMlQTBpJTIwa2hvJUUxJUJBJUEzbiUyMHF1JUUxJUJCJTkxYyUyMGdpYS9UJUMzJUEwaSUyMGtobyVFMSVCQSVBM24lMjBxdSVFMSVCQiU5MWMlMjBnaWEvVjAzLjEyLnB4L3RhYmxlL3RhYmxlVmlld0xheW91dDEvP3J4aWQ9Nzk4OTUxMzItZmY1MC00ZDYxLWIyZmUtZmRmOGYyOTRlNjliJmRpc3BsYXlwYW5lbD10YWJsZXNldHRpbmdzZBYCZg8PFgYfBgUXcHgtc2V0dGluZ3MtZXhwYW5kaW1hZ2UfAQW/AS9XZWJSZXNvdXJjZS5heGQ/ZD1tNUJralBrVTFROUlGb0FVSXFJbmItaW1ZQTY3STFjRjFLRTdSeVhyeUxocTRGbmlyVHhyYVFsNW1mTzVEQ2kyWjhmUGx1b2F1ZDEzR2FtWGdITG5yaFVaY2V5WUdTSUpzYU9sNVRSMWVlS0tEdjJTeEtyVW9wRWdZaFRxWXJPc2tOUGpvMWotTXNLSDlKQnh4MFlsNHcyJnQ9NjM1Njg0NDE1MDYzNTkwMDAwHwcCAmRkAgEPD2QWAh4Fc3R5bGUFDWRpc3BsYXk6bm9uZTsWAgIFDw8WAh8ABbEBL3B4d2ViL3ZpL1QlQzMlQTBpJTIwa2hvJUUxJUJBJUEzbiUyMHF1JUUxJUJCJTkxYyUyMGdpYS9UJUMzJUEwaSUyMGtobyVFMSVCQSVBM24lMjBxdSVFMSVCQiU5MWMlMjBnaWEvVjAzLjEyLnB4L3RhYmxlL3RhYmxlVmlld0xheW91dDEvP3J4aWQ9Nzk4OTUxMzItZmY1MC00ZDYxLWIyZmUtZmRmOGYyOTRlNjliZGQCBw8PFgIfAAXJAS9weHdlYi92aS9UJUMzJUEwaSUyMGtobyVFMSVCQSVBM24lMjBxdSVFMSVCQiU5MWMlMjBnaWEvVCVDMyVBMGklMjBraG8lRTElQkElQTNuJTIwcXUlRTElQkIlOTFjJTIwZ2lhL1YwMy4xMi5weC90YWJsZS90YWJsZVZpZXdMYXlvdXQxLz9yeGlkPTc5ODk1MTMyLWZmNTAtNGQ2MS1iMmZlLWZkZjhmMjk0ZTY5YiZkaXNwbGF5cGFuZWw9c2F2ZXF1ZXJ5MWQWAmYPDxYGHwYFF3B4LXNldHRpbmdzLWV4cGFuZGltYWdlHwEFvwEvV2ViUmVzb3VyY2UuYXhkP2Q9bTVCa2pQa1UxUTlJRm9BVUlxSW5iLWltWUE2N0kxY0YxS0U3UnlYcnlMaHE0Rm5pclR4cmFRbDVtZk81RENpMlo4ZlBsdW9hdWQxM0dhbVhnSExucmhVWmNleVlHU0lKc2FPbDVUUjFlZUtLRHYyU3hLclVvcEVnWWhUcVlyT3NrTlBqbzFqLU1zS0g5SkJ4eDBZbDR3MiZ0PTYzNTY4NDQxNTA2MzU5MDAwMB8HAgJkZAIJD2QWBGYPD2QWAh8KBQ1kaXNwbGF5Om5vbmU7FgICAQ9kFgoCAQ9kFgQCAQ8PFgIfAQW/AS9XZWJSZXNvdXJjZS5heGQ/ZD1tNUJralBrVTFROUlGb0FVSXFJbmItaW1ZQTY3STFjRjFLRTdSeVhyeUxocTRGbmlyVHhyYVFsNW1mTzVEQ2kyWjhmUGx1b2F1ZDEzR2FtWGdITG5yaFVaY2V5WUdTSUpzYU9sNVRSMWVlS0tEdjJTeEtyVW9wRWdZaFRxWXJPc2tOUGpvMWotTXNLSDlKQnh4MFlsNHcyJnQ9NjM1Njg0NDE1MDYzNTkwMDAwZGQCAw8PFgIfBQVeSXQgaXMgbm90IHBvc3NpYmxlIHRvIHVwZGF0ZSB0aGUgc2VhcmNoIHNpbmNlIHRoZXJlIGlzIG5vIGRlZmluZWQgdGltZSB2YXJpYWJsZSBpbiB0aGlzIHRhYmxlLmRkAgcPEGQPFgJmAgEWAhBkZGgQZGRoFgECAmQCCQ8PFgIfBQUfU2F2ZSB0aGUgcmVzdWx0IGFzIChtYW5kYXRvcnkpOmRkAgsPEGQPFgpmAgECAgIDAgQCBQIGAgcCCAIJFgoQBQ1TZWxlY3QgZm9ybWF0BQxzZWxlY3RGb3JtYXRnEAUXU2FtZSBhcyBzaG93biBvbiBzY3JlZW4FBlNDUkVFTmcQBQ1U4buHcCBQQy1BWElTBQpGaWxlVHlwZVBYZxAFL1Bow6JuIHTDoWNoIGLhu5tpIGThuqV1IHBo4bqpeSBrw6htIHRpw6p1IMSR4buBBR5GaWxlVHlwZUNzdldpdGhIZWFkaW5nQW5kQ29tbWFnEAU9UGjDom4gdMOhY2ggYuG7m2kgZOG6pXUgY2jhuqVtIHBo4bqpeSBraMO0bmcga8OobSB0acOqdSDEkeG7gQUlRmlsZVR5cGVDc3ZXaXRob3V0SGVhZGluZ0FuZFNlbWlDb2xvbmcQBRBU4buHcCBIVE1MIChodG0pBQxGaWxlVHlwZUh0bWxnEAUVVOG7h3AgcXVhbiBo4buHIChzY2IpBRJGaWxlVHlwZVJlbGF0aW9uYWxnEAUMRXhjZWwgKHhsc3gpBQ5GaWxlVHlwZUV4Y2VsWGcQBSZFeGNlbCAoeGxzeCkgd2l0aCBjb2RlIGFuZCB0ZXh0IGNvbHVtbgUaRmlsZVR5cGVFeGNlbFhEb3VibGVDb2x1bW5nEAUVSlNPTi1zdGF0IGZpbGUgKGpzb24pBRBGaWxlVHlwZUpzb25TdGF0Z2RkAg8PDxYCHwAFsQEvcHh3ZWIvdmkvVCVDMyVBMGklMjBraG8lRTElQkElQTNuJTIwcXUlRTElQkIlOTFjJTIwZ2lhL1QlQzMlQTBpJTIwa2hvJUUxJUJBJUEzbiUyMHF1JUUxJUJCJTkxYyUyMGdpYS9WMDMuMTIucHgvdGFibGUvdGFibGVWaWV3TGF5b3V0MS8/cnhpZD03OTg5NTEzMi1mZjUwLTRkNjEtYjJmZS1mZGY4ZjI5NGU2OWJkZAIBDw9kFgIfCgUNZGlzcGxheTpub25lOxYCAgEPZBYCAg0PDxYCHwAFyQEvcHh3ZWIvdmkvVCVDMyVBMGklMjBraG8lRTElQkElQTNuJTIwcXUlRTElQkIlOTFjJTIwZ2lhL1QlQzMlQTBpJTIwa2hvJUUxJUJBJUEzbiUyMHF1JUUxJUJCJTkxYyUyMGdpYS9WMDMuMTIucHgvdGFibGUvdGFibGVWaWV3TGF5b3V0MS8/cnhpZD03OTg5NTEzMi1mZjUwLTRkNjEtYjJmZS1mZGY4ZjI5NGU2OWImZGlzcGxheXBhbmVsPXNhdmVxdWVyeTFkZAILD2QWBAIBD2QWBAIBDw8WBB8BBb8BL1dlYlJlc291cmNlLmF4ZD9kPW01QmtqUGtVMVE5SUZvQVVJcUluYi1pbVlBNjdJMWNGMUtFN1J5WHJ5TGhxNEZuaXJUeHJhUWw1bWZPNURDaTJaOGZQbHVvYXVkMTNHYW1YZ0hMbnJoVVpjZXlZR1NJSnNhT2w1VFIxZWVLS0R2MlN4S3JVb3BFZ1loVHFZck9za05Qam8xai1Nc0tIOUpCeHgwWWw0dzImdD02MzU2ODQ0MTUwNjM1OTAwMDAfBGhkZAIDDw8WAh8EaGRkAgMPFgIfBGgWAgIBDw8WAh8BBb8BL1dlYlJlc291cmNlLmF4ZD9kPW01QmtqUGtVMVE5SUZvQVVJcUluYi1pbVlBNjdJMWNGMUtFN1J5WHJ5TGhxNEZuaXJUeHJhUWw1bWZPNURDaTJaOGZQbHVvYXVkMTNHYW1YZ0hMbnJoVVpjZXlZR1NJSnNhT2w1VFIxZWVLS0R2MlN4S3JVb3BFZ1loVHFZck9za05Qam8xai1Nc0tIOUpCeHgwWWw0dzImdD02MzU2ODQ0MTUwNjM1OTAwMDBkZAIND2QWAgIBD2QWAmYPDxYCHwRoZBYCZg9kFgICAw9kFgICAQ8PFgQfBgUcdGFibGVpbmZvcm1hdGlvbl9kZXNjcmlwdGlvbh8HAgJkZAIPDw8WAh8EaGQWAmYPZBYCAgMPDxYEHwUFFktow7RuZyBjw7MgY2jDuiB0aMOtY2gfBGhkZAIRDw8WAh8EaGRkAhMPZBYCZg8PFgIfBGhkZAITD2QWBAIBDw8WAh8EaGRkAgMPDxYCHwRoZGQYDAU+Y3RsMDAkY3RsMDAkQ29udGVudFBsYWNlSG9sZGVyTWFpbiRjcGhNYWluJFRhYmxlSW5mbyRUYWJsZUluZm8PMrgEAAEAAAD/////AQAAAAAAAAAEAQAAAH9TeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5MaXN0YDFbW1N5c3RlbS5PYmplY3QsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAwAAAAZfaXRlbXMFX3NpemUIX3ZlcnNpb24FAAAICAkCAAAABgAAAAYAAAAQAgAAAAgAAAAIAQAJAwAAAAkEAAAABgUAAAAjaGllcmFyY2hpY2FsX3RhYmxlaW5mb3JtYXRpb25fdGl0bGUGBgAAACloaWVyYXJjaGljYWxfdGFibGVpbmZvcm1hdGlvbl9kZXNjcmlwdGlvbg0DDAcAAABWUENBeGlzLldlYi5Db250cm9scywgVmVyc2lvbj0xLjEuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWMwYTgxOGJkZThmOTVjMzAFAwAAADlQQ0F4aXMuV2ViLkNvbnRyb2xzLlRhYmxlSW5mb3JtYXRpb24rVGFibGVJbmZvcm1hdGlvblR5cGUBAAAAB3ZhbHVlX18ACAcAAAAAAAAABQQAAAA4UENBeGlzLldlYi5Db250cm9scy5UYWJsZUluZm9ybWF0aW9uQ29kZWJlaGluZCtUaXRsZVRhZ3MBAAAAB3ZhbHVlX18ACAcAAAAAAAAAC2QFOGN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlck1haW4kY3BoTWFpbiRUYWJsZTEkVGFibGUxDzLlCgABAAAA/////wEAAAAAAAAABAEAAAB/U3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuTGlzdGAxW1tTeXN0ZW0uT2JqZWN0LCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXQMAAAAGX2l0ZW1zBV9zaXplCF92ZXJzaW9uBQAACAgJAgAAABIAAAASAAAAEAIAAAAgAAAACAgAAAAACAEACQMAAAAIAQEJBAAAAAkFAAAACQYAAAAJBwAAAAgBAQgBAAkIAAAACAgeAAAACAjoAwAACAEBCAEBCAEACAEBDQ8MCQAAAFZQQ0F4aXMuV2ViLkNvbnRyb2xzLCBWZXJzaW9uPTEuMS4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49YzBhODE4YmRlOGY5NWMzMAUDAAAAI1BDQXhpcy5XZWIuQ29udHJvbHMuVGFibGVMYXlvdXRUeXBlAQAAAAd2YWx1ZV9fAAgJAAAAAAAAAAwKAAAATlBDQXhpcy5Db3JlLCBWZXJzaW9uPTEuMS4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49YzBhODE4YmRlOGY5NWMzMAUEAAAAI1BDQXhpcy5QYXhpb20uRGF0YU5vdGVQbGFjZW1lbnRUeXBlAQAAAAd2YWx1ZV9fAAgKAAAAAAAAAAUFAAAAIlBDQXhpcy5QYXhpb20uSW5mb3JtYXRpb25MZXZlbFR5cGUBAAAAB3ZhbHVlX18ACAoAAAACAAAABQYAAAAcUENBeGlzLlBheGlvbS5aZXJvT3B0aW9uVHlwZQEAAAAHdmFsdWVfXwAICgAAAAAAAAAFBwAAACtQQ0F4aXMuV2ViLkNvbnRyb2xzLlRhYmxlVHJhbnNmb3JtYXRpb25UeXBlAQAAAAd2YWx1ZV9fAAgJAAAAAgAAAAQIAAAA/AFTeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5EaWN0aW9uYXJ5YDJbW1N5c3RlbS5TdHJpbmcsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV0sW1BDQXhpcy5QYXhpb20uSGVhZGVyUHJlc2VudGF0aW9uVHlwZSwgUENBeGlzLkNvcmUsIFZlcnNpb249MS4xLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jMGE4MThiZGU4Zjk1YzMwXV0DAAAAB1ZlcnNpb24IQ29tcGFyZXIISGFzaFNpemUAAwAIkgFTeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5HZW5lcmljRXF1YWxpdHlDb21wYXJlcmAxW1tTeXN0ZW0uU3RyaW5nLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXQgAAAAACQsAAAAAAAAABAsAAACSAVN5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkdlbmVyaWNFcXVhbGl0eUNvbXBhcmVyYDFbW1N5c3RlbS5TdHJpbmcsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAAAAAAtkBT5jdGwwMCRjdGwwMCRDb250ZW50UGxhY2VIb2xkZXJNYWluJGNwaE1haW4kRm9vdG5vdGUxJEZvb3Rub3RlMQ8y1AEAAQAAAP////8BAAAAAAAAAAQBAAAAf1N5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbU3lzdGVtLk9iamVjdCwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9pdGVtcwVfc2l6ZQhfdmVyc2lvbgUAAAgICQIAAAADAAAAAwAAABACAAAABAAAAAgBAAgBAQ0CC2QFNmN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlck1haW4kRm9vdG5vdGVzJEZvb3Rub3Rlcw8y1AEAAQAAAP////8BAAAAAAAAAAQBAAAAf1N5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbU3lzdGVtLk9iamVjdCwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9pdGVtcwVfc2l6ZQhfdmVyc2lvbgUAAAgICQIAAAADAAAAAwAAABACAAAABAAAAAgBAAgBAA0CC2QFVGN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlck1haW4kY3BoTWFpbiRUYWJsZUluZm9ybWF0aW9uVmlldyRUYWJsZUluZm9ybWF0aW9uVmlldw8yngQAAQAAAP////8BAAAAAAAAAAQBAAAAf1N5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbU3lzdGVtLk9iamVjdCwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9pdGVtcwVfc2l6ZQhfdmVyc2lvbgUAAAgICQIAAAAGAAAABgAAABACAAAACAAAAAgBAAkDAAAACQQAAAAGBQAAABZ0YWJsZWluZm9ybWF0aW9uX3RpdGxlBgYAAAAcdGFibGVpbmZvcm1hdGlvbl9kZXNjcmlwdGlvbg0DDAcAAABWUENBeGlzLldlYi5Db250cm9scywgVmVyc2lvbj0xLjEuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWMwYTgxOGJkZThmOTVjMzAFAwAAADlQQ0F4aXMuV2ViLkNvbnRyb2xzLlRhYmxlSW5mb3JtYXRpb24rVGFibGVJbmZvcm1hdGlvblR5cGUBAAAAB3ZhbHVlX18ACAcAAAABAAAABQQAAAA4UENBeGlzLldlYi5Db250cm9scy5UYWJsZUluZm9ybWF0aW9uQ29kZWJlaGluZCtUaXRsZVRhZ3MBAAAAB3ZhbHVlX18ACAcAAAAAAAAAC2QFOmN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlck1haW4kQ29tbWFuZEJhcjEkQ29tbWFuZEJhcjEPMrMWAAEAAAD/////AQAAAAAAAAAEAQAAAH9TeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5MaXN0YDFbW1N5c3RlbS5PYmplY3QsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAwAAAAZfaXRlbXMFX3NpemUIX3ZlcnNpb24FAAAICAkCAAAADwAAAA8AAAAQAgAAABAAAAAKCAEBCQMAAAAJBAAAAAkFAAAACQYAAAAJBwAAAAkIAAAACQkAAAAJCgAAAAkLAAAACQwAAAAJDQAAAAkOAAAADQIMDwAAAFZQQ0F4aXMuV2ViLkNvbnRyb2xzLCBWZXJzaW9uPTEuMS4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49YzBhODE4YmRlOGY5NWMzMAUDAAAAMVBDQXhpcy5XZWIuQ29udHJvbHMuQ29tbWFuZEJhci5Db21tYW5kQmFyVmlld01vZGUBAAAAB3ZhbHVlX18ACA8AAAAAAAAABAQAAAB/U3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuTGlzdGAxW1tTeXN0ZW0uU3RyaW5nLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXQMAAAAGX2l0ZW1zBV9zaXplCF92ZXJzaW9uBgAACAgJEAAAAA8AAAAPAAAAAQUAAAAEAAAACREAAAAKAAAACgAAAAEGAAAABAAAAAkSAAAAEgAAABIAAAABBwAAAAQAAAAJEwAAAAAAAAAAAAAAAQgAAAAEAAAACRQAAAACAAAAAgAAAAEJAAAABAAAAAkVAAAAAQAAAAEAAAABCgAAAAQAAAAJFgAAAAEAAAABAAAAAQsAAAAEAAAACRMAAAAAAAAAAAAAAAEMAAAABAAAAAkTAAAAAAAAAAAAAAABDQAAAAQAAAAJEwAAAAAAAAAAAAAABQ4AAABCUENBeGlzLldlYi5Db250cm9scy5Db21tYW5kQmFyLlBsdWdpbi5Db21tYW5kQmFyVGFibGVMYXlvdXQxRmlsdGVyCQAAABBfcGx1Z2luQmxhY2tMaXN0GF9vdXRwdXRGaWxldHlwZUJsYWNrTGlzdBZfb3V0cHV0Rm9ybWF0QmxhY2tMaXN0Gl9kcm9wRG93bkZpbGVGb3JtYXRzQWN0aXZlGV9kcm9wRG93bk9wZXJhdGlvbnNBY3RpdmUUX2Ryb3BEb3duVmlld3NBY3RpdmUvQ29tbWFuZEJhckZpbHRlck5vbmUrX2Ryb3BEb3duRmlsZUZvcm1hdHNBY3RpdmUuQ29tbWFuZEJhckZpbHRlck5vbmUrX2Ryb3BEb3duT3BlcmF0aW9uc0FjdGl2ZSlDb21tYW5kQmFyRmlsdGVyTm9uZStfZHJvcERvd25WaWV3c0FjdGl2ZQMDAwAAAAAAAH9TeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5MaXN0YDFbW1N5c3RlbS5TdHJpbmcsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1df1N5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbU3lzdGVtLlN0cmluZywgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV1/U3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuTGlzdGAxW1tTeXN0ZW0uU3RyaW5nLCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXQEBAQEBAQ8AAAAJGAAAAAkZAAAACRoAAAABAQEBAQEREAAAABAAAAAGGwAAAAtwaXZvdE1hbnVhbAYcAAAAB3Bpdm90Q1cGHQAAAAhwaXZvdENDVwYeAAAAEGNoYW5nZVZhbHVlT3JkZXIGHwAAABFzcGxpdFRpbWVWYXJpYWJsZQYgAAAADWNoYW5nZURlY2ltYWwGIQAAAAtkZWxldGVWYWx1ZQYiAAAADmRlbGV0ZVZhcmlhYmxlBiMAAAAWY2hhbmdlVGV4dFByZXNlbnRhdGlvbgYkAAAAGmNoYW5nZVRleHRDb2RlUHJlc2VudGF0aW9uBiUAAAAHcGVyUGFydAYmAAAAA3N1bQYnAAAACHN1YnRyYWN0BigAAAAGZGl2aWRlBikAAAAIbXVsdGlwbHkKEREAAAAQAAAABioAAAAKRmlsZVR5cGVQWAYrAAAAHkZpbGVUeXBlQ3N2V2l0aEhlYWRpbmdBbmRDb21tYQYsAAAAJUZpbGVUeXBlQ3N2V2l0aG91dEhlYWRpbmdBbmRTZW1pQ29sb24GLQAAAAxGaWxlVHlwZUh0bWwGLgAAABJGaWxlVHlwZVJlbGF0aW9uYWwGLwAAABBGaWxlVHlwZUNoYXJ0R2lmBjAAAAARRmlsZVR5cGVDaGFydEpwZWcGMQAAAA5GaWxlVHlwZUV4Y2VsWAYyAAAAGkZpbGVUeXBlRXhjZWxYRG91YmxlQ29sdW1uBjMAAAAQRmlsZVR5cGVKc29uU3RhdA0GERIAAAAgAAAABjQAAAAQdGFibGVWaWV3TGF5b3V0MQY1AAAAEHRhYmxlVmlld0xheW91dDIGNgAAAA90YWJsZVZpZXdTb3J0ZWQGNwAAAA9jaGFydFZpZXdDb2x1bW4GOAAAABZjaGFydFZpZXdDb2x1bW5TdGFja2VkBjkAAAAZY2hhcnRWaWV3Q29sdW1uU3RhY2tlZDEwMAY6AAAADGNoYXJ0Vmlld0JhcgY7AAAAE2NoYXJ0Vmlld0JhclN0YWNrZWQGPAAAABZjaGFydFZpZXdCYXJTdGFja2VkMTAwBj0AAAANY2hhcnRWaWV3TGluZQY+AAAAE2NoYXJ0Vmlld0NvbHVtbkxpbmUGPwAAAA1jaGFydFZpZXdBcmVhBkAAAAAUY2hhcnRWaWV3QXJlYVN0YWNrZWQGQQAAABdjaGFydFZpZXdBcmVhU3RhY2tlZDEwMAZCAAAADmNoYXJ0Vmlld1BvaW50BkMAAAAOY2hhcnRWaWV3UmFkYXIGRAAAAAxmb290bm90ZVZpZXcGRQAAAA9pbmZvcm1hdGlvblZpZXcNDhETAAAAAAAAABEUAAAABAAAAAZGAAAADEZpbGVUeXBlSHRtbAZHAAAAEkZpbGVUeXBlUmVsYXRpb25hbA0CERUAAAAEAAAABkgAAAAQdGFibGVWaWV3TGF5b3V0MQ0DERYAAAAEAAAABkkAAAAPaW5mb3JtYXRpb25WaWV3DQMBGAAAAAQAAAAJEwAAAAAAAAAAAAAAARkAAAAEAAAACUsAAAAEAAAABAAAAAEaAAAABAAAAAlMAAAABAAAAAQAAAARSwAAAAQAAAAGTQAAAAVjaGFydAZOAAAAEEZpbGVUeXBlQ2hhcnRHaWYGTwAAABFGaWxlVHlwZUNoYXJ0SnBlZwZQAAAAEEZpbGVUeXBlQ2hhcnRQbmcRTAAAAAQAAAAJTQAAAAlOAAAACU8AAAAJUAAAAAtkBSNjdGwwMCRjdGwwMCRicmVhZGNydW1iMSRicmVhZGNydW1iMQ8yxQQAAQAAAP////8BAAAAAAAAAAQBAAAAf1N5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbU3lzdGVtLk9iamVjdCwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9pdGVtcwVfc2l6ZQhfdmVyc2lvbgUAAAgICQIAAAAPAAAADwAAABACAAAAEAAAAAYDAAAAF1TDoGkga2hv4bqjbiBxdeG7kWMgZ2lhBgQAAAAXVMOgaSBraG/huqNuIHF14buRYyBnaWEGBQAAABdUw6BpIGtob+G6o24gcXXhu5FjIGdpYQYGAAAACVYwMy4xMi5weAYHAAAADn4vRGVmYXVsdC5hc3B4CAEABggAAAAXU+G7kSBsaeG7h3UgdGjhu5FuZyBrw6oIAQEGCQAAAAlNZW51LmFzcHgGCgAAAA5TZWxlY3Rpb24uYXNweAYLAAAAB3B4X3BhdGgGDAAAAAZsYXlvdXQJDQAAAAgBAQ0CDA4AAABSUENBeGlzLldlYi5Db3JlLCBWZXJzaW9uPTEuMS4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49YzBhODE4YmRlOGY5NWMzMAUNAAAAIlBDQXhpcy5XZWIuQ29yZS5FbnVtcy5EYXRhYmFzZVR5cGUBAAAAB3ZhbHVlX18ACA4AAAAAAAAAC2QFTmN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlck1haW4kVGFibGVRdWVyeUluZm9ybWF0aW9uJFRhYmxlUXVlcnlJbmZvcm1hdGlvbg8y1QMAAQAAAP////8BAAAAAAAAAAQBAAAAf1N5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbU3lzdGVtLk9iamVjdCwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9pdGVtcwVfc2l6ZQhfdmVyc2lvbgUAAAgICQIAAAAJAAAACQAAABACAAAAEAAAAAoIAQEJAwAAAAYEAAAAF1TDoGkga2hv4bqjbiBxdeG7kWMgZ2lhBgUAAAAXVMOgaSBraG/huqNuIHF14buRYyBnaWEGBgAAAAlWMDMuMTIucHgGBwAAABZodHRwOi8vd3d3LnNjYi5zZS9hcGkvCAEBDQgMCAAAAFJQQ0F4aXMuV2ViLkNvcmUsIFZlcnNpb249MS4xLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jMGE4MThiZGU4Zjk1YzMwBQMAAAAiUENBeGlzLldlYi5Db3JlLkVudW1zLkRhdGFiYXNlVHlwZQEAAAAHdmFsdWVfXwAICAAAAAAAAAALZAUjY3RsMDAkY3RsMDAkSW5mb3JtYXRpb24kSW5mb3JtYXRpb24PMowIAAEAAAD/////AQAAAAAAAAAEAQAAAH9TeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5MaXN0YDFbW1N5c3RlbS5PYmplY3QsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAwAAAAZfaXRlbXMFX3NpemUIX3ZlcnNpb24FAAAICAkCAAAAAwAAAAMAAAAQAgAAAAQAAAAJAwAAAAgBAQ0CDAQAAABOUENBeGlzLkNvcmUsIFZlcnNpb249MS4xLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jMGE4MThiZGU4Zjk1YzMwBAMAAACRAVN5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbUENBeGlzLkVudW1zLkluZm9ybWF0aW9uVHlwZSwgUENBeGlzLkNvcmUsIFZlcnNpb249MS4xLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jMGE4MThiZGU4Zjk1YzMwXV0DAAAABl9pdGVtcwVfc2l6ZQhfdmVyc2lvbgQAAB5QQ0F4aXMuRW51bXMuSW5mb3JtYXRpb25UeXBlW10EAAAACAgJBQAAABMAAAATAAAABwUAAAAAAQAAACAAAAAEHFBDQXhpcy5FbnVtcy5JbmZvcm1hdGlvblR5cGUEAAAABfr///8cUENBeGlzLkVudW1zLkluZm9ybWF0aW9uVHlwZQEAAAAHdmFsdWVfXwAIBAAAAAAAAAAB+f////r///8BAAAAAfj////6////AgAAAAH3////+v///wMAAAAB9v////r///8EAAAAAfX////6////BQAAAAH0////+v///wYAAAAB8/////r///8HAAAAAfL////6////CAAAAAHx////+v///wkAAAAB8P////r///8KAAAAAe/////6////CwAAAAHu////+v///wwAAAAB7f////r///8NAAAAAez////6////DgAAAAHr////+v///w8AAAAB6v////r///8QAAAAAen////6////EQAAAAHo////+v///xIAAAAB5/////r///8AAAAAAeb////6////AAAAAAHl////+v///wAAAAAB5P////r///8AAAAAAeP////6////AAAAAAHi////+v///wAAAAAB4f////r///8AAAAAAeD////6////AAAAAAHf////+v///wAAAAAB3v////r///8AAAAAAd3////6////AAAAAAHc////+v///wAAAAAB2/////r///8AAAAAC2QFOmN0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlck1haW4kSW5mb3JtYXRpb24kSW5mb3JtYXRpb24PMqAFAAEAAAD/////AQAAAAAAAAAEAQAAAH9TeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5MaXN0YDFbW1N5c3RlbS5PYmplY3QsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAwAAAAZfaXRlbXMFX3NpemUIX3ZlcnNpb24FAAAICAkCAAAAAwAAAAMAAAAQAgAAAAQAAAAJAwAAAAgBAQ0CDAQAAABOUENBeGlzLkNvcmUsIFZlcnNpb249MS4xLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jMGE4MThiZGU4Zjk1YzMwBAMAAACRAVN5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbUENBeGlzLkVudW1zLkluZm9ybWF0aW9uVHlwZSwgUENBeGlzLkNvcmUsIFZlcnNpb249MS4xLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jMGE4MThiZGU4Zjk1YzMwXV0DAAAABl9pdGVtcwVfc2l6ZQhfdmVyc2lvbgQAAB5QQ0F4aXMuRW51bXMuSW5mb3JtYXRpb25UeXBlW10EAAAACAgJBQAAAAEAAAABAAAABwUAAAAAAQAAAAQAAAAEHFBDQXhpcy5FbnVtcy5JbmZvcm1hdGlvblR5cGUEAAAABfr///8cUENBeGlzLkVudW1zLkluZm9ybWF0aW9uVHlwZQEAAAAHdmFsdWVfXwAIBAAAAAEAAAAB+f////r///8AAAAAAfj////6////AAAAAAH3////+v///wAAAAALZAUeX19Db250cm9sc1JlcXVpcmVQb3N0QmFja0tleV9fFgUFLmN0bDAwJGN0bDAwJGJyZWFkY3J1bWIxJGJyZWFkY3J1bWIxJEhvbWVCdXR0b24FU2N0bDAwJGN0bDAwJENvbnRlbnRQbGFjZUhvbGRlck1haW4kQ29tbWFuZEJhcjEkQ29tbWFuZEJhcjEkU2hvcnRjdXRGaWxlRmlsZVR5cGVIdG1sBVljdGwwMCRjdGwwMCRDb250ZW50UGxhY2VIb2xkZXJNYWluJENvbW1hbmRCYXIxJENvbW1hbmRCYXIxJFNob3J0Y3V0RmlsZUZpbGVUeXBlUmVsYXRpb25hbAVXY3RsMDAkY3RsMDAkQ29udGVudFBsYWNlSG9sZGVyTWFpbiRDb21tYW5kQmFyMSRDb21tYW5kQmFyMSRTaG9ydGN1dExpbmt0YWJsZVZpZXdMYXlvdXQxBVxjdGwwMCRjdGwwMCRDb250ZW50UGxhY2VIb2xkZXJNYWluJENvbW1hbmRCYXIxJENvbW1hbmRCYXIxJENvbW1hbmRCYXJTaG9ydGN1dGluZm9ybWF0aW9uVmlldwU3Y3RsMDAkY3RsMDAkbmF2aWdhdGlvbkZsb3dDb250cm9sJG5hdmlnYXRpb25GbG93Q29udHJvbA8yjgQAAQAAAP////8BAAAAAAAAAAQBAAAAf1N5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkxpc3RgMVtbU3lzdGVtLk9iamVjdCwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1iNzdhNWM1NjE5MzRlMDg5XV0DAAAABl9pdGVtcwVfc2l6ZQhfdmVyc2lvbgUAAAgICQIAAAALAAAACwAAABACAAAAEAAAAAgBAAYDAAAAF1TDoGkga2hv4bqjbiBxdeG7kWMgZ2lhBgQAAAAXVMOgaSBraG/huqNuIHF14buRYyBnaWEGBQAAABdUw6BpIGtob+G6o24gcXXhu5FjIGdpYQYGAAAACVYwMy4xMi5weAYHAAAACU1lbnUuYXNweAYIAAAADlNlbGVjdGlvbi5hc3B4BgkAAAAHcHhfcGF0aAYKAAAABmxheW91dAkLAAAADQYMDAAAAFJQQ0F4aXMuV2ViLkNvcmUsIFZlcnNpb249MS4xLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jMGE4MThiZGU4Zjk1YzMwBQsAAAAiUENBeGlzLldlYi5Db3JlLkVudW1zLkRhdGFiYXNlVHlwZQEAAAAHdmFsdWVfXwAIDAAAAAAAAAALZKyJgxv8rGxP+1TA/mbUMYJTyDN0/5OIwsUSUB8Z099a" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['aspnetForm'];
+if (!theForm) {
+    theForm = document.aspnetForm;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="3537ADB3" />
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAFH4wVzR+KHjX57fid9sNK7uULMuZhJpeDV8mPjoy4K8yejUY45OqABXREOhRSXfG/uOa523tRwls3GcsWDFjA7UVkus9RgCGKHfNZVCO6Oto+R7vfmijCYP+u6z6+omqIsusv5A3i8EtRRAsgSWU1Cp2lC8M8QqUbu9xKBNAUuCcw9ykQkG6YaVnv/yT3/F4CalPth5lebpJFDLb74v4eYAuiX2NnLb48+MlfBxdVtDucpG1XOjlru61Y6baJXIiI7Q9CtUXlvbexqYCRVlPUBMeSWOBB0W9Ej7kDgalwyxnwUC9eFUjgc9t1yuOcUsQTGrg7EB4kWQIvODgPpuDIbvT28+///Dm4qbwfzvm+A4V9o5nubxBEizIIp6y3Ufu5Dpt05d0OcmxAF+Ury2OcpZhm3VJMyeFDh5G+mzeu1PpLb9Ez7kkO09TierFzwQ6BUTwiIZd5BM0TtZWT9OczXE8hQbOxTzCm8j61bWTsbBNkXi9JRs9z3JM2ML7SkWyS/6Cs+5qpt94a0vJU53FEeHigIKOmuzNYg1gFgC/oPrBr04g/sX09i5NpeaAxJJKZbgDm34EF+WSdK/jQKomYEuhMrPktwGG4M5ke6iaq0+UVQlu2/COAXzOCGkV+haCUB7f7j8G48bY+rkR4GtieyLKoQRfBmkf/RCjEJtS3sf5v3nIYmj+3eHirsTx1ZJB6n60kb5oSv3GpGSz5UsTRy/UAK280cIm8Qfw1jcMPHxL8WDc8Kicd0m/YooWkW032ZAucI4ReL+tQiQA/d/YL0DEXeRkLOR0aCiyubEwoOhC/Zj5KYnto9oH0143K73ilgnh32VMO+3/6dgscbz/8qka7QG2MRa4+XARSY+qVfONh1qgXIm+FjQ90IUmJbX9VylwLDk7T1qm5780UlcSqkD3F5qKO0nhlnu1AVqoSqp/0Hfl6rE1W5xrW/t+6yH2zBTv0csYA98tMCy+il6QxQxMFlzcM3V33/VMNSn7fe97COPx2JsIOI/F0A7M5J1I0V9UaRFXZhfn+y3LUq6PP6dvSKLT94/s2+KJb0I152RYxAVjNSeRowJAF8IiPQpjm+x1/K68OmRgGdZefpejeO8nPklKhwp3qKyZgi/g+KMVJab81emYFRQuh443HG6DmEcGXeUdU9jIYh/3U9btUc27zWjox3RMo8PlTxxLW57YXqbux4wOWE2pAA78N1hdMeveXfhw71iMcgMTZuThe69QQRLwYfqV9hF7xYgD/1V0Q2fXmySC0Mpwsx5ZSKfovGfBwF1X8Avl0xzNBcWjOYUUwCD9Jhx57DtWELkcHdlu3sVYP3BRNwR8oQHvBF7ibOqJxjXR/yH42WizN+BgSg3kKuwIicIGvvEyPEmab0+J6DLVTzdhTsOE4Y4HRovxgnWCFUocyzY9J6POm6SpjChsOe4M+g0IT0fBfUiNokD1zpzJGXHAgqlVQrPQCfgv1HS/BAO0jXo2ujDzLhV6WhZzO4d86AtWLaMBMPfDKmBKzSr2VEeP9+pTO6xaFzdYuXgr2AeXR2gddetYHtijlCdzQwfBu1eIwz9aNlSjrSz66rnYuFYTMRWyCsyUDY4vCatdzcJvq8Gqvil7ikQMStOBb069s9g2i3TsoGuNI7hhxVtw9oLfBkcbB2W5dh8UBAY61sOP1HsHpg31d7JzeERVUDiPpS7+3vkrSBb5uQ8O5TrB59DgPKupBSNzY/E3gHi7vkQicPjkpyQeyDjgPtiqNND60yTRIwru/PSYgtAXQ==" />
+</div>
+        <div id="wrap"> 
+            <div id="header">
+                <div class="headerleft">
+                       <!-- <img src="../../../../../../../Resources/Images/logo-tk.png" id="ctl00_ctl00_imgSiteLogo" class="imgSiteLogo" alt="PX-Web" /> -->
+                      <!--  <span class="siteLogoText"></span> -->
+                </div>
+                <div class="headerright">
+                 <!--  <select name="ctl00$ctl00$cboSelectLanguages" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$ctl00$cboSelectLanguages\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_ctl00_cboSelectLanguages" class="cboSelectLanguages">
+	<option selected="selected" value="vi">Ti&#234;́ng Việt</option>
+	<option value="en">English</option>
+
+</select> -->
+                </div>
+                <div style="clear: both;"> </div>
+            </div>
+
+            <div id="breadcrumb">    
+              <div id="ctl00_ctl00_breadcrumb1">
+	
+
+<div class="breadcrumb_container">
+    <!-- <input type="image" name="ctl00$ctl00$breadcrumb1$breadcrumb1$HomeButton" id="ctl00_ctl00_breadcrumb1_breadcrumb1_HomeButton" class="breadcrumb_homebutton" src="" />-->
+    <a id="ctl00_ctl00_breadcrumb1_breadcrumb1_lnkHome" href="/pxweb/vi/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b"><img id="ctl00_ctl00_breadcrumb1_breadcrumb1_imgHome" title="Số liệu thống kê" class="breadcrumb_homebutton" src="/WebResource.axd?d=m5BkjPkU1Q9IFoAUIqInb-imYA67I1cF1KE7RyXryLhq4FnirTxraQl5mfO5DCi2Z8fPluoaud13GamXgHLnrhUZceyYGSIJsaOl5TR1eeKKDv2SxKrUopEgYhTqYrOskNPjo1j-MsKH9JBxx0Yl4w2&amp;t=635684415063590000" alt="Số liệu thống kê" /></a>
+    <span id="ctl00_ctl00_breadcrumb1_breadcrumb1_lblSep1" class="breadcrumb_sep">>></span>
+    <a id="ctl00_ctl00_breadcrumb1_breadcrumb1_lnkDb" class="breadcrumb_text breadcrumb_dblink" href="/pxweb/vi/T%c3%a0i%20kho%e1%ba%a3n%20qu%e1%bb%91c%20gia/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b">Tài khoản quốc gia</a>
+    
+    
+    
+    
+    
+    
+    <span id="ctl00_ctl00_breadcrumb1_breadcrumb1_lblSep5" class="breadcrumb_sep">>></span>
+    <a id="ctl00_ctl00_breadcrumb1_breadcrumb1_lnkTable" class="breadcrumb_text breadcrumb_tablelink" href="/pxweb/vi/T%c3%a0i%20kho%e1%ba%a3n%20qu%e1%bb%91c%20gia/T%c3%a0i%20kho%e1%ba%a3n%20qu%e1%bb%91c%20gia/V03.12.px/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b">Tổng sản phẩm trên địa bàn bình quân đầu người phân theo địa phương</a>
+    
+    
+</div>   
+
+
+
+
+</div>           
+            </div>  
+            <div id="navigationFlow" >        
+              <!--  <div id="ctl00_ctl00_navigationFlowControl">
+	<div id="ctl00_ctl00_navigationFlowControl_navigationFlowControl_panelShowNavigationFlow">
+		
+    <div class="navigationFlowArea">
+        <div class="dottedline" style="left: 71px; top: 18px; *top: 40px; width: 137px;"></div>
+        <div class="dottedline" style="left: 240px; top: 18px; *top: 28px; width: 137px;"></div>
+        <div class="row1">
+            <a id="ctl00_ctl00_navigationFlowControl_navigationFlowControl_firstLink" href="/pxweb/vi/T%c3%a0i%20kho%e1%ba%a3n%20qu%e1%bb%91c%20gia/T%c3%a0i%20kho%e1%ba%a3n%20qu%e1%bb%91c%20gia/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b"><div id="ctl00_ctl00_navigationFlowControl_navigationFlowControl_firstItem" class="col1 passive">
+			                
+				    <div class="number" >
+					    1
+				    </div>
+				    <div class="text" >
+					   <span id="ctl00_ctl00_navigationFlowControl_navigationFlowControl_lblFirstStep">Choose table</span>
+				    </div>
+			    
+		</div></a>
+            <a id="ctl00_ctl00_navigationFlowControl_navigationFlowControl_secondLink" href="/pxweb/vi/T%c3%a0i%20kho%e1%ba%a3n%20qu%e1%bb%91c%20gia/T%c3%a0i%20kho%e1%ba%a3n%20qu%e1%bb%91c%20gia/V03.12.px/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b"><div id="ctl00_ctl00_navigationFlowControl_navigationFlowControl_secondItem" class="col2 passive">
+			
+				    <div class="number" >
+					    2
+				    </div>
+				    <div class="text">
+					    <span id="ctl00_ctl00_navigationFlowControl_navigationFlowControl_lblSecondStep">Choose variable</span>
+				    </div>
+			    
+		</div></a>           
+			<div id="ctl00_ctl00_navigationFlowControl_navigationFlowControl_thirdItem" class="col3 active ">
+			
+				<div class="number" >
+					3
+				</div>
+				<div class="text" >
+					<span id="ctl00_ctl00_navigationFlowControl_navigationFlowControl_lblThirdStep">Show table</span>
+				</div>
+			
+		</div>      
+        </div>   
+    </div>
+    <div style="clear: both;"></div>
+    <div class="fullscreen dottedline"></div>
+
+
+	</div>
+
+
+
+</div> -->
+            </div>      
+        
+            <div id="content"> 
+                <div id="place-holder">
+                    
+    <div id="PageElements">
+    
+        <div id="Presentation">
+            <div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1">
+	<div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_CommandBarPanel">
+		
+    <div class="commandbar">
+        <div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_DropDownPanel" class="commandbar_dropdown">
+			
+            <div>
+                <select name="ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$FunctionDropDownList" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$FunctionDropDownList\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_FunctionDropDownList" class="commandbar_function_dropdownlist">
+				<option selected="selected" value="Chỉnh sửa và tính toán">Chỉnh sửa v&#224; t&#237;nh to&#225;n</option>
+				<option value="pivotManual">Xoay bảng thủ c&#244;ng</option>
+				<option value="pivotCW">Xoay theo chiều kim đồng hồ</option>
+				<option value="pivotCCW">Xoay ngược chiều kim đồng hồ</option>
+				<option value="changeValueOrder">Thay đổi thứ tự gi&#225; trị</option>
+				<option value="changeDecimal">Thay đổi số thập ph&#226;n</option>
+				<option value="deleteValue">X&#243;a gi&#225; trị</option>
+				<option value="deleteVariable">X&#243;a biến</option>
+				<option value="changeTextPresentation">Thay đổi nội dung</option>
+				<option value="changeTextCodePresentation">Thay đổi nội dung/m&#227; tr&#236;nh b&#224;y</option>
+				<option value="perPart">Tỷ lệ phần trăm</option>
+				<option value="sum">Tỉnh tổng c&#225;c gi&#225; trị của biến</option>
+				<option value="subtract">Hiệu c&#225;c gi&#225; trị của biến</option>
+				<option value="divide">Chia c&#225;c gi&#225; trị của biến</option>
+				<option value="multiply">Nh&#226;n c&#225;c gi&#225; trị của biến</option>
+
+			</select> 
+                <div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_FunctionDropDownListShortcuts" class="commandbar_shortcut">
+
+			</div>
+            </div>
+            <div>
+                <select name="ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$SaveAsDropDownList" id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_SaveAsDropDownList" class="commandbar_saveas_dropdownlist" onchange="return downloadSelectedFile(this);">
+				<option selected="selected" value="Lưu dưới dạng">Lưu dưới dạng</option>
+				<option value="/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypePX">Tệp PC-AXIS</option>
+				<option value="/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypeCsvWithHeadingAndComma">Ph&#226;n t&#225;ch bới dấu phẩy k&#232;m ti&#234;u đề</option>
+				<option value="/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypeCsvWithoutHeadingAndSemiColon">Ph&#226;n t&#225;ch bới dấu chấm phẩy kh&#244;ng k&#232;m ti&#234;u đề</option>
+				<option value="/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypeHtml">Tệp HTML (htm)</option>
+				<option value="/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypeRelational">Tệp quan hệ (scb)</option>
+				<option value="/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypeExcelX">Excel (xlsx)</option>
+				<option value="/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypeExcelXDoubleColumn">Excel (xlsx) with code and text column</option>
+				<option value="/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypeJsonStat">JSON-stat file (json)</option>
+
+			</select>    
+                <div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_SaveAsDropDownListShortcuts" class="commandbar_shortcut">
+				<input type="image" name="ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$ShortcutFileFileTypeHtml" id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_ShortcutFileFileTypeHtml" title="Tệp HTML (htm)" class="commandbar_pluginbutton" src="../../../../../../../Resources/Images/small_button_html.gif" alt="Tệp HTML (htm)" onclick="commandbarDownloadFile(&#39;/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypeHtml&#39;); return false;" /><input type="image" name="ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$ShortcutFileFileTypeRelational" id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_ShortcutFileFileTypeRelational" title="Tệp quan hệ (scb)" class="commandbar_pluginbutton" src="../../../../../../../Resources/Images/small_button_scb.gif" alt="Tệp quan hệ (scb)" onclick="commandbarDownloadFile(&#39;/pxweb/vi/Tài khoản quốc gia/Tài khoản quốc gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;downloadfile=FileTypeRelational&#39;); return false;" />
+			</div>
+            </div>
+            <div>
+                <select name="ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$PresentationViewsDropDownList" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$PresentationViewsDropDownList\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_PresentationViewsDropDownList" class="commandbar_link_dropdownlist">
+				<option selected="selected" value="tableViewLayout1">Bảng - Giao diện 1</option>
+				<option value="tableViewLayout2">Bảng - Giao diện 2</option>
+				<option value="tableViewSorted">Bảng - Sắp xếp</option>
+				<option value="chartViewColumn">Biểu đồ - Dạng cột</option>
+				<option value="chartViewColumnStacked">Biểu đồ - Dạng cột xếp chồng</option>
+				<option value="chartViewColumnStacked100">Biểu đồ - Dạng cột xếp chồng 100%</option>
+				<option value="chartViewBar">Biểu đồ - Dạng thanh</option>
+				<option value="chartViewBarStacked">Biểu đồ - Dạng thanh xếp chồng</option>
+				<option value="chartViewBarStacked100">Biểu đồ - Dạng thanh xếp chồng 100%</option>
+				<option value="chartViewLine">Biểu đồ - Dạng d&#242;ng kẻ</option>
+				<option value="chartViewColumnLine">Biểu đồ - Dạng cột v&#224; d&#242;ng kẻ</option>
+				<option value="chartViewArea">Biểu đồ - Dạng v&#249;ng</option>
+				<option value="chartViewAreaStacked">Biểu đồ - Dạng v&#249;ng xếp chồng</option>
+				<option value="chartViewAreaStacked100">Biểu đồ - Dạng v&#249;ng xếp chồng 100%</option>
+				<option value="chartViewPoint">Biểu đồ - Dạng điểm</option>
+				<option value="chartViewRadar">Biểu đồ - Dạng Rada</option>
+				<option value="footnoteView">Ch&#250; th&#237;ch</option>
+				<option value="informationView">Th&#244;ng tin</option>
+
+			</select>
+                <div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_LinkDropDownListShortcuts" class="commandbar_shortcut">
+				<input type="image" name="ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$ShortcutLinktableViewLayout1" id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_ShortcutLinktableViewLayout1" title="Bảng - Giao diện 1" class="commandbar_pluginbutton" src="../../../../../../../Resources/Images/small_button_layout_1.png" alt="Bảng - Giao diện 1" />
+			</div>
+            </div>
+                <div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_CommandBarShortcutsDropDown" class="commandbar_mainshortcut">
+				<input type="image" name="ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$CommandBarShortcutinformationView" id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_CommandBarShortcutinformationView" title="Thông tin" class="commandbar_pluginbutton" src="../../../../../../../Resources/Images/info.gif" alt="Thông tin" />
+			</div>
+                <input type="submit" name="ctl00$ctl00$ContentPlaceHolderMain$CommandBar1$CommandBar1$ActionButton" value="Gửi" id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_ActionButton" class="commandbar_action" />    
+        
+		</div>
+        
+        <div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_CommandBarShortcutsImage" class="commandbar_mainshortcut">
+
+		</div>
+        
+        
+    </div>
+    
+    <div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_commandbarDownloadFileDialog" class="commandbar_download_file_dialog" style="display: none" title="Save file">
+        <div id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_commandbarDownloadFileContainer" class="commandbar_download_file_container">
+			
+            <span id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_commandbarDownloadFileInformation" class="commandbar_download_file_information">Click the 'Save file' link below to download the file to your computer</span>
+            <a id="ctl00_ctl00_ContentPlaceHolderMain_CommandBar1_CommandBar1_commandbarDownloadFileLink" class="commandbar_download_file_link" target="_blank">Save file</a>
+        
+		</div>
+    </div>
+
+
+	</div>
+
+</div>
+            <div id="settingsPanel" class="settings_panel">
+                
+    <a id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_lnkShowTblSettings" class="tablesettings panelshowlink " data-showclass="tablesettings" href="/pxweb/vi/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;displaypanel=tablesettings"><img id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_imgSettingsExpander" class="px-settings-expandimage" src="/WebResource.axd?d=m5BkjPkU1Q9IFoAUIqInb-imYA67I1cF1KE7RyXryLhq4FnirTxraQl5mfO5DCi2Z8fPluoaud13GamXgHLnrhUZceyYGSIJsaOl5TR1eeKKDv2SxKrUopEgYhTqYrOskNPjo1j-MsKH9JBxx0Yl4w2&amp;t=635684415063590000" />Table settings</a>
+
+    <div id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_pnlSettings" class="px-settings settingpanel tablesettings" style="display:none;">
+	
+        <span id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_lblZeroOption" class="px_setting_heading">Rows with zeros:</span>   
+            <table id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption" class="px_setting_radiobuttonlist">
+		<tr>
+			<td><input id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_0" type="radio" name="ctl00$ctl00$ContentPlaceHolderMain$cphSettings$rblZeroOption" value="ShowAll" checked="checked" /><label for="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_0">Show all rows</label></td>
+		</tr><tr>
+			<td><input id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_1" type="radio" name="ctl00$ctl00$ContentPlaceHolderMain$cphSettings$rblZeroOption" value="NoZero" /><label for="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_1">Hide rows with only zeros</label></td>
+		</tr><tr>
+			<td><input id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_2" type="radio" name="ctl00$ctl00$ContentPlaceHolderMain$cphSettings$rblZeroOption" value="NoZeroAndNil" /><label for="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_2">Hide rows with only zeros or '-'</label></td>
+		</tr><tr>
+			<td><input id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_3" type="radio" name="ctl00$ctl00$ContentPlaceHolderMain$cphSettings$rblZeroOption" value="NoSymbols" /><label for="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_3">Hide rows with only dots</label></td>
+		</tr><tr>
+			<td><input id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_4" type="radio" name="ctl00$ctl00$ContentPlaceHolderMain$cphSettings$rblZeroOption" value="NoZeroNilAndSymbol" /><label for="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption_4">Hide rows with only zeros, '-' or dots</label></td>
+		</tr>
+	</table>
+        <div id="divSettingButtons" class="px_settings_buttons">
+            <a id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_lnkCancelSettings" class="px_settings_cancel" href="/pxweb/vi/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b"><span id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_lblCancelSettings">Cancel</span></a> 
+            <input type="submit" name="ctl00$ctl00$ContentPlaceHolderMain$cphSettings$btnApply" value="Save settings" id="ctl00_ctl00_ContentPlaceHolderMain_cphSettings_btnApply" class="px_setting_apply" />
+        </div>
+    
+</div>
+
+    <script type="text/javascript" >
+
+        jQuery(document).ready(function () {
+            jQuery('.px_settings_cancel').click(function () {
+                // Reset selected value in radiobuttonlist
+                jQuery('#ctl00_ctl00_ContentPlaceHolderMain_cphSettings_rblZeroOption').find("input[value='ShowAll']").prop('checked', true);
+
+                //Hide any currently displayed setting panel
+                jQuery('.settingpanel').hide(0);
+
+                //Change expand image on all links
+                var col = jQuery('.px-settings-collapseimage');
+                col.removeClass('px-settings-collapseimage');
+                col.addClass('px-settings-expandimage');
+
+                // Collapse all setting panels
+                jQuery('.panelshowlink').removeClass('settingpanelexpanded');
+                return false;
+            });
+        });
+
+    </script>
+
+                <a id="ctl00_ctl00_ContentPlaceHolderMain_lnkSaveQueryInformation" class="savequery_showinformationlink savequery panelshowlink" data-showclass="savequery" href="/pxweb/vi/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;displaypanel=savequery1"><img id="ctl00_ctl00_ContentPlaceHolderMain_imgShowSaveQueryExpander" class="px-settings-expandimage" src="/WebResource.axd?d=m5BkjPkU1Q9IFoAUIqInb-imYA67I1cF1KE7RyXryLhq4FnirTxraQl5mfO5DCi2Z8fPluoaud13GamXgHLnrhUZceyYGSIJsaOl5TR1eeKKDv2SxKrUopEgYhTqYrOskNPjo1j-MsKH9JBxx0Yl4w2&amp;t=635684415063590000" />Save your retrieval</a>
+
+            </div>
+            
+
+<div class="savequery_container" >
+
+    <a id="tableSavequerycontrol"></a>         
+        <div id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_pnl2_SaveQuerySelection" class="savequery_informationpanel savequery_informationpanelwidth settingpanel savequery" style="display:none;">
+	            
+            <div id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_pnlSettings" class="px-settings">
+		
+                <div id="divTimePeriod" class="savequery_timeperioddiv"  >
+                    <div id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_divTimeWarning" class="time_warning_panel">
+                        <img id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_imgTimeWarning" class="alertimage" src="/WebResource.axd?d=m5BkjPkU1Q9IFoAUIqInb-imYA67I1cF1KE7RyXryLhq4FnirTxraQl5mfO5DCi2Z8fPluoaud13GamXgHLnrhUZceyYGSIJsaOl5TR1eeKKDv2SxKrUopEgYhTqYrOskNPjo1j-MsKH9JBxx0Yl4w2&amp;t=635684415063590000" />
+                        <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblTimeWarning">It is not possible to update the search since there is no defined time variable in this table.</span>
+                    </div>
+                    <h2><span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblTimePeriod" class="savequery_informationtext savequery_heading">Update options</span></h2>
+                    <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblTimePeriodInformation" class="savequery_informationtext">What do you want to do with your saved search if the tables are updated with new time periods?</span>
+                    <table id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_rblTimePeriod" class="savequery_rblist">
+			<tr>
+				<td><span class="aspNetDisabled"><input id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_rblTimePeriod_0" type="radio" name="ctl00$ctl00$ContentPlaceHolderMain$SavedQueryFeature$rblTimePeriod" value="from" disabled="disabled" /><label for="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_rblTimePeriod_0">Update the search with a fixed starting time point and the new time periods </label></span></td>
+			</tr><tr>
+				<td><span class="aspNetDisabled"><input id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_rblTimePeriod_1" type="radio" name="ctl00$ctl00$ContentPlaceHolderMain$SavedQueryFeature$rblTimePeriod" value="top" disabled="disabled" /><label for="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_rblTimePeriod_1">Update the search with a rolling start time point and an unchanged number of time periods</label></span></td>
+			</tr><tr>
+				<td><span><input id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_rblTimePeriod_2" type="radio" name="ctl00$ctl00$ContentPlaceHolderMain$SavedQueryFeature$rblTimePeriod" value="item" checked="checked" /><label for="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_rblTimePeriod_2">Don't update the search, but show the same time periods as on the screen</label></span></td>
+			</tr>
+		</table>
+                    <div id="divSaveAs" class="savequery_saveasdiv"  >
+                        <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblResultAs" class="savequery_informationtext savequery_heading">Save the result as (mandatory):</span>
+                        <select name="ctl00$ctl00$ContentPlaceHolderMain$SavedQueryFeature$ddlOutputFormats" id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_ddlOutputFormats" class="commandbar_saveas_dropdownlist saveas_dropdownlist">
+			<option value="selectFormat">Select format</option>
+			<option value="SCREEN">Same as shown on screen</option>
+			<option value="FileTypePX">Tệp PC-AXIS</option>
+			<option value="FileTypeCsvWithHeadingAndComma">Ph&#226;n t&#225;ch bới dấu phẩy k&#232;m ti&#234;u đề</option>
+			<option value="FileTypeCsvWithoutHeadingAndSemiColon">Ph&#226;n t&#225;ch bới dấu chấm phẩy kh&#244;ng k&#232;m ti&#234;u đề</option>
+			<option value="FileTypeHtml">Tệp HTML (htm)</option>
+			<option value="FileTypeRelational">Tệp quan hệ (scb)</option>
+			<option value="FileTypeExcelX">Excel (xlsx)</option>
+			<option value="FileTypeExcelXDoubleColumn">Excel (xlsx) with code and text column</option>
+			<option value="FileTypeJsonStat">JSON-stat file (json)</option>
+
+		</select>
+                        <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblFormatError" class="savequery_error"></span>
+                    </div>
+                    <div class="savequery_functionbtn">                     
+                        <a id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lnkCancelSaveQuery" class="savequery_cancel" href="/pxweb/vi/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b"><span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblCancelSaveQuery">Cancel</span></a> 
+                        <input type="submit" name="ctl00$ctl00$ContentPlaceHolderMain$SavedQueryFeature$btnCreateSaveQuery" value="Finish" id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_btnCreateSaveQuery" class="savequery_create" />                
+                        
+                    </div>
+                </div>
+                <div id="divHelp">
+                    <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblHeadingInformationText" class="savequery_informationtext savequery_heading">About save your retrieval</span>
+                    <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblInformationText" class="savequery_informationtext">Save your retrieval so you can return to the same table by using a web address</span>                
+                </div>
+            
+	</div>
+        
+</div>
+        <div id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_pnl3_ShowSaveQueryUrl" class="savequery_informationpanel savequery_informationpanelwidth settingpanel" style="display:none;">
+	  
+            <div id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_pnlUrl" class="px-settings">
+		
+                <div id="divQuerySummary" class="querySummary">
+                    <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblUpdateSummaryHeading" class="savequery_informationtext savequery_heading querySummaryItem">Update alternatives:</span>
+                    <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblUpdateSummaryValue" class="savequery_informationtext querySummaryItem"></span>
+                    <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblOutputSummaryHeading" class="savequery_informationtext savequery_heading querySummaryItem">Format:</span>
+                    <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblOutputSummaryValue" class="savequery_informationtext querySummaryItem"></span>
+                </div>
+                <span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblWithdrawInformation" class="savequery_informationtext">You can return to the saved search by clicking on this link</span>                        
+                <input name="ctl00$ctl00$ContentPlaceHolderMain$SavedQueryFeature$txtSaveQueryUrl" type="text" readonly="readonly" id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_txtSaveQueryUrl" class="savequery_url" /> 
+                <div class="savequery_functionbtn">    
+                    <a id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lnkBack" class="savequery_back savequery_function" href="/pxweb/vi/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/T%C3%A0i%20kho%E1%BA%A3n%20qu%E1%BB%91c%20gia/V03.12.px/table/tableViewLayout1/?rxid=79895132-ff50-4d61-b2fe-fdf8f294e69b&amp;displaypanel=savequery1"><span id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblBack">Back</span></a>
+                    <input type="submit" name="ctl00$ctl00$ContentPlaceHolderMain$SavedQueryFeature$btnbookMark" value="Bookmark" onclick="Bookmark(); return false;" id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_btnbookMark" class="savequery_btnbookmark savequery_function savequery_novisibility" />
+                    <input type="submit" name="ctl00$ctl00$ContentPlaceHolderMain$SavedQueryFeature$btnCopyToClipboard" value="Copy" onclick="CopyToClipboard(); return false;" id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_btnCopyToClipboard" class="savequery_btncopy savequery_function savequery_novisibility" />           
+                    <input type="submit" name="ctl00$ctl00$ContentPlaceHolderMain$SavedQueryFeature$btnMailSaveQuery" value="Send as e-mail" onclick="document.location = sendMail(); return false;" id="ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_btnMailSaveQuery" class="savequery_btnmail savequery_function savequery_novisibility" /> 
+                </div>
+            
+	</div>
+             
+            
+       
+</div>  
+
+ </div>
+
+<script type="text/javascript" >
+
+        jQuery(document).ready(function () {
+
+            jQuery('.saveas_dropdownlist').change(function () {
+                if (jQuery('option:selected', this).val() != "selectFormat") {
+                    jQuery('#ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblFormatError').hide(0);
+                }
+                else {
+                    jQuery('#ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblFormatError').show(0);
+                }
+            });
+            
+            jQuery('.savequery_cancel').click(function () {
+                // Reset selected value in radiobuttonlist
+                jQuery('#ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_rblTimePeriod').find("input[value='from']").prop('checked', true);
+                // Reset selected value in dropdownlist
+                jQuery('#ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_ddlOutputFormats').val("selectFormat");
+                // Hide errormessage
+                jQuery('#ctl00_ctl00_ContentPlaceHolderMain_SavedQueryFeature_lblFormatError').hide(0);
+
+                //Hide any currently displayed setting panel
+                jQuery('.settingpanel').hide(0);
+
+                //Change expand image on all links
+                var col = jQuery('.px-settings-collapseimage');
+                col.removeClass('px-settings-collapseimage');
+                col.addClass('px-settings-expandimage');
+
+                // Manipulation on the Save query link on the Presentation.Master page:
+                // - Remove the expanded class for the Save query link
+                jQuery('[id$=lnkSaveQueryInformation]').removeClass('settingpanelexpanded');
+
+                return false;
+            });
+
+            if ((jQuery('[id$=pnl3_ShowSaveQueryUrl]').is(':visible')) || (jQuery('[id$=lblFormatError]').is(':visible'))) {
+                // The URL-panel is displayed
+                // Do some manipulation on the Save query link on the Presentation.Master page:
+                // 1. Set the correct image to the Save query expander/collapser
+                jQuery('[id$=imgShowSaveQueryExpander]').removeClass('px-settings-expandimage');
+                jQuery('[id$=imgShowSaveQueryExpander]').addClass('px-settings-collapseimage');
+                // 2. Set the correct class on the Save query link
+                jQuery('[id$=lnkSaveQueryInformation]').addClass('settingpanelexpanded');
+            }
+
+            jQuery('[id$=btnMailSaveQuery]').css('display', 'inline-block');
+
+            if (typeof window.external == "object" && ('AddFavorite' in window.external)) {
+
+                jQuery('[id$=btnbookMark]').css('display', 'inline-block');
+
+            }
+            
+            if (window.clipboardData && clipboardData.setData) {
+
+                jQuery('[id$=btnCopyToClipboard]').css('display', 'inline-block');
+            }
+
+            jQuery('[id$=lnkBack]').click(function () {
+                jQuery('[id$=pnl2_SaveQuerySelection]').show(0);
+                jQuery('[id$=pnl3_ShowSaveQueryUrl]').hide(0);
+                return false;
+            });
+
+    });
+    
+    function CopyToClipboard() 
+    { 
+        window.clipboardData.setData('Text', "");
+        ShowPanel();
+        return false;
+    }
+    
+    
+    function ShowPanel()
+    {
+        jQuery('[id$=pnl3_ShowSaveQueryUrl]').show(0);
+        jQuery('[id$=pnl2_SaveQuerySelection]').hide(0);
+        jQuery('[id$=pnl1_SaveQueryInformationHidden]').hide(0);
+
+    }
+
+
+</script>   
+
+            
+            
+    <div id="ctl00_ctl00_ContentPlaceHolderMain_cphMain_TableInformationView">
+
+</div>
+    <div id="ctl00_ctl00_ContentPlaceHolderMain_cphMain_Table1">
+	
+
+
+<div id="pcaxis_tablediv">
+    <table id="ctl00_ctl00_ContentPlaceHolderMain_cphMain_Table1_Table1_DataTable" class="table-class" summary="Tổng sản phẩm trên địa bàn bình quân đầu người phân theo địa phương chia theo Tỉnh, thành phố và Năm">
+		<thead>
+			<tr>
+				<th class="table-title" colspan="9">Tổng sản phẩm trên địa bàn bình quân đầu người phân theo địa phương chia theo Tỉnh, thành phố và Năm</th>
+			</tr><tr>
+				<td class="table-header-first" colspan="1" rowspan="1">&nbsp;</td><th class="table-header-first" id="H101" scope="col" colspan="1">2018</th><th class="table-header-first" id="H111" scope="col" colspan="1">2019</th><th class="table-header-first" id="H121" scope="col" colspan="1">2020</th><th class="table-header-first" id="H131" scope="col" colspan="1">2021</th><th class="table-header-first" id="H141" scope="col" colspan="1">2022</th><th class="table-header-first" id="H151" scope="col" colspan="1">2023</th><th class="table-header-first" id="H161" scope="col" colspan="1">Sơ bộ 2024</th><th class="table-header-first" id="H171" scope="col" colspan="1">Ước tính 2025</th>
+			</tr>
+		</thead><tbody>
+			<tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R00" rowspan="1" scope="row">Ðồng bằng sông Hồng</th><td class="table-data-filled" headers="R00 H101">89,53</td><td class="table-data-filled" headers="R00 H111">98,14</td><td class="table-data-filled" headers="R00 H121">102,87</td><td class="table-data-filled" headers="R00 H131">110,16</td><td class="table-data-filled" headers="R00 H141">122,53</td><td class="table-data-filled" headers="R00 H151">129,67</td><td class="table-data-filled" headers="R00 H161">141,63</td><td class="table-data-filled" headers="R00 H171">157,24</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R11" rowspan="1" scope="row">Hà Nội</th><td class="table-data-filled" headers="R11 H101">111,60</td><td class="table-data-filled" headers="R11 H111">120,32</td><td class="table-data-filled" headers="R11 H121">123,40</td><td class="table-data-filled" headers="R11 H131">128,33</td><td class="table-data-filled" headers="R11 H141">141,12</td><td class="table-data-filled" headers="R11 H151">149,69</td><td class="table-data-filled" headers="R11 H161">162,92</td><td class="table-data-filled" headers="R11 H171">179,29</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R22" rowspan="1" scope="row">Vĩnh Phúc</th><td class="table-data-filled" headers="R22 H101">94,54</td><td class="table-data-filled" headers="R22 H111">102,47</td><td class="table-data-filled" headers="R22 H121">105,88</td><td class="table-data-filled" headers="R22 H131">114,38</td><td class="table-data-filled" headers="R22 H141">128,10</td><td class="table-data-filled" headers="R22 H151">129,68</td><td class="table-data-filled" headers="R22 H161">141,06</td><td class="table-data-filled" headers="R22 H171">158,02</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R33" rowspan="1" scope="row">Bắc Ninh</th><td class="table-data-filled" headers="R33 H101">144,95</td><td class="table-data-filled" headers="R33 H111">144,99</td><td class="table-data-filled" headers="R33 H121">147,26</td><td class="table-data-filled" headers="R33 H131">157,65</td><td class="table-data-filled" headers="R33 H141">166,72</td><td class="table-data-filled" headers="R33 H151">156,74</td><td class="table-data-filled" headers="R33 H161">159,10</td><td class="table-data-filled" headers="R33 H171">173,44</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R44" rowspan="1" scope="row">Quảng Ninh</th><td class="table-data-filled" headers="R44 H101">126,81</td><td class="table-data-filled" headers="R44 H111">143,31</td><td class="table-data-filled" headers="R44 H121">155,60</td><td class="table-data-filled" headers="R44 H131">170,19</td><td class="table-data-filled" headers="R44 H141">195,27</td><td class="table-data-filled" headers="R44 H151">213,15</td><td class="table-data-filled" headers="R44 H161">234,10</td><td class="table-data-filled" headers="R44 H171">261,20</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R55" rowspan="1" scope="row">Hải Dương</th><td class="table-data-filled" headers="R55 H101">61,21</td><td class="table-data-filled" headers="R55 H111">66,78</td><td class="table-data-filled" headers="R55 H121">68,40</td><td class="table-data-filled" headers="R55 H131">77,30</td><td class="table-data-filled" headers="R55 H141">87,71</td><td class="table-data-filled" headers="R55 H151">94,85</td><td class="table-data-filled" headers="R55 H161">106,25</td><td class="table-data-filled" headers="R55 H171">118,20</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R66" rowspan="1" scope="row">Hải Phòng</th><td class="table-data-filled" headers="R66 H101">104,42</td><td class="table-data-filled" headers="R66 H111">122,17</td><td class="table-data-filled" headers="R66 H121">133,90</td><td class="table-data-filled" headers="R66 H131">151,13</td><td class="table-data-filled" headers="R66 H141">171,57</td><td class="table-data-filled" headers="R66 H151">185,07</td><td class="table-data-filled" headers="R66 H161">206,20</td><td class="table-data-filled" headers="R66 H171">231,58</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R77" rowspan="1" scope="row">Hưng Yên</th><td class="table-data-filled" headers="R77 H101">66,90</td><td class="table-data-filled" headers="R77 H111">73,71</td><td class="table-data-filled" headers="R77 H121">79,04</td><td class="table-data-filled" headers="R77 H131">88,04</td><td class="table-data-filled" headers="R77 H141">102,53</td><td class="table-data-filled" headers="R77 H151">109,88</td><td class="table-data-filled" headers="R77 H161">117,74</td><td class="table-data-filled" headers="R77 H171">130,27</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R88" rowspan="1" scope="row">Thái Bình</th><td class="table-data-filled" headers="R88 H101">39,98</td><td class="table-data-filled" headers="R88 H111">45,22</td><td class="table-data-filled" headers="R88 H121">47,90</td><td class="table-data-filled" headers="R88 H131">51,60</td><td class="table-data-filled" headers="R88 H141">57,72</td><td class="table-data-filled" headers="R88 H151">62,57</td><td class="table-data-filled" headers="R88 H161">68,93</td><td class="table-data-filled" headers="R88 H171">76,83</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R99" rowspan="1" scope="row">Hà Nam</th><td class="table-data-filled" headers="R99 H101">56,31</td><td class="table-data-filled" headers="R99 H111">64,03</td><td class="table-data-filled" headers="R99 H121">69,53</td><td class="table-data-filled" headers="R99 H131">75,96</td><td class="table-data-filled" headers="R99 H141">87,11</td><td class="table-data-filled" headers="R99 H151">95,75</td><td class="table-data-filled" headers="R99 H161">107,53</td><td class="table-data-filled" headers="R99 H171">121,54</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1010" rowspan="1" scope="row">Nam Ðịnh</th><td class="table-data-filled" headers="R1010 H101">34,92</td><td class="table-data-filled" headers="R1010 H111">39,04</td><td class="table-data-filled" headers="R1010 H121">42,69</td><td class="table-data-filled" headers="R1010 H131">44,55</td><td class="table-data-filled" headers="R1010 H141">47,33</td><td class="table-data-filled" headers="R1010 H151">51,61</td><td class="table-data-filled" headers="R1010 H161">58,72</td><td class="table-data-filled" headers="R1010 H171">67,08</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1111" rowspan="1" scope="row">Ninh Bình</th><td class="table-data-filled" headers="R1111 H101">54,31</td><td class="table-data-filled" headers="R1111 H111">62,77</td><td class="table-data-filled" headers="R1111 H121">67,53</td><td class="table-data-filled" headers="R1111 H131">70,73</td><td class="table-data-filled" headers="R1111 H141">79,77</td><td class="table-data-filled" headers="R1111 H151">83,19</td><td class="table-data-filled" headers="R1111 H161">91,39</td><td class="table-data-filled" headers="R1111 H171">101,36</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1212" rowspan="1" scope="row">Trung du và miền núi phía Bắc</th><td class="table-data-filled" headers="R1212 H101">46,11</td><td class="table-data-filled" headers="R1212 H111">49,54</td><td class="table-data-filled" headers="R1212 H121">53,37</td><td class="table-data-filled" headers="R1212 H131">56,05</td><td class="table-data-filled" headers="R1212 H141">62,81</td><td class="table-data-filled" headers="R1212 H151">67,24</td><td class="table-data-filled" headers="R1212 H161">74,33</td><td class="table-data-filled" headers="R1212 H171">85,44</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1313" rowspan="1" scope="row">Hà Giang</th><td class="table-data-filled" headers="R1313 H101">26,07</td><td class="table-data-filled" headers="R1313 H111">28,19</td><td class="table-data-filled" headers="R1313 H121">29,80</td><td class="table-data-filled" headers="R1313 H131">30,76</td><td class="table-data-filled" headers="R1313 H141">33,76</td><td class="table-data-filled" headers="R1313 H151">34,69</td><td class="table-data-filled" headers="R1313 H161">37,82</td><td class="table-data-filled" headers="R1313 H171">42,87</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1414" rowspan="1" scope="row">Cao Bằng</th><td class="table-data-filled" headers="R1414 H101">30,63</td><td class="table-data-filled" headers="R1414 H111">32,89</td><td class="table-data-filled" headers="R1414 H121">35,81</td><td class="table-data-filled" headers="R1414 H131">35,85</td><td class="table-data-filled" headers="R1414 H141">38,71</td><td class="table-data-filled" headers="R1414 H151">40,98</td><td class="table-data-filled" headers="R1414 H161">44,25</td><td class="table-data-filled" headers="R1414 H171">49,59</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1515" rowspan="1" scope="row">Bắc Kạn</th><td class="table-data-filled" headers="R1515 H101">35,38</td><td class="table-data-filled" headers="R1515 H111">38,21</td><td class="table-data-filled" headers="R1515 H121">41,06</td><td class="table-data-filled" headers="R1515 H131">42,46</td><td class="table-data-filled" headers="R1515 H141">47,05</td><td class="table-data-filled" headers="R1515 H151">51,90</td><td class="table-data-filled" headers="R1515 H161">57,05</td><td class="table-data-filled" headers="R1515 H171">62,18</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1616" rowspan="1" scope="row">Tuyên Quang</th><td class="table-data-filled" headers="R1616 H101">36,19</td><td class="table-data-filled" headers="R1616 H111">39,58</td><td class="table-data-filled" headers="R1616 H121">43,52</td><td class="table-data-filled" headers="R1616 H131">45,23</td><td class="table-data-filled" headers="R1616 H141">50,26</td><td class="table-data-filled" headers="R1616 H151">53,76</td><td class="table-data-filled" headers="R1616 H161">60,03</td><td class="table-data-filled" headers="R1616 H171">67,69</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1717" rowspan="1" scope="row">Lào Cai</th><td class="table-data-filled" headers="R1717 H101">62,17</td><td class="table-data-filled" headers="R1717 H111">68,11</td><td class="table-data-filled" headers="R1717 H121">71,98</td><td class="table-data-filled" headers="R1717 H131">74,45</td><td class="table-data-filled" headers="R1717 H141">83,37</td><td class="table-data-filled" headers="R1717 H151">85,32</td><td class="table-data-filled" headers="R1717 H161">92,96</td><td class="table-data-filled" headers="R1717 H171">108,25</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1818" rowspan="1" scope="row">Yên Bái</th><td class="table-data-filled" headers="R1818 H101">33,87</td><td class="table-data-filled" headers="R1818 H111">37,09</td><td class="table-data-filled" headers="R1818 H121">39,87</td><td class="table-data-filled" headers="R1818 H131">42,58</td><td class="table-data-filled" headers="R1818 H141">47,49</td><td class="table-data-filled" headers="R1818 H151">50,12</td><td class="table-data-filled" headers="R1818 H161">55,35</td><td class="table-data-filled" headers="R1818 H171">63,06</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R1919" rowspan="1" scope="row">Thái Nguyên</th><td class="table-data-filled" headers="R1919 H101">84,75</td><td class="table-data-filled" headers="R1919 H111">90,89</td><td class="table-data-filled" headers="R1919 H121">94,33</td><td class="table-data-filled" headers="R1919 H131">99,96</td><td class="table-data-filled" headers="R1919 H141">108,14</td><td class="table-data-filled" headers="R1919 H151">110,42</td><td class="table-data-filled" headers="R1919 H161">114,49</td><td class="table-data-filled" headers="R1919 H171">124,47</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2020" rowspan="1" scope="row">Lạng Sơn</th><td class="table-data-filled" headers="R2020 H101">38,25</td><td class="table-data-filled" headers="R2020 H111">41,90</td><td class="table-data-filled" headers="R2020 H121">44,23</td><td class="table-data-filled" headers="R2020 H131">47,17</td><td class="table-data-filled" headers="R2020 H141">50,98</td><td class="table-data-filled" headers="R2020 H151">57,83</td><td class="table-data-filled" headers="R2020 H161">62,36</td><td class="table-data-filled" headers="R2020 H171">70,95</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2121" rowspan="1" scope="row">Bắc Giang</th><td class="table-data-filled" headers="R2121 H101">50,85</td><td class="table-data-filled" headers="R2121 H111">57,72</td><td class="table-data-filled" headers="R2121 H121">65,64</td><td class="table-data-filled" headers="R2121 H131">70,35</td><td class="table-data-filled" headers="R2121 H141">84,30</td><td class="table-data-filled" headers="R2121 H151">96,21</td><td class="table-data-filled" headers="R2121 H161">109,17</td><td class="table-data-filled" headers="R2121 H171">124,65</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2222" rowspan="1" scope="row">Phú Thọ</th><td class="table-data-filled" headers="R2222 H101">42,53</td><td class="table-data-filled" headers="R2222 H111">47,07</td><td class="table-data-filled" headers="R2222 H121">50,74</td><td class="table-data-filled" headers="R2222 H131">54,00</td><td class="table-data-filled" headers="R2222 H141">59,64</td><td class="table-data-filled" headers="R2222 H151">65,05</td><td class="table-data-filled" headers="R2222 H161">73,09</td><td class="table-data-filled" headers="R2222 H171">83,65</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2323" rowspan="1" scope="row">Ðiện Biên</th><td class="table-data-filled" headers="R2323 H101">30,65</td><td class="table-data-filled" headers="R2323 H111">32,14</td><td class="table-data-filled" headers="R2323 H121">33,09</td><td class="table-data-filled" headers="R2323 H131">35,30</td><td class="table-data-filled" headers="R2323 H141">39,50</td><td class="table-data-filled" headers="R2323 H151">43,19</td><td class="table-data-filled" headers="R2323 H161">47,74</td><td class="table-data-filled" headers="R2323 H171">53,39</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2424" rowspan="1" scope="row">Lai Châu</th><td class="table-data-filled" headers="R2424 H101">40,50</td><td class="table-data-filled" headers="R2424 H111">38,86</td><td class="table-data-filled" headers="R2424 H121">43,33</td><td class="table-data-filled" headers="R2424 H131">44,66</td><td class="table-data-filled" headers="R2424 H141">49,62</td><td class="table-data-filled" headers="R2424 H151">50,80</td><td class="table-data-filled" headers="R2424 H161">60,38</td><td class="table-data-filled" headers="R2424 H171">79,43</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2525" rowspan="1" scope="row">Sơn La</th><td class="table-data-filled" headers="R2525 H101">40,37</td><td class="table-data-filled" headers="R2525 H111">39,68</td><td class="table-data-filled" headers="R2525 H121">43,32</td><td class="table-data-filled" headers="R2525 H131">44,25</td><td class="table-data-filled" headers="R2525 H141">48,84</td><td class="table-data-filled" headers="R2525 H151">50,84</td><td class="table-data-filled" headers="R2525 H161">57,38</td><td class="table-data-filled" headers="R2525 H171">71,38</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2626" rowspan="1" scope="row">Hoà Bình</th><td class="table-data-filled" headers="R2626 H101">54,42</td><td class="table-data-filled" headers="R2626 H111">54,61</td><td class="table-data-filled" headers="R2626 H121">57,72</td><td class="table-data-filled" headers="R2626 H131">59,15</td><td class="table-data-filled" headers="R2626 H141">67,21</td><td class="table-data-filled" headers="R2626 H151">69,75</td><td class="table-data-filled" headers="R2626 H161">79,43</td><td class="table-data-filled" headers="R2626 H171">95,14</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2727" rowspan="1" scope="row">Bắc Trung Bộ và Duyên hải miền Trung</th><td class="table-data-filled" headers="R2727 H101">50,17</td><td class="table-data-filled" headers="R2727 H111">55,91</td><td class="table-data-filled" headers="R2727 H121">57,41</td><td class="table-data-filled" headers="R2727 H131">61,80</td><td class="table-data-filled" headers="R2727 H141">70,61</td><td class="table-data-filled" headers="R2727 H151">74,70</td><td class="table-data-filled" headers="R2727 H161">82,36</td><td class="table-data-filled" headers="R2727 H171">90,54</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2828" rowspan="1" scope="row">Thanh Hoá</th><td class="table-data-filled" headers="R2828 H101">40,26</td><td class="table-data-filled" headers="R2828 H111">48,33</td><td class="table-data-filled" headers="R2828 H121">51,26</td><td class="table-data-filled" headers="R2828 H131">57,60</td><td class="table-data-filled" headers="R2828 H141">69,08</td><td class="table-data-filled" headers="R2828 H151">72,62</td><td class="table-data-filled" headers="R2828 H161">81,32</td><td class="table-data-filled" headers="R2828 H171">88,49</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R2929" rowspan="1" scope="row">Nghệ An</th><td class="table-data-filled" headers="R2929 H101">36,52</td><td class="table-data-filled" headers="R2929 H111">39,85</td><td class="table-data-filled" headers="R2929 H121">43,06</td><td class="table-data-filled" headers="R2929 H131">46,21</td><td class="table-data-filled" headers="R2929 H141">51,20</td><td class="table-data-filled" headers="R2929 H151">54,94</td><td class="table-data-filled" headers="R2929 H161">60,75</td><td class="table-data-filled" headers="R2929 H171">67,61</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3030" rowspan="1" scope="row">Hà Tĩnh</th><td class="table-data-filled" headers="R3030 H101">54,73</td><td class="table-data-filled" headers="R3030 H111">60,54</td><td class="table-data-filled" headers="R3030 H121">63,55</td><td class="table-data-filled" headers="R3030 H131">68,90</td><td class="table-data-filled" headers="R3030 H141">71,89</td><td class="table-data-filled" headers="R3030 H151">76,50</td><td class="table-data-filled" headers="R3030 H161">82,81</td><td class="table-data-filled" headers="R3030 H171">90,51</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3131" rowspan="1" scope="row">Quảng Bình</th><td class="table-data-filled" headers="R3131 H101">39,72</td><td class="table-data-filled" headers="R3131 H111">43,75</td><td class="table-data-filled" headers="R3131 H121">46,32</td><td class="table-data-filled" headers="R3131 H131">49,29</td><td class="table-data-filled" headers="R3131 H141">54,30</td><td class="table-data-filled" headers="R3131 H151">59,26</td><td class="table-data-filled" headers="R3131 H161">64,71</td><td class="table-data-filled" headers="R3131 H171">71,94</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3232" rowspan="1" scope="row">Quảng Trị</th><td class="table-data-filled" headers="R3232 H101">45,49</td><td class="table-data-filled" headers="R3232 H111">50,34</td><td class="table-data-filled" headers="R3232 H121">52,84</td><td class="table-data-filled" headers="R3232 H131">57,90</td><td class="table-data-filled" headers="R3232 H141">67,19</td><td class="table-data-filled" headers="R3232 H151">70,94</td><td class="table-data-filled" headers="R3232 H161">77,04</td><td class="table-data-filled" headers="R3232 H171">85,10</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3333" rowspan="1" scope="row">Thừa Thiên Huế</th><td class="table-data-filled" headers="R3333 H101">42,54</td><td class="table-data-filled" headers="R3333 H111">46,81</td><td class="table-data-filled" headers="R3333 H121">48,56</td><td class="table-data-filled" headers="R3333 H131">50,83</td><td class="table-data-filled" headers="R3333 H141">56,80</td><td class="table-data-filled" headers="R3333 H151">62,01</td><td class="table-data-filled" headers="R3333 H161">67,72</td><td class="table-data-filled" headers="R3333 H171">75,27</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3434" rowspan="1" scope="row">Ðà Nẵng</th><td class="table-data-filled" headers="R3434 H101">91,00</td><td class="table-data-filled" headers="R3434 H111">97,44</td><td class="table-data-filled" headers="R3434 H121">88,85</td><td class="table-data-filled" headers="R3434 H131">90,41</td><td class="table-data-filled" headers="R3434 H141">102,88</td><td class="table-data-filled" headers="R3434 H151">108,30</td><td class="table-data-filled" headers="R3434 H161">119,31</td><td class="table-data-filled" headers="R3434 H171">135,13</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3535" rowspan="1" scope="row">Quảng Nam</th><td class="table-data-filled" headers="R3535 H101">61,55</td><td class="table-data-filled" headers="R3535 H111">66,05</td><td class="table-data-filled" headers="R3535 H121">65,41</td><td class="table-data-filled" headers="R3535 H131">69,77</td><td class="table-data-filled" headers="R3535 H141">78,67</td><td class="table-data-filled" headers="R3535 H151">76,10</td><td class="table-data-filled" headers="R3535 H161">83,10</td><td class="table-data-filled" headers="R3535 H171">90,06</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3636" rowspan="1" scope="row">Quảng Ngãi</th><td class="table-data-filled" headers="R3636 H101">67,73</td><td class="table-data-filled" headers="R3636 H111">70,53</td><td class="table-data-filled" headers="R3636 H121">69,48</td><td class="table-data-filled" headers="R3636 H131">81,51</td><td class="table-data-filled" headers="R3636 H141">99,89</td><td class="table-data-filled" headers="R3636 H151">100,90</td><td class="table-data-filled" headers="R3636 H161">104,28</td><td class="table-data-filled" headers="R3636 H171">114,45</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3737" rowspan="1" scope="row">Bình Ðịnh</th><td class="table-data-filled" headers="R3737 H101">50,25</td><td class="table-data-filled" headers="R3737 H111">55,67</td><td class="table-data-filled" headers="R3737 H121">60,08</td><td class="table-data-filled" headers="R3737 H131">63,66</td><td class="table-data-filled" headers="R3737 H141">71,65</td><td class="table-data-filled" headers="R3737 H151">78,10</td><td class="table-data-filled" headers="R3737 H161">85,26</td><td class="table-data-filled" headers="R3737 H171">93,38</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3838" rowspan="1" scope="row">Phú Yên</th><td class="table-data-filled" headers="R3838 H101">44,30</td><td class="table-data-filled" headers="R3838 H111">48,63</td><td class="table-data-filled" headers="R3838 H121">50,49</td><td class="table-data-filled" headers="R3838 H131">51,53</td><td class="table-data-filled" headers="R3838 H141">57,39</td><td class="table-data-filled" headers="R3838 H151">63,06</td><td class="table-data-filled" headers="R3838 H161">68,25</td><td class="table-data-filled" headers="R3838 H171">74,23</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R3939" rowspan="1" scope="row">Khánh Hoà</th><td class="table-data-filled" headers="R3939 H101">63,89</td><td class="table-data-filled" headers="R3939 H111">70,36</td><td class="table-data-filled" headers="R3939 H121">64,27</td><td class="table-data-filled" headers="R3939 H131">63,51</td><td class="table-data-filled" headers="R3939 H141">77,20</td><td class="table-data-filled" headers="R3939 H151">88,53</td><td class="table-data-filled" headers="R3939 H161">104,33</td><td class="table-data-filled" headers="R3939 H171">114,21</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4040" rowspan="1" scope="row">Ninh Thuận</th><td class="table-data-filled" headers="R4040 H101">43,66</td><td class="table-data-filled" headers="R4040 H111">52,70</td><td class="table-data-filled" headers="R4040 H121">59,11</td><td class="table-data-filled" headers="R4040 H131">69,69</td><td class="table-data-filled" headers="R4040 H141">77,70</td><td class="table-data-filled" headers="R4040 H151">85,52</td><td class="table-data-filled" headers="R4040 H161">94,69</td><td class="table-data-filled" headers="R4040 H171">102,28</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4141" rowspan="1" scope="row">Bình Thuận</th><td class="table-data-filled" headers="R4141 H101">53,39</td><td class="table-data-filled" headers="R4141 H111">64,24</td><td class="table-data-filled" headers="R4141 H121">69,23</td><td class="table-data-filled" headers="R4141 H131">73,44</td><td class="table-data-filled" headers="R4141 H141">81,03</td><td class="table-data-filled" headers="R4141 H151">82,19</td><td class="table-data-filled" headers="R4141 H161">91,96</td><td class="table-data-filled" headers="R4141 H171">99,86</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4242" rowspan="1" scope="row">Tây Nguyên</th><td class="table-data-filled" headers="R4242 H101">43,35</td><td class="table-data-filled" headers="R4242 H111">45,76</td><td class="table-data-filled" headers="R4242 H121">48,82</td><td class="table-data-filled" headers="R4242 H131">53,71</td><td class="table-data-filled" headers="R4242 H141">60,62</td><td class="table-data-filled" headers="R4242 H151">65,54</td><td class="table-data-filled" headers="R4242 H161">77,69</td><td class="table-data-filled" headers="R4242 H171">89,37</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4343" rowspan="1" scope="row">Kon Tum</th><td class="table-data-filled" headers="R4343 H101">37,81</td><td class="table-data-filled" headers="R4343 H111">40,33</td><td class="table-data-filled" headers="R4343 H121">43,01</td><td class="table-data-filled" headers="R4343 H131">47,72</td><td class="table-data-filled" headers="R4343 H141">53,23</td><td class="table-data-filled" headers="R4343 H151">58,97</td><td class="table-data-filled" headers="R4343 H161">67,75</td><td class="table-data-filled" headers="R4343 H171">75,76</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4444" rowspan="1" scope="row">Gia Lai</th><td class="table-data-filled" headers="R4444 H101">39,35</td><td class="table-data-filled" headers="R4444 H111">40,25</td><td class="table-data-filled" headers="R4444 H121">42,59</td><td class="table-data-filled" headers="R4444 H131">48,20</td><td class="table-data-filled" headers="R4444 H141">54,08</td><td class="table-data-filled" headers="R4444 H151">57,82</td><td class="table-data-filled" headers="R4444 H161">66,68</td><td class="table-data-filled" headers="R4444 H171">77,33</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4545" rowspan="1" scope="row">Ðắk Lắk</th><td class="table-data-filled" headers="R4545 H101">39,14</td><td class="table-data-filled" headers="R4545 H111">41,67</td><td class="table-data-filled" headers="R4545 H121">46,09</td><td class="table-data-filled" headers="R4545 H131">50,96</td><td class="table-data-filled" headers="R4545 H141">56,69</td><td class="table-data-filled" headers="R4545 H151">60,52</td><td class="table-data-filled" headers="R4545 H161">72,46</td><td class="table-data-filled" headers="R4545 H171">83,43</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4646" rowspan="1" scope="row">Ðắk Nông</th><td class="table-data-filled" headers="R4646 H101">44,01</td><td class="table-data-filled" headers="R4646 H111">45,47</td><td class="table-data-filled" headers="R4646 H121">48,14</td><td class="table-data-filled" headers="R4646 H131">53,23</td><td class="table-data-filled" headers="R4646 H141">60,28</td><td class="table-data-filled" headers="R4646 H151">65,44</td><td class="table-data-filled" headers="R4646 H161">83,27</td><td class="table-data-filled" headers="R4646 H171">98,08</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4747" rowspan="1" scope="row">Lâm Ðồng</th><td class="table-data-filled" headers="R4747 H101">56,05</td><td class="table-data-filled" headers="R4747 H111">60,50</td><td class="table-data-filled" headers="R4747 H121">62,89</td><td class="table-data-filled" headers="R4747 H131">67,04</td><td class="table-data-filled" headers="R4747 H141">77,48</td><td class="table-data-filled" headers="R4747 H151">84,96</td><td class="table-data-filled" headers="R4747 H161">99,90</td><td class="table-data-filled" headers="R4747 H171">113,90</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4848" rowspan="1" scope="row">Ðông Nam Bộ</th><td class="table-data-filled" headers="R4848 H101">133,78</td><td class="table-data-filled" headers="R4848 H111">141,75</td><td class="table-data-filled" headers="R4848 H121">140,35</td><td class="table-data-filled" headers="R4848 H131">144,31</td><td class="table-data-filled" headers="R4848 H141">159,62</td><td class="table-data-filled" headers="R4848 H151">164,07</td><td class="table-data-filled" headers="R4848 H161">176,40</td><td class="table-data-filled" headers="R4848 H171">194,34</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R4949" rowspan="1" scope="row">Bình Phước</th><td class="table-data-filled" headers="R4949 H101">56,08</td><td class="table-data-filled" headers="R4949 H111">62,61</td><td class="table-data-filled" headers="R4949 H121">67,73</td><td class="table-data-filled" headers="R4949 H131">76,12</td><td class="table-data-filled" headers="R4949 H141">87,36</td><td class="table-data-filled" headers="R4949 H151">94,64</td><td class="table-data-filled" headers="R4949 H161">107,62</td><td class="table-data-filled" headers="R4949 H171">123,13</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5050" rowspan="1" scope="row">Tây Ninh</th><td class="table-data-filled" headers="R5050 H101">62,36</td><td class="table-data-filled" headers="R5050 H111">70,59</td><td class="table-data-filled" headers="R5050 H121">74,02</td><td class="table-data-filled" headers="R5050 H131">76,58</td><td class="table-data-filled" headers="R5050 H141">86,85</td><td class="table-data-filled" headers="R5050 H151">93,17</td><td class="table-data-filled" headers="R5050 H161">103,56</td><td class="table-data-filled" headers="R5050 H171">116,48</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5151" rowspan="1" scope="row">Bình Dương</th><td class="table-data-filled" headers="R5151 H101">137,67</td><td class="table-data-filled" headers="R5151 H111">147,38</td><td class="table-data-filled" headers="R5151 H121">150,48</td><td class="table-data-filled" headers="R5151 H131">157,40</td><td class="table-data-filled" headers="R5151 H141">163,45</td><td class="table-data-filled" headers="R5151 H151">166,43</td><td class="table-data-filled" headers="R5151 H161">177,20</td><td class="table-data-filled" headers="R5151 H171">196,09</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5252" rowspan="1" scope="row">Ðồng Nai</th><td class="table-data-filled" headers="R5252 H101">103,08</td><td class="table-data-filled" headers="R5252 H111">110,68</td><td class="table-data-filled" headers="R5252 H121">115,07</td><td class="table-data-filled" headers="R5252 H131">119,10</td><td class="table-data-filled" headers="R5252 H141">129,16</td><td class="table-data-filled" headers="R5252 H151">132,93</td><td class="table-data-filled" headers="R5252 H161">142,30</td><td class="table-data-filled" headers="R5252 H171">159,53</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5353" rowspan="1" scope="row">Bà Rịa - Vũng Tàu</th><td class="table-data-filled" headers="R5353 H101">309,62</td><td class="table-data-filled" headers="R5353 H111">300,38</td><td class="table-data-filled" headers="R5353 H121">251,16</td><td class="table-data-filled" headers="R5353 H131">297,64</td><td class="table-data-filled" headers="R5353 H141">372,10</td><td class="table-data-filled" headers="R5353 H151">338,98</td><td class="table-data-filled" headers="R5353 H161">338,97</td><td class="table-data-filled" headers="R5353 H171">346,89</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5454" rowspan="1" scope="row">TP.Hồ Chí Minh</th><td class="table-data-filled" headers="R5454 H101">138,76</td><td class="table-data-filled" headers="R5454 H111">148,66</td><td class="table-data-filled" headers="R5454 H121">148,63</td><td class="table-data-filled" headers="R5454 H131">145,99</td><td class="table-data-filled" headers="R5454 H141">159,55</td><td class="table-data-filled" headers="R5454 H151">168,93</td><td class="table-data-filled" headers="R5454 H161">184,66</td><td class="table-data-filled" headers="R5454 H171">204,80</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5555" rowspan="1" scope="row">Ðồng bằng sông Cửu Long</th><td class="table-data-filled" headers="R5555 H101">49,56</td><td class="table-data-filled" headers="R5555 H111">53,73</td><td class="table-data-filled" headers="R5555 H121">55,54</td><td class="table-data-filled" headers="R5555 H131">57,38</td><td class="table-data-filled" headers="R5555 H141">65,57</td><td class="table-data-filled" headers="R5555 H151">71,51</td><td class="table-data-filled" headers="R5555 H161">79,60</td><td class="table-data-filled" headers="R5555 H171">87,36</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5656" rowspan="1" scope="row">Long An</th><td class="table-data-filled" headers="R5656 H101">65,72</td><td class="table-data-filled" headers="R5656 H111">72,80</td><td class="table-data-filled" headers="R5656 H121">76,36</td><td class="table-data-filled" headers="R5656 H131">79,85</td><td class="table-data-filled" headers="R5656 H141">90,30</td><td class="table-data-filled" headers="R5656 H151">93,63</td><td class="table-data-filled" headers="R5656 H161">103,52</td><td class="table-data-filled" headers="R5656 H171">115,02</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5757" rowspan="1" scope="row">Tiền Giang</th><td class="table-data-filled" headers="R5757 H101">50,54</td><td class="table-data-filled" headers="R5757 H111">54,57</td><td class="table-data-filled" headers="R5757 H121">55,77</td><td class="table-data-filled" headers="R5757 H131">55,81</td><td class="table-data-filled" headers="R5757 H141">62,94</td><td class="table-data-filled" headers="R5757 H151">69,14</td><td class="table-data-filled" headers="R5757 H161">76,81</td><td class="table-data-filled" headers="R5757 H171">84,89</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5858" rowspan="1" scope="row">Bến Tre</th><td class="table-data-filled" headers="R5858 H101">36,75</td><td class="table-data-filled" headers="R5858 H111">40,31</td><td class="table-data-filled" headers="R5858 H121">41,86</td><td class="table-data-filled" headers="R5858 H131">44,62</td><td class="table-data-filled" headers="R5858 H141">48,36</td><td class="table-data-filled" headers="R5858 H151">51,80</td><td class="table-data-filled" headers="R5858 H161">56,43</td><td class="table-data-filled" headers="R5858 H171">62,98</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R5959" rowspan="1" scope="row">Trà Vinh</th><td class="table-data-filled" headers="R5959 H101">53,55</td><td class="table-data-filled" headers="R5959 H111">58,85</td><td class="table-data-filled" headers="R5959 H121">61,01</td><td class="table-data-filled" headers="R5959 H131">63,09</td><td class="table-data-filled" headers="R5959 H141">72,47</td><td class="table-data-filled" headers="R5959 H151">82,42</td><td class="table-data-filled" headers="R5959 H161">94,96</td><td class="table-data-filled" headers="R5959 H171">102,23</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R6060" rowspan="1" scope="row">Vĩnh Long</th><td class="table-data-filled" headers="R6060 H101">48,08</td><td class="table-data-filled" headers="R6060 H111">52,94</td><td class="table-data-filled" headers="R6060 H121">57,34</td><td class="table-data-filled" headers="R6060 H131">57,50</td><td class="table-data-filled" headers="R6060 H141">68,60</td><td class="table-data-filled" headers="R6060 H151">73,19</td><td class="table-data-filled" headers="R6060 H161">80,87</td><td class="table-data-filled" headers="R6060 H171">87,27</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R6161" rowspan="1" scope="row">Ðồng Tháp</th><td class="table-data-filled" headers="R6161 H101">47,35</td><td class="table-data-filled" headers="R6161 H111">51,47</td><td class="table-data-filled" headers="R6161 H121">53,39</td><td class="table-data-filled" headers="R6161 H131">54,37</td><td class="table-data-filled" headers="R6161 H141">62,17</td><td class="table-data-filled" headers="R6161 H151">68,76</td><td class="table-data-filled" headers="R6161 H161">76,83</td><td class="table-data-filled" headers="R6161 H171">83,04</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R6262" rowspan="1" scope="row">An Giang</th><td class="table-data-filled" headers="R6262 H101">40,43</td><td class="table-data-filled" headers="R6262 H111">44,49</td><td class="table-data-filled" headers="R6262 H121">46,64</td><td class="table-data-filled" headers="R6262 H131">47,71</td><td class="table-data-filled" headers="R6262 H141">52,67</td><td class="table-data-filled" headers="R6262 H151">58,67</td><td class="table-data-filled" headers="R6262 H161">65,98</td><td class="table-data-filled" headers="R6262 H171">71,84</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R6363" rowspan="1" scope="row">Kiên Giang</th><td class="table-data-filled" headers="R6363 H101">52,04</td><td class="table-data-filled" headers="R6363 H111">55,17</td><td class="table-data-filled" headers="R6363 H121">55,65</td><td class="table-data-filled" headers="R6363 H131">59,03</td><td class="table-data-filled" headers="R6363 H141">66,40</td><td class="table-data-filled" headers="R6363 H151">72,55</td><td class="table-data-filled" headers="R6363 H161">81,06</td><td class="table-data-filled" headers="R6363 H171">89,23</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R6464" rowspan="1" scope="row">Cần Thơ</th><td class="table-data-filled" headers="R6464 H101">67,78</td><td class="table-data-filled" headers="R6464 H111">72,66</td><td class="table-data-filled" headers="R6464 H121">72,41</td><td class="table-data-filled" headers="R6464 H131">73,93</td><td class="table-data-filled" headers="R6464 H141">86,74</td><td class="table-data-filled" headers="R6464 H151">94,32</td><td class="table-data-filled" headers="R6464 H161">104,26</td><td class="table-data-filled" headers="R6464 H171">114,64</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R6565" rowspan="1" scope="row">Hậu Giang</th><td class="table-data-filled" headers="R6565 H101">44,27</td><td class="table-data-filled" headers="R6565 H111">48,64</td><td class="table-data-filled" headers="R6565 H121">51,48</td><td class="table-data-filled" headers="R6565 H131">54,40</td><td class="table-data-filled" headers="R6565 H141">67,67</td><td class="table-data-filled" headers="R6565 H151">79,55</td><td class="table-data-filled" headers="R6565 H161">90,25</td><td class="table-data-filled" headers="R6565 H171">100,29</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R6666" rowspan="1" scope="row">Sóc Trăng</th><td class="table-data-filled" headers="R6666 H101">41,47</td><td class="table-data-filled" headers="R6666 H111">44,50</td><td class="table-data-filled" headers="R6666 H121">45,84</td><td class="table-data-filled" headers="R6666 H131">48,05</td><td class="table-data-filled" headers="R6666 H141">55,31</td><td class="table-data-filled" headers="R6666 H151">59,88</td><td class="table-data-filled" headers="R6666 H161">65,58</td><td class="table-data-filled" headers="R6666 H171">71,13</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R6767" rowspan="1" scope="row">Bạc Liêu</th><td class="table-data-filled" headers="R6767 H101">43,95</td><td class="table-data-filled" headers="R6767 H111">45,95</td><td class="table-data-filled" headers="R6767 H121">48,02</td><td class="table-data-filled" headers="R6767 H131">51,44</td><td class="table-data-filled" headers="R6767 H141">59,30</td><td class="table-data-filled" headers="R6767 H151">64,45</td><td class="table-data-filled" headers="R6767 H161">70,77</td><td class="table-data-filled" headers="R6767 H171">78,08</td>
+			</tr><tr>
+				<th class="layout1-table-stub layout1-table-stub1" id="R6868" rowspan="1" scope="row">Cà Mau</th><td class="table-data-filled" headers="R6868 H101">48,21</td><td class="table-data-filled" headers="R6868 H111">50,67</td><td class="table-data-filled" headers="R6868 H121">51,21</td><td class="table-data-filled" headers="R6868 H131">51,81</td><td class="table-data-filled" headers="R6868 H141">59,44</td><td class="table-data-filled" headers="R6868 H151">64,38</td><td class="table-data-filled" headers="R6868 H161">71,36</td><td class="table-data-filled" headers="R6868 H171">79,02</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+
+
+
+<div id="ctl00_ctl00_ContentPlaceHolderMain_cphMain_Table1_Table1_pxtableCellInformationDialog" style="display: none" title="Cell details"></div>
+<input type="hidden" name="ctl00$ctl00$ContentPlaceHolderMain$cphMain$Table1$Table1$pxtableCellInformationDialogCloseText" id="ctl00_ctl00_ContentPlaceHolderMain_cphMain_Table1_Table1_pxtableCellInformationDialogCloseText" value="Close" />
+
+
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        // Remove links for attribute cell values (we only want them when we have no javascript)
+        jQuery('.attribute-cell a').each(function () {
+            jQuery(jQuery(this).parent()).html(jQuery(this).text());
+        })
+        // Add click event for all attribute cells
+        jQuery('.attribute-cell').click(function () {
+            displayCellInformation(jQuery(this).attr("data-value"), jQuery("[id$=pxtableCellInformationDialogCloseText]").val());
+            return false;
+        });
+    });  
+</script> 
+
+
+</div>       
+    
+
+        </div>
+        <div id="AboutTable">
+              
+            <br /><br />
+                      
+            <div id="ctl00_ctl00_ContentPlaceHolderMain_TableQueryInformation">
+
+</div>
+        </div>
+    </div>
+    <script type="text/javascript">
+            jQuery(function () { jQuery("#PageElements").tabs(); });
+
+            jQuery(document).ready(function () {
+
+                jQuery('.panelshowlink').click(function () {
+                    //Hide any currently displayed setting panel
+                    jQuery('.settingpanel').hide(0);
+
+                    //Change expand image on all links
+                    var col = jQuery('.px-settings-collapseimage');
+                    col.removeClass('px-settings-collapseimage');
+                    col.addClass('px-settings-expandimage');
+
+                    if (!jQuery(this).hasClass('settingpanelexpanded')) {
+                        //Remove expanded class from all panellinks
+                        jQuery('.panelshowlink').removeClass('settingpanelexpanded');
+                        //Add expanded class to this panellink
+                        jQuery(this).addClass('settingpanelexpanded');
+                        //Get my currently clicked panel
+                        var showclass = '.' + jQuery(this).data('showclass');
+                        //Show my setting panel
+                        jQuery(showclass + '.settingpanel').show(0);
+                        //Change expand-image
+                        var img = jQuery(this).find('.px-settings-expandimage');
+                        img.removeClass('px-settings-expandimage');
+                        img.addClass('px-settings-collapseimage');
+                    }
+                    else {
+                        //Remove expanded class from this panellink
+                        jQuery(this).removeClass('settingpanelexpanded');
+                    }
+
+                    ////Hide any currently displayed panel
+                    //jQuery('.panelvisible').hide(0);
+                    ////...and show its hidden panel...
+                    //jQuery('.panelhidden').show(0);
+
+                    ////Get my currently clicked panel
+                    //var showclass = '.' + jQuery(this).data('showclass');
+                    ////Hide my hidden panel
+                    //jQuery(showclass + '.panelhidden').hide(0);
+                    ////Show my visible panel
+                    //jQuery(showclass + '.panelvisible').show(0);
+
+
+                    return false;
+                });
+                //jQuery('.panelhidelink').click(function () {
+                //    //Hide all displayed panels
+                //    jQuery('.panelvisible').hide(0);
+                //    //Show all hidden panels
+                //    jQuery('.panelhidden').show(0);
+                //    return false;
+                //});
+
+            });
+
+    </script>
+    
+
+
+                </div>
+		<div id="ctl00_ctl00_Information">
+	
+        <h2 class="information_definitionlist_heading">Thông tin</h2>
+        <dl class="information_definitionlist">
+    
+        <dt class="information_officialstatistics_heading">
+            Thống kê chính thức            
+        </dt>
+        <dd class="information_officialstatistics_value">
+            Không            
+            
+        </dd>
+    
+        <dt class="information_unit_heading">
+            Đơn vị tính            
+        </dt>
+        <dd class="information_unit_value">
+            Triệu đồng            
+            
+        </dd>
+    
+        <dt class="information_lastupdated_heading">
+            Cập nhật lần cuối            
+        </dt>
+        <dd class="information_lastupdated_value">
+            15/08/2026            
+            
+        </dd>
+    
+        <dt class="information_creationdate_heading">
+            Ngày tạo            
+        </dt>
+        <dd class="information_creationdate_value">
+            15/08/2026            
+            
+        </dd>
+    
+        <dt class="information_copyright_heading">
+            Bản quyền            
+        </dt>
+        <dd class="information_copyright_value">
+            Không            
+            
+        </dd>
+    
+        <dt class="information_matrix_heading">
+            Ma trận            
+        </dt>
+        <dd class="information_matrix_value">
+            V03.12            
+            
+        </dd>
+    
+        </dl>
+    
+
+
+
+</div>
+            </div>
+            <div id="footer">
+        
+                <div class="footerleft">
+		
+                    <span id="ctl00_ctl00_lblFooterText"></span>  
+
+                </div>
+                <div class="footerright">
+
+                   
+    
+
+   
+                </div>
+               <!--  
+<style type="text/css">
+
+    .auto-style10 {
+        width: 100%;
+        vertical-align:text-top;
+        margin-top:0px;
+	font-size:13px;
+    }
+    .auto-style20 {
+        text-align: center;
+    }
+    .auto-style30 {
+        width: 287px;
+    }
+.auto-style50 {
+        font-size:13px;
+ 	margin-top:0px;
+	vertical-align:text-top;
+    }
+</style>
+
+
+
+
+
+<div id="ctl00_ctl00_Footpage1_Panel3">
+	
+    <table class="auto-style10">
+        <tr>
+            <td class="auto-style30"><strong>Nhà tài trợ/Sponsors by</strong><strong style="text-align: center">: worldbank<br/> </strong>
+                <img id="ctl00_ctl00_Footpage1_Image3" src="../../../../../../../Resources/Images/logo-wb-header-en.png" style="text-align: center" />
+            </td>
+            <td>
+                <div style="clear: both;">
+                    <span id="_ctl1_lblContent1"><span id="_ctl1_lblContent2">
+                    <p class="auto-style20" style="outline: 0;">
+                        <font class="auto-style50" color="002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;">Địa chỉ: Khu đô thị mới đại lộ Lê Lợi - Đông Hương - TP Thanh Hoá - Tỉnh Thanh Hoá<p></p>
+                        </font>
+                    </p>
+                    </span>
+                    <p class="auto-style20" style="outline: 0;">
+                        <font class="auto-style50" color="002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;">Address: new urban boulevard Le Loi - Dong Huong Street - Thanh Hoa City - Thanh Hoa Province</font></p>
+                    <p class="auto-style20" style="outline: 0;">
+                        Điện thoại/Telephone<font class="auto-style50" color="#002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;"> : 237.3 859 226- 3 852 306</font></p>
+                    <p class="auto-style20" style="outline: 0;">
+                        <font class="auto-style50" color="#002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;">Fax: 237.3 756 627</font></p>
+                    <p class="auto-style20" style="outline: 0;">
+                        <font class="auto-style50" color="#002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;"> </font><a class="auto-style10" href="mailto:thanhhoa@gso.gov.vn"><font class="auto-style10" color="#002f54" face="Arial, Helvetica, sans-serif" size="2" style="outline: 0;">Email:thanhhoa@gso.gov.vn</font></a></p>
+                    </span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+
+
+
+   -->
+            </div>
+        </div>
+    
+
+<script type="text/javascript">
+//<![CDATA[
+PCAxis_HideElement(".commandbar_action");//]]>
+</script>
+</form>
+</body>
+</html>

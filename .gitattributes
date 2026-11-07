@@ -23,3 +23,7 @@
 *.joblib binary
 *.rar binary
 *.zip binary
+
+# Dữ liệu raw tải từ web: giữ nguyên byte (không chuẩn hóa line-ending) để
+# SHA-256 ghi trong PROVENANCE.md của từng nguồn khớp với bản trên git.
+data/raw/** -text

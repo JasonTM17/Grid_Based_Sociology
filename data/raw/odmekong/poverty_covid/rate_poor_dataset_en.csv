@@ -1,0 +1,37 @@
+Region,Household status,Period,Pourcentage
+Urban,Non poor,12/1/2019,83.5
+Urban,Non poor,4/1/2020,37.1
+Urban,Non poor,5/1/2020,62.4
+Urban,Near poor,12/1/2019,5.3
+Urban,Near poor,4/1/2020,6.9
+Urban,Near poor,5/1/2020,5.9
+Urban,Poor,12/1/2019,11.2
+Urban,Poor,4/1/2020,56
+Urban,Poor,5/1/2020,31.7
+Rural,Non poor,12/1/2019,88.4
+Rural,Non poor,4/1/2020,49.4
+Rural,Non poor,5/1/2020,71.4
+Rural,Near poor,12/1/2019,1.8
+Rural,Near poor,4/1/2020,6.1
+Rural,Near poor,5/1/2020,9.7
+Rural,Poor,12/1/2019,9.7
+Rural,Poor,4/1/2020,44.5
+Rural,Poor,5/1/2020,18.9
+Ethnic minorities,Non poor,12/1/2019,83.3
+Ethnic minorities,Non poor,4/1/2020,30
+Ethnic minorities,Non poor,5/1/2020,26.7
+Ethnic minorities,Near poor,12/1/2019,4.9
+Ethnic minorities,Near poor,4/1/2020,8.8
+Ethnic minorities,Near poor,5/1/2020,26.7
+Ethnic minorities,Poor,12/1/2019,11.8
+Ethnic minorities,Poor,4/1/2020,61.3
+Ethnic minorities,Poor,5/1/2020,46.7
+All,Non poor,12/1/2019,86.1
+All,Non poor,4/1/2020,43.6
+All,Non poor,5/1/2020,68.2
+All,Near poor,12/1/2019,3.4
+All,Near poor,4/1/2020,6.5
+All,Near poor,5/1/2020,8.4
+All,Poor,12/1/2019,10.4
+All,Poor,4/1/2020,49.9
+All,Poor,5/1/2020,23.4

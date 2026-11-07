@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
 .pytest_cache/
+.ruff_cache/
 .coverage
 .coverage.*
 .venv/
@@ -13,8 +14,17 @@ venv/
 .agents/
 .claude/
 .codex/
+.cursor/
+.zcode/
 plans/
 AGENTS.md
+
+# Streamlit: secrets (nếu có) không bao giờ commit — config.toml (theme) vẫn track
+.streamlit/secrets.toml
+
+# Dữ liệu raw tải từ web (PCI/GSO/ODM/WorldBank) ĐƯỢC COMMIT TRỌN VẾT — làm bằng chứng
+# asset lấy từ nguồn thật cho giảng viên; PROVENANCE.md từng nguồn ghi URL + ngày tải
+# + giấy phép + SHA-256 để đối chiếu hash.
 
 # Mendeley: CHỈ commit các file nhỏ dùng trực tiếp (tái lập crosscheck + bản đồ).
 # Gói đầy đủ tải theo DOI 10.17632/wbk42j9wc8.1 — phần còn lại giữ ngoài repo.
