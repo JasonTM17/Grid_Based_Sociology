@@ -1,0 +1,442 @@
+province_code,province_ascii,province_vi,year,grdp_per_capita_million_vnd,source,papi_province_code
+1,Ha Noi,Hà Nội,2018,111.6,gso_pxweb_V03.12,1
+1,Ha Noi,Hà Nội,2019,120.32,gso_pxweb_V03.12,1
+1,Ha Noi,Hà Nội,2020,123.4,gso_pxweb_V03.12,1
+1,Ha Noi,Hà Nội,2021,128.33,gso_pxweb_V03.12,1
+1,Ha Noi,Hà Nội,2022,141.12,gso_pxweb_V03.12,1
+1,Ha Noi,Hà Nội,2023,149.69,gso_pxweb_V03.12,1
+1,Ha Noi,Hà Nội,2024,162.92,gso_pxweb_V03.12 (Sơ bộ/preliminary),1
+10,Lao Cai,Lào Cai,2018,62.17,gso_pxweb_V03.12,10
+10,Lao Cai,Lào Cai,2019,68.11,gso_pxweb_V03.12,10
+10,Lao Cai,Lào Cai,2020,71.98,gso_pxweb_V03.12,10
+10,Lao Cai,Lào Cai,2021,74.45,gso_pxweb_V03.12,10
+10,Lao Cai,Lào Cai,2022,83.37,gso_pxweb_V03.12,10
+10,Lao Cai,Lào Cai,2023,85.32,gso_pxweb_V03.12,10
+10,Lao Cai,Lào Cai,2024,92.96,gso_pxweb_V03.12 (Sơ bộ/preliminary),10
+11,Dien Bien,Điện Biên,2018,30.65,gso_pxweb_V03.12,11
+11,Dien Bien,Điện Biên,2019,32.14,gso_pxweb_V03.12,11
+11,Dien Bien,Điện Biên,2020,33.09,gso_pxweb_V03.12,11
+11,Dien Bien,Điện Biên,2021,35.3,gso_pxweb_V03.12,11
+11,Dien Bien,Điện Biên,2022,39.5,gso_pxweb_V03.12,11
+11,Dien Bien,Điện Biên,2023,43.19,gso_pxweb_V03.12,11
+11,Dien Bien,Điện Biên,2024,47.74,gso_pxweb_V03.12 (Sơ bộ/preliminary),11
+12,Lai Chau,Lai Châu,2018,40.5,gso_pxweb_V03.12,12
+12,Lai Chau,Lai Châu,2019,38.86,gso_pxweb_V03.12,12
+12,Lai Chau,Lai Châu,2020,43.33,gso_pxweb_V03.12,12
+12,Lai Chau,Lai Châu,2021,44.66,gso_pxweb_V03.12,12
+12,Lai Chau,Lai Châu,2022,49.62,gso_pxweb_V03.12,12
+12,Lai Chau,Lai Châu,2023,50.8,gso_pxweb_V03.12,12
+12,Lai Chau,Lai Châu,2024,60.38,gso_pxweb_V03.12 (Sơ bộ/preliminary),12
+14,Son La,Sơn La,2018,40.37,gso_pxweb_V03.12,14
+14,Son La,Sơn La,2019,39.68,gso_pxweb_V03.12,14
+14,Son La,Sơn La,2020,43.32,gso_pxweb_V03.12,14
+14,Son La,Sơn La,2021,44.25,gso_pxweb_V03.12,14
+14,Son La,Sơn La,2022,48.84,gso_pxweb_V03.12,14
+14,Son La,Sơn La,2023,50.84,gso_pxweb_V03.12,14
+14,Son La,Sơn La,2024,57.38,gso_pxweb_V03.12 (Sơ bộ/preliminary),14
+15,Yen Bai,Yên Bái,2018,33.87,gso_pxweb_V03.12,15
+15,Yen Bai,Yên Bái,2019,37.09,gso_pxweb_V03.12,15
+15,Yen Bai,Yên Bái,2020,39.87,gso_pxweb_V03.12,15
+15,Yen Bai,Yên Bái,2021,42.58,gso_pxweb_V03.12,15
+15,Yen Bai,Yên Bái,2022,47.49,gso_pxweb_V03.12,15
+15,Yen Bai,Yên Bái,2023,50.12,gso_pxweb_V03.12,15
+15,Yen Bai,Yên Bái,2024,55.35,gso_pxweb_V03.12 (Sơ bộ/preliminary),15
+17,Hoa Binh,Hòa Bình,2018,54.42,gso_pxweb_V03.12,17
+17,Hoa Binh,Hòa Bình,2019,54.61,gso_pxweb_V03.12,17
+17,Hoa Binh,Hòa Bình,2020,57.72,gso_pxweb_V03.12,17
+17,Hoa Binh,Hòa Bình,2021,59.15,gso_pxweb_V03.12,17
+17,Hoa Binh,Hòa Bình,2022,67.21,gso_pxweb_V03.12,17
+17,Hoa Binh,Hòa Bình,2023,69.75,gso_pxweb_V03.12,17
+17,Hoa Binh,Hòa Bình,2024,79.43,gso_pxweb_V03.12 (Sơ bộ/preliminary),17
+19,Thai Nguyen,Thái Nguyên,2018,84.75,gso_pxweb_V03.12,19
+19,Thai Nguyen,Thái Nguyên,2019,90.89,gso_pxweb_V03.12,19
+19,Thai Nguyen,Thái Nguyên,2020,94.33,gso_pxweb_V03.12,19
+19,Thai Nguyen,Thái Nguyên,2021,99.96,gso_pxweb_V03.12,19
+19,Thai Nguyen,Thái Nguyên,2022,108.14,gso_pxweb_V03.12,19
+19,Thai Nguyen,Thái Nguyên,2023,110.42,gso_pxweb_V03.12,19
+19,Thai Nguyen,Thái Nguyên,2024,114.49,gso_pxweb_V03.12 (Sơ bộ/preliminary),19
+2,Ha Giang,Hà Giang,2018,26.07,gso_pxweb_V03.12,2
+2,Ha Giang,Hà Giang,2019,28.19,gso_pxweb_V03.12,2
+2,Ha Giang,Hà Giang,2020,29.8,gso_pxweb_V03.12,2
+2,Ha Giang,Hà Giang,2021,30.76,gso_pxweb_V03.12,2
+2,Ha Giang,Hà Giang,2022,33.76,gso_pxweb_V03.12,2
+2,Ha Giang,Hà Giang,2023,34.69,gso_pxweb_V03.12,2
+2,Ha Giang,Hà Giang,2024,37.82,gso_pxweb_V03.12 (Sơ bộ/preliminary),2
+20,Lang Son,Lạng Sơn,2018,38.25,gso_pxweb_V03.12,20
+20,Lang Son,Lạng Sơn,2019,41.9,gso_pxweb_V03.12,20
+20,Lang Son,Lạng Sơn,2020,44.23,gso_pxweb_V03.12,20
+20,Lang Son,Lạng Sơn,2021,47.17,gso_pxweb_V03.12,20
+20,Lang Son,Lạng Sơn,2022,50.98,gso_pxweb_V03.12,20
+20,Lang Son,Lạng Sơn,2023,57.83,gso_pxweb_V03.12,20
+20,Lang Son,Lạng Sơn,2024,62.36,gso_pxweb_V03.12 (Sơ bộ/preliminary),20
+22,Quang Ninh,Quảng Ninh,2018,126.81,gso_pxweb_V03.12,22
+22,Quang Ninh,Quảng Ninh,2019,143.31,gso_pxweb_V03.12,22
+22,Quang Ninh,Quảng Ninh,2020,155.6,gso_pxweb_V03.12,22
+22,Quang Ninh,Quảng Ninh,2021,170.19,gso_pxweb_V03.12,22
+22,Quang Ninh,Quảng Ninh,2022,195.27,gso_pxweb_V03.12,22
+22,Quang Ninh,Quảng Ninh,2023,213.15,gso_pxweb_V03.12,22
+22,Quang Ninh,Quảng Ninh,2024,234.1,gso_pxweb_V03.12 (Sơ bộ/preliminary),22
+24,Bac Giang,Bắc Giang,2018,50.85,gso_pxweb_V03.12,24
+24,Bac Giang,Bắc Giang,2019,57.72,gso_pxweb_V03.12,24
+24,Bac Giang,Bắc Giang,2020,65.64,gso_pxweb_V03.12,24
+24,Bac Giang,Bắc Giang,2021,70.35,gso_pxweb_V03.12,24
+24,Bac Giang,Bắc Giang,2022,84.3,gso_pxweb_V03.12,24
+24,Bac Giang,Bắc Giang,2023,96.21,gso_pxweb_V03.12,24
+24,Bac Giang,Bắc Giang,2024,109.17,gso_pxweb_V03.12 (Sơ bộ/preliminary),24
+25,Phu Tho,Phú Thọ,2018,42.53,gso_pxweb_V03.12,25
+25,Phu Tho,Phú Thọ,2019,47.07,gso_pxweb_V03.12,25
+25,Phu Tho,Phú Thọ,2020,50.74,gso_pxweb_V03.12,25
+25,Phu Tho,Phú Thọ,2021,54.0,gso_pxweb_V03.12,25
+25,Phu Tho,Phú Thọ,2022,59.64,gso_pxweb_V03.12,25
+25,Phu Tho,Phú Thọ,2023,65.05,gso_pxweb_V03.12,25
+25,Phu Tho,Phú Thọ,2024,73.09,gso_pxweb_V03.12 (Sơ bộ/preliminary),25
+26,Vinh Phuc,Vĩnh Phúc,2018,94.54,gso_pxweb_V03.12,26
+26,Vinh Phuc,Vĩnh Phúc,2019,102.47,gso_pxweb_V03.12,26
+26,Vinh Phuc,Vĩnh Phúc,2020,105.88,gso_pxweb_V03.12,26
+26,Vinh Phuc,Vĩnh Phúc,2021,114.38,gso_pxweb_V03.12,26
+26,Vinh Phuc,Vĩnh Phúc,2022,128.1,gso_pxweb_V03.12,26
+26,Vinh Phuc,Vĩnh Phúc,2023,129.68,gso_pxweb_V03.12,26
+26,Vinh Phuc,Vĩnh Phúc,2024,141.06,gso_pxweb_V03.12 (Sơ bộ/preliminary),26
+27,Bac Ninh,Bắc Ninh,2018,144.95,gso_pxweb_V03.12,27
+27,Bac Ninh,Bắc Ninh,2019,144.99,gso_pxweb_V03.12,27
+27,Bac Ninh,Bắc Ninh,2020,147.26,gso_pxweb_V03.12,27
+27,Bac Ninh,Bắc Ninh,2021,157.65,gso_pxweb_V03.12,27
+27,Bac Ninh,Bắc Ninh,2022,166.72,gso_pxweb_V03.12,27
+27,Bac Ninh,Bắc Ninh,2023,156.74,gso_pxweb_V03.12,27
+27,Bac Ninh,Bắc Ninh,2024,159.1,gso_pxweb_V03.12 (Sơ bộ/preliminary),27
+30,Hai Duong,Hải Dương,2018,61.21,gso_pxweb_V03.12,30
+30,Hai Duong,Hải Dương,2019,66.78,gso_pxweb_V03.12,30
+30,Hai Duong,Hải Dương,2020,68.4,gso_pxweb_V03.12,30
+30,Hai Duong,Hải Dương,2021,77.3,gso_pxweb_V03.12,30
+30,Hai Duong,Hải Dương,2022,87.71,gso_pxweb_V03.12,30
+30,Hai Duong,Hải Dương,2023,94.85,gso_pxweb_V03.12,30
+30,Hai Duong,Hải Dương,2024,106.25,gso_pxweb_V03.12 (Sơ bộ/preliminary),30
+31,Hai Phong,Hải Phòng,2018,104.42,gso_pxweb_V03.12,31
+31,Hai Phong,Hải Phòng,2019,122.17,gso_pxweb_V03.12,31
+31,Hai Phong,Hải Phòng,2020,133.9,gso_pxweb_V03.12,31
+31,Hai Phong,Hải Phòng,2021,151.13,gso_pxweb_V03.12,31
+31,Hai Phong,Hải Phòng,2022,171.57,gso_pxweb_V03.12,31
+31,Hai Phong,Hải Phòng,2023,185.07,gso_pxweb_V03.12,31
+31,Hai Phong,Hải Phòng,2024,206.2,gso_pxweb_V03.12 (Sơ bộ/preliminary),31
+33,Hung Yen,Hưng Yên,2018,66.9,gso_pxweb_V03.12,33
+33,Hung Yen,Hưng Yên,2019,73.71,gso_pxweb_V03.12,33
+33,Hung Yen,Hưng Yên,2020,79.04,gso_pxweb_V03.12,33
+33,Hung Yen,Hưng Yên,2021,88.04,gso_pxweb_V03.12,33
+33,Hung Yen,Hưng Yên,2022,102.53,gso_pxweb_V03.12,33
+33,Hung Yen,Hưng Yên,2023,109.88,gso_pxweb_V03.12,33
+33,Hung Yen,Hưng Yên,2024,117.74,gso_pxweb_V03.12 (Sơ bộ/preliminary),33
+34,Thai Binh,Thái Bình,2018,39.98,gso_pxweb_V03.12,34
+34,Thai Binh,Thái Bình,2019,45.22,gso_pxweb_V03.12,34
+34,Thai Binh,Thái Bình,2020,47.9,gso_pxweb_V03.12,34
+34,Thai Binh,Thái Bình,2021,51.6,gso_pxweb_V03.12,34
+34,Thai Binh,Thái Bình,2022,57.72,gso_pxweb_V03.12,34
+34,Thai Binh,Thái Bình,2023,62.57,gso_pxweb_V03.12,34
+34,Thai Binh,Thái Bình,2024,68.93,gso_pxweb_V03.12 (Sơ bộ/preliminary),34
+35,Ha Nam,Hà Nam,2018,56.31,gso_pxweb_V03.12,35
+35,Ha Nam,Hà Nam,2019,64.03,gso_pxweb_V03.12,35
+35,Ha Nam,Hà Nam,2020,69.53,gso_pxweb_V03.12,35
+35,Ha Nam,Hà Nam,2021,75.96,gso_pxweb_V03.12,35
+35,Ha Nam,Hà Nam,2022,87.11,gso_pxweb_V03.12,35
+35,Ha Nam,Hà Nam,2023,95.75,gso_pxweb_V03.12,35
+35,Ha Nam,Hà Nam,2024,107.53,gso_pxweb_V03.12 (Sơ bộ/preliminary),35
+36,Nam Dinh,Nam Định,2018,34.92,gso_pxweb_V03.12,36
+36,Nam Dinh,Nam Định,2019,39.04,gso_pxweb_V03.12,36
+36,Nam Dinh,Nam Định,2020,42.69,gso_pxweb_V03.12,36
+36,Nam Dinh,Nam Định,2021,44.55,gso_pxweb_V03.12,36
+36,Nam Dinh,Nam Định,2022,47.33,gso_pxweb_V03.12,36
+36,Nam Dinh,Nam Định,2023,51.61,gso_pxweb_V03.12,36
+36,Nam Dinh,Nam Định,2024,58.72,gso_pxweb_V03.12 (Sơ bộ/preliminary),36
+37,Ninh Binh,Ninh Bình,2018,54.31,gso_pxweb_V03.12,37
+37,Ninh Binh,Ninh Bình,2019,62.77,gso_pxweb_V03.12,37
+37,Ninh Binh,Ninh Bình,2020,67.53,gso_pxweb_V03.12,37
+37,Ninh Binh,Ninh Bình,2021,70.73,gso_pxweb_V03.12,37
+37,Ninh Binh,Ninh Bình,2022,79.77,gso_pxweb_V03.12,37
+37,Ninh Binh,Ninh Bình,2023,83.19,gso_pxweb_V03.12,37
+37,Ninh Binh,Ninh Bình,2024,91.39,gso_pxweb_V03.12 (Sơ bộ/preliminary),37
+38,Thanh Hoa,Thanh Hóa,2018,40.26,gso_pxweb_V03.12,38
+38,Thanh Hoa,Thanh Hóa,2019,48.33,gso_pxweb_V03.12,38
+38,Thanh Hoa,Thanh Hóa,2020,51.26,gso_pxweb_V03.12,38
+38,Thanh Hoa,Thanh Hóa,2021,57.6,gso_pxweb_V03.12,38
+38,Thanh Hoa,Thanh Hóa,2022,69.08,gso_pxweb_V03.12,38
+38,Thanh Hoa,Thanh Hóa,2023,72.62,gso_pxweb_V03.12,38
+38,Thanh Hoa,Thanh Hóa,2024,81.32,gso_pxweb_V03.12 (Sơ bộ/preliminary),38
+4,Cao Bang,Cao Bằng,2018,30.63,gso_pxweb_V03.12,4
+4,Cao Bang,Cao Bằng,2019,32.89,gso_pxweb_V03.12,4
+4,Cao Bang,Cao Bằng,2020,35.81,gso_pxweb_V03.12,4
+4,Cao Bang,Cao Bằng,2021,35.85,gso_pxweb_V03.12,4
+4,Cao Bang,Cao Bằng,2022,38.71,gso_pxweb_V03.12,4
+4,Cao Bang,Cao Bằng,2023,40.98,gso_pxweb_V03.12,4
+4,Cao Bang,Cao Bằng,2024,44.25,gso_pxweb_V03.12 (Sơ bộ/preliminary),4
+40,Nghe An,Nghệ An,2018,36.52,gso_pxweb_V03.12,40
+40,Nghe An,Nghệ An,2019,39.85,gso_pxweb_V03.12,40
+40,Nghe An,Nghệ An,2020,43.06,gso_pxweb_V03.12,40
+40,Nghe An,Nghệ An,2021,46.21,gso_pxweb_V03.12,40
+40,Nghe An,Nghệ An,2022,51.2,gso_pxweb_V03.12,40
+40,Nghe An,Nghệ An,2023,54.94,gso_pxweb_V03.12,40
+40,Nghe An,Nghệ An,2024,60.75,gso_pxweb_V03.12 (Sơ bộ/preliminary),40
+42,Ha Tinh,Hà Tĩnh,2018,54.73,gso_pxweb_V03.12,42
+42,Ha Tinh,Hà Tĩnh,2019,60.54,gso_pxweb_V03.12,42
+42,Ha Tinh,Hà Tĩnh,2020,63.55,gso_pxweb_V03.12,42
+42,Ha Tinh,Hà Tĩnh,2021,68.9,gso_pxweb_V03.12,42
+42,Ha Tinh,Hà Tĩnh,2022,71.89,gso_pxweb_V03.12,42
+42,Ha Tinh,Hà Tĩnh,2023,76.5,gso_pxweb_V03.12,42
+42,Ha Tinh,Hà Tĩnh,2024,82.81,gso_pxweb_V03.12 (Sơ bộ/preliminary),42
+44,Quang Binh,Quảng Bình,2018,39.72,gso_pxweb_V03.12,44
+44,Quang Binh,Quảng Bình,2019,43.75,gso_pxweb_V03.12,44
+44,Quang Binh,Quảng Bình,2020,46.32,gso_pxweb_V03.12,44
+44,Quang Binh,Quảng Bình,2021,49.29,gso_pxweb_V03.12,44
+44,Quang Binh,Quảng Bình,2022,54.3,gso_pxweb_V03.12,44
+44,Quang Binh,Quảng Bình,2023,59.26,gso_pxweb_V03.12,44
+44,Quang Binh,Quảng Bình,2024,64.71,gso_pxweb_V03.12 (Sơ bộ/preliminary),44
+45,Quang Tri,Quảng Trị,2018,45.49,gso_pxweb_V03.12,45
+45,Quang Tri,Quảng Trị,2019,50.34,gso_pxweb_V03.12,45
+45,Quang Tri,Quảng Trị,2020,52.84,gso_pxweb_V03.12,45
+45,Quang Tri,Quảng Trị,2021,57.9,gso_pxweb_V03.12,45
+45,Quang Tri,Quảng Trị,2022,67.19,gso_pxweb_V03.12,45
+45,Quang Tri,Quảng Trị,2023,70.94,gso_pxweb_V03.12,45
+45,Quang Tri,Quảng Trị,2024,77.04,gso_pxweb_V03.12 (Sơ bộ/preliminary),45
+46,Thua Thien Hue,Thừa Thiên Huế,2018,42.54,gso_pxweb_V03.12,46
+46,Thua Thien Hue,Thừa Thiên Huế,2019,46.81,gso_pxweb_V03.12,46
+46,Thua Thien Hue,Thừa Thiên Huế,2020,48.56,gso_pxweb_V03.12,46
+46,Thua Thien Hue,Thừa Thiên Huế,2021,50.83,gso_pxweb_V03.12,46
+46,Thua Thien Hue,Thừa Thiên Huế,2022,56.8,gso_pxweb_V03.12,46
+46,Thua Thien Hue,Thừa Thiên Huế,2023,62.01,gso_pxweb_V03.12,46
+46,Thua Thien Hue,Thừa Thiên Huế,2024,67.72,gso_pxweb_V03.12 (Sơ bộ/preliminary),46
+48,Da Nang,Đà Nẵng,2018,91.0,gso_pxweb_V03.12,48
+48,Da Nang,Đà Nẵng,2019,97.44,gso_pxweb_V03.12,48
+48,Da Nang,Đà Nẵng,2020,88.85,gso_pxweb_V03.12,48
+48,Da Nang,Đà Nẵng,2021,90.41,gso_pxweb_V03.12,48
+48,Da Nang,Đà Nẵng,2022,102.88,gso_pxweb_V03.12,48
+48,Da Nang,Đà Nẵng,2023,108.3,gso_pxweb_V03.12,48
+48,Da Nang,Đà Nẵng,2024,119.31,gso_pxweb_V03.12 (Sơ bộ/preliminary),48
+49,Quang Nam,Quảng Nam,2018,61.55,gso_pxweb_V03.12,49
+49,Quang Nam,Quảng Nam,2019,66.05,gso_pxweb_V03.12,49
+49,Quang Nam,Quảng Nam,2020,65.41,gso_pxweb_V03.12,49
+49,Quang Nam,Quảng Nam,2021,69.77,gso_pxweb_V03.12,49
+49,Quang Nam,Quảng Nam,2022,78.67,gso_pxweb_V03.12,49
+49,Quang Nam,Quảng Nam,2023,76.1,gso_pxweb_V03.12,49
+49,Quang Nam,Quảng Nam,2024,83.1,gso_pxweb_V03.12 (Sơ bộ/preliminary),49
+51,Quang Ngai,Quảng Ngãi,2018,67.73,gso_pxweb_V03.12,51
+51,Quang Ngai,Quảng Ngãi,2019,70.53,gso_pxweb_V03.12,51
+51,Quang Ngai,Quảng Ngãi,2020,69.48,gso_pxweb_V03.12,51
+51,Quang Ngai,Quảng Ngãi,2021,81.51,gso_pxweb_V03.12,51
+51,Quang Ngai,Quảng Ngãi,2022,99.89,gso_pxweb_V03.12,51
+51,Quang Ngai,Quảng Ngãi,2023,100.9,gso_pxweb_V03.12,51
+51,Quang Ngai,Quảng Ngãi,2024,104.28,gso_pxweb_V03.12 (Sơ bộ/preliminary),51
+52,Binh Dinh,Bình Định,2018,50.25,gso_pxweb_V03.12,52
+52,Binh Dinh,Bình Định,2019,55.67,gso_pxweb_V03.12,52
+52,Binh Dinh,Bình Định,2020,60.08,gso_pxweb_V03.12,52
+52,Binh Dinh,Bình Định,2021,63.66,gso_pxweb_V03.12,52
+52,Binh Dinh,Bình Định,2022,71.65,gso_pxweb_V03.12,52
+52,Binh Dinh,Bình Định,2023,78.1,gso_pxweb_V03.12,52
+52,Binh Dinh,Bình Định,2024,85.26,gso_pxweb_V03.12 (Sơ bộ/preliminary),52
+54,Phu Yen,Phú Yên,2018,44.3,gso_pxweb_V03.12,54
+54,Phu Yen,Phú Yên,2019,48.63,gso_pxweb_V03.12,54
+54,Phu Yen,Phú Yên,2020,50.49,gso_pxweb_V03.12,54
+54,Phu Yen,Phú Yên,2021,51.53,gso_pxweb_V03.12,54
+54,Phu Yen,Phú Yên,2022,57.39,gso_pxweb_V03.12,54
+54,Phu Yen,Phú Yên,2023,63.06,gso_pxweb_V03.12,54
+54,Phu Yen,Phú Yên,2024,68.25,gso_pxweb_V03.12 (Sơ bộ/preliminary),54
+56,Khanh Hoa,Khánh Hòa,2018,63.89,gso_pxweb_V03.12,56
+56,Khanh Hoa,Khánh Hòa,2019,70.36,gso_pxweb_V03.12,56
+56,Khanh Hoa,Khánh Hòa,2020,64.27,gso_pxweb_V03.12,56
+56,Khanh Hoa,Khánh Hòa,2021,63.51,gso_pxweb_V03.12,56
+56,Khanh Hoa,Khánh Hòa,2022,77.2,gso_pxweb_V03.12,56
+56,Khanh Hoa,Khánh Hòa,2023,88.53,gso_pxweb_V03.12,56
+56,Khanh Hoa,Khánh Hòa,2024,104.33,gso_pxweb_V03.12 (Sơ bộ/preliminary),56
+58,Ninh Thuan,Ninh Thuận,2018,43.66,gso_pxweb_V03.12,58
+58,Ninh Thuan,Ninh Thuận,2019,52.7,gso_pxweb_V03.12,58
+58,Ninh Thuan,Ninh Thuận,2020,59.11,gso_pxweb_V03.12,58
+58,Ninh Thuan,Ninh Thuận,2021,69.69,gso_pxweb_V03.12,58
+58,Ninh Thuan,Ninh Thuận,2022,77.7,gso_pxweb_V03.12,58
+58,Ninh Thuan,Ninh Thuận,2023,85.52,gso_pxweb_V03.12,58
+58,Ninh Thuan,Ninh Thuận,2024,94.69,gso_pxweb_V03.12 (Sơ bộ/preliminary),58
+6,Bac Kan,Bắc Kạn,2018,35.38,gso_pxweb_V03.12,6
+6,Bac Kan,Bắc Kạn,2019,38.21,gso_pxweb_V03.12,6
+6,Bac Kan,Bắc Kạn,2020,41.06,gso_pxweb_V03.12,6
+6,Bac Kan,Bắc Kạn,2021,42.46,gso_pxweb_V03.12,6
+6,Bac Kan,Bắc Kạn,2022,47.05,gso_pxweb_V03.12,6
+6,Bac Kan,Bắc Kạn,2023,51.9,gso_pxweb_V03.12,6
+6,Bac Kan,Bắc Kạn,2024,57.05,gso_pxweb_V03.12 (Sơ bộ/preliminary),6
+60,Binh Thuan,Bình Thuận,2018,53.39,gso_pxweb_V03.12,60
+60,Binh Thuan,Bình Thuận,2019,64.24,gso_pxweb_V03.12,60
+60,Binh Thuan,Bình Thuận,2020,69.23,gso_pxweb_V03.12,60
+60,Binh Thuan,Bình Thuận,2021,73.44,gso_pxweb_V03.12,60
+60,Binh Thuan,Bình Thuận,2022,81.03,gso_pxweb_V03.12,60
+60,Binh Thuan,Bình Thuận,2023,82.19,gso_pxweb_V03.12,60
+60,Binh Thuan,Bình Thuận,2024,91.96,gso_pxweb_V03.12 (Sơ bộ/preliminary),60
+62,Kon Tum,Kon Tum,2018,37.81,gso_pxweb_V03.12,62
+62,Kon Tum,Kon Tum,2019,40.33,gso_pxweb_V03.12,62
+62,Kon Tum,Kon Tum,2020,43.01,gso_pxweb_V03.12,62
+62,Kon Tum,Kon Tum,2021,47.72,gso_pxweb_V03.12,62
+62,Kon Tum,Kon Tum,2022,53.23,gso_pxweb_V03.12,62
+62,Kon Tum,Kon Tum,2023,58.97,gso_pxweb_V03.12,62
+62,Kon Tum,Kon Tum,2024,67.75,gso_pxweb_V03.12 (Sơ bộ/preliminary),62
+64,Gia Lai,Gia Lai,2018,39.35,gso_pxweb_V03.12,64
+64,Gia Lai,Gia Lai,2019,40.25,gso_pxweb_V03.12,64
+64,Gia Lai,Gia Lai,2020,42.59,gso_pxweb_V03.12,64
+64,Gia Lai,Gia Lai,2021,48.2,gso_pxweb_V03.12,64
+64,Gia Lai,Gia Lai,2022,54.08,gso_pxweb_V03.12,64
+64,Gia Lai,Gia Lai,2023,57.82,gso_pxweb_V03.12,64
+64,Gia Lai,Gia Lai,2024,66.68,gso_pxweb_V03.12 (Sơ bộ/preliminary),64
+66,Dak Lak,Đắk Lắk,2018,39.14,gso_pxweb_V03.12,66
+66,Dak Lak,Đắk Lắk,2019,41.67,gso_pxweb_V03.12,66
+66,Dak Lak,Đắk Lắk,2020,46.09,gso_pxweb_V03.12,66
+66,Dak Lak,Đắk Lắk,2021,50.96,gso_pxweb_V03.12,66
+66,Dak Lak,Đắk Lắk,2022,56.69,gso_pxweb_V03.12,66
+66,Dak Lak,Đắk Lắk,2023,60.52,gso_pxweb_V03.12,66
+66,Dak Lak,Đắk Lắk,2024,72.46,gso_pxweb_V03.12 (Sơ bộ/preliminary),66
+67,Dak Nong,Đắk Nông,2018,44.01,gso_pxweb_V03.12,67
+67,Dak Nong,Đắk Nông,2019,45.47,gso_pxweb_V03.12,67
+67,Dak Nong,Đắk Nông,2020,48.14,gso_pxweb_V03.12,67
+67,Dak Nong,Đắk Nông,2021,53.23,gso_pxweb_V03.12,67
+67,Dak Nong,Đắk Nông,2022,60.28,gso_pxweb_V03.12,67
+67,Dak Nong,Đắk Nông,2023,65.44,gso_pxweb_V03.12,67
+67,Dak Nong,Đắk Nông,2024,83.27,gso_pxweb_V03.12 (Sơ bộ/preliminary),67
+68,Lam Dong,Lâm Đồng,2018,56.05,gso_pxweb_V03.12,68
+68,Lam Dong,Lâm Đồng,2019,60.5,gso_pxweb_V03.12,68
+68,Lam Dong,Lâm Đồng,2020,62.89,gso_pxweb_V03.12,68
+68,Lam Dong,Lâm Đồng,2021,67.04,gso_pxweb_V03.12,68
+68,Lam Dong,Lâm Đồng,2022,77.48,gso_pxweb_V03.12,68
+68,Lam Dong,Lâm Đồng,2023,84.96,gso_pxweb_V03.12,68
+68,Lam Dong,Lâm Đồng,2024,99.9,gso_pxweb_V03.12 (Sơ bộ/preliminary),68
+70,Binh Phuoc,Bình Phước,2018,56.08,gso_pxweb_V03.12,70
+70,Binh Phuoc,Bình Phước,2019,62.61,gso_pxweb_V03.12,70
+70,Binh Phuoc,Bình Phước,2020,67.73,gso_pxweb_V03.12,70
+70,Binh Phuoc,Bình Phước,2021,76.12,gso_pxweb_V03.12,70
+70,Binh Phuoc,Bình Phước,2022,87.36,gso_pxweb_V03.12,70
+70,Binh Phuoc,Bình Phước,2023,94.64,gso_pxweb_V03.12,70
+70,Binh Phuoc,Bình Phước,2024,107.62,gso_pxweb_V03.12 (Sơ bộ/preliminary),70
+72,Tay Ninh,Tây Ninh,2018,62.36,gso_pxweb_V03.12,72
+72,Tay Ninh,Tây Ninh,2019,70.59,gso_pxweb_V03.12,72
+72,Tay Ninh,Tây Ninh,2020,74.02,gso_pxweb_V03.12,72
+72,Tay Ninh,Tây Ninh,2021,76.58,gso_pxweb_V03.12,72
+72,Tay Ninh,Tây Ninh,2022,86.85,gso_pxweb_V03.12,72
+72,Tay Ninh,Tây Ninh,2023,93.17,gso_pxweb_V03.12,72
+72,Tay Ninh,Tây Ninh,2024,103.56,gso_pxweb_V03.12 (Sơ bộ/preliminary),72
+74,Binh Duong,Bình Dương,2018,137.67,gso_pxweb_V03.12,74
+74,Binh Duong,Bình Dương,2019,147.38,gso_pxweb_V03.12,74
+74,Binh Duong,Bình Dương,2020,150.48,gso_pxweb_V03.12,74
+74,Binh Duong,Bình Dương,2021,157.4,gso_pxweb_V03.12,74
+74,Binh Duong,Bình Dương,2022,163.45,gso_pxweb_V03.12,74
+74,Binh Duong,Bình Dương,2023,166.43,gso_pxweb_V03.12,74
+74,Binh Duong,Bình Dương,2024,177.2,gso_pxweb_V03.12 (Sơ bộ/preliminary),74
+75,Dong Nai,Đồng Nai,2018,103.08,gso_pxweb_V03.12,75
+75,Dong Nai,Đồng Nai,2019,110.68,gso_pxweb_V03.12,75
+75,Dong Nai,Đồng Nai,2020,115.07,gso_pxweb_V03.12,75
+75,Dong Nai,Đồng Nai,2021,119.1,gso_pxweb_V03.12,75
+75,Dong Nai,Đồng Nai,2022,129.16,gso_pxweb_V03.12,75
+75,Dong Nai,Đồng Nai,2023,132.93,gso_pxweb_V03.12,75
+75,Dong Nai,Đồng Nai,2024,142.3,gso_pxweb_V03.12 (Sơ bộ/preliminary),75
+77,Ba Ria - Vung Tau,Bà Rịa - Vũng Tàu,2018,309.62,gso_pxweb_V03.12,77
+77,Ba Ria - Vung Tau,Bà Rịa - Vũng Tàu,2019,300.38,gso_pxweb_V03.12,77
+77,Ba Ria - Vung Tau,Bà Rịa - Vũng Tàu,2020,251.16,gso_pxweb_V03.12,77
+77,Ba Ria - Vung Tau,Bà Rịa - Vũng Tàu,2021,297.64,gso_pxweb_V03.12,77
+77,Ba Ria - Vung Tau,Bà Rịa - Vũng Tàu,2022,372.1,gso_pxweb_V03.12,77
+77,Ba Ria - Vung Tau,Bà Rịa - Vũng Tàu,2023,338.98,gso_pxweb_V03.12,77
+77,Ba Ria - Vung Tau,Bà Rịa - Vũng Tàu,2024,338.97,gso_pxweb_V03.12 (Sơ bộ/preliminary),77
+79,Ho Chi Minh City,TP. Hồ Chí Minh,2018,138.76,gso_pxweb_V03.12,79
+79,Ho Chi Minh City,TP. Hồ Chí Minh,2019,148.66,gso_pxweb_V03.12,79
+79,Ho Chi Minh City,TP. Hồ Chí Minh,2020,148.63,gso_pxweb_V03.12,79
+79,Ho Chi Minh City,TP. Hồ Chí Minh,2021,145.99,gso_pxweb_V03.12,79
+79,Ho Chi Minh City,TP. Hồ Chí Minh,2022,159.55,gso_pxweb_V03.12,79
+79,Ho Chi Minh City,TP. Hồ Chí Minh,2023,168.93,gso_pxweb_V03.12,79
+79,Ho Chi Minh City,TP. Hồ Chí Minh,2024,184.66,gso_pxweb_V03.12 (Sơ bộ/preliminary),79
+8,Tuyen Quang,Tuyên Quang,2018,36.19,gso_pxweb_V03.12,8
+8,Tuyen Quang,Tuyên Quang,2019,39.58,gso_pxweb_V03.12,8
+8,Tuyen Quang,Tuyên Quang,2020,43.52,gso_pxweb_V03.12,8
+8,Tuyen Quang,Tuyên Quang,2021,45.23,gso_pxweb_V03.12,8
+8,Tuyen Quang,Tuyên Quang,2022,50.26,gso_pxweb_V03.12,8
+8,Tuyen Quang,Tuyên Quang,2023,53.76,gso_pxweb_V03.12,8
+8,Tuyen Quang,Tuyên Quang,2024,60.03,gso_pxweb_V03.12 (Sơ bộ/preliminary),8
+80,Long An,Long An,2018,65.72,gso_pxweb_V03.12,80
+80,Long An,Long An,2019,72.8,gso_pxweb_V03.12,80
+80,Long An,Long An,2020,76.36,gso_pxweb_V03.12,80
+80,Long An,Long An,2021,79.85,gso_pxweb_V03.12,80
+80,Long An,Long An,2022,90.3,gso_pxweb_V03.12,80
+80,Long An,Long An,2023,93.63,gso_pxweb_V03.12,80
+80,Long An,Long An,2024,103.52,gso_pxweb_V03.12 (Sơ bộ/preliminary),80
+82,Tien Giang,Tiền Giang,2018,50.54,gso_pxweb_V03.12,82
+82,Tien Giang,Tiền Giang,2019,54.57,gso_pxweb_V03.12,82
+82,Tien Giang,Tiền Giang,2020,55.77,gso_pxweb_V03.12,82
+82,Tien Giang,Tiền Giang,2021,55.81,gso_pxweb_V03.12,82
+82,Tien Giang,Tiền Giang,2022,62.94,gso_pxweb_V03.12,82
+82,Tien Giang,Tiền Giang,2023,69.14,gso_pxweb_V03.12,82
+82,Tien Giang,Tiền Giang,2024,76.81,gso_pxweb_V03.12 (Sơ bộ/preliminary),82
+83,Ben Tre,Bến Tre,2018,36.75,gso_pxweb_V03.12,83
+83,Ben Tre,Bến Tre,2019,40.31,gso_pxweb_V03.12,83
+83,Ben Tre,Bến Tre,2020,41.86,gso_pxweb_V03.12,83
+83,Ben Tre,Bến Tre,2021,44.62,gso_pxweb_V03.12,83
+83,Ben Tre,Bến Tre,2022,48.36,gso_pxweb_V03.12,83
+83,Ben Tre,Bến Tre,2023,51.8,gso_pxweb_V03.12,83
+83,Ben Tre,Bến Tre,2024,56.43,gso_pxweb_V03.12 (Sơ bộ/preliminary),83
+84,Tra Vinh,Trà Vinh,2018,53.55,gso_pxweb_V03.12,84
+84,Tra Vinh,Trà Vinh,2019,58.85,gso_pxweb_V03.12,84
+84,Tra Vinh,Trà Vinh,2020,61.01,gso_pxweb_V03.12,84
+84,Tra Vinh,Trà Vinh,2021,63.09,gso_pxweb_V03.12,84
+84,Tra Vinh,Trà Vinh,2022,72.47,gso_pxweb_V03.12,84
+84,Tra Vinh,Trà Vinh,2023,82.42,gso_pxweb_V03.12,84
+84,Tra Vinh,Trà Vinh,2024,94.96,gso_pxweb_V03.12 (Sơ bộ/preliminary),84
+86,Vinh Long,Vĩnh Long,2018,48.08,gso_pxweb_V03.12,86
+86,Vinh Long,Vĩnh Long,2019,52.94,gso_pxweb_V03.12,86
+86,Vinh Long,Vĩnh Long,2020,57.34,gso_pxweb_V03.12,86
+86,Vinh Long,Vĩnh Long,2021,57.5,gso_pxweb_V03.12,86
+86,Vinh Long,Vĩnh Long,2022,68.6,gso_pxweb_V03.12,86
+86,Vinh Long,Vĩnh Long,2023,73.19,gso_pxweb_V03.12,86
+86,Vinh Long,Vĩnh Long,2024,80.87,gso_pxweb_V03.12 (Sơ bộ/preliminary),86
+87,Dong Thap,Đồng Tháp,2018,47.35,gso_pxweb_V03.12,87
+87,Dong Thap,Đồng Tháp,2019,51.47,gso_pxweb_V03.12,87
+87,Dong Thap,Đồng Tháp,2020,53.39,gso_pxweb_V03.12,87
+87,Dong Thap,Đồng Tháp,2021,54.37,gso_pxweb_V03.12,87
+87,Dong Thap,Đồng Tháp,2022,62.17,gso_pxweb_V03.12,87
+87,Dong Thap,Đồng Tháp,2023,68.76,gso_pxweb_V03.12,87
+87,Dong Thap,Đồng Tháp,2024,76.83,gso_pxweb_V03.12 (Sơ bộ/preliminary),87
+89,An Giang,An Giang,2018,40.43,gso_pxweb_V03.12,89
+89,An Giang,An Giang,2019,44.49,gso_pxweb_V03.12,89
+89,An Giang,An Giang,2020,46.64,gso_pxweb_V03.12,89
+89,An Giang,An Giang,2021,47.71,gso_pxweb_V03.12,89
+89,An Giang,An Giang,2022,52.67,gso_pxweb_V03.12,89
+89,An Giang,An Giang,2023,58.67,gso_pxweb_V03.12,89
+89,An Giang,An Giang,2024,65.98,gso_pxweb_V03.12 (Sơ bộ/preliminary),89
+91,Kien Giang,Kiên Giang,2018,52.04,gso_pxweb_V03.12,91
+91,Kien Giang,Kiên Giang,2019,55.17,gso_pxweb_V03.12,91
+91,Kien Giang,Kiên Giang,2020,55.65,gso_pxweb_V03.12,91
+91,Kien Giang,Kiên Giang,2021,59.03,gso_pxweb_V03.12,91
+91,Kien Giang,Kiên Giang,2022,66.4,gso_pxweb_V03.12,91
+91,Kien Giang,Kiên Giang,2023,72.55,gso_pxweb_V03.12,91
+91,Kien Giang,Kiên Giang,2024,81.06,gso_pxweb_V03.12 (Sơ bộ/preliminary),91
+92,Can Tho,Cần Thơ,2018,67.78,gso_pxweb_V03.12,92
+92,Can Tho,Cần Thơ,2019,72.66,gso_pxweb_V03.12,92
+92,Can Tho,Cần Thơ,2020,72.41,gso_pxweb_V03.12,92
+92,Can Tho,Cần Thơ,2021,73.93,gso_pxweb_V03.12,92
+92,Can Tho,Cần Thơ,2022,86.74,gso_pxweb_V03.12,92
+92,Can Tho,Cần Thơ,2023,94.32,gso_pxweb_V03.12,92
+92,Can Tho,Cần Thơ,2024,104.26,gso_pxweb_V03.12 (Sơ bộ/preliminary),92
+93,Hau Giang,Hậu Giang,2018,44.27,gso_pxweb_V03.12,93
+93,Hau Giang,Hậu Giang,2019,48.64,gso_pxweb_V03.12,93
+93,Hau Giang,Hậu Giang,2020,51.48,gso_pxweb_V03.12,93
+93,Hau Giang,Hậu Giang,2021,54.4,gso_pxweb_V03.12,93
+93,Hau Giang,Hậu Giang,2022,67.67,gso_pxweb_V03.12,93
+93,Hau Giang,Hậu Giang,2023,79.55,gso_pxweb_V03.12,93
+93,Hau Giang,Hậu Giang,2024,90.25,gso_pxweb_V03.12 (Sơ bộ/preliminary),93
+94,Soc Trang,Sóc Trăng,2018,41.47,gso_pxweb_V03.12,94
+94,Soc Trang,Sóc Trăng,2019,44.5,gso_pxweb_V03.12,94
+94,Soc Trang,Sóc Trăng,2020,45.84,gso_pxweb_V03.12,94
+94,Soc Trang,Sóc Trăng,2021,48.05,gso_pxweb_V03.12,94
+94,Soc Trang,Sóc Trăng,2022,55.31,gso_pxweb_V03.12,94
+94,Soc Trang,Sóc Trăng,2023,59.88,gso_pxweb_V03.12,94
+94,Soc Trang,Sóc Trăng,2024,65.58,gso_pxweb_V03.12 (Sơ bộ/preliminary),94
+95,Bac Lieu,Bạc Liêu,2018,43.95,gso_pxweb_V03.12,95
+95,Bac Lieu,Bạc Liêu,2019,45.95,gso_pxweb_V03.12,95
+95,Bac Lieu,Bạc Liêu,2020,48.02,gso_pxweb_V03.12,95
+95,Bac Lieu,Bạc Liêu,2021,51.44,gso_pxweb_V03.12,95
+95,Bac Lieu,Bạc Liêu,2022,59.3,gso_pxweb_V03.12,95
+95,Bac Lieu,Bạc Liêu,2023,64.45,gso_pxweb_V03.12,95
+95,Bac Lieu,Bạc Liêu,2024,70.77,gso_pxweb_V03.12 (Sơ bộ/preliminary),95
+96,Ca Mau,Cà Mau,2018,48.21,gso_pxweb_V03.12,96
+96,Ca Mau,Cà Mau,2019,50.67,gso_pxweb_V03.12,96
+96,Ca Mau,Cà Mau,2020,51.21,gso_pxweb_V03.12,96
+96,Ca Mau,Cà Mau,2021,51.81,gso_pxweb_V03.12,96
+96,Ca Mau,Cà Mau,2022,59.44,gso_pxweb_V03.12,96
+96,Ca Mau,Cà Mau,2023,64.38,gso_pxweb_V03.12,96
+96,Ca Mau,Cà Mau,2024,71.36,gso_pxweb_V03.12 (Sơ bộ/preliminary),96
