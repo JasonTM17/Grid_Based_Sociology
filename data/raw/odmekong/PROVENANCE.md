@@ -23,6 +23,7 @@
     3. `covid-19-impacts-on-society-in-vietnam` — rate_poor chỉ Urban/Rural.
 - Wayback Machine tạm offline lúc tải ("Internet Archive: Temporarily Offline") nên không kiểm chứng được bản lưu cũ của trang `poverty-rate`.
 - Kết luận: **không còn dataset poverty theo tỉnh trên nguồn này**; lấy bản 6 vùng làm thay thế tốt nhất có được, xuất ra `data/processed/external_odm_poverty_region_1998_2016.csv` (KHÔNG đặt tên `external_odm_poverty_63.csv` vì dữ liệu không phải cấp tỉnh).
+- `_search_poverty_vn.json` bản tải đầu (2026-11-07) chỉ lưu được 30/61 kết quả vì CKAN `package_search` mặc định trả 30 rows; đã tải lại **cùng query** `package_search?q=poverty vietnam` với `rows=61` và ghi đè file — đủ 61/61 kết quả (không có thêm dataset poverty cấp tỉnh nào xuất hiện, kết luận không đổi).
 
 ## Manifest — tên file — bytes — SHA-256
 
@@ -39,7 +40,7 @@ health_covid/quarantine_en.csv — 9992 — e423c56869d70802c37e3e2bcde55c7c7481
 
 ```
 _search_poverty_api.json — 183984 — 14e10f4d58042ed95022ca61b88902710c676ccdb8765957cbeea8eddf8dfc2d
-_search_poverty_vn.json — 362098 — 844e9c250bc070d96b02666aad8d04367511b9310b2809635b7ad639cf54e7ec
+_search_poverty_vn.json — 868179 — 1d824ad8a00e140830299c1ba91ef740a760ac404a6e54f0a19bfe0337960f2d
 _search_poverty_title.json — 49499 — 9ccb533427e88fb64f8627748b4cf0866f8507810d79d54d704bd5614f71fa16
 _search_poverty_all.json — 5933113 — 50ab6aec298085345e8d55ffb313337e38ad4a6f4e0c5d7d03d94184ae39d306
 _all_0.json — 6250774 — c34b4600d2e3726a4a8e6db343531be5b4e1f825d9fe723fb8161a210824da42

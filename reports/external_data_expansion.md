@@ -174,6 +174,15 @@ Các file này có sẵn từ Phase 2 (không phải sản phẩm mới của đ
 - **Hạn chế:** các file này được `external_pci_63_full.csv` và `external_gso_population_63_full.csv` thay thế (thêm năm 2011/2023/2024 và cột `source`); `external_gso_waste_63.csv` **chưa có** bản "full" hơn.
 - **Provenance:** `data/processed/external_provenance.md`.
 
+### 3.6 Nghèo cấp tỉnh — bảng pxweb GSO V14.47 (bổ sung 2026-11-07, sau đợt tải ban đầu ở §1.2)
+
+- **Nguồn + cách tải:** ma trận **V14.47** "Tỷ lệ hộ nghèo phân theo địa phương" trong database "Y tế, văn hóa và MSDC" trên <https://pxweb.nso.gov.vn> — database này **KHÔNG mở qua API `/api/v1`** (404) mà chỉ hiện qua giao diện classic PX-Web (`?tablelist=true`); tải bằng chính `scripts/gso_pxweb_fetch.py` (GET trang chọn biến → chọn giá trị biến → POST WebForms; robots.txt không có `Disallow` — §3.2). Đơn vị %, cập nhật lần cuối 21/08/2026, trang bảng ghi "Bản quyền: Không".
+- **File:** raw `data/raw/gso/pxweb_V14.47_poverty_step2.html` (146.373 bytes, SHA-256 `3e652b6b1e5be65ebefa718b658dbde3b249fcc148eeb777bd3698d36d7183bd`); processed `data/processed/external_poverty_63.csv` sinh bởi `scripts/build_poverty_63.py`: parse HTML, bỏ dòng TỔNG SỐ + 6 vùng + dòng Hà Tây cũ (chỉ có 2006 — theo chú thích của nguồn, Hà Nội gộp Hà Tây từ 2008), nối 63/63 tỉnh qua `province_crosswalk_63.csv`, gán `papi_province_code` từ panel PAPI **882/882 (0 thiếu, panel chỉ đọc)**. Schema long format: `province_code, province_ascii, province_vi, year, poverty_rate_pct, papi_province_code`.
+- **Độ phủ:** 63 tỉnh × 14 năm (2006, 2008, 2010, 2012–2016, 2020–2025) = 882 dòng; **881/882 ô có số** — thiếu duy nhất TP.HCM 2016 (nguồn ghi ".."); **2017–2019 không có trên bảng nguồn** (danh sách năm của bảng chỉ có đúng 14 giá trị) → để trống, **KHÔNG nội suy**.
+- **Đối chiếu** (khâu verification trong `scripts/build_poverty_63.py`, dung sai 0,051 = sai số làm tròn): vs Niên giám 2025, bảng chương tr.934–935 (cột 2020, 2022, 2023, 2024, Sơ bộ 2025): **315/315 trùng**; vs Niên giám 2021 tr.881–882 (cột 2020, 2021): **124/124 trùng**.
+- **Lưu ý chuẩn nghèo (đọc trước khi phát biểu trong báo cáo/thi):** cột 2010–2016 theo "chuẩn nghèo của Chính phủ giai đoạn 2011-2015 **tính theo thu nhập**" (cả nước 2016 = 5,8) — khác với số "chuẩn nghèo **đa chiều**" trong Niên giám 2019–2021; từ 2022, Niên giám 2025 ghi "theo chuẩn nghèo đa chiều của Chính phủ giai đoạn 2022-2025" và trùng khớp pxweb; cột "2025" của pxweb = "Sơ bộ 2025" của Niên giám 2025. Phụ lục Niên giám 2025 tr.1494–1495 liệt kê theo **34 tỉnh sau sáp nhập 2025** — khác địa giới 63 tỉnh nên không dùng đối chiếu (chi tiết: `data/raw/gso/PROVENANCE.md`).
+- **Trạng thái so với gap [7]:** (a) phần rà ODM đã đóng — `_search_poverty_vn.json` tải lại đủ **61/61 kết quả** (`rows=61`; SHA-256 `1d824ad8a00e140830299c1ba91ef740a760ac404a6e54f0a19bfe0337960f2d`) — không có dataset poverty cấp tỉnh nào mới trên ODM, kết luận §3.3 không đổi; (b) mục tiêu "có nghèo cấp tỉnh" **đạt được qua nguồn GSO** (bảng trên), không qua ODM/Wayback — Wayback vì vậy không còn cần thiết cho gap này. **File chưa nối vào `external_master`** — dùng làm feature/validation hay chỉ bối cảnh là quyết định của nhóm; trước mắt chỉ đọc như dữ liệu tham khảo cấp tỉnh.
+
 ---
 
 ## 4. Ma trận độ phủ và khoảng trống còn lại
@@ -224,8 +233,9 @@ Ký hiệu: ✓ = lấp đủ 63/63 tỉnh · ◐ = một phần · ✗ = trốn
 
 > **Trạng thái cập nhật 2026-11-07 (phiên dựng master table + external validation):**
 > [1] [2] [8] [9] **ĐÃ ĐÓNG** · [3] **ĐÓNG dạng quyết định thiết kế** · [6] **ĐÓNG**
-> (kèm lưu ý tài liệu ngoài) · nhận định gốc của [5] **VÔ HIỆU** · [7] [10] **MỞ,
-> cần tải thêm / quyết định nhóm**. Bằng chứng của từng trạng thái ghi ngay trong
+> (kèm lưu ý tài liệu ngoài) · nhận định gốc của [5] **VÔ HIỆU** · [7] **ĐÓNG —
+> đạt mục tiêu qua nguồn GSO V14.47 (§3.6, bổ sung cuối ngày 2026-11-07)** ·
+> [10] **MỞ, cần bổ sung dependency**. Bằng chứng của từng trạng thái ghi ngay trong
 > mục; số liệu chi tiết xem `results/external_master_summary.md` và
 > `results/external_validation.md`.
 
@@ -284,7 +294,7 @@ Ký hiệu: ✓ = lấp đủ 63/63 tỉnh · ◐ = một phần · ✗ = trốn
    (và "kg/urban resident/day") → phát biểu "kg/người/ngày" dựa trên nhãn
    code của gói; văn bản GSO gốc (Supplementary S5) là tài liệu ngoài — cần tải
    thêm nếu muốn chốt văn bản thay vì nhãn code.
-7. **[7] MỞ — nghèo cấp tỉnh thay cho 6 vùng ODM (needs-new-download):** nếu muốn đưa nghèo vào feature/validation — (a) rà nốt **61 kết quả** của truy vấn chưa liệt kê trong `_search_poverty_vn.json` để đóng cửa khả năng bỏ sót (file hiện **chỉ lưu 30/61 items** — đếm lại trong phiên 2026-11-07; tùy chọn fetch `rows=61` để đóng kho lưu trữ); (b) thử lại **Wayback Machine** cho trang `poverty-rate` đã 404 (một lần, rẻ; nếu vẫn offline/chết nội dung → chốt bỏ đường này); (c) chuyển hẳn sang nguồn cấp tỉnh khác: số hộ nghèo MOLISA theo tỉnh, bảng nghèo World Bank Vietnam.
+7. **[7] ĐÓNG (cập nhật cuối 2026-11-07 — mục tiêu đạt qua nguồn khác, xem §3.6) — nghèo cấp tỉnh thay cho 6 vùng ODM:** nếu muốn đưa nghèo vào feature/validation — (a) rà nốt **61 kết quả** của truy vấn chưa liệt kê trong `_search_poverty_vn.json` để đóng cửa khả năng bỏ sót (file hiện **chỉ lưu 30/61 items** — đếm lại trong phiên 2026-11-07; tùy chọn fetch `rows=61` để đóng kho lưu trữ); (b) thử lại **Wayback Machine** cho trang `poverty-rate` đã 404 (một lần, rẻ; nếu vẫn offline/chết nội dung → chốt bỏ đường này); (c) chuyển hẳn sang nguồn cấp tỉnh khác: số hộ nghèo MOLISA theo tỉnh, bảng nghèo World Bank Vietnam. **Đóng như sau:** (a) đã rà nốt — file tải lại đủ **61/61 kết quả** (`rows=61`, cùng query, cùng host — `data/raw/odmekong/PROVENANCE.md`) — không có dataset poverty cấp tỉnh nào mới trên ODM; (c) đạt qua nguồn **pxweb GSO V14.47** → `external_poverty_63.csv` (63 tỉnh × 14 năm, 881/882 ô có số — chi tiết §3.6); (b) Wayback không còn cần thiết cho gap này. File **chưa nối vào `external_master`** — quyết định của nhóm nếu dùng vào feature/validation.
 8. **[8] ĐÃ ĐÓNG — ODM health 10 tỉnh count=0:** kết luận "0-thật (nguồn điểm
    không phủ)" — dump 2.169 điểm đã point-in-polygon với bộ alias tên tỉnh đã
    kiểm tra (script ODM map 6 tên lệch của geojson), 10 tỉnh giữ 0. Đã thực
@@ -305,7 +315,7 @@ Ký hiệu: ✓ = lấp đủ 63/63 tỉnh · ◐ = một phần · ✗ = trốn
 ### 4.3 Câu hỏi dự kiến khi demo/thi (chuẩn bị trước)
 
 - **"Dữ liệu sau sáp nhập 34 tỉnh thì sao?"** PCI 2025 là cấu trúc mới 34 tỉnh sau sáp nhập với 9 chỉ số thành phần (§3.1), nên panel 63 tỉnh 2011–2024 kết thúc tại 2024. Nối tiếp kỳ sau là quyết định thiết kế riêng (crosswalk 34 tỉnh mới, panel riêng) — ngoài phạm vi tài liệu này, nhưng cần một câu trả lời chuẩn bị sẵn.
-- **"Vì sao không có nghèo cấp tỉnh?"** — trả lời bằng §3.3 (404 + rà catalog) và kế hoạch [7].
+- **"Vì sao không có nghèo cấp tỉnh?"** — từ 2026-11-07 đã CÓ: ODM không có (§3.3 — 404 + rà catalog 61/61), nhưng tìm thấy trên pxweb GSO V14.47 → `external_poverty_63.csv`, 63 tỉnh × 14 năm, 881/882 ô có số (§3.6; gap [7] đã đóng).
 - **"10 tỉnh không có bệnh viện là lỗi không?"** — trả lời bằng gap [8] (quy trình 3 bước).
 
 ---
