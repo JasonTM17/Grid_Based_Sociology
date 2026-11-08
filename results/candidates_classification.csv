@@ -1,0 +1,146 @@
+﻿section,key,metric,value
+baseline_check,lr_published_grid,value_cv_inmemory,0.434155
+baseline_check,lr_published_grid,value_cv_published,0.434000
+baseline_check,lr_published_grid,published_source,supervised_metrics.csv
+baseline_check,lr_published_grid,match,KHOP
+baseline_check,rf_published_grid,value_cv_inmemory,0.397245
+baseline_check,rf_published_grid,value_cv_published,0.397000
+baseline_check,rf_published_grid,published_source,supervised_metrics.csv
+baseline_check,rf_published_grid,match,KHOP
+baseline_check,majority,value_cv_inmemory,0.228209
+baseline_check,majority,value_cv_published,0.228000
+baseline_check,majority,published_source,supervised_metrics.csv
+baseline_check,majority,match,KHOP
+baseline_check,always_one,value_cv_inmemory,0.400102
+baseline_check,always_one,value_cv_published,0.400000
+baseline_check,always_one,published_source,supervised_summary.md:31
+baseline_check,always_one,match,KHOP
+fold_structure,origin=2017,n_train_pairs,374
+fold_structure,origin=2017,n_val_pairs,61
+fold_structure,origin=2017,train_majority_class,0
+fold_structure,origin=2017,val_prevalence_label1,0.557377
+fold_structure,origin=2018,n_train_pairs,435
+fold_structure,origin=2018,n_val_pairs,61
+fold_structure,origin=2018,train_majority_class,0
+fold_structure,origin=2018,val_prevalence_label1,0.442623
+fold_structure,origin=2019,n_train_pairs,496
+fold_structure,origin=2019,n_val_pairs,63
+fold_structure,origin=2019,train_majority_class,0
+fold_structure,origin=2019,val_prevalence_label1,0.587302
+fold_structure,origin=2020,n_train_pairs,559
+fold_structure,origin=2020,n_val_pairs,60
+fold_structure,origin=2020,train_majority_class,0
+fold_structure,origin=2020,val_prevalence_label1,0.816667
+fold_structure,origin=2021,n_train_pairs,619
+fold_structure,origin=2021,n_val_pairs,60
+fold_structure,origin=2021,train_majority_class,0
+fold_structure,origin=2021,val_prevalence_label1,0.916667
+fold_structure,origin=2022,n_train_pairs,679
+fold_structure,origin=2022,n_val_pairs,59
+fold_structure,origin=2022,train_majority_class,0
+fold_structure,origin=2022,val_prevalence_label1,0.779661
+baseline_folds,lr_best_published|origin=2017,f1_macro,0.338916
+baseline_folds,lr_best_published|origin=2018,f1_macro,0.408915
+baseline_folds,lr_best_published|origin=2019,f1_macro,0.456897
+baseline_folds,lr_best_published|origin=2020,f1_macro,0.430871
+baseline_folds,lr_best_published|origin=2021,f1_macro,0.472485
+baseline_folds,lr_best_published|origin=2022,f1_macro,0.496848
+baseline_folds,rf_best_published|origin=2017,f1_macro,0.306818
+baseline_folds,rf_best_published|origin=2018,f1_macro,0.381159
+baseline_folds,rf_best_published|origin=2019,f1_macro,0.383696
+baseline_folds,rf_best_published|origin=2020,f1_macro,0.374824
+baseline_folds,rf_best_published|origin=2021,f1_macro,0.365751
+baseline_folds,rf_best_published|origin=2022,f1_macro,0.571221
+baseline_folds,majority|origin=2017,f1_macro,0.306818
+baseline_folds,majority|origin=2018,f1_macro,0.357895
+baseline_folds,majority|origin=2019,f1_macro,0.292135
+baseline_folds,majority|origin=2020,f1_macro,0.154930
+baseline_folds,majority|origin=2021,f1_macro,0.076923
+baseline_folds,majority|origin=2022,f1_macro,0.180556
+baseline_folds,always_one|origin=2017,f1_macro,0.357895
+baseline_folds,always_one|origin=2018,f1_macro,0.306818
+baseline_folds,always_one|origin=2019,f1_macro,0.370000
+baseline_folds,always_one|origin=2020,f1_macro,0.449541
+baseline_folds,always_one|origin=2021,f1_macro,0.478261
+baseline_folds,always_one|origin=2022,f1_macro,0.438095
+grid_lr_published,C=0.1,mean_cv,0.416910
+grid_lr_published,C=0.3,mean_cv,0.421599
+grid_lr_published,C=1,mean_cv,0.434155
+grid_c1,C=0.1,mean_cv,0.479756
+grid_c1,C=0.3,mean_cv,0.486055
+grid_c1,C=1,mean_cv,0.486055
+grid_c2,C=0.03,mean_cv,0.368117
+grid_c2,C=0.1,mean_cv,0.416910
+grid_c2,C=0.3,mean_cv,0.421599
+grid_c2,C=1,mean_cv,0.434155
+grid_c2,C=3,mean_cv,0.430630
+grid_c2,C=10,mean_cv,0.428913
+grid_rf_published,"depth=3, leaf=1",mean_cv,0.334535
+grid_rf_published,"depth=3, leaf=2",mean_cv,0.329954
+grid_rf_published,"depth=6, leaf=1",mean_cv,0.369651
+grid_rf_published,"depth=6, leaf=2",mean_cv,0.379329
+grid_rf_published,"depth=None, leaf=1",mean_cv,0.397245
+grid_rf_published,"depth=None, leaf=2",mean_cv,0.391684
+grid_c3,"depth=3, leaf=1",mean_cv,0.464351
+grid_c3,"depth=3, leaf=2",mean_cv,0.465035
+grid_c3,"depth=6, leaf=1",mean_cv,0.518265
+grid_c3,"depth=6, leaf=2",mean_cv,0.523785
+grid_c3,"depth=None, leaf=1",mean_cv,0.390399
+grid_c3,"depth=None, leaf=2",mean_cv,0.423547
+candidate_folds,C1|origin=2017,f1_macro,0.590854
+candidate_folds,C1|origin=2017,beats_lr_best,1
+candidate_folds,C1|origin=2018,f1_macro,0.383838
+candidate_folds,C1|origin=2018,beats_lr_best,0
+candidate_folds,C1|origin=2019,f1_macro,0.343750
+candidate_folds,C1|origin=2019,beats_lr_best,0
+candidate_folds,C1|origin=2020,f1_macro,0.542484
+candidate_folds,C1|origin=2020,beats_lr_best,1
+candidate_folds,C1|origin=2021,f1_macro,0.537037
+candidate_folds,C1|origin=2021,beats_lr_best,1
+candidate_folds,C1|origin=2022,f1_macro,0.518367
+candidate_folds,C1|origin=2022,beats_lr_best,1
+verdict,C1,value_cv,0.486055
+verdict,C1,delta_vs_lr_best_inmemory,0.051900
+verdict,C1,delta_vs_majority_inmemory,0.257846
+verdict,C1,folds_beat_lr_best,4
+verdict,C1,cond_i_value_cv_gt_milestone,1
+verdict,C1,cond_ii_beat_ge_4_of_6,1
+verdict,C1,verdict,VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV]
+candidate_folds,C2|origin=2017,f1_macro,0.338916
+candidate_folds,C2|origin=2017,beats_lr_best,0
+candidate_folds,C2|origin=2018,f1_macro,0.408915
+candidate_folds,C2|origin=2018,beats_lr_best,0
+candidate_folds,C2|origin=2019,f1_macro,0.456897
+candidate_folds,C2|origin=2019,beats_lr_best,0
+candidate_folds,C2|origin=2020,f1_macro,0.430871
+candidate_folds,C2|origin=2020,beats_lr_best,0
+candidate_folds,C2|origin=2021,f1_macro,0.472485
+candidate_folds,C2|origin=2021,beats_lr_best,0
+candidate_folds,C2|origin=2022,f1_macro,0.496848
+candidate_folds,C2|origin=2022,beats_lr_best,0
+verdict,C2,value_cv,0.434155
+verdict,C2,delta_vs_lr_best_inmemory,0.000000
+verdict,C2,delta_vs_majority_inmemory,0.205946
+verdict,C2,folds_beat_lr_best,0
+verdict,C2,cond_i_value_cv_gt_milestone,0
+verdict,C2,cond_ii_beat_ge_4_of_6,0
+verdict,C2,verdict,KHÔNG VƯỢT — value_cv không vượt mốc LR công bố; beat per-fold LR-best < 4/6 fold
+candidate_folds,C3|origin=2017,f1_macro,0.489466
+candidate_folds,C3|origin=2017,beats_lr_best,1
+candidate_folds,C3|origin=2018,f1_macro,0.419048
+candidate_folds,C3|origin=2018,beats_lr_best,1
+candidate_folds,C3|origin=2019,f1_macro,0.602774
+candidate_folds,C3|origin=2019,beats_lr_best,1
+candidate_folds,C3|origin=2020,f1_macro,0.456325
+candidate_folds,C3|origin=2020,beats_lr_best,1
+candidate_folds,C3|origin=2021,f1_macro,0.593538
+candidate_folds,C3|origin=2021,beats_lr_best,1
+candidate_folds,C3|origin=2022,f1_macro,0.581560
+candidate_folds,C3|origin=2022,beats_lr_best,1
+verdict,C3,value_cv,0.523785
+verdict,C3,delta_vs_lr_best_inmemory,0.089630
+verdict,C3,delta_vs_majority_inmemory,0.295576
+verdict,C3,folds_beat_lr_best,6
+verdict,C3,cond_i_value_cv_gt_milestone,1
+verdict,C3,cond_ii_beat_ge_4_of_6,1
+verdict,C3,verdict,VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV]

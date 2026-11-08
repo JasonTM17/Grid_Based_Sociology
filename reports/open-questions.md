@@ -47,3 +47,9 @@ Không có câu hỏi logistics mới; bảng ở trên **giữ nguyên** (câu 
 | Tài liệu nguồn | Có — `reports/external_data_expansion.md` §3.6 (nguồn + provenance) + mục mới §3.7 "Nghèo cấp tỉnh đã tích hợp" | `reports/external_data_expansion.md` |
 
 Còn mở như cũ: câu 2 và câu 5 logistics (chờ GV); **B5** (`predict_sweep`) chờ người hướng dẫn duyệt; `external_poverty_63.csv` **vẫn chưa nối** vào `external_master` — dùng làm feature/validation hay chỉ bối cảnh là quyết định của nhóm.
+
+---
+
+## CẬP NHẬT 2026-11-08 (ma trận ứng viên cải thiện model)
+
+**CẬP NHẬT 2026-11-08** — ma trận ứng viên cải thiện model đã chạy, verdict trong `results/model_improvement_candidates.md` (exploratory, adoption cần GV). Kết luận highlights đã chốt thành câu trả lời Q&A số 31 "Còn gì cải thiện được cho model?" trong `reports/qa_final.md`. Đợt này chỉ sửa 2 tệp tài liệu (`reports/open-questions.md`, `reports/qa_final.md`) — không đụng script/artifact, không đổi số đã công bố (Ridge 0.265, carry 0.145, LR 0.434, k=3 — giữ nguyên); ba ứng viên vượt ngưỡng (C3, C1, R1) đều còn nhãn [THAM KHẢO — CHƯA DUYỆT GV]. Gate trong phiên này (từ thư mục gốc repo): `python -E -m ruff check .` → **All checks passed!**; `git diff --name-only` trước khi ghi → rỗng, sau khi ghi → đúng 2 tệp reports/.

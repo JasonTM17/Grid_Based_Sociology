@@ -1,0 +1,15 @@
+﻿method,family,min_samples,eps,kdist_pct,k,noise_rate,noise_le_025,sizes_top5,ari_full_vs_frozen,ari_nonnoise_vs_frozen,ari_full_vs_refit,ari_nonnoise_vs_refit,silhouette,n_sil,note
+STING đóng băng — nhãn gốc CSV (mốc),sting_frozen,,,,3,0.1995,True,"[577, 16, 5]",1.0,1.0,0.2927,0.0672,-0.0651,598,mốc công bằng: nhãn pred_cluster của predict_all_years.csv trên đúng 747 dòng + z-trong-năm; ARI vs chính nó = 1
+STING refit z-trong-năm (cfg đóng băng),sting_refit,,,,2,0.158,True,"[624, 5]",0.2927,0.006,1.0,1.0,0.3586,629,"deconfound: refit cfg đóng băng (L=3, f=4, mc=5, lv=2, conn=1) trên cùng z-trong-năm — tách hiệu ứng chuẩn hóa"
+DBSCAN ms=5 eps=0.1407 (k-dist p50),dbscan,5.0,0.1407,50.0,18,0.3708,False,"[350, 15, 11, 10, 9]",0.126,0.034,0.1073,0.0063,-0.0611,470,
+DBSCAN ms=5 eps=0.1579 (k-dist p60),dbscan,5.0,0.1579,60.0,17,0.2664,False,"[419, 16, 15, 12, 11]",0.2095,0.0034,0.251,0.0194,-0.1696,548,
+DBSCAN ms=5 eps=0.1860 (k-dist p70),dbscan,5.0,0.186,70.0,8,0.2129,True,"[540, 11, 9, 7, 6]",0.3099,0.0295,0.5494,0.0758,-0.2173,588,
+DBSCAN ms=5 eps=0.2267 (k-dist p80),dbscan,5.0,0.2267,80.0,8,0.1178,True,"[609, 12, 10, 8, 6]",0.3372,0.0742,0.6813,0.2043,-0.0633,659,
+DBSCAN ms=5 eps=0.2989 (k-dist p90),dbscan,5.0,0.2989,90.0,2,0.0549,True,"[702, 4]",0.1912,0.0372,0.4262,0.0,0.218,706,
+DBSCAN ms=10 eps=0.2134 (k-dist p50),dbscan,10.0,0.2134,50.0,3,0.3467,False,"[470, 11, 7]",0.2544,0.0562,0.3156,0.0305,0.0256,488,
+DBSCAN ms=10 eps=0.2446 (k-dist p60),dbscan,10.0,0.2446,60.0,3,0.2517,False,"[536, 13, 10]",0.339,0.0506,0.5017,0.0682,0.1838,559,
+DBSCAN ms=10 eps=0.2786 (k-dist p70),dbscan,10.0,0.2786,70.0,1,0.1968,True,[600],0.3125,0.0371,0.6861,0.184,,600,<2 cụm non-noise → silhouette n/a
+DBSCAN ms=10 eps=0.3273 (k-dist p80),dbscan,10.0,0.3273,80.0,1,0.1111,True,[664],0.2586,0.0003,0.619,0.5432,,664,<2 cụm non-noise → silhouette n/a
+DBSCAN ms=10 eps=0.4193 (k-dist p90),dbscan,10.0,0.4193,90.0,1,0.0375,True,[719],0.1252,0.0524,0.2787,0.0,,719,<2 cụm non-noise → silhouette n/a
+"KMeans k=3 (seed 11, n_init=10)",kmeans,,,,3,0.0,True,"[307, 234, 206]",0.0557,0.0272,0.0155,0.0011,0.336,747,tất cả điểm được gán cụm
+Ward k=3 (linkage=ward),ward,,,,3,0.0,True,"[413, 191, 143]",0.1462,0.0679,0.0726,0.0142,0.3336,747,tất cả điểm được gán cụm
