@@ -379,6 +379,20 @@ if regression_tab.open:
                     "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
                 },
             )
+            # Bảng cố tình chỉ so baseline carry-forward + 2 họ đã tune; các dòng
+            # regression khác trong artifact được liệt kê tường minh ở đây thay vì
+            # lọc im lặng (đổi tên model trong CSV sẽ lộ ra chỗ này).
+            dropped_regression_rows = metrics.loc[
+                metrics.task.eq("regression")
+                & ~metrics.model.isin(overall_regression.model)
+            ]
+            if not dropped_regression_rows.empty:
+                st.caption(
+                    "Bảng trên chỉ so sánh baseline giữ nguyên giá trị và 2 họ model "
+                    "được tune. Dòng regression khác trong supervised_metrics.csv nhưng "
+                    "không thuộc bảng so sánh: "
+                    + ", ".join(dropped_regression_rows.model.astype(str)) + "."
+                )
             st.warning(
                 "R² CV hồi quy là điểm chọn họ model bằng expanding origin 2017–2022 "
                 "(warm-up 2011–2016); holdout không tham gia chọn model. "
@@ -681,62 +695,63 @@ if external_tab.open:
                 "`results/external_validation.csv`; tạo lại bằng `python scripts/external_validation.py`."
             )
 
-with audit_tab:
-    st.subheader("Feature, missingness và giới hạn thang đo")
-    flags = scale_audit(panel)
-    indicator_columns = [
-        column for column in panel.columns
-        if column.startswith(("d", "sd_")) and pd.api.types.is_numeric_dtype(panel[column])
-    ]
-    flag_col1, flag_col2, flag_col3 = st.columns(3)
-    flag_col1.metric("Mean-jump heuristic", f"{len(flags)} / {len(indicator_columns)}")
-    flag_col2.metric("Feature STING đang dùng", f"{len(features)}")
-    flag_col3.metric(f"Thiếu feature toàn năm {selected_year}", f"{sting_counts['missing_feature_rows']}")
-    st.warning(
-        "Mean-jump > 0.25 điểm là heuristic để rà soát; nó không tự chứng minh gãy thang đo. "
-        "Danh sách dưới đây tính trên toàn panel 2011–2024; quy tắc sweep eligibility dùng train đến 2020."
-    )
-
-    st.markdown("#### Cặp feature STING đã chốt")
-    feature_rows = []
-    for feature in features:
-        feature_rows.append({
-            "Feature": feature,
-            "Chỉ tiêu": feature_label(feature, config),
-            "Mean-jump flag toàn panel": any(row[0] == feature for row in flags),
-            "Thiếu trong panel": int(panel[feature].isna().sum()),
-        })
-    st.dataframe(pd.DataFrame(feature_rows), hide_index=True, width="stretch")
-    st.caption(f"Cấu hình đóng băng: STING(L={config['sting']['n_levels']}, factor={config['sting']['factor']}, min_count={config['sting']['min_count']}); không tối ưu từ giao diện.")
-
-    flag_frame = pd.DataFrame(flags, columns=["Feature", "Max mean jump", "Năm lớn nhất"])
-    if flag_frame.empty:
-        render_empty("Không có cột nào vượt heuristic trên panel hiện tại.")
-    else:
-        st.markdown("#### Các cột có cờ heuristic")
-        st.dataframe(flag_frame, hide_index=True, width="stretch")
-
-    classification = metrics.loc[metrics.task.eq("classification")].copy()
-    if not classification.empty:
-        classifier = select_classification_model(metrics)
-        classification["Được chọn theo CV"] = classification.model.eq(classifier)
-        st.markdown("#### Phân loại pseudo-label STING")
-        st.caption(
-            "Nhãn được dựng tại từng cutoff; CV expanding 2017–2022 sau warm-up 2011–2016. "
-            "Điểm đo mức khớp nhãn STING, không phải ground truth xã hội."
+if audit_tab.open:
+    with audit_tab:
+        st.subheader("Feature, missingness và giới hạn thang đo")
+        flags = scale_audit(panel)
+        indicator_columns = [
+            column for column in panel.columns
+            if column.startswith(("d", "sd_")) and pd.api.types.is_numeric_dtype(panel[column])
+        ]
+        flag_col1, flag_col2, flag_col3 = st.columns(3)
+        flag_col1.metric("Mean-jump heuristic", f"{len(flags)} / {len(indicator_columns)}")
+        flag_col2.metric("Feature STING đang dùng", f"{len(features)}")
+        flag_col3.metric(f"Thiếu feature toàn năm {selected_year}", f"{sting_counts['missing_feature_rows']}")
+        st.warning(
+            "Mean-jump > 0.25 điểm là heuristic để rà soát; nó không tự chứng minh gãy thang đo. "
+            "Danh sách dưới đây tính trên toàn panel 2011–2024; quy tắc sweep eligibility dùng train đến 2020."
         )
-        st.dataframe(
-            classification[["model", "value_cv", "holdout_acc", "holdout_macro_f1", "Được chọn theo CV"]],
-            hide_index=True,
-            width="stretch",
-            column_config={
-                "model": "Mô hình / baseline",
-                "value_cv": st.column_config.NumberColumn("CV · macro-F1", format="%.3f"),
-                "holdout_acc": st.column_config.NumberColumn("Accuracy pseudo-label", format="%.3f"),
-                "holdout_macro_f1": st.column_config.NumberColumn("Macro-F1 pseudo-label", format="%.3f"),
-                "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
-            },
-        )
+
+        st.markdown("#### Cặp feature STING đã chốt")
+        feature_rows = []
+        for feature in features:
+            feature_rows.append({
+                "Feature": feature,
+                "Chỉ tiêu": feature_label(feature, config),
+                "Mean-jump flag toàn panel": any(row[0] == feature for row in flags),
+                "Thiếu trong panel": int(panel[feature].isna().sum()),
+            })
+        st.dataframe(pd.DataFrame(feature_rows), hide_index=True, width="stretch")
+        st.caption(f"Cấu hình đóng băng: STING(L={config['sting']['n_levels']}, factor={config['sting']['factor']}, min_count={config['sting']['min_count']}); không tối ưu từ giao diện.")
+
+        flag_frame = pd.DataFrame(flags, columns=["Feature", "Max mean jump", "Năm lớn nhất"])
+        if flag_frame.empty:
+            render_empty("Không có cột nào vượt heuristic trên panel hiện tại.")
+        else:
+            st.markdown("#### Các cột có cờ heuristic")
+            st.dataframe(flag_frame, hide_index=True, width="stretch")
+
+        classification = metrics.loc[metrics.task.eq("classification")].copy()
+        if not classification.empty:
+            classifier = select_classification_model(metrics)
+            classification["Được chọn theo CV"] = classification.model.eq(classifier)
+            st.markdown("#### Phân loại pseudo-label STING")
+            st.caption(
+                "Nhãn được dựng tại từng cutoff; CV expanding 2017–2022 sau warm-up 2011–2016. "
+                "Điểm đo mức khớp nhãn STING, không phải ground truth xã hội."
+            )
+            st.dataframe(
+                classification[["model", "value_cv", "holdout_acc", "holdout_macro_f1", "Được chọn theo CV"]],
+                hide_index=True,
+                width="stretch",
+                column_config={
+                    "model": "Mô hình / baseline",
+                    "value_cv": st.column_config.NumberColumn("CV · macro-F1", format="%.3f"),
+                    "holdout_acc": st.column_config.NumberColumn("Accuracy pseudo-label", format="%.3f"),
+                    "holdout_macro_f1": st.column_config.NumberColumn("Macro-F1 pseudo-label", format="%.3f"),
+                    "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
+                },
+            )
 
 st.divider()
 st.caption(

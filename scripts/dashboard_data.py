@@ -466,7 +466,13 @@ def _published_group_code(group) -> int:
 
 
 def published_external_pci_tests(validation: pd.DataFrame, section: str) -> dict:
-    """Parse các dòng kiểm định đã công bố của một section PCI trong artifact."""
+    """Parse các dòng kiểm định đã công bố của một section PCI trong artifact.
+
+    p trong note theo đúng quy ước `format_p_value` (và `fmt_p` của generator
+    `scripts/external_validation.py`): `p = <số>` cho p thường, và `p < 1e-12`
+    khi p cực nhỏ — dạng chặn trên, không phải điểm số. Dict trả về kèm
+    `p_anova_is_bound`/`p_kw_is_bound` để gate so sánh đúng loại giá trị.
+    """
     rows = validation.loc[validation.section.eq(section)]
     if rows.empty:
         raise DashboardDataError(
@@ -486,11 +492,11 @@ def published_external_pci_tests(validation: pd.DataFrame, section: str) -> dict
         r"ANOVA F\((\d+),\s*(\d+)\)", str(anova_row.group).strip()
     )
     anova_note = re.fullmatch(
-        r"F\s*=\s*([0-9.eE+-]+)\s*;\s*p\s*=\s*([0-9.eE+-]+)",
+        r"F\s*=\s*([0-9.eE+-]+)\s*;\s*p\s*([<=])\s*([0-9.eE+-]+)",
         str(anova_row.note).strip(),
     )
     kruskal_note = re.fullmatch(
-        r"H\s*=\s*([0-9.eE+-]+)\s*;\s*p\s*=\s*([0-9.eE+-]+)",
+        r"H\s*=\s*([0-9.eE+-]+)\s*;\s*p\s*([<=])\s*([0-9.eE+-]+)",
         str(_single_row("Kruskal").note).strip(),
     )
     eta_note = re.fullmatch(
@@ -514,9 +520,11 @@ def published_external_pci_tests(validation: pd.DataFrame, section: str) -> dict
         "df1": int(anova_df.group(1)),
         "df2": int(anova_df.group(2)),
         "f": float(anova_note.group(1)),
-        "p_anova": float(anova_note.group(2)),
+        "p_anova": float(anova_note.group(3)),
+        "p_anova_is_bound": anova_note.group(2) == "<",
         "h": float(kruskal_note.group(1)),
-        "p_kw": float(kruskal_note.group(2)),
+        "p_kw": float(kruskal_note.group(3)),
+        "p_kw_is_bound": kruskal_note.group(2) == "<",
         "eta_sq": float(eta_note.group(1)),
         "n": published_n,
     }
@@ -532,7 +540,9 @@ def ensure_external_pci_consistency(
     Số công bố (ANOVA F=9.04, Kruskal H=31.78, …) không được đổi: nếu số tính
     lại từ CSV lệch artifact nhiều hơn độ làm tròn (4 số lẻ cho F/H/eta², 3 chữ
     số có nghĩa cho p, giá trị nguyên cho n/df), raise thay vì hiển thị số khác
-    một cách âm thầm. Trả về dict số tính lại để dashboard hiển thị.
+    một cách âm thầm. p dạng chặn trên (`p < 1e-12` theo quy ước
+    `format_p_value`) không so isclose — yêu cầu p tính lại cũng thỏa chặn trên
+    đó. Trả về dict số tính lại để dashboard hiển thị.
     """
     recomputed = external_pci_tests(view)
     published = published_external_pci_tests(validation, section)
@@ -546,7 +556,16 @@ def ensure_external_pci_consistency(
                 f"{key}: tính lại {recomputed[key]:.6f} ≠ artifact {published[key]}"
             )
     for key in ("p_anova", "p_kw"):
-        if not math.isclose(recomputed[key], published[key], rel_tol=0.006):
+        if published[f"{key}_is_bound"]:
+            # Artifact ghi chặn trên dạng 'p < X' (quy ước format_p_value cho p
+            # cực nhỏ) — không có điểm số để so isclose; nhất quán khi p tính
+            # lại cũng nằm dưới đúng chặn trên đó.
+            if recomputed[key] >= published[key]:
+                problems.append(
+                    f"{key}: tính lại {recomputed[key]:.3g} không thỏa "
+                    f"'p < {published[key]:g}' của artifact."
+                )
+        elif not math.isclose(recomputed[key], published[key], rel_tol=0.006):
             problems.append(
                 f"{key}: tính lại {recomputed[key]:.3g} ≠ artifact {published[key]:.3g}"
             )

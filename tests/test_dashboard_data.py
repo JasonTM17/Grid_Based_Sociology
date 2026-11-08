@@ -580,11 +580,35 @@ def test_published_external_pci_tests_parses_published_rows():
         "df2": 743,
         "f": 9.0426,
         "p_anova": 6.93e-06,
+        "p_anova_is_bound": False,
         "h": 31.7751,
         "p_kw": 5.84e-07,
+        "p_kw_is_bound": False,
         "eta_sq": 0.0352,
         "n": 747,
     }
+
+
+def test_published_external_pci_tests_parses_bound_p_note():
+    """Note dạng chặn trên 'p < 1e-12' (format_p_value cho p cực nhỏ, cùng quy
+    ước fmt_p của scripts/external_validation.py) phải đọc được — trước fix
+    parser raise 'không đọc được định dạng' dù artifact nhất quán."""
+    validation = pd.DataFrame([
+        _validation_row("pci_2011_2022", "nhiễu (–1)", n=149, mean=59.798),
+        _validation_row("pci_2011_2022", "ANOVA F(3,743)", n=747, note="F = 9.0426; p < 1e-12"),
+        _validation_row("pci_2011_2022", "Kruskal–Wallis", n=747, note="H = 31.7751; p < 1e-12"),
+        _validation_row("pci_2011_2022", "eta squared", n=747, note="eta² = 0.0352 (SS giữa / SS tổng)"),
+    ])
+
+    tests = published_external_pci_tests(validation, "pci_2011_2022")
+
+    assert tests["f"] == 9.0426
+    assert tests["p_anova"] == 1e-12
+    assert tests["p_anova_is_bound"] is True
+    assert tests["h"] == 31.7751
+    assert tests["p_kw"] == 1e-12
+    assert tests["p_kw_is_bound"] is True
+    assert tests["n"] == 747
 
 
 def test_published_external_pci_tests_rejects_malformed_rows():
@@ -679,6 +703,51 @@ def test_ensure_external_pci_consistency_passes_then_flags_drift():
     drifted_mean.loc[drifted_mean.group.eq("cụm 2"), "mean"] = 42.0
     with pytest.raises(DashboardDataError, match="mean nhóm 'cụm 2'"):
         ensure_external_pci_consistency(view, drifted_mean, section="pci_main")
+
+
+def _tiny_p_view() -> pd.DataFrame:
+    """ANOVA p ≈ 2.7e-16 (< 1e-12 → note dạng 'p < 1e-12'), Kruskal p ≈ 0.0495
+    (note dạng 'p = …') — một view phủ cả hai quy ước của format_p_value."""
+    return pd.DataFrame({
+        "pred_cluster": [0, 0, 0, 1, 1, 1],
+        "pci_weighted_score": [1.0, 2.0, 3.0, 10001.0, 10002.0, 10003.0],
+    })
+
+
+def test_ensure_external_pci_consistency_accepts_bound_p_note():
+    """p cực nhỏ: generator phát hành note 'p < 1e-12' (format_p_value /
+    fmt_p) — gate phải đọc được và chấp nhận khi p tính lại cũng dưới chặn
+    trên. Trước fix parser đây là DashboardDataError 'không đọc được định
+    dạng' dù dữ liệu nhất quán và rebuild không chữa được."""
+    view = _tiny_p_view()
+    recomputed = external_pci_tests(view)
+    assert recomputed["p_anova"] < 1e-12  # note ANOVA chắc chắn ở dạng chặn trên
+
+    validation = _published_rows_for(view, "pci_main")
+    anova_note = validation.loc[
+        validation.group.str.startswith("ANOVA"), "note"
+    ].iloc[0]
+    assert "p < 1e-12" in anova_note  # format_p_value đã phát hành dạng chặn trên
+
+    result = ensure_external_pci_consistency(view, validation, section="pci_main")
+    assert result["p_anova"] == pytest.approx(external_pci_tests(view)["p_anova"])
+    # Cờ bound nằm ở phía artifact đã parse, không phải dict số tính lại.
+    published = published_external_pci_tests(validation, "pci_main")
+    assert published["p_anova_is_bound"] is True
+    assert published["p_kw_is_bound"] is False
+
+
+def test_ensure_external_pci_consistency_rejects_unsatisfied_bound():
+    """p tính lại KHÔNG thỏa chặn trên của artifact → từ chối, không hiển thị
+    số khác một cách âm thầm."""
+    view = _tiny_p_view()
+    validation = _published_rows_for(view, "pci_main")
+    validation.loc[validation.group.str.startswith("ANOVA"), "note"] = (
+        f"F = {external_pci_tests(view)['f']:.4f}; p < 1e-40"
+    )
+
+    with pytest.raises(DashboardDataError, match="KHÔNG khớp artifact"):
+        ensure_external_pci_consistency(view, validation, section="pci_main")
 
 
 def test_external_pci_group_stats_summary_and_labels():
