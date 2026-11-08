@@ -158,7 +158,43 @@ print("Ridge prediction:", ridge.predict(probe).tolist())"""))
 
 cd(nbf.v4.new_code_cell("""display(Image(filename="../results/figs/predict_2024.png"))"""))
 
-md(nbf.v4.new_markdown_cell("""## 7. Kết luận
+md(nbf.v4.new_markdown_cell("""## 7. Kiểm chứng bổ trợ — nghèo GSO theo nhãn cụm (cửa sổ giao 2012–2016 & 2020–2024)
+
+- Nguồn độc lập thứ hai sau PCI: tỷ lệ hộ nghèo cấp tỉnh **GSO pxweb V14.47** (thống kê chính thức,
+  tách khỏi PAPI là khảo sát hộ dân) — KHÔNG vào feature, KHÔNG nội suy ô thiếu (TP.HCM 2016 thiếu phía nguồn).
+- Mọi số dưới đây **đọc trực tiếp từ `results/poverty_validation.csv`** (sinh bởi `scripts/poverty_validation.py`) — không hardcode.
+- Hai kiểm định bắt buộc **đọc cùng nhau**: gộp thô (nhiễm hiệu ứng năm — chuẩn nghèo đổi theo giai đoạn,
+  median nghèo giảm sâu xuyên giai đoạn) và đã-trừ-median-trong-năm (tách hiệu ứng năm)."""))
+
+cd(nbf.v4.new_code_cell("""pov = pd.read_csv("../results/poverty_validation.csv")
+
+pooled_sections = ["poverty_pooled_raw", "poverty_pooled_demeaned", "test_mw_noise_vs_c2"]
+pov_pool = pov[pov.section.isin(pooled_sections)].copy()
+has_stats = pov_pool["mean"].notna() & pov_pool["mean"].astype(str).str.strip().ne("")
+has_note = pov_pool["note"].notna() & pov_pool["note"].astype(str).str.strip().ne("")
+show_md(pov_pool[has_stats].to_markdown(index=False))
+print()
+show_md(pov_pool[has_note][["section", "group", "n", "note"]].to_markdown(index=False))
+print()
+
+def _pov_note(section, group):
+    return str(pov[(pov.section == section) & (pov.group == group)].iloc[0]["note"])
+
+print("Gộp thô:                ", _pov_note("poverty_pooled_raw", "Kruskal–Wallis"))
+print("Đã trừ median trong năm:", _pov_note("poverty_pooled_demeaned", "Kruskal–Wallis"))
+for _, r in pov[pov.section == "test_mw_noise_vs_c2"].iterrows():
+    print(f"{r['group']}: {r['note']}")
+print()
+_c0 = int(pov_pool[has_stats & pov_pool["group"].str.contains("cụm 0", regex=False)].iloc[0]["n"])
+_c1 = int(pov_pool[has_stats & pov_pool["group"].str.contains("cụm 1", regex=False)].iloc[0]["n"])
+print("Đọc trung thực: gộp thô KHÔNG đáng kể (nhiễm hiệu ứng năm); đã-trừ-median-năm đáng kể ở mức yếu.")
+print(f"Cặp tương phản đáng tin duy nhất là nhiễu vs cụm 2 (cụm 0 n={_c0}, cụm 1 n={_c1} quá nhỏ):")
+print("không khác biệt ở mức gộp, biên sau khi tách năm → nghèo GSO là kiểm chứng bổ trợ,")
+print("không thay thế kiểm định chính PCI (số liệu đầy đủ: results/poverty_validation.md).")
+
+display(Image(filename="../results/figs/external_poverty_by_cluster.png"))"""))
+
+md(nbf.v4.new_markdown_cell("""## 8. Kết luận
 
 - STING tự viết hoạt động đúng trên dữ liệu giả lập (ARI=0.950) và trên dữ liệu thật; kết quả thật
   cho thấy **dữ liệu PAPI cấp tỉnh/năm gần như một khối** — cấu trúc tách biệt rất yếu và chỉ ở ngoại vi.

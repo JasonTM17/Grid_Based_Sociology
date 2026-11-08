@@ -1,0 +1,53 @@
+﻿section,group,year,n,mean,median,std,min,max,note
+poverty_pooled_raw,nhiễu (–1),,127,9.384,6.1,9.468,0.0,42.3,
+poverty_pooled_raw,cụm 0,,2,14.95,14.95,3.748,12.3,17.6,
+poverty_pooled_raw,cụm 1,,9,4.9,3.6,3.679,1.2,12.1,
+poverty_pooled_raw,cụm 2,,480,8.741,6.0,8.243,0.0,43.5,
+poverty_pooled_raw,"ANOVA F(3,614)",,618,,,,,,F = 1.1950; p = 0.311
+poverty_pooled_raw,Kruskal–Wallis,,618,,,,,,H = 3.4415; p = 0.328
+poverty_pooled_raw,eta squared,,618,,,,,,eta² = 0.0058 (SS giữa / SS tổng)
+poverty_pooled_demeaned,nhiễu (–1),,127,1.511,-1.7,8.412,-12.8,29.4,
+poverty_pooled_demeaned,cụm 0,,2,4.5,4.5,0.283,4.3,4.7,
+poverty_pooled_demeaned,cụm 1,,9,-6.117,-7.1,3.008,-9.0,0.2,
+poverty_pooled_demeaned,cụm 2,,480,2.233,0.175,7.763,-12.8,31.7,
+poverty_pooled_demeaned,"ANOVA F(3,614)",,618,,,,,,F = 3.5759; p = 0.0138
+poverty_pooled_demeaned,Kruskal–Wallis,,618,,,,,,H = 20.1709; p = 0.000156
+poverty_pooled_demeaned,eta squared,,618,,,,,,eta² = 0.0172 (SS giữa / SS tổng)
+poverty_by_year_raw,cụm 0,2012,1,17.6,17.6,,17.6,17.6,
+poverty_by_year_raw,cụm 1,2012,2,6.15,6.15,2.333,4.5,7.8,
+poverty_by_year_raw,cụm 2,2012,43,15.23,14.1,9.484,0.1,43.5,
+poverty_by_year_raw,nhiễu (–1),2012,17,13.876,9.0,12.049,0.1,42.3,
+poverty_by_year_raw,cụm 1,2013,4,6.675,5.85,4.288,2.9,12.1,
+poverty_by_year_raw,cụm 2,2013,43,13.16,12.0,8.875,0.1,38.6,
+poverty_by_year_raw,nhiễu (–1),2013,16,14.506,12.55,11.056,0.0,40.6,
+poverty_by_year_raw,cụm 1,2014,2,1.9,1.9,0.99,1.2,2.6,
+poverty_by_year_raw,cụm 2,2014,42,10.49,9.8,6.803,0.0,35.3,
+poverty_by_year_raw,nhiễu (–1),2014,17,13.794,11.1,10.713,0.0,33.0,
+poverty_by_year_raw,cụm 0,2015,1,12.3,12.3,,12.3,12.3,
+poverty_by_year_raw,cụm 2,2015,35,8.366,7.2,6.262,0.7,29.1,
+poverty_by_year_raw,nhiễu (–1),2015,27,10.53,9.3,8.312,0.0,31.5,
+poverty_by_year_raw,cụm 1,2016,1,1.3,1.3,,1.3,1.3,
+poverty_by_year_raw,cụm 2,2016,50,8.54,6.7,6.674,0.5,27.9,
+poverty_by_year_raw,nhiễu (–1),2016,11,5.6,4.3,4.543,0.0,12.0,
+poverty_by_year_raw,cụm 2,2020,57,7.379,4.1,8.543,0.0,36.7,
+poverty_by_year_raw,nhiễu (–1),2020,6,9.633,8.65,6.964,2.1,21.5,
+poverty_by_year_raw,cụm 2,2021,53,7.625,4.7,8.276,0.0,34.5,
+poverty_by_year_raw,nhiễu (–1),2021,7,4.071,3.0,3.782,0.0,10.7,
+poverty_by_year_raw,cụm 2,2022,57,7.439,4.1,8.243,0.0,33.6,
+poverty_by_year_raw,nhiễu (–1),2022,4,2.575,1.7,2.438,0.8,6.1,
+poverty_by_year_raw,cụm 2,2023,52,6.46,3.8,7.538,0.0,29.5,
+poverty_by_year_raw,nhiễu (–1),2023,9,2.367,1.7,2.112,0.1,6.1,
+poverty_by_year_raw,cụm 2,2024,48,4.788,2.75,5.88,0.0,23.2,
+poverty_by_year_raw,nhiễu (–1),2024,13,1.962,0.6,2.717,0.1,10.1,
+test_mw_noise_vs_c2,Mann–Whitney nhiễu vs cụm 2 (thô),,607,,,,,,U = 30517; p = 0.983
+test_mw_noise_vs_c2,Mann–Whitney nhiễu vs cụm 2 (đã trừ median năm),,607,,,,,,U = 27439; p = 0.0836
+kw_by_year_descriptive,Kruskal–Wallis,2012,63,,,,,,"k = 4 nhóm, min n = 1; H = 3.1067; p = 0.375; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2013,63,,,,,,"k = 3 nhóm, min n = 4; H = 2.3814; p = 0.304"
+kw_by_year_descriptive,Kruskal–Wallis,2014,61,,,,,,"k = 3 nhóm, min n = 2; H = 4.8289; p = 0.0894"
+kw_by_year_descriptive,Kruskal–Wallis,2015,63,,,,,,"k = 3 nhóm, min n = 1; H = 1.4569; p = 0.483; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2016,62,,,,,,"k = 3 nhóm, min n = 1; H = 3.9493; p = 0.139; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2020,63,,,,,,"k = 2 nhóm, min n = 6; H = 1.8778; p = 0.171; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2021,60,,,,,,"k = 2 nhóm, min n = 7; H = 1.0506; p = 0.305; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2022,61,,,,,,"k = 2 nhóm, min n = 4; H = 2.1229; p = 0.145; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2023,61,,,,,,"k = 2 nhóm, min n = 9; H = 3.4654; p = 0.0627; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2024,61,,,,,,"k = 2 nhóm, min n = 13; H = 5.5328; p = 0.0187; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"

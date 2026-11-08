@@ -183,6 +183,17 @@ Các file này có sẵn từ Phase 2 (không phải sản phẩm mới của đ
 - **Lưu ý chuẩn nghèo (đọc trước khi phát biểu trong báo cáo/thi):** cột 2010–2016 theo "chuẩn nghèo của Chính phủ giai đoạn 2011-2015 **tính theo thu nhập**" (cả nước 2016 = 5,8) — khác với số "chuẩn nghèo **đa chiều**" trong Niên giám 2019–2021; từ 2022, Niên giám 2025 ghi "theo chuẩn nghèo đa chiều của Chính phủ giai đoạn 2022-2025" và trùng khớp pxweb; cột "2025" của pxweb = "Sơ bộ 2025" của Niên giám 2025. Phụ lục Niên giám 2025 tr.1494–1495 liệt kê theo **34 tỉnh sau sáp nhập 2025** — khác địa giới 63 tỉnh nên không dùng đối chiếu (chi tiết: `data/raw/gso/PROVENANCE.md`).
 - **Trạng thái so với gap [7]:** (a) phần rà ODM đã đóng — `_search_poverty_vn.json` tải lại đủ **61/61 kết quả** (`rows=61`; SHA-256 `1d824ad8a00e140830299c1ba91ef740a760ac404a6e54f0a19bfe0337960f2d`) — không có dataset poverty cấp tỉnh nào mới trên ODM, kết luận §3.3 không đổi; (b) mục tiêu "có nghèo cấp tỉnh" **đạt được qua nguồn GSO** (bảng trên), không qua ODM/Wayback — Wayback vì vậy không còn cần thiết cho gap này. **File chưa nối vào `external_master`** — dùng làm feature/validation hay chỉ bối cảnh là quyết định của nhóm; trước mắt chỉ đọc như dữ liệu tham khảo cấp tỉnh.
 
+### 3.7 Nghèo cấp tỉnh đã tích hợp — kiểm định bổ trợ + hình + dashboard (bổ sung 2026-11-08)
+
+Sau khi §3.6 chuẩn hóa `external_poverty_63.csv`, nghèo GSO đã được đưa vào **đầy đủ các asset kiểm chứng** của repo. Số dưới đây đọc từ `results/poverty_validation.md`/`.csv` — mọi số do `scripts/poverty_validation.py` tự tính từ CSV provenance (không hardcode); phiên tài liệu 2026-11-08 chạy lại script và md/csv/png **byte-giống** (sha256):
+
+- **Script kiểm định:** `scripts/poverty_validation.py` — tái dùng nguyên xi helper của `scripts/external_validation.py`, hình dùng `scripts/fig_style.py`; tái lập: `python -E scripts/poverty_validation.py`.
+- **Kết quả:** `results/poverty_validation.md` (+ `.csv`) — kiểm chứng ngoại lai **thứ hai** sau PCI, trên cửa sổ giao **2012–2016 & 2020–2024**: 630 ô cửa sổ, 629 ô có giá trị poverty; left-join nhãn cụm của model đóng băng được **618 ô vào kiểm định**; **11 ô** có poverty nhưng không có nhãn cụm bị loại có liệt kê tường minh; TP.HCM 2016 thiếu phía nguồn — **KHÔNG nội suy**.
+- **Hai kiểm định bắt buộc đọc CÙNG nhau:** gộp thô Kruskal–Wallis **H = 3.4415 (p = 0.328)** — KHÔNG đáng kể; đã trừ median trong năm **H = 20.1709 (p = 0.000156)** — đáng kể (median nghèo giảm 12.9% năm 2012 → 2.3% năm 2024, tỷ trọng cụm trôi theo năm). Mann–Whitney nhiễu vs cụm 2: p = 0.983 (thô) / p = 0.0836 (đã trừ median). Poverty là kiểm chứng **bổ trợ** — không thay thế kiểm định chính PCI (§4.2 mục [2]).
+- **Hình:** `results/figs/external_poverty_by_cluster.png` — boxplot gộp + median theo năm từng cụm (400 dpi, nguồn + mask ghi ngay trên hình).
+- **Dashboard:** tab "Kiểm chứng ngoại lai" có mục "Nghèo cấp tỉnh (GSO V14.47)" (`app.py:728`) — metrics cửa sổ, box plot, hai kiểm định tính lại live từ CSV bởi `scripts/dashboard_data.py` (`load_poverty_assets`, `prepare_poverty_cluster_view`); test pin protocol đối chiếu số đã công bố (`tests/test_dashboard_data.py`, `tests/test_app_ui.py`).
+- Trạng thái **không đổi so với §3.6**: `external_poverty_63.csv` vẫn chưa nối vào `external_master` — quyết định của nhóm.
+
 ---
 
 ## 4. Ma trận độ phủ và khoảng trống còn lại

@@ -639,3 +639,203 @@ def external_section_frame(validation: pd.DataFrame, section: str) -> pd.DataFra
     rows["year"] = rows.year.astype("Int64")
     rows["n"] = rows.n.astype("Int64")
     return rows.sort_values(["pred_cluster", "year"]).reset_index(drop=True)
+
+
+# --------------------------------------------------------------------- #
+# Kiểm chứng bổ trợ — nghèo cấp tỉnh GSO (pxweb V14.47) theo nhãn cụm.
+# Nguồn: data/processed/external_poverty_63.csv (sinh bởi
+# scripts/build_poverty_63.py) + results/predict_all_years.csv (model chốt,
+# gate bởi tests/test_artifact_reproduction.py). Protocol join GIỐNG
+# poverty_validation.py / external_validation.py: khóa (year, province_code)
+# duy nhất hai phía, left-join `validate="one_to_one"`, KHÔNG nội suy ô thiếu;
+# ô thiếu được đếm và liệt kê tường minh. Hai kiểm định chính báo cáo CÙNG
+# nhau — gộp thô và đã-trừ-median-năm (pov_dm) — vì chuẩn nghèo đổi theo giai
+# đoạn: chỉ so GIỮA CỤM trong cùng một năm là hợp lệ. Mọi số tự tính lại từ
+# CSV — không hardcode.
+# --------------------------------------------------------------------- #
+
+_POVERTY_CSV = Path("data/processed/external_poverty_63.csv")
+_POVERTY_REBUILD_COMMAND = "python scripts/build_poverty_63.py"
+
+# Cửa sổ giao thiết kế (= DESIGN_WINDOW của scripts/poverty_validation.py:83):
+# poverty pxweb V14.47 có 2006–2016 & 2020–2025, nhãn cụm phủ 2011–2024, nên
+# giao tự tính từ dữ liệu phải khớp đúng danh sách này — lệch là artifact đã
+# đổi phía nguồn hoặc phía nhãn.
+POVERTY_OVERLAP_YEARS = (2012, 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023, 2024)
+
+# Đủ để nối nhãn và liệt kê ô thiếu; load_poverty_assets yêu cầu schema đầy đủ.
+_REQUIRED_POVERTY_VIEW_COLUMNS = {"province_code", "province_vi", "year", "poverty_rate_pct"}
+_REQUIRED_POVERTY_CSV_COLUMNS = {
+    "province_code", "province_ascii", "province_vi", "year",
+    "poverty_rate_pct", "papi_province_code",
+}
+
+
+def load_poverty_assets(root: Path = ROOT) -> dict:
+    """Load artifact nghèo cấp tỉnh dùng cho block 'Nghèo cấp tỉnh' Tab 4."""
+    root = Path(root)
+    if not (root / _POVERTY_CSV).is_file():
+        raise DashboardDataError(
+            f"Thiếu artifact {_POVERTY_CSV.as_posix()} (poverty). "
+            f"Tạo lại bằng `{_POVERTY_REBUILD_COMMAND}`."
+        )
+    poverty = pd.read_csv(root / _POVERTY_CSV, encoding="utf-8-sig")
+    missing = _REQUIRED_POVERTY_CSV_COLUMNS - set(poverty.columns)
+    if missing:
+        raise DashboardDataError(
+            f"{_POVERTY_CSV.as_posix()} thiếu cột: {', '.join(sorted(missing))}."
+        )
+    _require_unique_keys(poverty, ["province_code", "year"], "Poverty GSO")
+    # papi_province_code khớp province_code → khóa nối nhãn thống nhất hai bên
+    # (assert tương tự poverty_validation.py:260).
+    misaligned = poverty.province_code.ne(poverty.papi_province_code)
+    if misaligned.any():
+        raise DashboardDataError(
+            f"{_POVERTY_CSV.as_posix()}: papi_province_code lệch province_code "
+            f"ở {int(misaligned.sum())} dòng — khóa nối nhãn không thống nhất."
+        )
+    return {"poverty": poverty}
+
+
+def prepare_poverty_cluster_view(
+    poverty: pd.DataFrame,
+    assignments: pd.DataFrame,
+) -> tuple[pd.DataFrame, dict]:
+    """Join poverty province-year với nhãn cụm đóng băng theo protocol.
+
+    Mirror của prepare_external_pci_view và của khối join trong
+    scripts/poverty_validation.py (255-292): giữ ô poverty CÓ giá trị trong
+    cửa sổ giao, nối trái `pred_cluster`, chỉ phân tích ô CÓ nhãn; ô thiếu
+    nhãn và ô thiếu giá trị nguồn được đếm và liệt kê tường minh, không nội
+    suy. Cột `pov_dm` = poverty đã trừ median TRONG TỪNG NĂM trên chính panel
+    phân tích — hằng số trong năm nên không đổi so sánh giữa cụm trong năm,
+    chỉ tái trọng số giữa các năm khi gộp.
+    """
+    keys = ["year", "province_code"]
+    _require_unique_keys(poverty, keys, "Poverty GSO")
+    _require_unique_keys(assignments, keys, "STING assignments")
+    missing_poverty = _REQUIRED_POVERTY_VIEW_COLUMNS - set(poverty.columns)
+    if missing_poverty:
+        raise DashboardDataError(
+            "Poverty GSO thiếu cột bắt buộc: " + ", ".join(sorted(missing_poverty)) + "."
+        )
+    if not {"pred_cluster"} <= set(assignments.columns):
+        raise DashboardDataError("STING assignments thiếu cột pred_cluster.")
+
+    poverty_years = set(poverty.year.astype(int))
+    assignment_years = set(assignments.year.astype(int))
+    overlap_years = sorted(poverty_years & assignment_years)
+    if tuple(overlap_years) != POVERTY_OVERLAP_YEARS:
+        raise DashboardDataError(
+            "Cửa sổ giao poverty ↔ nhãn cụm lệch protocol: tính lại từ CSV là "
+            f"{overlap_years}, protocol yêu cầu {list(POVERTY_OVERLAP_YEARS)}. "
+            "Artifact poverty hoặc nhãn đã đổi — kiểm tra lại "
+            f"`{_POVERTY_REBUILD_COMMAND}` và nhãn cụm."
+        )
+
+    window = poverty.loc[poverty.year.isin(overlap_years)].copy()
+    missing_source = window.loc[window.poverty_rate_pct.isna(), keys + ["province_vi"]]
+    valid = window.loc[window.poverty_rate_pct.notna()].copy()
+
+    # Cột tên của assignments không mang sang (chỉ hiển thị phía poverty).
+    labels = assignments.loc[:, keys + ["pred_cluster"]]
+    merged = valid.merge(labels, on=keys, how="left", validate="one_to_one")
+    no_label = merged.loc[merged.pred_cluster.isna(), keys + ["province_vi"]]
+
+    view = merged.loc[merged.pred_cluster.notna()].copy()
+    view["pred_cluster"] = view["pred_cluster"].astype(int)
+    view["cluster_label"] = view.pred_cluster.map(_cluster_label)
+    view["pov_dm"] = view.poverty_rate_pct - view.groupby("year").poverty_rate_pct.transform(
+        "median"
+    )
+    view = view.sort_values(keys).reset_index(drop=True)
+
+    n_by_cluster = {
+        int(code): int(size) for code, size in view.groupby("pred_cluster").size().items()
+    }
+    noise_by_year = {
+        int(year): int(size)
+        for year, size in view.loc[view.pred_cluster.eq(-1)].groupby("year").size().items()
+    }
+    counts = {
+        "overlap_years": [int(year) for year in overlap_years],
+        "pov_only_years": sorted(poverty_years - assignment_years),
+        "label_only_years": sorted(assignment_years - poverty_years),
+        "window_cells": int(len(window)),
+        "valid_cells": int(len(valid)),
+        "missing_source_cells": missing_source.sort_values(keys).to_dict("records"),
+        "no_label_cells": no_label.sort_values(keys).to_dict("records"),
+        "panel_rows": int(len(view)),
+        "clusters": sorted(n_by_cluster),
+        "n_by_cluster": n_by_cluster,
+        "noise_by_year": noise_by_year,
+    }
+    return view, counts
+
+
+def format_poverty_window(years: list[int]) -> str:
+    """'2012–2016 & 2020–2024' — chạy năm liên tiếp, cùng quy ước fmt_window
+    của scripts/poverty_validation.py:86."""
+    years = [int(year) for year in years]
+    if not years:
+        raise DashboardDataError("Danh sách năm cửa sổ giao rỗng.")
+    runs: list[tuple[int, int]] = []
+    start = prev = years[0]
+    for year in years[1:]:
+        if year == prev + 1:
+            prev = year
+            continue
+        runs.append((start, prev))
+        start = prev = year
+    runs.append((start, prev))
+    singles = [str(a) for a, b in runs if a == b]
+    spans = [f"{a}–{b}" for a, b in runs if b > a]
+    return " & ".join(([", ".join(singles)] if singles else []) + spans)
+
+
+def poverty_cluster_tests(view: pd.DataFrame, value_col: str = "poverty_rate_pct") -> dict:
+    """One-way ANOVA + Kruskal–Wallis + eta² trên một cột poverty đã nối nhãn.
+
+    Cùng estimator với `external_pci_tests` (scipy `f_oneway`, `kruskal`,
+    eta² = SS giữa / SS tổng). Gọi HAI lần — `poverty_rate_pct` (gộp thô) và
+    `pov_dm` (đã-trừ-median-năm) — và hai kết quả phải hiển thị CÙNG nhau:
+    test gộp thô nhiễm hiệu ứng năm vì chuẩn nghèo đổi giai đoạn và tỷ trọng
+    cụm trôi theo năm.
+    """
+    if value_col not in view.columns:
+        raise DashboardDataError(
+            f"Poverty view thiếu cột giá trị '{value_col}' — cột pov_dm chỉ có "
+            "trong view sinh bởi prepare_poverty_cluster_view."
+        )
+    if view[value_col].isna().any():
+        raise DashboardDataError("Poverty view còn ô thiếu giá trị — không đưa vào kiểm định.")
+    groups = [sub[value_col].to_numpy() for _, sub in view.groupby("pred_cluster")]
+    if len(groups) < 2:
+        raise DashboardDataError("Kiểm định poverty cần ít nhất 2 nhóm cụm.")
+    f_stat, p_anova = stats.f_oneway(*groups)
+    h_stat, p_kw = stats.kruskal(*groups)
+    grand = view[value_col].to_numpy()
+    ss_total = float(((grand - grand.mean()) ** 2).sum())
+    ss_between = float(sum(len(g) * (g.mean() - grand.mean()) ** 2 for g in groups))
+    return {
+        "f": float(f_stat),
+        "p_anova": float(p_anova),
+        "df1": len(groups) - 1,
+        "df2": len(view) - len(groups),
+        "h": float(h_stat),
+        "p_kw": float(p_kw),
+        "eta_sq": ss_between / ss_total if ss_total > 0 else float("nan"),
+        "n": int(len(view)),
+    }
+
+
+def poverty_noise_vs_c2(view: pd.DataFrame, value_col: str = "poverty_rate_pct") -> dict:
+    """Mann–Whitney hai phía nhiễu (−1) vs cụm 2 — cặp tương phản đáng tin
+    duy nhất (cụm 0 và cụm 1 quá nhỏ; đối xứng cảnh báo PCI trong
+    external_validation.py)."""
+    noise = view.loc[view.pred_cluster.eq(-1), value_col].to_numpy()
+    cluster2 = view.loc[view.pred_cluster.eq(2), value_col].to_numpy()
+    if not len(noise) or not len(cluster2):
+        raise DashboardDataError("Thiếu nhóm nhiễu hoặc cụm 2 cho Mann–Whitney poverty.")
+    u_stat, p_value = stats.mannwhitneyu(noise, cluster2)  # hai phía (mặc định scipy)
+    return {"u": float(u_stat), "p": float(p_value), "n": int(len(noise) + len(cluster2))}

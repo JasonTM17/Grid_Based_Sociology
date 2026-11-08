@@ -29,3 +29,21 @@ Bảng câu hỏi logistics ở trên **giữ nguyên, không xóa** (câu 2 và
 | Dashboard có hiển thị kiểm chứng ngoại lai không? | Có — tab mới **"Kiểm chứng ngoại lai"**: 4 metric lưới PCI (756 / 747 / 9 / 4), box plot PCI theo cụm, ANOVA/Kruskal/eta² tính lại bằng scipy trên chính dữ liệu hiển thị rồi tự đối chiếu `results/external_validation.csv` (lệch quá sai số làm tròn → tab dừng, không hiện số khác số đã công bố); kèm kiểm tra phụ Top-30 2023–2024, mật độ y tế 2020, GRDP 2018–2024 | `app.py:193` (đăng ký tab), `app.py:448` (nội dung), `scripts/dashboard_data.py:525` (khâu tự đối chiếu); `tests/test_dashboard_data.py` |
 
 Còn mở sau vòng này: câu 2 và câu 5 của bảng logistics (chờ GV); **B5** (`predict_sweep`) chờ người hướng dẫn duyệt — ngoài phạm vi vòng này; `external_poverty_63.csv` **chưa nối** vào `external_master` (ngoài phạm vi yêu cầu) — dùng làm feature/validation hay chỉ bối cảnh là quyết định của nhóm.
+
+---
+
+## CẬP NHẬT 2026-11-08 (nghèo cấp tỉnh đã vào đầy đủ asset)
+
+Không có câu hỏi logistics mới; bảng ở trên **giữ nguyên** (câu 2 và câu 5 vẫn ⏳ chờ GV). Mục này chốt trạng thái tích hợp của **nghèo cấp tỉnh GSO V14.47** (kiểm chứng bổ trợ thứ hai sau PCI): đã vào **đầy đủ asset** — script kiểm định, results (md + csv + hình), dashboard, tests, báo cáo, notebook, tài liệu nguồn. **Không có số kết quả đã công bố nào bị đổi** (PCI F = 9.04 / H = 31.78, ridge 0.265, carry 0.145 — giữ nguyên; poverty là bổ sung). Gate chạy trong phiên này (từ thư mục gốc repo): `python -E -m pytest tests -q` → **101 passed** (exit 0), `python -m ruff check .` → **All checks passed!**; rebuild `python -E scripts/poverty_validation.py` → `results/poverty_validation.md`/`.csv`/hình **byte-giống** trước–sau (sha256, diff rỗng).
+
+| Asset | Trạng thái | Bằng chứng |
+|---|---|---|
+| Script kiểm định | Có — tái dùng helper `external_validation.py`, hình dùng `scripts/fig_style.py`, cửa sổ giao 2012–2016 & 2020–2024 assert khớp thiết kế | `scripts/poverty_validation.py:63-83` |
+| Results (md + csv) | Có — mọi số tự tính từ CSV provenance, không hardcode, không nội suy (TP.HCM 2016 thiếu phía nguồn); determinstic — rebuild 2026-11-08 byte-giống | `results/poverty_validation.md`; stdout phiên chạy: 630 ô cửa sổ / 629 có giá trị / 618 vào kiểm định / 11 ô không nhãn |
+| Hình | Có — `results/figs/external_poverty_by_cluster.png` (boxplot gộp + median theo năm, 400 dpi) | `scripts/poverty_validation.py:80`, `:536` |
+| Dashboard | Có — tab "Kiểm chứng ngoại lai", mục "Nghèo cấp tỉnh (GSO V14.47)": metrics cửa sổ, box plot, hai kiểm định tính live, cảnh báo "đọc CÙNG nhau" | `app.py:728`–`860`; `scripts/dashboard_data.py:674` (`load_poverty_assets`), `:700` (`prepare_poverty_cluster_view`) |
+| Tests | Có — loader/schema, cửa sổ giao, bảng kiểm định hiển thị; test pin protocol trên artifact thật đối chiếu `results/poverty_validation.csv` đã công bố | `tests/test_dashboard_data.py` (ví dụ `test_poverty_protocol_recomputed_on_real_artifacts`); `tests/test_app_ui.py:185`–`436` |
+| Báo cáo + notebook | Có — đọc cùng `results/poverty_validation.csv` (không hardcode số) | `scripts/build_report.py:74`–`82`; `scripts/gen_final_analysis.py:165`–`193` |
+| Tài liệu nguồn | Có — `reports/external_data_expansion.md` §3.6 (nguồn + provenance) + mục mới §3.7 "Nghèo cấp tỉnh đã tích hợp" | `reports/external_data_expansion.md` |
+
+Còn mở như cũ: câu 2 và câu 5 logistics (chờ GV); **B5** (`predict_sweep`) chờ người hướng dẫn duyệt; `external_poverty_63.csv` **vẫn chưa nối** vào `external_master` — dùng làm feature/validation hay chỉ bối cảnh là quyết định của nhóm.

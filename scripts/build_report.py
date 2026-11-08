@@ -7,6 +7,7 @@ front matter đầy đủ (TÓM TẮT · LỜI MỞ ĐẦU · MỤC LỤC(TOC fi
 Cách dùng: python scripts/build_report.py
 """
 import csv
+import json
 from pathlib import Path
 
 from docx import Document
@@ -69,6 +70,87 @@ R_F3 = _rob("OFAT f=3")
 R_MC2 = _rob("OFAT mc=2")
 R_LV2 = _rob("OFAT lv=2")
 N8 = R_GOC["n"]
+
+POV_ROWS = _read_results_csv("poverty_validation.csv")
+
+
+def _pov_note(section, group):
+    """Note kiểm định do scripts/poverty_validation.py tự tính (không hardcode)."""
+    for r in POV_ROWS:
+        if r["section"] == section and r["group"] == group:
+            return r["note"]
+    raise KeyError(f"poverty_validation.csv thiếu {section}/{group}")
+
+
+def _note_val(note, key):
+    """'H = 3.4415; p = 0.328' + 'H = ' → '3.4415' — đọc đúng chuỗi script ghi."""
+    for part in note.split(";"):
+        part = part.strip()
+        if part.startswith(key):
+            return part[len(key):].strip()
+    raise KeyError(f"{key!r} không có trong note {note!r}")
+
+
+def _note_eta(note):
+    """'eta² = 0.0058 (SS giữa / SS tổng)' → '0.0058'."""
+    return _note_val(note, "eta² = ").split(" (")[0]
+
+
+POV_GROUPS = [r for r in POV_ROWS if r["section"] == "poverty_pooled_raw"
+              and str(r["mean"]).strip() != ""]
+POV_GROUPS_DM = [r for r in POV_ROWS if r["section"] == "poverty_pooled_demeaned"
+                 and str(r["mean"]).strip() != ""]
+assert len(POV_GROUPS) == len(POV_GROUPS_DM) == 4, "thiếu dòng nhóm poverty"
+POV_KW_RAW = _pov_note("poverty_pooled_raw", "Kruskal–Wallis")
+POV_KW_DM = _pov_note("poverty_pooled_demeaned", "Kruskal–Wallis")
+POV_ANOVA_RAW = next(r for r in POV_ROWS
+                     if r["section"] == "poverty_pooled_raw"
+                     and r["group"].startswith("ANOVA"))
+POV_ANOVA_DM = next(r for r in POV_ROWS
+                    if r["section"] == "poverty_pooled_demeaned"
+                    and r["group"].startswith("ANOVA"))
+POV_MW_RAW = next(r for r in POV_ROWS if r["section"] == "test_mw_noise_vs_c2"
+                  and "(thô)" in r["group"])
+POV_MW_DM = next(r for r in POV_ROWS if r["section"] == "test_mw_noise_vs_c2"
+                 and "trừ" in r["group"])
+
+
+def _pov_group_n(sub):
+    return int(next(r["n"] for r in POV_GROUPS if sub in r["group"]))
+
+
+# Cửa sổ thiết kế — giao thức kiểm định (poverty_validation.py:83 tự assert khớp
+# cửa sổ giao tự tính từ dữ liệu). Số ĐẾM dưới đây tính trực tiếp từ 2 CSV
+# provenance, rồi đối chiếu với poverty_validation.csv — không hardcode số đếm.
+POV_WINDOW = {2012, 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023, 2024}
+
+with open(ROOT / "data" / "processed" / "external_poverty_63.csv",
+          encoding="utf-8-sig", newline="") as _f:
+    _pov_src = list(csv.DictReader(_f))
+with open(ROOT / "results" / "predict_all_years.csv",
+          encoding="utf-8-sig", newline="") as _f:
+    _pov_lab_keys = {(int(r["year"]), int(r["province_code"]))
+                     for r in csv.DictReader(_f)}
+_pov_win = [r for r in _pov_src if int(r["year"]) in POV_WINDOW]
+POV = {
+    "n_win": len(_pov_win),
+    "n_val": sum(1 for r in _pov_win if str(r["poverty_rate_pct"]).strip() != ""),
+    "missing_txt": "; ".join(f"{r['province_vi']} {r['year']}" for r in _pov_win
+                             if str(r["poverty_rate_pct"]).strip() == ""),
+}
+POV["n_join"] = sum(1 for r in _pov_win
+                    if str(r["poverty_rate_pct"]).strip() != ""
+                    and (int(r["year"]), int(r["province_code"])) in _pov_lab_keys)
+POV["n_no_label"] = POV["n_val"] - POV["n_join"]
+assert POV["n_join"] == sum(int(r["n"]) for r in POV_GROUPS) == \
+    int(POV_ANOVA_RAW["n"]), "số ô join không khớp poverty_validation.csv"
+
+# Notebook cuối kỳ — đếm cell/hình nhúng trực tiếp từ file đã execute (bảng A1).
+_nb = json.loads((ROOT / "notebooks" / "final_analysis.ipynb").read_text(
+    encoding="utf-8"))
+NB_CELLS = len(_nb["cells"])
+NB_IMGS = sum(1 for c in _nb["cells"] for out in c.get("outputs", [])
+              if isinstance(out.get("data"), dict) and "image/png" in out["data"])
 
 NAVY = RGBColor(0x0F, 0x2B, 0x46)
 TEAL = RGBColor(0x1B, 0x6E, 0x77)
@@ -346,6 +428,7 @@ for i, t in enumerate([
     "Mật độ cơ sở y tế/1.000 dân theo cụm STING — 2020 (ODM + GSO dân số)",
     "GRDP/người theo cụm STING — cửa sổ 2018–2024 (GSO pxweb; 2024 = Sơ bộ)",
     "Bối cảnh vĩ mô quốc gia 2010–2024 (World Bank WDI — chuỗi không đều phía nguồn)",
+    "Tỷ lệ hộ nghèo GSO theo cụm STING — cửa sổ giao 2012–2016 & 2020–2024 (GSO pxweb V14.47)",
 ], start=1):
     body(f"Hình {i}. {t}")
 
@@ -358,6 +441,7 @@ for i, t in enumerate([
     "Hồi quy và phân loại pseudo-label STING — holdout 2023→2024",
     "Chuyển cụm 2023 → 2024 (tách chuyển thật vs nhiễu)",
     "Kiểm chứng ngoại lai — PCI theo nhãn cụm STING (2011–2022)",
+    "Nghèo GSO theo nhãn cụm STING — cửa sổ giao 2012–2016 & 2020–2024 (thô và đã-trừ-median-năm)",
 ], start=1):
     body(f"Bảng {i}. {t}")
 doc.add_page_break()
@@ -592,6 +676,23 @@ body("GRDP/người [10] chỉ có cửa sổ 2018–2024 (441 ô; 2024 = Sơ b�
 figure("external_grdp_by_cluster.png", "GRDP/người theo cụm STING — cửa sổ 2018–2024 (nguồn: GSO pxweb V03.12; 2024 = Sơ bộ)", 13.5)
 body("Bối cảnh vĩ mô quốc gia [12] (WDI): GDP/người và % đô thị đủ 2010–2024 (15/15 năm); chi y tế thiếu 2024 (14/15); giường bệnh dừng 2017 (8/15) — chuỗi dừng phía nguồn, giữ ô trống, không nội suy. Cấp quốc gia nên chỉ dùng làm year effects/bối cảnh đọc xu hướng PAPI, không phải feature cấp tỉnh.")
 figure("external_wdi_panel.png", "Bối cảnh vĩ mô quốc gia 2010–2024 (nguồn: World Bank WDI — chuỗi không đều phía nguồn, không nội suy)", 13.5)
+h3("Nghèo cấp tỉnh (GSO V14.47)")
+body(f"Kiểm chứng bổ trợ thứ hai dùng tỷ lệ hộ nghèo cấp tỉnh [10] — bảng GSO pxweb V14.47, số liệu thống kê chính thức tách khỏi PAPI là khảo sát hộ dân; KHÔNG đưa vào feature, KHÔNG nội suy ô thiếu. Cửa sổ giao hai nguồn 2012–2016 & 2020–2024 gồm {POV['n_win']} ô, trong đó {POV['n_val']} ô có giá trị ({POV['missing_txt']} thiếu phía nguồn — nguồn ghi “..”); join nhãn cụm được {POV['n_join']} ô vào kiểm định (" + "; ".join(f"{r['group']} n={r['n']}" for r in POV_GROUPS) + f"); {POV['n_no_label']} ô tỉnh-năm có nghèo nhưng không có nhãn (panel PAPI thiếu chỉ tiêu sd_4_2/sd_6_1) được loại tường minh khỏi kiểm định. Chuẩn nghèo ĐỔI theo giai đoạn nên so mức tuyệt đối xuyên năm không like-for-like — hai kiểm định dưới đây báo cáo CÙNG nhau (số liệu đầy đủ: results/poverty_validation.md).")
+table(["Nhãn nhóm", "n", "Thô — trung bình", "Thô — trung vị", "Trừ median năm — trung bình", "Trừ median năm — trung vị"], [
+    [g["group"], g["n"], _vn(g["mean"]), _vn(g["median"]),
+     _vn(dm["mean"]), _vn(dm["median"])]
+    for g, dm in zip(POV_GROUPS, POV_GROUPS_DM)
+], widths=[2.7, 1.2, 2.9, 2.4, 3.6, 3.3], caption=(
+    f"Bảng 8. Nghèo GSO (%) theo nhãn cụm STING — cửa sổ giao 2012–2016 & 2020–2024 "
+    f"(n={POV['n_join']}); gộp thô: Kruskal–Wallis H = {_note_val(POV_KW_RAW, 'H = ')}, "
+    f"p = {_note_val(POV_KW_RAW, 'p = ')} — KHÔNG đáng kể; đã-trừ-median-năm: "
+    f"H = {_note_val(POV_KW_DM, 'H = ')}, p = {_note_val(POV_KW_DM, 'p = ')} — đáng kể. "
+    "Hai kết quả đọc CÙNG nhau"))
+_pov_fig_no = figure("external_poverty_by_cluster.png",
+                     "Tỷ lệ hộ nghèo GSO theo cụm STING — cửa sổ giao 2012–2016 & 2020–2024: "
+                     "boxplot gộp (trên) và median theo năm từng cụm (dưới) (nguồn: GSO pxweb "
+                     "V14.47; kết quả: results/poverty_validation.md)", 13.5)
+body(f"Đọc kết quả CÙNG nhau: gộp thô KHÔNG đáng kể (Kruskal–Wallis H = {_note_val(POV_KW_RAW, 'H = ')}, p = {_note_val(POV_KW_RAW, 'p = ')}; {POV_ANOVA_RAW['group']} = {_note_val(POV_ANOVA_RAW['note'], 'F = ')}, p = {_note_val(POV_ANOVA_RAW['note'], 'p = ')}; eta² = {_note_eta(_pov_note('poverty_pooled_raw', 'eta squared'))}) vì test gộp nhiễm hiệu ứng năm — median nghèo toàn panel giảm sâu xuyên giai đoạn và tỷ trọng cụm trôi theo năm (hàng dưới của Hình {_pov_fig_no}); đã-trừ-median-trong-năm đáng kể ở mức yếu (H = {_note_val(POV_KW_DM, 'H = ')}, p = {_note_val(POV_KW_DM, 'p = ')}; {POV_ANOVA_DM['group']} = {_note_val(POV_ANOVA_DM['note'], 'F = ')}, p = {_note_val(POV_ANOVA_DM['note'], 'p = ')}; eta² = {_note_eta(_pov_note('poverty_pooled_demeaned', 'eta squared'))}). Cặp tương phản đáng tin duy nhất nhiễu vs cụm 2 (cụm 0 n={_pov_group_n('cụm 0')}, cụm 1 n={_pov_group_n('cụm 1')} quá nhỏ để tự kết luận) không khác biệt ở mức gộp (Mann–Whitney U = {_note_val(POV_MW_RAW['note'], 'U = ')}, p = {_note_val(POV_MW_RAW['note'], 'p = ')}) và chỉ tới biên sau khi tách năm (U = {_note_val(POV_MW_DM['note'], 'U = ')}, p = {_note_val(POV_MW_DM['note'], 'p = ')}). Kết luận trung thực: ở mức gộp KHÔNG thấy khác biệt nghèo có ý nghĩa giữa các nhóm; tín hiệu chỉ xuất hiện sau khi tách hiệu ứng năm và yếu hơn nhiều so với kiểm định chính PCI (eta² {_note_eta(_pov_note('poverty_pooled_demeaned', 'eta squared'))} so với 0.035) — nghèo GSO đọc như kiểm chứng bổ trợ, không thay thế kiểm định chính và không chứng minh nhân quả. Tái lập: python scripts/poverty_validation.py.")
 body("Tổng hợp: cấu trúc cụm STING tương ứng với một thước đo độc lập (PCI) ở mức ý nghĩa thống kê cao — luận cứ ngoài dữ liệu PAPI cho một mô hình học không giám sát. Kết quả này KHÔNG chứng minh quan hệ nhân quả và không phủ định kết luận “dữ liệu gần như một khối” (eta² nhỏ; khác biệt chủ yếu giữa nhiễu và cụm lớn). Tái lập: python scripts/external_validation.py.")
 h2("6.6. Các hạn chế còn lại")
 bullets([
@@ -643,8 +744,9 @@ table(["Lệnh", "Kỳ vọng"], [
     ["python scripts/run_analysis.py", "metrics.csv, per_year.csv, robustness.csv, evolution/map hình, analysis_summary.md"],
     ["python scripts/build_external_master.py", "data/processed/external_master_63_2011_2024.csv (882×59, mask tường minh) + results/external_master_summary.md"],
     ["python scripts/external_validation.py", "results/external_validation.md + results/external_validation.csv + 4 hình external_* (ANOVA/Kruskal PCI, y tế 2020, GRDP, WDI)"],
+    ["python scripts/poverty_validation.py", "results/poverty_validation.md + results/poverty_validation.csv + results/figs/external_poverty_by_cluster.png (KW gộp thô & đã-trừ-median-năm; Mann–Whitney nhiễu vs cụm 2)"],
     ["python -m nbconvert --to notebook --execute --inplace notebooks/midterm_demo.ipynb", "execute sạch ~18s, 18 cells, 0 lỗi"],
-    ["python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb", "execute sạch, 20 cells, 4 hình nhúng"],
+    ["python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb", f"execute sạch, {NB_CELLS} cells, {NB_IMGS} hình nhúng (đếm từ notebook đã execute)"],
     ["python scripts/build_report.py", "reports/final_report.docx"],
 ], widths=[9.8, 6.0], caption="Bảng A1. Danh sách lệnh tái lập và kết quả kỳ vọng")
 body("Môi trường: jupyter/pytest/nbconvert không cài trên PATH — luôn dùng python -m pytest / python -m nbconvert. Dữ liệu gốc data/raw/ bất biến; panel tái tạo từ raw bằng build_panel.py; Mendeley đầy đủ tải theo DOI 10.17632/wbk42j9wc8.1 (chỉ commit 4 file nhỏ dùng trực tiếp).")

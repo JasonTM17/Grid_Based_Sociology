@@ -1,0 +1,155 @@
+# Kiểm định bổ trợ — tỷ lệ hộ nghèo GSO theo nhãn cụm STING (cửa sổ giao 2012–2016 & 2020–2024)
+
+Sinh bởi `scripts/poverty_validation.py`. Kiểm chứng ngoại lai thứ hai của cụm STING sau PCI (nguồn độc lập với PAPI): nghèo GSO là số liệu thống kê chính thức, không phải khảo sát hộ dân. Nhãn cụm lấy từ `results/predict_all_years.csv` (model đóng băng, gate bởi `tests/test_artifact_reproduction.py`); join khóa (year, province_code) `validate="one_to_one"` đúng protocol `scripts/external_validation.py`. Thống kê bằng scipy 1.16.3 (Python 3.14.2), helper tái dùng nguyên xi (`group_table`, `anova_kruskal`, `source_note`, `place_n_labels`). Mọi số tự tính lại từ CSV — không hardcode, không nội suy.
+
+## 1) Dữ liệu và join — cửa sổ giao 2012–2016 & 2020–2024
+
+- `external_poverty_63.csv`: 882 dòng × 14 năm (2006, 2008, 2010 & 2012–2016 & 2020–2025); cửa sổ giao có nhãn: **630 ô**, trong đó **629 ô có giá trị** `poverty_rate_pct`.
+- Thiếu phía nguồn (dòng có trong CSV, giá trị trống — nguồn pxweb ghi `".."`): TP. Hồ Chí Minh 2016 (code 79). KHÔNG nội suy (data/raw/gso/PROVENANCE.md:90).
+- Left-join nhãn cụm: **618 ô vào kiểm định**; **11 ô tỉnh-năm có poverty nhưng KHÔNG có nhãn** (panel PAPI thiếu sd_4_2/sd_6_1) — loại KHỎI kiểm định, mask tường minh (pattern GRDP, external_validation.py:477-486): Bắc Giang 2014; Đồng Tháp 2014; Quảng Ninh 2021; Bắc Giang 2021; Bắc Ninh 2021; Bắc Giang 2022; Bắc Ninh 2022; Quảng Ninh 2023; Bình Dương 2023; Vĩnh Phúc 2024; Tiền Giang 2024.
+- Panel theo cụm: nhiễu (–1) n=127, cụm 0 n=2, cụm 1 n=9, cụm 2 n=480.
+
+## 2) Kiểm định gộp — HAI kết quả báo cáo CÙNG nhau
+
+|   pred_cluster | nhóm       |   n |   mean |   median |   std |   min |   max |
+|---------------:|:-----------|----:|-------:|---------:|------:|------:|------:|
+|             -1 | nhiễu (–1) | 127 |  9.384 |     6.1  | 9.468 |   0   |  42.3 |
+|              0 | cụm 0      |   2 | 14.95  |    14.95 | 3.748 |  12.3 |  17.6 |
+|              1 | cụm 1      |   9 |  4.9   |     3.6  | 3.679 |   1.2 |  12.1 |
+|              2 | cụm 2      | 480 |  8.741 |     6    | 8.243 |   0   |  43.5 |
+
+|   pred_cluster | nhóm       |   n |   mean |   median |   std |   min |   max |
+|---------------:|:-----------|----:|-------:|---------:|------:|------:|------:|
+|             -1 | nhiễu (–1) | 127 |  1.511 |   -1.7   | 8.412 | -12.8 |  29.4 |
+|              0 | cụm 0      |   2 |  4.5   |    4.5   | 0.283 |   4.3 |   4.7 |
+|              1 | cụm 1      |   9 | -6.117 |   -7.1   | 3.008 |  -9   |   0.2 |
+|              2 | cụm 2      | 480 |  2.233 |    0.175 | 7.763 | -12.8 |  31.7 |
+
+- **Gộp thô** (poverty gốc, nhiễm xu hướng năm): Kruskal–Wallis H = 3.4415, p = 0.328; One-way ANOVA F(3,614) = 1.1950, p = 0.311; eta² = 0.0058 — KHÔNG đáng kể thống kê.
+- **Đã trừ median trong năm** (tách hiệu ứng năm): Kruskal–Wallis H = 20.1709, p = 0.000156; ANOVA F(3,614) = 3.5759, p = 0.0138; eta² = 0.0172 — đáng kể.
+- Median nghèo toàn panel giảm rất mạnh xuyên năm: 12.9% (2012) → 2.3% (2024); tỷ trọng cụm cũng trôi theo năm (nhiễu 17/63 năm 2012 → 4–27/63 các năm 2020–2024). Test gộp thô phối trộn hiệu ứng năm với khác biệt cụm — hai số trên PHẢI đọc cùng nhau, không chọn trình bày một kết quả.
+- Diễn giải thận trọng: cụm 0 (n=2) và cụm 1 (n=9) quá nhỏ để tự kết luận; cặp tương phản đáng tin duy nhất là **nhiễu vs cụm 2** (đối xứng cảnh báo PCI — external_validation.py:608-610). Đọc eta²/ANOVA chỉ như mô tả bổ sung.
+
+## 3) Mann–Whitney nhiễu vs cụm 2 (hai phía)
+
+- Thô: U = 30517, p = 0.983 — không khác biệt.
+- Đã trừ median trong năm: U = 27439, p = 0.0836 — biên (cận ngưỡng 0.05, không chỉnh sửa cho nhiều so sánh).
+- Kết luận an toàn: nghèo GSO KHÔNG cho thấy khác biệt rõ giữa nhiễu và cụm 2 ở mức gộp; tín hiệu chỉ xuất hiện sau khi tách hiệu ứng năm, nên đọc như kiểm chứng bổ trợ, không phải bằng chứng độc lập mạnh như PCI.
+
+## 4) Thống kê từng nhóm — RIÊNG TỪNG năm giao và pooled
+
+### 4a) Pooled gộp thô (n=618)
+
+|   pred_cluster | nhóm       |   n |   mean |   median |   std |   min |   max |
+|---------------:|:-----------|----:|-------:|---------:|------:|------:|------:|
+|             -1 | nhiễu (–1) | 127 |  9.384 |     6.1  | 9.468 |   0   |  42.3 |
+|              0 | cụm 0      |   2 | 14.95  |    14.95 | 3.748 |  12.3 |  17.6 |
+|              1 | cụm 1      |   9 |  4.9   |     3.6  | 3.679 |   1.2 |  12.1 |
+|              2 | cụm 2      | 480 |  8.741 |     6    | 8.243 |   0   |  43.5 |
+
+### 4b) Pooled đã trừ median trong năm (n=618)
+
+|   pred_cluster | nhóm       |   n |   mean |   median |   std |   min |   max |
+|---------------:|:-----------|----:|-------:|---------:|------:|------:|------:|
+|             -1 | nhiễu (–1) | 127 |  1.511 |   -1.7   | 8.412 | -12.8 |  29.4 |
+|              0 | cụm 0      |   2 |  4.5   |    4.5   | 0.283 |   4.3 |   4.7 |
+|              1 | cụm 1      |   9 | -6.117 |   -7.1   | 3.008 |  -9   |   0.2 |
+|              2 | cụm 2      | 480 |  2.233 |    0.175 | 7.763 | -12.8 |  31.7 |
+
+### 4c) Theo từng năm × cụm (giá trị thô)
+
+| section             | group      |   year |   n |   mean |   median |     std |   min |   max | note   |
+|:--------------------|:-----------|-------:|----:|-------:|---------:|--------:|------:|------:|:-------|
+| poverty_by_year_raw | cụm 0      |   2012 |   1 | 17.6   |    17.6  | nan     |  17.6 |  17.6 |        |
+| poverty_by_year_raw | cụm 1      |   2012 |   2 |  6.15  |     6.15 |   2.333 |   4.5 |   7.8 |        |
+| poverty_by_year_raw | cụm 2      |   2012 |  43 | 15.23  |    14.1  |   9.484 |   0.1 |  43.5 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2012 |  17 | 13.876 |     9    |  12.049 |   0.1 |  42.3 |        |
+| poverty_by_year_raw | cụm 1      |   2013 |   4 |  6.675 |     5.85 |   4.288 |   2.9 |  12.1 |        |
+| poverty_by_year_raw | cụm 2      |   2013 |  43 | 13.16  |    12    |   8.875 |   0.1 |  38.6 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2013 |  16 | 14.506 |    12.55 |  11.056 |   0   |  40.6 |        |
+| poverty_by_year_raw | cụm 1      |   2014 |   2 |  1.9   |     1.9  |   0.99  |   1.2 |   2.6 |        |
+| poverty_by_year_raw | cụm 2      |   2014 |  42 | 10.49  |     9.8  |   6.803 |   0   |  35.3 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2014 |  17 | 13.794 |    11.1  |  10.713 |   0   |  33   |        |
+| poverty_by_year_raw | cụm 0      |   2015 |   1 | 12.3   |    12.3  | nan     |  12.3 |  12.3 |        |
+| poverty_by_year_raw | cụm 2      |   2015 |  35 |  8.366 |     7.2  |   6.262 |   0.7 |  29.1 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2015 |  27 | 10.53  |     9.3  |   8.312 |   0   |  31.5 |        |
+| poverty_by_year_raw | cụm 1      |   2016 |   1 |  1.3   |     1.3  | nan     |   1.3 |   1.3 |        |
+| poverty_by_year_raw | cụm 2      |   2016 |  50 |  8.54  |     6.7  |   6.674 |   0.5 |  27.9 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2016 |  11 |  5.6   |     4.3  |   4.543 |   0   |  12   |        |
+| poverty_by_year_raw | cụm 2      |   2020 |  57 |  7.379 |     4.1  |   8.543 |   0   |  36.7 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2020 |   6 |  9.633 |     8.65 |   6.964 |   2.1 |  21.5 |        |
+| poverty_by_year_raw | cụm 2      |   2021 |  53 |  7.625 |     4.7  |   8.276 |   0   |  34.5 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2021 |   7 |  4.071 |     3    |   3.782 |   0   |  10.7 |        |
+| poverty_by_year_raw | cụm 2      |   2022 |  57 |  7.439 |     4.1  |   8.243 |   0   |  33.6 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2022 |   4 |  2.575 |     1.7  |   2.438 |   0.8 |   6.1 |        |
+| poverty_by_year_raw | cụm 2      |   2023 |  52 |  6.46  |     3.8  |   7.538 |   0   |  29.5 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2023 |   9 |  2.367 |     1.7  |   2.112 |   0.1 |   6.1 |        |
+| poverty_by_year_raw | cụm 2      |   2024 |  48 |  4.788 |     2.75 |   5.88  |   0   |  23.2 |        |
+| poverty_by_year_raw | nhiễu (–1) |   2024 |  13 |  1.962 |     0.6  |   2.717 |   0.1 |  10.1 |        |
+
+### 4d) Cỡ nhóm theo năm (n ô)
+
+|   năm |   nhiễu (–1) |   cụm 0 |   cụm 1 |   cụm 2 |
+|------:|-------------:|--------:|--------:|--------:|
+|  2012 |           17 |       1 |       2 |      43 |
+|  2013 |           16 |       0 |       4 |      43 |
+|  2014 |           17 |       0 |       2 |      42 |
+|  2015 |           27 |       1 |       0 |      35 |
+|  2016 |           11 |       0 |       1 |      50 |
+|  2020 |            6 |       0 |       0 |      57 |
+|  2021 |            7 |       0 |       0 |      53 |
+|  2022 |            4 |       0 |       0 |      57 |
+|  2023 |            9 |       0 |       0 |      52 |
+|  2024 |           13 |       0 |       0 |      48 |
+
+### 4e) Kruskal–Wallis từng năm — CHỈ mô tả, không phải kiểm định chính
+
+|   year |   n | note                                                                                       |
+|-------:|----:|:-------------------------------------------------------------------------------------------|
+|   2012 |  63 | k = 4 nhóm, min n = 1; H = 3.1067; p = 0.375; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
+|   2013 |  63 | k = 3 nhóm, min n = 4; H = 2.3814; p = 0.304                                               |
+|   2014 |  61 | k = 3 nhóm, min n = 2; H = 4.8289; p = 0.0894                                              |
+|   2015 |  63 | k = 3 nhóm, min n = 1; H = 1.4569; p = 0.483; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
+|   2016 |  62 | k = 3 nhóm, min n = 1; H = 3.9493; p = 0.139; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
+|   2020 |  63 | k = 2 nhóm, min n = 6; H = 1.8778; p = 0.171; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
+|   2021 |  60 | k = 2 nhóm, min n = 7; H = 1.0506; p = 0.305; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
+|   2022 |  61 | k = 2 nhóm, min n = 4; H = 2.1229; p = 0.145; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
+|   2023 |  61 | k = 2 nhóm, min n = 9; H = 3.4654; p = 0.0627; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả  |
+|   2024 |  61 | k = 2 nhóm, min n = 13; H = 5.5328; p = 0.0187; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả |
+
+- Trừ median trong năm là HẰNG SỐ trong năm nên không đổi so sánh giữa cụm trong từng năm — thống kê theo năm chỉ cần trình bày trên giá trị thô.
+- Năm 2012/2015/2016 có nhóm n<2 và 2020–2024 suy biến thành test 2 nhóm (cụm 0/1 rỗng) → KW từng năm không phải bằng chứng độc lập.
+
+## 5) Caveats
+
+1. TP. Hồ Chí Minh 2016 (code 79) thiếu `poverty_rate_pct` phía nguồn (pxweb ghi `".."`) — dòng có trong CSV nhưng bị loại khỏi kiểm định vì NaN; KHÔNG nội suy (data/raw/gso/PROVENANCE.md:90).
+
+2. Các năm 2006, 2008, 2010, 2025 có poverty nhưng KHÔNG có nhãn cụm (`predict_all_years.csv` chỉ phủ 2011–2024; 2025 còn là Sơ bộ) → loại khỏi mọi thống kê theo cụm.
+
+3. Các năm 2011, 2017, 2018, 2019 KHÔNG có poverty: bảng pxweb V14.47 không có cột năm đó (data/raw/gso/PROVENANCE.md:25) → loại.
+
+4. 11 ô tỉnh-năm trong cửa sổ giao có poverty nhưng không có nhãn (panel PAPI thiếu sd_4_2/sd_6_1): Bắc Giang 2014; Đồng Tháp 2014; Quảng Ninh 2021; Bắc Giang 2021; Bắc Ninh 2021; Bắc Giang 2022; Bắc Ninh 2022; Quảng Ninh 2023; Bình Dương 2023; Vĩnh Phúc 2024; Tiền Giang 2024 — mask tường minh, không vẽ không test.
+
+5. Chuẩn nghèo ĐỔI theo giai đoạn (thu nhập 2011–2015 vs đa chiều từ ~2020 — data/raw/gso/PROVENANCE.md:48-58): so MỨC tuyệt đối xuyên năm không like-for-like; chỉ so GIỮA CỤM trong cùng một năm là hợp lệ — lý do bắt buộc phải có test đã-trừ-median-năm song song với test gộp.
+
+6. KW gộp thô KHÔNG đáng kể (p = 0.328) trong khi đã-trừ-median-năm đáng kể (p = 0.000156): hai kết quả phải báo cáo cùng nhau; không được chọn trình bày một kết quả duy nhất (nguyên tắc trung thực của repo, build_report.py:628).
+
+7. Cụm 0 (n=2) và cụm 1 (n=9) quá nhỏ để tự kết luận — cặp tương phản đáng tin duy nhất là nhiễu vs cụm 2; đọc eta²/ANOVA chỉ như mô tả.
+
+8. KW theo từng năm không khả thi ở 2012/2015/2016 (nhóm n<2) và suy biến 2 nhóm ở 2020–2024 — chỉ dạng bảng mô tả, không làm kiểm định chính.
+
+9. Tỷ trọng cụm trôi mạnh theo năm (nhiễu 17/63 năm 2012 → 4–27/63 các năm 2020–2024) — test gộp phối trộn năm với cụm; limitation khai báo, không phải lỗi dữ liệu.
+
+10. External check bằng thước đo độc lập (GSO thống kê chính thức, tách khỏi PAPI khảo sát hộ dân) — KHÔNG đưa vào feature, KHÔNG chứng minh nhân quả; poverty là kết quả thứ hai sau PCI nên đọc như kiểm chứng bổ trợ, không thay thế kiểm định chính PCI.
+
+11. Hà Nội bao gồm Hà Tây từ 2008 (chú thích gốc bảng, data/raw/gso/PROVENANCE.md:48) — ngoài cửa sổ phân tích nhưng ghi trong provenance để tránh nhầm khi mở rộng cửa sổ.
+
+## 6) Tái lập
+
+```powershell
+python -E scripts/poverty_validation.py
+```
+- Đầu vào: `data/processed/external_poverty_63.csv` + `results/predict_all_years.csv`.
+- Đầu ra: `results/poverty_validation.md` (file này), `results/poverty_validation.csv`, `results/figs/external_poverty_by_cluster.png`.
+- Determinism: chạy 2 lần — md/csv byte-giống (sha256); hình vẽ bằng rng seed 11.
+- Provenance nguồn: `data/raw/gso/PROVENANCE.md` (tải 2026-11-07), `data/processed/external_provenance.md`; kiểm định chính PCI: `results/external_validation.md`.

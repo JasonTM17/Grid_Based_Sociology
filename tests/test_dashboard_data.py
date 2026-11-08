@@ -4,6 +4,7 @@ import pytest
 from scipy import stats as scipy_stats
 
 from scripts.dashboard_data import (
+    POVERTY_OVERLAP_YEARS,
     DashboardDataError,
     ensure_external_pci_consistency,
     external_pci_group_stats,
@@ -11,16 +12,21 @@ from scripts.dashboard_data import (
     external_section_frame,
     filter_regression_holdout,
     format_p_value,
+    format_poverty_window,
     load_dashboard_assets,
     load_external_validation_assets,
+    load_poverty_assets,
     load_regression_models,
     prepare_external_pci_view,
+    prepare_poverty_cluster_view,
     prepare_regression_holdout,
     prepare_sting_view,
+    poverty_cluster_tests,
+    poverty_noise_vs_c2,
     published_external_pci_tests,
     select_classification_model,
 )
-from scripts.papi_pred_common import REGRESSION_FEATURES, REGRESSION_TARGET
+from scripts.papi_pred_common import REGRESSION_FEATURES, REGRESSION_TARGET, ROOT
 
 
 class DummyRegressor:
@@ -804,3 +810,293 @@ def test_external_section_frame_maps_labels_and_sorts():
     ])
     with pytest.raises(DashboardDataError, match="Không hiểu tên nhóm"):
         external_section_frame(pci_like, "pci_2011_2022")
+
+
+# --------------------------------------------------------------------- #
+# Kiểm chứng bổ trợ — nghèo cấp tỉnh GSO V14.47 theo nhãn cụm
+# --------------------------------------------------------------------- #
+
+
+def _make_poverty_frame() -> pd.DataFrame:
+    """4 tỉnh thay cho 63: đủ 10 năm cửa sổ giao + 1 năm poverty-only.
+    (2013, tỉnh 3) thiếu giá trị phía nguồn (pattern TP. Hồ Chí Minh 2016);
+    giá trị là số nguyên dương nên so sánh float chính xác."""
+    rows = []
+    for year in POVERTY_OVERLAP_YEARS:
+        for code in (1, 2, 3):
+            value = float(10 + code + (year - 2012))
+            if year == 2013 and code == 3:
+                value = np.nan  # nguồn ghi ".." — KHÔNG nội suy
+            rows.append({
+                "province_code": code,
+                "province_ascii": f"P{code}",
+                "province_vi": f"Tỉnh {code}",
+                "year": int(year),
+                "poverty_rate_pct": value,
+                "papi_province_code": code,
+            })
+    # Năm poverty-only: có poverty nhưng predict_all_years không phủ (pattern 2006/2008/2010/2025).
+    rows.append({
+        "province_code": 4,
+        "province_ascii": "P4",
+        "province_vi": "Tỉnh 4",
+        "year": 2006,
+        "poverty_rate_pct": 20.0,
+        "papi_province_code": 4,
+    })
+    return pd.DataFrame(rows)
+
+
+def _make_poverty_assignments() -> pd.DataFrame:
+    """Nhãn cho tỉnh 1 (nhiễu) và 2 (cụm 2) mọi năm giao; tỉnh 3 chỉ có nhãn
+    trừ năm 2014 (pattern ô không nhãn); cộng 1 năm label-only 2011."""
+    rows = []
+    for year in POVERTY_OVERLAP_YEARS:
+        rows.append({"province_code": 1, "year": int(year), "pred_cluster": -1, "split": "test"})
+        rows.append({"province_code": 2, "year": int(year), "pred_cluster": 2, "split": "test"})
+        if year != 2014:
+            rows.append({"province_code": 3, "year": int(year), "pred_cluster": 0, "split": "test"})
+    rows.append({"province_code": 1, "year": 2011, "pred_cluster": 1, "split": "train"})
+    return pd.DataFrame(rows)
+
+
+def test_load_poverty_assets_missing_file_points_to_rebuild(tmp_path):
+    with pytest.raises(DashboardDataError, match=r"python scripts/build_poverty_63\.py"):
+        load_poverty_assets(tmp_path)
+
+
+def test_load_poverty_assets_validates_schema(tmp_path):
+    poverty_file = tmp_path / "data" / "processed" / "external_poverty_63.csv"
+    poverty_file.parent.mkdir(parents=True, exist_ok=True)
+
+    _make_poverty_frame().drop(columns=["papi_province_code"]).to_csv(
+        poverty_file, index=False, encoding="utf-8"
+    )
+    with pytest.raises(DashboardDataError, match="external_poverty_63.csv thiếu cột"):
+        load_poverty_assets(tmp_path)
+
+    misaligned = _make_poverty_frame()
+    misaligned.loc[0, "papi_province_code"] = 99
+    misaligned.to_csv(poverty_file, index=False, encoding="utf-8")
+    with pytest.raises(DashboardDataError, match="papi_province_code lệch province_code"):
+        load_poverty_assets(tmp_path)
+
+    frame = _make_poverty_frame()
+    pd.concat([frame, frame.iloc[[0]]]).to_csv(poverty_file, index=False, encoding="utf-8")
+    with pytest.raises(DashboardDataError, match="Poverty GSO có khóa trùng"):
+        load_poverty_assets(tmp_path)
+
+    _make_poverty_frame().to_csv(poverty_file, index=False, encoding="utf-8")
+    loaded = load_poverty_assets(tmp_path)
+    assert set(loaded) == {"poverty"}
+    assert int(loaded["poverty"].year.nunique()) == len(POVERTY_OVERLAP_YEARS) + 1
+
+
+def test_prepare_poverty_cluster_view_counts_and_masks():
+    view, counts = prepare_poverty_cluster_view(_make_poverty_frame(), _make_poverty_assignments())
+
+    assert counts["overlap_years"] == list(POVERTY_OVERLAP_YEARS)
+    assert counts["pov_only_years"] == [2006]
+    assert counts["label_only_years"] == [2011]
+    assert counts["window_cells"] == 30  # 3 tỉnh × 10 năm giao
+    assert counts["valid_cells"] == 29  # (2013, 3) thiếu phía nguồn
+    assert [
+        (int(cell["year"]), int(cell["province_code"]), cell["province_vi"])
+        for cell in counts["missing_source_cells"]
+    ] == [(2013, 3, "Tỉnh 3")]
+    # Ô (2014, 3) có poverty nhưng không có nhãn — mask tường minh, không vào view
+    assert [
+        (int(cell["year"]), int(cell["province_code"]), cell["province_vi"])
+        for cell in counts["no_label_cells"]
+    ] == [(2014, 3, "Tỉnh 3")]
+    assert counts["panel_rows"] == 28  # 29 ô hợp lệ − 1 ô không nhãn
+    assert counts["clusters"] == [-1, 0, 2]
+    assert counts["n_by_cluster"] == {-1: 10, 0: 8, 2: 10}
+    assert counts["noise_by_year"] == {int(year): 1 for year in POVERTY_OVERLAP_YEARS}
+
+    noise_row = view.loc[(view.year == 2012) & (view.province_code == 1)].iloc[0]
+    assert noise_row.poverty_rate_pct == pytest.approx(11.0)
+    assert noise_row.pov_dm == pytest.approx(-1.0)  # median năm 2012 = 12
+    assert noise_row.cluster_label == "Nhiễu (-1)"
+    # Năm chỉ còn 2 ô: median là trung bình 2 giá trị (12, 13) → dm = ±0.5
+    half_row = view.loc[(view.year == 2013) & (view.province_code == 1)].iloc[0]
+    assert half_row.pov_dm == pytest.approx(-0.5)
+    assert (view.year == 2006).sum() == 0  # năm poverty-only bị loại khỏi view
+
+
+def test_prepare_poverty_cluster_view_rejects_protocol_drift_and_bad_inputs():
+    poverty = _make_poverty_frame()
+    assignments = _make_poverty_assignments()
+
+    # Mất 1 năm phía poverty → cửa sổ giao tự tính lệch protocol → từ chối.
+    truncated = poverty.loc[poverty.year.ne(2020)]
+    with pytest.raises(DashboardDataError, match="lệch protocol"):
+        prepare_poverty_cluster_view(truncated, assignments)
+
+    duplicated_poverty = pd.concat([poverty, poverty.iloc[[0]]])
+    with pytest.raises(DashboardDataError, match="Poverty GSO có khóa trùng"):
+        prepare_poverty_cluster_view(duplicated_poverty, assignments)
+
+    duplicated_assignments = pd.concat([assignments, assignments.iloc[[0]]])
+    with pytest.raises(DashboardDataError, match="STING assignments có khóa trùng"):
+        prepare_poverty_cluster_view(poverty, duplicated_assignments)
+
+    with pytest.raises(DashboardDataError, match="thiếu cột pred_cluster"):
+        prepare_poverty_cluster_view(poverty, assignments.drop(columns=["pred_cluster"]))
+
+    with pytest.raises(DashboardDataError, match="thiếu cột bắt buộc"):
+        prepare_poverty_cluster_view(poverty.drop(columns=["province_vi"]), assignments)
+
+
+def test_poverty_demean_preserves_within_year_comparison():
+    """Trừ median trong năm là HẰNG SỐ trong năm: pov_dm + median năm = giá trị
+    thô và KW từng năm KHÔNG đổi (thứ hạng trong năm giữ nguyên) — demean chỉ
+    tái trọng số giữa các năm khi gộp, đúng ý nghĩa test đã-điều-chỉnh-năm."""
+    view, _ = prepare_poverty_cluster_view(_make_poverty_frame(), _make_poverty_assignments())
+
+    medians = view.groupby("year").poverty_rate_pct.transform("median")
+    assert np.allclose(view.pov_dm + medians, view.poverty_rate_pct)
+    for _, sub in view.groupby("year"):
+        raw = scipy_stats.kruskal(*[g.poverty_rate_pct.to_numpy() for _, g in sub.groupby("pred_cluster")])
+        demeaned = scipy_stats.kruskal(*[g.pov_dm.to_numpy() for _, g in sub.groupby("pred_cluster")])
+        assert raw.statistic == pytest.approx(demeaned.statistic)
+
+
+def test_poverty_cluster_tests_hand_computed_values():
+    # Ba nhóm [1,2,3], [4,5,6], [7,8,9]: F = MS giữa / MS trong = 54/2 / 1 = 27;
+    # Kruskal không tie: H = 12/90 × (6²+15²+24²)/3 − 30 = 7.2; eta² = 54/60 = 0.9.
+    view = pd.DataFrame({
+        "pred_cluster": [0] * 3 + [1] * 3 + [2] * 3,
+        "poverty_rate_pct": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
+    })
+
+    tests = poverty_cluster_tests(view)
+
+    assert tests["f"] == pytest.approx(27.0)
+    assert tests["h"] == pytest.approx(7.2)
+    assert tests["df1"] == 2
+    assert tests["df2"] == 6
+    assert tests["eta_sq"] == pytest.approx(0.9)
+    assert tests["n"] == 9
+    assert tests["p_anova"] == pytest.approx(scipy_stats.f.sf(27.0, 2, 6))
+    assert tests["p_kw"] == pytest.approx(scipy_stats.chi2.sf(7.2, 2))
+
+
+def test_poverty_cluster_tests_separates_year_effect_from_cluster_effect():
+    """Cơ chế của quy tắc 'hai kết quả báo cáo CÙNG nhau': khi baseline nghèo
+    giảm mạnh xuyên năm mà khoảng cách cụm nhỏ, KW gộp thô không phân biệt được
+    (nhiễu năm át hiệu ứng cụm) còn đã-trừ-median-năm thì có."""
+    rows = []
+    for year, base in ((2012, 10.0), (2016, 4.0), (2024, 1.0)):
+        # Nhiễu cao hơn cụm 2 đúng 0.5 điểm ở MỌI năm, baseline năm trôi 10→1.
+        rows += [
+            {"pred_cluster": -1, "poverty_rate_pct": base, "year": year},
+            {"pred_cluster": -1, "poverty_rate_pct": base + 0.1, "year": year},
+            {"pred_cluster": 2, "poverty_rate_pct": base + 0.5, "year": year},
+            {"pred_cluster": 2, "poverty_rate_pct": base + 0.6, "year": year},
+        ]
+    view = pd.DataFrame(rows)
+    # pov_dm đúng cách prepare_poverty_cluster_view sinh ra (trừ median trong năm).
+    view["pov_dm"] = view.poverty_rate_pct - view.groupby("year").poverty_rate_pct.transform("median")
+
+    raw = poverty_cluster_tests(view)
+    demeaned = poverty_cluster_tests(view, "pov_dm")
+
+    assert raw["p_kw"] > 0.05  # gộp thô: không đáng kể
+    assert raw["p_anova"] > 0.05
+    assert demeaned["p_kw"] < 0.05  # đã trừ median năm: đáng kể
+    assert demeaned["p_anova"] < 0.05
+    assert demeaned["h"] > raw["h"]
+
+
+def test_poverty_cluster_tests_rejects_incomplete_input():
+    one_group = pd.DataFrame({
+        "pred_cluster": [0, 0, 0],
+        "poverty_rate_pct": [1.0, 2.0, 3.0],
+    })
+    with pytest.raises(DashboardDataError, match="ít nhất 2 nhóm"):
+        poverty_cluster_tests(one_group)
+
+    with_nan = pd.DataFrame({
+        "pred_cluster": [0, 1],
+        "poverty_rate_pct": [1.0, np.nan],
+    })
+    with pytest.raises(DashboardDataError, match="thiếu giá trị"):
+        poverty_cluster_tests(with_nan)
+
+
+def test_poverty_noise_vs_c2_hand_computed():
+    view = pd.DataFrame({
+        "pred_cluster": [-1] * 3 + [2] * 3,
+        "poverty_rate_pct": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+    })
+
+    mw = poverty_noise_vs_c2(view)
+
+    assert mw["u"] == pytest.approx(0.0)  # nhiễu thấp hơn cụm 2 toàn bộ → U = 0
+    assert mw["n"] == 6
+    assert mw["p"] == pytest.approx(
+        scipy_stats.mannwhitneyu([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).pvalue
+    )
+
+
+def test_poverty_noise_vs_c2_requires_both_groups():
+    only_noise = pd.DataFrame({
+        "pred_cluster": [-1, -1],
+        "poverty_rate_pct": [1.0, 2.0],
+    })
+    with pytest.raises(DashboardDataError, match="Thiếu nhóm nhiễu hoặc cụm 2"):
+        poverty_noise_vs_c2(only_noise)
+
+
+def test_format_poverty_window_runs_and_singles():
+    assert format_poverty_window(
+        [2012, 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023, 2024]
+    ) == "2012–2016 & 2020–2024"
+    assert format_poverty_window([2006, 2008, 2010]) == "2006, 2008, 2010"
+    assert format_poverty_window([2020]) == "2020"
+
+    with pytest.raises(DashboardDataError, match="rỗng"):
+        format_poverty_window([])
+
+
+def test_poverty_protocol_recomputed_on_real_artifacts():
+    """Pin protocol trên artifact thật — các số protocol ghi nhận (TP.HCM 2016
+    code 79 thiếu nguồn; 11 ô không nhãn; panel 618 ô, {-1:127, 0:2, 1:9, 2:480};
+    KW thô p≈0.328 KHÔNG đáng kể, KW đã-trừ-median-năm p≈1.6e-04 đáng kể, khớp
+    results/poverty_validation.csv đã công bố). Artifact hoặc hàm đổi → test
+    lộ ra thay vì dashboard hiển thị lệch im lặng."""
+    poverty = load_poverty_assets()["poverty"]
+    assignments = pd.read_csv(ROOT / "results" / "predict_all_years.csv")
+
+    view, counts = prepare_poverty_cluster_view(poverty, assignments)
+
+    assert counts["overlap_years"] == list(POVERTY_OVERLAP_YEARS)
+    assert counts["pov_only_years"] == [2006, 2008, 2010, 2025]
+    assert counts["label_only_years"] == [2011, 2017, 2018, 2019]
+    assert [
+        (int(cell["year"]), int(cell["province_code"]), cell["province_vi"])
+        for cell in counts["missing_source_cells"]
+    ] == [(2016, 79, "TP. Hồ Chí Minh")]
+    assert [
+        (int(cell["year"]), int(cell["province_code"])) for cell in counts["no_label_cells"]
+    ] == [
+        (2014, 24), (2014, 87), (2021, 22), (2021, 24), (2021, 27), (2022, 24),
+        (2022, 27), (2023, 22), (2023, 74), (2024, 26), (2024, 82),
+    ]
+    assert counts["panel_rows"] == 618
+    assert counts["n_by_cluster"] == {-1: 127, 0: 2, 1: 9, 2: 480}
+
+    raw = poverty_cluster_tests(view)
+    demeaned = poverty_cluster_tests(view, "pov_dm")
+    assert raw["h"] == pytest.approx(3.4415, abs=5e-4)
+    assert raw["p_kw"] == pytest.approx(0.328, abs=5e-4)  # KHÔNG đáng kể
+    assert demeaned["h"] == pytest.approx(20.1709, abs=5e-4)
+    assert demeaned["p_kw"] == pytest.approx(1.6e-04, rel=0.05)  # đáng kể
+    assert raw["n"] == demeaned["n"] == 618
+
+    mw_raw = poverty_noise_vs_c2(view)
+    mw_dm = poverty_noise_vs_c2(view, "pov_dm")
+    assert mw_raw["n"] == mw_dm["n"] == 607  # 127 nhiễu + 480 cụm 2
+    assert mw_raw["p"] > 0.05  # thô: không khác biệt
+    assert 0.05 < mw_dm["p"] < 0.10  # đã trừ median năm: biên, cận ngưỡng 0.05

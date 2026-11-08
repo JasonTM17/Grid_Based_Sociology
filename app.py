@@ -15,15 +15,21 @@ from scripts.dashboard_data import (
     external_section_frame,
     filter_regression_holdout,
     format_p_value,
+    format_poverty_window,
     load_dashboard_assets,
     load_external_validation_assets,
+    load_poverty_assets,
     load_regression_models,
+    poverty_cluster_tests,
+    poverty_noise_vs_c2,
     prepare_external_pci_view,
+    prepare_poverty_cluster_view,
     select_classification_model,
     prepare_regression_holdout,
     prepare_sting_view,
     select_regression_model,
 )
+from scripts.fig_style import CLUSTER_COLORS
 from scripts.papi_pred_common import FEATURE_LABELS, ROOT
 
 
@@ -73,6 +79,7 @@ _EXTERNAL_FILES = (
     "data/processed/external_pci_63_full.csv",
     "results/external_validation.csv",
 )
+_POVERTY_FILES = ("data/processed/external_poverty_63.csv",)
 
 
 def artifact_identity(relative_paths: tuple[str, ...]) -> tuple[tuple[str, int | None, int | None], ...]:
@@ -104,6 +111,12 @@ def get_regression_models(artifact_identity: tuple[tuple[str, int | None, int | 
 def get_external_assets(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
     del artifact_identity
     return load_external_validation_assets()
+
+
+@st.cache_resource(show_spinner="Đang đọc artifact nghèo GSO…")
+def get_poverty_assets(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
+    del artifact_identity
+    return load_poverty_assets()
 
 
 def feature_label(feature: str, config: dict) -> str:
@@ -688,6 +701,163 @@ if external_tab.open:
                 "(chưa chính thức, có thể được sửa sau). Trong cửa sổ này gần như chỉ còn nhiễu vs "
                 "cụm 2 (cụm 0 rỗng, cụm 1 còn ít điểm)."
             )
+
+            # ----- Block bổ trợ: nghèo cấp tỉnh GSO V14.47 (thứ hai sau PCI).
+            # try/except RIÊNG để lỗi artifact poverty không che 4 section kiểm
+            # chứng phía trên; số hiển thị đều tự tính từ CSV (không hardcode).
+            try:
+                poverty_assets = get_poverty_assets(artifact_identity(_POVERTY_FILES))
+                poverty_view, poverty_counts = prepare_poverty_cluster_view(
+                    poverty_assets["poverty"], assignments
+                )
+                pov_tests_raw = poverty_cluster_tests(poverty_view, "poverty_rate_pct")
+                pov_tests_dm = poverty_cluster_tests(poverty_view, "pov_dm")
+                pov_mw_raw = poverty_noise_vs_c2(poverty_view, "poverty_rate_pct")
+                pov_mw_dm = poverty_noise_vs_c2(poverty_view, "pov_dm")
+            except DashboardDataError as exc:
+                st.error(str(exc))
+                st.info(
+                    "Bốn section kiểm chứng phía trên vẫn dùng được. "
+                    "Tạo lại artifact poverty theo hướng dẫn trong thông báo, rồi làm mới ứng dụng."
+                )
+            except Exception as exc:
+                st.error(f"Không đọc được artifact nghèo GSO: {exc}")
+                st.info("Bốn section kiểm chứng phía trên vẫn dùng được.")
+            else:
+                window_text = format_poverty_window(poverty_counts["overlap_years"])
+                st.markdown(f"#### Nghèo cấp tỉnh (GSO V14.47) — cửa sổ giao {window_text}")
+                pov_m1, pov_m2 = st.columns(2)
+                pov_m1.metric(
+                    "Ô poverty trong cửa sổ giao",
+                    f"{poverty_counts['window_cells']}",
+                    help=(
+                        f"Cửa sổ giao poverty ↔ nhãn cụm: {window_text}; trong đó "
+                        f"{poverty_counts['valid_cells']} ô có giá trị poverty."
+                    ),
+                )
+                pov_m2.metric(
+                    "Ô vào kiểm định theo cụm",
+                    f"{poverty_counts['panel_rows']}",
+                    help=(
+                        "Ô có giá trị poverty VÀ có nhãn cụm từ model đóng băng — "
+                        "dùng cho boxplot và kiểm định bên dưới."
+                    ),
+                )
+
+                poverty_palette = {
+                    cluster_label(code): CLUSTER_COLORS.get(code, "#64748b")
+                    for code in poverty_counts["clusters"]
+                }
+                poverty_order = [cluster_label(code) for code in poverty_counts["clusters"]]
+                poverty_figure = px.box(
+                    poverty_view,
+                    x="cluster_label",
+                    y="poverty_rate_pct",
+                    color="cluster_label",
+                    category_orders={"cluster_label": poverty_order},
+                    color_discrete_map=poverty_palette,
+                    points="all",
+                    hover_name="province_vi",
+                    hover_data={"province_code": True, "year": True, "cluster_label": False},
+                    labels={
+                        "cluster_label": "Nhãn cụm STING",
+                        "poverty_rate_pct": "Tỷ lệ hộ nghèo (%)",
+                    },
+                    title=f"Tỷ lệ hộ nghèo GSO theo cụm STING — cửa sổ giao {window_text}",
+                )
+                poverty_figure.update_traces(
+                    marker={"size": 5, "opacity": 0.45, "line": {"width": 0.5, "color": "white"}}
+                )
+                poverty_figure.update_layout(
+                    template="plotly_white",
+                    height=470,
+                    showlegend=False,
+                    xaxis_title="Nhãn cụm STING (pred_cluster)",
+                    yaxis_title="Tỷ lệ hộ nghèo (%)",
+                    margin={"t": 70, "r": 20, "b": 20, "l": 20},
+                )
+                st.plotly_chart(poverty_figure, width="stretch")
+
+                st.markdown("#### Hai kiểm định poverty — phải đọc CÙNG nhau")
+                poverty_table = pd.DataFrame([
+                    {
+                        "Kiểm định": "Kruskal–Wallis H (gộp thô — nhiễm hiệu ứng năm)",
+                        "Giá trị": f"{pov_tests_raw['h']:.4f}",
+                        "p-value": format_p_value(pov_tests_raw["p_kw"]),
+                        "n": pov_tests_raw["n"],
+                    },
+                    {
+                        "Kiểm định": "Kruskal–Wallis H (đã trừ median trong năm)",
+                        "Giá trị": f"{pov_tests_dm['h']:.4f}",
+                        "p-value": format_p_value(pov_tests_dm["p_kw"]),
+                        "n": pov_tests_dm["n"],
+                    },
+                    {
+                        "Kiểm định": "Mann–Whitney U — nhiễu vs cụm 2 (thô)",
+                        "Giá trị": f"{pov_mw_raw['u']:.0f}",
+                        "p-value": format_p_value(pov_mw_raw["p"]),
+                        "n": pov_mw_raw["n"],
+                    },
+                    {
+                        "Kiểm định": "Mann–Whitney U — nhiễu vs cụm 2 (đã trừ median năm)",
+                        "Giá trị": f"{pov_mw_dm['u']:.0f}",
+                        "p-value": format_p_value(pov_mw_dm["p"]),
+                        "n": pov_mw_dm["n"],
+                    },
+                ])
+                st.dataframe(poverty_table, hide_index=True, width="stretch")
+
+                med_by_year = poverty_view.groupby("year").poverty_rate_pct.median()
+                noise_by_year = poverty_counts["noise_by_year"]
+                first_year = poverty_counts["overlap_years"][0]
+                recent_years = [year for year in poverty_counts["overlap_years"] if year >= 2020]
+                recent_noise = [noise_by_year[year] for year in recent_years if year in noise_by_year]
+                drift_phrase = (
+                    f" với tỷ trọng cụm trôi theo năm (nhiễu {noise_by_year.get(first_year, 0)} ô "
+                    f"năm {first_year} → {min(recent_noise)}–{max(recent_noise)} ô các năm "
+                    f"{recent_years[0]}–{recent_years[-1]})"
+                    if recent_noise
+                    else ""
+                )
+                n_cluster_0 = poverty_counts["n_by_cluster"].get(0, 0)
+                n_cluster_1 = poverty_counts["n_by_cluster"].get(1, 0)
+                st.warning(
+                    "**Đọc cả hai kết quả cùng nhau** — chuẩn nghèo ĐỔI theo giai đoạn nên so MỨC "
+                    "tuyệt đối xuyên năm không like-for-like, chỉ so GIỮA CỤM trong cùng một năm "
+                    f"hợp lệ: KW gộp thô {format_p_value(pov_tests_raw['p_kw'])} (không đáng kể) "
+                    f"trong khi đã-trừ-median-năm {format_p_value(pov_tests_dm['p_kw'])} (đáng kể). "
+                    "Test gộp thô phối trộn hiệu ứng năm (median nghèo "
+                    f"{med_by_year.iloc[0]:.1f}% năm {int(med_by_year.index[0])} → "
+                    f"{med_by_year.iloc[-1]:.1f}% năm {int(med_by_year.index[-1])}"
+                    + drift_phrase + ")."
+                )
+                st.caption(
+                    f"Cụm 0 (n={n_cluster_0}) và cụm 1 (n={n_cluster_1}) quá nhỏ để tự kết luận — "
+                    f"cặp tương phản đáng tin duy nhất là nhiễu vs cụm 2 (Mann–Whitney: "
+                    f"{format_p_value(pov_mw_raw['p'])} thô / "
+                    f"{format_p_value(pov_mw_dm['p'])} đã-trừ-median-năm). Poverty là kiểm chứng bổ "
+                    "trợ thứ hai sau PCI: thước đo độc lập GSO (thống kê chính thức, tách khỏi PAPI "
+                    "khảo sát hộ dân), KHÔNG đưa vào feature, KHÔNG chứng minh nhân quả — không "
+                    "thay thế kiểm định chính PCI."
+                )
+                missing_source_txt = "; ".join(
+                    f"{cell['province_vi']} {int(cell['year'])} (code {int(cell['province_code'])})"
+                    for cell in poverty_counts["missing_source_cells"]
+                ) or "—"
+                no_label_txt = "; ".join(
+                    f"{cell['province_vi']} {int(cell['year'])}"
+                    for cell in poverty_counts["no_label_cells"]
+                ) or "—"
+                st.caption(
+                    f"Nguồn: GSO pxweb V14.47 → `data/processed/external_poverty_63.csv` "
+                    f"(tạo lại bằng `python scripts/build_poverty_63.py`), nhãn cụm "
+                    f"`results/predict_all_years.csv`; màu cụm theo `scripts/fig_style.py`. "
+                    f"Thiếu phía nguồn — KHÔNG nội suy: {missing_source_txt}. "
+                    f"{len(poverty_counts['no_label_cells'])} ô có poverty nhưng KHÔNG có nhãn cụm "
+                    f"(mask tường minh, không vẽ không test): {no_label_txt}. Ngoài cửa sổ: năm "
+                    f"poverty-only {poverty_counts['pov_only_years']} (không có nhãn cụm) và năm "
+                    f"{poverty_counts['label_only_years']} (bảng pxweb V14.47 không có cột poverty)."
+                )
 
             st.caption(
                 "Nguồn local: `data/processed/external_pci_63_full.csv` (PCI VCCI–USAID — provenance "

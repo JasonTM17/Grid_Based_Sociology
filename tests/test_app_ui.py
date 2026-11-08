@@ -182,6 +182,20 @@ def expected_external_tables(external: dict, assignments: pd.DataFrame) -> dict:
     }
 
 
+def expected_poverty_tables(assignments: pd.DataFrame) -> dict:
+    """Kỳ vọng block nghèo GSO — cùng hàm dashboard dùng trên artifact thật."""
+    poverty = dd.load_poverty_assets()
+    view, counts = dd.prepare_poverty_cluster_view(poverty["poverty"], assignments)
+    return {
+        "view": view,
+        "counts": counts,
+        "raw": dd.poverty_cluster_tests(view, "poverty_rate_pct"),
+        "dm": dd.poverty_cluster_tests(view, "pov_dm"),
+        "mw_raw": dd.poverty_noise_vs_c2(view, "poverty_rate_pct"),
+        "mw_dm": dd.poverty_noise_vs_c2(view, "pov_dm"),
+    }
+
+
 # --------------------------------------------------------------------- #
 # Happy path — từng section trong danh sách của ask
 # --------------------------------------------------------------------- #
@@ -342,6 +356,7 @@ def test_tab4_kiem_ngoai_numbers_match_external_validation_csv(assets, external_
     validation = external_assets["validation"]
     published = published_external_pci_tests(validation, "pci_2011_2022")
     published_top = published_external_pci_tests(validation, "pci_top30_2023_2024")
+    pov = expected_poverty_tables(assets["assignments"])
 
     # Số hiển thị khớp artifact theo đúng dung sai gate của dashboard
     # (dashboard_data.py:540-552): 5.1e-5 cho F/H/eta², rel_tol 0.006 cho p.
@@ -361,8 +376,10 @@ def test_tab4_kiem_ngoai_numbers_match_external_validation_csv(assets, external_
     assert values["Điểm vào kiểm định"] == f"{counts['tested_points']}"
     assert values["Có điểm nhưng thiếu nhãn"] == f"{counts['missing_label_cells']}"
     assert values["Nhóm so sánh"] == f"{len(counts['clusters'])}"
+    assert values["Ô poverty trong cửa sổ giao"] == f"{pov['counts']['window_cells']}"
+    assert values["Ô vào kiểm định theo cụm"] == f"{pov['counts']['panel_rows']}"
 
-    assert len(external.dataframe) == 4
+    assert len(external.dataframe) == 5
     tests_table = external.dataframe[0].value
     anova_row, kruskal_row, eta_row = (tests_table.iloc[index] for index in range(3))
     assert anova_row["Kiểm định"] == f"One-way ANOVA F({tests['df1']},{tests['df2']})"
@@ -398,6 +415,26 @@ def test_tab4_kiem_ngoai_numbers_match_external_validation_csv(assets, external_
     assert [int(value) for value in health_table["n"]] == list(health["n"])
     text = "\n".join(container_texts(external))
     assert "GRDP/người" in text  # section GRDP render (px.line sau bảng y tế)
+
+    # Block bổ trợ nghèo GSO (dataframe[4], sau GRDP; boxplot là chart thứ 3)
+    poverty_table = external.dataframe[4].value
+    assert poverty_table["Kiểm định"].tolist() == [
+        "Kruskal–Wallis H (gộp thô — nhiễm hiệu ứng năm)",
+        "Kruskal–Wallis H (đã trừ median trong năm)",
+        "Mann–Whitney U — nhiễu vs cụm 2 (thô)",
+        "Mann–Whitney U — nhiễu vs cụm 2 (đã trừ median năm)",
+    ]
+    assert poverty_table.iloc[0]["Giá trị"] == f"{pov['raw']['h']:.4f}"
+    assert poverty_table.iloc[0]["p-value"] == format_p_value(pov["raw"]["p_kw"])
+    assert poverty_table.iloc[1]["Giá trị"] == f"{pov['dm']['h']:.4f}"
+    assert poverty_table.iloc[1]["p-value"] == format_p_value(pov["dm"]["p_kw"])
+    assert poverty_table.iloc[2]["Giá trị"] == f"{pov['mw_raw']['u']:.0f}"
+    assert int(poverty_table.iloc[2]["n"]) == pov["mw_raw"]["n"]
+    assert poverty_table.iloc[3]["Giá trị"] == f"{pov['mw_dm']['u']:.0f}"
+    assert int(poverty_table.iloc[3]["n"]) == pov["mw_dm"]["n"]
+    assert "Nghèo cấp tỉnh (GSO V14.47)" in text
+    assert "python scripts/build_poverty_63.py" in text  # caption nguồn block
+    assert "không vẽ không test" in text  # 11 ô không nhãn được liệt kê tường minh
 
 
 def test_tab5_audit_renders_scale_flags_and_classification_from_csv(assets):
@@ -586,6 +623,7 @@ def test_risk4_tampered_external_validation_fails_closed_and_hides_sections(
     text = "\n".join(container_texts(at.tabs[3]))
     assert "Mật độ cơ sở y tế 2020" not in text
     assert "GRDP/người" not in text
+    assert "Nghèo cấp tỉnh" not in text  # block poverty cũng ẩn khi gate PCI fail
     assert metric_values(at.tabs[0])  # tab Tổng quan vẫn render
 
 
@@ -743,4 +781,4 @@ def test_risk11_grdp_rows_without_year_render_silently(external_assets, tmp_path
     assert "Mật độ cơ sở y tế 2020" in text  # section y tế vẫn render trước
     assert "GRDP/người" in text  # section GRDP vẫn render (chart rỗng im lặng)
     plotly_charts = [child for child in external.children.values() if child.type == "plotly_chart"]
-    assert len(plotly_charts) == 2  # box PCI + line GRDP (0 traces)
+    assert len(plotly_charts) == 3  # box PCI + line GRDP (0 traces) + box poverty
