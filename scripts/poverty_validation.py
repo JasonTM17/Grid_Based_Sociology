@@ -3,8 +3,10 @@
 Nghèo là kết quả thứ HAI được dùng để kiểm chứng ngoại lai cụm STING, sau PCI
 (scripts/external_validation.py). Nguồn độc lập với PAPI: thống kê chính thức
 GSO pxweb V14.47, chuẩn hóa bởi scripts/build_poverty_63.py thành
-data/processed/external_poverty_63.csv (63 tỉnh × 14 năm 2006, 2008, 2010,
-2012–2016, 2020–2025). Chạy từ thư mục gốc:
+data/processed/external_poverty_63.csv (63 tỉnh × 17 năm 2006, 2008, 2010 +
+2012–2025 liên tục; 2017–2019 điền từ Niên giám Thống kê 2020/2021 theo quy ước
+vintage-mới-nhất-chứa-năm — cột `source` ghi nguồn theo từng dòng).
+Chạy từ thư mục gốc:
 
     python -E scripts/poverty_validation.py
 
@@ -20,9 +22,10 @@ Giao thức join — GIỐNG NGUYÊN XI protocol PCI của external_validation.p
     minh (pattern masked của GRDP — external_validation.py:477-486).
 
 Cửa sổ phân tích = các năm CÓ Ở CẢ HAI nguồn (tự tính từ dữ liệu, trùng cửa
-sổ thiết kế 2012–2016 & 2020–2024): poverty có 2006/2008/2010/2025 nhưng không
-có nhãn cụm (predict_all_years.csv phủ 2011–2024); nhãn có 2011/2017–2019
-nhưng bảng pxweb V14.47 không có cột poverty cho các năm đó.
+sổ thiết kế 2012–2024): poverty có 2006/2008/2010/2025 nhưng không có nhãn cụm
+(predict_all_years.csv phủ 2011–2024); nhãn có 2011 nhưng chuỗi nghèo không có
+năm đó (pxweb V14.47 không có cột 2011; 2017–2019 đã điền từ Niên giám Thống
+kê 2020/2021).
 
 Hai kiểm định CHÍNH, bắt buộc báo cáo CÙNG nhau (nguyên tắc trung thực):
   1. Kruskal–Wallis poverty_rate_pct theo pred_cluster GỘP cửa sổ — kèm
@@ -80,7 +83,10 @@ OUT_MD = RES / "poverty_validation.md"
 OUT_PNG = FIGS / "external_poverty_by_cluster.png"
 
 # Cửa sổ thiết kế trong giao thức — assert khớp cửa sổ tự tính từ dữ liệu.
-DESIGN_WINDOW = [2012, 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023, 2024]
+# 2017–2019 đã có trong chuỗi nghèo (điền từ NGTK 2020/2021 —
+# scripts/build_poverty_gap.py) nên cửa sổ giao với nhãn cụm liền 2012–2024.
+DESIGN_WINDOW = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+                 2020, 2021, 2022, 2023, 2024]
 
 
 def fmt_window(years: list[int]) -> str:
@@ -154,8 +160,18 @@ def mw_noise_vs_c2(d: pd.DataFrame, value_col: str) -> dict:
     return {"u": float(u), "p": float(p), "n": int(len(a) + len(b))}
 
 
+def mw_verdict(p: float) -> str:
+    """Cụm từ kết luận theo p — ngưỡng 0.05/0.10, KHÔNG chỉnh cho nhiều so sánh."""
+    if p < 0.05:
+        return "khác biệt đáng kể"
+    if p < 0.10:
+        return "biên (cận ngưỡng 0.05, không chỉnh sửa cho nhiều so sánh)"
+    return "không khác biệt"
+
+
 def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
-                mw_raw: dict, mw_dm: dict, out_path: Path) -> None:
+                mw_raw: dict, mw_dm: dict, out_path: Path,
+                n_no_label: int) -> None:
     """Hình 2 hàng: boxplot gộp (template plot_pci) + median theo năm (GRDP)."""
     import matplotlib
 
@@ -227,11 +243,12 @@ def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
 
     n_src = source_note(
         fig,
-        "GSO pxweb V14.47 (data/raw/gso) → data/processed/"
-        "external_poverty_63.csv; nhãn cụm results/predict_all_years.csv",
+        "GSO pxweb V14.47 + Niên giám 2020/2021 (điền 2017–2019, data/raw/gso) "
+        "→ data/processed/external_poverty_63.csv; nhãn cụm "
+        "results/predict_all_years.csv",
         retrieved=RETRIEVED_DATE,
-        extra=("TP.HCM 2016 thiếu phía nguồn; 11 ô tỉnh-năm không có nhãn cụm "
-               "nên không vẽ/kiểm định"),
+        extra=(f"TP.HCM 2016 thiếu phía nguồn; {n_no_label} ô tỉnh-năm không có "
+               "nhãn cụm nên không vẽ/kiểm định"),
     )
     fig.tight_layout(rect=(0, source_rect_bottom(n_src), 1, 1))
     # Nhãn n= đặt SAU tight_layout về phía trống nhất (external_validation.py:
@@ -422,8 +439,8 @@ def main() -> int:
         f"{med_year.iloc[-1]:.1f}% ({int(med_year.index[-1])}); tỷ trọng cụm "
         f"cũng trôi theo năm (nhiễu {int(noise_by_year.iloc[0])}/{len(d[d.year == d.year.iloc[0]])} "
         f"năm {int(noise_by_year.index[0])} → "
-        f"{int(noise_by_year.min())}–{int(noise_by_year.max())}/63 các năm "
-        "2020–2024). Test gộp thô phối trộn hiệu ứng năm với khác biệt cụm — "
+        f"{int(noise_by_year.min())}–{int(noise_by_year.max())}/63 trong các "
+        "năm của cửa sổ). Test gộp thô phối trộn hiệu ứng năm với khác biệt cụm — "
         "hai số trên PHẢI đọc cùng nhau, không chọn trình bày một kết quả.\n"
         f"- Diễn giải thận trọng: cụm 0 (n={int(cnt.get(0, 0))}) và cụm 1 "
         f"(n={int(cnt.get(1, 0))}) quá nhỏ để tự kết luận; cặp tương phản đáng "
@@ -433,14 +450,15 @@ def main() -> int:
     )
     md.append("## 3) Mann–Whitney nhiễu vs cụm 2 (hai phía)\n")
     md.append(
-        f"- Thô: U = {mw_raw['u']:.0f}, {fmt_p(mw_raw['p'])} — không khác biệt.\n"
+        f"- Thô: U = {mw_raw['u']:.0f}, {fmt_p(mw_raw['p'])} — "
+        f"{mw_verdict(mw_raw['p'])}.\n"
         f"- Đã trừ median trong năm: U = {mw_dm['u']:.0f}, "
-        f"{fmt_p(mw_dm['p'])} — biên (cận ngưỡng 0.05, không chỉnh sửa cho "
-        "nhiều so sánh).\n"
-        "- Kết luận an toàn: nghèo GSO KHÔNG cho thấy khác biệt rõ giữa nhiễu "
-        "và cụm 2 ở mức gộp; tín hiệu chỉ xuất hiện sau khi tách hiệu ứng "
-        "năm, nên đọc như kiểm chứng bổ trợ, không phải bằng chứng độc lập "
-        "mạnh như PCI.\n"
+        f"{fmt_p(mw_dm['p'])} — {mw_verdict(mw_dm['p'])}.\n"
+        f"- Kết luận an toàn: ở mức gộp, Mann–Whitney nhiễu vs cụm 2 "
+        f"{mw_verdict(mw_raw['p'])} (thô) và {mw_verdict(mw_dm['p'])} (đã trừ "
+        "median năm) — nghèo GSO đọc như kiểm chứng bổ trợ, không phải bằng "
+        "chứng độc lập mạnh như PCI; tín hiệu cụm (nếu có) nằm trong kiểm "
+        "định đã-trừ-median-năm ở mục 2, so phân phối toàn bộ các nhóm.\n"
     )
     md.append("## 4) Thống kê từng nhóm — RIÊNG TỪNG năm giao và pooled\n")
     md.append(f"### 4a) Pooled gộp thô (n={n_panel})\n")
@@ -459,12 +477,15 @@ def main() -> int:
               "định chính\n")
     md.append(kw_tab.to_markdown(index=False))
     md.append("")
+    kw_degen = [int(r["year"]) for r in kw_year if "suy biến" in r["note"]]
+    kw_valid = [int(r["year"]) for r in kw_year if "suy biến" not in r["note"]]
     md.append(
         "- Trừ median trong năm là HẰNG SỐ trong năm nên không đổi so sánh "
         "giữa cụm trong từng năm — thống kê theo năm chỉ cần trình bày trên "
         "giá trị thô.\n"
-        "- Năm 2012/2015/2016 có nhóm n<2 và 2020–2024 suy biến thành test 2 "
-        "nhóm (cụm 0/1 rỗng) → KW từng năm không phải bằng chứng độc lập.\n"
+        f"- Năm {', '.join(map(str, kw_valid))} có test ≥3 nhóm không suy "
+        f"biến; năm {', '.join(map(str, kw_degen))} suy biến (n<2 hoặc chỉ 2 "
+        "nhóm — cụm 0/1 rỗng) → KW từng năm không phải bằng chứng độc lập.\n"
     )
     md.append("## 5) Caveats\n")
     md.append(f"1. {missing_src_txt} thiếu `poverty_rate_pct` phía nguồn "
@@ -485,7 +506,10 @@ def main() -> int:
         "tường minh, không vẽ không test.\n")
     md.append(
         "5. Chuẩn nghèo ĐỔI theo giai đoạn (thu nhập 2011–2015 vs đa chiều từ "
-        "~2020 — data/raw/gso/PROVENANCE.md:48-58): so MỨC tuyệt đối xuyên "
+        "~2020 — data/raw/gso/PROVENANCE.md:48-58); các năm 2017–2019 điền "
+        "thêm là ĐA CHIỀU theo footnote (*) của bảng Niên giám — cùng chuẩn với "
+        "phần pxweb từ 2020, khớp 124/124 ở cột giao 2020/2021 "
+        "(scripts/build_poverty_gap.py): so MỨC tuyệt đối xuyên "
         "năm không like-for-like; chỉ so GIỮA CỤM trong cùng một năm là hợp "
         "lệ — lý do bắt buộc phải có test đã-trừ-median-năm song song với "
         "test gộp.\n")
@@ -505,9 +529,9 @@ def main() -> int:
     md.append(
         f"9. Tỷ trọng cụm trôi mạnh theo năm (nhiễu {int(noise_by_year.iloc[0])}"
         f"/63 năm {int(noise_by_year.index[0])} → "
-        f"{int(noise_by_year.min())}–{int(noise_by_year.max())}/63 các năm "
-        "2020–2024) — test gộp phối trộn năm với cụm; limitation khai báo, "
-        "không phải lỗi dữ liệu.\n")
+        f"{int(noise_by_year.min())}–{int(noise_by_year.max())}/63 trong các "
+        "năm của cửa sổ) — test gộp phối trộn năm với cụm; limitation khai "
+        "báo, không phải lỗi dữ liệu.\n")
     md.append(
         "10. External check bằng thước đo độc lập (GSO thống kê chính thức, "
         "tách khỏi PAPI khảo sát hộ dân) — KHÔNG đưa vào feature, KHÔNG chứng "
@@ -533,7 +557,7 @@ def main() -> int:
     OUT_MD.write_text("\n".join(md), encoding="utf-8")
     print(f"Đã ghi {OUT_MD}")
 
-    make_figure(d, window, t_raw, t_dm, mw_raw, mw_dm, OUT_PNG)
+    make_figure(d, window, t_raw, t_dm, mw_raw, mw_dm, OUT_PNG, n_no_label)
     print(f"Đã ghi {OUT_PNG} (dpi={FIG_DPI_PRINT})")
     return 0
 

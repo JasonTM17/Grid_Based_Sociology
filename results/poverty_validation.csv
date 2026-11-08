@@ -1,18 +1,18 @@
 ﻿section,group,year,n,mean,median,std,min,max,note
-poverty_pooled_raw,nhiễu (–1),,127,9.384,6.1,9.468,0.0,42.3,
+poverty_pooled_raw,nhiễu (–1),,144,9.872,6.6,9.937,0.0,42.3,
 poverty_pooled_raw,cụm 0,,2,14.95,14.95,3.748,12.3,17.6,
-poverty_pooled_raw,cụm 1,,9,4.9,3.6,3.679,1.2,12.1,
-poverty_pooled_raw,cụm 2,,480,8.741,6.0,8.243,0.0,43.5,
-poverty_pooled_raw,"ANOVA F(3,614)",,618,,,,,,F = 1.1950; p = 0.311
-poverty_pooled_raw,Kruskal–Wallis,,618,,,,,,H = 3.4415; p = 0.328
-poverty_pooled_raw,eta squared,,618,,,,,,eta² = 0.0058 (SS giữa / SS tổng)
-poverty_pooled_demeaned,nhiễu (–1),,127,1.511,-1.7,8.412,-12.8,29.4,
+poverty_pooled_raw,cụm 1,,10,4.55,3.25,3.641,1.2,12.1,
+poverty_pooled_raw,cụm 2,,649,9.008,6.2,8.729,0.0,50.2,
+poverty_pooled_raw,"ANOVA F(3,801)",,805,,,,,,F = 1.5376; p = 0.203
+poverty_pooled_raw,Kruskal–Wallis,,805,,,,,,H = 4.6670; p = 0.198
+poverty_pooled_raw,eta squared,,805,,,,,,eta² = 0.0057 (SS giữa / SS tổng)
+poverty_pooled_demeaned,nhiễu (–1),,144,2.124,-1.05,9.071,-12.8,33.7,
 poverty_pooled_demeaned,cụm 0,,2,4.5,4.5,0.283,4.3,4.7,
-poverty_pooled_demeaned,cụm 1,,9,-6.117,-7.1,3.008,-9.0,0.2,
-poverty_pooled_demeaned,cụm 2,,480,2.233,0.175,7.763,-12.8,31.7,
-poverty_pooled_demeaned,"ANOVA F(3,614)",,618,,,,,,F = 3.5759; p = 0.0138
-poverty_pooled_demeaned,Kruskal–Wallis,,618,,,,,,H = 20.1709; p = 0.000156
-poverty_pooled_demeaned,eta squared,,618,,,,,,eta² = 0.0172 (SS giữa / SS tổng)
+poverty_pooled_demeaned,cụm 1,,10,-6.035,-6.2,2.848,-9.0,0.2,
+poverty_pooled_demeaned,cụm 2,,649,2.444,0.0,8.378,-12.8,42.3,
+poverty_pooled_demeaned,"ANOVA F(3,801)",,805,,,,,,F = 3.3629; p = 0.0183
+poverty_pooled_demeaned,Kruskal–Wallis,,805,,,,,,H = 20.6285; p = 0.000126
+poverty_pooled_demeaned,eta squared,,805,,,,,,eta² = 0.0124 (SS giữa / SS tổng)
 poverty_by_year_raw,cụm 0,2012,1,17.6,17.6,,17.6,17.6,
 poverty_by_year_raw,cụm 1,2012,2,6.15,6.15,2.333,4.5,7.8,
 poverty_by_year_raw,cụm 2,2012,43,15.23,14.1,9.484,0.1,43.5,
@@ -29,6 +29,13 @@ poverty_by_year_raw,nhiễu (–1),2015,27,10.53,9.3,8.312,0.0,31.5,
 poverty_by_year_raw,cụm 1,2016,1,1.3,1.3,,1.3,1.3,
 poverty_by_year_raw,cụm 2,2016,50,8.54,6.7,6.674,0.5,27.9,
 poverty_by_year_raw,nhiễu (–1),2016,11,5.6,4.3,4.543,0.0,12.0,
+poverty_by_year_raw,cụm 2,2017,55,10.782,7.4,10.318,0.1,50.2,
+poverty_by_year_raw,nhiễu (–1),2017,8,17.625,14.15,16.008,0.9,41.6,
+poverty_by_year_raw,cụm 1,2018,1,1.4,1.4,,1.4,1.4,
+poverty_by_year_raw,cụm 2,2018,58,10.116,6.6,10.426,0.1,44.5,
+poverty_by_year_raw,nhiễu (–1),2018,2,11.4,11.4,1.838,10.1,12.7,
+poverty_by_year_raw,cụm 2,2019,56,8.409,5.0,9.13,0.1,39.9,
+poverty_by_year_raw,nhiễu (–1),2019,7,9.429,8.4,9.22,0.8,29.1,
 poverty_by_year_raw,cụm 2,2020,57,7.379,4.1,8.543,0.0,36.7,
 poverty_by_year_raw,nhiễu (–1),2020,6,9.633,8.65,6.964,2.1,21.5,
 poverty_by_year_raw,cụm 2,2021,53,7.625,4.7,8.276,0.0,34.5,
@@ -39,13 +46,16 @@ poverty_by_year_raw,cụm 2,2023,52,6.46,3.8,7.538,0.0,29.5,
 poverty_by_year_raw,nhiễu (–1),2023,9,2.367,1.7,2.112,0.1,6.1,
 poverty_by_year_raw,cụm 2,2024,48,4.788,2.75,5.88,0.0,23.2,
 poverty_by_year_raw,nhiễu (–1),2024,13,1.962,0.6,2.717,0.1,10.1,
-test_mw_noise_vs_c2,Mann–Whitney nhiễu vs cụm 2 (thô),,607,,,,,,U = 30517; p = 0.983
-test_mw_noise_vs_c2,Mann–Whitney nhiễu vs cụm 2 (đã trừ median năm),,607,,,,,,U = 27439; p = 0.0836
+test_mw_noise_vs_c2,Mann–Whitney nhiễu vs cụm 2 (thô),,793,,,,,,U = 47464; p = 0.767
+test_mw_noise_vs_c2,Mann–Whitney nhiễu vs cụm 2 (đã trừ median năm),,793,,,,,,U = 43978; p = 0.269
 kw_by_year_descriptive,Kruskal–Wallis,2012,63,,,,,,"k = 4 nhóm, min n = 1; H = 3.1067; p = 0.375; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
 kw_by_year_descriptive,Kruskal–Wallis,2013,63,,,,,,"k = 3 nhóm, min n = 4; H = 2.3814; p = 0.304"
 kw_by_year_descriptive,Kruskal–Wallis,2014,61,,,,,,"k = 3 nhóm, min n = 2; H = 4.8289; p = 0.0894"
 kw_by_year_descriptive,Kruskal–Wallis,2015,63,,,,,,"k = 3 nhóm, min n = 1; H = 1.4569; p = 0.483; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
 kw_by_year_descriptive,Kruskal–Wallis,2016,62,,,,,,"k = 3 nhóm, min n = 1; H = 3.9493; p = 0.139; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2017,63,,,,,,"k = 2 nhóm, min n = 8; H = 0.7881; p = 0.375; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2018,61,,,,,,"k = 3 nhóm, min n = 1; H = 2.8373; p = 0.242; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+kw_by_year_descriptive,Kruskal–Wallis,2019,63,,,,,,"k = 2 nhóm, min n = 7; H = 0.5054; p = 0.477; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
 kw_by_year_descriptive,Kruskal–Wallis,2020,63,,,,,,"k = 2 nhóm, min n = 6; H = 1.8778; p = 0.171; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
 kw_by_year_descriptive,Kruskal–Wallis,2021,60,,,,,,"k = 2 nhóm, min n = 7; H = 1.0506; p = 0.305; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
 kw_by_year_descriptive,Kruskal–Wallis,2022,61,,,,,,"k = 2 nhóm, min n = 4; H = 2.1229; p = 0.145; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"

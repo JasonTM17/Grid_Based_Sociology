@@ -818,7 +818,7 @@ def test_external_section_frame_maps_labels_and_sorts():
 
 
 def _make_poverty_frame() -> pd.DataFrame:
-    """4 tỉnh thay cho 63: đủ 10 năm cửa sổ giao + 1 năm poverty-only.
+    """4 tỉnh thay cho 63: đủ 13 năm cửa sổ giao + 1 năm poverty-only.
     (2013, tỉnh 3) thiếu giá trị phía nguồn (pattern TP. Hồ Chí Minh 2016);
     giá trị là số nguyên dương nên so sánh float chính xác."""
     rows = []
@@ -898,8 +898,8 @@ def test_prepare_poverty_cluster_view_counts_and_masks():
     assert counts["overlap_years"] == list(POVERTY_OVERLAP_YEARS)
     assert counts["pov_only_years"] == [2006]
     assert counts["label_only_years"] == [2011]
-    assert counts["window_cells"] == 30  # 3 tỉnh × 10 năm giao
-    assert counts["valid_cells"] == 29  # (2013, 3) thiếu phía nguồn
+    assert counts["window_cells"] == 39  # 3 tỉnh × 13 năm giao
+    assert counts["valid_cells"] == 38  # (2013, 3) thiếu phía nguồn
     assert [
         (int(cell["year"]), int(cell["province_code"]), cell["province_vi"])
         for cell in counts["missing_source_cells"]
@@ -909,9 +909,9 @@ def test_prepare_poverty_cluster_view_counts_and_masks():
         (int(cell["year"]), int(cell["province_code"]), cell["province_vi"])
         for cell in counts["no_label_cells"]
     ] == [(2014, 3, "Tỉnh 3")]
-    assert counts["panel_rows"] == 28  # 29 ô hợp lệ − 1 ô không nhãn
+    assert counts["panel_rows"] == 37  # 38 ô hợp lệ − 1 ô không nhãn
     assert counts["clusters"] == [-1, 0, 2]
-    assert counts["n_by_cluster"] == {-1: 10, 0: 8, 2: 10}
+    assert counts["n_by_cluster"] == {-1: 13, 0: 11, 2: 13}
     assert counts["noise_by_year"] == {int(year): 1 for year in POVERTY_OVERLAP_YEARS}
 
     noise_row = view.loc[(view.year == 2012) & (view.province_code == 1)].iloc[0]
@@ -1062,10 +1062,11 @@ def test_format_poverty_window_runs_and_singles():
 
 def test_poverty_protocol_recomputed_on_real_artifacts():
     """Pin protocol trên artifact thật — các số protocol ghi nhận (TP.HCM 2016
-    code 79 thiếu nguồn; 11 ô không nhãn; panel 618 ô, {-1:127, 0:2, 1:9, 2:480};
-    KW thô p≈0.328 KHÔNG đáng kể, KW đã-trừ-median-năm p≈1.6e-04 đáng kể, khớp
+    code 79 thiếu nguồn; 13 ô không nhãn; panel 805 ô, {-1:144, 0:2, 1:10, 2:649};
+    KW thô p≈0.198 KHÔNG đáng kể, KW đã-trừ-median-năm p≈1.3e-04 đáng kể, khớp
     results/poverty_validation.csv đã công bố). Artifact hoặc hàm đổi → test
-    lộ ra thay vì dashboard hiển thị lệch im lặng."""
+    lộ ra thay vì dashboard hiển thị lệch im lặng. Pin cập nhật 2026-11-08 khi
+    2017–2019 được điền từ NGTK 2020/2021 (cửa sổ 10 → 13 năm, panel 618 → 805)."""
     poverty = load_poverty_assets()["poverty"]
     assignments = pd.read_csv(ROOT / "results" / "predict_all_years.csv")
 
@@ -1073,7 +1074,7 @@ def test_poverty_protocol_recomputed_on_real_artifacts():
 
     assert counts["overlap_years"] == list(POVERTY_OVERLAP_YEARS)
     assert counts["pov_only_years"] == [2006, 2008, 2010, 2025]
-    assert counts["label_only_years"] == [2011, 2017, 2018, 2019]
+    assert counts["label_only_years"] == [2011]
     assert [
         (int(cell["year"]), int(cell["province_code"]), cell["province_vi"])
         for cell in counts["missing_source_cells"]
@@ -1081,22 +1082,25 @@ def test_poverty_protocol_recomputed_on_real_artifacts():
     assert [
         (int(cell["year"]), int(cell["province_code"])) for cell in counts["no_label_cells"]
     ] == [
-        (2014, 24), (2014, 87), (2021, 22), (2021, 24), (2021, 27), (2022, 24),
-        (2022, 27), (2023, 22), (2023, 74), (2024, 26), (2024, 82),
+        (2014, 24), (2014, 87), (2018, 22), (2018, 87), (2021, 22), (2021, 24),
+        (2021, 27), (2022, 24), (2022, 27), (2023, 22), (2023, 74), (2024, 26),
+        (2024, 82),
     ]
-    assert counts["panel_rows"] == 618
-    assert counts["n_by_cluster"] == {-1: 127, 0: 2, 1: 9, 2: 480}
+    assert counts["panel_rows"] == 805
+    assert counts["n_by_cluster"] == {-1: 144, 0: 2, 1: 10, 2: 649}
 
     raw = poverty_cluster_tests(view)
     demeaned = poverty_cluster_tests(view, "pov_dm")
-    assert raw["h"] == pytest.approx(3.4415, abs=5e-4)
-    assert raw["p_kw"] == pytest.approx(0.328, abs=5e-4)  # KHÔNG đáng kể
-    assert demeaned["h"] == pytest.approx(20.1709, abs=5e-4)
-    assert demeaned["p_kw"] == pytest.approx(1.6e-04, rel=0.05)  # đáng kể
-    assert raw["n"] == demeaned["n"] == 618
+    assert raw["h"] == pytest.approx(4.6670, abs=5e-4)
+    assert raw["p_kw"] == pytest.approx(0.1979, abs=5e-4)  # KHÔNG đáng kể
+    assert demeaned["h"] == pytest.approx(20.6285, abs=5e-4)
+    assert demeaned["p_kw"] == pytest.approx(1.257e-04, rel=0.05)  # đáng kể
+    assert raw["n"] == demeaned["n"] == 805
 
     mw_raw = poverty_noise_vs_c2(view)
     mw_dm = poverty_noise_vs_c2(view, "pov_dm")
-    assert mw_raw["n"] == mw_dm["n"] == 607  # 127 nhiễu + 480 cụm 2
+    assert mw_raw["n"] == mw_dm["n"] == 793  # 144 nhiễu + 649 cụm 2
     assert mw_raw["p"] > 0.05  # thô: không khác biệt
-    assert 0.05 < mw_dm["p"] < 0.10  # đã trừ median năm: biên, cận ngưỡng 0.05
+    assert mw_dm["p"] > 0.10  # đã trừ median năm: không khác biệt
+    # (trước khi điền 2017–2019, mw_dm p = 0.0836 — biên; thêm 3 năm làm mất
+    # tín hiệu biên đó — phải báo cáo thẳng, không giữ claim cũ)

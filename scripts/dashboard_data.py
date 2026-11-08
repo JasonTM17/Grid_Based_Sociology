@@ -657,11 +657,13 @@ def external_section_frame(validation: pd.DataFrame, section: str) -> pd.DataFra
 _POVERTY_CSV = Path("data/processed/external_poverty_63.csv")
 _POVERTY_REBUILD_COMMAND = "python scripts/build_poverty_63.py"
 
-# Cửa sổ giao thiết kế (= DESIGN_WINDOW của scripts/poverty_validation.py:83):
-# poverty pxweb V14.47 có 2006–2016 & 2020–2025, nhãn cụm phủ 2011–2024, nên
-# giao tự tính từ dữ liệu phải khớp đúng danh sách này — lệch là artifact đã
-# đổi phía nguồn hoặc phía nhãn.
-POVERTY_OVERLAP_YEARS = (2012, 2013, 2014, 2015, 2016, 2020, 2021, 2022, 2023, 2024)
+# Cửa sổ giao thiết kế (= DESIGN_WINDOW của scripts/poverty_validation.py:88):
+# chuỗi nghèo phủ 2006/2008/2010 + 2012–2025 liên tục (2017–2019 điền từ NGTK
+# 2020/2021 — scripts/build_poverty_gap.py), nhãn cụm phủ 2011–2024, nên giao
+# tự tính từ dữ liệu phải khớp đúng danh sách này — lệch là artifact đã đổi
+# phía nguồn hoặc phía nhãn.
+POVERTY_OVERLAP_YEARS = (2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+                         2020, 2021, 2022, 2023, 2024)
 
 # Đủ để nối nhãn và liệt kê ô thiếu; load_poverty_assets yêu cầu schema đầy đủ.
 _REQUIRED_POVERTY_VIEW_COLUMNS = {"province_code", "province_vi", "year", "poverty_rate_pct"}
@@ -687,7 +689,7 @@ def load_poverty_assets(root: Path = ROOT) -> dict:
         )
     _require_unique_keys(poverty, ["province_code", "year"], "Poverty GSO")
     # papi_province_code khớp province_code → khóa nối nhãn thống nhất hai bên
-    # (assert tương tự poverty_validation.py:260).
+    # (assert tương tự poverty_validation.py:277).
     misaligned = poverty.province_code.ne(poverty.papi_province_code)
     if misaligned.any():
         raise DashboardDataError(
@@ -775,7 +777,7 @@ def prepare_poverty_cluster_view(
 
 def format_poverty_window(years: list[int]) -> str:
     """'2012–2016 & 2020–2024' — chạy năm liên tiếp, cùng quy ước fmt_window
-    của scripts/poverty_validation.py:86."""
+    của scripts/poverty_validation.py:92."""
     years = [int(year) for year in years]
     if not years:
         raise DashboardDataError("Danh sách năm cửa sổ giao rỗng.")

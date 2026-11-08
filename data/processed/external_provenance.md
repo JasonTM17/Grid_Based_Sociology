@@ -34,7 +34,20 @@
 | `external_odm_poverty_region_1998_2016.csv` | `scripts/build_odmekong_external.py` | OD Mekong `data/raw/odmekong/` (6 VÙNG, không cấp tỉnh) | CC BY-SA |
 | `external_odm_health_63.csv` | `scripts/build_odmekong_external.py` | OD Mekong Health Facilities 2020 + point-in-polygon `data/raw/boundaries/diaphantinh.geojson` | ODbL |
 | `external_worldbank_vnm.csv` | `scripts/build_external_worldbank.py` | WDI API v2, quốc gia VNM `data/raw/worldbank/` | CC BY 4.0 |
+| `external_poverty_gap_63.csv` | `scripts/build_poverty_gap.py` | Niên giám Thống kê 2018–2021 (bảng nghèo đa chiều), `data/raw/gso/` — 63 tỉnh × 2017–2019, 189 dòng 0 ô thiếu, vintage mới nhất chứa năm | NSO công khai ("Bản quyền: Không") |
+| `external_poverty_63.csv` | `scripts/build_poverty_63.py` | pxweb V14.47 (882 dòng, 2006/2008/2010 + 2012–2025) + `external_poverty_gap_63.csv` điền 2017–2019 (tích hợp 2026-11-08) = 1071 dòng × 17 năm; cột `source` ghi nguồn theo từng dòng | NSO công khai — phái sinh của hai nguồn trên |
+| `external_molisa_poverty_63.csv` | `scripts/build_molisa_poverty.py` | Phụ lục I các QĐ 862/2017, 1052/2018, 835/2019 của MOLISA `data/raw/molisa/` — 63 tỉnh × 2017–2019 | văn bản pháp luật công khai |
 | `external_master_63_2011_2024.csv` | `scripts/build_external_master.py` | nối panel PAPI + các file trên, mask thiếu tường minh | phái sinh — giữ license nguồn |
+
+**Vai trò MOLISA — kiểm chứng chéo ĐỘC LẬP, KHÔNG gộp vào chuỗi chính:** trên 189 ô
+giao (63 tỉnh × 2017–2019), nghèo-only MOLISA (rà soát hành chính theo QĐ
+862/1052/835) lệch có hệ thống so với GSO NGTK (khảo sát): 178/189 ô lệch
+>0,1 điểm %, mean |Δ| = 2,48 điểm %, max 14,16 điểm % (Gia Lai 2017: GSO 27,5
+vs MOLISA 13,34; Lai Châu, Sơn La, Kon Tum cùng pattern) — hai PHÉP ĐO khác
+nhau, không phải bản sao; gộp sẽ phá tính thuần nhất của panel kiểm định cụm.
+Đo trực tiếp từ 2 CSV trong phiên tích hợp 2026-11-08. WB/UNDP (6 vùng hợp
+tỉnh, `data/raw/{worldbank,undp}/`) không có province_code — giữ làm tham
+chiếu, không tích hợp.
 
 Trạng thái từng khoảng trống dữ liệu: `reports/external_data_expansion.md` §4.2.
 Đối chiếu chi tiết từng nguồn (độ phủ, vintage, kiểm chứng chéo): file đó.

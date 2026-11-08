@@ -13,10 +13,22 @@ Nguồn đã tải về data/raw/gso/ (KHÔNG sửa):
     tiêu dùng ..." (chuẩn khác với bảng "chuẩn nghèo đa chiều" trong Niên giám
     2019–2021 cho các năm 2016–2019 — xem PROVENANCE.md data/raw/gso/).
 
+Đầu vào thứ 2 (giai đoạn tích hợp — sinh bởi scripts/build_poverty_gap.py):
+  - external_poverty_gap_63.csv — 189 dòng (63 tỉnh × 2017–2019) trích từ
+    Niên giám Thống kê 2020/2021 theo quy ước vintage-mới-nhất-chứa-năm,
+    cùng chuẩn nghèo đa chiều theo footnote (*) của bảng; khớp pxweb V14.47
+    ở cột giao 2020/2021 124/124 (sanity trong build_poverty_gap.py) nên
+    nối 2017–2019 không tạo bước nhảy cấp độ ở ranh giới 2016→2017 và
+    2019→2020. KHÔNG nội suy.
+
 Kết quả (ghi data/processed/, không đụng file nguồn khác):
   - external_poverty_63.csv — province_code, province_ascii, province_vi,
-    year, poverty_rate_pct, papi_province_code; 63 tỉnh × 14 năm dạng dài,
-    ô thiếu để trống, KHÔNG nội suy.
+    year, poverty_rate_pct, papi_province_code, source; 63 tỉnh × 17 năm
+    (2006, 2008, 2010 + 2012–2025 liên tục) dạng dài, ô thiếu để trống,
+    KHÔNG nội suy. Cột `source` (cuối) phân biệt nguồn THEO TỪNG DÒNG:
+    'gso_pxweb_V14.47' cho 882 dòng pxweb, nhãn vintage NGTK
+    ('GSO NGTK 2020 tr.879-880 …' cho 2017; 'GSO NGTK 2021 tr.881-882 …'
+    cho 2018–2019) cho 189 dòng điền thêm. Giá trị cũ giữ nguyên.
 
 Đối chiếu (verification, không dùng làm số liệu):
   - Niên giám 2025, bảng chương tr.934–935 (63 tỉnh; cột 2020, 2022*, 2023,
@@ -175,12 +187,39 @@ def main() -> int:
         bad = sorted(pov.loc[pov["papi_province_code"].isna(), "province_ascii"].unique())
         raise SystemExit(f"LỖI: province_ascii không có trong panel PAPI: {bad}")
 
+    # ----------------------------- điền 2017–2019 từ gap CSV (không đụng ô cũ)
+    # Cột source phân biệt nguồn THEO TỪNG DÒNG; concat sau phần pxweb.
+    pov["source"] = "gso_pxweb_V14.47"
+    gap_path = OUT / "external_poverty_gap_63.csv"
+    gap = pd.read_csv(gap_path, encoding="utf-8-sig")
+    assert list(gap.columns) == [
+        "province_code", "province_ascii", "province_vi", "year",
+        "poverty_rate_pct", "source", "papi_province_code",
+    ], f"schema gap CSV lệch: {list(gap.columns)}"
+    gap = gap[["province_code", "province_ascii", "province_vi", "year",
+               "poverty_rate_pct", "papi_province_code", "source"]]
+    assert set(gap["year"]) == {2017, 2018, 2019} and len(gap) == 189, \
+        f"gap CSV lệch kỳ vọng: {gap['year'].unique()} × {len(gap)} dòng"
+    assert gap["poverty_rate_pct"].notna().all(), \
+        "gap CSV có ô thiếu — KHÔNG nội suy, kiểm tra build_poverty_gap.py"
+    assert (gap["papi_province_code"] == gap["province_code"]).all(), \
+        "gap CSV: papi_province_code lệch province_code"
+    gap["province_code"] = gap["province_code"].astype(str)  # cùng dtype phần pxweb
+    overlap = set(zip(pov["province_code"], pov["year"])) & \
+        set(zip(gap["province_code"], gap["year"]))
+    assert not overlap, f"khóa (province_code, year) trùng pxweb∩gap: {sorted(overlap)}"
+    pov = pd.concat([pov, gap], ignore_index=True) \
+        .sort_values(["province_code", "year"]).reset_index(drop=True)
+    assert len(pov) == 882 + 189 == 1071 and pov["year"].nunique() == 17, \
+        f"sau merge: {len(pov)} dòng × {pov['year'].nunique()} năm"
+
     pov.to_csv(OUT / "external_poverty_63.csv", index=False, na_rep="", encoding="utf-8")
     n_missing = int(pov["poverty_rate_pct"].isna().sum())
     print(
         f"Đã ghi external_poverty_63.csv: {pov['province_ascii'].nunique()} tỉnh × "
         f"{pov['year'].nunique()} năm = {len(pov)} dòng; ô thiếu {n_missing} (để trống, không nội suy)"
     )
+    print("Cột source theo dòng:", pov["source"].value_counts().to_dict())
     print("Giá trị TỔNG SỐ (cả nước) theo bảng, cho đối chiếu nhanh:", national)
 
     # ---------------------------------------- đối chiếu Niên giám 2025 (verification)

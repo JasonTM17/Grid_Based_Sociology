@@ -126,3 +126,93 @@ hết, không có dòng nào bị bỏ/bịa mã**.
 | `pxweb_V03.10_grdp_pc_step2.html` | 118,774 | `bf1b54569d738e53ce02912377437398f75e45f5e19aa13dd25f529e8d244dca` |
 | `pxweb_V03.12_grdp_pc_step2.html` | 118,210 | `38238e839d69f75d3ddbc9bede1821594c485889390bb48a33a5b264e98d2951` |
 | `pxweb_V14.47_poverty_step2.html` | 146,373 | `3e652b6b1e5be65ebefa718b658dbde3b249fcc148eeb777bd3698d36d7183bd` |
+
+---
+
+## Cập nhật 2026-11-08 — điền lỗ hổng 2017–2019 của tỷ lệ hộ nghèo cấp tỉnh
+
+- **Ngày tải:** 2026-11-08.
+- **Nhiệm vụ:** tìm "Tỷ lệ hộ nghèo" cấp tỉnh 2017–2019 — 3 năm duy nhất thiếu
+  của V14.47 (bảng gốc chỉ có 2006, 2008, 2010, 2012–2016, 2020–2025).
+- **Giấy phép:** như phần đầu (dữ liệu thống kê chính thức công khai của NSO,
+  "Bản quyền: Không"; Niên giám là ấn phẩm công khai trên www.nso.gov.vn).
+
+### 1. Kết quả quét PX-Web (2026-11-08) — KHÔNG có bảng nào phủ 2017–2019 cấp tỉnh
+
+| Hướng | Kết quả | Bằng chứng |
+|---|---|---|
+| Quét tablelist (`?tablelist=true`) **cả 28 database** cổng classic | 28/28 lấy được; toàn cổng chỉ có **4 bảng "nghèo"**: `V14.46`, `V14.47` (database "Y tế, văn hóa và MSDC", 97 bảng) và `PL.V14.23`, `PL.V14.24` (database PLV14, 60 bảng) | script quét urllib, đầu ra in trong phiên; file `pxweb_tablelist_yte_2026-11-08.html` (97 link .px), `pxweb_tablelist_plv14_2026-11-08.html` (60 link .px) |
+| `V14.46` (bản PL.V14.23) "Tỷ lệ hộ nghèo phân theo thành thị, nông thôn và theo vùng" | Biến = CẢ NƯỚC / Kinh-Hoa / khác / Thành thị / Nông thôn / 6 vùng — **không có cấp tỉnh**; cột năm 1998–2016, 2020–2025 — **không có 2017–2019** | listbox trong `pxweb_V14.46_step1_2026-11-08.html` (dump 2026-11-08) |
+| `PL.V14.24` — bản vintage cũ của chính bảng theo địa phương | Cột năm **chỉ có 2020–2025** | listbox trong `pxweb_PL.V14.24_step1_2026-11-08.html` |
+| `V14.47` (kiểm tra lại lần 2) | Listbox "Năm": 2006, 2008, 2010, 2012–2016, 2020–2025 — xác nhận lại **không có 2017–2019** | trang chọn biến GET trực tiếp 2026-11-08 |
+| API v1 "Dân số và lao động" | `GET /api/v1/vi/Dân số và lao động/` — không bảng nào chứa "nghèo" (grep 0 match); database "Đầu tư" trả 404 | probe `scripts/gso_pxweb_probe.py tree` |
+| Cổng dữ liệu khác của GSO | `data.nso.gov.vn`, `opendata.nso.gov.vn`, `stat.gso.gov.vn`, `www.stat.gso.gov.vn`, `gso.gov.vn`, `www.gso.gov.vn`, `stat.gov.vn` — **đều không phân giải DNS**; chỉ `www.nso.gov.vn` (160.25.148.3) sống | `socket.gethostbyname` từng host, 2026-11-08 |
+
+### 2. Nguồn điền 2017–2019: bảng nghèo đa chiều trong Niên giám Thống kê
+
+Cùng chuỗi, cùng chuẩn, của Tổng cục Thống kê (ấn phẩm chính thức, PDF đã tải
+sẵn trong thư mục này ngày 2026-11-07 — manifest ở phần trên, không tải lại):
+
+| Bản | Trang PDF | Bảng | Cột năm | Cả nước (đa chiều) |
+|---|---|---|---|---|
+| Niên giám 2018 | 854–856 | "Tỷ lệ hộ nghèo phân theo địa phương" (2 chuẩn cạnh nhau: thu nhập (*) và đa chiều (**)) — dùng cột đa chiều | 2010, 2015, 2016 TN, 2016 ĐC, 2017, Sơ bộ 2018 | 9,2 / 7,9 / 6,8 |
+| Niên giám 2019 | 864–865 | "Tỷ lệ hộ nghèo phân theo địa phương(*)" (Biểu 365) | 2016, 2017, 2018, Sơ bộ 2019 | 9,2 / 7,9 / 6,8 / 5,7 |
+| Niên giám 2020 | 879–880 | "Tỷ lệ hộ nghèo phân theo địa phương(*)" | 2016, 2017, 2018, 2019, Sơ bộ 2020 | 9,2 / 7,9 / 6,8 / 5,7 / 4,8 |
+| Niên giám 2021 | 881–882 | "Tỷ lệ hộ nghèo đa chiều phân theo địa phương(*)" | 2016, 2018, 2019, 2020, Sơ bộ 2021 | 9,2 / 6,8 / 5,7 / 4,8 / 4,4 |
+
+Chú thích (*) của bảng (trích Niên giám 2019, tr.863 — Biểu 364): **"Tỷ lệ hộ
+nghèo được tính theo chuẩn nghèo tiếp cận đa chiều. / The household poverty
+rate is calculated according to multi-dimensional poverty approach."** — tức
+cùng chuẩn với phần 2020–2025 của pxweb V14.47 (đã đối chiếu trùng khớp ở
+phiên trước), KHÁCH với cột 2006–2016 của V14.47 (chuẩn thu nhập).
+
+TP. Hồ Chí Minh để trống cột 2020/2021 trong Niên giám 2021 (ô trống thật,
+không phải lỗi trích) — nhất quán với ghi chú cũ "TP.HCM 2020/2021 để trống
+trong Niên giám".
+
+### 3. Chuẩn hóa và kiểm tra (scripts/build_poverty_gap.py → 2026-11-08)
+
+- Chọn số theo **vintage mới nhất** chứa năm đó (quy ước như
+  `external_gso_population_63_full.csv`): 2017 ← Niên giám 2020 (tr.879–880);
+  2018, 2019 ← Niên giám 2021 (tr.881–882). Các vintage khác chỉ đối chiếu.
+- **Đối chiếu chéo mọi vintage có chung năm (dung sai 0,051): 0 ô lệch trên
+  toàn bộ 63 tỉnh** — 2016 (4 nguồn), 2017 (3 nguồn: NG2018/NG2019/NG2020),
+  2018 (4 nguồn), 2019 (3 nguồn: Sơ bộ NG2019 = bản chính thức NG2020/NG2021),
+  2020 (2 nguồn). Sơ bộ 2019 của NG2019 trùng khớp bản chính thức.
+- Sanity đầu-cuối: cột 2020/2021 của NGTK 2021 trích bằng parser mới so với
+  `external_poverty_63.csv` (pxweb V14.47): **124/124 trùng, 0 lệch** (62 tỉnh
+  × 2 năm; TP.HCM trống trong Niên giám).
+- Kiểm tra độc lập ngoài script: dump thô text PDF dòng Hà Nội
+  (1,4/0,9/0,7/…), Điện Biên (53,9/44,5/39,9/…), Quảng Ninh (4,3/2,5/2,2/…)
+  khớp giá trị ghi trong CSV.
+
+### 4. File tải thêm trong thư mục này (2026-11-08)
+
+| File | Nội dung |
+|---|---|
+| `pxweb_tablelist_yte_2026-11-08.html` | Tablelist database "Y tế, văn hóa và MSDC" (97 bảng) — bằng chứng chỉ có V14.46/V14.47 chứa "nghèo" |
+| `pxweb_V14.46_step1_2026-11-08.html` | Trang chọn biến V14.46 — biến không có cấp tỉnh, năm không có 2017–2019 |
+| `pxweb_tablelist_plv14_2026-11-08.html` | Tablelist database PLV14 (60 bảng) — bằng chứng chỉ có PL.V14.23/PL.V14.24 |
+| `pxweb_PL.V14.24_step1_2026-11-08.html` | Trang chọn biến PL.V14.24 — vintage cũ của bảng theo địa phương, năm chỉ 2020–2025 |
+
+URL gốc:
+
+- Tablelist Y tế: `https://pxweb.nso.gov.vn/pxweb/vi/Y%20t%E1%BA%BF%2C%20v%C4%83n%20h%C3%B3a%20v%C3%A0%20MSDC/Y%20t%E1%BA%BF%2C%20v%C4%83n%20h%C3%B3a%20v%C3%A0%20MSDC/?tablelist=true`
+- V14.46: `https://pxweb.nso.gov.vn/pxweb/vi/Y%20t%E1%BA%BF%2C%20v%C4%83n%20h%C3%B3a%20v%C3%A0%20MSDC/Y%20t%E1%BA%BF%2C%20v%C4%83n%20h%C3%B3a%20v%C3%A0%20MSDC/V14.46.px/`
+- Tablelist PLV14: `https://pxweb.nso.gov.vn/pxweb/vi/PLV14Y%20t%E1%BA%BF%2C%20v%C4%83n%20h%C3%B3a%20v%C3%A0%20MSDC/PLV14Y%20t%E1%BA%BF%2C%20v%C4%83n%20h%C3%B3a%20v%C3%A0%20MSDC/?tablelist=true`
+- PL.V14.24: `https://pxweb.nso.gov.vn/pxweb/vi/PLV14Y%20t%E1%BA%BF%2C%20v%C4%83n%20h%C3%B3a%20v%C3%A0%20MSDC/PLV14Y%20t%E1%BA%BF%2C%20v%C4%83n%20h%C3%B3a%20v%C3%A0%20MSDC/PL.V14.24.px/`
+
+### 5. File sinh ra (data/processed/) — 2026-11-08
+
+| File | Nội dung |
+|---|---|
+| `external_poverty_gap_63.csv` | Tỷ lệ hộ nghèo cấp tỉnh **chỉ 2017–2019** (`poverty_rate_pct`, %, chuẩn nghèo đa chiều), 63 tỉnh × 3 năm = 189 dòng, 0 ô thiếu, KHÔNG nội suy; cột `source` ghi bản Niên giám + trang từng dòng; join `province_crosswalk_63.csv` (63/63 khớp, không bỏ/bịa mã nào) và gán `papi_province_code` qua panel PAPI. KHÔNG đụng `external_poverty_63.csv` (việc merge thuộc giai đoạn tích hợp) |
+
+### Manifest bổ sung (tên file — bytes — SHA-256, 2026-11-08)
+
+| File | Bytes | SHA-256 |
+|---|---|---|
+| `pxweb_tablelist_yte_2026-11-08.html` | 144,266 | `334fbdc087b72516876f4bea17042cf7105964d97554898868b6841895e6221e` |
+| `pxweb_V14.46_step1_2026-11-08.html` | 102,801 | `871834f0b86ade3dd0fd4973d1df3b8deec5bf342ee20b62b334fdd6ca12b1a2` |
+| `pxweb_tablelist_plv14_2026-11-08.html` | 98,921 | `1f9d3cbfcce3e3e9b9e3f6c0282dd084a905ab215ba266c798ded27d856bf028` |
+| `pxweb_PL.V14.24_step1_2026-11-08.html` | 104,214 | `ede549a1feca150f1bf764368ab74ae3c8aa222dac042c847b02a1a480915bad` |

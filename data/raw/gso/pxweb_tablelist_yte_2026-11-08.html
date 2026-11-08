@@ -1,0 +1,3934 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+
+<style type="text/css">
+
+.auto-style2 {
+	font-weight:bold;
+	font-style:italic;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+	text-align: center;
+	border-style: none;
+	border-color: inherit;
+	border-width: 0;
+	margin: 0;
+	padding: 0;
+}
+.auto-style5 {
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+	border-style: none;
+	border-color: inherit;
+	border-width: 0;
+	margin: 0;
+	padding: 0;
+}
+</style>
+
+
+<!--[if lt IE 7 ]> <html xmlns="http://www.w3.org/1999/xhtml" class="ie6"> <![endif]-->
+<!--[if IE 7 ]> <html xmlns="http://www.w3.org/1999/xhtml" class="ie7"> <![endif]-->
+<!--[if IE 8 ]> <html xmlns="http://www.w3.org/1999/xhtml" class="ie8"> <![endif]-->
+<!--[if IE 9 ]> <html xmlns="http://www.w3.org/1999/xhtml" class="ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html xmlns="http://www.w3.org/1999/xhtml"> <!--<![endif]-->
+<head><link href="../../../../Resources/Styles/reset.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/PxWeb.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/CommandBar.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/variableselector.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/datasort.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/excel.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/footnote.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/tablequery.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/hierarchical.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/information.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/searchvalues.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/table.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/tableinformation.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/tablelist.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/tableofcontent.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/textsearch.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/TreeView.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/navigationFlow.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/breadcrumb.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/search.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/jQuery/redmond/jquery-ui-1.10.3.custom.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/jQuery/tablesorter/style.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/Custom.css" rel="stylesheet" type="text/css" media="screen" /><link href="../../../../Resources/Styles/savequery.css" rel="stylesheet" type="text/css" media="screen" />
+    <script src="/Resources/Scripts/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/pcaxis.web.client.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/pcaxis.web.controls.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/jquery.tablesorter.min.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/jquery.metadata.js" type="text/javascript"></script>
+    <script src="/Resources/Scripts/format.20110630-1100.min.js" type="text/javascript"></script>
+
+    
+
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7CPQ921LE0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-7CPQ921LE0');
+</script>
+<title>
+	PX-Web - Select table
+</title></head>
+<body>
+    <form method="post" action="./?tablelist=true" onsubmit="javascript:return WebForm_OnSubmit();" id="aspnetForm">
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value="" />
+<input type="hidden" name="ctl00_ContentPlaceHolderMain_TableOfContent1_TableOfContent1_MenuNavigationTree__VIEWSTATE" id="ctl00_ContentPlaceHolderMain_TableOfContent1_TableOfContent1_MenuNavigationTree__VIEWSTATE" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUJNzIxMDE1NDY0D2QWAmYPZBYCAgMPZBYIAgcPZBYCZg9kFgYCAw8PFgIeC05hdmlnYXRlVXJsBTQvcHh3ZWIvdmkvP3J4aWQ9MTFjMGNlMGItNzg4Mi00ZmE2LTgxYmEtMTdmZTgzNTIxNDBkZBYCZg8PFgYeCEltYWdlVXJsBb8BL1dlYlJlc291cmNlLmF4ZD9kPW01QmtqUGtVMVE5SUZvQVVJcUluYi1pbVlBNjdJMWNGMUtFN1J5WHJ5TGhxNEZuaXJUeHJhUWw1bWZPNURDaTJaOGZQbHVvYXVkMTNHYW1YZ0hMbnJoVVpjZXlZR1NJSnNhT2w1VFIxZWVLS0R2MlN4S3JVb3BFZ1loVHFZck9za05Qam8xai1Nc0tIOUpCeHgwWWw0dzImdD02MzU2ODQ0MTUwNjM1OTAwMDAeDUFsdGVybmF0ZVRleHQFF1Phu5EgbGnhu4d1IHRo4buRbmcga8OqHgdUb29sVGlwBRdT4buRIGxp4buHdSB0aOG7kW5nIGvDqmRkAgUPDxYCHgdWaXNpYmxlZ2RkAgcPDxYEHgRUZXh0BRpZIHThur8sIHbEg24gaMOzYSB2w6AgTVNEQx8ABU8vcHh3ZWIvdmkvWSB04bq/LCB2xINuIGjDs2EgdsOgIE1TREMvP3J4aWQ9MTFjMGNlMGItNzg4Mi00ZmE2LTgxYmEtMTdmZTgzNTIxNDBkZGQCCQ8PFgIfBGdkFgJmD2QWAmYPZBYGAgEPZBYCZg8PFgQeCENzc0NsYXNzBQxjb2wxIGFjdGl2ZSAeBF8hU0ICAmQWAgIBDw8WAh8FBQxDaG9vc2UgdGFibGVkZAIDD2QWAmYPDxYEHwYFC2NvbDIgZnV0dXJlHwcCAmQWAgIBDw8WAh8FBQ9DaG9vc2UgdmFyaWFibGVkZAIFDw8WBB8GBQtjb2wzIGZ1dHVyZR8HAgJkFgICAQ8PFgIfBQUKU2hvdyB0YWJsZWRkAgsPZBYGAgEPDxYCHwUFGlkgdOG6vywgdsSDbiBow7NhIHbDoCBNU0RDZGQCAw8PFgIfBGhkFgICAQ9kFggCAQ8PFgIfBQUlU2VhcmNoIGluIFkgdOG6vywgdsSDbiBow7NhIHbDoCBNU0RDOmRkAgUPDxYCHwUFBlNlYXJjaGRkAgcPDxYCHwVlZGQCCQ8WAh4FVmFsdWUFBFRydWVkAgUPZBYCZg9kFgJmDw8WAh8EaGQWBAIBDw8WAh8FBUdKYXZhc2NyaXB0IGLhu4sgdsO0IGhp4buHdSBow7NhLCBi4bqlbSB2w6BvIMSR4buDIHThuqNpIHRvw6BuIGLhu5kgY8OieWRkAgMPZBYCAgEQPCsACQIADxYCHg1OZXZlckV4cGFuZGVkZ2QIFCsAAgUDMDowFCsAAhYIHwUFTDxzcGFuIGNsYXNzPSd0YWJsZW9mY29udGVudF90YWJsZWxpc3RsaW5rJz5ZIHThur8sIHbEg24gaMOzYSB2w6AgTVNEQzwvc3Bhbj4fAAV5L3B4d2ViL3ZpL1kgdOG6vywgdsSDbiBow7NhIHbDoCBNU0RDL1kgdOG6vywgdsSDbiBow7NhIHbDoCBNU0RDLz90YWJsZWxpc3Q9dHJ1ZSZyeGlkPTExYzBjZTBiLTc4ODItNGZhNi04MWJhLTE3ZmU4MzUyMTQwZB4MU2VsZWN0QWN0aW9uCyouU3lzdGVtLldlYi5VSS5XZWJDb250cm9scy5UcmVlTm9kZVNlbGVjdEFjdGlvbgIeEFBvcHVsYXRlT25EZW1hbmRoZAVbY3RsMDBfQ29udGVudFBsYWNlSG9sZGVyTWFpbl9UYWJsZU9mQ29udGVudDFfVGFibGVPZkNvbnRlbnQxX01lbnVOYXZpZ2F0aW9uVHJlZV9fVklFV1NUQVRFfGQCEw9kFgQCAQ8PFgIfBGhkZAIDDw8WAh8EaGRkGAYFMmN0bDAwJENvbnRlbnRQbGFjZUhvbGRlck1haW4kVGFibGVMaXN0MSRUYWJsZUxpc3QxDzLpAgABAAAA/////wEAAAAAAAAABAEAAAB/U3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuTGlzdGAxW1tTeXN0ZW0uT2JqZWN0LCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXQMAAAAGX2l0ZW1zBV9zaXplCF92ZXJzaW9uBQAACAgJAgAAAAIAAAACAAAAEAIAAAAEAAAACQMAAAANAwwEAAAAUlBDQXhpcy5XZWIuQ29yZSwgVmVyc2lvbj0xLjEuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWMwYTgxOGJkZThmOTVjMzAFAwAAACJQQ0F4aXMuV2ViLkNvcmUuRW51bXMuRGF0YWJhc2VUeXBlAQAAAAd2YWx1ZV9fAAgEAAAAAAAAAAtkBTxjdGwwMCRDb250ZW50UGxhY2VIb2xkZXJNYWluJFRhYmxlT2ZDb250ZW50MSRUYWJsZU9mQ29udGVudDEPMrMFAAEAAAD/////AQAAAAAAAAAEAQAAAH9TeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5MaXN0YDFbW1N5c3RlbS5PYmplY3QsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAwAAAAZfaXRlbXMFX3NpemUIX3ZlcnNpb24FAAAICAkCAAAAFwAAABcAAAAQAgAAACAAAAAJAwAAAAYEAAAADERlZmF1bHQuYXNweAYFAAAACU1lbnUuYXNweAYGAAAADlNlbGVjdGlvbi5hc3B4BgcAAAAQZmlsZU1vZGlmaWVkLmdpZgYIAAAAD2ZpbGVVcGRhdGVkLmdpZgYJAAAAC3JlZnJlc2gucG5nBgoAAAAMZmlsZVNpemUuZ2lmCAEACAEACAEACAEBCAEBCAEACAEACAEBCAEBCAEACAEACAEACAEBCQsAAAANCgwMAAAAVlBDQXhpcy5XZWIuQ29udHJvbHMsIFZlcnNpb249MS4xLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tlbj1jMGE4MThiZGU4Zjk1YzMwBQMAAAAjUENBeGlzLldlYi5Db250cm9scy5VcmxMaW5rTW9kZVR5cGUBAAAAB3ZhbHVlX18ACAwAAAAAAAAADA0AAABSUENBeGlzLldlYi5Db3JlLCBWZXJzaW9uPTEuMS4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49YzBhODE4YmRlOGY5NWMzMAULAAAAIlBDQXhpcy5XZWIuQ29yZS5FbnVtcy5EYXRhYmFzZVR5cGUBAAAAB3ZhbHVlX18ACA0AAAAAAAAAC2QFHWN0bDAwJGJyZWFkY3J1bWIxJGJyZWFkY3J1bWIxDzLABAABAAAA/////wEAAAAAAAAABAEAAAB/U3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuTGlzdGAxW1tTeXN0ZW0uT2JqZWN0LCBtc2NvcmxpYiwgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODldXQMAAAAGX2l0ZW1zBV9zaXplCF92ZXJzaW9uBQAACAgJAgAAAA8AAAAPAAAAEAIAAAAQAAAABgMAAAAaWSB04bq/LCB2xINuIGjDs2EgdsOgIE1TREMGBAAAABpZIHThur8sIHbEg24gaMOzYSB2w6AgTVNEQwYFAAAAGlkgdOG6vywgdsSDbiBow7NhIHbDoCBNU0RDCgYGAAAADn4vRGVmYXVsdC5hc3B4CAEABgcAAAAXU+G7kSBsaeG7h3UgdGjhu5FuZyBrw6oIAQEGCAAAAAlNZW51LmFzcHgGCQAAAA5TZWxlY3Rpb24uYXNweAYKAAAAB3B4X3BhdGgGCwAAAAZsYXlvdXQJDAAAAAgBAQ0CDA0AAABSUENBeGlzLldlYi5Db3JlLCBWZXJzaW9uPTEuMS4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49YzBhODE4YmRlOGY5NWMzMAUMAAAAIlBDQXhpcy5XZWIuQ29yZS5FbnVtcy5EYXRhYmFzZVR5cGUBAAAAB3ZhbHVlX18ACA0AAAAAAAAAC2QFMWN0bDAwJG5hdmlnYXRpb25GbG93Q29udHJvbCRuYXZpZ2F0aW9uRmxvd0NvbnRyb2wPMokEAAEAAAD/////AQAAAAAAAAAEAQAAAH9TeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5MaXN0YDFbW1N5c3RlbS5PYmplY3QsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAwAAAAZfaXRlbXMFX3NpemUIX3ZlcnNpb24FAAAICAkCAAAACwAAAAsAAAAQAgAAABAAAAAIAQAGAwAAABpZIHThur8sIHbEg24gaMOzYSB2w6AgTVNEQwYEAAAAGlkgdOG6vywgdsSDbiBow7NhIHbDoCBNU0RDBgUAAAAaWSB04bq/LCB2xINuIGjDs2EgdsOgIE1TREMKBgYAAAAJTWVudS5hc3B4BgcAAAAOU2VsZWN0aW9uLmFzcHgGCAAAAAdweF9wYXRoBgkAAAAGbGF5b3V0CQoAAAANBgwLAAAAUlBDQXhpcy5XZWIuQ29yZSwgVmVyc2lvbj0xLjEuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWMwYTgxOGJkZThmOTVjMzAFCgAAACJQQ0F4aXMuV2ViLkNvcmUuRW51bXMuRGF0YWJhc2VUeXBlAQAAAAd2YWx1ZV9fAAgLAAAAAAAAAAtkBR5fX0NvbnRyb2xzUmVxdWlyZVBvc3RCYWNrS2V5X18WAQUoY3RsMDAkYnJlYWRjcnVtYjEkYnJlYWRjcnVtYjEkSG9tZUJ1dHRvbgUdY3RsMDAkSW5mb3JtYXRpb24kSW5mb3JtYXRpb24PMtIBAAEAAAD/////AQAAAAAAAAAEAQAAAH9TeXN0ZW0uQ29sbGVjdGlvbnMuR2VuZXJpYy5MaXN0YDFbW1N5c3RlbS5PYmplY3QsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OV1dAwAAAAZfaXRlbXMFX3NpemUIX3ZlcnNpb24FAAAICAkCAAAAAwAAAAMAAAAQAgAAAAQAAAAKCAEBDQILZL5hcyjamFR0ujj6uknItonuyxZ0y7lJJDLuheJtYZSp" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['aspnetForm'];
+if (!theForm) {
+    theForm = document.aspnetForm;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/WebResource.axd?d=UkyURSDZNHTpXaFJOfEv1njHoMJ5VJtUAFOO7CaoLZozPCS2YIwY1VZoAMkNPOIn0IKh7I6vtcwNU2m7vzdVrHJkoFVUahQjQXegomvFPso1&amp;t=638286317964787378" type="text/javascript"></script>
+
+
+<script src="/WebResource.axd?d=5zSd972OiMVBO6zfIBvipUqJ1-JQkSFeaGNTnJW9agIaiIAqMpksX80X0BYpPKLPkqH8LJABAXV6tPLWtWuiisbYf-GCqY0RmWWC7AoV-P_qoss_hu5zK2jJZgtR0iLwFxi20BneT-Fd7ZBsl1IDBQ2&amp;t=635684415029430000" type="text/javascript"></script>
+<script src="/WebResource.axd?d=H1zNTF4VsL5VHxlpNax_nHFH4cGdIPJDkDmB0AncJXz3PJ2h5a2sbzHGNyVWuUR-wgQeJOeXRQ8CuJW7zkWAfCChXoQhxfJ9rGvrSkh-A1MPnpdy-G5uGtlk7ECdqiXxaumJcbFLHiewCyGQ8UR-6w2&amp;t=635684415029430000" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+function WebForm_OnSubmit() {
+document.getElementById('ctl00_ContentPlaceHolderMain_TableOfContent1_TableOfContent1_MenuNavigationTree__VIEWSTATE').value = GetViewState__AspNetTreeView('ctl00_ContentPlaceHolderMain_TableOfContent1_TableOfContent1_MenuNavigationTree_UL');
+return true;
+}
+//]]>
+</script>
+
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="8A99A23D" />
+	<input type="hidden" name="__SCROLLPOSITIONX" id="__SCROLLPOSITIONX" value="0" />
+	<input type="hidden" name="__SCROLLPOSITIONY" id="__SCROLLPOSITIONY" value="0" />
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAAUOwFQm86cgXCFrQWiJTreEA91ucMxxd6qK4i9+A8xb7BvGXnfeIMJWZ4VG0D5SscSxJL87lYsnl6WQdAgon7gMc967YGPlWISRfu/0dfDAhM4Hg2D2uC2qwtKcNxNaG1dokTbBSxvXMPp2Lae6cVHK" />
+</div>
+        <div id="wrap"> 
+            <div id="header">
+                <div class="headerleft">
+                       <!-- <img src="../../../../Resources/Images/logo-tk.png" id="ctl00_imgSiteLogo" class="imgSiteLogo" alt="PX-Web" /> -->
+                      <!--  <span class="siteLogoText"></span> -->
+                </div>
+                <div class="headerright">
+                 <!--  <select name="ctl00$cboSelectLanguages" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;ctl00$cboSelectLanguages\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_cboSelectLanguages" class="cboSelectLanguages">
+	<option selected="selected" value="vi">Ti&#234;́ng Việt</option>
+	<option value="en">English</option>
+
+</select> -->
+                </div>
+                <div style="clear: both;"> </div>
+            </div>
+
+            <div id="breadcrumb">    
+              <div id="ctl00_breadcrumb1">
+	
+
+<div class="breadcrumb_container">
+    <!-- <input type="image" name="ctl00$breadcrumb1$breadcrumb1$HomeButton" id="ctl00_breadcrumb1_breadcrumb1_HomeButton" class="breadcrumb_homebutton" src="" />-->
+    <a id="ctl00_breadcrumb1_breadcrumb1_lnkHome" href="/pxweb/vi/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d"><img id="ctl00_breadcrumb1_breadcrumb1_imgHome" title="Số liệu thống kê" class="breadcrumb_homebutton" src="/WebResource.axd?d=m5BkjPkU1Q9IFoAUIqInb-imYA67I1cF1KE7RyXryLhq4FnirTxraQl5mfO5DCi2Z8fPluoaud13GamXgHLnrhUZceyYGSIJsaOl5TR1eeKKDv2SxKrUopEgYhTqYrOskNPjo1j-MsKH9JBxx0Yl4w2&amp;t=635684415063590000" alt="Số liệu thống kê" /></a>
+    <span id="ctl00_breadcrumb1_breadcrumb1_lblSep1" class="breadcrumb_sep">>></span>
+    <a id="ctl00_breadcrumb1_breadcrumb1_lnkDb" class="breadcrumb_text breadcrumb_dblink" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Y tế, văn hóa và MSDC</a>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</div>   
+
+
+
+
+</div>           
+            </div>  
+            <div id="navigationFlow" >        
+              <!--  <div id="ctl00_navigationFlowControl">
+	<div id="ctl00_navigationFlowControl_navigationFlowControl_panelShowNavigationFlow">
+		
+    <div class="navigationFlowArea">
+        <div class="dottedline" style="left: 71px; top: 18px; *top: 40px; width: 137px;"></div>
+        <div class="dottedline" style="left: 240px; top: 18px; *top: 28px; width: 137px;"></div>
+        <div class="row1">
+            <a id="ctl00_navigationFlowControl_navigationFlowControl_firstLink"><div id="ctl00_navigationFlowControl_navigationFlowControl_firstItem" class="col1 active ">
+			                
+				    <div class="number" >
+					    1
+				    </div>
+				    <div class="text" >
+					   <span id="ctl00_navigationFlowControl_navigationFlowControl_lblFirstStep">Choose table</span>
+				    </div>
+			    
+		</div></a>
+            <a id="ctl00_navigationFlowControl_navigationFlowControl_secondLink"><div id="ctl00_navigationFlowControl_navigationFlowControl_secondItem" class="col2 future">
+			
+				    <div class="number" >
+					    2
+				    </div>
+				    <div class="text">
+					    <span id="ctl00_navigationFlowControl_navigationFlowControl_lblSecondStep">Choose variable</span>
+				    </div>
+			    
+		</div></a>           
+			<div id="ctl00_navigationFlowControl_navigationFlowControl_thirdItem" class="col3 future">
+			
+				<div class="number" >
+					3
+				</div>
+				<div class="text" >
+					<span id="ctl00_navigationFlowControl_navigationFlowControl_lblThirdStep">Show table</span>
+				</div>
+			
+		</div>      
+        </div>   
+    </div>
+    <div style="clear: both;"></div>
+    <div class="fullscreen dottedline"></div>
+
+
+	</div>
+
+
+
+</div> -->
+            </div>      
+        
+            <div id="content"> 
+                <div id="place-holder">
+                    
+    <div class="menuTopLeftContent">
+      <!--  <span id="ctl00_ContentPlaceHolderMain_lblDatabase" class="menu_databasename">Y tế, văn hóa và MSDC</span> -->
+    </div>
+    <div class="menuTopRightContent">
+        
+    </div>
+        <div class="break"></div>
+   
+            <div id="ctl00_ContentPlaceHolderMain_TableOfContent1">
+	
+
+<script type="text/javascript">
+
+    jQuery(document).ready(function () {
+        var offset = jQuery('.AspNet-TreeView-Collapse:first').offset();
+        if (offset) {
+            jQuery('html, body').scrollTop(offset.top);
+        }
+        jQuery('a[rel="_blank"]').each(function () {
+            jQuery(this).attr('target', '_blank');
+        });
+    });
+
+</script>
+</div>  
+       
+    <div id="ctl00_ContentPlaceHolderMain_TableList1">
+	<div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_MenulistPanel">
+		
+    <ol class="tablelist_ol">
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.01.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Một số chỉ tiêu xã hội chủ yếu</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl03_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl03_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.02.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số cơ sở khám, chữa bệnh(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl05_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl05_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.03.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số cơ sở khám, chữa bệnh phân theo cấp quản lý(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl07_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl07_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.04.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số cơ sở khám, chữa bệnh phân theo loại cơ sở và phân theo cấp quản lý(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl09_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl09_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.05.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số cơ sở khám, chữa bệnh trực thuộc sở Y tế phân theo địa phương(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl11_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl11_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.06.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số giường bệnh và số bác sĩ</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl13_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl13_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.07.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số giường bệnh(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl15_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl15_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.08.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số giường bệnh phân theo cấp quản lý(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl17_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl17_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.09.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số giường bệnh  phân theo địa phương(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl19_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl19_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.10.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số giường bệnh trực thuộc sở Y tế phân theo địa phương(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl21_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl21_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.11.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số nhân lực y tế(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl23_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl23_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.12.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số nhân lực y tế phân theo cấp quản lý(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl25_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl25_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.13.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số nhân lực ngành Y trực thuộc sở Y tế phân theo địa phương(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl27_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl27_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.14.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số bác sĩ phân theo địa phương(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl29_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl29_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.15.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số nhân lực ngành dược trực thuộc sở Y tế phân theo địa phương(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl31_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl31_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.16.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ trẻ em dưới một tuổi được tiêm chủng đầy đủ các loại vắc xin phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl33_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl33_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.17.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ trẻ em dưới 5 tuổi bị suy dinh dưỡng phân theo giới tính và theo thành thị, nông thôn</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl35_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl35_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.18.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ trẻ em dưới 5 tuổi bị suy dinh dưỡng  phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl37_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl37_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.19.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số người nhiễm HIV/AIDS và số người chết do HIV/ AIDS phân theo địa phương(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl39_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl39_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.20.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Xuất bản sách, văn hóa phẩm, báo và tạp chí</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl41_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl41_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.21.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số thư viện do địa phương quản lý phân theo địa phương (*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl43_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl43_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.22.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số tòa soạn báo, tạp chí phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl45_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl45_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.23.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số huy chương thể thao quốc tế đạt được</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl47_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl47_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.24.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số di tích lịch sử, văn hóa, danh lam thắng cảnh</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl49_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl49_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.25.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số di sản văn hóa cấp quốc gia phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl51_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl51_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.26.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân đầu người một tháng theo giá hiện hành phân theo thành thị, nông thôn và phân theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl53_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl53_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.27.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân đầu người một tháng theo giá hiện hành phân theo nguồn thu, thành thị, nông thôn, giới tính chủ hộ và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl55_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl55_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.28.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân đầu người một tháng theo giá hiện hành phân theo nguồn thu và theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl57_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl57_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.28.1.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân đầu người một tháng theo giá hiện hành phân theo nguồn thu, thành thị, nông thôn, giới tính chủ hộ và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl59_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl59_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.29.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân đầu người một tháng theo giá hiện hành phân theo 5 nhóm thu nhập, theo thành thị, nông thôn, theo giới tính chủ hộ và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl61_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl61_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.30.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân đầu người một tháng theo giá hiện hành phân theo 5 nhóm thu nhập và phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl63_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl63_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.31.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Chênh lệch thu nhập bình quân đầu người một tháng giữa nhóm thu nhập cao nhất so với nhóm thu nhập thấp nhất theo giá hiện hành phân theo thành thị, nông thôn, theo giới tính chủ hộ và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl65_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl65_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.32.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Chênh lệch thu nhập bình quân đầu người một tháng giữa nhóm thu nhập cao nhất so với nhóm thu nhập thấp nhất theo giá hiện hành phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl67_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl67_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.33.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân một lao động đang làm việc phân theo giới tính và theo thành thị, nông thôn</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl69_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl69_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.34.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân một lao động đang làm việc phân theo ngành kinh tế</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl71_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl71_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.35.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân một lao động đang làm việc phân theo nghề nghiệp</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl73_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl73_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.36.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thu nhập bình quân một lao động đang làm việc phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl75_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl75_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.37.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Chỉ số phát triển con người phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl77_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl77_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.38.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Hệ số bất bình đẳng trong phân phối thu nhập (hệ số GINI)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl79_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl79_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.39.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Hệ số bất bình đẳng trong phân phối thu nhập (hệ số GINI) phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl81_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl81_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.40.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Chi tiêu bình quân đầu người một tháng theo giá hiện hành phân theo thành thị, nông thôn và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl83_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl83_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.41.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Chi tiêu bình quân đầu người một tháng theo giá hiện hành phân theo khoản chi,thành thị, nông thôn và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl85_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl85_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.42.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Chi tiêu cho đời sống bình quân đầu người một tháng theo giá hiện hành phân theo thành thị, nông thôn và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl87_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl87_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.43.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Chi tiêu cho đời sống bình quân đầu người một tháng theo giá hiện hành phân theo 5 nhóm thu nhập, theo thành thị, nông thôn,theo giới tính chủ hộ và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl89_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl89_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.44.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Chênh lệch chi tiêu cho đời sống bình quân đầu người một tháng giữa Nhóm thu nhập cao nhất so với Nhóm thu nhập thấp nhất theo giá hiện hành phân theo thành thị, nông thôn, theo giới tính chủ hộ và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl91_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl91_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.45.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Mức sống tối thiểu</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl93_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl93_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.46.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ nghèo phân theo thành thị, nông thôn và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl95_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl95_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.47.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ nghèo phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl97_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl97_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.49.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Mức tiêu dùng một số mặt hàng chủ yếu bình quân đầu người một tháng phân theo mặt hàng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl99_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl99_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.50.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Mức tiêu dùng một số mặt hàng chủ yếu bình quân đầu người một tháng phân theo thành thị, nông thôn</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl101_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl101_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.51.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Mức tiêu dùng một số mặt hàng chủ yếu bình quân đầu người một tháng phân theo 5 nhóm thu nhập</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl103_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl103_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.52.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ dân số được sử dụng nguồn nước hợp vệ sinh (*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl105_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl105_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.53.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ dân số được sử dụng nguồn nước hợp vệ sinh phân theo địa phương(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl107_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl107_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.54.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ dân số đô thị được cung cấp nước sạch qua hệ thống cấp nước tập trung phân theo địa phương(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl109_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl109_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.55.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ dân số dùng hố xí hợp vệ sinh phân theo thành thị, nông thôn và theo vùng(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl111_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl111_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.56.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ dân số dùng hố xí hợp vệ sinh phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl113_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl113_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.57.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ dùng điện sinh hoạt phân theo thành thị, nông thôn và theo vùng(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl115_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl115_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.58.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ dùng điện sinh hoạt phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl117_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl117_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.59.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ có đồ dùng lâu bền phân theo thành thị, nông thôn, theo vùng và phân theo 5 nhóm thu nhập</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl119_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl119_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.60.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ có máy tính phân theo thành thị, nông thôn và phân theo vùng và theo 5 nhóm thu nhập</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl121_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl121_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.61.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ có máy tính phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl123_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl123_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.62.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ người sử dụng điện thoại di động phân theo thành thị, nông thôn, giới tính, nhóm tuổi, loại điện thoại và phân theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl125_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl125_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.63.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ người sử dụng điện thoại di động phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl127_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl127_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.64.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ người sử dụng internet phân theo thành thị, nông thôn, giới tính, nhóm tuổi, loại điện thoại và phân theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl129_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl129_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.65.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ người sử dụng internet phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl131_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl131_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.66.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ gia đình có kết nối internet phân theo thành thị, nông thôn, giới tính chủ hộ và phân theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl133_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl133_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.67.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ gia đình có kết nối internet phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl135_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl135_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.68.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ người dân biết kỹ năng về công nghệ thông tin phân theo thành thị, nông thôn, giới tính, nhóm tuổi, loại kỹ năng và phân theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl137_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl137_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.69.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ người dân biết kỹ năng về công nghệ thông tin phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl139_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl139_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.70.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ người dân tham gia mạng xã hội phân theo thành thị, nông thôn, giới tính, nhóm tuổi và phân theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl141_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl141_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.71.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ người dân tham gia mạng xã hội theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl143_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl143_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.72.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ có nhà ở phân theo loại nhà, theo thành thị, nông thôn, theo vùng và theo 5 nhóm thu nhập</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl145_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl145_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.73.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ hộ có nhà ở phân theo loại nhà và phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl147_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl147_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.74.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Diện tích nhà ở bình quân đầu người phân theo thành thị, nông thôn, theo vùng và theo 5 nhóm thu nhập</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl149_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl149_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.75.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tiêu dùng năng lượng bình quân đầu người phân theo loại năng lượng và theo vùng</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl151_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl151_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.76.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Diện tích nhà ở bình quân đầu người phân theo loại nhà và phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl153_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl153_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.77.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Hoạt động tư pháp</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl155_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl155_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.78.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số vụ án và số bị can đã bị khởi tố phân theo nhóm tội danh năm 2025</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl157_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl157_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.79.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số vụ án và số bị can đã bị khởi tố phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl159_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl159_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.80.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số vụ án và số bị can đã bị truy tố năm 2025 phân theo nhóm tội danh</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl161_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl161_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.81.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số vụ án và bị can đã bị truy tố phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl163_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl163_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.82.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số vụ án và bị cáo đã xét xử sở thẩm phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl165_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl165_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.83.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Kết quả thi hành án dân sự  phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl167_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl167_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.84.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Số lượt người đã được trợ giúp pháp lý phân theo đối tượng được trợ giúp pháp lý và vùng kinh tế</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl169_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl169_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.85.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Kết quả thi hành án dân sự  phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl171_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl171_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.86.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Trật tự và an toàn xã hội</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl173_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl173_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.87.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Một số chỉ tiêu về tai nạn giao thông phân theo loại đường và theo vùng kinh tế</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl175_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl175_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.88.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Một số chỉ tiêu về  tai nạn giao thông phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl177_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl177_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.89.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Một số chỉ tiêu về vụ cháy, nổ phân theo loại cháy, nổ và vùng kinh tế</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl179_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl179_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.90.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Một số chỉ tiêu về vụ cháy, nổ phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl181_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl181_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.91.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Thiệt hại do thiên tai</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl183_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl183_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.92.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Xử lý chất thải rắn và nước thải của các khu công nghiệp(*)</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl185_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl185_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.93.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Xử lý chất thải rắn và nước thải của các khu đô thị</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl187_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl187_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.94.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Chất thải rắn được xử lý bình quân một ngày phân theo địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl189_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl189_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.95.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ chất thải nguy hại được thu gom, xử lý phân theo vùng và địa phương</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl191_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl191_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.96.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ khu công nghiệp, khu chế xuất đã đi vào hoạt động có nhà máy xử lý nước thải tập trung đạt tiêu chuẩn môi trường</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        <hr />
+            <li class="tablelist_li">
+                <div id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl193_pnlPx">
+			
+                <p>                               
+                <a id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl193_lnkTableListItemText" class="tablelist_linkHeading" href="/pxweb/vi/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/Y%20t%e1%ba%bf,%20v%c4%83n%20h%c3%b3a%20v%c3%a0%20MSDC/V14.97.px/?rxid=11c0ce0b-7882-4fa6-81ba-17fe8352140d">Tỷ lệ cụm công nghiệp đang hoạt động có hệ thống xử lý nước thải tập trung đạt tiêu chuẩn môi trường phân theo vùng và địa phương năm 2022 và năm 2023</a>                
+                </p>
+
+                
+                    
+                                                                             
+                 
+                                
+                
+                
+                
+                
+                
+                                
+
+                
+                
+                
+                
+                
+                
+                
+                
+
+                </p>
+                
+                
+             
+                
+		</div>
+                
+            </li>
+        </ol>
+    
+
+	</div>
+</div>
+
+    
+
+
+                </div>
+		<div id="ctl00_Information">
+	
+
+
+
+</div>
+            </div>
+            <div id="footer">
+        
+                <div class="footerleft">
+		
+                    <span id="ctl00_lblFooterText"></span>  
+
+                </div>
+                <div class="footerright">
+
+                   
+   
+                </div>
+               <!--  
+<style type="text/css">
+
+    .auto-style10 {
+        width: 100%;
+        vertical-align:text-top;
+        margin-top:0px;
+	font-size:13px;
+    }
+    .auto-style20 {
+        text-align: center;
+    }
+    .auto-style30 {
+        width: 287px;
+    }
+.auto-style50 {
+        font-size:13px;
+ 	margin-top:0px;
+	vertical-align:text-top;
+    }
+</style>
+
+
+
+
+
+<div id="ctl00_Footpage1_Panel3">
+	
+    <table class="auto-style10">
+        <tr>
+            <td class="auto-style30"><strong>Nhà tài trợ/Sponsors by</strong><strong style="text-align: center">: worldbank<br/> </strong>
+                <img id="ctl00_Footpage1_Image3" src="../../../../Resources/Images/logo-wb-header-en.png" style="text-align: center" />
+            </td>
+            <td>
+                <div style="clear: both;">
+                    <span id="_ctl1_lblContent1"><span id="_ctl1_lblContent2">
+                    <p class="auto-style20" style="outline: 0;">
+                        <font class="auto-style50" color="002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;">Địa chỉ: Khu đô thị mới đại lộ Lê Lợi - Đông Hương - TP Thanh Hoá - Tỉnh Thanh Hoá<p></p>
+                        </font>
+                    </p>
+                    </span>
+                    <p class="auto-style20" style="outline: 0;">
+                        <font class="auto-style50" color="002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;">Address: new urban boulevard Le Loi - Dong Huong Street - Thanh Hoa City - Thanh Hoa Province</font></p>
+                    <p class="auto-style20" style="outline: 0;">
+                        Điện thoại/Telephone<font class="auto-style50" color="#002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;"> : 237.3 859 226- 3 852 306</font></p>
+                    <p class="auto-style20" style="outline: 0;">
+                        <font class="auto-style50" color="#002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;">Fax: 237.3 756 627</font></p>
+                    <p class="auto-style20" style="outline: 0;">
+                        <font class="auto-style50" color="#002f54" face="Arial, Helvetica, sans-serif" size="3" style="outline: 0;"> </font><a class="auto-style10" href="mailto:thanhhoa@gso.gov.vn"><font class="auto-style10" color="#002f54" face="Arial, Helvetica, sans-serif" size="2" style="outline: 0;">Email:thanhhoa@gso.gov.vn</font></a></p>
+                    </span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+
+
+
+   -->
+            </div>
+        </div>
+    
+
+<script type="text/javascript">
+//<![CDATA[
+PCAxis_HideElement(".tableofcontent_action");
+theForm.oldSubmit = theForm.submit;
+theForm.submit = WebForm_SaveScrollPositionSubmit;
+
+theForm.oldOnSubmit = theForm.onsubmit;
+theForm.onsubmit = WebForm_SaveScrollPositionOnSubmit;
+//]]>
+</script>
+</form>
+</body>
+</html>

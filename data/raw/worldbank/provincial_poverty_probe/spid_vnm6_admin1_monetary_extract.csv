@@ -1,0 +1,67 @@
+year,geo_code,sample,mean2021,poor300,poor420,poor830,gini,theil
+2002,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,4.726725,0.390911,0.637181,0.890813,0.362322,0.249099
+2002,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,3.412635,0.573767,0.764202,0.951978,0.336242,0.197864
+2002,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,3.617845,0.535092,0.745104,0.948039,0.318809,0.179440
+2002,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,3.131787,0.655581,0.807428,0.951337,0.358982,0.231675
+2002,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,7.317479,0.181837,0.361675,0.694152,0.384215,0.247839
+2002,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,4.186788,0.386662,0.641156,0.934446,0.300942,0.156529
+2004,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,5.732588,0.220053,0.465472,0.838717,0.347987,0.216843
+2004,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,3.650760,0.523411,0.741662,0.944037,0.333236,0.192761
+2004,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,4.200353,0.398671,0.652947,0.922869,0.330578,0.191332
+2004,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,3.966928,0.473386,0.650971,0.931341,0.358037,0.219937
+2004,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,8.637583,0.082629,0.212794,0.593437,0.343448,0.197453
+2004,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,4.859302,0.288143,0.547472,0.906107,0.311956,0.174656
+2006,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,6.429878,0.158737,0.383122,0.785680,0.346269,0.219486
+2006,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,4.174056,0.436572,0.652037,0.908003,0.333780,0.184912
+2006,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,4.759863,0.322511,0.553124,0.891522,0.328451,0.185504
+2006,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,4.925679,0.364329,0.499723,0.873261,0.363091,0.216814
+2006,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,9.219684,0.067026,0.162323,0.576267,0.344879,0.203695
+2006,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,5.689814,0.173783,0.397901,0.855880,0.301835,0.162113
+2008,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,6.991130,0.103372,0.334308,0.748450,0.346735,0.216157
+2008,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,4.480268,0.372685,0.616282,0.891654,0.338983,0.196213
+2008,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,5.292679,0.225491,0.466062,0.858061,0.317866,0.172842
+2008,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,5.527126,0.275072,0.430559,0.831049,0.352879,0.209120
+2008,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,9.280211,0.036911,0.159304,0.611824,0.357629,0.225418
+2008,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,5.872153,0.157088,0.384941,0.826544,0.310505,0.174067
+2010,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,14.079485,0.018018,0.065624,0.390673,0.401063,0.297488
+2010,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,7.140436,0.174210,0.344836,0.714964,0.370888,0.238508
+2010,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,9.293960,0.048575,0.151700,0.566828,0.339820,0.209118
+2010,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,8.540110,0.128631,0.251040,0.607231,0.366910,0.229547
+2010,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,15.877381,0.012466,0.039816,0.285434,0.398121,0.316364
+2010,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,9.709234,0.021994,0.103989,0.524141,0.317108,0.178160
+2012,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,14.336864,0.005348,0.032650,0.281463,0.343898,0.209097
+2012,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,7.886923,0.125382,0.274633,0.661557,0.365998,0.234168
+2012,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,10.357286,0.036261,0.107137,0.478976,0.333057,0.196405
+2012,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,9.871176,0.117364,0.216572,0.542257,0.379341,0.251933
+2012,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,14.905168,0.003887,0.021735,0.237769,0.332904,0.204834
+2012,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,9.784773,0.017261,0.073469,0.520601,0.302895,0.176050
+2014,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,14.333452,0.002235,0.020528,0.278560,0.336414,0.203162
+2014,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,8.079463,0.115118,0.272762,0.664146,0.369887,0.250399
+2014,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,11.290930,0.033151,0.090644,0.413958,0.332303,0.196268
+2014,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,9.578052,0.137313,0.246113,0.525419,0.388713,0.263197
+2014,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,15.973025,0.003262,0.015349,0.169333,0.311439,0.179760
+2014,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,10.774956,0.014256,0.045252,0.412063,0.286685,0.144972
+2016,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,16.017797,0.000847,0.010521,0.194948,0.327645,0.192936
+2016,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,9.265895,0.072125,0.189258,0.591640,0.363822,0.238495
+2016,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,12.518231,0.026776,0.074661,0.344118,0.338617,0.208787
+2016,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,11.275504,0.122785,0.178000,0.447923,0.397138,0.273084
+2016,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,19.700751,0.000857,0.002907,0.081520,0.308548,0.174084
+2016,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,13.231954,0.003540,0.025606,0.283204,0.306450,0.173156
+2018,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,17.611450,0.001861,0.007055,0.130800,0.319235,0.181365
+2018,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,10.268736,0.073643,0.178634,0.559976,0.398042,0.307423
+2018,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,14.330355,0.019102,0.046510,0.258614,0.334168,0.204036
+2018,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,12.975184,0.094548,0.169662,0.405385,0.433065,0.354966
+2018,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,21.854285,0.000768,0.002421,0.055272,0.308506,0.158808
+2018,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,14.714223,0.002358,0.012186,0.208153,0.306271,0.170774
+2020,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,20.601679,0.002106,0.002474,0.065603,0.320156,0.183203
+2020,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,11.690989,0.044577,0.123867,0.433351,0.368757,0.232625
+2020,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,15.300673,0.010732,0.032293,0.243902,0.349410,0.215762
+2020,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,13.004374,0.060038,0.137972,0.393339,0.391259,0.273635
+2020,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,25.541196,0.000673,0.002796,0.046148,0.341833,0.214617
+2020,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,13.484882,0.003693,0.023143,0.275064,0.313414,0.208000
+2022,VNM_2015_GAULx_1,Bac Ninh & Ha Nam & Ha Noi City & Ha Tay & Hai Duong & Hai Phong City & Hung Yen & Nam Dinh & Ninh Binh & Quang Ninh & Thai Binh & Vinh Phuc,21.009401,0.001519,0.002740,0.065149,0.350362,0.332073
+2022,VNM_2015_GAULx_2,Bac Giang & Bac Kan & Cao Bang & Dien Bien & Ha Giang & Hoa Binh & Lai Chau & Lang Son & Lao Cai & Phu Tho & Son La & Thai Nguyen & Tuyen Quang & Yen Bai,11.281166,0.046868,0.130184,0.462925,0.368667,0.231183
+2022,VNM_2015_GAULx_3,Binh Dinh & Binh Thuan & Da Nang City & Ha Tinh & Khanh Hoa & Nghe An & Ninh Thuan & Phu Yen & Quang Binh & Quang Nam & Quang Ngai & Quang Tri & Thanh Hoa & Thua Thien - Hue,14.519358,0.012766,0.032585,0.225635,0.321560,0.188886
+2022,VNM_2015_GAULx_4,Dak Lak & Dak Nong & Gia Lai & Kon Tum & Lam Dong,13.237384,0.074733,0.155530,0.406913,0.406714,0.277737
+2022,VNM_2015_GAULx_5,Ba Ria-Vung Tau & Binh Duong & Binh Phuoc & Dong Nai & Ho Chi Minh City & Tay Ninh,21.355938,0.000252,0.007849,0.073014,0.317997,0.176592
+2022,VNM_2015_GAULx_6,An Giang & Bac Lieu & Ben Tre & Ca Mau & Can Tho city & Dong Thap & Hau Giang & Kien Giang & Long An & Soc Trang & Tien Giang & Tra Vinh & Vinh Long,13.054590,0.012395,0.034447,0.304490,0.314731,0.173802
