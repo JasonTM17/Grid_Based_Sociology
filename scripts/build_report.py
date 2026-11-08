@@ -8,6 +8,7 @@ Cách dùng: python scripts/build_report.py
 """
 import csv
 import json
+import re
 from pathlib import Path
 
 from docx import Document
@@ -753,6 +754,339 @@ table(["Lệnh", "Kỳ vọng"], [
     ["python scripts/build_report.py", "reports/final_report.docx"],
 ], widths=[9.8, 6.0], caption="Bảng A1. Danh sách lệnh tái lập và kết quả kỳ vọng")
 body("Môi trường: jupyter/pytest/nbconvert không cài trên PATH — luôn dùng python -m pytest / python -m nbconvert. Dữ liệu gốc data/raw/ bất biến; panel tái tạo từ raw bằng build_panel.py; Mendeley đầy đủ tải theo DOI 10.17632/wbk42j9wc8.1 (chỉ commit 4 file nhỏ dùng trực tiếp).")
+
+# ================= PHỤ LỤC B =================
+# THUẦN ADDITIVE — tóm tắt 3 lane phân tích chuyên sâu model của
+# reports/model_deep_dive.md (A: độ nhạy giao thức/B5, B: hồ sơ cụm +
+# bootstrap, C: chẩn đoán supervised). Lane chỉ chạy script mới in-memory,
+# KHÔNG đụng artifact đóng băng. MỌI số dưới đây được PARSE lúc build từ
+# results/*.md do các lane script sinh — KHÔNG hardcode; regex lệch định
+# dạng → build fail (không bao giờ in số sai).
+
+
+def _md_read(name):
+    return (ROOT / "results" / name).read_text(encoding="utf-8")
+
+
+def _md_rx(pattern, text):
+    m = re.search(pattern, text, re.MULTILINE)
+    if m is None:
+        raise ValueError(f"Phụ lục B: không khớp pattern {pattern!r}")
+    return m
+
+
+def _md_between(text, start, end=None):
+    i = text.index(start)
+    j = text.index(end, i) if end is not None else len(text)
+    return text[i:j]
+
+
+def _md_rows(block):
+    for ln in block.splitlines():
+        ln = ln.strip()
+        if ln.startswith("|") and ln.endswith("|") and "---" not in ln:
+            yield [c.strip() for c in ln.strip("|").split("|")]
+
+
+def _md_kw(sec):
+    return _md_rx(r"\*\*Kruskal–Wallis\*\*: H = ([\d.]+), df = (\d+), "
+                  r"p = ([\d.eE+-]+) \(n = (\d+);", sec)
+
+
+def _md_medians(sec):
+    return [{"cl": c[0], "n": c[2], "median": c[3]} for c in _md_rows(sec)
+            if len(c) == 8 and c[0].lstrip("-").isdigit()]
+
+
+def _grpm(med_list, cl):
+    m = next(x for x in med_list if x["cl"] == cl)
+    return f"{m['median']} (n = {m['n']})"
+
+
+# ---- Lane A: results/protocol_sensitivity.md ----
+_A = _md_read("protocol_sensitivity.md")
+_A3 = _md_between(_A, "## 3.", "## 4.")
+_A4 = _md_between(_A, "## 4.", "## 5.")
+_A5 = _md_between(_A, "## 5.", "## 6.")
+_A6 = _md_between(_A, "## 6.", "## 7.")
+_A7 = _md_between(_A, "## 7.", "## 8.")
+_A8 = _md_between(_A, "## 8.", "## 9.")
+_A_M = _md_rx(r"Khớp giá trị từng trường trên (\d+)/(\d+) dòng", _A3)
+_A_MATCH = f"{_A_M.group(1)}/{_A_M.group(2)}"
+_A_ORDER = _md_rx(r"Khớp cả THỨ TỰ (\d+) dòng sau sort như gốc: (True|False)", _A3)
+_A_PASS = [{"feat": c[0], "cfg": c[1], "sizes": c[3], "score": c[8]}
+           for c in _md_rows(_A3)
+           if len(c) == 9 and c[0].startswith("sd_") and "+" in c[0]]
+assert len(_A_PASS) == 4, "Phụ lục B: bảng 4 dòng pass bộ lọc cũ lệch định dạng"
+_A_WINNER = next(r for r in _A_PASS if r["feat"] == "sd_4_2+sd_6_1")
+_A_ZERO = _md_rx(r"pass bộ lọc sửa \((\d+)/(\d+)\)", _A4)
+_A_MCS_MOD = _md_rx(r"## 4\. Bộ lọc SỬA — kết quả chính \(mcs = ([\d.]+)\)",
+                    _A4).group(1)
+_A_CONT = _md_rx(r"Tổ hợp gần đạt nhất \(trong nhóm đạt k/noise/coverage, "
+                 r"(\d+)/(\d+) tổ hợp\): `([\w+]+)` \(([\d/]+)\) — min_share = "
+                 r"([\d.]+) \(còn thiếu ([\d.]+) để đạt ([\d.]+)\), "
+                 r"largest_sửa = (\d+\.\d+)", _A4)
+_A_CONT_OLD = next(r["score"] for r in _A_PASS
+                   if r["feat"] == _A_CONT.group(3) and r["cfg"] == _A_CONT.group(4))
+_A_CONT_DELTA = _vn(f"{float(_A_CONT_OLD) - float(_A_WINNER['score']):.4f}")
+_A_MCS = {c[0]: c[1] for c in _md_rows(_A7)
+          if len(c) == 5 and re.fullmatch(r"0\.\d+", c[0])}
+assert len(_A_MCS) == 3, "Phụ lục B: bảng độ nhạy mcs phải đủ 3 dòng"
+_A_ONLY5 = _md_rx(r"chỉ (\d+)/(\d+) tổ hợp có largest_sửa ≤ ([\d.]+), và cả nhóm "
+                  r"này có noise_train ([\d.]+[–-][\d.]+), coverage "
+                  r"([\d.]+[–-][\d.]+)", _A7)
+_A_TOP5R1 = next(c for c in _md_rows(_A5)
+                 if len(c) == 13 and c[0] == "1" and c[1].startswith("sd_"))
+_A_TOP1 = _md_rx(r"top-1 toàn bảng là \*\*([\w+]+)\*\* \(([\d/]+)\) với score_sửa "
+                 r"([\d.]+)", _A6)
+_A_FZ_LG = _md_rx(r"\| largest_sửa \(non-noise\) \| ([\d.]+) — vượt ngưỡng ([\d.]+) "
+                  r"thêm ([\d.]+) \|", _A6)
+_A_FZ_MS = _md_rx(r"\| min_share \(non-noise\) \| ([\d.]+) — thiếu ([\d.]+) so với "
+                  r"mcs=([\d.]+) \|", _A6)
+_A_FZ_SM = _md_rx(r"\| score_sửa của cấu hình đóng băng \| ([\d.]+) \|", _A6).group(1)
+_A_SCORE_PUB = _md_rx(r"\| score công bố \(bộ lọc cũ\) \| ([\d.]+) \|",
+                      _A6).group(1)
+assert float(_A_SCORE_PUB) == float(_A_WINNER["score"]), \
+    "Phụ lục B: score công bố ở mục 6 lệch dòng winner mục 3"
+_A_GAP_MOD = _md_rx(r"score_sửa: top-1 toàn bảng \(không pass bộ lọc sửa\) − đóng băng "
+                    r"\| ([\d.]+) \|", _A6).group(1)
+_A_GAP_OLD = _md_rx(r"khoảng cách score \(công thức cũ\): top-1 − [\d.]+ \| ([\d.]+) \|",
+                    _A6).group(1)
+_A_ST_TOP = _md_rx(r"top-1 toàn bảng `([\w+]+)` \(([\d/]+)\) có stable_mc_pm1 = "
+                   r"\*\*(True|False)\*\*", _A8)
+_A_ST_CONT = _md_rx(r"`([\w+]+)` \(([\d/]+)\): stable_mc_pm1 = \*\*(True|False)\*\*",
+                    _A8)
+
+# ---- Lane B: results/cluster_profile.md ----
+_B = _md_read("cluster_profile.md")
+_B_PCI = _md_between(_B, "### 2.1)", "### 2.2)")
+_B_POV = _md_between(_B, "### 2.2)", "### 2.3)")
+_B_HEA = _md_between(_B, "### 2.3)", "### 2.4)")
+_B_GRD = _md_between(_B, "### 2.4)", "### 2.5)")
+_B_URB = _md_between(_B, "### 2.5)", "## 3)")
+_B_BOOT = _md_between(_B, "## 3)", "## 4)")
+_B_KW = {"pci": _md_kw(_B_PCI), "pov": _md_kw(_B_POV), "hea": _md_kw(_B_HEA),
+         "grd": _md_kw(_B_GRD), "urb": _md_kw(_B_URB)}
+_B_MED_PCI = _md_medians(_B_PCI)
+_B_MED_POV = _md_medians(_B_POV)
+_B_MED_GRD = _md_medians(_B_GRD)
+assert len(_B_MED_PCI) == len(_B_MED_POV) == 4, \
+    "Phụ lục B: bảng median PCI/nghèo phải đủ 4 nhóm"
+assert len(_B_MED_GRD) == 3, "Phụ lục B: bảng median GRDP phải đủ 3 nhóm"
+_B_SEED = _md_rx(r"seed \*\*(\d+)\*\* = `numpy\.random\.default_rng\(\d+\)`",
+                 _B).group(1)
+_B_NBOOT = _md_rx(r"\*\*Bootstrap\*\*: (\d+) lần resample CÓ hoàn lại "
+                  r"\*\*theo TỈNH\*\*", _B).group(1)
+_B_KEEP_ALL, _B_SIL = None, None
+for c in _md_rows(_B_BOOT):
+    if len(c) == 6 and c[4].startswith("["):
+        if "Silhouette" in c[0]:
+            _B_SIL = c
+        else:
+            _B_KEEP_ALL = c
+assert _B_KEEP_ALL is not None and _B_SIL is not None, \
+    "Phụ lục B: bảng bootstrap mean/CI lệch định dạng"
+_B_SIL_REF = _md_rx(r"silhouette của model gốc trên train \(không nhiễu\) = "
+                    r"\*\*([\d.]+)\*\*", _B_BOOT).group(1)
+_B_KEEP = [c for c in _md_rows(_B_BOOT)
+           if len(c) == 6 and c[1].endswith("%") and c[5].endswith("/200")]
+assert len(_B_KEEP) == 4, "Phụ lục B: bảng giữ nhãn theo nhãn gốc phải đủ 4 nhóm"
+_B_JAC = {c[0]: (c[1], c[2]) for c in _md_rows(_B_BOOT)
+          if len(c) == 3 and c[0] in ("0", "1", "2") and "/200" in c[2]}
+assert len(_B_JAC) == 3, "Phụ lục B: bảng Jaccard phải đủ 3 cụm gốc"
+_B_ZERO_N = len([p for p in next(ln for ln in _B_HEA.splitlines()
+                                 if "0-thật" in ln).split("):", 1)[1].split(",")
+                 if p.strip()])
+
+# ---- Lane C: results/supervised_depth.md ----
+_C = _md_read("supervised_depth.md")
+_C_RIDGE = _md_between(_C, "### Ridge hồi quy — R²", "### LogisticRegression")
+_C_LR = _md_between(_C, "### LogisticRegression", "- Hình:")
+_C_IMPT = _md_between(_C, "### Trên train 2011–2022 (in-sample)", "### Trên holdout")
+_C_IMPH = _md_between(_C, "### Trên holdout 2023→2024", "- Hình:")
+_C_RES3 = _md_between(_C, "## 3) Residual diagnostics", "### 3a)")
+_C_LARGE = _md_between(_C, "### 3b)", "### 3c)")
+_C_TOP = _md_between(_C, "### 3c)", "## Phạm vi")
+
+
+def _md_lc(sec):
+    return [(c[0], c[1], c[4]) for c in _md_rows(sec)
+            if len(c) == 5 and re.fullmatch(r"\d{4}", c[0])]
+
+
+def _md_imp(sec):
+    out = [(c[1].replace("`", ""), c[2]) for c in _md_rows(sec)
+           if len(c) == 5 and c[0].isdigit() and c[1].startswith("`sd_")]
+    return out[:3]
+
+
+_C_RIDGE_LC = _md_lc(_C_RIDGE)
+_C_LR_LC = _md_lc(_C_LR)
+assert len(_C_RIDGE_LC) == len(_C_LR_LC) == 7, \
+    "Phụ lục B: learning curve phải đủ 7 origin 2016–2022"
+_C_RIDGE_MIN = min(_C_RIDGE_LC, key=lambda t: float(t[2]))
+_C_RIDGE_MAX = max(_C_RIDGE_LC, key=lambda t: float(t[2]))
+_C_IMP_TR = _md_imp(_C_IMPT)
+_C_IMP_HO = _md_imp(_C_IMPH)
+assert len(_C_IMP_TR) == len(_C_IMP_HO) == 3, \
+    "Phụ lục B: permutation importance phải đủ top-3 cả 2 bảng"
+_C_RES_M = _md_rx(r"Holdout (\d+) cặp \(origin 2023 → đích 2024\): residual mean "
+                  r"(-?[\d.]+), median (-?[\d.]+), sd (-?[\d.]+), min (-?[\d.]+), "
+                  r"max (-?[\d.]+), MAE ([\d.]+)", _C_RES3)
+assert float(_C_RES_M.group(2)) > 0, \
+    "Phụ lục B: residual mean holdout phải dương (dự báo thấp hơn thực tế)"
+_C_SUP_MAE = next(r["holdout_mae"] for r in SUP_ROWS
+                  if r["task"] == "regression" and r["model"] == "ridge")
+assert float(_C_SUP_MAE) == float(_C_RES_M.group(7)), \
+    "Phụ lục B: MAE holdout parse từ supervised_depth.md lệch supervised_metrics.csv"
+_C_POP = _md_rx(r"Median dân số 2023 \(của chính (\d+) tỉnh holdout\) = "
+                r"([\d.]+) nghìn", _C_LARGE)
+_C_LGSM = {c[0]: c for c in _md_rows(_C_LARGE)
+           if len(c) == 7 and c[0] in ("lớn", "nhỏ")}
+assert set(_C_LGSM) == {"lớn", "nhỏ"}, "Phụ lục B: bảng residual lớn/nhỏ lệch định dạng"
+_C_TOP5 = [(c[1], c[6]) for c in _md_rows(_C_TOP) if len(c) == 7 and c[0].isdigit()]
+assert len(_C_TOP5) == 5, "Phụ lục B: top-5 tỉnh lệch nhất phải đủ 5 dòng"
+_C_TOP5_POS = all(float(r) > 0 for _, r in _C_TOP5)
+_C_SEED = _md_rx(r"permutation importance dùng seed (\d+), n_repeats=(\d+)", _C)
+assert _C_SEED.group(1) == _B_SEED, "Phụ lục B: seed các lane không thống nhất"
+_C_HYPER = _md_rx(r"Ridge alpha=([\d.]+), LogisticRegression C=([\d.]+), "
+                  r"RF max_depth=(\d+), min_samples_leaf=(\d+)", _C)
+_C_CHECK = _md_rx(r"ridge CV R²=([\d.]+) / holdout MAE=([\d.]+) và RF CV R²=([\d.]+)",
+                  _C)
+_MDD = (ROOT / "reports" / "model_deep_dive.md").read_text(encoding="utf-8")
+_MDD_VER = _md_rx(r"\*\*Phiên bản (\d+)\*\*", _MDD).group(1)
+_MDD_DATE = _md_rx(r"\*\*Ngày:\*\* (\d{4}-\d{2}-\d{2})", _MDD).group(1)
+
+doc.add_page_break()
+h1("PHỤ LỤC B — PHÂN TÍCH CHUYÊN SÂU MODEL")
+body(f"Tóm tắt báo cáo phân tích chuyên sâu model — reports/model_deep_dive.md "
+     f"(phiên bản {_MDD_VER}, ngày {_MDD_DATE}): ba lane phân tích MỚI, THUẦN "
+     "ADDITIVE — lane A: độ nhạy giao thức chọn cấu hình (câu hỏi B5: largest "
+     "trên tổng n vs trên non-noise); lane B: hồ sơ cụm × chỉ số ngoài + ổn định "
+     "bootstrap; lane C: chẩn đoán chuyên sâu phần supervised. Các lane chỉ chạy "
+     "script mới in-memory — KHÔNG ghi models/predict_config.json, KHÔNG chạy "
+     "scripts/predict_sweep.py, KHÔNG sửa bất kỳ số đã công bố; toàn bộ kết quả "
+     "lane là [THAM KHẢO — CHƯA DUYỆT GV], quyền chốt thay đổi giao thức thuộc "
+     "giảng viên. Mọi số dưới đây do script báo cáo PARSE trực tiếp lúc build từ "
+     "results/*.md (không hardcode); hai lane có bước ngẫu nhiên dùng chung seed "
+     f"{_B_SEED} và chạy 2 lần cho md/csv sha256 byte-giống. Số liệu đầy đủ: "
+     "reports/model_deep_dive.md.")
+
+h2("B.1. Lane A — Độ nhạy giao thức chọn cấu hình (câu hỏi B5)")
+bullets([
+    ("Tái lập bộ lọc CŨ — bắt buộc trước khi tin bộ lọc sửa.",
+     f"{_A_MATCH} dòng khớp từng trường (k, sizes_top5, noise, largest, coverage, "
+     f"stable, score, pass), khớp cả THỨ TỰ {_A_ORDER.group(1)} dòng sau sort; 4 "
+     f"dòng pass trùng hệt công bố ({' / '.join(r['score'] for r in _A_PASS)}) — "
+     f"winner {_A_WINNER['feat']} ({_A_WINNER['cfg']}, sizes {_A_WINNER['sizes']}, "
+     f"score {_A_WINNER['score']})."),
+    ("Bộ lọc SỬA (largest trên non-noise + ràng buộc cụm nhỏ nhất ≥ mcs): KHÔNG có "
+     "ứng viên nào pass — phát hiện quan trọng của B5, ghi đúng theo yêu cầu.",
+     f"{_A_ZERO.group(1)}/{_A_ZERO.group(2)} tổ hợp pass tại mcs = {_A_MCS_MOD}; "
+     f"chính cấu hình đóng băng {_A_WINNER['feat']} ({_A_WINNER['cfg']}) tự fail: "
+     f"largest_sửa = {_A_FZ_LG.group(1)} > {_A_FZ_LG.group(2)} (vượt "
+     f"{_A_FZ_LG.group(3)}), min_share = {_A_FZ_MS.group(1)} < {_A_FZ_MS.group(3)} "
+     f"(thiếu {_A_FZ_MS.group(2)}), score_sửa = {_A_FZ_SM} vs score công bố "
+     f"{_A_SCORE_PUB}."),
+    ("Độ nhạy MIN_CLUSTER_SHARE: kết quả không đổi ở cả 3 ngưỡng.",
+     f"số tổ hợp pass = {_A_MCS['0.02']} (mcs 0.02) / {_A_MCS['0.05']} (0.05) / "
+     f"{_A_MCS['0.1']} (0.1); vì chỉ {_A_ONLY5.group(1)}/{_A_ONLY5.group(2)} tổ "
+     f"hợp có largest_sửa ≤ {_A_ONLY5.group(3)} và cả nhóm có noise_train "
+     f"{_A_ONLY5.group(4)}, coverage {_A_ONLY5.group(5)} — cụm cân bằng trên "
+     "non-noise chỉ xuất hiện kèm nhiễu cao và mất phủ."),
+    ("Điểm cao nhất toàn bảng là giải suy biến.",
+     f"top-1 {_A_TOP1.group(1)} ({_A_TOP1.group(2)}) score_sửa = "
+     f"{_A_TOP1.group(3)} nhưng k = {_A_TOP5R1[3]} — fail {_A_TOP5R1[12]}; "
+     f"contender gần đạt nhất (đạt k/noise/coverage, {_A_CONT.group(1)}/"
+     f"{_A_CONT.group(2)} tổ hợp): {_A_CONT.group(3)} ({_A_CONT.group(4)}) — "
+     f"min_share = {_A_CONT.group(5)}, còn thiếu {_A_CONT.group(6)} để đạt "
+     f"{_A_CONT.group(7)}, largest_sửa = {_A_CONT.group(8)}; stable_mc_pm1: "
+     f"top-1 = {_A_ST_TOP.group(3)}, contender = {_A_ST_CONT.group(3)} — trùng "
+     "stable = False của cả 4 dòng pass cũ."),
+    ("Khoảng cách điểm với cấu hình đóng băng.",
+     f"score_sửa: top-1 − đóng băng = {_A_GAP_MOD}; công thức cũ: top-1 − "
+     f"{_A_SCORE_PUB} = {_A_GAP_OLD}; contender gần nhất (score cũ {_A_CONT_OLD}) "
+     f"= {_A_CONT_DELTA} so với {_A_SCORE_PUB} — không có ứng viên thay thế trong "
+     "phạm vi giả định B5; nới giao thức là quyền của GV."),
+])
+body("Số liệu đầy đủ: results/protocol_sensitivity.md (kèm protocol_sensitivity.csv, "
+     "results/figs/protocol_sensitivity_grid.png). Tái lập: "
+     "python -E scripts/protocol_sensitivity.py.", italic=True)
+
+h2("B.2. Lane B — Hồ sơ cụm × chỉ số ngoài & ổn định bootstrap")
+bullets([
+    ("PCI tái hiện đúng số đã công bố — kiểm chứng chéo độc lập trên cùng join.",
+     f"Kruskal–Wallis H = {_B_KW['pci'].group(1)}, df = {_B_KW['pci'].group(2)}, "
+     f"p = {_B_KW['pci'].group(3)} (n = {_B_KW['pci'].group(4)} ô, 2011–2022); "
+     f"trung vị nhóm: nhiễu {_grpm(_B_MED_PCI, '-1')}, cụm 0 "
+     f"{_grpm(_B_MED_PCI, '0')}, cụm 1 {_grpm(_B_MED_PCI, '1')}, cụm 2 "
+     f"{_grpm(_B_MED_PCI, '2')}."),
+    ("Các chỉ số ngoài còn lại không phân hóa theo cụm (cụm 0/1 quá nhỏ — chỉ mô tả).",
+     f"nghèo 13 năm giao 2012–2024: H = {_B_KW['pov'].group(1)}, "
+     f"p = {_B_KW['pov'].group(3)}, n = {_B_KW['pov'].group(4)} (trung vị: nhiễu "
+     f"{_grpm(_B_MED_POV, '-1')}, cụm 0 {_grpm(_B_MED_POV, '0')}, cụm 1 "
+     f"{_grpm(_B_MED_POV, '1')}, cụm 2 {_grpm(_B_MED_POV, '2')}); y tế 2020: "
+     f"H = {_B_KW['hea'].group(1)}, p = {_B_KW['hea'].group(3)}, "
+     f"n = {_B_KW['hea'].group(4)}, df = {_B_KW['hea'].group(2)} — {_B_ZERO_N} "
+     f"tỉnh count = 0 là 0-thật; GRDP/người 2018–2024: H = {_B_KW['grd'].group(1)}, "
+     f"p = {_B_KW['grd'].group(3)}, n = {_B_KW['grd'].group(4)} (trung vị nhiễu "
+     f"{_grpm(_B_MED_GRD, '-1')} vs cụm 2 {_grpm(_B_MED_GRD, '2')}); % đô thị: "
+     f"H = {_B_KW['urb'].group(1)}, p = {_B_KW['urb'].group(3)}, "
+     f"n = {_B_KW['urb'].group(4)}."),
+    (f"Bootstrap ổn định ({_B_NBOOT} lần, seed {_B_SEED}, resample CÓ hoàn lại "
+     "theo TỈNH, refit cấu hình đóng băng).",
+     f"tỉ lệ giữ nhãn mean = {_B_KEEP_ALL[1]}, median = {_B_KEEP_ALL[2]}, sd = "
+     f"{_B_KEEP_ALL[3]}, CI95 {_B_KEEP_ALL[4]}; silhouette non-noise mean = "
+     f"{_B_SIL[1]}, CI95 {_B_SIL[4]} (hợp lệ {_B_SIL[5]}/{_B_NBOOT} lần) vs "
+     f"model gốc trên train = {_B_SIL_REF}."),
+    ("Cụm li ti vỡ dưới bootstrap — chỉ cặp nhiễu vs cụm 2 đáng tin.",
+     f"giữ nhãn gộp: nhiễu {_B_KEEP[0][1]}, cụm 0 {_B_KEEP[1][1]} (ghép được "
+     f"Jaccard > 0 chỉ {_B_JAC['0'][1]} lần, Jaccard TB {_B_JAC['0'][0]}), cụm 1 "
+     f"{_B_KEEP[2][1]} ({_B_JAC['1'][1]}, J {_B_JAC['1'][0]}), cụm 2 "
+     f"{_B_KEEP[3][1]} ({_B_JAC['2'][1]}, J {_B_JAC['2'][0]})."),
+])
+body("Số liệu đầy đủ: results/cluster_profile.md (kèm cluster_profile.csv, "
+     "results/figs/deep_cluster_profile.png). Tái lập: "
+     "python -E scripts/cluster_profile.py.", italic=True)
+
+h2("B.3. Lane C — Chẩn đoán chuyên sâu phần supervised")
+bullets([
+    ("Kiểm đối tái dùng pipeline — khớp 100% số đã công bố.",
+     f"tái tính in-memory cho ridge CV R² = {_C_CHECK.group(1)} / holdout MAE = "
+     f"{_C_CHECK.group(2)} / RF CV R² = {_C_CHECK.group(3)} — KHỚP "
+     "results/supervised_metrics.csv (MAE holdout bằng chính số Bảng 5); siêu "
+     "tham số cố định (CV train-only 2017–2022 của pipeline): Ridge alpha = "
+     f"{_C_HYPER.group(1)}, LR C = {_C_HYPER.group(2)}, RF max_depth = "
+     f"{_C_HYPER.group(3)} / min_samples_leaf = {_C_HYPER.group(4)}."),
+    (f"Permutation importance (RF hồi quy, seed {_C_SEED.group(1)}, n_repeats = "
+     f"{_C_SEED.group(2)}): sd_6_1 chiếm áp đảo.",
+     f"train 2011–2022 (in-sample, mean giảm R²): 1. {_C_IMP_TR[0][0]} = "
+     f"{_C_IMP_TR[0][1]}; 2. {_C_IMP_TR[1][0]} = {_C_IMP_TR[1][1]}; "
+     f"3. {_C_IMP_TR[2][0]} = {_C_IMP_TR[2][1]}; holdout 2023→2024 (chỉ mô tả): "
+     f"1. {_C_IMP_HO[0][0]} = {_C_IMP_HO[0][1]}. sd_6_1 chính là biến đích năm "
+     "trước của pipeline → phần supervised chủ yếu là tự tương quan thời gian."),
+    ("Learning curve expanding origin 2016→2022 (không đụng holdout).",
+     f"Ridge R² dao động {_C_RIDGE_MIN[2]} (origin {_C_RIDGE_MIN[0]}, "
+     f"{_C_RIDGE_MIN[1]} năm train) → {_C_RIDGE_MAX[2]} (origin "
+     f"{_C_RIDGE_MAX[0]}), không tăng đơn điệu; LogisticRegression macro-F1 "
+     f"{_C_LR_LC[0][2]} (2016) → {_C_LR_LC[-1][2]} (2022)."),
+    ("Residual Ridge holdout 2023→2024 — dự báo THẤP hơn thực tế.",
+     f"{_C_RES_M.group(1)} cặp: mean = {_C_RES_M.group(2)}, median = "
+     f"{_C_RES_M.group(3)}, sd = {_C_RES_M.group(4)}, MAE = {_C_RES_M.group(7)} "
+     f"(trùng công bố); tỉnh nhỏ (< median dân số {_C_POP.group(2)} nghìn của "
+     f"{_C_POP.group(1)} tỉnh holdout) resid mean = {_C_LGSM['nhỏ'][3]} vs tỉnh "
+     f"lớn = {_C_LGSM['lớn'][3]}; top-5 |residual|: "
+     + "; ".join(f"{t} +{r}" for t, r in _C_TOP5)
+     + (" — cả 5 đều dự báo THẤP hơn thực tế" if _C_TOP5_POS else "") + "."),
+])
+body("Số liệu đầy đủ: results/supervised_depth.md (kèm supervised_depth.csv, "
+     "results/figs/supervised_learning_curve.png, "
+     "results/figs/supervised_importance.png). Tái lập: "
+     "python -E scripts/supervised_depth.py.", italic=True)
+body("Đọc gộp (mô tả, chưa duyệt GV): những gì vững là cụm lớn và tương phản "
+     "nhiễu vs cụm 2; những gì mong manh là cụm li ti và độ quan trọng của các "
+     "đặc trưng ngoài sd_6_1. Danh sách hành động đã tách theo quyền duyệt GV ở "
+     "reports/model_deep_dive.md — nhóm viết báo cáo không tự chốt thay đổi nào.")
 
 # ================= TÀI LIỆU THAM KHẢO =================
 h1("TÀI LIỆU THAM KHẢO")
