@@ -4,3 +4,14 @@
 # '2018PAPI-ALLDimentions' là TÊN SHEET công khai trong workbook PAPI 2018
 # (dữ liệu công bố chính thức, không phải credential); khớp nhầm với rule generic-api-key.
 scripts/build_report.py:generic-api-key:357
+#
+# data/raw/molisa/*.html là bản lưu trữ Wayback/mirror của trang thuvienphapluat/luatvietnam
+# (trang tổng hợp văn bản pháp lý công khai, tải làm bằng chứng nguồn MOLISA). Các key bị flag
+# là CLIENT-SIDE key công khai của chính trang đó (reCAPTCHA site key + Google API key nhúng
+# trong page source) — không phải credential của dự án; file raw phải giữ byte-identical
+# nên không thể gọt bỏ nội dung.
+data/raw/molisa/QD862_2017_thuvienphapluat_wayback20240805133145.html:generic-api-key:1455
+data/raw/molisa/QD1052_2018_luatvietnam.html:gcp-api-key:2362
+data/raw/molisa/QD1052_2018_luatvietnam.html:generic-api-key:2442
+data/raw/molisa/QD862_2017_luatvietnam.html:gcp-api-key:28953
+data/raw/molisa/QD862_2017_luatvietnam.html:generic-api-key:29033
