@@ -37,3 +37,7 @@
   2020–2024 ma trận chuyển vị, header 2 dòng (Mã tỉnh dòng 1, tên tỉnh dòng 2). `d7/d8` chỉ có từ 2018.
 - **Gãy thang đo:** 23/37 cột chỉ tiêu có bước nhảy trung bình năm > 0.25 điểm
   (vd `sd_5_4` đổi 0.25–2.5 → 0.33–3.33 tại 2021) — audit tự động: `python scripts/check_data.py`.
+
+## Báo cáo PAPI 2024 (tiếng Việt)
+
+- `PAPI_2024_REPORT_VIE_final.pdf` — 22,974,723 bytes — SHA-256 `7809a7379eda7a9737a17fbd3bc1220cb985e5506b708d7b51cc52a337a13fc6`; tải 2026-11-03 từ trang PAPI chính thức, lưu để đối chiếu thang đo (Bảng A5 tr.129, chú thích tr.130) và số tỉnh khảo sát. Không chỉnh sửa.
