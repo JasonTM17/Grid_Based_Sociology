@@ -6,7 +6,7 @@ _Cập nhật: 2026-11-04 · Chủ sở hữu: B · Hạn chốt: 2026-11-10 (P4
 
 | Mốc | Yêu cầu đề | Sản phẩm dự kiến | Trạng thái |
 |---|---|---|---|
-| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides + notebook | `slides/midterm.pptx` (12–15 trang) + `notebooks/midterm_demo.ipynb` (chạy sạch ≤5') | ⏳ P3 |
+| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (≤10 slide) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (10 slide) + `notebooks/submission_demo.ipynb` (execute sạch) | ⏳ P3 |
 | Cuối kỳ | Thi vấn đáp offline; nộp báo cáo (.docx) + notebook; dataset ≥500×10 | `reports/final_report.docx` (7 mục) + `notebooks/final_analysis.ipynb` + panel 882×41 (đã đạt) | ⏳ P5–P6 |
 
 ## Quyết định cần chốt (hỏi GV trước 10/11 — xem `open-questions.md`)
@@ -14,7 +14,7 @@ _Cập nhật: 2026-11-04 · Chủ sở hữu: B · Hạn chốt: 2026-11-10 (P4
 - [x] **Template `.docx`:** môn chưa cung cấp template riêng → tự soạn theo ghi chú định dạng chắt lọc từ
       tài liệu mẫu của nhóm (`reports/report_format_notes.md`): A4, lề 2.5/2.0/2.0/2.0 cm, Title 20pt bold,
       Heading 1/2/3 = 16/14/12pt bold, front matter đầy đủ (TÓM TẮT → bảng → nội dung 7 chương → TLTK).
-- [x] **Template slide:** chưa có → tự thiết kế, 12–15 trang, hình từ `results/figs/`.
+- [x] **Template slide:** chưa có → tự thiết kế, ≤10 slide (deck nộp bài `slides/submission.pptx`), hình từ `results/figs/`. Deck phụ lục mở rộng cho cuối kỳ: `slides/final.pptx` (16 slide).
 - [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051); giữ kế hoạch đầy đủ, không áp cut-lines.
 - [ ] **Định dạng nộp (tên file/cấu trúc/zip/nơi nộp):** đề xuất dưới đây, chốt P4.
 - [ ] **Người trình bày & Q&A:** đề xuất Sơn (thuật toán/demo/code) + Quyên (kết quả/ý nghĩa/báo cáo) — chốt trước rehearsal.
@@ -24,8 +24,8 @@ _Cập nhật: 2026-11-04 · Chủ sở hữu: B · Hạn chốt: 2026-11-10 (P4
 
 ```
 Nhom<XX>_HocMay_Topic6_STING_GiuaKy/     (giữa kỳ)
-├── slides.pdf / midterm.pptx
-└── notebooks/midterm_demo.ipynb          (đã execute sẵn output)
+├── slides/submission.pptx               (10 slide)
+└── notebooks/submission_demo.ipynb      (đã execute sẵn output)
 
 Nhom<XX>_HocMay_Topic6_STING_CuoiKy/     (cuối kỳ)
 ├── bao-cao.docx
