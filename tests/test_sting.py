@@ -366,3 +366,47 @@ def test_significance_z_collapses():
         labels = model.cluster(level=1, connectivity=1)
     assert model.n_clusters_ == 0
     assert np.all(labels == -1)
+
+
+def test_min_count_negative_rejected():
+    """min_count < 0 làm sai ngưỡng ô dày — phải ValueError khi khởi tạo."""
+    with pytest.raises(ValueError, match="min_count"):
+        STING(n_levels=2, factor=2, min_count=-1)
+
+
+def test_fit_rejects_excessive_grid_volume():
+    """Tham số lưới quá lớn phải báo ValueError rõ, không lỗi NumPy giữa fit."""
+    X = np.random.default_rng(0).normal(size=(20, 4))
+    model = STING(n_levels=5, factor=16)
+    with pytest.raises(ValueError, match="lưới quá lớn"):
+        model.fit(X)
+
+
+def test_fit_rejects_nan_and_inf():
+    """fit() từ chối NaN/inf trong X."""
+    model = STING(n_levels=2, factor=2, min_count=1)
+    base = np.random.default_rng(0).normal(size=(10, 2))
+    with pytest.raises(ValueError, match="NaN"):
+        model.fit(np.vstack([base, [np.nan, 0.0]]))
+    with pytest.raises(ValueError, match="NaN"):
+        model.fit(np.vstack([base, [0.0, np.inf]]))
+
+
+def test_fit_rejects_empty_samples():
+    """fit() với n_samples=0 phải ValueError."""
+    model = STING(n_levels=2, factor=2, min_count=1)
+    with pytest.raises(ValueError, match="không rỗng"):
+        model.fit(np.empty((0, 2)))
+
+
+def test_predict_non_finite_returns_noise_without_warning():
+    """predict(): hàng NaN/inf nhận -1, không gọi _assign (không RuntimeWarning)."""
+    X, _ = make_blobs(
+        n_samples=120, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=42
+    )
+    model = STING(n_levels=3, factor=4, min_count=3).fit(X)
+    model.cluster(level=2, connectivity=1)
+    bad = np.array([[np.nan, 0.0], [0.0, np.inf], [6.0, 6.0]])
+    pred = model.predict(bad)
+    assert list(pred[:2]) == [-1, -1]
+    assert pred[2] != -1
