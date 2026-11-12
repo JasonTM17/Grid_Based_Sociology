@@ -1,6 +1,6 @@
 # Checklist nộp bài cuối kỳ — Topic 6 · STING × PAPI
 
-_Cập nhật: 2026-11-04 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-15 hoặc sớm nhất có thể)_
+_Cập nhật: 2026-11-12 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-15 hoặc sớm nhất có thể)_
 
 ## Deliverable bắt buộc của môn
 
@@ -10,9 +10,16 @@ _Cập nhật: 2026-11-04 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 - [x] **Notebook nộp bài (giữa kỳ)** — `notebooks/submission_demo.ipynb` (execute sạch, 0 lỗi; sinh bằng `python scripts/gen_submission_demo.py`).
 - [x] **Slides nộp bài (giữa kỳ)** — `slides/submission.pptx` (10 slide, tiếng Việt, notes kèm từng slide; build bằng `python scripts/build_slides_10.py`). Deck phụ lục mở rộng cho cuối kỳ: `slides/final.pptx` (16 slide).
 
+## Đối chiếu môn học (2026-11-12)
+
+- [x] **Audit tiền xử lý Day 4** — `scripts/preprocessing_audit.py` + `results/preprocessing_audit.{md,csv}`; notebook cuối kỳ đọc CSV (`tests/test_submission_artifacts.py` gate).
+- [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
+- [x] **Q&A theo khái niệm bài giảng** — `reports/qa_course_concepts.md`.
+
 ## Tái lập / chất lượng mã
 
 - [x] Toàn bộ test xanh (`python -m pytest tests -q`)
+- [x] Smoke demo (`python scripts/demo_smoke.py` → SAN SANG DEMO, toàn bộ mục PASS)
 - [x] Đối chiếu chéo Mendeley: max |diff| = 0.0
 - [x] Mọi số liệu trong báo cáo/slide truy được về `results/*.csv` (metrics.csv, per_year.csv, robustness.csv, predict_summary.md, supervised_summary.md)
 - [x] PROVENANCE + SHA-256 cho 3 nguồn dữ liệu (`data/raw/*/PROVENANCE.md`)

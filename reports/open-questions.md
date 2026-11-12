@@ -1,6 +1,6 @@
 # Câu hỏi mở với giảng viên (theo plan.md §8)
 
-_Cập nhật: 2026-11-04 · Địa chỉ hỏi: GV phụ trách môn (LMS/email lớp) · Hạn chốt: 2026-11-10_
+_Cập nhật: 2026-11-12 · Địa chỉ hỏi: GV phụ trách môn (LMS/email lớp) · Hạn chốt logistics: chờ GV (xem câu 5–7)_
 
 | # | Câu hỏi | Mặc định đang áp dụng | Trả lời | Ngày trả lời |
 |---|---|---|---|---|
@@ -8,9 +8,11 @@ _Cập nhật: 2026-11-04 · Địa chỉ hỏi: GV phụ trách môn (LMS/email
 | 2 | Nộp bằng Jupyter hay Zeppelin? | Jupyter (`python -m nbconvert` để execute) | ⏳ chưa | — |
 | 3 | Có template báo cáo `.docx` của môn không? | Môn chưa có template riêng → tự soạn theo ghi chú định dạng đã chắt lọc từ tài liệu mẫu của nhóm (`report_format_notes.md`) | ✅ user gợi ý lấy mẫu trong OneDrive; đã khảo sát xong | 2026-11-04 |
 | 4 | Nhóm 1 hay 2 người? | **2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051); **Nhóm 15**; kế hoạch đầy đủ, không cut-lines | ✅ user xác nhận | 2026-11-04 |
-| 5 | Định dạng nộp: tên file, cấu trúc thư mục/zip, nơi nộp? | Đề xuất: `Nhom<mã>_HocMay_Topic6_STING_GiuaKy/` gồm slides + notebook; chốt ở P4 | ⏳ chưa (user có thể bổ sung sau) | — |
+| 5 | Định dạng nộp: tên file, cấu trúc thư mục/zip, nơi nộp? | Đề xuất: `Nhom<mã>_HocMay_Topic6_STING_GiuaKy/` gồm slides + notebook; chốt khi GV/LMS phản hồi | ⏳ chưa | — |
+| 6 | Trọng số rubric **cuối kỳ** (preprocessing, model learning, evaluation, code, report, oral)? | Text trích PDF bài giảng bị garbled — **chỉ liệt kê được tên hạng mục**, không đọc được điểm; xem `reports/course_requirements.md` | ⏳ chưa — cần xác nhận trực quan slide/PDF hoặc GV | — |
+| 7 | Báo cáo cuối: bắt buộc **3 chương** (mẫu `Report-proj.docx`) hay chấp nhận **7 chương** hiện tại (`reports/final_report.docx`)? | Giữ 7 chương + bìa/Lời cảm ơn theo mẫu quan sát; skeleton 3 chương ghi trong `course_requirements.md` | ⏳ chưa | — |
 
-**Ghi chú:** nếu quá 2026-11-10 chưa có trả lời → áp dụng mặc định ở cột giữa và ghi lại quyết định.
+**Ghi chú:** câu 2, 5–7 chờ GV; khi hết hạn tự đặt vẫn áp dụng mặc định ở cột giữa và ghi ngày quyết định.
 
 ---
 
@@ -47,6 +49,24 @@ Không có câu hỏi logistics mới; bảng ở trên **giữ nguyên** (câu 
 | Tài liệu nguồn | Có — `reports/external_data_expansion.md` §3.6 (nguồn + provenance) + mục mới §3.7 "Nghèo cấp tỉnh đã tích hợp" | `reports/external_data_expansion.md` |
 
 Còn mở như cũ: câu 2 và câu 5 logistics (chờ GV); **B5** (`predict_sweep`) chờ người hướng dẫn duyệt; `external_poverty_63.csv` **vẫn chưa nối** vào `external_master` — dùng làm feature/validation hay chỉ bối cảnh là quyết định của nhóm.
+
+---
+
+## CẬP NHẬT 2026-11-12 (đối chiếu khóa học + README/DEMO)
+
+Bảng logistics ở trên **giữ nguyên**; câu 2, 5, 6, 7 vẫn ⏳ chờ GV. Các mục kỹ thuật sau **đã đạt** (ngày 2026-11-12, worktree `docs/readme-and-requirements-course-alignment`):
+
+| Mục | Trạng thái | Bằng chứng |
+|---|---|---|
+| Bìa `final_report.docx` (họ tên/MSSV) | Đã điền | `reports/submission_checklist.md` (mục deliverable + con người) |
+| Audit tiền xử lý Day 4 | Có artifact + gate notebook | `results/preprocessing_audit.{md,csv}`; `scripts/preprocessing_audit.py`; `tests/test_preprocessing_audit.py`; `tests/test_submission_artifacts.py` |
+| Classifier học phần + confusion | Có artifact + test | `results/course_supervised_baselines.{csv,md}`; `results/figs/course_confusion_matrix.png`; `tests/test_course_supervised_baselines.py` |
+| Notebook gates (submission + final) | Pass | `tests/test_submission_artifacts.py`; `tests/test_final_notebook_artifacts.py` |
+| Tài liệu README/DEMO/requirements | Cập nhật đối chiếu Day 1–4 | `README.md` (mục Đối chiếu); `DEMO.md`; `reports/course_requirements.md` |
+
+Gate chạy cuối phiên (cwd repo): `python -m ruff check .`; `python -m pytest tests -q`; `python scripts/demo_smoke.py` — xem exit code trong summary worker.
+
+Vẫn **chỉ con người:** rehearsal/mock defense; nộp LMS/zip; chốt deadline & format (câu 5); trọng số rubric cuối kỳ (câu 6); skeleton 3 vs 7 chương (câu 7).
 
 ---
 
