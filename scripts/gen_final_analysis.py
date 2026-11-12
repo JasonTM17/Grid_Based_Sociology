@@ -21,7 +21,16 @@ md(nbf.v4.new_markdown_cell("""# Báo cáo phân tích cuối kỳ — Phân c�
 **Đồ án môn Học máy** · Topic 6: *Grid-based (clustering)* · Sociology / History · Nhóm 2 người.
 
 Notebook end-to-end: dữ liệu → STING tự viết → baselines → robustness → bản đồ → dự đoán → kết luận.
-Mọi bước có thể chạy lại từ đầu theo thứ tự; mọi số liệu khớp các file trong `results/`."""))
+Notebook chỉ đọc artifact đã sinh, không tính lại các bảng:
+`data/processed/papi_panel_63_2011_2024.csv` (`scripts/build_panel.py`);
+`models/predict_config.json` (`scripts/predict_sweep.py`);
+`results/metrics.csv`, `per_year.csv`, `robustness.csv`, `figs/map_*.png`, `figs/evolution.png`
+(`scripts/run_analysis.py`); `results/supervised_metrics.csv`, `models/sup_ridge.joblib`
+(`scripts/predict_supervised.py`); `results/figs/predict_2024.png` (`scripts/predict_demo.py`);
+`results/poverty_validation.csv`, `figs/external_poverty_by_cluster.png`
+(`scripts/poverty_validation.py`).
+Tái tạo: chạy các script trên theo đúng thứ tự, rồi `python scripts/gen_final_analysis.py` và
+`python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb`."""))
 
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
@@ -53,7 +62,7 @@ md(nbf.v4.new_markdown_cell("""## 1. Dữ liệu & chất lượng
   Pipeline xuyên năm CHỈ dùng chỉ tiêu qua audit: `sd_1_3, sd_1_4, sd_4_1–4_4, sd_6_1, sd_6_3`.
 - `d7/d8` chỉ có từ 2018 → robustness 8 chiều giới hạn 2018–2024."""))
 
-cd(nbf.v4.new_code_cell("""cfg = json.load(open("../models/predict_config.json", encoding="utf-8"))
+cd(nbf.v4.new_code_cell("""cfg = json.loads(Path("../models/predict_config.json").read_text(encoding="utf-8"))
 print("Cặp chỉ tiêu đóng băng:", cfg["features"])
 print("STING:", cfg["sting"])
 print("Giao thức chọn (train-only):", cfg["selection_protocol"])"""))
@@ -116,7 +125,9 @@ md(nbf.v4.new_markdown_cell("""## 6. Pipeline dự đoán (năm 2024 — out-of-
 1. **STING.predict:** gán tỉnh vào ô lưới đã học — 48/61 tỉnh đủ chỉ tiêu → cụm lớn, 13 → nhiễu.
 2. **Model giám sát:** Ridge được chọn theo CV để dự báo *6.1 Y tế công lập* năm sau; MAE holdout 2023→2024 thấp hơn carry-forward **6.3%**
    (xem `results/supervised_metrics.csv`).
-3. **Phân loại ngoại vi (âm tính):** không vượt baseline đủ tin cậy — giữ lại trung thực."""))
+3. **Phân loại ngoại vi (khám phá, không phải bằng chứng tổng quát hóa):** điểm holdout vượt baseline
+   majority trên đúng một năm, nhưng nhãn là pseudo-label do STING sinh và cấu hình gán nhãn được chọn
+   trên 2021–2022 — trùng 2 fold CV cuối — nên chỉ đọc như khảo sát; xem `results/supervised_summary.md`."""))
 
 cd(nbf.v4.new_code_cell("""sup = pd.read_csv("../results/supervised_metrics.csv")
 show_md(sup.to_markdown(index=False))"""))

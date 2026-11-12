@@ -108,8 +108,8 @@ def as_score(x, where: str) -> float:
         raise SystemExit(f"LỖI: điểm tổng trống tại {where} — cần rà thủ công, không tự điền")
     try:
         v = float(str(x).strip())
-    except (TypeError, ValueError):
-        raise SystemExit(f"LỖI: không đọc được số tại {where}: {x!r}")
+    except (TypeError, ValueError) as exc:
+        raise SystemExit(f"LỖI: không đọc được số tại {where}: {x!r}") from exc
     if not 0.0 < v <= 100.0:
         raise SystemExit(f"LỖI: điểm ngoài thang (0,100] tại {where}: {v!r}")
     return v

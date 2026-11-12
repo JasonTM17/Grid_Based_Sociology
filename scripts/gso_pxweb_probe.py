@@ -17,6 +17,7 @@ import json
 import sys
 import urllib.parse
 import urllib.request
+from pathlib import Path
 
 BASE = "https://pxweb.nso.gov.vn/api/v1/vi"
 
@@ -65,7 +66,7 @@ def main() -> int:
         return 0
     if cmd == "data":
         dbid, tid, qfile = sys.argv[2], sys.argv[3], sys.argv[4]
-        q = json.loads(open(qfile, encoding="utf-8").read())
+        q = json.loads(Path(qfile).read_text(encoding="utf-8"))
         url = f"{BASE}/{enc(dbid)}/{enc(tid)}.px"
         out = sys.argv[5] if len(sys.argv) > 5 else None
         blob = post_json(url, q)

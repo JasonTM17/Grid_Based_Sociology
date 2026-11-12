@@ -156,7 +156,8 @@ class STING:
         if self.significance_z is not None and not dense_set:
             warnings.warn(
                 "significance_z loại mọi ô dày → k=0 (toàn bộ điểm nhận -1); "
-                "hãy giảm significance_z hoặc min_count."
+                "hãy giảm significance_z hoặc min_count.",
+                stacklevel=2,  # trỏ về dòng gọi cluster(), không phải dòng warn
             )
 
         # Gom thành phần liên thông trên các ô dày (DFS lặp, thứ tự ổn định).

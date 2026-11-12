@@ -2,6 +2,10 @@
 
 Chạy: python -m pytest tests -q
 """
+import inspect
+import warnings
+from pathlib import Path
+
 import numpy as np
 import pytest
 from sklearn.datasets import make_blobs
@@ -366,6 +370,22 @@ def test_significance_z_collapses():
         labels = model.cluster(level=1, connectivity=1)
     assert model.n_clusters_ == 0
     assert np.all(labels == -1)
+
+
+def test_significance_z_warning_points_at_caller():
+    """Cảnh báo k=0 phải trỏ về file gọi cluster() (stacklevel=2), không trỏ vào src/sting.py."""
+    X = np.zeros((20, 2))
+    model = STING(n_levels=2, factor=2, min_count=1, significance_z=50).fit(X)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        caller_line = inspect.currentframe().f_lineno + 1
+        model.cluster(level=1, connectivity=1)
+
+    assert len(caught) == 1, f"cần đúng 1 cảnh báo, nhận {len(caught)}"
+    warning = caught[0]
+    assert Path(warning.filename).resolve() == Path(__file__).resolve()
+    assert warning.lineno == caller_line
+    assert warning.category is UserWarning
 
 
 def test_min_count_negative_rejected():

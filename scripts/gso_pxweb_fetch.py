@@ -22,6 +22,7 @@ import re
 import sys
 import urllib.parse
 import urllib.request
+from pathlib import Path
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) research-download"
 
@@ -82,7 +83,11 @@ def main() -> int:
     table_url, out_path = sys.argv[1], sys.argv[2]
     keep2: set[str] = set()
     if len(sys.argv) > 3:
-        keep2 = {line.strip() for line in open(sys.argv[3], encoding="utf-8-sig") if line.strip()}
+        keep2 = {
+            line.strip()
+            for line in Path(sys.argv[3]).read_text(encoding="utf-8-sig").splitlines()
+            if line.strip()
+        }
         print(f"[0] listbox #2 chỉ giữ {sorted(keep2)}")
 
     cj = http.cookiejar.CookieJar()
