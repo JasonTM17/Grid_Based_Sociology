@@ -698,6 +698,52 @@ table(
         "Kiểm tra tiền xử lý theo thứ tự Day 4 — nguồn: results/preprocessing_audit.csv"
     ),
 )
+h2("3.6. Quyết định tiền xử lý và giới hạn")
+body(
+    "Tóm tắt các quyết định Test → Quyết định (Day 4) và giới hạn thiết kế liên quan baseline "
+    "học phần — số đo trong cột giữa trích từ results/preprocessing_audit.md và "
+    "results/course_supervised_baselines.md; chi tiết đầy đủ ở Bảng trên, không lặp từng test."
+)
+table(
+    ["Quyết định", "Số đo", "Lý do"],
+    [
+        [
+            "Không nội suy ô thiếu",
+            "4284/4649 ô thiếu nằm ngoài cửa sổ thu thập của cột",
+            "Thiếu là cấu trúc (chỉ tiêu chưa thu thập trong năm); điền giả định làm sai ý nghĩa "
+            "điểm PAPI — chỉ loại dòng bằng dropna khi ghép cặp feature.",
+        ],
+        [
+            "Giữ ngoại lai, không xóa",
+            "122 ô |z|>3 (0,4%)",
+            "Bước ngoại lai cuối Day 4: chỉ cờ; điểm khảo sát thật, cực trị rơi ô lưới thưa "
+            "và nhận nhãn nhiễu STING thay vì bị loại khỏi panel.",
+        ],
+        [
+            "Scaler + STING chỉ fit ≤2023",
+            "Δmean=0, Δscale=0 (khớp JSON ≤2023)",
+            "Chống rò rỉ: năm 2024 chỉ transform/predict; fit thêm 2024 đổi mean (Δmean=0,011456) "
+            "và không khớp tham số đóng băng.",
+        ],
+        [
+            "Pseudo-label ≠ bán giám sát",
+            "Nhãn vùng dày (1) / ngoại vi (0) do STING",
+            "Nhãn là nhãn cụm do mô hình sinh, không phải nhãn khảo sát và không phải bài toán "
+            "bán giám sát (học từ tập nhãn + tập không nhãn song song); mục 5.6 chỉ đối chứng độ "
+            "khớp với nhãn lưới.",
+        ],
+        [
+            "Chọn classifier theo macro-F1 CV",
+            "Holdout 2023→2024: lớp 0 = 11, lớp 1 = 48 tỉnh",
+            "Mất cân lớp mạnh trên một năm giữ — accuracy dễ theo đa số; macro-F1 cân hai lớp khi "
+            "so sánh classifier học phần (không dùng holdout để chọn model).",
+        ],
+    ],
+    widths=[3.6, 4.4, 7.0],
+    caption=tbl_caption(
+        "Quyết định tiền xử lý, chống rò rỉ và giới hạn pseudo-label / đánh giá"
+    ),
+)
 
 # ================= CHƯƠNG 4 =================
 h1("CHƯƠNG 4. PHƯƠNG PHÁP")
