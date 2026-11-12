@@ -232,7 +232,7 @@ bullets(s, 0.55, 1.5, 6.7, 5.3, [
     ("Panel.", "882 × 41: d1–d6 (mọi năm) + d7/d8 (2018+) + 29 sub-dim; 39 cột số."),
     ("0.0 → NaN.", "“Không có dữ liệu” theo quy ước gói replication Mendeley (đối chiếu khớp 100%)."),
     ("PROVENANCE.", "URL + hash SHA-256 mọi nguồn trong repo — tái lập được."),
-    ("Nguồn ngoài (kiểm chứng).", "PCI VCCI–USAID · GSO (dân số, GRDP) · OD Mekong y tế 2020 · WDI — chỉ dùng kiểm chứng ngoại lai, không đưa vào feature."),
+    ("Nguồn ngoài (kiểm chứng).", "PCI VCCI–USAID · GSO (dân số, GRDP) · OD Mekong y tế 2020 · WDI — chỉ dùng kiểm chứng bên ngoài, không đưa vào feature."),
 ], size=16, gap_pt=30)
 rect(s, 7.55, 1.35, 5.2, 2.45, RGBColor(0xFD, 0xF3, 0xDC))
 text(s, 7.85, 1.55, 4.7, 0.35, [("⚠ GÃY THANG ĐO (phát hiện khi làm sạch)", 13, True, RGBColor(0x8A, 0x5A, 0x00))])
@@ -399,9 +399,9 @@ for i, (a, b) in enumerate(steps):
     text(s, 4.0, y + 0.14, 8.4, 1.0, [(b, 11.5, False, INK)])
 note(s, "Nói ngắn: cuối kỳ làm gì, khi nào, deliverable gì.")
 
-# ---------- Slide 14 — Kiểm chứng ngoại lai ----------
+# ---------- Slide 14 — Kiểm chứng bên ngoài ----------
 s = slide_new()
-header(s, "KIỂM CHỨNG NGOẠI LAI", "Cụm STING khớp PCI — thước đo độc lập", 14)
+header(s, "KIỂM CHỨNG BÊN NGOÀI", "Cụm STING khớp PCI — thước đo độc lập", 14)
 pic(s, "external_pci_by_cluster.png", 0.55, 1.45, h=4.75)
 bullets(s, 8.0, 1.5, 4.8, 4.8, [
     ("PCI.", "Khảo sát DOANH NGHIỆP (VCCI–USAID) — tách khỏi PAPI (hộ dân); chưa từng dùng khi học."),
@@ -410,7 +410,13 @@ bullets(s, 8.0, 1.5, 4.8, 4.8, [
     ("Đọc thận trọng.", "Tương phản đáng tin: nhiễu vs cụm 2 (hai cụm nhỏ n=5/16); không chứng minh nhân quả."),
     ("Nguồn khác.", "Y tế/1.000 dân 2020 · GRDP 2018–2024 · WDI — results/external_validation.md."),
 ], size=13, gap_pt=32)
-note(s, "External validation đúng nghĩa: cấu trúc học không giám sát khớp một thước đo độc lập chưa từng dùng khi học. Nhấn: PCI là khảo sát doanh nghiệp, PAPI là khảo sát hộ dân — hai đường ống dữ liệu khác nhau. Cụm 0/1 quá nhỏ để tự kết luận; đọc cặp nhiễu vs cụm 2; không chứng minh nhân quả. Chi tiết: results/external_validation.md; provenance: data/processed/external_provenance.md.")
+note(
+    s,
+    "Kiểm chứng bên ngoài độc lập (PCI): liên hệ thống kê giữa các nhóm, không chứng minh nhân quả hay dự báo. "
+    "Nhấn: PCI là khảo sát doanh nghiệp, PAPI là khảo sát hộ dân — hai đường ống dữ liệu khác nhau. "
+    "Cụm 0/1 quá nhỏ để tự kết luận; đọc cặp nhiễu vs cụm 2. "
+    "Chi tiết: results/external_validation.md; provenance: data/processed/external_provenance.md.",
+)
 
 # ---------- Slide 15 — Tài liệu ----------
 s = slide_new()

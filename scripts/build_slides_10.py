@@ -516,7 +516,7 @@ text(
 # Dải tiền xử lý Day 4 — thứ tự dạy học + số đo audit, đọc từ preprocessing_audit.csv.
 rect(s, 0.55, 5.7, 12.23, 1.2, LIGHT)
 text(s, 0.72, 5.74, 11.8, 0.26, [
-    ("TIỀN XỬ LÝ THEO DAY 4 — MỖI BƯỚC: TEST → DECIDE", 10.5, True, TEAL),
+    ("TIỀN XỬ LÝ THEO DAY 4 — MỖI BƯỚC: TEST → DECIDE", 11, True, TEAL),
 ])
 text_line(
     s, 0.72, 5.99, 11.9, 0.34,
@@ -760,10 +760,10 @@ rect(s, 6.55, 1.38, 6.25, 5.55, LIGHT)
 # Cột phải xếp dọc: hình Ridge (thu nhỏ) → chú thích hình → tiêu đề bảng → bảng classifier.
 pic(s, "supervised_regression.png", 7.0, 1.46, w=5.35)
 text(s, 6.66, 4.45, 6.0, 0.22, [
-    ("Hình: Ridge holdout 2023→2024 (một lần)", 10.5, False, GREY),
+    ("Hình: Ridge holdout 2023→2024 (một lần)", 11, False, GREY),
 ])
 text(s, 6.62, 4.68, 6.05, 0.24, [
-    ("PHÂN LOẠI HỌC PHẦN · nhãn pseudo-label STING · một năm holdout 2023→2024", 10.5, True, TEAL),
+    ("PHÂN LOẠI HỌC PHẦN · nhãn pseudo-label STING · một năm holdout 2023→2024", 11, True, TEAL),
 ])
 clf_rows = [("Mô hình", "CV macro-F1", "Holdout")] + list(COURSE_ROWS)
 tb7 = s.shapes.add_table(
@@ -819,7 +819,7 @@ bullets(
     [
         ("PCI (doanh nghiệp).", "747 điểm join · ANOVA p≈6.9e-06 · đọc nhiễu vs cụm 2."),
         (
-            "Kiểm chứng ngoại lai độc lập (PCI):",
+            "Kiểm chứng bên ngoài độc lập (PCI):",
             "liên hệ giữa các nhóm, không phải nhân quả — PCI không dùng khi học STING.",
         ),
     ],
@@ -843,7 +843,7 @@ bullets(
 )
 note(
     s,
-    "Slide điểm Q&A: tự nêu hạn chế. PCI là doanh nghiệp vs PAPI hộ dân — kiểm chứng ngoại lai độc lập "
+    "Slide điểm Q&A: tự nêu hạn chế. PCI là doanh nghiệp vs PAPI hộ dân — kiểm chứng bên ngoài độc lập "
     "(PCI): liên hệ giữa các nhóm, không phải nhân quả; không nói quá thành kiểm chứng nhân quả. "
     "23/37 là cờ scale_audit (check_data.py) — heuristic, chưa tự chứng minh đổi thang; "
     "sd_5_4 (0.25–2.5 → 0.33–3.33, 2021) đã đối chiếu workbook. Robustness từ robustness.csv. ~90 giây.",
