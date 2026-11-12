@@ -33,6 +33,8 @@ import numpy as np
 
 __all__ = ["Cell", "STING"]
 
+_MAX_GRID_CELLS = 2**62  # flat index phải vừa int64 (np.ravel_multi_index)
+
 
 @dataclass
 class Cell:
@@ -61,13 +63,16 @@ class STING:
     ) -> None:
         """Khởi tạo tham số lưới STING.
 
-        ``min_count`` None → ``max(1, round(0.02 * n))`` khi ``fit()``.
+        ``min_count`` None → ``max(1, round(0.02 * n))`` khi ``fit()``; nếu đặt
+        tường minh thì phải ``>= 0`` (âm làm mọi ô dày sai).
         ``significance_z`` None → tắt kiểm định z so với ô cha.
         """
         if n_levels < 1:
             raise ValueError("n_levels phải >= 1")
         if factor < 2:
             raise ValueError("factor phải >= 2")
+        if min_count is not None and min_count < 0:
+            raise ValueError("min_count phải >= 0")
         self.n_levels = int(n_levels)
         self.factor = int(factor)
         self.min_count = min_count
@@ -102,6 +107,14 @@ class STING:
         self.cells_: dict[int, dict[tuple[int, ...], Cell]] = {}
         self._point_idx_: dict[int, np.ndarray] = {}
         self._flat_: dict[int, np.ndarray] = {}
+
+        max_res = self.factor ** (self.n_levels - 1)
+        grid_cells = max_res ** d
+        if max_res > _MAX_GRID_CELLS or grid_cells > _MAX_GRID_CELLS:
+            raise ValueError(
+                f"lưới quá lớn (res={max_res}, số ô={grid_cells}); "
+                f"giảm n_levels, factor hoặc số chiều (giới hạn {_MAX_GRID_CELLS} ô)"
+            )
 
         for level in range(self.n_levels):
             res = self.factor ** level
@@ -192,15 +205,17 @@ class STING:
             X = X.reshape(1, -1)
         if X.ndim != 2 or X.shape[1] != self.n_dims_:
             raise ValueError(f"X cần đúng {self.n_dims_} chiều, nhận shape={X.shape}")
-        out_of_support = ~np.isfinite(X).all(axis=1) | np.any(
+        finite = np.isfinite(X).all(axis=1)
+        in_support = finite & ~np.any(
             (X < self.bounds_min_) | (X > self.bounds_max_), axis=1
         )
         res = self.factor ** self.cluster_level_
-        _, flat = self._assign(X, res)
-        preds = np.array(
-            [self._cell_comp_.get(int(f), -1) for f in flat], dtype=int
-        )
-        preds[out_of_support] = -1
+        preds = np.full(X.shape[0], -1, dtype=int)
+        if np.any(in_support):
+            _, flat = self._assign(X[in_support], res)
+            preds[in_support] = [
+                self._cell_comp_.get(int(f), -1) for f in flat
+            ]
         return preds
 
     def save(self, path: str | PathLike[str]) -> None:
