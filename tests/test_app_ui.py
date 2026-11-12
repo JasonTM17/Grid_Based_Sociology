@@ -510,7 +510,7 @@ def test_tab5_audit_content_is_lazy_until_tab_opened(assets):
 def test_risk1_metrics_without_regression_cv_rows_crash_app_uncaught(
     assets, tmp_path, monkeypatch
 ):
-    """app.py:192 gọi select_regression_model NGOÀI try → crash toàn app."""
+    """Thiếu hàng CV regression → st.error, app vẫn chạy."""
     tampered = assets["metrics"].loc[assets["metrics"].task.ne("regression")]
     with pytest.raises(ValueError, match="Không có CV score"):
         select_regression_model(tampered)
@@ -519,18 +519,15 @@ def test_risk1_metrics_without_regression_cv_rows_crash_app_uncaught(
 
     at = run_app()
 
-    assert len(at.exception) == 1
-    assert at.exception[0].value == NO_CV_SCORE_MESSAGE
-    assert not at.error  # crash bằng exception, không phải st.error
+    assert not at.exception
+    error_messages = [element.value for element in at.error]
+    assert any(NO_CV_SCORE_MESSAGE in message for message in error_messages)
 
 
 def test_risk1b_classification_baseline_only_crashes_audit_tab_uncaught(
     assets, tmp_path, monkeypatch
 ):
-    """app.py chỉ che bằng 'if not classification.empty'; majority vẫn làm
-    classification non-empty → select_classification_model raise → tab Audit
-    crash (khối audit_tab không có try). Tab Audit giờ lazy nên phải mở tab
-    bằng session_state trước khi run."""
+    """Chỉ baseline phân loại → tab Audit báo st.error, không crash."""
     tampered = assets["metrics"].loc[
         ~(
             assets["metrics"].task.eq("classification")
@@ -546,9 +543,9 @@ def test_risk1b_classification_baseline_only_crashes_audit_tab_uncaught(
 
     at = run_app(TAB_AUDIT)  # tab Audit lazy — mở như tab 3/4
 
-    assert len(at.exception) == 1
-    assert at.exception[0].value == NO_CV_SCORE_MESSAGE
-    assert not at.error
+    assert not at.exception
+    error_messages = [element.value for element in at.error]
+    assert any(NO_CV_SCORE_MESSAGE in message for message in error_messages)
 
 
 def test_risk2_renamed_regression_model_surfaced_by_holdout_table_caption(
@@ -583,17 +580,14 @@ def test_risk2_renamed_regression_model_surfaced_by_holdout_table_caption(
 
 
 def test_risk3_holdout_pairs_label_in_source_matches_artifact_pairs(assets):
-    """Nhãn 'MAE · 59 cặp' hardcode trong column_config (app.py:376-378) phải
-    bằng số cặp thật tính từ artifact. column_config không đọc được qua
-    AppTest 1.58 nên test ở mức source — nếu artifact đổi, test FAIL và nhắc
-    owner sửa nhãn."""
+    """Nhãn holdout trong column_config phải lấy holdout_pairs từ dữ liệu,
+    không hardcode số cặp."""
     panel, assignments = assets["panel"], assets["assignments"]
     _, counts = prepare_regression_holdout(panel, assignments)
     source = APP_PATH.read_text(encoding="utf-8")
-    labels = re.findall(r"(?:MAE|RMSE|R²) · (\d+) cặp", source)
-
-    assert len(labels) == 3, "cấu trúc nhãn cột trong app.py đã đổi — cập nhật test"
-    assert {int(label) for label in labels} == {counts["holdout_pairs"]}
+    assert counts["holdout_pairs"] > 0
+    assert "regression_counts['holdout_pairs']" in source
+    assert not re.findall(r'(?:MAE|RMSE|R²) · \d+ cặp', source)
 
 
 def test_risk4_tampered_external_validation_fails_closed_and_hides_sections(
@@ -630,42 +624,27 @@ def test_risk4_tampered_external_validation_fails_closed_and_hides_sections(
 def test_risk5_pci_without_province_ascii_loads_but_crashes_app(
     external_assets, tmp_path, monkeypatch
 ):
-    """province_ascii KHÔNG nằm trong _REQUIRED_PCI_COLUMNS
-    (dashboard_data.py:305) nhưng app.py:588-590 truy khi dựng top_sets.
-
-    ĐÃ QUAN SÁT (khác mô tả scout): KeyError xảy ra trong nhánh `else:` của
-    try (app.py:473+) — NGOÀI tầm `except Exception` ở app.py:470-472 vốn chỉ
-    bọc phần nạp artifact/consistency (app.py:450-463). Kết quả là app crash
-    bằng exception (không phải st.error), sau khi các bảng kiểm định chính đã
-    render (app.py:531-573)."""
+    """PCI thiếu province_ascii → fail-closed st.error khi nạp tab ngoại lai."""
     pci = external_assets["pci"].drop(columns=["province_ascii"])
     stage_external_artifacts(tmp_path, pci_frame=pci)
-    loaded = load_external_validation_assets(tmp_path)  # schema check KHÔNG bắt
-    assert "province_ascii" not in loaded["pci"].columns
+    with pytest.raises(dd.DashboardDataError, match="province_ascii"):
+        load_external_validation_assets(tmp_path)
     patch_external_assets(monkeypatch, tmp_path)
 
     at = run_app(TAB_EXTERNAL)
 
-    assert len(at.exception) == 1
-    assert "province_ascii" in at.exception[0].value
-    assert not at.error  # không phải đường st.error như dự đoán ban đầu
-    # Bảng kiểm định chính + nhóm render TRƯỚC khi vấp KeyError (app.py:531-573).
-    assert len(at.tabs[3].dataframe) == 2
-    tests_table = at.tabs[3].dataframe[0].value
-    assert "ANOVA" in tests_table.iloc[0]["Kiểm định"]
-    # Section sau điểm crash không render (header Top-30 ở app.py:585 render
-    # TRƯỚC dòng crash 588 nên vẫn còn; caption/bảng Top-30 phía sau thì mất).
+    assert not at.exception
+    error_messages = [element.value for element in at.error]
+    assert any("province_ascii" in message for message in error_messages)
     text = "\n".join(container_texts(at.tabs[3]))
-    assert "tỉnh chung hai năm" not in text
-    assert "Mật độ cơ sở y tế 2020" not in text
-    assert "GRDP/người" not in text
+    assert "Kiểm định khác biệt PCI" not in text
+    assert metric_values(at.tabs[0])  # tab Tổng quan vẫn render
 
 
 def test_risk6_single_feature_config_crashes_sting_tab_uncaught(
     assets, tmp_path, monkeypatch
 ):
-    """Config < 2 feature: app.py:244-245 (features[1]) IndexError NGOÀI try;
-    prepare_sting_view chỉ chặn list rỗng (dashboard_data.py:127)."""
+    """Config < 2 feature → DashboardDataError khi nạp, st.error, không crash."""
     import json
 
     config = json.loads((ROOT / "models" / "predict_config.json").read_text(encoding="utf-8"))
@@ -678,16 +657,15 @@ def test_risk6_single_feature_config_crashes_sting_tab_uncaught(
 
     at = run_app()
 
-    assert len(at.exception) == 1
-    assert "index out of range" in at.exception[0].value
-    assert not at.error
+    assert not at.exception
+    error_messages = [element.value for element in at.error]
+    assert any("2 feature" in message for message in error_messages)
 
 
 def test_risk7_assignments_without_any_year_crash_sidebar_uncaught(
     assets, tmp_path, monkeypatch
 ):
-    """predict_all_years.csv header-only → years rỗng → max([]) ValueError tại
-    app.py:155, NGOÀI khối try (chỉ bọc get_assets ở app.py:136-143)."""
+    """Assignment không có năm → st.error và dừng, không ValueError từ max([])."""
     empty_assignments = assets["assignments"].iloc[0:0]
     assert empty_assignments.year.dropna().empty
     stage_dashboard_artifacts(tmp_path, assets["metrics"])
@@ -697,9 +675,9 @@ def test_risk7_assignments_without_any_year_crash_sidebar_uncaught(
 
     at = run_app()
 
-    assert len(at.exception) == 1
-    assert "max()" in at.exception[0].value
-    assert not at.error
+    assert not at.exception
+    error_messages = [element.value for element in at.error]
+    assert any("năm" in message.lower() for message in error_messages)
 
 
 def test_risk8_wdi_excluded_from_external_tab_intentionally(external_assets):
@@ -765,8 +743,7 @@ def test_risk10_cluster_counts_fit_within_plotly_palette(assets, external_assets
 
 
 def test_risk11_grdp_rows_without_year_render_silently(external_assets, tmp_path, monkeypatch):
-    """Mọi dòng grdp_2018_2024 có year trống → px.line nhận frame rỗng:
-    KHÔNG crash, KHÔNG error — chart rỗng im lặng (app.py:645-671)."""
+    """GRDP không có year → st.info thay chart rỗng, không crash."""
     validation = external_assets["validation"].copy()
     validation.loc[validation.section.eq("grdp_2018_2024"), "year"] = np.nan
     stage_external_artifacts(tmp_path, validation_frame=validation)
@@ -779,6 +756,8 @@ def test_risk11_grdp_rows_without_year_render_silently(external_assets, tmp_path
     external = at.tabs[3]
     text = "\n".join(container_texts(external))
     assert "Mật độ cơ sở y tế 2020" in text  # section y tế vẫn render trước
-    assert "GRDP/người" in text  # section GRDP vẫn render (chart rỗng im lặng)
+    assert "GRDP/người" in text  # section GRDP vẫn render
+    info_messages = [element.value for element in at.info]
+    assert any("GRDP" in message for message in info_messages)
     plotly_charts = [child for child in external.children.values() if child.type == "plotly_chart"]
-    assert len(plotly_charts) == 3  # box PCI + line GRDP (0 traces) + box poverty
+    assert len(plotly_charts) == 2  # box PCI + box poverty (không line GRDP rỗng)

@@ -162,6 +162,9 @@ metrics = assets["metrics"]
 features = list(config["features"])
 names = province_name_map(panel)
 years = sorted(int(year) for year in assignments.year.dropna().unique())
+if not years:
+    st.error("Artifact assignment không có năm hợp lệ.")
+    st.stop()
 
 with st.sidebar:
     st.header("Bộ lọc STING")
@@ -202,7 +205,12 @@ sting_view, sting_counts = prepare_sting_view(
 )
 
 _, regression_counts = prepare_regression_holdout(panel, assignments)
-selected_model = select_regression_model(metrics)
+holdout_pair_count = regression_counts["holdout_pairs"]
+try:
+    selected_model = select_regression_model(metrics)
+except ValueError as exc:
+    st.error(str(exc))
+    selected_model = ""
 overview_tab, sting_tab, regression_tab, external_tab, audit_tab = st.tabs(
     [
         "Tổng quan",
@@ -241,9 +249,14 @@ with overview_tab:
         "trong artifact."
     )
     st.markdown("#### Hồi quy được đánh giá riêng")
+    model_phrase = (
+        f"Chọn theo CV train-only: **{selected_model.title()}**."
+        if selected_model
+        else "Không chọn được model hồi quy từ CV."
+    )
     st.write(
-        f"Holdout cố định: **2023 → 2024**, {regression_counts['holdout_pairs']} cặp tỉnh. "
-        f"Chọn theo CV train-only: **{selected_model.title()}**. "
+        f"Holdout cố định: **2023 → 2024**, {holdout_pair_count} cặp tỉnh. "
+        f"{model_phrase} "
         "Bộ lọc năm/cụm STING ở sidebar không áp dụng cho holdout."
     )
     st.warning(
@@ -253,14 +266,16 @@ with overview_tab:
 
 with sting_tab:
     st.subheader(f"Phân bố assignment STING · {selected_year}")
-    st.caption(
-        f"Trục X: {feature_label(features[0], config)} · "
-        f"Trục Y: {feature_label(features[1], config)}. "
-        "Bảng bên dưới giữ cả dòng thiếu feature hoặc thiếu assignment."
-    )
-    if sting_view.empty:
+    if len(features) < 2:
+        st.error("Cấu hình cần ít nhất 2 feature để vẽ scatter.")
+    elif sting_view.empty:
         render_empty("0 dòng phù hợp. Hãy mở rộng bộ lọc tỉnh hoặc chọn một cụm khác.")
     else:
+        st.caption(
+            f"Trục X: {feature_label(features[0], config)} · "
+            f"Trục Y: {feature_label(features[1], config)}. "
+            "Bảng bên dưới giữ cả dòng thiếu feature hoặc thiếu assignment."
+        )
         plot_data = sting_view.dropna(subset=features + ["pred_cluster"]).copy()
         if plot_data.empty:
             render_empty("Các dòng đang lọc chưa có đủ feature và assignment để vẽ biểu đồ.")
@@ -386,9 +401,15 @@ if regression_tab.open:
                 column_config={
                     "model": "Mô hình / baseline",
                     "value_cv": st.column_config.NumberColumn("CV train-only · R²", format="%.3f"),
-                    "holdout_mae": st.column_config.NumberColumn("MAE · 59 cặp", format="%.4f"),
-                    "holdout_rmse": st.column_config.NumberColumn("RMSE · 59 cặp", format="%.4f"),
-                    "holdout_r2": st.column_config.NumberColumn("R² · 59 cặp", format="%.3f"),
+                    "holdout_mae": st.column_config.NumberColumn(
+                        f"MAE · {regression_counts['holdout_pairs']} cặp", format="%.4f"
+                    ),
+                    "holdout_rmse": st.column_config.NumberColumn(
+                        f"RMSE · {regression_counts['holdout_pairs']} cặp", format="%.4f"
+                    ),
+                    "holdout_r2": st.column_config.NumberColumn(
+                        f"R² · {regression_counts['holdout_pairs']} cặp", format="%.3f"
+                    ),
                     "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
                 },
             )
@@ -671,31 +692,34 @@ if external_tab.open:
             st.markdown("#### GRDP/người theo cụm — chỉ cửa sổ 2018–2024")
             grdp = external_section_frame(external_assets["validation"], "grdp_2018_2024")
             grdp = grdp.loc[grdp.year.notna()].copy()
-            grdp["year"] = grdp.year.astype(int)
-            grdp_figure = px.line(
-                grdp,
-                x="year",
-                y="median",
-                color="cluster_label",
-                markers=True,
-                color_discrete_map=palette,
-                hover_data={"n": True, "mean": True, "cluster_label": False},
-                labels={
-                    "cluster_label": "Nhóm",
-                    "year": "Năm",
-                    "median": "GRDP/người (triệu đồng, trung vị)",
-                },
-                title="GRDP/người theo cụm STING — trung vị nhóm",
-            )
-            grdp_figure.update_layout(
-                template="plotly_white",
-                height=430,
-                xaxis={"dtick": 1, "title": "Năm"},
-                yaxis_title="GRDP/người (triệu đồng, trung vị nhóm)",
-                legend_title_text="Nhóm",
-                margin={"t": 70, "r": 20, "b": 20, "l": 20},
-            )
-            st.plotly_chart(grdp_figure, width="stretch")
+            if grdp.empty:
+                render_empty("Không có dữ liệu GRDP theo năm trong artifact.")
+            else:
+                grdp["year"] = grdp.year.astype(int)
+                grdp_figure = px.line(
+                    grdp,
+                    x="year",
+                    y="median",
+                    color="cluster_label",
+                    markers=True,
+                    color_discrete_map=palette,
+                    hover_data={"n": True, "mean": True, "cluster_label": False},
+                    labels={
+                        "cluster_label": "Nhóm",
+                        "year": "Năm",
+                        "median": "GRDP/người (triệu đồng, trung vị)",
+                    },
+                    title="GRDP/người theo cụm STING — trung vị nhóm",
+                )
+                grdp_figure.update_layout(
+                    template="plotly_white",
+                    height=430,
+                    xaxis={"dtick": 1, "title": "Năm"},
+                    yaxis_title="GRDP/người (triệu đồng, trung vị nhóm)",
+                    legend_title_text="Nhóm",
+                    margin={"t": 70, "r": 20, "b": 20, "l": 20},
+                )
+                st.plotly_chart(grdp_figure, width="stretch")
             st.caption(
                 "Nguồn GSO pxweb V03.12 chỉ phủ 2018–2024 — không nội suy 2011–2017; 2024 = Sơ bộ "
                 "(chưa chính thức, có thể được sửa sau). Trong cửa sổ này gần như chỉ còn nhiễu vs "
@@ -903,25 +927,29 @@ if audit_tab.open:
 
         classification = metrics.loc[metrics.task.eq("classification")].copy()
         if not classification.empty:
-            classifier = select_classification_model(metrics)
-            classification["Được chọn theo CV"] = classification.model.eq(classifier)
-            st.markdown("#### Phân loại pseudo-label STING")
-            st.caption(
-                "Nhãn được dựng tại từng cutoff; CV expanding 2017–2022 sau warm-up 2011–2016. "
-                "Điểm đo mức khớp nhãn STING, không phải ground truth xã hội."
-            )
-            st.dataframe(
-                classification[["model", "value_cv", "holdout_acc", "holdout_macro_f1", "Được chọn theo CV"]],
-                hide_index=True,
-                width="stretch",
-                column_config={
-                    "model": "Mô hình / baseline",
-                    "value_cv": st.column_config.NumberColumn("CV · macro-F1", format="%.3f"),
-                    "holdout_acc": st.column_config.NumberColumn("Accuracy pseudo-label", format="%.3f"),
-                    "holdout_macro_f1": st.column_config.NumberColumn("Macro-F1 pseudo-label", format="%.3f"),
-                    "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
-                },
-            )
+            try:
+                classifier = select_classification_model(metrics)
+            except ValueError as exc:
+                st.error(str(exc))
+            else:
+                classification["Được chọn theo CV"] = classification.model.eq(classifier)
+                st.markdown("#### Phân loại pseudo-label STING")
+                st.caption(
+                    "Nhãn được dựng tại từng cutoff; CV expanding 2017–2022 sau warm-up 2011–2016. "
+                    "Điểm đo mức khớp nhãn STING, không phải ground truth xã hội."
+                )
+                st.dataframe(
+                    classification[["model", "value_cv", "holdout_acc", "holdout_macro_f1", "Được chọn theo CV"]],
+                    hide_index=True,
+                    width="stretch",
+                    column_config={
+                        "model": "Mô hình / baseline",
+                        "value_cv": st.column_config.NumberColumn("CV · macro-F1", format="%.3f"),
+                        "holdout_acc": st.column_config.NumberColumn("Accuracy pseudo-label", format="%.3f"),
+                        "holdout_macro_f1": st.column_config.NumberColumn("Macro-F1 pseudo-label", format="%.3f"),
+                        "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
+                    },
+                )
 
 st.divider()
 st.caption(
