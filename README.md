@@ -50,7 +50,7 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 - **OD Mekong (thêm)** — nghèo theo 6 vùng 1998–2016 và COVID: CC BY-SA 4.0 (<https://vietnam.opendevelopmentmekong.net/terms-of-use/>); *Health Facilities in Mekong Countries 2020*: ODbL.
 - **World Bank WDI** — CC BY 4.0 ([Terms of Use for Datasets](https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets)).
 - Chi tiết từng nguồn (cách tải, schema, độ phủ, hạn chế) và ma trận độ phủ: [`reports/external_data_expansion.md`](reports/external_data_expansion.md).
-- Kết quả kiểm chứng ngoại lai bằng các nguồn này (ANOVA/Kruskal–Wallis PCI theo cụm STING, mật độ y tế 2020, GRDP 2018–2024, WDI): [`results/external_validation.md`](results/external_validation.md).
+- Kết quả kiểm chứng bên ngoài bằng các nguồn này (ANOVA/Kruskal–Wallis PCI theo cụm STING, mật độ y tế 2020, GRDP 2018–2024, WDI): [`results/external_validation.md`](results/external_validation.md).
 - Bằng chứng nguồn gốc (URL, ngày tải, giấy phép, SHA-256): các file `PROVENANCE.md` trong `data/raw/*/` và [`data/processed/external_provenance.md`](data/processed/external_provenance.md).
 
 ## Chạy nhanh
@@ -62,6 +62,7 @@ python -c "import pandas, openpyxl, plotly, sklearn, streamlit; print('ok')"
 # Unit test — toàn bộ test pass (gồm tests/test_sting.py cho STING)
 python -m pytest tests -q
 python -m pytest tests --cov=src -q
+# Coverage đo được: src/sting.py 99%
 
 # Lint (tùy chọn): python -m pip install -r requirements-dev.txt
 python -m ruff check .
