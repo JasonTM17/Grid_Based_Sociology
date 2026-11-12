@@ -1,24 +1,73 @@
 # Yêu cầu môn học & quyết định nộp bài (checklist)
 
-_Cập nhật: 2026-11-04 · Chủ sở hữu: B · Hạn chốt: 2026-11-10 (P4 xác nhận lần cuối)_
+_Cập nhật: 2026-11-12 · Chủ sở hữu: nhóm · Hạn chốt logistics: xem `open-questions.md`_
+
+## Rubric & nội dung đã dạy (trích từ bài giảng — không tự bịa trọng số)
+
+### Giữa kỳ (rubric Day 1 — trọng số đọc được từ text bài giảng)
+
+| Hạng mục | Điểm |
+|---|---|
+| Tiền xử lý (preprocessing) | 1.5 |
+| Học model (model learning) | 2 |
+| Đánh giá (evaluation) | 2 |
+| Báo cáo (report) | 2.5 |
+| Q&A | 2 |
+
+_Liên hệ deliverable giữa kỳ:_ slides ≤10 + notebook execute; tiền xử lý/đánh giá có thể trỏ `results/preprocessing_audit.md`, classifier & confusion: `results/course_supervised_baselines.{md,csv}`, `results/figs/course_confusion_matrix.png`.
+
+### Cuối kỳ (rubric Day 1 — **trọng số cuối kỳ UNKNOWN**)
+
+Các **hạng mục** (tên category) đọc được từ text trích PDF bài giảng:
+
+- Tiền xử lý (preprocessing)
+- Học model (model learning)
+- Đánh giá & thảo luận (evaluation & discussion)
+- Quy ước code + cảnh báo (coding conventions + warnings)
+- Báo cáo (report)
+- Thi vấn đáp (oral test)
+
+**Trọng số điểm cuối kỳ không đọc được** từ text trích (PDF bị lỗi font/garbled khi extract) — **phải xác nhận bằng mắt trên slide/PDF gốc hoặc hỏi GV**; nhóm **không** ghi số điểm từng phần cho đến khi GV chốt.
+
+### Day 4 — thứ tự tiền xử lý (bắt buộc đối chiếu khi trình bày)
+
+1. **Cleaning** — theo thứ tự: **dedup trước** → imputation → consistency → **outlier removal cuối cùng**
+2. **Integration** — merge, xử lý xung đột, cardinality một-nhiều / nhiều-nhiều, tránh data leakage
+3. **Transformation** — scaling và biến đổi thang
+
+Nguyên tắc: **với mỗi giai đoạn: Test → Decide** (có bằng chứng trước khi chốt).
+
+_Áp dụng trong repo:_ `scripts/preprocessing_audit.py` ghi bảng Test | Result | Decision | Evidence vào `results/preprocessing_audit.{md,csv}`; quyết định “cứng” nằm trong `scripts/build_panel.py`, `predict_demo.py`, `predict_supervised.py`, v.v.
+
+### Mẫu báo cáo GV (`Report-proj.docx`) — quan sát một lần, không có trong repo
+
+Lead đã đọc **chỉ dạng text** file mẫu `Report-proj.docx` (sau đó file không còn trên máy local). Cấu trúc text quan sát (không khẳng định font/lề):
+
+- Trường → Khoa CNTT → Bộ môn trí tuệ nhân tạo → sinh viên (placeholder) → đề tài → **Đồ án môn HỌC MAY** → GV: **ThS. Le Minh Tan** → Khóa 2023–2027
+- **Lời cảm ơn**, **Mục lục**
+- Nội dung gợi ý **3 chương:** Chương 1 Lý thuyết liên quan (mục/tiểu mục cấp 3) · Chương 2 Mô tả hệ thống · Chương 3 Kết luận
+
+**Khác biệt với báo cáo hiện tại:** `reports/final_report.docx` giữ **7 chương** theo kế hoạch nhóm + front matter (TÓM TẮT, danh mục, TLTK) và **trang bìa / Lời cảm ơn** lấy cảm hứng từ mẫu GV (`reports/report_format_notes.md`). Câu hỏi **có bắt buộc thu gọn còn 3 chương như skeleton mẫu không** — **mở**, chờ GV (ghi `open-questions.md`).
+
+_File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản sao slide/mẫu có thể để local tại `data/raw/course/` — cũng không commit._
 
 ## Deliverable theo đề
 
 | Mốc | Yêu cầu đề | Sản phẩm dự kiến | Trạng thái |
 |---|---|---|---|
-| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (≤10 slide) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (10 slide) + `notebooks/submission_demo.ipynb` (execute sạch) | ⏳ P3 |
-| Cuối kỳ | Thi vấn đáp offline; nộp báo cáo (.docx) + notebook; dataset ≥500×10 | `reports/final_report.docx` (7 mục) + `notebooks/final_analysis.ipynb` + panel 882×41 (đã đạt) | ⏳ P5–P6 |
+| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (≤10 slide) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (10 slide) + `notebooks/submission_demo.ipynb` (execute sạch) | Sẵn sàng kỹ thuật (smoke + test) — rehearsal: con người |
+| Cuối kỳ | Thi vấn đáp offline; nộp báo cáo (.docx) + notebook; dataset ≥500×10 | `reports/final_report.docx` (7 mục) + `notebooks/final_analysis.ipynb` + panel 882×41 | Sẵn sàng kỹ thuật — mock defense + nộp: con người |
 
-## Quyết định cần chốt (hỏi GV trước 10/11 — xem `open-questions.md`)
+## Quyết định cần chốt (hỏi GV — xem `open-questions.md`)
 
-- [x] **Template `.docx`:** môn chưa cung cấp template riêng → tự soạn theo ghi chú định dạng chắt lọc từ
-      tài liệu mẫu của nhóm (`reports/report_format_notes.md`): A4, lề 2.5/2.0/2.0/2.0 cm, Title 20pt bold,
-      Heading 1/2/3 = 16/14/12pt bold, front matter đầy đủ (TÓM TẮT → bảng → nội dung 7 chương → TLTK).
-- [x] **Template slide:** chưa có → tự thiết kế, ≤10 slide (deck nộp bài `slides/submission.pptx`), hình từ `results/figs/`. Deck phụ lục mở rộng cho cuối kỳ: `slides/final.pptx` (16 slide).
-- [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051); giữ kế hoạch đầy đủ, không áp cut-lines.
-- [ ] **Định dạng nộp (tên file/cấu trúc/zip/nơi nộp):** đề xuất dưới đây, chốt P4.
-- [ ] **Người trình bày & Q&A:** đề xuất Sơn (thuật toán/demo/code) + Quyên (kết quả/ý nghĩa/báo cáo) — chốt trước rehearsal.
-- [ ] **Ngày giữa kỳ: 24/11–01/12** (mặc định user xác nhận 2026-11-04) → freeze 20/11 đứng.
+- [x] **Template `.docx`:** môn chưa cung cấp template bắt buộc trong repo → tự soạn theo ghi chú định dạng (`reports/report_format_notes.md`); đã khảo sát skeleton 3 chương từ mẫu GV (text only).
+- [x] **Template slide:** chưa có → tự thiết kế, ≤10 slide (`slides/submission.pptx`); phụ lục cuối kỳ: `slides/final.pptx` (16 slide).
+- [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051).
+- [ ] **Định dạng nộp (tên file/cấu trúc/zip/nơi nộp) và deadline chính thức** — chờ GV/LMS.
+- [ ] **Người trình bày & Q&A** — rehearsal.
+- [ ] **Trọng số rubric cuối kỳ** — chờ xác nhận trực quan slide/PDF.
+- [ ] **Skeleton báo cáo 3 chương (mẫu GV) vs 7 chương (báo cáo hiện tại)** — chờ GV.
+- [ ] **Ngày giữa kỳ: 24/11–01/12** (mặc định) → freeze gói giữa kỳ 20/11.
 
 ## Định dạng nộp đề xuất (default đến khi GV chốt khác)
 

@@ -22,6 +22,12 @@ chcp 65001
 # mở sẵn 2 thứ nộp bài
 notebooks\submission_demo.ipynb   # notebook nộp bài (execute sẵn — chiếu trực tiếp không cần chạy)
 slides\submission.pptx            # 10 slide, có speaker notes từng slide
+
+# đối chiếu môn học — mở sẵn trước Q&A (không cần mạng)
+results\preprocessing_audit.md              # audit Day 4 (bảng Test → Decide)
+results\course_supervised_baselines.md      # bảng NB/KNN/SVM/cây/RF (pseudo-label STING)
+results\figs\course_confusion_matrix.png    # 6 panel confusion (học phần)
+reports\qa_course_concepts.md               # cheat sheet Q&A Day 1–4
 ```
 
 Môi trường đã kiểm chứng: Python 3.14.2, Windows 11.
@@ -72,7 +78,9 @@ Ngoài 15′ (khi Q&A hoặc GV muốn xem thêm): mở dashboard — `python -m
 |---|---|
 | Dataset | 882 × 41 (đáp ứng ≥500×10) · 63 tỉnh × 14 năm · 39 cột số |
 | Nguồn | PAPI 2011–2024 (papi.org.vn) · Mendeley CC BY 4.0 (DOI 10.17632/wbk42j9wc8.1, crosscheck lệch 0.0) |
-| STING synthetic | ARI = **0.950** · nhiễu 2.5% · bộ test STING (`tests/test_sting.py`) xanh · toàn bộ test suite pass · coverage 98% cho `src/sting.py` (đo bằng `pytest --cov`) |
+| STING synthetic | ARI = **0.950** · nhiễu 2.5% · bộ test STING (`tests/test_sting.py`) xanh · toàn bộ test suite pass |
+| Tiền xử lý (Day 4) | `results/preprocessing_audit.md` — 0 trùng khóa / 882 dòng; không nội suy; outlier giữ + đánh dấu |
+| Classifier học phần | `results/course_supervised_baselines.csv` — CV macro-F1; holdout 2023→2024 **một lần**; so **khớp pseudo-label STING**, không ground truth xã hội (NB CV cao nhất ≠ “tốt nhất” tổng quát — xem `qa_course_concepts.md` câu 7) |
 | Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột bị cờ heuristic audit (`check_data.py`; chưa chứng minh đổi thang) |
 | Dự đoán 2024 | Train ≤2023 (frozen, train-only) · phủ **79%** · {nhiễu: 13, cụm lớn: 48} · 0 chuyển thật 2023→2024 — phát biểu rỗng/vacuous (cả 2023 lẫn 2024 không có điểm cụm 0/1), không chứng minh độ ổn định nhãn |
 | Kiểm chứng ngoại lai | PCI theo cụm STING: ANOVA F(3,743)=9.04, p=6.9e-06 · Kruskal–Wallis H=31.78, p=5.8e-07 · nhóm {nhiễu: 149, cụm 0: 5, cụm 1: 16, cụm 2: 577} · không chứng minh nhân quả (`results/external_validation.md`) |
