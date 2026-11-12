@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 from docx import Document
+from docx.enum.section import WD_SECTION_START
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
@@ -262,10 +263,14 @@ GREY = RGBColor(0x5A, 0x5A, 0x5A)
 doc = Document()
 
 # ================= Page setup & styles =================
-for section in doc.sections:
+def apply_page_setup(section):
     section.page_width, section.page_height = Cm(21.0), Cm(29.7)
     section.left_margin, section.right_margin = Cm(2.5), Cm(2.0)
     section.top_margin, section.bottom_margin = Cm(2.0), Cm(2.0)
+
+
+for section in doc.sections:
+    apply_page_setup(section)
 
 
 def set_run(run, size=12, bold=False, color=INK, italic=False, name="Times New Roman"):
@@ -307,23 +312,54 @@ except KeyError:
     pass
 
 
-def add_page_number_footer():
-    sec = doc.sections[0]
+def _append_field_to_run(run, instruction: str, cached: str | None = None):
+    fld_begin = OxmlElement("w:fldChar")
+    fld_begin.set(qn("w:fldCharType"), "begin")
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = instruction
+    fld_sep = OxmlElement("w:fldChar")
+    fld_sep.set(qn("w:fldCharType"), "separate")
+    fld_end = OxmlElement("w:fldChar")
+    fld_end.set(qn("w:fldCharType"), "end")
+    el = run._element
+    el.append(fld_begin)
+    el.append(instr)
+    el.append(fld_sep)
+    if cached is not None:
+        t = OxmlElement("w:t")
+        t.set(qn("xml:space"), "preserve")
+        t.text = cached
+        el.append(t)
+    el.append(fld_end)
+
+
+def _paragraph_field(paragraph, instruction: str, placeholder: str, *, size=10.5,
+                    bold=False, color=INK, italic=False):
+    """Word field với kết quả tạm (cập nhật bằng scripts/update_report_fields.py)."""
+    run = paragraph.add_run()
+    set_run(run, size, bold, color, italic)
+    _append_field_to_run(run, instruction, placeholder)
+
+
+def _clear_footer_block(footer):
+    for para in footer.paragraphs:
+        para.clear()
+
+
+def configure_cover_section(sec):
+    sec.different_first_page_header_footer = True
+    _clear_footer_block(sec.first_page_footer)
+    _clear_footer_block(sec.footer)
+
+
+def add_page_number_footer(sec):
     p = sec.footer.paragraphs[0]
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r = p.add_run("Trang ")
     set_run(r, 10, False, GREY)
-    fld1 = OxmlElement("w:fldChar")
-    fld1.set(qn("w:fldCharType"), "begin")
-    it = OxmlElement("w:instrText")
-    it.set(qn("xml:space"), "preserve")
-    it.text = "PAGE"
-    fld2 = OxmlElement("w:fldChar")
-    fld2.set(qn("w:fldCharType"), "end")
     r2 = p.add_run()
-    r2._element.append(fld1)
-    r2._element.append(it)
-    r2._element.append(fld2)
+    _append_field_to_run(r2, "PAGE")
 
 
 def p(text, size=12, bold=False, color=INK, align=None, space_after=6, italic=False):
@@ -382,7 +418,13 @@ def table(headers, rows, widths=None, caption=None, header_fill="1B6E77"):
     if caption:
         cp = doc.add_paragraph()
         cp.paragraph_format.space_before = Pt(10)
-        r = cp.add_run(caption)
+        r0 = cp.add_run("Bảng ")
+        set_run(r0, 10.5, True, GREY)
+        _paragraph_field(
+            cp, "SEQ Bảng \\* ARABIC", str(TABLE_NO[0]),
+            size=10.5, bold=True, color=GREY,
+        )
+        r = cp.add_run(f". {caption}")
         set_run(r, 10.5, True, GREY)
     t = doc.add_table(rows=len(rows) + 1, cols=len(headers))
     t.style = doc.styles["Table Grid"]
@@ -428,7 +470,7 @@ TABLE_NO = [0]
 
 def tbl_caption(title):
     TABLE_NO[0] += 1
-    return f"Bảng {TABLE_NO[0]}. {title}"
+    return title
 
 
 def figure(fname, caption, width_cm=12.5):
@@ -437,16 +479,39 @@ def figure(fname, caption, width_cm=12.5):
     para.paragraph_format.space_after = Pt(2)
     para.add_run().add_picture(str(FIGS / fname), width=Cm(width_cm))
     FIG_NO[0] += 1
+    n = FIG_NO[0]
     cp = doc.add_paragraph()
     cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     cp.paragraph_format.space_after = Pt(8)
-    r = cp.add_run(f"Hình {FIG_NO[0]}. {caption}")
+    r0 = cp.add_run("Hình ")
+    set_run(r0, 10.5, False, GREY, italic=True)
+    _paragraph_field(
+        cp, "SEQ Hình \\* ARABIC", str(n),
+        size=10.5, color=GREY, italic=True,
+    )
+    r = cp.add_run(f". {caption}")
     set_run(r, 10.5, False, GREY, italic=True)
-    return FIG_NO[0]
+    return n
+
+
+def _catalog_field(caption_label: str):
+    p1 = doc.add_paragraph()
+    r = p1.add_run()
+    fld1 = OxmlElement("w:fldChar")
+    fld1.set(qn("w:fldCharType"), "begin")
+    it = OxmlElement("w:instrText")
+    it.set(qn("xml:space"), "preserve")
+    it.text = f'TOC \\h \\z \\c "{caption_label}"'
+    fld2 = OxmlElement("w:fldChar")
+    fld2.set(qn("w:fldCharType"), "end")
+    r._element.append(fld1)
+    r._element.append(it)
+    r._element.append(fld2)
 
 
 def toc_field():
     p1 = doc.add_paragraph()
+    r = p1.add_run()
     fld1 = OxmlElement("w:fldChar")
     fld1.set(qn("w:fldCharType"), "begin")
     it = OxmlElement("w:instrText")
@@ -454,16 +519,12 @@ def toc_field():
     it.text = 'TOC \\o "1-2" \\h \\z \\u'
     fld2 = OxmlElement("w:fldChar")
     fld2.set(qn("w:fldCharType"), "end")
-    r = p1.add_run()
     r._element.append(fld1)
     r._element.append(it)
     r._element.append(fld2)
-    p2 = doc.add_paragraph()
-    r2 = p2.add_run("(Mở bằng Microsoft Word → References → Update Table để cập nhật số trang.)")
-    set_run(r2, 9, False, GREY, italic=True)
 
 
-add_page_number_footer()
+configure_cover_section(doc.sections[0])
 
 # ================= BÌA =================
 p("TRƯỜNG ĐẠI HỌC CÔNG NGHỆ KỸ THUẬT TP. HỒ CHÍ MINH", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
@@ -480,6 +541,9 @@ p("Sinh viên 1: Nguyễn Tiến Sơn — MSSV: 24110054", 12, False, INK, WD_AL
 p("Sinh viên 2: Trần Thị Ngọc Quyên — MSSV: 24110051", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
 p("Thành phố Hồ Chí Minh, tháng 11 năm 2026", 11, False, GREY, WD_ALIGN_PARAGRAPH.CENTER)
 doc.add_page_break()
+front_matter_sec = doc.add_section(WD_SECTION_START.NEW_PAGE)
+apply_page_setup(front_matter_sec)
+add_page_number_footer(front_matter_sec)
 
 # ================= LỜI CẢM ƠN =================
 h1("LỜI CẢM ƠN")
@@ -513,19 +577,6 @@ doc.add_page_break()
 # ================= MỤC LỤC =================
 h1("MỤC LỤC")
 toc_field()
-p("Danh mục chính", 12, True, NAVY, space_after=4)
-toc_lines = [
-    ("CHƯƠNG 1. TỔNG QUAN ĐỀ TÀI", 2),
-    ("CHƯƠNG 2. CƠ SỞ LÝ THUYẾT", 2),
-    ("CHƯƠNG 3. DỮ LIỆU VÀ TIỀN XỬ LÝ", 2),
-    ("CHƯƠNG 4. PHƯƠNG PHÁP", 2),
-    ("CHƯƠNG 5. KẾT QUẢ", 2),
-    ("CHƯƠNG 6. THẢO LUẬN VÀ HẠN CHẾ", 2),
-    ("CHƯƠNG 7. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN", 2),
-    ("TÀI LIỆU THAM KHẢO", 2),
-]
-for t, _ in toc_lines:
-    body(t)
 doc.add_page_break()
 
 # ================= DANH MỤC =================
@@ -543,37 +594,14 @@ table(["Viết tắt", "Nghĩa"], [
 ], widths=[3.5, 13.0])
 
 h1("DANH MỤC HÌNH ẢNH")
-for i, t in enumerate([
-    "Demo STING trên dữ liệu giả lập — blobs 2 cụm (ARI = 0.950)",
-    "Kết quả STING trên dữ liệu thật 2023 (hai mức phân giải lưới)",
-    "STING học 2011–2023 → dự đoán cụm 2024 (phủ 79%)",
-    "Hồi quy: dự báo 6.1 Y tế công lập năm sau",
-    "Ma trận nhầm lẫn — các classifier học phần (pseudo-label STING, holdout 2023→2024)",
-    "Dịch chuyển cụm STING 2011–2024 (lưới toàn cục)",
-    "Bản đồ centroid tô màu theo cụm — 2024",
-    "PCI theo nhãn cụm STING 2011–2022 — kiểm chứng ngoại lai (ANOVA/Kruskal–Wallis)",
-    "Mật độ cơ sở y tế/1.000 dân theo cụm STING — 2020 (ODM + GSO dân số)",
-    "GRDP/người theo cụm STING — cửa sổ 2018–2024 (GSO pxweb; 2024 = Sơ bộ)",
-    "Bối cảnh vĩ mô quốc gia 2010–2024 (World Bank WDI — chuỗi không đều phía nguồn)",
-    "Tỷ lệ hộ nghèo GSO theo cụm STING — cửa sổ giao 2012–2024 (GSO pxweb V14.47 + NGTK 2020/2021)",
-], start=1):
-    body(f"Hình {i}. {t}")
+_catalog_field("Hình")
 
 h1("DANH MỤC BẢNG")
-for i, t in enumerate([
-    "Kiểm chứng chất lượng dữ liệu",
-    "Kiểm tra tiền xử lý theo thứ tự Day 4 (Cleaning → Integration → Transformation)",
-    "STING theo từng năm (lưới thô 3×3) — đa số k = 1",
-    "Kết quả STING vs k-means vs DBSCAN (pooled 2011–2023)",
-    "Robustness đa chỉ tiêu (PCA d1–d6 + OFAT 8 chiều 2018–2024)",
-    "Hồi quy và phân loại pseudo-label STING — holdout 2023→2024",
-    "Chuyển cụm 2023 → 2024 (tách chuyển thật vs nhiễu)",
-    "So sánh các bộ phân loại học trong môn (pseudo-label STING)",
-    "Kiểm chứng ngoại lai — PCI theo nhãn cụm STING (2011–2022)",
-    "Nghèo GSO theo nhãn cụm STING — cửa sổ giao 2012–2024 (thô và đã-trừ-median-năm)",
-], start=1):
-    body(f"Bảng {i}. {t}")
+_catalog_field("Bảng")
 doc.add_page_break()
+body_sec = doc.add_section(WD_SECTION_START.NEW_PAGE)
+apply_page_setup(body_sec)
+_clear_footer_block(body_sec.footer)
 
 # ================= CHƯƠNG 1 =================
 h1("CHƯƠNG 1. TỔNG QUAN ĐỀ TÀI")
@@ -588,7 +616,7 @@ bullets([
     ("Mục tiêu 4.", "Robustness: PCA d1–d6 toàn panel; nhánh 8 chiều 2018–2024 — ablation OFAT, đổi đúng một tham số mỗi lần so với cấu hình gốc."),
     ("Mục tiêu 5.", "Pipeline dự đoán 2024: STING.predict + mô hình giám sát (Ridge/RF); chọn cấu hình theo quy trình train-only."),
 ])
-body("Phạm vi: 63 tỉnh/thành Việt Nam, 2011–2024, cấp tỉnh/năm. Không phân tích cấp huyện, không dự đoán sau 2024; các nguồn khảo sát ngoài (PCI, GSO, OD Mekong, WDI — mục 3.1) chỉ dùng để kiểm chứng ngoại lai, không đưa vào huấn luyện (mục 6.5).")
+body("Phạm vi: 63 tỉnh/thành Việt Nam, 2011–2024, cấp tỉnh/năm. Không phân tích cấp huyện, không dự đoán sau 2024; các nguồn khảo sát ngoài (PCI, GSO, OD Mekong, WDI — mục 3.1) chỉ dùng để kiểm chứng bên ngoài, không đưa vào huấn luyện (mục 6.5).")
 h2("1.3. Đóng góp của đồ án")
 bullets([
     ("Kỹ thuật.", f"STING tự cài (src/sting.py); bộ test STING (`tests/test_sting.py`) xanh ({SUITE_OK}); pipeline dự đoán hai mô hình local; quy trình chọn cấu hình chống selection-on-test."),
@@ -832,8 +860,8 @@ bullets([
 ])
 h2("6.4. Robustness — ablation OFAT chỉ định thủ phạm khi mở rộng chiều")
 body(f"PCA d1–d6 không nhận diện cấu trúc ({_pct(R_PCA['explained_var_total'])} phương sai, k={R_PCA['k']}). Nhánh 8 chiều được đọc qua ablation OFAT: thủ phạm là tổ hợp tham số, không phải dữ liệu “quá sạch” — lv=2 sập hoàn toàn (k={R_LV2['k']}, {_pct(R_LV2['noise_ratio'])} nhiễu), f=3 khi giữ mc=10 mất gần hết điểm (k={R_F3['k']}, {_pct(R_F3['noise_ratio'])} nhiễu), gốc mc=10/lv=1 vượt ngưỡng nhiễu (k={R_GOC['k']}, {_pct(R_GOC['noise_ratio'])}); duy nhất mc=2 đạt ngưỡng k/noise (k={R_MC2['k']}, {_pct(R_MC2['noise_ratio'])}) nhưng silhouette âm ({_f3(R_MC2['silhouette'])}) — hai cụm tách yếu, không phải cấu trúc mạnh. Đây là kết quả cần báo cáo, không lược bỏ: nó bác bỏ khả năng “cấu trúc ẩn ở chiều cao”. Một cấu trúc 2D dựng lại bằng cách chọn cặp-post-hoc sẽ bị PCA phủ định — vì vậy nhóm cũng loại bỏ mọi “cấu trúc 2D post-hoc” khỏi tuyên bố khoa học.")
-h2("6.5. Kiểm chứng ngoại lai độc lập")
-body("Robustness nội tại (mục 5.4) là âm tính; câu hỏi còn lại: cấu trúc học không giám sát có tương ứng với một thước đo chưa từng dùng khi học — kiểm chứng ngoại lai độc lập (liên hệ giữa nhóm, không phải nhân quả) — hay không? Nhóm đối chiếu nhãn cụm STING (model chốt, results/predict_all_years.csv) với các nguồn ngoài ở mục 3.1: không đưa vào feature, không nội suy ô trống; mọi thống kê tính lại trực tiếp từ CSV trong scripts/external_validation.py (số liệu đầy đủ: results/external_validation.md).")
+h2("6.5. Kiểm chứng bên ngoài độc lập")
+body("Robustness nội tại (mục 5.4) là âm tính; câu hỏi còn lại: cấu trúc học không giám sát có tương ứng với một thước đo chưa từng dùng khi học — kiểm chứng bên ngoài độc lập (liên hệ giữa nhóm, không phải nhân quả) — hay không? Nhóm đối chiếu nhãn cụm STING (model chốt, results/predict_all_years.csv) với các nguồn ngoài ở mục 3.1: không đưa vào feature, không nội suy ô trống; mọi thống kê tính lại trực tiếp từ CSV trong scripts/external_validation.py (số liệu đầy đủ: results/external_validation.md).")
 body("Kiểm định chính — PCI [9] (khảo sát doanh nghiệp của VCCI – USAID, tách hoàn toàn khỏi PAPI là khảo sát hộ dân của CECODES/UNDP): 756 ô 2011–2022, join được 747 điểm có nhãn (9 ô có PCI nhưng panel thiếu chỉ tiêu nên không có nhãn). Phân nhóm theo nhãn STING (Bảng 8): nhiễu −1 (n=149, PCI trung bình 59.80), cụm 0 (n=5, 59.00), cụm 1 (n=16, 58.78), cụm 2 (n=577, 61.66). One-way ANOVA F(3,743) = 9.04, p = 6.9e-06; Kruskal–Wallis (phi tham số, có sửa tie) H = 31.78, p = 5.8e-07; eta² = 0.035. Đọc thận trọng: hai cụm nhỏ quá ít điểm để tự kết luận; cặp tương phản đáng tin là nhiễu vs cụm 2; Top-30 2023–2024 chỉ là kiểm tra phụ vì chọn mẫu (58/60 ô có nhãn; ANOVA p = 0.35 — không gộp với lưới đủ 63 tỉnh).")
 table(["Nhãn nhóm", "n", "PCI trung bình", "Trung vị", "Độ lệch chuẩn"], [
     ["nhiễu (−1)", "149", "59.80", "59.16", "5.04"],
@@ -842,7 +870,7 @@ table(["Nhãn nhóm", "n", "PCI trung bình", "Trung vị", "Độ lệch chuẩ
     ["cụm 2", "577", "61.66", "62.16", "4.29"],
 ], widths=[3.4, 1.6, 3.6, 2.6, 3.2],
       caption=tbl_caption(
-          "Kiểm chứng ngoại lai — PCI theo nhãn cụm STING (2011–2022, n=747); "
+          "Kiểm chứng bên ngoài — PCI theo nhãn cụm STING (2011–2022, n=747); "
           "ANOVA F(3,743)=9.04, p=6.9e-06; Kruskal–Wallis H=31.78, p=5.8e-07"
       ))
 figure("external_pci_by_cluster.png", "PCI theo nhãn cụm STING 2011–2022 — boxplot theo nhóm (nguồn: PCI VCCI–USAID; kết quả: results/external_validation.md)", 13.5)
@@ -871,7 +899,7 @@ _pov_fig_no = figure("external_poverty_by_cluster.png",
                      "boxplot gộp (trên) và median theo năm từng cụm (dưới) (nguồn: GSO pxweb "
                      "V14.47 + NGTK 2020/2021 điền 2017–2019; kết quả: results/poverty_validation.md)", 13.5)
 body(f"Đọc kết quả CÙNG nhau: gộp thô KHÔNG đáng kể (Kruskal–Wallis H = {_note_val(POV_KW_RAW, 'H = ')}, p = {_note_val(POV_KW_RAW, 'p = ')}; {POV_ANOVA_RAW['group']} = {_note_val(POV_ANOVA_RAW['note'], 'F = ')}, p = {_note_val(POV_ANOVA_RAW['note'], 'p = ')}; eta² = {_note_eta(_pov_note('poverty_pooled_raw', 'eta squared'))}) vì test gộp nhiễm hiệu ứng năm — median nghèo toàn panel giảm sâu xuyên giai đoạn và tỷ trọng cụm trôi theo năm (hàng dưới của Hình {_pov_fig_no}); đã-trừ-median-trong-năm đáng kể ở mức yếu (H = {_note_val(POV_KW_DM, 'H = ')}, p = {_note_val(POV_KW_DM, 'p = ')}; {POV_ANOVA_DM['group']} = {_note_val(POV_ANOVA_DM['note'], 'F = ')}, p = {_note_val(POV_ANOVA_DM['note'], 'p = ')}; eta² = {_note_eta(_pov_note('poverty_pooled_demeaned', 'eta squared'))}). Cặp tương phản đáng tin duy nhất nhiễu vs cụm 2 (cụm 0 n={_pov_group_n('cụm 0')}, cụm 1 n={_pov_group_n('cụm 1')} quá nhỏ để tự kết luận) không khác biệt ở mức gộp (Mann–Whitney U = {_note_val(POV_MW_RAW['note'], 'U = ')}, p = {_note_val(POV_MW_RAW['note'], 'p = ')}) và vẫn không khác biệt sau khi tách năm (U = {_note_val(POV_MW_DM['note'], 'U = ')}, p = {_note_val(POV_MW_DM['note'], 'p = ')}). Kết luận trung thực: ở mức gộp KHÔNG thấy khác biệt nghèo có ý nghĩa giữa các nhóm; tín hiệu chỉ xuất hiện sau khi tách hiệu ứng năm và yếu hơn nhiều so với kiểm định chính PCI (eta² {_note_eta(_pov_note('poverty_pooled_demeaned', 'eta squared'))} so với 0.035) — nghèo GSO đọc như kiểm chứng bổ trợ, không thay thế kiểm định chính và không chứng minh nhân quả. Tái lập: python scripts/poverty_validation.py.")
-body("Tổng hợp: cấu trúc cụm STING tương ứng với PCI như kiểm chứng ngoại lai độc lập (liên hệ giữa nhóm, không phải nhân quả) ở mức ý nghĩa thống kê — luận cứ ngoài dữ liệu PAPI cho một mô hình học không giám sát. Kết quả này không chứng minh quan hệ nhân quả và không phủ định kết luận “dữ liệu gần như một khối” (eta² nhỏ; khác biệt chủ yếu giữa nhiễu và cụm lớn). Tái lập: python scripts/external_validation.py.")
+body("Tổng hợp: cấu trúc cụm STING tương ứng với PCI như kiểm chứng bên ngoài độc lập (liên hệ giữa nhóm, không phải nhân quả) ở mức ý nghĩa thống kê — luận cứ ngoài dữ liệu PAPI cho một mô hình học không giám sát. Kết quả này không chứng minh quan hệ nhân quả và không phủ định kết luận “dữ liệu gần như một khối” (eta² nhỏ; khác biệt chủ yếu giữa nhiễu và cụm lớn). Tái lập: python scripts/external_validation.py.")
 h2("6.6. Các hạn chế còn lại")
 bullets([
     ("Một holdout duy nhất (2024).", "mọi kết luận dự đoán cần thêm nhiều năm; độ bất định lớn; backtest cuốn chiếu chỉ khả thi khi có thêm dữ liệu lịch sử — cấu trúc cụm thay vào đó đã được kiểm chứng bằng nguồn ngoài độc lập (mục 6.5)."),
