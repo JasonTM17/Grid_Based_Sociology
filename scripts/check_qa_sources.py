@@ -1,4 +1,8 @@
-"""Kiểm tra mọi (nguồn: path:line) trong reports/qa_final.md và reports/qa_midterm.md.
+"""Kiểm tra mọi tham chiếu `path:line` trong các file Q&A của repo.
+
+Hai kiểu tham chiếu được hiểu:
+- khối ``(nguồn: path:line; path:line)`` — qa_final.md, qa_midterm.md;
+- dòng ``- **Repo:** `path:line`; `path:line` `` — qa_course_concepts.md.
 
 Chạy từ thư mục gốc repo: python scripts/check_qa_sources.py
 """
@@ -8,9 +12,15 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-QA_FILES = [ROOT / "reports" / "qa_final.md", ROOT / "reports" / "qa_midterm.md"]
+QA_FILES = [
+    ROOT / "reports" / "qa_final.md",
+    ROOT / "reports" / "qa_midterm.md",
+    ROOT / "reports" / "qa_course_concepts.md",
+]
 
 REF_RE = re.compile(r"\(nguồn:\s*([^)]+)\)", re.IGNORECASE)
+REPO_LINE_RE = re.compile(r"\*\*Repo:\*\*\s*(.+)")
+BACKTICK_RE = re.compile(r"`([^`]+)`")
 SPLIT_RE = re.compile(r"\s*;\s*")
 
 
@@ -89,19 +99,44 @@ def check_ref(ref: str) -> tuple[bool, str]:
     return False, f"không tồn tại: {path_part}"
 
 
+def source_refs(text: str) -> tuple[list[str], list[str]]:
+    """Tham chiếu nguồn trong một file Q&A, theo cả hai kiểu ghi.
+
+    Trả về ``(refs, dòng_hỏng)``: dòng "Repo" không có tham chiếu trong dấu
+    backtick bị coi là hỏng thay vì bị bỏ qua im lặng.
+    """
+    refs = []
+    broken = []
+    for block in REF_RE.findall(text):
+        refs.extend(SPLIT_RE.split(block))
+    for line in REPO_LINE_RE.findall(text):
+        found = BACKTICK_RE.findall(line)
+        if not found:
+            broken.append(line.strip())
+        refs.extend(found)
+    return [ref.strip() for ref in refs if ref.strip()], broken
+
+
 def main() -> int:
     errors: list[str] = []
     checked = 0
     for qa in QA_FILES:
         text = qa.read_text(encoding="utf-8")
-        for block in REF_RE.findall(text):
-            for ref in SPLIT_RE.split(block):
-                checked += 1
-                ok, msg = check_ref(ref)
-                status = "PASS" if ok else "FAIL"
-                print(f"[{status}] {qa.name} :: {ref.strip()} -> {msg}")
-                if not ok:
-                    errors.append(f"{qa.name}: {ref.strip()} — {msg}")
+        refs, broken_lines = source_refs(text)
+        for line in broken_lines:
+            errors.append(f"{qa.name}: dòng Repo thiếu `path:line` — {line}")
+        n_file = 0
+        for ref in refs:
+            checked += 1
+            n_file += 1
+            ok, msg = check_ref(ref)
+            status = "PASS" if ok else "FAIL"
+            print(f"[{status}] {qa.name} :: {ref} -> {msg}")
+            if not ok:
+                errors.append(f"{qa.name}: {ref} — {msg}")
+        print(f"[file] {qa.name}: {n_file} tham chiếu")
+        if n_file == 0:
+            errors.append(f"{qa.name}: không tìm thấy tham chiếu nguồn nào")
 
     print(f"\nTổng tham chiếu: {checked}, lỗi: {len(errors)}")
     if errors:
