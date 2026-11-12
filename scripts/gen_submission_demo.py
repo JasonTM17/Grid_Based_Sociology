@@ -3,7 +3,7 @@
 Pattern theo scripts/gen_midterm_demo.py và scripts/gen_final_analysis.py nhưng
 tự execute (nbconvert inplace) và tự kiểm tra: mọi code cell có output, 0 output
 loại ``error``. Mọi số liệu trong notebook được tính lại từ dữ liệu và assert
-khớp ``results/*.csv|md`` — không hardcode.
+khớp ``results/*.csv|md``; gate đọc kỳ vọng từ các file đó (không gõ tay số mới).
 
 Cách dùng: python scripts/gen_submission_demo.py
 """
@@ -37,7 +37,7 @@ md(nbf.v4.new_markdown_cell("""# Notebook nộp bài — Phân cụm 63 tỉnh V
 - **Cách chạy:** `python scripts/gen_submission_demo.py` (sinh + execute notebook này) hoặc
   `python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb`.
 - Mọi số liệu được **tính lại từ dữ liệu** ngay trong notebook và đối chiếu (`assert`) với
-  `results/*.csv|md`; không hardcode."""))
+  `results/*.csv|md`; giá trị kỳ vọng của gate lấy từ các file kết quả (không gõ tay số mới)."""))
 
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
@@ -195,9 +195,29 @@ for mc in (2, 3, 5, 8, 12):
     mm = STING(n_levels=3, factor=4, min_count=mc).fit(X_syn)
     ll = mm.cluster(level=2, connectivity=1)
     rows.append((mc, adjusted_rand_score(y_true, ll), (ll == -1).mean(), mm.n_clusters_))
-print(f"{'min_count':>9} | {'ARI':>6} | {'noise':>7} | k")
+print(f"{'min_count':>9} | {'ARI':>6} | {'nhiễu':>7} | k")
 for mc, a, nz, k in rows:
     print(f"{mc:>9} | {a:>6.3f} | {nz:>7.1%} | {k}")"""))
+
+md(nbf.v4.new_markdown_cell("""### 3.1 Minh họa `query_rect` và `connectivity`
+
+Ở mức 2, `query_rect` cộng thống kê các ô **nằm trọn** trong vùng chữ nhật (không quét lại điểm thô).
+So sánh `connectivity=1` (4 hướng) với `connectivity=2` (8 hướng) trên cùng lưới tổng hợp."""))
+
+cd(nbf.v4.new_code_cell("""import re
+import ast
+
+rect = np.array([[-9.0, -3.0], [-9.0, -3.0]])
+q = m_syn.query_rect(rect, level=2)
+print("query_rect vùng cụm trái (−9…−3):", q)
+assert q["count"] and q["count"] > 50
+
+lab4 = m_syn.cluster(level=2, connectivity=1)
+k4, nz4 = m_syn.n_clusters_, (lab4 == -1).mean()
+lab8 = m_syn.cluster(level=2, connectivity=2)
+k8, nz8 = m_syn.n_clusters_, (lab8 == -1).mean()
+print(f"connectivity=1 → k={k4}, nhiễu={nz4:.1%}")
+print(f"connectivity=2 → k={k8}, nhiễu={nz8:.1%}")"""))
 
 md(nbf.v4.new_markdown_cell("""## 4. Ứng dụng PAPI
 
@@ -230,9 +250,13 @@ lab = m_frozen.cluster(level=cfg["sting"]["cluster_level"],
 sizes = sorted([int((lab == c).sum()) for c in range(m_frozen.n_clusters_)], reverse=True)
 noise = float((lab == -1).mean())
 print(f"STING frozen: k={m_frozen.n_clusters_} | cỡ={sizes} | nhiễu={noise:.1%} (n={len(ptr)})")
-assert m_frozen.n_clusters_ == 3
-assert sizes == [629, 16, 5]
-assert abs(noise - 0.196) < 1e-3"""))
+_exp = pd.read_csv(ROOT / "results" / "metrics.csv")
+_sting = _exp[(_exp.scope == "pooled 2011-2023") & (_exp.method == "STING (frozen)")].iloc[0]
+_sizes_m = re.search(r"\\[(\\d+,\\s*\\d+,\\s*\\d+)\\]", str(_sting.note))
+exp_sizes = ast.literal_eval("[" + _sizes_m.group(1) + "]")
+assert m_frozen.n_clusters_ == int(_sting.k)
+assert sizes == exp_sizes
+assert abs(noise - float(_sting.noise_ratio)) < 1e-3"""))
 
 cd(nbf.v4.new_code_cell("""saved = pd.read_csv(ROOT / "results" / "predict_all_years.csv", encoding="utf-8-sig")
 
@@ -301,8 +325,8 @@ axes[0].set_title(f"STING frozen — k=3, nhiễu {noise:.0%}")
 axes[1].scatter(Xz[:, 0], Xz[:, 1], s=12, c=[CLUSTER_COLORS[int(c)] for c in km2.labels_])
 axes[1].set_title("k-means k=2")
 for ax in axes:
-    ax.set_xlabel(f"{feats[0]} (z-score)")
-    ax.set_ylabel(f"{feats[1]} (z-score)")
+    ax.set_xlabel(f"{FEATURE_LABELS[feats[0]]} (z-score)")
+    ax.set_ylabel(f"{FEATURE_LABELS[feats[1]]} (z-score)")
 plt.tight_layout()
 plt.show()
 
@@ -327,8 +351,30 @@ for mc, cov, k, ari in sens:
     print(f"{mc:>9} | {cov:>13.0%} | {k} | {ari:.3f}")
 cov_map = {mc: round(cov, 2) for mc, cov, _, _ in sens}
 ari_map = {mc: round(ari, 3) for mc, _, _, ari in sens}
-assert cov_map[3] == 0.82 and cov_map[5] == 0.79 and cov_map[8] == 0.70
-assert ari_map[3] == 0.852 and ari_map[5] == 1.0 and ari_map[8] == 0.678
+
+def _sensitivity_expectations(md_path):
+    exp = {}
+    in_tbl = False
+    for line in md_path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("| min_count |"):
+            in_tbl = True
+            continue
+        if not in_tbl:
+            continue
+        if not line.startswith("|"):
+            break
+        if line.startswith("|---"):
+            continue
+        cols = [c.strip() for c in line.split("|")[1:-1]]
+        if len(cols) >= 4 and cols[0].isdigit():
+            mc = int(cols[0])
+            exp[mc] = (float(cols[1].rstrip("%")) / 100, float(cols[3]))
+    return exp
+
+exp_sens = _sensitivity_expectations(ROOT / "results" / "predict_summary.md")
+for mc, (ecov, eari) in exp_sens.items():
+    assert abs(cov_map[mc] - round(ecov, 2)) < 1e-9
+    assert ari_map[mc] == round(eari, 3)
 print("Độ nhạy min_count khớp results/predict_summary.md (đã assert).")"""))
 
 md(nbf.v4.new_markdown_cell("""## 5. Mô hình giám sát: Ridge/RF
@@ -393,7 +439,7 @@ md(nbf.v4.new_markdown_cell("""## 6. Kết luận & hạn chế
 - Mô hình giám sát: Ridge chọn theo CV (R²=0.265), MAE holdout 2023→2024 thấp hơn carry-forward 6.3%.
 
 **Hạn chế (trung thực):**
-- Lưới song song trục; metric hình học (silhouette/DB/CH) không bản địa với lưới — chỉ so sánh thô, tách noise.
+- Lưới song song trục; metric hình học (silhouette/DB/CH) không bản địa với lưới — chỉ so sánh thô, tách nhiễu.
 - Cấu trúc “k=3” thực chất là 1 cụm khổng lồ + 2 cụm li ti; 2 cụm li ti chỉ có điểm 2011–2018 (concept drift).
 - Một holdout 2023→2024 chưa đủ để khẳng định năng lực dự báo tổng quát; lợi thế so với carry-forward chủ yếu
   là thông tin lag-1 của chính target (xem `results/supervised_summary.md`).
