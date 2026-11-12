@@ -41,3 +41,21 @@ _Cập nhật: 2026-11-04 · Owner rehearsal: A + B · Freeze gói nộp: 2026-1
 - Slides ≤ 15 trang, tiếng Việt, đủ mục ✓ (15 trang; nội dung theo outline `phase-03`).
 - `qa_midterm.md` ≥ 10 câu ✓ (12 câu).
 - Live rehearsal ≤ 15' + Q&A ≤ 5' ⏳ — **bằng chứng duy nhất còn thiếu** (cần 2 người).
+
+## Bộ 10 slide nộp bài — thời gian đề xuất (chưa rehearsal)
+
+Bảng trên là kế hoạch rehearsal cho deck mở rộng `slides/final.pptx` (16 slide, phụ lục). Deck nộp bài là `slides/submission.pptx` (10 slide); phân bổ phút dưới đây chỉ là đề xuất, người nói chưa được phân công.
+
+| # | Slide | Phút | Người nói |
+|---|---|---|---|
+| 1 | Bìa — thesis | 0:30 | chưa phân công |
+| 2 | Bài toán & dữ liệu | 1:30 | chưa phân công |
+| 3 | Lý thuyết STING (1/2): lưới phân cấp | 1:30 | chưa phân công |
+| 4 | Lý thuyết STING (2/2): gom cụm, độ phức tạp | 1:30 | chưa phân công |
+| 5 | Ví dụ minh họa (synthetic, ARI 0.95) | 2:00 | chưa phân công |
+| 6 | Ứng dụng PAPI | 2:30 | chưa phân công |
+| 7 | Đánh giá | 2:00 | chưa phân công |
+| 8 | Kiểm chứng ngoài và hạn chế | 1:30 | chưa phân công |
+| 9 | Kết luận | 1:00 | chưa phân công |
+| 10 | TLTK / Q&A | 1:00 | chưa phân công |
+| Tổng | | **≈ 15'** | |

@@ -28,11 +28,11 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 | `src/` | Thư viện STING (tự viết từ đầu) |
 | `scripts/` | Script dữ liệu & phân tích |
 | `models/` | Model STING đã huấn luyện + tham số chuẩn hóa (dùng cho dự đoán) |
-| `notebooks/` | Notebook nộp bài (Jupyter) |
+| `notebooks/` | Notebook nộp bài (Jupyter): `submission_demo.ipynb` (giữa kỳ) + `final_analysis.ipynb` (cuối kỳ) |
 | `tests/` | Unit test |
 | `results/figs/` | Hình kết quả |
 | `reports/` | Báo cáo, ghi chú |
-| `slides/` | Slide trình bày |
+| `slides/` | Slide nộp bài `submission.pptx` (10 slide) + deck phụ lục mở rộng `final.pptx` (16 slide) |
 
 ## Nguồn dữ liệu & giấy phép
 
@@ -67,6 +67,21 @@ python scripts/check_data.py
 ```
 
 Ghi chú: `jupyter` CLI chưa vào PATH — dùng `python -m jupyter` / `python -m nbconvert`.
+
+## Tái tạo deliverable nộp bài (slides + notebook)
+
+```powershell
+# Deck nộp bài (10 slide) — build bằng python-pptx
+python scripts/build_slides_10.py
+
+# Notebook nộp bài — sinh bằng nbformat rồi execute
+python scripts/gen_submission_demo.py
+python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb
+```
+
+- Deck nộp bài: `slides/submission.pptx` (10 slide, tiếng Việt, notes từng slide).
+- Notebook nộp bài: `notebooks/submission_demo.ipynb` (execute sạch, 0 lỗi).
+- Deck phụ lục mở rộng (cuối kỳ): `slides/final.pptx` (16 slide).
 
 ## Dự đoán (train quá khứ → dự đoán năm mới)
 

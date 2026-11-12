@@ -19,33 +19,39 @@ python -m pip install -r requirements.txt
 # Windows — hiển thị Unicode đẹp (tránh ký tự lạ khi chiếu)
 chcp 65001
 
-# mở sẵn 2 thứ
-notebooks\midterm_demo.ipynb   # notebook đã có output sẵn (chiếu trực tiếp không cần chạy)
-slides\final.pptx              # 16 trang, có speaker notes từng trang
+# mở sẵn 2 thứ nộp bài
+notebooks\submission_demo.ipynb   # notebook nộp bài (execute sẵn — chiếu trực tiếp không cần chạy)
+slides\submission.pptx            # 10 slide, có speaker notes từng slide
 ```
 
 Môi trường đã kiểm chứng: Python 3.14.2, Windows 11.
+
+_Tái tạo nếu thiếu/hỏng (deck + notebook nộp bài):_
+
+```powershell
+python scripts/build_slides_10.py                                     # build slides/submission.pptx (10 slide)
+python scripts/gen_submission_demo.py                                 # sinh notebooks/submission_demo.ipynb
+python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb
+```
+
+Deck phụ lục mở rộng (cuối kỳ): `slides\final.pptx` (16 slide) — không phải deck nộp bài.
 
 ## 2. Kịch bản 15 phút (khớp `reports/rehearsal_log.md`)
 
 | Phút | Màn hình | Nội dung |
 |---|---|---|
-| 0–1 | Slide 1 | Bìa — thesis: dữ liệu PAPI rất đồng nhất, nhóm báo cáo trung thực |
-| 1–2 | Slide 2 | Vì sao grid-based (O(n), không giả định hình dạng) |
-| 2–3 | Slide 3 | STING 3 bước: lưới phân cấp → thống kê ô → gom cụm |
-| 3–4 | Slide 4 | Dữ liệu 882×41; audit thang đo 23/37 cột |
-| 4–5 | Slide 5 + notebook §2 | Demo synthetic — ARI 0.950, 28 test trong `tests/test_sting.py` xanh |
-| 5–6 | Slide 6 + notebook §3–4 | Kết quả thật: đồng nhất (k≈1); độ nhạy lưới |
-| 6–8 | Slide 7 | Pipeline dự đoán: train ≤2023 → predict 2024 (out-of-sample duy nhất) |
-| 8–9 | Slide 8 | 2024: 48 tỉnh cụm lớn / 13 tỉnh ngoại vi (coverage 79%) |
-| 9–10 | Slide 9 | Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau — MAE 0.064, giảm 6.3% so với carry-forward 0.0683 |
-| 10–11 | Slide 10 | STING vs k-means vs DBSCAN (noise tách khỏi metric) |
-| 11–12 | Slide 11 | Bản đồ centroid 2024 |
-| 12–13 | Slide 12 | Hạn chế trung thực (robustness âm tính, gãy thang đo) |
-| 13–14 | Slide 13 | Lộ trình cuối kỳ — ĐÃ HOÀN THÀNH (P5/P6 xong; còn tag v1.0-final) |
-| 14–15 | Slide 14–16 | Kiểm chứng ngoại lai (PCI theo cụm) · Nguồn dữ liệu · Q&A |
+| 0–0:30 | Slide 1 | Bìa — thesis: dữ liệu PAPI rất đồng nhất, nhóm báo cáo trung thực |
+| 0:30–2 | Slide 2 | Bài toán & dữ liệu: vì sao grid-based (O(n), không giả định hình dạng) · panel 882×41, audit thang đo 23/37 cột |
+| 2–3:30 | Slide 3 | Lý thuyết STING (1/2): lưới phân cấp → thống kê ô |
+| 3:30–5 | Slide 4 | Lý thuyết STING (2/2): gom cụm ô dày — STING vs k-means vs DBSCAN (noise tách khỏi metric) |
+| 5–7 | Slide 5 + notebook | Ví dụ minh họa: demo synthetic — ARI 0.950, 28 test trong `tests/test_sting.py` xanh |
+| 7–9:30 | Slide 6 + notebook | Ứng dụng PAPI: kết quả thật đồng nhất (k≈1); bản đồ centroid 2024; pipeline dự đoán train ≤2023 → predict 2024 — 48 tỉnh cụm lớn / 13 ngoại vi (coverage 79%) |
+| 9:30–11:30 | Slide 7 | Đánh giá: Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau — MAE 0.064, giảm 6.3% so với carry-forward 0.0683 |
+| 11:30–13 | Slide 8 | Kiểm chứng ngoài (PCI theo cụm) & hạn chế trung thực (robustness âm tính, gãy thang đo) |
+| 13–14 | Slide 9 | Kết luận + lộ trình cuối kỳ |
+| 14–15 | Slide 10 | TLTK / Q&A |
 
-Mẹo: notebook đã **execute sẵn** (0 lỗi, ~18s) — chiếu thẳng không cần chạy live; muốn chạy lại live: `python -m nbconvert --to notebook --execute --inplace notebooks/midterm_demo.ipynb`.
+Mẹo: notebook đã **execute sẵn** (0 lỗi) — chiếu thẳng không cần chạy live; muốn chạy lại live: `python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb`.
 
 Ngoài 15′ (khi Q&A hoặc GV muốn xem thêm): mở dashboard — `python -m streamlit run app.py` → tab **"Kiểm chứng ngoại lai"** (`app.py:193`) hiển thị PCI theo cụm STING + ANOVA/Kruskal/eta² tính lại trực tiếp từ CSV và tự đối chiếu `results/external_validation.csv` — lệch quá sai số làm tròn thì tab dừng thay vì hiện số khác số đã công bố.
 
