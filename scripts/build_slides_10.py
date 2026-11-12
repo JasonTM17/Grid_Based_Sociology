@@ -135,7 +135,7 @@ def _fmt_cell_callout(cell) -> list[str]:
         f"σ = ({s0:.3f}, {s1:.3f})",
         f"min = ({lo0:.2f}, {lo1:.2f})",
         f"max = ({hi0:.2f}, {hi1:.2f})",
-        "phân phối: thống kê theo chiều (STING Cell)",
+        "loại phân phối: bỏ (đơn giản hóa)",
     ]
 
 
@@ -444,7 +444,7 @@ bullets(
     s, 0.55, FIG3_BOT + 0.1, 7.35, _btm_h,
     [
         ("Ý tưởng.", "Chia không gian đa chiều thành lưới lồng nhau; không cần k cố định trước."),
-        ("Ô lưới.", "Mỗi ô lưu n, μ, σ, min, max — quét O(n) mỗi mức."),
+        ("Ô lưới.", "Mỗi ô lưu n, μ, σ, min, max; bỏ loại phân phối (đơn giản hóa) — quét O(n) mỗi mức."),
         ("Minh họa.", "Scatter 2-D tổng hợp (240 điểm, seed 42) — thống kê ô từ STING.fit."),
         ("Tham số (slide 5).", "n_levels=3 · factor=4 · min_count=3."),
     ],
@@ -454,35 +454,37 @@ rect(s, 8.15, FIG3_BOT + 0.08, 4.65, _btm_h, WHITE, line=TEAL)
 text(s, 8.3, FIG3_BOT + 0.18, 4.35, 0.32, [
     ("Thống kê một ô (level 2)", 14, True, NAVY),
 ])
-_stats_lines = [ln for ln in CALLOUT_LINES if not ln.startswith("phân phối")]
+_stats_lines = CALLOUT_LINES
 text(
     s, 8.3, FIG3_BOT + 0.48, 4.35, _btm_h - 0.55,
     [(ln, 14, False, INK) for ln in _stats_lines],
 )
 note(
     s,
-    "Dùng sơ đồ bên phải: chỉ tay từ mức thô xuống mịn. Giải thích ô xanh là ô 'dày' đủ thống kê. "
-    "Wang, Yang & Muntz (1997) VLDB. Không đi sâu công thức — tập trung hình dung. ~90 giây.",
+    "Dùng sơ đồ bên phải: chỉ tay từ mức thô xuống mịn. Giải thích ô dày đủ thống kê. "
+    "Gốc STING lưu thêm loại phân phối; Cell trong src/sting.py chỉ count/mean/std/min/max. "
+    "fit() xây lưới lần lượt từng mức trực tiếp từ điểm, không duyệt top-down cắt tỉa như VLDB 1997. "
+    "~90 giây.",
 )
 
 # ---------- 4 — STING lý thuyết II ----------
 s = slide_new()
-header(s, "LÝ THUYẾT II", "Gom cụm top-down · độ phức tạp · tham số", 4)
+header(s, "LÝ THUYẾT II", "Gom cụm · truy vấn vùng · độ phức tạp", 4)
 steps = [
     (
         "TRUY VẤN",
-        "Dùng thống kê ô để đánh giá vùng\nmà không quét lại mọi điểm.",
-        "Bước: gộp thống kê các ô ⊆ vùng truy vấn.",
+        "query_rect: gộp thống kê ô\nnằm trọn trong vùng —\ntại một level đã chọn.",
+        "Không duyệt cây top-down\ncắt tỉa như STING gốc.",
     ),
     (
         "GOM CỤM",
         "Ô dày (count ≥ min_count)\nliền kề → một cụm;\nđiểm ô thưa → nhiễu (−1).",
-        "Bước: DFS trên ô dense + connectivity.",
+        "Một level cố định: DFS\nô dense + connectivity.",
     ),
     (
-        "TOP-DOWN",
-        "Chọn cluster_level;\nô cha quyết định phân vùng\ncon — ổn định với n lớn.",
-        "Bước: nhãn điểm = cụm ô chứa điểm tại level L.",
+        "STING GỐC",
+        "VLDB 1997: top-down —\nkiểm định độ tin cậy,\nchỉ hạ vào ô con liên quan.",
+        "Ta: từng mức dựng từ điểm;\ncluster/query chọn level L.",
     ),
 ]
 for i, (title, body, step) in enumerate(steps):
@@ -537,8 +539,10 @@ text(
 )
 note(
     s,
-    "Slide cầu nối lý thuyết–thực hành: nhấn O(n) và tách nhiễu là khác biệt so k-means. "
-    "Tham số min_count sẽ quay lại ở slide PAPI và robustness. ~90 giây.",
+    "Slide cầu nối lý thuyết–thực hành: nhấn O(n) và tách nhiễu so k-means. "
+    "Phân biệt rõ: Wang et al. truy vấn/Phân vùng top-down có pruning; "
+    "src/sting.py query_rect và cluster() chỉ dùng ô tại một level — đơn giản hóa có chủ đích. "
+    "min_count quay lại ở slide PAPI. ~90 giây.",
 )
 
 # ---------- 5 — Ví dụ tổng hợp ----------
@@ -683,14 +687,20 @@ bullets(
          f"OFAT gốc k={R_GOC['k']}, nhiễu {_pct(R_GOC['noise_ratio'])}; "
          f"f=3 → k={R_F3['k']}/{_pct(R_F3['noise_ratio'])}; lv=2 → k={R_LV2['k']}/100%; "
          f"mc=2 k={R_MC2['k']}/{_pct(R_MC2['noise_ratio'])} sil {_f3(R_MC2['silhouette'])} âm."),
-        ("Hạn chế.", "Một holdout 2024; gãy thang đo 23/37 cột; metric hình học chỉ so sánh thô."),
+        (
+            "Hạn chế.",
+            "Một holdout 2024; 23/37 chỉ tiêu bị đánh dấu bởi kiểm tra heuristic "
+            "(bước nhảy trung bình > 0.25); chưa chứng minh là đổi thang "
+            "(vd sd_5_4 — PROVENANCE); metric hình học chỉ so sánh thô.",
+        ),
     ],
     size=14, gap_pt=22,
 )
 note(
     s,
-    "Slide điểm Q&A: tự nêu hạn chế. PCI là doanh nghiệp vs PAPI hộ dân. Robustness từ robustness.csv. "
-    "~90 giây.",
+    "Slide điểm Q&A: tự nêu hạn chế. PCI là doanh nghiệp vs PAPI hộ dân. "
+    "23/37 là cờ scale_audit (check_data.py) — heuristic, không tự chứng minh gãy thang; "
+    "sd_5_4 (0.25–2.5 → 0.33–3.33, 2021) đã đối chiếu workbook. Robustness từ robustness.csv. ~90 giây.",
 )
 
 # ---------- 9 — Kết luận ----------
