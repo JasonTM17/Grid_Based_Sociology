@@ -8,7 +8,7 @@ _Mục tiêu: bạn mở repo ra và demo được ngay — không cần mạng,
 python scripts/demo_smoke.py
 ```
 
-Phải in ra: **KET LUAN: SAN SANG DEMO (33/33 muc dat)**. Nếu có FAIL → sửa xong chạy lại.
+Phải in ra: **KET LUAN: SAN SANG DEMO (N/N muc dat)** với N = số mục kiểm tra (gom cả `submission.pptx` ≤10 slide và `submission_demo.ipynb` 0 lỗi). Nếu có FAIL → sửa xong chạy lại.
 
 ## 1. Lắp ráp máy demo
 
@@ -72,7 +72,7 @@ Ngoài 15′ (khi Q&A hoặc GV muốn xem thêm): mở dashboard — `python -m
 |---|---|
 | Dataset | 882 × 41 (đáp ứng ≥500×10) · 63 tỉnh × 14 năm · 39 cột số |
 | Nguồn | PAPI 2011–2024 (papi.org.vn) · Mendeley CC BY 4.0 (DOI 10.17632/wbk42j9wc8.1, crosscheck lệch 0.0) |
-| STING synthetic | ARI = **0.950** · nhiễu 2.5% · 28 unit test trong `tests/test_sting.py` xanh (55 test toàn suite) · coverage 98% cho `src/sting.py` (đo bằng `pytest --cov`) |
+| STING synthetic | ARI = **0.950** · nhiễu 2.5% · 28 unit test trong `tests/test_sting.py` xanh · toàn bộ test suite pass · coverage 98% cho `src/sting.py` (đo bằng `pytest --cov`) |
 | Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột gãy thang đo (check_data audit) |
 | Dự đoán 2024 | Train ≤2023 (frozen, train-only) · phủ **79%** · {nhiễu: 13, cụm lớn: 48} · 0 chuyển thật 2023→2024 — phát biểu rỗng/vacuous (cả 2023 lẫn 2024 không có điểm cụm 0/1), không chứng minh độ ổn định nhãn |
 | Kiểm chứng ngoại lai | PCI theo cụm STING: ANOVA F(3,743)=9.04, p=6.9e-06 · Kruskal–Wallis H=31.78, p=5.8e-07 · nhóm {nhiễu: 149, cụm 0: 5, cụm 1: 16, cụm 2: 577} · không chứng minh nhân quả (`results/external_validation.md`) |
