@@ -88,17 +88,23 @@ thành **lưới phân cấp** và lưu thống kê cho từng ô, thay vì qué
 - Mức $l$ chia mỗi chiều thành $factor^l$ đoạn bằng nhau → mức 0 = 1 ô duy nhất; mức $l$ có tới
   $factor^{l \\cdot d}$ ô ($d$ = số chiều).
 - Mỗi ô xác định bởi chỉ số $(i_1, \\dots, i_d)$ và lưu thống kê **độc lập theo từng chiều**:
-  count, mean, std, min, max.
+  count, mean, std, min, max. Bài gốc (Wang et al.) còn lưu **loại phân phối** (distribution type);
+  **cài đặt của chúng ta bỏ qua distribution type (đơn giản hóa)**.
 
 ### 1.2 Thống kê mỗi ô
 Với ô $c$ chứa $n_c$ điểm:
 $$\\mu_j(c) = \\frac{1}{n_c}\\sum_{x \\in c} x_j, \\qquad
 \\sigma_j^2(c) = \\frac{1}{n_c}\\sum_{x \\in c}\\bigl(x_j - \\mu_j(c)\\bigr)^2$$
-Một ô "dày" (dense) khi $count(c) \\ge min\\_count$.
+Một ô "dày" (dense) khi $count(c) \\ge min\\_count$. (Chỉ count/mean/std/min/max — không có distribution type như bài gốc.)
 
-### 1.3 Truy vấn top-down (query_rect)
-Truy vấn vùng chữ nhật chỉ tổng hợp thống kê các ô nằm **trọn** trong vùng — không cần quét lại
-điểm thô; đây là cơ chế giảm chi phí khi truy vấn vùng lớn.
+### 1.3 STING gốc (top-down) vs cài đặt `src/sting.py`
+**Bài gốc:** truy vấn/phân tích **top-down** — bắt đầu từ lớp cao, kiểm định mức liên quan thống kê
+của từng ô (confidence), chỉ hạ xuống các ô con của ô “có liên quan”; nhờ đó cắt tỉa không gian tìm kiếm.
+
+**Cài đặt của chúng ta (đơn giản hóa):** `fit()` xây lưới **từng mức một** (level 0 → … → cuối),
+không có bước cắt tỉa theo confidence như bài gốc. `query_rect` quét mọi ô tại **một mức `level` chọn sẵn**
+và cộng dồn thống kê các ô nằm **trọn** trong vùng chữ nhật — không quét lại điểm thô, nhưng **không**
+phải truy vấn top-down. `cluster()` cũng gom các ô dày liền kề tại **một mức cố định** (tham số `level`).
 
 ### 1.4 Hợp ô liền kề (connected components)
 Các ô dày liền kề được gom thành cụm bằng DFS. `connectivity=1` gom ô kề **mặt** (4 hướng trong
@@ -197,7 +203,9 @@ md(nbf.v4.new_markdown_cell("""## 4. Ứng dụng PAPI
 
 **Tiền xử lý / chuẩn hóa (nêu lý do):**
 - Panel `papi_panel_63_2011_2024.csv` đã sạch: `0.0` quy về NaN (khớp quy ước gói replication Mendeley);
-  cột sub-dimension có gãy thang đo xuyên năm đã bị loại khỏi pipeline (chỉ dùng chỉ tiêu qua audit).
+  23/37 chỉ tiêu bị đánh dấu bởi kiểm tra heuristic (bước nhảy trung bình > 0.25); chưa chứng minh là
+  đổi thang — các cột đó bị loại khỏi pipeline xuyên năm (chỉ dùng chỉ tiêu qua audit; ví dụ đã chứng minh:
+  `sd_5_4`, xem `data/raw/papi/PROVENANCE.md`).
 - Chọn cặp chỉ tiêu đóng băng `sd_4_2 × sd_6_1` (theo `models/predict_config.json`, chọn bằng quy trình
   train-only — không nhìn 2024).
 - **Chuẩn hóa z-score** từng cột (`StandardScaler`) để hai trục có cùng thang, biên ô lưới không bị lệch
@@ -389,7 +397,9 @@ md(nbf.v4.new_markdown_cell("""## 6. Kết luận & hạn chế
 - Cấu trúc “k=3” thực chất là 1 cụm khổng lồ + 2 cụm li ti; 2 cụm li ti chỉ có điểm 2011–2018 (concept drift).
 - Một holdout 2023→2024 chưa đủ để khẳng định năng lực dự báo tổng quát; lợi thế so với carry-forward chủ yếu
   là thông tin lag-1 của chính target (xem `results/supervised_summary.md`).
-- Gãy thang đo ở 23/37 cột sub-dimension giới hạn phân tích xuyên năm.
+- 23/37 chỉ tiêu bị đánh dấu bởi kiểm tra heuristic (bước nhảy trung bình > 0.25); chưa chứng minh là
+  đổi thang — giới hạn phân tích xuyên năm. Ví dụ đã đối chiếu workbook: `sd_5_4` (đổi thang 2021;
+  `data/raw/papi/PROVENANCE.md`).
 
 **Tài liệu tham khảo:** Wang, Yang & Muntz (VLDB'97); PAPI (CECODES/VFF-CRT/RTA/UNDP);
 Le et al., Mendeley Data (DOI 10.17632/wbk42j9wc8.1, CC BY 4.0)."""))
