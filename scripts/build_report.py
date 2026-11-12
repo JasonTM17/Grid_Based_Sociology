@@ -2,7 +2,7 @@
 
 Định dạng học theo ghi chú báo cáo tự biên soạn (`reports/report_format_notes.md`):
 A4, lề 2.5/2.0/2.0/2.0 cm, Times New Roman, Title 20pt bold, H1 16pt, H2 14pt, H3 12pt,
-front matter đầy đủ (TÓM TẮT · LỜI MỞ ĐẦU · MỤC LỤC(TOC field) · danh mục các loại).
+front matter đầy đủ (LỜI CẢM ƠN · TÓM TẮT · LỜI MỞ ĐẦU · MỤC LỤC(TOC field) · danh mục các loại).
 
 Cách dùng: python scripts/build_report.py
 """
@@ -437,18 +437,36 @@ def toc_field():
 add_page_number_footer()
 
 # ================= BÌA =================
-p("BỘ GIÁO DỤC VÀ ĐÀO TẠO", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
-p("TRƯỜNG ĐẠI HỌC SƯ PHẠM KỸ THUẬT TP. HỒ CHÍ MINH", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
-p("KHOA CÔNG NGHỆ THÔNG TIN", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
+p("TRƯỜNG ĐẠI HỌC CÔNG NGHỆ KỸ THUẬT TP. HỒ CHÍ MINH", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
+p("KHOA CÔNG NGHỆ THÔNG TIN", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
+p("BỘ MÔN TRÍ TUỆ NHÂN TẠO", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
 p("—  ◆  —", 14, False, TEAL, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
 p("BÁO CÁO CUỐI KỲ", 20, True, NAVY, WD_ALIGN_PARAGRAPH.CENTER, space_after=10)
 p("Topic 6 — Grid-based (clustering)", 14, True, TEAL, WD_ALIGN_PARAGRAPH.CENTER, space_after=30)
 p("PHÂN CỤM 63 TỈNH VIỆT NAM\nVỚI STING TRÊN DỮ LIỆU PAPI 2011–2024", 20, True, NAVY, WD_ALIGN_PARAGRAPH.CENTER, space_after=50)
-p("Môn học: Học Máy (Machine Learning)", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
+p("ĐỒ ÁN MÔN HỌC MÁY (MALE431984)", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
+p("Giáo viên hướng dẫn: ThS. Lê Minh Tân", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
 p("Nhóm: 15", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
 p("Sinh viên 1: Nguyễn Tiến Sơn — MSSV: 24110054", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
 p("Sinh viên 2: Trần Thị Ngọc Quyên — MSSV: 24110051", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
 p("Thành phố Hồ Chí Minh, tháng 11 năm 2026", 11, False, GREY, WD_ALIGN_PARAGRAPH.CENTER)
+doc.add_page_break()
+
+# ================= LỜI CẢM ƠN =================
+h1("LỜI CẢM ƠN")
+body(
+    "Nhóm xin chân thành cảm ơn ThS. Lê Minh Tân — giảng viên hướng dẫn — và Bộ môn Trí tuệ "
+    "nhân tạo, Khoa Công nghệ Thông tin, đã tạo điều kiện và góp ý trong quá trình thực hiện "
+    "đồ án môn Học máy."
+)
+body(
+    "Đồ án sử dụng dữ liệu công khai; nhóm xin ghi nhận các tổ chức cung cấp: CECODES, VFF-CRT, "
+    "RTA và UNDP (chỉ số PAPI); VCCI – USAID (PCI); Tổng cục Thống kê / NSO (GSO); Open "
+    "Development Mekong; và World Bank (WDI)."
+)
+body(
+    "Mọi sai sót còn lại trong báo cáo là trách nhiệm của nhóm."
+)
 doc.add_page_break()
 
 # ================= TÓM TẮT =================
