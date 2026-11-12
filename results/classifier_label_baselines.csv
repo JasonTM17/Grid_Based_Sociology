@@ -1,0 +1,58 @@
+﻿analysis,model,comparator,feature_set,fold_year,metric,value,n_permutations,permutation_fit
+published_cv,gaussian naive bayes,,,,value_cv,0.514368,,
+published_cv,gaussian naive bayes,,,2017,fold_macro_f1,0.306818,,
+published_cv,gaussian naive bayes,,,2018,fold_macro_f1,0.515103,,
+published_cv,gaussian naive bayes,,,2019,fold_macro_f1,0.599542,,
+published_cv,gaussian naive bayes,,,2020,fold_macro_f1,0.479167,,
+published_cv,gaussian naive bayes,,,2021,fold_macro_f1,0.656071,,
+published_cv,gaussian naive bayes,,,2022,fold_macro_f1,0.529506,,
+published_cv,knn,,,,value_cv,0.48589,,
+published_cv,knn,,,2017,fold_macro_f1,0.378128,,
+published_cv,knn,,,2018,fold_macro_f1,0.541353,,
+published_cv,knn,,,2019,fold_macro_f1,0.569694,,
+published_cv,knn,,,2020,fold_macro_f1,0.474479,,
+published_cv,knn,,,2021,fold_macro_f1,0.477534,,
+published_cv,knn,,,2022,fold_macro_f1,0.474153,,
+published_cv,logistic regression,,,,value_cv,0.434155,,
+published_cv,logistic regression,,,2017,fold_macro_f1,0.338916,,
+published_cv,logistic regression,,,2018,fold_macro_f1,0.408915,,
+published_cv,logistic regression,,,2019,fold_macro_f1,0.456897,,
+published_cv,logistic regression,,,2020,fold_macro_f1,0.430871,,
+published_cv,logistic regression,,,2021,fold_macro_f1,0.472485,,
+published_cv,logistic regression,,,2022,fold_macro_f1,0.496848,,
+shuffled_label,gaussian naive bayes,,,,observed_cv,0.514368,200,fixed_best_params
+shuffled_label,gaussian naive bayes,,,,perm_mean_macro_f1,0.251048,200,fixed_best_params
+shuffled_label,gaussian naive bayes,,,,perm_p95_macro_f1,0.293629,200,fixed_best_params
+shuffled_label,gaussian naive bayes,,,,empirical_p,0.004975,200,fixed_best_params
+shuffled_label,knn,,,,observed_cv,0.48589,200,fixed_best_params
+shuffled_label,knn,,,,perm_mean_macro_f1,0.34346,200,fixed_best_params
+shuffled_label,knn,,,,perm_p95_macro_f1,0.38216,200,fixed_best_params
+shuffled_label,knn,,,,empirical_p,0.004975,200,fixed_best_params
+shuffled_label,logistic regression,,,,observed_cv,0.434155,200,fixed_best_params
+shuffled_label,logistic regression,,,,perm_mean_macro_f1,0.228974,200,fixed_best_params
+shuffled_label,logistic regression,,,,perm_p95_macro_f1,0.233905,200,fixed_best_params
+shuffled_label,logistic regression,,,,empirical_p,0.004975,200,fixed_best_params
+year_only,gaussian naive bayes,,year_t,,value_cv,0.391589,,
+year_only,knn,,year_t,,value_cv,0.378611,,
+year_only,logistic regression,,year_t,,value_cv,0.400102,,
+year_only,gaussian naive bayes,,prev_year_prevalence,,value_cv,0.400102,,
+year_only,knn,,prev_year_prevalence,,value_cv,0.391589,,
+year_only,logistic regression,,prev_year_prevalence,,value_cv,0.387124,,
+paired_nb,gaussian naive bayes,knn,,2017,nb_minus_other,-0.07131,,
+paired_nb,gaussian naive bayes,knn,,2018,nb_minus_other,-0.02625,,
+paired_nb,gaussian naive bayes,knn,,2019,nb_minus_other,0.029848,,
+paired_nb,gaussian naive bayes,knn,,2020,nb_minus_other,0.004688,,
+paired_nb,gaussian naive bayes,knn,,2021,nb_minus_other,0.178537,,
+paired_nb,gaussian naive bayes,knn,,2022,nb_minus_other,0.055352,,
+paired_nb,gaussian naive bayes,knn,,,nb_wins,4.0,,
+paired_nb,gaussian naive bayes,knn,,,mean_paired_diff,0.028478,,
+paired_nb,gaussian naive bayes,knn,,,std_paired_diff,0.085744,,
+paired_nb,gaussian naive bayes,logistic regression,,2017,nb_minus_other,-0.032098,,
+paired_nb,gaussian naive bayes,logistic regression,,2018,nb_minus_other,0.106189,,
+paired_nb,gaussian naive bayes,logistic regression,,2019,nb_minus_other,0.142646,,
+paired_nb,gaussian naive bayes,logistic regression,,2020,nb_minus_other,0.048296,,
+paired_nb,gaussian naive bayes,logistic regression,,2021,nb_minus_other,0.183586,,
+paired_nb,gaussian naive bayes,logistic regression,,2022,nb_minus_other,0.032657,,
+paired_nb,gaussian naive bayes,logistic regression,,,nb_wins,5.0,,
+paired_nb,gaussian naive bayes,logistic regression,,,mean_paired_diff,0.080213,,
+paired_nb,gaussian naive bayes,logistic regression,,,std_paired_diff,0.078934,,
