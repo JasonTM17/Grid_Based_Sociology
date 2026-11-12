@@ -42,6 +42,7 @@ from papi_pred_common import (  # noqa: E402
     select_model_by_cv,
 )
 from predict_supervised import (  # noqa: E402
+    CLASSIFICATION_CV_YEARS,
     FIG_DPI,
     FIG_EXTRA,
     FIG_RETRIEVED,
@@ -122,6 +123,51 @@ def _clf_metrics(y: np.ndarray, yp: np.ndarray, cv_score: float) -> dict[str, An
             ),
             3,
         ),
+    }
+
+
+def _majority_fold_macro_f1(
+    y: np.ndarray, splits: list[tuple[np.ndarray, np.ndarray]]
+) -> np.ndarray:
+    """Macro-F1 majority trên từng fold validation — dùng tính cv_std."""
+    target = np.asarray(y, dtype=int)
+    scores: list[float] = []
+    for train_idx, validation_idx in splits:
+        majority = int(pd.Series(target[train_idx]).mode().iloc[0])
+        prediction = np.full(validation_idx.size, majority, dtype=int)
+        scores.append(
+            float(
+                f1_score(
+                    target[validation_idx],
+                    prediction,
+                    average="macro",
+                    labels=[0, 1],
+                    zero_division=0,
+                )
+            )
+        )
+    return np.asarray(scores, dtype=float)
+
+
+def _grid_best_fold_scores(grid: GridSearchCV) -> np.ndarray:
+    """Điểm macro-F1 từng fold của cấu hình được CV chọn (best_index_)."""
+    cvr = grid.cv_results_
+    scores: list[float] = []
+    for i in range(len(CLASSIFICATION_CV_YEARS)):
+        key = f"split{i}_test_score"
+        if key not in cvr:
+            break
+        scores.append(float(cvr[key][grid.best_index_]))
+    return np.asarray(scores, dtype=float)
+
+
+def _cv_spread_columns(fold_scores: np.ndarray) -> dict[str, float | int]:
+    n_folds = int(fold_scores.size)
+    if n_folds < 2:
+        return {"cv_std": float("nan"), "cv_folds": n_folds}
+    return {
+        "cv_std": round(float(np.std(fold_scores, ddof=1)), 3),
+        "cv_folds": n_folds,
     }
 
 
@@ -254,17 +300,26 @@ def build_metrics_table(
         rf_n_estimators=rf_n_estimators,
     )
 
+    majority_folds = _majority_fold_macro_f1(ytr, clf_cv)
     rows: list[dict[str, Any]] = []
     rows.append(
         {
             "model": MODEL_MAJORITY,
             **_clf_metrics(yte, np.full_like(yte, maj), majority_cv),
+            **_cv_spread_columns(majority_folds),
         }
     )
 
     for name, grid in grids.items():
         yp = grid.best_estimator_.predict(Xte)
-        rows.append({"model": name, **_clf_metrics(yte, yp, grid.best_score_)})
+        fold_scores = _grid_best_fold_scores(grid)
+        rows.append(
+            {
+                "model": name,
+                **_clf_metrics(yte, yp, grid.best_score_),
+                **_cv_spread_columns(fold_scores),
+            }
+        )
 
     metrics = pd.DataFrame(rows)
     return metrics, grids, yte, Xte
@@ -286,6 +341,13 @@ def _write_markdown(
     selectable = metrics[~metrics.model.isin([MODEL_MAJORITY])]
     selected = select_model_by_cv(selectable)
     selected_row = metrics.set_index("model").loc[selected]
+    top_two = selectable.nlargest(2, "value_cv")
+    cv_gap_top = (
+        float(top_two.iloc[0]["value_cv"] - top_two.iloc[1]["value_cv"])
+        if len(top_two) >= 2
+        else float("nan")
+    )
+    leader_cv_std = float(selected_row["cv_std"])
 
     lines = [
         "# Baseline classifier theo nội dung học phần (pseudo-label STING)",
@@ -307,8 +369,12 @@ def _write_markdown(
         "",
         metrics.to_markdown(index=False),
         "",
-        f"- Model cao nhất theo CV (không tính majority): **{selected}** "
-        f"(macro-F1 CV = {selected_row['value_cv']:.3f}).",
+        f"- Theo **quy tắc chọn** của pipeline (macro-F1 CV cao nhất, không tính "
+        f"majority): **{selected}** (macro-F1 CV = {selected_row['value_cv']:.3f}).",
+        f"- Khoảng cách macro-F1 CV giữa hai model đầu bảng ({cv_gap_top:.3f}) "
+        f"nhỏ hơn độ lệch fold-to-fold của model dẫn đầu (`cv_std` = "
+        f"{leader_cv_std:.3f}), nên thứ hạng chỉ mang tính mô tả, không khẳng "
+        f"định một model vượt trội.",
         "",
         "## Hình",
         "- **Hình:** `results/figs/course_confusion_matrix.png` — ma trận nhầm lẫn "
@@ -322,6 +388,8 @@ def _write_markdown(
         "",
         "## Cách đọc",
         "- `value_cv`: macro-F1 trung bình trên các fold validation thời gian.",
+        "- `cv_std`: độ lệch chuẩn mẫu (ddof=1) của macro-F1 các fold cho cấu hình "
+        "được CV chọn; `cv_folds`: số fold.",
         "- `holdout_acc` / `holdout_macro_f1`: đánh giá một năm giữ lại; "
         "độ đồng thuận với nhãn STING, không khẳng định độ chính xác "
         "thực tế ngoài đời.",
