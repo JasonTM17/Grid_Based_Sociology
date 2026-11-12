@@ -102,7 +102,8 @@ md(nbf.v4.new_markdown_cell("""## 2. Sweep trên dữ liệu PAPI thật (3 năm
 
 Dùng cặp chỉ tiêu đã đóng băng (`sd_4_2 × sd_6_1`); chuẩn hóa z trong từng năm để các năm so sánh được tương đối."""))
 
-cd(nbf.v4.new_code_cell("""cfg = __import__("json").load(open("../models/predict_config.json", encoding="utf-8"))
+cd(nbf.v4.new_code_cell("""import json
+cfg = json.loads(Path("../models/predict_config.json").read_text(encoding="utf-8"))
 FEATS = cfg["features"]
 panel = pd.read_csv("../data/processed/papi_panel_63_2011_2024.csv")
 print(f"Cặp chỉ tiêu: {FEATS}")

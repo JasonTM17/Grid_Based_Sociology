@@ -136,7 +136,7 @@ Cặp chỉ tiêu chốt (qua quy trình train-only — chọn trên ≤2020, ki
 `4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công × 6.1 Y tế công lập`"""))
 
 cd(nbf.v4.new_code_cell("""import json
-cfg = json.load(open("../models/predict_config.json", encoding="utf-8"))
+cfg = json.loads(Path("../models/predict_config.json").read_text(encoding="utf-8"))
 print("Config đã đóng băng (predict_sweep.py):")
 print("  features:", cfg["features"])
 print("  STING:", cfg["sting"])
