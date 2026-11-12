@@ -75,7 +75,9 @@ for f in [
 for f in [
     "notebooks/midterm_demo.ipynb",
     "notebooks/final_analysis.ipynb",
+    "notebooks/submission_demo.ipynb",
     "slides/final.pptx",
+    "slides/submission.pptx",
     "reports/final_report.docx",
     "reports/qa_midterm.md",
     "reports/qa_final.md",
@@ -103,7 +105,11 @@ except Exception as e:  # noqa: BLE001
 # --- 5) Notebook execute san --- #
 import nbformat  # noqa: E402
 
-for nb in ["notebooks/midterm_demo.ipynb", "notebooks/final_analysis.ipynb"]:
+for nb in [
+    "notebooks/midterm_demo.ipynb",
+    "notebooks/final_analysis.ipynb",
+    "notebooks/submission_demo.ipynb",
+]:
     try:
         n = nbformat.read(ROOT / nb, as_version=4)
         n_cells = len(n.cells)
@@ -113,6 +119,15 @@ for nb in ["notebooks/midterm_demo.ipynb", "notebooks/final_analysis.ipynb"]:
         check(f"{nb} da execute, 0 loi", n_err == 0, f"{n_cells} cells, {n_err} loi")
     except Exception as e:  # noqa: BLE001
         check(f"{nb} doc duoc", False, str(e))
+
+try:
+    from pptx import Presentation  # noqa: E402
+
+    p_sub = Presentation(ROOT / "slides" / "submission.pptx")
+    n_sub = len(p_sub.slides._sldIdLst)
+    check("submission.pptx mo duoc <=10 trang", 1 <= n_sub <= 10, f"{n_sub} trang")
+except Exception as e:  # noqa: BLE001
+    check("submission.pptx mo duoc", False, str(e))
 
 # --- Bao cao --- #
 print("=" * 64)

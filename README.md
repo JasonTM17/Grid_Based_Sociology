@@ -9,7 +9,7 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 
 Đồ án môn Học máy · Chủ đề 6: **Grid-based (clustering)** · Domain: Sociology / History.
 
-**Sắp demo/thi?** Xem [`DEMO.md`](DEMO.md) — một lệnh kiểm tra sẵn sàng: `python scripts/demo_smoke.py` (phải in "SAN SANG DEMO (33/33)").
+**Sắp demo/thi?** Xem [`DEMO.md`](DEMO.md) — một lệnh kiểm tra sẵn sàng: `python scripts/demo_smoke.py` (phải in "SAN SANG DEMO" với toàn bộ mục PASS).
 
 ## Cấu trúc dự án
 
@@ -55,7 +55,7 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 # Kiểm tra môi trường
 python -c "import pandas, openpyxl, plotly, sklearn, streamlit; print('ok')"
 
-# Unit test (28 tests STING — tests/test_sting.py; 55 tests toàn suite; coverage 98% cho src/sting.py)
+# Unit test (28 tests STING — tests/test_sting.py; toàn bộ test suite; coverage 98% cho src/sting.py)
 python -m pytest tests -q
 python -m pytest tests --cov=src -q
 
