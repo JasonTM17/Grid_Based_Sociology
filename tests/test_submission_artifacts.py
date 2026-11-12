@@ -112,6 +112,15 @@ def check_notebook_cells(nb: dict) -> list[str]:
     return violations
 
 
+def notebook_markdown_text(nb: dict) -> str:
+    chunks: list[str] = []
+    for cell in nb.get("cells", []):
+        if cell.get("cell_type") != "markdown":
+            continue
+        chunks.append(_cell_source_text(cell))
+    return "\n".join(chunks)
+
+
 def notebook_executed_text(nb: dict) -> str:
     """Ghép mọi stdout / text/plain từ output đã lưu."""
     chunks: list[str] = []
@@ -205,6 +214,26 @@ def test_submission_pptx_exists_and_notes():
 def test_submission_notebook_cells(submission_notebook: dict):
     violations = check_notebook_cells(submission_notebook)
     assert not violations, "\n".join(violations)
+
+
+def test_submission_notebook_course_rubric_sections(submission_notebook: dict):
+    """Notebook nộp bài phải hiện thứ tự Day 4 và baseline classifier học phần."""
+    md_text = notebook_markdown_text(submission_notebook)
+    code_cells = [
+        c for c in submission_notebook.get("cells", []) if c.get("cell_type") == "code"
+    ]
+    missing: list[str] = []
+    if "Tiền xử lý theo Day 4" not in md_text:
+        missing.append("thiếu mục Tiền xử lý theo Day 4")
+    if "Bộ phân loại trong môn học" not in md_text:
+        missing.append("thiếu mục Bộ phân loại trong môn học")
+    if not any("preprocessing_audit.csv" in _cell_source_text(c) for c in code_cells):
+        missing.append("không có ô đọc preprocessing_audit.csv")
+    if not any("course_supervised_baselines.csv" in _cell_source_text(c) for c in code_cells):
+        missing.append("không có ô đọc course_supervised_baselines.csv")
+    if not any("course_confusion_matrix.png" in _cell_source_text(c) for c in code_cells):
+        missing.append("không có ô hiển thị course_confusion_matrix.png")
+    assert not missing, "\n".join(missing)
 
 
 def test_submission_notebook_key_numbers(
