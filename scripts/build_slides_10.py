@@ -266,7 +266,7 @@ def _cell_counts_2d(X: np.ndarray, lo: np.ndarray, hi: np.ndarray, res: int) -> 
 
 
 def _sting_hierarchy_figure_png(model: STING, X: np.ndarray) -> BytesIO:
-    """Ba panel 1 ô / 2×2 / 4×4 — matplotlib + fig_style, nhúng slide qua BytesIO."""
+    """Ba panel STING mức 0/1/2 — độ phân giải factor**level (1×1, 4×4, 16×16 khi f=4)."""
     import matplotlib
 
     matplotlib.use("Agg")
@@ -275,11 +275,13 @@ def _sting_hierarchy_figure_png(model: STING, X: np.ndarray) -> BytesIO:
 
     lo, hi = model.bounds_min_, model.bounds_max_
     span = hi - lo
+    f = model.factor
     panels = [
-        (1, "Mức 0 (1 ô)"),
-        (2, "Mức 1 (2×2)"),
-        (4, "Mức 2 (4×4)"),
+        (f ** 0, "Mức 0 (1×1)"),
+        (f ** 1, f"Mức 1 ({f}×{f})"),
+        (f ** 2, f"Mức 2 ({f ** 2}×{f ** 2})"),
     ]
+    level2_res = f ** 2
     bio = BytesIO()
     with style_context():
         fig, axes = plt.subplots(1, 3, figsize=(12.2, 3.35), dpi=200)
@@ -313,12 +315,9 @@ def _sting_hierarchy_figure_png(model: STING, X: np.ndarray) -> BytesIO:
             ax.set_aspect("equal", adjustable="box")
             ax.set_title(title, fontsize=11, pad=6)
             ax.tick_params(labelsize=7)
-            if res == 4:
+            if res == level2_res:
                 key, _cell = _callout_cell(model, level=2)
-                # Ánh xạ ô STING mức 2 (factor**2 ô/chiều) → panel minh họa 4×4
-                sting_res = model.factor ** 2
-                demo_key = (key[0] * res // sting_res, key[1] * res // sting_res)
-                ix, iy = demo_key
+                ix, iy = int(key[0]), int(key[1])
                 cx0, cy0 = lo[0] + ix * step[0], lo[1] + iy * step[1]
                 highlight = Rectangle(
                     (cx0, cy0),
@@ -330,9 +329,9 @@ def _sting_hierarchy_figure_png(model: STING, X: np.ndarray) -> BytesIO:
                     zorder=4,
                 )
                 ax.add_patch(highlight)
-                p_ix, p_iy = ix // 2, iy // 2
-                px0, py0 = lo[0] + p_ix * (span[0] / 2), lo[1] + p_iy * (span[1] / 2)
-                pstep = span / 2
+                p_ix, p_iy = ix // f, iy // f
+                px0, py0 = lo[0] + p_ix * (span[0] / f), lo[1] + p_iy * (span[1] / f)
+                pstep = span / f
                 ax.add_patch(
                     Rectangle(
                         (px0, py0),
@@ -346,7 +345,7 @@ def _sting_hierarchy_figure_png(model: STING, X: np.ndarray) -> BytesIO:
                     )
                 )
                 ax.annotate(
-                    "ô cha → 4 ô con",
+                    f"ô cha → {f ** 2} ô con",
                     xy=(cx0 + step[0] * 0.5, cy0 + step[1] * 0.5),
                     xytext=(px0 + pstep[0] * 0.15, py0 + pstep[1] * 1.05),
                     fontsize=8.5,
@@ -432,13 +431,14 @@ note(
 )
 
 # ---------- 3 — STING lý thuyết I ----------
-FIG3_H = SH * 0.55 - 0.95
+FIG3_W = SW - 1.1
+FIG3_H = FIG3_W * (3.35 / 12.2)
 FIG3_Y = 1.32
 FIG3_BOT = FIG3_Y + FIG3_H
 s = slide_new()
 header(s, "LÝ THUYẾT I", "STING — lưới thống kê phân cấp", 3)
 _hier_png = _sting_hierarchy_figure_png(_syn_model, _X_SYN)
-pic_bytes(s, _hier_png, 0.55, FIG3_Y, w=SW - 1.1, h=FIG3_H)
+pic_bytes(s, _hier_png, 0.55, FIG3_Y, w=FIG3_W)
 _btm_h = SH - 0.42 - FIG3_BOT - 0.08
 bullets(
     s, 0.55, FIG3_BOT + 0.1, 7.35, _btm_h,
@@ -572,10 +572,10 @@ pic(s, "sting_first_real.png", 0.55, 1.45, h=4.2)
 bullets(
     s, 7.95, 1.55, 4.75, 5.0,
     [
-        ("Tiền xử lý.", "Chuẩn hóa within-year z; cặp sd_4_2 × sd_6_1 (allowlist audit)."),
-        ("(a) Lưới thô 3×3:", "k=1 · 55/61 trong vùng dày · nhiễu 10%."),
-        ("(b) Lưới mịn 9×9:", "k=3 · nhiễu 31% — độ phân giải đổi kết luận."),
-        ("Đóng băng.", "STING(3,4,5) level=2 — chọn train-only; 2024 holdout một lần."),
+        ("(a) n_levels=2, 3×3, mc=5:", "k=1 · 55/61 trong vùng dày · nhiễu 10% · đặc trưng thô, năm 2023 (61 tỉnh)."),
+        ("(b) n_levels=3, 9×9, mc=2:", "k=3 · nhiễu 31% · cùng năm/không gian — nhiễu tăng."),
+        ("Đóng băng.", "STING(3,4,5) level=2 · pooled z (fit 2011–2023); holdout 2024 một lần."),
+        ("Cặp đặc trưng.", "sd_4_2 × sd_6_1 (allowlist audit)."),
     ],
     size=14.5, gap_pt=44,
 )
@@ -589,7 +589,7 @@ note(
 s = slide_new()
 header(s, "ĐÁNH GIÁ", "So baseline · Ridge holdout 2023→2024", 7)
 rows = [
-    ("Method", "k", "Noise", "Silh.", "ARI"),
+    ("Phương pháp", "k", "Nhiễu", "Silh.", "ARI"),
     (
         "STING",
         M_STING["k"],
@@ -646,9 +646,9 @@ text(s, 0.55, 4.18, 5.6, 0.55, [
     ("Pooled 2011–2023 · metrics.csv · STING ≈ DBSCAN (ARI 0.647); k-means khác vùng.", 14, False, GREY),
 ])
 rect(s, 6.55, 1.38, 6.25, 5.55, LIGHT)
-pic(s, "supervised_regression.png", 6.65, 1.48, w=6.05, h=4.35)
+pic(s, "supervised_regression.png", 6.65, 1.48, w=6.05)
 text(s, 6.65, 5.92, 6.05, 0.45, [
-    ("Hình: supervised_regression.png · holdout 2024 (một lần)", 14, False, GREY),
+    ("Hình: supervised_regression.png · holdout 2023→2024 (một lần)", 14, False, GREY),
 ])
 bullets(
     s, 0.55, 4.75, 5.75, 2.25,
@@ -670,7 +670,7 @@ s = slide_new()
 header(s, "TRUNG THỰC", "Kiểm chứng ngoài · robustness · hạn chế", 8)
 rect(s, 0.55, 1.42, 4.85, 3.95, LIGHT)
 text(s, 0.7, 1.5, 4.5, 0.3, [("PCI vs cụm STING (external)", 14, True, TEAL)])
-pic(s, "external_pci_by_cluster.png", 0.65, 1.82, w=4.65, h=3.4)
+pic(s, "external_pci_by_cluster.png", 0.65, 1.82, w=4.65)
 text(s, 0.65, 5.28, 4.65, 0.35, [("Nguồn: results/figs/external_pci_by_cluster.png", 14, False, GREY)])
 bullets(
     s, 5.65, 1.45, 7.15, 3.85,
