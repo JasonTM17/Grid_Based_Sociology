@@ -2,8 +2,8 @@
 
 Pattern theo scripts/gen_midterm_demo.py và scripts/gen_final_analysis.py nhưng
 tự execute (nbconvert inplace) và tự kiểm tra: mọi code cell có output, 0 output
-loại ``error``. Mọi số liệu trong notebook được tính lại từ dữ liệu và assert
-khớp ``results/*.csv|md``; gate đọc kỳ vọng từ các file đó (không gõ tay số mới).
+loại ``error``. Phần lớn số liệu được tính lại từ dữ liệu trong notebook; các ô gate
+đọc ``results/*.csv|md`` và ``assert`` khớp artifact đã lưu (không gõ tay số mới).
 
 Cách dùng: python scripts/gen_submission_demo.py
 """
@@ -36,8 +36,8 @@ md(nbf.v4.new_markdown_cell("""# Notebook nộp bài — Phân cụm 63 tỉnh V
   với holdout 2023→2024.
 - **Cách chạy:** `python scripts/gen_submission_demo.py` (sinh + execute notebook này) hoặc
   `python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb`.
-- Mọi số liệu được **tính lại từ dữ liệu** ngay trong notebook và đối chiếu (`assert`) với
-  `results/*.csv|md`; giá trị kỳ vọng của gate lấy từ các file kết quả (không gõ tay số mới)."""))
+- Phần lớn số liệu **tính lại từ dữ liệu** ngay trong notebook; các ô kiểm chứng đọc
+  `results/*.csv|md` và `assert` khớp artifact đã lưu — không gõ tay số kỳ vọng mới."""))
 
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path

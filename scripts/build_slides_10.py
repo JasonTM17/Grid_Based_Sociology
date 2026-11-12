@@ -113,9 +113,6 @@ assert SYN_NOISE <= 0.05
 assert SYN_K == 2
 SYN_ARI_S = f"{SYN_ARI:.3f}"
 
-_PYTEST_STING = 28
-
-
 def _callout_cell(model: STING, level: int = 2) -> tuple[tuple[int, ...], object]:
     """Ô dày đại diện trên demo tổng hợp (số thật từ fit slide build)."""
     cells = model.cells_[level]
@@ -555,7 +552,7 @@ bullets(
         ("Dữ liệu.", "2 blob Gauss, 240 điểm, seed 42 (khớp tests/test_sting.py)."),
         ("Kết quả.", f"ARI = {SYN_ARI_S} · nhiễu {_pct(SYN_NOISE)} · k = {SYN_K}."),
         ("Lưới.", "n_levels=3, factor=4, cluster_level=2, min_count=3."),
-        ("Kiểm chứng.", f"pytest {_PYTEST_STING} test src/sting.py — thống kê ô khớp numpy."),
+        ("Kiểm chứng.", "bộ test STING (tests/test_sting.py) pass — thống kê ô khớp numpy."),
     ],
     size=15, gap_pt=52,
 )
@@ -699,7 +696,7 @@ bullets(
 note(
     s,
     "Slide điểm Q&A: tự nêu hạn chế. PCI là doanh nghiệp vs PAPI hộ dân. "
-    "23/37 là cờ scale_audit (check_data.py) — heuristic, không tự chứng minh gãy thang; "
+    "23/37 là cờ scale_audit (check_data.py) — heuristic, chưa tự chứng minh đổi thang; "
     "sd_5_4 (0.25–2.5 → 0.33–3.33, 2021) đã đối chiếu workbook. Robustness từ robustness.csv. ~90 giây.",
 )
 
