@@ -1,3 +1,4 @@
 # Notebook cells import per cell and use compact one-liners; outputs are generated.
 [lint.per-file-ignores]
 "*.ipynb" = ["E402", "E702", "F401", "F811"]
+"scripts/build_slides_10.py" = ["E402"]
