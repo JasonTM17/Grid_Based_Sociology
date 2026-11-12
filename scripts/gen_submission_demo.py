@@ -10,6 +10,7 @@ Cách dùng: python scripts/gen_submission_demo.py
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -43,16 +44,57 @@ md(nbf.v4.new_markdown_cell("""# Notebook nộp bài — Phân cụm 63 tỉnh V
   Ridge/RF nạp `models/sup_ridge.joblib`, `models/sup_rf.joblib`; các ô gate `assert` khớp
   `results/metrics.csv`, `results/supervised_metrics.csv`, v.v. — không gõ tay số kỳ vọng mới."""))
 
-cd(nbf.v4.new_code_cell("""import sys
+cd(nbf.v4.new_code_cell("""import os
+import sys
 from pathlib import Path
 
-ROOT = None
-for cand in (Path.cwd(), Path.cwd().parent):
-    if (cand / "src" / "sting.py").exists():
-        ROOT = cand
-        sys.path.insert(0, str(cand / "src"))
-        sys.path.insert(0, str(cand / "scripts"))
-        break
+_STING_MARKER = Path("src") / "sting.py"
+
+
+def _find_repo_root() -> Path:
+    seeds: list[Path] = [Path.cwd().resolve()]
+    for env_key in ("STING_REPO_ROOT", "SUBMISSION_DEMO_NB_PATH", "JPY_STARTUP_PATH"):
+        raw = os.environ.get(env_key)
+        if not raw:
+            continue
+        seeds.append(
+            Path(raw).resolve()
+            if env_key == "STING_REPO_ROOT"
+            else Path(raw).resolve().parent
+        )
+    try:
+        from IPython import get_ipython
+
+        ip = get_ipython()
+        if ip is not None:
+            for key in ("__vsc_ipynb_file__", "__file__"):
+                raw = ip.user_ns.get(key)
+                if raw:
+                    seeds.append(Path(raw).resolve().parent)
+    except ImportError:
+        pass
+    seen: set[Path] = set()
+    for seed in seeds:
+        cur = seed
+        for _ in range(64):
+            if cur in seen:
+                break
+            seen.add(cur)
+            if (cur / _STING_MARKER).is_file():
+                return cur
+            parent = cur.parent
+            if parent == cur:
+                break
+            cur = parent
+    raise FileNotFoundError(
+        "Không tìm thấy repo: không có src/sting.py khi đi lên từ cwd hoặc "
+        "vị trí notebook — đặt STING_REPO_ROOT hoặc chạy từ thư mục gốc repo."
+    )
+
+
+ROOT = _find_repo_root()
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "scripts"))
 
 import joblib
 import numpy as np
@@ -81,7 +123,7 @@ from predict_supervised import HOLDOUT_YEAR, build_regression_pairs, expanding_o
 from fig_style import CLUSTER_COLORS, CLUSTER_LABELS, apply_style
 
 apply_style()
-print("import OK | ROOT =", ROOT)"""))
+print("import OK")"""))
 
 md(nbf.v4.new_markdown_cell("""## 1. Lý thuyết STING
 
@@ -500,9 +542,15 @@ print("written:", OUT)
 
 
 def main() -> int:
+    env = {
+        **os.environ,
+        "STING_REPO_ROOT": str(ROOT),
+        "SUBMISSION_DEMO_NB_PATH": str(OUT),
+    }
     proc = subprocess.run(
         [sys.executable, "-m", "nbconvert", "--to", "notebook", "--execute", "--inplace", str(OUT)],
         cwd=str(ROOT),
+        env=env,
         capture_output=True,
         text=True,
         timeout=600,
