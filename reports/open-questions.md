@@ -9,7 +9,7 @@ _Cập nhật: 2026-11-12 · Địa chỉ hỏi: GV phụ trách môn (LMS/email
 | 3 | Có template báo cáo `.docx` của môn không? | Môn chưa có template riêng → tự soạn theo ghi chú định dạng đã chắt lọc từ tài liệu mẫu của nhóm (`report_format_notes.md`) | ✅ user gợi ý lấy mẫu trong OneDrive; đã khảo sát xong | 2026-11-04 |
 | 4 | Nhóm 1 hay 2 người? | **2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051); **Nhóm 15**; kế hoạch đầy đủ, không cut-lines | ✅ user xác nhận | 2026-11-04 |
 | 5 | Định dạng nộp: tên file, cấu trúc thư mục/zip, nơi nộp? | Đề xuất: `Nhom<mã>_HocMay_Topic6_STING_GiuaKy/` gồm slides + notebook; chốt khi GV/LMS phản hồi | ⏳ chưa | — |
-| 6 | Trọng số rubric **cuối kỳ** (preprocessing, model learning, evaluation, code, report, oral)? | Text trích PDF bài giảng bị garbled — **chỉ liệt kê được tên hạng mục**, không đọc được điểm; xem `reports/course_requirements.md` | ⏳ chưa — cần xác nhận trực quan slide/PDF hoặc GV | — |
+| 6 | Trọng số rubric **cuối kỳ**? | Đã xác minh trên Day 1 trang 10: Group 8 (preprocessing 1.5, model 1, evaluation 2, code/warning 1, report 2.5) + oral 2 cá nhân; xem `reports/course_requirements.md` | ✅ xong | Day 1 PDF tr. 10 |
 | 7 | Báo cáo cuối: bắt buộc **3 chương** (mẫu `Report-proj.docx`) hay chấp nhận **7 chương** hiện tại (`reports/final_report.docx`)? | Giữ 7 chương + bìa/Lời cảm ơn theo mẫu quan sát; skeleton 3 chương ghi trong `course_requirements.md` | ⏳ chưa | — |
 
 **Ghi chú:** câu 2, 5–7 chờ GV; khi hết hạn tự đặt vẫn áp dụng mặc định ở cột giữa và ghi ngày quyết định.
@@ -66,7 +66,7 @@ Bảng logistics ở trên **giữ nguyên**; câu 2, 5, 6, 7 vẫn ⏳ chờ GV
 
 Gate chạy cuối phiên (cwd repo): `python -m ruff check .`; `python -m pytest tests -q`; `python scripts/demo_smoke.py` — xem exit code trong summary worker.
 
-Vẫn **chỉ con người:** rehearsal/mock defense; nộp LMS/zip; chốt deadline & format (câu 5); trọng số rubric cuối kỳ (câu 6); skeleton 3 vs 7 chương (câu 7).
+Vẫn **chỉ con người:** rehearsal/mock defense; nộp LMS/zip; chốt deadline & format (câu 5); skeleton 3 vs 7 chương (câu 7).
 
 ---
 

@@ -16,7 +16,7 @@ _Cập nhật: 2026-11-12 · Chủ sở hữu: nhóm · Hạn chốt logistics: 
 
 _Liên hệ deliverable giữa kỳ:_ slides ≤10 + notebook execute; tiền xử lý/đánh giá có thể trỏ `results/preprocessing_audit.md`, classifier & confusion: `results/course_supervised_baselines.{md,csv}`, `results/figs/course_confusion_matrix.png`.
 
-### Cuối kỳ (rubric Day 1 — **trọng số cuối kỳ UNKNOWN**)
+### Cuối kỳ (rubric Day 1, trang 10 — đã xác minh bằng mắt trên PDF gốc)
 
 Các **hạng mục** (tên category) đọc được từ text trích PDF bài giảng:
 
@@ -27,7 +27,7 @@ Các **hạng mục** (tên category) đọc được từ text trích PDF bài 
 - Báo cáo (report)
 - Thi vấn đáp (oral test)
 
-**Trọng số điểm cuối kỳ không đọc được** từ text trích (PDF bị lỗi font/garbled khi extract) — **phải xác nhận bằng mắt trên slide/PDF gốc hoặc hỏi GV**; nhóm **không** ghi số điểm từng phần cho đến khi GV chốt.
+Trọng số (Group +8, Individual +2; render trang 10 của `data/raw/course/lecture-day1-ideas-of-machine-learning.pdf`): tiền xử lý **1.5**, học model **1**, đánh giá & thảo luận **2**, quy ước code + cảnh báo **1**, báo cáo **2.5** (nhóm, tổng 8); thi vấn đáp **2** (cá nhân). Chia theo Group/Individual nên phần Q&A mỗi thành viên phải tự trả lời được.
 
 ### Day 4 — thứ tự tiền xử lý (bắt buộc đối chiếu khi trình bày)
 
