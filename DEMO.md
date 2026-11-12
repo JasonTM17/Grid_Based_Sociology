@@ -41,10 +41,10 @@ Deck phụ lục mở rộng (cuối kỳ): `slides\final.pptx` (16 slide) — k
 | Phút | Màn hình | Nội dung |
 |---|---|---|
 | 0–0:30 | Slide 1 | Bìa — thesis: dữ liệu PAPI rất đồng nhất, nhóm báo cáo trung thực |
-| 0:30–2 | Slide 2 | Bài toán & dữ liệu: vì sao grid-based (O(n), không giả định hình dạng) · panel 882×41, audit thang đo 23/37 cột |
+| 0:30–2 | Slide 2 | Bài toán & dữ liệu: vì sao grid-based (O(n), không giả định hình dạng) · panel 882×41, 23/37 cột bị cờ heuristic audit thang đo |
 | 2–3:30 | Slide 3 | Lý thuyết STING (1/2): lưới phân cấp → thống kê ô |
 | 3:30–5 | Slide 4 | Lý thuyết STING (2/2): gom cụm ô dày — STING vs k-means vs DBSCAN (noise tách khỏi metric) |
-| 5–7 | Slide 5 + notebook | Ví dụ minh họa: demo synthetic — ARI 0.950, 28 test trong `tests/test_sting.py` xanh |
+| 5–7 | Slide 5 + notebook | Ví dụ minh họa: demo synthetic — ARI 0.950, bộ test STING (`tests/test_sting.py`) xanh |
 | 7–9:30 | Slide 6 + notebook | Ứng dụng PAPI: kết quả thật đồng nhất (k≈1); bản đồ centroid 2024; pipeline dự đoán train ≤2023 → predict 2024 — 48 tỉnh cụm lớn / 13 ngoại vi (coverage 79%) |
 | 9:30–11:30 | Slide 7 | Đánh giá: Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau — MAE 0.064, giảm 6.3% so với carry-forward 0.0683 |
 | 11:30–13 | Slide 8 | Kiểm chứng ngoài (PCI theo cụm) & hạn chế trung thực (robustness âm tính, gãy thang đo) |
@@ -72,8 +72,8 @@ Ngoài 15′ (khi Q&A hoặc GV muốn xem thêm): mở dashboard — `python -m
 |---|---|
 | Dataset | 882 × 41 (đáp ứng ≥500×10) · 63 tỉnh × 14 năm · 39 cột số |
 | Nguồn | PAPI 2011–2024 (papi.org.vn) · Mendeley CC BY 4.0 (DOI 10.17632/wbk42j9wc8.1, crosscheck lệch 0.0) |
-| STING synthetic | ARI = **0.950** · nhiễu 2.5% · 28 unit test trong `tests/test_sting.py` xanh · toàn bộ test suite pass · coverage 98% cho `src/sting.py` (đo bằng `pytest --cov`) |
-| Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột gãy thang đo (check_data audit) |
+| STING synthetic | ARI = **0.950** · nhiễu 2.5% · bộ test STING (`tests/test_sting.py`) xanh · toàn bộ test suite pass · coverage 98% cho `src/sting.py` (đo bằng `pytest --cov`) |
+| Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột bị cờ heuristic audit (`check_data.py`; chưa chứng minh đổi thang) |
 | Dự đoán 2024 | Train ≤2023 (frozen, train-only) · phủ **79%** · {nhiễu: 13, cụm lớn: 48} · 0 chuyển thật 2023→2024 — phát biểu rỗng/vacuous (cả 2023 lẫn 2024 không có điểm cụm 0/1), không chứng minh độ ổn định nhãn |
 | Kiểm chứng ngoại lai | PCI theo cụm STING: ANOVA F(3,743)=9.04, p=6.9e-06 · Kruskal–Wallis H=31.78, p=5.8e-07 · nhóm {nhiễu: 149, cụm 0: 5, cụm 1: 16, cụm 2: 577} · không chứng minh nhân quả (`results/external_validation.md`) |
 | Model giám sát | Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau: MAE 0.064 vs carry-forward 0.0683 = **giảm 6.3%**; RF 0.0616 = giảm 9.8% · baseline cũng có CV thật trên cùng fold: carry 0.145 vs ridge 0.265 (trung bình train −0.77) — Ridge vẫn được chọn theo CV |
