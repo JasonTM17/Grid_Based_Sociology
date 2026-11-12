@@ -25,8 +25,9 @@ from __future__ import annotations
 import itertools
 import pickle
 import warnings
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
+from os import PathLike
 
 import numpy as np
 
@@ -38,14 +39,14 @@ class Cell:
     """Một ô lưới tại một mức phân cấp."""
 
     level: int
-    index: Tuple[int, ...]          # chỉ số ô theo từng chiều
+    index: tuple[int, ...]          # chỉ số ô theo từng chiều
     bounds_min: np.ndarray          # cận dưới (mỗi chiều)
     bounds_max: np.ndarray          # cận trên (mỗi chiều)
     count: int = 0
-    mean: Optional[np.ndarray] = None
-    std: Optional[np.ndarray] = None
-    min_: Optional[np.ndarray] = None
-    max_: Optional[np.ndarray] = None
+    mean: np.ndarray | None = None
+    std: np.ndarray | None = None
+    min_: np.ndarray | None = None
+    max_: np.ndarray | None = None
 
 
 class STING:
@@ -55,9 +56,14 @@ class STING:
         self,
         n_levels: int = 4,
         factor: int = 2,
-        min_count: Optional[int] = None,
-        significance_z: Optional[float] = None,
+        min_count: int | None = None,
+        significance_z: float | None = None,
     ) -> None:
+        """Khởi tạo tham số lưới STING.
+
+        ``min_count`` None → ``max(1, round(0.02 * n))`` khi ``fit()``.
+        ``significance_z`` None → tắt kiểm định z so với ô cha.
+        """
         if n_levels < 1:
             raise ValueError("n_levels phải >= 1")
         if factor < 2:
@@ -70,7 +76,8 @@ class STING:
     # ------------------------------------------------------------------ #
     # Huấn luyện: xây lưới phân cấp và thống kê từng ô
     # ------------------------------------------------------------------ #
-    def fit(self, X: np.ndarray) -> "STING":
+    def fit(self, X: np.ndarray) -> STING:
+        """Xây lưới phân cấp và thống kê từng ô từ ma trận điểm ``X``."""
         X = np.asarray(X, dtype=float)
         if X.ndim != 2 or X.shape[0] == 0:
             raise ValueError("X phải là mảng 2 chiều (n_samples, n_dims) không rỗng")
@@ -92,9 +99,9 @@ class STING:
             else max(1, int(round(0.02 * n)))
         )
 
-        self.cells_: Dict[int, Dict[Tuple[int, ...], Cell]] = {}
-        self._point_idx_: Dict[int, np.ndarray] = {}
-        self._flat_: Dict[int, np.ndarray] = {}
+        self.cells_: dict[int, dict[tuple[int, ...], Cell]] = {}
+        self._point_idx_: dict[int, np.ndarray] = {}
+        self._flat_: dict[int, np.ndarray] = {}
 
         for level in range(self.n_levels):
             res = self.factor ** level
@@ -107,7 +114,7 @@ class STING:
     # ------------------------------------------------------------------ #
     # Phân cụm
     # ------------------------------------------------------------------ #
-    def cluster(self, level: Optional[int] = None, connectivity: int = 1) -> np.ndarray:
+    def cluster(self, level: int | None = None, connectivity: int = 1) -> np.ndarray:
         """Gán nhãn cụm cho từng điểm tại mức lưới ``level``.
 
         connectivity = 1: chỉ gom ô kề mặt (4 hướng trong 2D);
@@ -140,7 +147,7 @@ class STING:
             )
 
         # Gom thành phần liên thông trên các ô dày (DFS lặp, thứ tự ổn định).
-        label_of: Dict[Tuple[int, ...], int] = {}
+        label_of: dict[tuple[int, ...], int] = {}
         comp = 0
         for start in sorted(dense_set):
             if start in label_of:
@@ -170,7 +177,7 @@ class STING:
         self._cell_comp_ = cell_to_comp
         return labels
 
-    def predict(self, X) -> np.ndarray:
+    def predict(self, X: np.ndarray) -> np.ndarray:
         """Dự đoán cụm cho các điểm MỚI sau khi đã fit() + cluster().
 
         Điểm mới được gán vào cụm của ô chứa nó tại mức lưới dùng trong cluster();
@@ -196,13 +203,13 @@ class STING:
         preds[out_of_support] = -1
         return preds
 
-    def save(self, path) -> None:
+    def save(self, path: str | PathLike[str]) -> None:
         """Lưu model đã huấn luyện thành file local (pickle)."""
         with open(path, "wb") as fh:
             pickle.dump(self, fh)
 
     @classmethod
-    def load(cls, path) -> "STING":
+    def load(cls, path: str | PathLike[str]) -> STING:
         """Nạp model đã lưu bằng save() — dự đoán không cần huấn luyện lại."""
         with open(path, "rb") as fh:
             obj = pickle.load(fh)
@@ -213,7 +220,11 @@ class STING:
     # ------------------------------------------------------------------ #
     # Truy vấn & tiện ích
     # ------------------------------------------------------------------ #
-    def query_rect(self, rect, level: Optional[int] = None) -> dict:
+    def query_rect(
+        self,
+        rect: Sequence[Sequence[float]] | np.ndarray,
+        level: int | None = None,
+    ) -> dict[str, int | np.ndarray | None]:
         """Thống kê tổng hợp vùng chữ nhật (chỉ gồm các ô nằm trọn trong vùng).
 
         rect: danh sách [(lo0, hi0), (lo1, hi1), ...] theo từng chiều.
@@ -253,14 +264,14 @@ class STING:
         """Chỉ số ô (theo từng chiều) của mỗi điểm tại mức `level` — shape (n, d)."""
         return self._point_idx_[level].copy()
 
-    def cell_stats(self, level: int):
+    def cell_stats(self, level: int) -> list[Cell]:
         """Danh sách các ô có dữ liệu tại mức `level`, sắp xếp theo chỉ số."""
         return [self.cells_[level][k] for k in sorted(self.cells_[level])]
 
     # ------------------------------------------------------------------ #
     # Nội bộ
     # ------------------------------------------------------------------ #
-    def _assign(self, X: np.ndarray, res: int) -> Tuple[np.ndarray, np.ndarray]:
+    def _assign(self, X: np.ndarray, res: int) -> tuple[np.ndarray, np.ndarray]:
         """Tính chỉ số ô của từng điểm tại lưới `res` ô/chiều."""
         span = self.bounds_max_ - self.bounds_min_
         idx = np.floor((X - self.bounds_min_) / span * res).astype(np.int64)
@@ -270,11 +281,13 @@ class STING:
         )
         return idx, flat
 
-    def _accumulate(self, X: np.ndarray, flat: np.ndarray, res: int, level: int):
+    def _accumulate(
+        self, X: np.ndarray, flat: np.ndarray, res: int, level: int
+    ) -> dict[tuple[int, ...], Cell]:
         """Tính thống kê từng ô từ nhóm điểm theo `flat` (một lượt O(n))."""
         span = self.bounds_max_ - self.bounds_min_
         step = span / res
-        cells: Dict[Tuple[int, ...], Cell] = {}
+        cells: dict[tuple[int, ...], Cell] = {}
 
         order = np.argsort(flat, kind="stable")
         sorted_flat = flat[order]
@@ -315,13 +328,16 @@ class STING:
         with np.errstate(divide="ignore", invalid="ignore"):
             return bool(np.any(diff > self.significance_z * se))
 
-    def _parent_of(self, cell: Cell) -> Optional[Cell]:
+    def _parent_of(self, cell: Cell) -> Cell | None:
+        """Ô cha gộp ``factor`` ô con theo từng chiều; None ở mức 0."""
         if cell.level == 0:
             return None
         pidx = tuple(i // self.factor for i in cell.index)
         return self.cells_[cell.level - 1].get(pidx)
 
-    def _neighbors(self, index: Tuple[int, ...], res: int, connectivity: int):
+    def _neighbors(
+        self, index: tuple[int, ...], res: int, connectivity: int
+    ) -> Iterator[tuple[int, ...]]:
         """Sinh chỉ số các ô kề hợp lệ (số tọa độ khác 0 <= connectivity)."""
         for offset in itertools.product((-1, 0, 1), repeat=self.n_dims_):
             if all(o == 0 for o in offset):
