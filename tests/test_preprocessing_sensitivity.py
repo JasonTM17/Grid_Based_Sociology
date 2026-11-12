@@ -15,7 +15,6 @@ from sklearn.preprocessing import StandardScaler
 from scripts.papi_pred_common import REGRESSION_FEATURES, load_panel
 from scripts.preprocessing_sensitivity import (
     CSV_COLUMNS,
-    CSV_PATH,
     PUBLISHED_GATE,
     TrainFoldWinsorizer,
     build_regression_pairs_keep_missing,
@@ -105,12 +104,18 @@ def test_gridsearch_imputer_fold_median_excludes_validation_rows():
     assert np.allclose(baseline, poisoned)
 
 
-def test_csv_schema_after_run():
+def test_csv_schema_after_run(tmp_path, monkeypatch):
     mod = importlib.import_module("scripts.preprocessing_sensitivity")
+    tmp_csv = tmp_path / "preprocessing_sensitivity.csv"
+    tmp_md = tmp_path / "preprocessing_sensitivity.md"
+    monkeypatch.setattr(mod, "CSV_PATH", tmp_csv)
+    monkeypatch.setattr(mod, "MD_PATH", tmp_md)
+    monkeypatch.setattr(mod, "RESULTS", tmp_path)
     rc = mod.main()
     assert rc == 0
-    assert CSV_PATH.is_file()
-    frame = pd.read_csv(CSV_PATH)
+    assert tmp_csv.is_file()
+    assert tmp_md.is_file()
+    frame = pd.read_csv(tmp_csv)
     assert list(frame.columns) == list(CSV_COLUMNS)
     assert len(frame) == 3 + 2 * 3  # ridge + (LR, GNB) × 3 variants
 

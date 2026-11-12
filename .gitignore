@@ -39,6 +39,9 @@ data/raw/mendeley/Replication_package/data/*
 !data/raw/mendeley/Replication_package/data/papi_panel_63_2011_2022.csv
 !data/raw/mendeley/Replication_package/data/SHA256_PAPI_ORIGINALS.txt
 
+# Tài liệu nội bộ môn học (slide bài giảng của GV — chỉ lưu local, không commit)
+data/raw/course/
+
 # Hệ điều hành
 Thumbs.db
 Desktop.ini

@@ -9,6 +9,7 @@ Chạy: ``python -W error scripts/classifier_label_baselines.py``
 from __future__ import annotations
 
 import hashlib
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -42,7 +43,8 @@ try:
 except Exception:
     pass
 
-RESULTS = ROOT / "results"
+_out_dir_env = os.environ.get("CLASSIFIER_LABEL_BASELINES_DIR")
+RESULTS = Path(_out_dir_env).resolve() if _out_dir_env else ROOT / "results"
 OUT_CSV = RESULTS / "classifier_label_baselines.csv"
 OUT_MD = RESULTS / "classifier_label_baselines.md"
 
@@ -315,7 +317,7 @@ def assert_published_reproduction(table: pd.DataFrame) -> None:
 
 
 def csv_sha256(df: pd.DataFrame) -> str:
-    text = df.to_csv(index=False, encoding="utf-8-sig")
+    text = df.to_csv(index=False, encoding="utf-8-sig", lineterminator="\n")
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
@@ -386,7 +388,7 @@ def _write_markdown(table: pd.DataFrame, *, n_perm: int) -> None:
         "",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(lines), encoding="utf-8")
+    OUT_MD.write_text("\n".join(lines), encoding="utf-8", newline="\n")
 
 
 def main() -> int:
@@ -394,7 +396,7 @@ def main() -> int:
     table = build_long_table(n_perm=N_PERMUTATIONS)
     assert_published_reproduction(table)
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
-    table.to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
+    table.to_csv(OUT_CSV, index=False, encoding="utf-8-sig", lineterminator="\n")
     _write_markdown(table, n_perm=N_PERMUTATIONS)
     print(table.to_string(index=False))
     print(f"\nđã lưu: {OUT_CSV.name}, {OUT_MD.name}")

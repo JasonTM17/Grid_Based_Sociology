@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -87,15 +88,20 @@ def test_permutation_does_not_mutate_validation_labels():
         np.testing.assert_array_equal(ytr[val_idx], y_snapshot[val_idx])
 
 
-def test_script_main_reproduction_gate():
+def test_script_main_reproduction_gate(tmp_path):
+    env = dict(os.environ)
+    env["CLASSIFIER_LABEL_BASELINES_DIR"] = str(tmp_path)
     proc = subprocess.run(
         [sys.executable, "-W", "error", "scripts/classifier_label_baselines.py"],
         cwd=ROOT,
         capture_output=True,
         text=True,
         timeout=600,
+        env=env,
     )
     assert proc.returncode == 0, proc.stderr or proc.stdout
+    assert (tmp_path / "classifier_label_baselines.csv").is_file()
+    assert (tmp_path / "classifier_label_baselines.md").is_file()
 
 
 def test_artifacts_on_disk():

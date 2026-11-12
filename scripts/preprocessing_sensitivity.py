@@ -375,7 +375,7 @@ def write_markdown(frame: pd.DataFrame) -> None:
         "4. Holdout 2023→2024 **không** tham gia chọn imputation hay winsorize; "
         "chỉ báo cáo minh họa.",
     ]
-    MD_PATH.write_text("\n".join(lines), encoding="utf-8")
+    MD_PATH.write_text("\n".join(lines), encoding="utf-8", newline="\n")
 
 
 def csv_digest(path: Path) -> str:
@@ -388,7 +388,7 @@ def main() -> int:
     if not verify_published_gate(frame):
         print("[Gate] Biến thể A không tái lập số công bố — thoát 1, không ghi tệp.")
         return 1
-    frame.to_csv(CSV_PATH, index=False, encoding="utf-8-sig")
+    frame.to_csv(CSV_PATH, index=False, encoding="utf-8-sig", lineterminator="\n")
     write_markdown(frame)
     print("\n" + frame.to_string(index=False))
     print(f"\n[OK] {CSV_PATH}")
