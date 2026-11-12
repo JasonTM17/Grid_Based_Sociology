@@ -11,18 +11,22 @@ import pytest
 from sklearn.metrics import confusion_matrix
 
 from scripts.course_supervised_baselines import (
+    BALANCED_SENSITIVITY_BASE_MODELS,
     COURSE_MODELS,
     GROUP_PRIMARY,
     GROUP_SENSITIVITY,
     MODEL_MAJORITY,
     SENSITIVITY_LABEL,
     _classification_pairs,
+    _fit_balanced_sensitivity_grids,
+    _fit_grids,
     build_metrics_table,
 )
 from scripts.papi_pred_common import REGRESSION_FEATURES, load_config, load_panel, select_model_by_cv
 from scripts.predict_supervised import (
     CLASSIFICATION_CV_YEARS,
     HOLDOUT_YEAR,
+    SEED,
     expanding_year_splits,
 )
 
@@ -244,3 +248,83 @@ def test_cv_std_non_negative_finite(baseline_run):
         assert folds == len(CLASSIFICATION_CV_YEARS)
         std = float(row["cv_std"])
         assert np.isfinite(std) and std >= 0.0, row["model"]
+
+
+def _grid_classifier(grid):
+    est = grid.estimator
+    if hasattr(est, "named_steps"):
+        return est.named_steps["clf"]
+    return est
+
+
+def _pipeline_step_names(grid) -> list[str] | None:
+    est = grid.estimator
+    if not hasattr(est, "steps"):
+        return None
+    return [name for name, _ in est.steps]
+
+
+def _cv_index_splits(cv) -> list[tuple[np.ndarray, np.ndarray]]:
+    if isinstance(cv, list):
+        return [(np.asarray(a), np.asarray(b)) for a, b in cv]
+    splits: list[tuple[np.ndarray, np.ndarray]] = []
+    for train_idx, val_idx in cv.split(np.zeros(1)):
+        splits.append((np.asarray(train_idx), np.asarray(val_idx)))
+    return splits
+
+
+def _assert_same_cv_splits(cv_a, cv_b, *, label: str) -> None:
+    splits_a = _cv_index_splits(cv_a)
+    splits_b = _cv_index_splits(cv_b)
+    assert len(splits_a) == len(splits_b) == len(CLASSIFICATION_CV_YEARS), label
+    for fold, ((ta, va), (tb, vb)) in enumerate(
+        zip(splits_a, splits_b, strict=True)
+    ):
+        np.testing.assert_array_equal(ta, tb, err_msg=f"{label} fold {fold} train")
+        np.testing.assert_array_equal(va, vb, err_msg=f"{label} fold {fold} val")
+
+
+def test_sensitivity_grids_match_primary_except_class_weight(real_classification_pairs):
+    """Primary và nhạy cảm: cùng CV/lưới/Pipeline; chỉ khác class_weight='balanced'."""
+    train = real_classification_pairs[real_classification_pairs.year_t < HOLDOUT_YEAR]
+    Xtr = train[REGRESSION_FEATURES].to_numpy()
+    ytr = train["y"].to_numpy()
+    clf_cv = expanding_year_splits(train["year_t"].to_numpy(), ytr)
+    rf_n_estimators = 50
+
+    primary = _fit_grids(Xtr, ytr, clf_cv, rf_n_estimators=rf_n_estimators)
+    sensitivity = _fit_balanced_sensitivity_grids(
+        Xtr, ytr, clf_cv, rf_n_estimators=rf_n_estimators
+    )
+
+    for name in BALANCED_SENSITIVITY_BASE_MODELS:
+        p_grid = primary[name]
+        s_grid = sensitivity[name]
+
+        _assert_same_cv_splits(clf_cv, p_grid.cv, label=f"{name} primary cv")
+        _assert_same_cv_splits(clf_cv, s_grid.cv, label=f"{name} sensitivity cv")
+        _assert_same_cv_splits(p_grid.cv, s_grid.cv, label=name)
+
+        assert p_grid.param_grid == s_grid.param_grid, name
+
+        p_steps = _pipeline_step_names(p_grid)
+        s_steps = _pipeline_step_names(s_grid)
+        assert p_steps == s_steps, name
+        if p_steps is not None:
+            assert p_steps == ["sc", "clf"], name
+
+        p_clf = _grid_classifier(p_grid)
+        s_clf = _grid_classifier(s_grid)
+
+        if "random forest" in name:
+            assert p_clf.n_estimators == s_clf.n_estimators == rf_n_estimators, name
+            assert p_clf.random_state == s_clf.random_state == SEED, name
+
+        p_params = p_clf.get_params(deep=False)
+        s_params = s_clf.get_params(deep=False)
+        differing = sorted(
+            k for k in set(p_params) | set(s_params) if p_params.get(k) != s_params.get(k)
+        )
+        assert differing == ["class_weight"], (name, differing)
+        assert p_params.get("class_weight") is None
+        assert s_params["class_weight"] == "balanced"
