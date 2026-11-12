@@ -54,13 +54,14 @@ Còn mở như cũ: câu 2 và câu 5 logistics (chờ GV); **B5** (`predict_swe
 
 ## CẬP NHẬT 2026-11-12 (đối chiếu khóa học + README/DEMO)
 
-Bảng logistics ở trên **giữ nguyên**; câu 2, 5, 6, 7 vẫn ⏳ chờ GV. Các mục kỹ thuật sau **đã đạt** (ngày 2026-11-12, worktree `docs/readme-and-requirements-course-alignment`):
+Bảng logistics ở trên **giữ nguyên**; câu 2, 5, 7 vẫn ⏳ chờ GV (câu 6 đã ✅). Các mục kỹ thuật sau **đã đạt** (ngày 2026-11-12):
 
 | Mục | Trạng thái | Bằng chứng |
 |---|---|---|
 | Bìa `final_report.docx` (họ tên/MSSV) | Đã điền | `reports/submission_checklist.md` (mục deliverable + con người) |
 | Audit tiền xử lý Day 4 | Có artifact + gate notebook | `results/preprocessing_audit.{md,csv}`; `scripts/preprocessing_audit.py`; `tests/test_preprocessing_audit.py`; `tests/test_submission_artifacts.py` |
 | Classifier học phần + confusion | Có artifact + test | `results/course_supervised_baselines.{csv,md}`; `results/figs/course_confusion_matrix.png`; `tests/test_course_supervised_baselines.py` |
+| Baseline hoán vị nhãn / drift năm | Có artifact + test (PR #52 đã merge) | `results/classifier_label_baselines.{csv,md}`; `scripts/classifier_label_baselines.py`; `tests/test_classifier_label_baselines.py`; Q&A #38 |
 | Notebook gates (submission + final) | Pass | `tests/test_submission_artifacts.py`; `tests/test_final_notebook_artifacts.py` |
 | Tài liệu README/DEMO/requirements | Cập nhật đối chiếu Day 1–4 | `README.md` (mục Đối chiếu); `DEMO.md`; `reports/course_requirements.md` |
 

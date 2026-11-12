@@ -209,3 +209,8 @@ _Quy tắc: ≤60 giây/câu; A trả lời chính câu thuật toán/dữ liệ
    - **Hỏi bẫy:** "Accuracy 0.746 là rất cao?" — Cao hơn majority nhưng thấp hơn luôn-đoán-1 (0.814); phải đọc macro-F1 và `results/figs/course_confusion_matrix.png`.
    - **Repo:** `results/course_supervised_baselines.md:28-29`; `results/course_supervised_baselines.csv:2-3`; `results/supervised_summary.md:31`; `scripts/course_supervised_baselines.py:65-68`.
    - **Bài giảng:** Day 2, trang 30-34.
+
+38. **Điểm classifier cao hơn chance thế nào, và bao nhiêu là drift theo năm?** — Phân tích thăm dò `scripts/classifier_label_baselines.py` (không thay bảng primary): (1) hoán vị nhãn **train** mỗi fold 200 lần (seed 42) với siêu tham số cố định từ GridSearchCV đã công bố — macro-F1 quan sát (NB 0.514, KNN 0.486, LR 0.434) cao hơn hầu hết hoán vị (perm mean ~0.23–0.34; empirical p = 0.005 = 1/200); (2) model chỉ dùng `year_t` hoặc prevalence nhãn năm *t−1* đạt ~0.38–0.40, nên phần lớn điểm vẫn gắn drift thời gian; (3) NB thắng KNN ở 4/6 fold (mean paired diff 0.028) — sáu fold không đủ để khẳng định ý nghĩa. Holdout không dùng trong script này.
+   - **Hỏi bẫy:** "p=0.005 chứng minh model tốt?" — Chỉ nói điểm quan sát cao hơn phân phối hoán vị nhãn train dưới cùng feature/năm; vẫn là khớp pseudo-label STING + drift năm, không ground truth xã hội.
+   - **Repo:** `results/classifier_label_baselines.md`; `results/classifier_label_baselines.csv`; `scripts/classifier_label_baselines.py`.
+   - **Bài giảng:** Day 2, trang 30-34 (đánh giá / baseline).

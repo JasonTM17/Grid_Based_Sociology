@@ -26,6 +26,7 @@ slides\submission.pptx            # 10 slide, có speaker notes từng slide
 # đối chiếu môn học — mở sẵn trước Q&A (không cần mạng)
 results\preprocessing_audit.md              # audit Day 4 (bảng Test → Decide)
 results\course_supervised_baselines.md      # bảng NB/KNN/SVM/cây/RF (pseudo-label STING)
+results\classifier_label_baselines.md       # sàn hoán vị nhãn + drift năm (exploratory)
 results\figs\course_confusion_matrix.png    # 6 panel confusion (học phần)
 reports\qa_course_concepts.md               # cheat sheet Q&A Day 1–4
 ```

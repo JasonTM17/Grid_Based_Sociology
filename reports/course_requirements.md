@@ -64,10 +64,10 @@ _File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản 
 - [x] **Template slide:** chưa có → tự thiết kế, ≤10 slide (`slides/submission.pptx`); phụ lục cuối kỳ: `slides/final.pptx` (16 slide).
 - [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051).
 - [ ] **Định dạng nộp (tên file/cấu trúc/zip/nơi nộp) và deadline chính thức** — chờ GV/LMS.
-- [ ] **Người trình bày & Q&A** — rehearsal.
-- [ ] **Trọng số rubric cuối kỳ** — chờ xác nhận trực quan slide/PDF.
-- [ ] **Skeleton báo cáo 3 chương (mẫu GV) vs 7 chương (báo cáo hiện tại)** — chờ GV.
-- [ ] **Ngày giữa kỳ: 24/11–01/12** (mặc định) → freeze gói giữa kỳ 20/11.
+- [ ] **Người trình bày & Q&A** — rehearsal (con người).
+- [x] **Trọng số rubric cuối kỳ** — đã xác minh Day 1 trang 10 (Group 8 + oral 2); xem mục rubric phía trên và `open-questions.md` câu 6.
+- [ ] **Skeleton báo cáo 3 chương (mẫu GV) vs 7 chương (báo cáo hiện tại)** — chờ GV; mặc định giữ 7 chương.
+- [x] **Ngày giữa kỳ: 24/11–01/12** (mặc định đã giữ) → freeze gói giữa kỳ 20/11.
 
 ## Định dạng nộp đề xuất (default đến khi GV chốt khác)
 

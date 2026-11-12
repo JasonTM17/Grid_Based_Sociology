@@ -29,6 +29,7 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 | `scripts/` | Script dữ liệu & phân tích |
 | `scripts/preprocessing_audit.py` | Kiểm chứng tiền xử lý (Day 4): chỉ đọc dữ liệu, ghi bảng Test → Decide → `results/preprocessing_audit.{md,csv}` |
 | `scripts/course_supervised_baselines.py` | So sánh classifier học phần (NB, KNN, SVM, cây, RF) trên pseudo-label STING → `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` |
+| `scripts/classifier_label_baselines.py` | Baseline đánh giá: hoán vị nhãn train, chỉ `year_t`/prevalence năm trước, so cặp fold (NB−KNN/LR) → `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary) |
 | `data/raw/course/` | Slide bài giảng + mẫu báo cáo GV — **chỉ lưu local, không commit** (tài liệu bên thứ ba); không script nào trong repo phụ thuộc thư mục này |
 | `models/` | Model STING đã huấn luyện + tham số chuẩn hóa (dùng cho dự đoán) |
 | `notebooks/` | Notebook nộp bài (Jupyter): `submission_demo.ipynb` (giữa kỳ) + `final_analysis.ipynb` (cuối kỳ) |
@@ -81,7 +82,7 @@ Bảng dưới ánh xạ chủ đề đã dạy (Day 1–4, môn Học máy — 
 |---|---|
 | Ý tưởng ML, học có/không giám sát, clustering grid-based (Day 1) | `src/sting.py`; demo synthetic + test: `notebooks/submission_demo.ipynb`, `tests/test_sting.py`; PAPI thật: `scripts/predict_demo.py`, `results/predict_summary.md` |
 | Regression vs classification (Day 1) | Hồi quy: `scripts/predict_supervised.py` → `results/supervised_metrics.csv`; phân loại pseudo-label: cùng script + `results/supervised_summary.md` |
-| Naive Bayes, KNN, đánh giá accuracy / F1 (Day 2) | `scripts/course_supervised_baselines.py` → `results/course_supervised_baselines.{csv,md}`; pipeline chọn LR: `scripts/predict_supervised.py` |
+| Naive Bayes, KNN, đánh giá accuracy / F1 (Day 2) | `scripts/course_supervised_baselines.py` → `results/course_supervised_baselines.{csv,md}`; sàn chance/drift: `scripts/classifier_label_baselines.py` → `results/classifier_label_baselines.{csv,md}`; pipeline chọn LR: `scripts/predict_supervised.py` |
 | Confusion matrix, precision/recall (Day 2) | Ma trận 6 model học phần: `results/figs/course_confusion_matrix.png`; LR đã chọn (một model): `results/figs/supervised_confusion.png` |
 | SVM tuyến tính + kernel RBF (Day 3) | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
 | Decision Tree, Random Forest (Day 3) | Cùng `scripts/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/predict_supervised.py` (chọn model theo CV, không theo holdout) |
@@ -93,6 +94,7 @@ Tái tạo audit và bảng classifier (nếu artifact cũ):
 ```powershell
 python scripts/preprocessing_audit.py
 python scripts/course_supervised_baselines.py
+python scripts/classifier_label_baselines.py   # tùy chọn — sàn hoán vị / drift thời gian
 ```
 
 ## Tái tạo deliverable nộp bài (slides + notebook)

@@ -14,6 +14,7 @@ _Cập nhật: 2026-11-12 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 
 - [x] **Audit tiền xử lý Day 4** — `scripts/preprocessing_audit.py` + `results/preprocessing_audit.{md,csv}`; notebook cuối kỳ đọc CSV (`tests/test_submission_artifacts.py` gate).
 - [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
+- [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).
 - [x] **Q&A theo khái niệm bài giảng** — `reports/qa_course_concepts.md`.
 
 ## Tái lập / chất lượng mã
