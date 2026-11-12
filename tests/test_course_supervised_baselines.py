@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import subprocess
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -9,7 +12,10 @@ from sklearn.metrics import confusion_matrix
 
 from scripts.course_supervised_baselines import (
     COURSE_MODELS,
+    GROUP_PRIMARY,
+    GROUP_SENSITIVITY,
     MODEL_MAJORITY,
+    SENSITIVITY_LABEL,
     _classification_pairs,
     build_metrics_table,
 )
@@ -28,7 +34,20 @@ REQUIRED_COLUMNS = (
     "holdout_macro_f1",
 )
 
-LEGACY_CSV_COLUMNS = REQUIRED_COLUMNS
+BASELINE_CSV_COLUMNS = (
+    *REQUIRED_COLUMNS,
+    "cv_std",
+    "cv_folds",
+)
+
+PRIMARY_VALUE_CV_ROUNDED = {
+    "gaussian naive bayes": 0.514,
+    "knn": 0.486,
+    "svm (linear)": 0.343,
+    "svm (rbf)": 0.437,
+    "decision tree": 0.426,
+    "random forest": 0.394,
+}
 
 
 def _synthetic_pairs(n_prov: int = 16, seed: int = 0) -> pd.DataFrame:
@@ -95,7 +114,8 @@ def test_confusion_matrix_totals_equal_holdout(baseline_run):
 
 def test_model_selection_uses_cv_only(baseline_run):
     metrics, _, _, _ = baseline_run
-    selectable = metrics[~metrics.model.isin([MODEL_MAJORITY])]
+    primary = metrics[metrics["group"] == GROUP_PRIMARY]
+    selectable = primary[~primary.model.isin([MODEL_MAJORITY])]
     chosen = select_model_by_cv(selectable)
 
     tampered = selectable.copy()
@@ -123,6 +143,7 @@ def test_artifacts_on_disk():
 
     root = mod.ROOT
     assert (root / "results" / "course_supervised_baselines.csv").is_file()
+    assert (root / "results" / "course_supervised_sensitivity.csv").is_file()
     assert (root / "results" / "course_supervised_baselines.md").is_file()
     assert (root / "results" / "figs" / "course_confusion_matrix.png").is_file()
 
@@ -142,16 +163,77 @@ def test_expanding_splits_train_years_strictly_before_validation(
         assert set(years[validation_idx].tolist()) == {validation_year}
 
 
-def test_saved_csv_legacy_columns_match_fresh_computation(baseline_run):
+def test_primary_csv_matches_head_content():
+    from scripts import course_supervised_baselines as mod
+
+    repo_root = Path(mod.ROOT)
+    diff = subprocess.run(
+        ["git", "diff", "--", "results/course_supervised_baselines.csv"],
+        cwd=repo_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert diff.stdout == "", "course_supervised_baselines.csv phải khớp HEAD"
+    on_disk = pd.read_csv(repo_root / "results" / "course_supervised_baselines.csv")
+    assert list(on_disk.columns) == list(BASELINE_CSV_COLUMNS)
+    assert len(on_disk) == 8
+
+
+def test_primary_csv_matches_fresh_computation(baseline_run):
     from scripts import course_supervised_baselines as mod
 
     metrics, _, _, _ = baseline_run
     on_disk = pd.read_csv(mod.ROOT / "results" / "course_supervised_baselines.csv")
+    primary_fresh = metrics[metrics["group"] == GROUP_PRIMARY]
     pd.testing.assert_frame_equal(
-        on_disk[list(LEGACY_CSV_COLUMNS)].reset_index(drop=True),
-        metrics[list(LEGACY_CSV_COLUMNS)].reset_index(drop=True),
+        on_disk[list(BASELINE_CSV_COLUMNS)].reset_index(drop=True),
+        primary_fresh[list(BASELINE_CSV_COLUMNS)].reset_index(drop=True),
         check_exact=True,
     )
+
+
+def test_sensitivity_csv_has_three_rows_and_no_group_column(baseline_run):
+    from scripts import course_supervised_baselines as mod
+
+    metrics, _, _, _ = baseline_run
+    sens_path = mod.ROOT / "results" / "course_supervised_sensitivity.csv"
+    on_disk = pd.read_csv(sens_path)
+    assert "group" not in on_disk.columns
+    assert len(on_disk) == 3
+    sens_fresh = metrics[metrics["group"] == GROUP_SENSITIVITY]
+    pd.testing.assert_frame_equal(
+        on_disk[list(BASELINE_CSV_COLUMNS)].reset_index(drop=True),
+        sens_fresh[list(BASELINE_CSV_COLUMNS)].reset_index(drop=True),
+        check_exact=True,
+    )
+
+
+def test_sensitivity_rows_exist_and_count(baseline_run):
+    metrics, _, _, _ = baseline_run
+    assert "group" in metrics.columns
+    sens = metrics[metrics["group"] == GROUP_SENSITIVITY]
+    assert len(sens) == 3
+    for _, row in sens.iterrows():
+        assert SENSITIVITY_LABEL in row["model"]
+
+
+def test_primary_value_cv_unchanged(baseline_run):
+    metrics, _, _, _ = baseline_run
+    primary = metrics[metrics["group"] == GROUP_PRIMARY]
+    for model, expected in PRIMARY_VALUE_CV_ROUNDED.items():
+        row = primary.loc[primary["model"] == model].iloc[0]
+        assert round(float(row["value_cv"]), 3) == expected, model
+
+
+def test_sensitivity_model_selection_uses_cv_only(baseline_run):
+    metrics, _, _, _ = baseline_run
+    sens = metrics[metrics["group"] == GROUP_SENSITIVITY]
+    chosen = select_model_by_cv(sens)
+    tampered = sens.copy()
+    tampered["holdout_macro_f1"] = 0.0
+    tampered["holdout_acc"] = 0.0
+    assert select_model_by_cv(tampered) == chosen
 
 
 def test_cv_std_non_negative_finite(baseline_run):

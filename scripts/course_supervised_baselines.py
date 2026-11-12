@@ -87,6 +87,21 @@ COURSE_MODELS = (
     MODEL_RANDOM_FOREST,
 )
 
+SENSITIVITY_LABEL = " (cân bằng lớp, tham khảo)"
+GROUP_PRIMARY = "primary"
+GROUP_SENSITIVITY = "sensitivity"
+
+# Ba classifier học phần — cùng lưới công bố, thêm class_weight="balanced".
+BALANCED_SENSITIVITY_BASE_MODELS = (
+    MODEL_SVM_RBF,
+    MODEL_DECISION_TREE,
+    MODEL_RANDOM_FOREST,
+)
+
+
+def _sensitivity_display_name(base_model: str) -> str:
+    return f"{base_model}{SENSITIVITY_LABEL}"
+
 # Tiêu đề panel trên hình — đọc được khi chiếu slide (tránh rút gọn kiểu svm-L).
 PANEL_TITLES: dict[str, str] = {
     MODEL_GAUSSIAN_NB: "Naive Bayes Gauss",
@@ -264,6 +279,71 @@ def _fit_grids(
     return grids
 
 
+def _fit_balanced_sensitivity_grids(
+    Xtr: np.ndarray,
+    ytr: np.ndarray,
+    clf_cv: list[tuple[np.ndarray, np.ndarray]],
+    *,
+    rf_n_estimators: int = 300,
+) -> dict[str, GridSearchCV]:
+    """Lưới giống primary cho SVM-RBF, cây và RF; chỉ thêm class_weight='balanced'."""
+    grids: dict[str, GridSearchCV] = {}
+
+    pipe_svm_rbf = Pipeline(
+        [
+            ("sc", StandardScaler()),
+            (
+                "clf",
+                SVC(kernel="rbf", random_state=SEED, class_weight="balanced"),
+            ),
+        ]
+    )
+    grids[MODEL_SVM_RBF] = GridSearchCV(
+        pipe_svm_rbf,
+        {"clf__C": [0.1, 1.0, 10.0]},
+        cv=clf_cv,
+        scoring=CLASSIFICATION_SCORER,
+        n_jobs=1,
+    )
+
+    pipe_dt = Pipeline(
+        [
+            ("sc", StandardScaler()),
+            (
+                "clf",
+                DecisionTreeClassifier(
+                    random_state=SEED, class_weight="balanced"
+                ),
+            ),
+        ]
+    )
+    grids[MODEL_DECISION_TREE] = GridSearchCV(
+        pipe_dt,
+        {"clf__max_depth": [2, 3, 4, 5]},
+        cv=clf_cv,
+        scoring=CLASSIFICATION_SCORER,
+        n_jobs=1,
+    )
+
+    grids[MODEL_RANDOM_FOREST] = GridSearchCV(
+        RandomForestClassifier(
+            n_estimators=rf_n_estimators,
+            random_state=SEED,
+            n_jobs=1,
+            class_weight="balanced",
+        ),
+        {"max_depth": [3, 6, None], "min_samples_leaf": [1, 2]},
+        cv=clf_cv,
+        scoring=CLASSIFICATION_SCORER,
+        n_jobs=1,
+    )
+
+    for grid in grids.values():
+        grid.fit(Xtr, ytr)
+
+    return grids
+
+
 def build_metrics_table(
     df: pd.DataFrame | None = None,
     cfg: dict | None = None,
@@ -307,6 +387,7 @@ def build_metrics_table(
             "model": MODEL_MAJORITY,
             **_clf_metrics(yte, np.full_like(yte, maj), majority_cv),
             **_cv_spread_columns(majority_folds),
+            "group": GROUP_PRIMARY,
         }
     )
 
@@ -318,6 +399,26 @@ def build_metrics_table(
                 "model": name,
                 **_clf_metrics(yte, yp, grid.best_score_),
                 **_cv_spread_columns(fold_scores),
+                "group": GROUP_PRIMARY,
+            }
+        )
+
+    sens_grids = _fit_balanced_sensitivity_grids(
+        Xtr,
+        ytr,
+        clf_cv,
+        rf_n_estimators=rf_n_estimators,
+    )
+    for base_name in BALANCED_SENSITIVITY_BASE_MODELS:
+        grid = sens_grids[base_name]
+        yp = grid.best_estimator_.predict(Xte)
+        fold_scores = _grid_best_fold_scores(grid)
+        rows.append(
+            {
+                "model": _sensitivity_display_name(base_name),
+                **_clf_metrics(yte, yp, grid.best_score_),
+                **_cv_spread_columns(fold_scores),
+                "group": GROUP_SENSITIVITY,
             }
         )
 
@@ -325,10 +426,27 @@ def build_metrics_table(
     return metrics, grids, yte, Xte
 
 
+def _baseline_csv_columns(metrics: pd.DataFrame) -> list[str]:
+    return [c for c in metrics.columns if c != "group"]
+
+
 def _write_csv(metrics: pd.DataFrame) -> Path:
     out = RESULTS / "course_supervised_baselines.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
-    metrics.to_csv(out, index=False, encoding="utf-8-sig")
+    primary = metrics[metrics["group"] == GROUP_PRIMARY]
+    primary[_baseline_csv_columns(primary)].to_csv(
+        out, index=False, encoding="utf-8-sig"
+    )
+    return out
+
+
+def _write_sensitivity_csv(metrics: pd.DataFrame) -> Path:
+    out = RESULTS / "course_supervised_sensitivity.csv"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    sensitivity = metrics[metrics["group"] == GROUP_SENSITIVITY]
+    sensitivity[_baseline_csv_columns(sensitivity)].to_csv(
+        out, index=False, encoding="utf-8-sig"
+    )
     return out
 
 
@@ -338,9 +456,16 @@ def _write_markdown(
     n_holdout: int,
     yte: np.ndarray,
 ) -> Path:
-    selectable = metrics[~metrics.model.isin([MODEL_MAJORITY])]
+    primary_metrics = metrics[metrics["group"] == GROUP_PRIMARY].drop(
+        columns=["group"]
+    )
+    sensitivity_metrics = metrics[metrics["group"] == GROUP_SENSITIVITY].drop(
+        columns=["group"]
+    )
+
+    selectable = primary_metrics[~primary_metrics.model.isin([MODEL_MAJORITY])]
     selected = select_model_by_cv(selectable)
-    selected_row = metrics.set_index("model").loc[selected]
+    selected_row = primary_metrics.set_index("model").loc[selected]
     top_two = selectable.nlargest(2, "value_cv")
     cv_gap_top = (
         float(top_two.iloc[0]["value_cv"] - top_two.iloc[1]["value_cv"])
@@ -367,7 +492,7 @@ def _write_markdown(
         "",
         "## Kết quả",
         "",
-        metrics.to_markdown(index=False),
+        primary_metrics.to_markdown(index=False),
         "",
         f"- Theo **quy tắc chọn** của pipeline (macro-F1 CV cao nhất, không tính "
         f"majority): **{selected}** (macro-F1 CV = {selected_row['value_cv']:.3f}).",
@@ -398,7 +523,44 @@ def _write_markdown(
         "- Một holdout không chứng minh mô hình nào vượt trội tổng quát.",
         "- Nhãn phụ thuộc cấu hình STING đóng băng trong `models/predict_config.json`.",
         f"- Train: {n_train} cặp · Holdout: {n_holdout} cặp.",
+        "",
+        "## Độ nhạy: class_weight=balanced",
+        "",
+        "Ba dòng sau chỉ mang tính **tham khảo** (exploratory): cùng lưới, fold và "
+        "Pipeline/scaler với bảng chính, thêm đúng một thay đổi `class_weight='balanced'`. "
+        "**Không** thay thế bảng primary và **không** dùng holdout để chọn.",
+        "",
+        "- **CSV:** `results/course_supervised_sensitivity.csv` — cùng cột với "
+        "`results/course_supervised_baselines.csv`.",
+        "",
+        sensitivity_metrics.to_markdown(index=False),
+        "",
     ]
+    if len(sensitivity_metrics) >= 2:
+        sens_top = sensitivity_metrics.nlargest(2, "value_cv")
+        sens_gap = float(sens_top.iloc[0]["value_cv"] - sens_top.iloc[1]["value_cv"])
+        sens_leader_std = float(sens_top.iloc[0]["cv_std"])
+        lines.append(
+            f"- Thứ hạng macro-F1 CV trong nhóm nhạy cảm chỉ mang tính mô tả: khoảng "
+            f"cách hai đầu ({sens_gap:.3f}) "
+            f"{'nhỏ hơn' if sens_gap < sens_leader_std else 'không nhỏ hơn'} "
+            f"độ lệch fold-to-fold của dòng dẫn (`cv_std` = {sens_leader_std:.3f})."
+        )
+    else:
+        lines.append(
+            "- Thứ hạng macro-F1 CV trong nhóm nhạy cảm chỉ mang tính mô tả "
+            "(so sánh gap với `cv_std` từng dòng)."
+        )
+    cv_last_two = tuple(CLASSIFICATION_CV_YEARS[-2:])
+    lines.extend(
+        [
+            f"- Cấu hình STING/labeler đóng băng trong `models/predict_config.json` "
+            f"được chọn có tham chiếu metric trên {cv_last_two[0]}–{cv_last_two[1]}; "
+            f"hai fold validation CV cuối trùng các năm đó "
+            f"({', '.join(str(y) for y in cv_last_two)}), nên nhãn pseudo-label "
+            f"và đánh giá classifier không hoàn toàn độc lập trên các fold đó.",
+        ]
+    )
     out = RESULTS / "course_supervised_baselines.md"
     out.write_text("\n".join(lines), encoding="utf-8")
     return out
@@ -476,11 +638,13 @@ def main() -> int:
     print(metrics.to_string(index=False))
 
     csv_path = _write_csv(metrics)
+    sens_csv_path = _write_sensitivity_csv(metrics)
     md_path = _write_markdown(metrics, n_train, n_holdout, yte)
     fig_path = _plot_confusion_grid(grids, yte, Xte)
 
     print(
-        f"\nđã lưu: {csv_path.name}, {md_path.name}, {fig_path.relative_to(ROOT)}"
+        f"\nđã lưu: {csv_path.name}, {sens_csv_path.name}, "
+        f"{md_path.name}, {fig_path.relative_to(ROOT)}"
     )
     return 0
 

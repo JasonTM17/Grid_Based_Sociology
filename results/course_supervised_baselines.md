@@ -37,3 +37,18 @@
 - Một holdout không chứng minh mô hình nào vượt trội tổng quát.
 - Nhãn phụ thuộc cấu hình STING đóng băng trong `models/predict_config.json`.
 - Train: 738 cặp · Holdout: 59 cặp.
+
+## Độ nhạy: class_weight=balanced
+
+Ba dòng sau chỉ mang tính **tham khảo** (exploratory): cùng lưới, fold và Pipeline/scaler với bảng chính, thêm đúng một thay đổi `class_weight='balanced'`. **Không** thay thế bảng primary và **không** dùng holdout để chọn.
+
+- **CSV:** `results/course_supervised_sensitivity.csv` — cùng cột với `results/course_supervised_baselines.csv`.
+
+| model                                   | metric_cv                             |   value_cv |   holdout_acc |   holdout_macro_f1 |   cv_std |   cv_folds |
+|:----------------------------------------|:--------------------------------------|-----------:|--------------:|-------------------:|---------:|-----------:|
+| svm (rbf) (cân bằng lớp, tham khảo)     | f1_macro (expanding origin 2017–2022) |      0.526 |         0.78  |              0.592 |    0.073 |          6 |
+| decision tree (cân bằng lớp, tham khảo) | f1_macro (expanding origin 2017–2022) |      0.494 |         0.661 |              0.553 |    0.097 |          6 |
+| random forest (cân bằng lớp, tham khảo) | f1_macro (expanding origin 2017–2022) |      0.539 |         0.78  |              0.649 |    0.123 |          6 |
+
+- Thứ hạng macro-F1 CV trong nhóm nhạy cảm chỉ mang tính mô tả: khoảng cách hai đầu (0.013) nhỏ hơn độ lệch fold-to-fold của dòng dẫn (`cv_std` = 0.123).
+- Cấu hình STING/labeler đóng băng trong `models/predict_config.json` được chọn có tham chiếu metric trên 2021–2022; hai fold validation CV cuối trùng các năm đó (2021, 2022), nên nhãn pseudo-label và đánh giá classifier không hoàn toàn độc lập trên các fold đó.
