@@ -36,6 +36,11 @@ _PDF_HASH_RE = re.compile(
     r"PAPI_2024_REPORT_VIE_final\.pdf.*?SHA-256\s+`([a-f0-9]{64})`",
     re.IGNORECASE | re.DOTALL,
 )
+_HOST_ABS_PATH_PATTERNS = (
+    re.compile(r"D:\\"),
+    re.compile(r"C:\\Users"),
+    re.compile(r"/Users/"),
+)
 
 
 def _sha256_file(path: Path) -> str:
@@ -140,6 +145,18 @@ def notebook_executed_text(nb: dict) -> str:
     return "\n".join(chunks)
 
 
+def check_notebook_no_absolute_host_paths(nb: dict) -> list[str]:
+    """Output đã lưu không được chứa đường dẫn tuyệt đối máy chủ."""
+    blob = notebook_executed_text(nb)
+    violations: list[str] = []
+    for pattern in _HOST_ABS_PATH_PATTERNS:
+        if pattern.search(blob):
+            violations.append(
+                f"output notebook chứa đường dẫn host khớp {pattern.pattern!r}"
+            )
+    return violations
+
+
 def check_notebook_key_numbers(nb: dict, ridge_mae: float) -> list[str]:
     """Output đã chạy phải chứa ARI 0.950 và MAE holdout Ridge từ CSV."""
     violations: list[str] = []
@@ -213,6 +230,11 @@ def test_submission_pptx_exists_and_notes():
 
 def test_submission_notebook_cells(submission_notebook: dict):
     violations = check_notebook_cells(submission_notebook)
+    assert not violations, "\n".join(violations)
+
+
+def test_submission_notebook_no_absolute_host_paths(submission_notebook: dict):
+    violations = check_notebook_no_absolute_host_paths(submission_notebook)
     assert not violations, "\n".join(violations)
 
 
