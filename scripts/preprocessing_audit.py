@@ -587,7 +587,7 @@ def main() -> int:
                 f"lưới khóa giống nhau: {grid_identical}"
             ),
             "decision": (
-                "LEFT join giữ đúng lưới panel; ô ngoại lai thiếu để trống, có mask."
+                "LEFT join giữ đúng lưới panel; ô dữ liệu bên ngoài thiếu để trống, có mask."
             ),
             "evidence": (
                 "scripts/build_external_master.py:149-150; "
@@ -707,7 +707,7 @@ def main() -> int:
         f"{panel.shape[1]} cột, {panel['province_code'].nunique()} tỉnh × "
         f"{panel['year'].nunique()} năm ({int(panel['year'].min())}–"
         f"{int(panel['year'].max())})",
-        f"- Master ngoại lai: `data/processed/external_master_63_2011_2024.csv` — "
+        f"- Master dữ liệu bên ngoài: `data/processed/external_master_63_2011_2024.csv` — "
         f"{len(master)} dòng × {master.shape[1]} cột",
         "- Crosswalk: `data/raw/mendeley/Replication_package/data/"
         "province_crosswalk_63.csv`",
