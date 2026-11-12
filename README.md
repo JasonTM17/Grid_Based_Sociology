@@ -55,7 +55,7 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 # Kiểm tra môi trường
 python -c "import pandas, openpyxl, plotly, sklearn, streamlit; print('ok')"
 
-# Unit test (28 tests STING — tests/test_sting.py; toàn bộ test suite; coverage 98% cho src/sting.py)
+# Unit test (bộ test STING — tests/test_sting.py pass; toàn bộ test suite pass; coverage 98% cho src/sting.py)
 python -m pytest tests -q
 python -m pytest tests --cov=src -q
 
