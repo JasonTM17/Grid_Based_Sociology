@@ -608,8 +608,8 @@ def main() -> int:
         "- Diễn giải thận trọng: cụm 0 (n=5) và cụm 1 (n=16) quá nhỏ để tự kết "
         "luận; cặp tương phản đáng tin là **nhiễu vs cụm 2**. PCI khác biệt có ý "
         "nghĩa thống kê giữa các nhóm → cấu trúc cụm STING tương ứng với một thước "
-        "đo ĐỘC LẬP chưa từng dùng khi học — external validation đúng nghĩa, KHÔNG "
-        "chứng minh quan hệ nhân quả.\n"
+        "đo ĐỘC LẬP chưa từng dùng khi học — kiểm chứng bên ngoài độc lập, không "
+        "chứng minh nhân quả.\n"
         f"- Hình: `results/figs/external_pci_by_cluster.png`.\n"
     )
     md.append("## 2) Kiểm tra PHỤ: Top-30 2023–2024 — có cảnh báo chọn mẫu\n")

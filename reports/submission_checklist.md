@@ -4,8 +4,8 @@ _Cập nhật: 2026-11-12 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 
 ## Deliverable bắt buộc của môn
 
-- [x] **Báo cáo (.docx tiếng Việt)** — `reports/final_report.docx` (7 chương + phụ lục + TLTK; 10 hình, 9 bảng; bìa đã điền: Nguyễn Tiến Sơn — 24110054 · Trần Thị Ngọc Quyên — 24110051; định dạng tự biên soạn đã được chấp nhận không phụ thuộc template môn — xem `reports/report_format_notes.md`).
-- [x] **Notebook cuối kỳ** — `notebooks/final_analysis.ipynb` (execute sạch, 4 hình nhúng; lệnh: `python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb`).
+- [x] **Báo cáo (.docx tiếng Việt)** — `reports/final_report.docx` (7 chương + phụ lục + TLTK; hình và bảng nhúng đầy đủ — hiện 12 hình, 12 bảng đo bằng `python-docx`; bìa đã điền: Nguyễn Tiến Sơn — 24110054 · Trần Thị Ngọc Quyên — 24110051; định dạng tự biên soạn đã được chấp nhận không phụ thuộc template môn — xem `reports/report_format_notes.md`).
+- [x] **Notebook cuối kỳ** — `notebooks/final_analysis.ipynb` (execute sạch, 5 output `image/png` nhúng; lệnh: `python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb`).
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/check_data.py` → PASS.
 - [x] **Notebook nộp bài (giữa kỳ)** — `notebooks/submission_demo.ipynb` (execute sạch, 0 lỗi; sinh bằng `python scripts/gen_submission_demo.py`).
 - [x] **Slides nộp bài (giữa kỳ)** — `slides/submission.pptx` (10 slide, tiếng Việt, notes kèm từng slide; build bằng `python scripts/build_slides_10.py`). Deck phụ lục mở rộng cho cuối kỳ: `slides/final.pptx` (16 slide).

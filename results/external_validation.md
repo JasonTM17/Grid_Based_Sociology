@@ -16,7 +16,7 @@ Sinh bởi `scripts/external_validation.py` (gaps [2], [8], [9] + phần GRDP c�
 
 - **One-way ANOVA:** F(3,743) = 9.0426, p = 6.93e-06.
 - **Kruskal–Wallis** (phi tham số, có sửa tie): H = 31.7751, p = 5.84e-07; eta² = 0.0352.
-- Diễn giải thận trọng: cụm 0 (n=5) và cụm 1 (n=16) quá nhỏ để tự kết luận; cặp tương phản đáng tin là **nhiễu vs cụm 2**. PCI khác biệt có ý nghĩa thống kê giữa các nhóm → cấu trúc cụm STING tương ứng với một thước đo ĐỘC LẬP chưa từng dùng khi học — external validation đúng nghĩa, KHÔNG chứng minh quan hệ nhân quả.
+- Diễn giải thận trọng: cụm 0 (n=5) và cụm 1 (n=16) quá nhỏ để tự kết luận; cặp tương phản đáng tin là **nhiễu vs cụm 2**. PCI khác biệt có ý nghĩa thống kê giữa các nhóm → cấu trúc cụm STING tương ứng với một thước đo ĐỘC LẬP chưa từng dùng khi học — kiểm chứng bên ngoài độc lập, không chứng minh nhân quả.
 - Hình: `results/figs/external_pci_by_cluster.png`.
 
 ## 2) Kiểm tra PHỤ: Top-30 2023–2024 — có cảnh báo chọn mẫu
