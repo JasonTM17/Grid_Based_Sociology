@@ -65,7 +65,12 @@ def load_dashboard_assets(root: Path = ROOT, include_models: bool = True) -> dic
             "Feature trong predict_config.json không khớp results/predict_all_years.csv. "
             "Tạo lại assignment bằng `python scripts/predict_demo.py`."
         )
-    if not set(config.get("features", [])) <= set(panel.columns):
+    config_features = list(config.get("features", []))
+    if len(config_features) < 2:
+        raise DashboardDataError(
+            "predict_config.json cần ít nhất 2 feature để biểu đồ scatter STING."
+        )
+    if not set(config_features) <= set(panel.columns):
         raise DashboardDataError(
             "Feature trong predict_config.json không có trong panel PAPI. "
             "Tạo lại panel bằng `python scripts/build_panel.py`."
@@ -302,7 +307,13 @@ _EXTERNAL_REBUILD_COMMAND = "python scripts/external_validation.py"
 PCI_MAIN_WINDOW = (2011, 2022)
 PCI_TOP30_WINDOW = (2023, 2024)
 
-_REQUIRED_PCI_COLUMNS = {"province_code", "year", "province_vi", "pci_weighted_score"}
+_REQUIRED_PCI_COLUMNS = {
+    "province_code",
+    "year",
+    "province_vi",
+    "pci_weighted_score",
+    "province_ascii",
+}
 _REQUIRED_VALIDATION_COLUMNS = {
     "section", "group", "year", "n", "mean", "median", "std", "min", "max", "note",
 }
