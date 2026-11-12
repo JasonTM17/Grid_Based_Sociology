@@ -101,6 +101,9 @@ python scripts/course_supervised_baselines.py
 # Deck nộp bài (10 slide) — build bằng python-pptx
 python scripts/build_slides_10.py
 
+python scripts/build_report.py
+python scripts/update_report_fields.py   # cập nhật mục lục/số trang của báo cáo bằng Word (Windows)
+
 # Notebook nộp bài — sinh bằng nbformat rồi execute
 python scripts/gen_submission_demo.py
 python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb

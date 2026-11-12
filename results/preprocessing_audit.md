@@ -3,7 +3,7 @@
 Sinh bởi `scripts/preprocessing_audit.py` — CHỈ ĐỌC dữ liệu, không ghi lại panel hay master.
 
 - Panel: `data/processed/papi_panel_63_2011_2024.csv` — 882 dòng × 41 cột, 63 tỉnh × 14 năm (2011–2024)
-- Master ngoại lai: `data/processed/external_master_63_2011_2024.csv` — 882 dòng × 59 cột
+- Master dữ liệu bên ngoài: `data/processed/external_master_63_2011_2024.csv` — 882 dòng × 59 cột
 - Crosswalk: `data/raw/mendeley/Replication_package/data/province_crosswalk_63.csv`
 - Metadata thang đo: `data/processed/papi_panel_scale_metadata.csv`
 - Tham số chuẩn hóa đóng băng: `models/sting_predict_scaler.json`
@@ -93,7 +93,7 @@ Khóa nối, cardinality, số dòng, xung đột tên/giá trị, rò rỉ dữ
 | Test | Result | Decision | Evidence file:line |
 |---|---|---|---|
 | Khóa nối duy nhất hai phía + quan hệ bản ghi | panel 0 trùng; master 0 trùng; quan hệ one_to_one (không one-to-many/many-to-many) | Nối one-to-one theo (province_code, year); không nhân dòng. | scripts/build_external_master.py:148; scripts/build_external_master.py:139-140 |
-| Số dòng trước/sau khi nối panel × master | 882 → 882; 63 tỉnh; lưới khóa giống nhau: True | LEFT join giữ đúng lưới panel; ô ngoại lai thiếu để trống, có mask. | scripts/build_external_master.py:149-150; scripts/build_external_master.py:180-183 |
+| Số dòng trước/sau khi nối panel × master | 882 → 882; 63 tỉnh; lưới khóa giống nhau: True | LEFT join giữ đúng lưới panel; ô dữ liệu bên ngoài thiếu để trống, có mask. | scripts/build_external_master.py:149-150; scripts/build_external_master.py:180-183 |
 | Tên và giá trị trùng giữa panel và master | 0 lệch tên/63 mã; papi_province_code≠province_code: 0; 37 cột số chung lệch tối đa 8.88e-16 (sai số biểu diễn CSV); 0 ô lệch > 1e-09 | Không sửa; dung sai 1e-9 xác nhận hai file cùng một dữ liệu. | scripts/build_external_master.py:161; scripts/build_external_master.py:70-82 |
 | Scaler/lưới dự đoán có fit ngoài cutoff không | JSON khớp thống kê ≤2023: 808 dòng, Δmean=0, Δscale=0; nếu fit cả 869 dòng thì Δmean=0.011456 → không khớp JSON | Không rò rỉ: scaler + lưới STING chỉ fit ≤2023; 2024 (63 dòng, 61 đủ 2 chỉ tiêu) chỉ được transform/predict. | scripts/predict_demo.py:65-70; scripts/predict_demo.py:75-77; scripts/predict_demo.py:113; scripts/predict_sweep.py:112-113; scripts/predict_supervised.py:156-159 |
 

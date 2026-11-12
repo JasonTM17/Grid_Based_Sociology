@@ -4,7 +4,7 @@ Yêu cầu: Word + PowerPoint (COM), pymupdf. Chạy:
     python scripts/render_check.py
 
 Đầu ra (xem bằng mắt):
-    C:\\Users\\Admin\\AppData\\Local\\Temp\\opencode\\demo_render\\
+    %TEMP%\\opencode\\demo_render\\
         slides\\slide_01.png ... slide_16.png   — mỗi slide
         report_p01.png ...                      — từng trang báo cáo (PDF render)
 """
