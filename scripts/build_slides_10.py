@@ -5,6 +5,7 @@ Cách dùng: python scripts/build_slides_10.py
 from __future__ import annotations
 
 import csv
+import re
 import sys
 from io import BytesIO
 from pathlib import Path
@@ -99,6 +100,79 @@ M_KM2 = _metric_row("k-means k=2")
 M_KM3 = _metric_row("k-means k=3")
 M_DB = _metric_row("DBSCAN eps=0.2")
 
+# Bảng classifier theo nội dung học phần (Day 2–3): nhãn pseudo-label STING.
+COURSE_CLF = _read_results_csv("course_supervised_baselines.csv")
+COURSE_METRIC = "f1_macro (expanding origin 2017–2022)"
+# Tên hiển thị trên slide; khoá là tên model trong CSV.
+COURSE_LABELS = (
+    ("majority", "majority"),
+    ("gaussian naive bayes", "Naive Bayes"),
+    ("knn", "KNN"),
+    ("svm (linear)", "SVM tuyến tính"),
+    ("svm (rbf)", "SVM RBF"),
+    ("decision tree", "Cây quyết định"),
+    ("random forest", "Random forest"),
+)
+
+
+def _course_row(model_sub: str) -> dict[str, str]:
+    hits = [r for r in COURSE_CLF if model_sub in r["model"]]
+    if len(hits) != 1:
+        raise KeyError(f"{model_sub}: {len(hits)} dòng trong course_supervised_baselines.csv")
+    return hits[0]
+
+
+assert all(r["metric_cv"] == COURSE_METRIC for r in COURSE_CLF), (
+    "course_supervised_baselines.csv: cột metric_cv đã đổi"
+)
+COURSE_ROWS = []
+for _key, _label in COURSE_LABELS:
+    _row = _course_row(_key)
+    COURSE_ROWS.append((_label, _f3(_row["value_cv"]), _f3(_row["holdout_macro_f1"])))
+
+# Số đo tiền xử lý — đọc từ audit Day 4, không gõ tay.
+AUDIT = _read_results_csv("preprocessing_audit.csv")
+
+
+def _audit_row(stage_sub: str, test_sub: str) -> dict[str, str]:
+    hits = [r for r in AUDIT if stage_sub in r["stage"] and test_sub in r["test"]]
+    if len(hits) != 1:
+        raise KeyError(f"{stage_sub} / {test_sub}: {len(hits)} dòng trong preprocessing_audit.csv")
+    return hits[0]
+
+
+def _nums(pattern: str, text: str) -> tuple[int, ...]:
+    match = re.search(pattern, text)
+    if match is None:
+        raise ValueError(f"không khớp {pattern!r} trong: {text}")
+    return tuple(int(group) for group in match.groups())
+
+
+_DUP_ROW = _audit_row("(a) trùng khóa", "dedup")
+_MISS_ROW = _audit_row("(b) giá trị thiếu", "Ô thiếu trong 37 cột")
+_OUT_ROW = _audit_row("(d) ngoại lai", "z-score")
+
+N_DUP, N_ROWS = _nums(r"(\d+) dòng trùng / (\d+) dòng", _DUP_ROW["result"])
+N_MISS, N_CELLS = _nums(r"(\d+)/(\d+) ô", _MISS_ROW["result"])
+(N_OUT,) = _nums(r"^(\d+) ô", _OUT_ROW["result"])
+(Z_OUT,) = _nums(r"z-score > (\d+)", _OUT_ROW["test"])
+
+assert N_DUP == 0, "preprocessing_audit.csv: kỳ vọng 0 dòng trùng khóa"
+assert "KHÔNG nội suy" in _MISS_ROW["decision"], "preprocessing_audit.csv: quyết định ô thiếu đã đổi"
+assert "chỉ đánh dấu" in _OUT_ROW["decision"], "preprocessing_audit.csv: quyết định ngoại lai đã đổi"
+
+
+def _sp(n: int) -> str:
+    """Tách hàng nghìn bằng khoảng trắng (4 649) — không lẫn với dấu thập phân."""
+    return f"{n:,}".replace(",", " ")
+
+
+PP_FACTS = (
+    f"Đo trên PAPI: {N_DUP}/{N_ROWS} dòng trùng khóa · "
+    f"{_sp(N_MISS)}/{_sp(N_CELLS)} ô thiếu ({100 * N_MISS / N_CELLS:.1f}%) giữ NaN, không nội suy · "
+    f"{N_OUT} ô |z|>{Z_OUT} chỉ đánh dấu, không xóa"
+)
+
 # Demo tổng hợp — tái lập test_two_blobs (assert khớp hình 00_synthetic_sting.png)
 _X_SYN, _Y_SYN = make_blobs(
     n_samples=240, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=42
@@ -182,6 +256,23 @@ def text(slide, x, y, w, h, runs, align=PP_ALIGN.LEFT, space_after=4):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
         p.alignment = align
         p.space_after = Pt(space_after)
+        r = p.add_run()
+        r.text = t
+        r.font.size = Pt(size)
+        r.font.bold = bold
+        r.font.color.rgb = color
+        r.font.name = "Calibri"
+    return tb
+
+
+def text_line(slide, x, y, w, h, spans, size=12.0, align=PP_ALIGN.LEFT):
+    """Một dòng nhiều run khác định dạng (dải quy trình, nhấn tên bước)."""
+    tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.alignment = align
+    for t, bold, color in spans:
         r = p.add_run()
         r.text = t
         r.font.size = Pt(size)
@@ -402,29 +493,52 @@ note(
 s = slide_new()
 header(s, "BÀI TOÁN", "Phân cụm tỉnh theo PAPI — panel 882 × 41", 2)
 bullets(
-    s, 0.55, 1.45, 6.5, 5.5,
+    s, 0.55, 1.45, 6.5, 4.15,
     [
         ("Mục tiêu.", "Khám phá cấu trúc không gian chỉ tiêu hành chính; so STING với baseline; dự đoán/giám sát holdout."),
         ("Phạm vi.", "63 tỉnh × 14 năm (2011–2024) → 882 quan sát; 41 cột (d1–d8 + 29 sub-dim; 39 số)."),
         ("Nguồn.", "PAPI (CECODES/VFF-CRT/RTA/UNDP) — audit 0.0→NaN, PROVENANCE trong repo."),
         ("Grid-based.", "Không giả định hình dạng cụm; mỗi ô lưới lưu thống kê — phù hợp dữ liệu không gian/tabular."),
     ],
-    size=15, gap_pt=38,
+    size=15, gap_pt=32,
 )
-rect(s, 7.4, 1.4, 5.35, 5.5, LIGHT)
-text(s, 7.65, 1.58, 4.9, 0.35, [("MA TRẬN DỮ LIỆU", 12, True, TEAL)])
+rect(s, 7.4, 1.4, 5.35, 4.22, LIGHT)
+text(s, 7.65, 1.52, 4.9, 0.32, [("MA TRẬN DỮ LIỆU", 12, True, TEAL)])
 for i, (lbl, val) in enumerate([("Hàng (tỉnh×năm)", "882"), ("Cột", "41"), ("Số đo chính", "≥500×10 ✓")]):
-    y = 2.15 + i * 1.35
-    rect(s, 7.65, y, 4.85, 1.05, WHITE)
-    text(s, 7.8, y + 0.15, 3.2, 0.75, [(lbl, 13, False, GREY), (val, 22, True, NAVY)])
+    y = 2.0 + i * 1.02
+    rect(s, 7.65, y, 4.85, 0.86, WHITE)
+    text(s, 7.8, y + 0.08, 3.2, 0.7, [(lbl, 12.5, False, GREY), (val, 21, True, NAVY)])
 text(
-    s, 7.65, 6.05, 4.85, 0.55,
-    [("Minh họa thuật toán: tập 2-D tổng hợp · Ứng dụng: chuẩn hóa trong-năm + lưới STING", 14, False, GREY)],
+    s, 7.65, 5.02, 4.85, 0.55,
+    [("Minh họa thuật toán: tập 2-D tổng hợp · Ứng dụng: chuẩn hóa trong-năm + lưới STING", 12.5, False, GREY)],
 )
+
+# Dải tiền xử lý Day 4 — thứ tự dạy học + số đo audit, đọc từ preprocessing_audit.csv.
+rect(s, 0.55, 5.7, 12.23, 1.2, LIGHT)
+text(s, 0.72, 5.74, 11.8, 0.26, [
+    ("TIỀN XỬ LÝ THEO DAY 4 — MỖI BƯỚC: TEST → DECIDE", 10.5, True, TEAL),
+])
+text_line(
+    s, 0.72, 5.99, 11.9, 0.34,
+    [
+        ("Làm sạch", True, NAVY),
+        (" (trùng khóa → thiếu → nhất quán → ngoại lai, để cuối)", False, INK),
+        ("  →  ", False, GREY),
+        ("Tích hợp", True, NAVY),
+        (" (join, rò rỉ)", False, INK),
+        ("  →  ", False, GREY),
+        ("Biến đổi", True, NAVY),
+        (" (scale)", False, INK),
+    ],
+    size=13,
+)
+text(s, 0.72, 6.36, 11.9, 0.34, [(PP_FACTS, 11, False, GREY)])
 note(
     s,
     "Giải thích vì sao đủ lớn cho đồ án: 882 dòng vượt chuẩn. Nhấn đây là dữ liệu thật đã làm sạch, "
-    "không phải toy CSV. 1.5 phút: liên hệ Topic 6 grid-based. Chuẩn bị chuyển sang lý thuyết STING.",
+    "không phải toy CSV. Dải dưới theo đúng thứ tự Day 4: làm sạch (trùng khóa trước, ngoại lai để cuối) "
+    "→ tích hợp (join one-to-one, kiểm tra rò rỉ) → biến đổi (scale đóng băng); mỗi bước Test → Decide, "
+    "số đo đọc từ results/preprocessing_audit.csv. 1.5 phút: liên hệ Topic 6 grid-based.",
 )
 
 # ---------- 3 — STING lý thuyết I ----------
@@ -584,7 +698,7 @@ note(
 
 # ---------- 7 — Đánh giá clustering + supervised ----------
 s = slide_new()
-header(s, "ĐÁNH GIÁ", "So baseline · Ridge holdout 2023→2024", 7)
+header(s, "ĐÁNH GIÁ", "So baseline · classifier học phần · Ridge holdout", 7)
 rows = [
     ("Phương pháp", "k", "Nhiễu", "Silh.", "ARI"),
     (
@@ -643,10 +757,39 @@ text(s, 0.55, 4.18, 5.6, 0.55, [
     ("Pooled 2011–2023 · metrics.csv · STING ≈ DBSCAN (ARI 0.647); k-means khác vùng.", 14, False, GREY),
 ])
 rect(s, 6.55, 1.38, 6.25, 5.55, LIGHT)
-pic(s, "supervised_regression.png", 6.65, 1.48, w=6.05)
-text(s, 6.65, 5.92, 6.05, 0.45, [
-    ("Hình: supervised_regression.png · holdout 2023→2024 (một lần)", 14, False, GREY),
+# Cột phải xếp dọc: hình Ridge (thu nhỏ) → chú thích hình → tiêu đề bảng → bảng classifier.
+pic(s, "supervised_regression.png", 7.0, 1.46, w=5.35)
+text(s, 6.66, 4.45, 6.0, 0.22, [
+    ("Hình: Ridge holdout 2023→2024 (một lần)", 10.5, False, GREY),
 ])
+text(s, 6.62, 4.68, 6.05, 0.24, [
+    ("PHÂN LOẠI HỌC PHẦN · nhãn pseudo-label STING · một năm holdout 2023→2024", 10.5, True, TEAL),
+])
+clf_rows = [("Mô hình", "CV macro-F1", "Holdout")] + list(COURSE_ROWS)
+tb7 = s.shapes.add_table(
+    len(clf_rows), 3, Inches(6.62), Inches(4.96), Inches(6.0), Inches(1.86)
+).table
+for c, wd in enumerate([2.25, 1.55, 2.2]):
+    tb7.columns[c].width = Inches(wd)
+for i, row in enumerate(clf_rows):
+    for j, v in enumerate(row):
+        cell = tb7.cell(i, j)
+        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+        cell.margin_top = cell.margin_bottom = Inches(0.01)
+        tf = cell.text_frame
+        tf.text = v
+        r = tf.paragraphs[0].runs[0]
+        r.font.size = Pt(12.5)
+        r.font.name = "Calibri"
+        if i == 0:
+            r.font.bold = True
+            r.font.color.rgb = WHITE
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = TEAL
+        else:
+            r.font.color.rgb = INK
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = WHITE if i % 2 else LIGHT
 bullets(
     s, 0.55, 4.75, 5.75, 2.25,
     [
@@ -658,8 +801,10 @@ bullets(
 )
 note(
     s,
-    "Bảng trái đọc từ metrics.csv. Phải: supervised_metrics.csv — chọn Ridge theo CV, không theo holdout. "
-    "Một holdout — nói thẳng. ~90 giây.",
+    "Bảng trái đọc từ metrics.csv. Bảng phải: course_supervised_baselines.csv — 6 classifier học phần "
+    "(Naive Bayes, KNN, SVM, cây quyết định, random forest) trên nhãn pseudo-label STING, chọn theo "
+    "macro-F1 CV; majority chỉ để so. Holdout 2023→2024 báo cáo một lần, không dùng để chọn. "
+    "Ridge: supervised_metrics.csv — chọn theo CV. ~100 giây.",
 )
 
 # ---------- 8 — Kiểm chứng · robustness · hạn chế ----------
@@ -668,12 +813,15 @@ header(s, "TRUNG THỰC", "Kiểm chứng ngoài · robustness · hạn chế", 
 rect(s, 0.55, 1.42, 4.85, 3.95, LIGHT)
 text(s, 0.7, 1.5, 4.5, 0.3, [("PCI vs cụm STING (external)", 14, True, TEAL)])
 pic(s, "external_pci_by_cluster.png", 0.65, 1.82, w=4.65)
-text(s, 0.65, 5.28, 4.65, 0.35, [("Nguồn: results/figs/external_pci_by_cluster.png", 14, False, GREY)])
+text(s, 0.65, 5.02, 4.65, 0.28, [("Nguồn: results/figs/external_pci_by_cluster.png", 14, False, GREY)])
 bullets(
     s, 5.65, 1.45, 7.15, 3.85,
     [
         ("PCI (doanh nghiệp).", "747 điểm join · ANOVA p≈6.9e-06 · đọc nhiễu vs cụm 2."),
-        ("Độc lập.", "PCI không dùng khi học STING — external validation đúng nghĩa."),
+        (
+            "Kiểm chứng ngoại lai độc lập (PCI):",
+            "liên hệ giữa các nhóm, không phải nhân quả — PCI không dùng khi học STING.",
+        ),
     ],
     size=14, gap_pt=28,
 )
@@ -695,7 +843,8 @@ bullets(
 )
 note(
     s,
-    "Slide điểm Q&A: tự nêu hạn chế. PCI là doanh nghiệp vs PAPI hộ dân. "
+    "Slide điểm Q&A: tự nêu hạn chế. PCI là doanh nghiệp vs PAPI hộ dân — kiểm chứng ngoại lai độc lập "
+    "(PCI): liên hệ giữa các nhóm, không phải nhân quả; không nói quá thành kiểm chứng nhân quả. "
     "23/37 là cờ scale_audit (check_data.py) — heuristic, chưa tự chứng minh đổi thang; "
     "sd_5_4 (0.25–2.5 → 0.33–3.33, 2021) đã đối chiếu workbook. Robustness từ robustness.csv. ~90 giây.",
 )
