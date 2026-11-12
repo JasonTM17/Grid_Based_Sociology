@@ -1,3 +1,5 @@
+"""Kiểm thử scripts/dashboard_data.py: nạp artifact, view STING/holdout, kiểm chứng ngoại lai."""
+
 import numpy as np
 import pandas as pd
 import pytest
