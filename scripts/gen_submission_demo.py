@@ -494,7 +494,7 @@ md(nbf.v4.new_markdown_cell("""### 5.1 Bộ phân loại trong môn học (Naive
 Pseudo-label STING (vùng dày vs ngoại vi) trên 8 chỉ tiêu; bảng và ma trận nhầm lẫn **đọc**
 artifact `results/course_supervised_baselines.csv` + `results/figs/course_confusion_matrix.png`
 (sinh bằng `python scripts/course_supervised_baselines.py`). Đây là đồng thuận với nhãn STING,
-không phải kiểm chứng ngoại lai độc lập (liên hệ nhóm, không phải nhân quả) như PCI/GRDP
+không phải kiểm chứng bên ngoài độc lập (liên hệ giữa các nhóm, không phải nhân quả) như PCI/GRDP
 trong `results/external_validation.csv` (`python scripts/external_validation.py`)."""))
 
 cd(nbf.v4.new_code_cell("""_course = pd.read_csv(ROOT / "results" / "course_supervised_baselines.csv")
