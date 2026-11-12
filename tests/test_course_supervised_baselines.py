@@ -14,7 +14,11 @@ from scripts.course_supervised_baselines import (
     build_metrics_table,
 )
 from scripts.papi_pred_common import REGRESSION_FEATURES, load_config, load_panel, select_model_by_cv
-from scripts.predict_supervised import HOLDOUT_YEAR
+from scripts.predict_supervised import (
+    CLASSIFICATION_CV_YEARS,
+    HOLDOUT_YEAR,
+    expanding_year_splits,
+)
 
 REQUIRED_COLUMNS = (
     "model",
@@ -23,6 +27,8 @@ REQUIRED_COLUMNS = (
     "holdout_acc",
     "holdout_macro_f1",
 )
+
+LEGACY_CSV_COLUMNS = REQUIRED_COLUMNS
 
 
 def _synthetic_pairs(n_prov: int = 16, seed: int = 0) -> pd.DataFrame:
@@ -50,9 +56,11 @@ def real_classification_pairs():
 
 @pytest.fixture(scope="module")
 def baseline_run(real_classification_pairs):
-    metrics, grids, yte, Xte = build_metrics_table(
-        pairs=real_classification_pairs
-    )
+    """Giống script chính: 50 cây RF, cặp STING đã cache qua real_classification_pairs."""
+    del real_classification_pairs  # chỉ warmup _PAIRS_CACHE
+    cfg = load_config()
+    df = load_panel()
+    metrics, grids, yte, Xte = build_metrics_table(df, cfg)
     return metrics, grids, yte, Xte
 
 
@@ -117,3 +125,40 @@ def test_artifacts_on_disk():
     assert (root / "results" / "course_supervised_baselines.csv").is_file()
     assert (root / "results" / "course_supervised_baselines.md").is_file()
     assert (root / "results" / "figs" / "course_confusion_matrix.png").is_file()
+
+
+def test_expanding_splits_train_years_strictly_before_validation(
+    real_classification_pairs,
+):
+    train = real_classification_pairs[real_classification_pairs.year_t < HOLDOUT_YEAR]
+    years = train["year_t"].to_numpy()
+    ytr = train["y"].to_numpy()
+    splits = expanding_year_splits(years, ytr)
+    assert len(splits) == len(CLASSIFICATION_CV_YEARS)
+    for validation_year, (train_idx, validation_idx) in zip(
+        CLASSIFICATION_CV_YEARS, splits, strict=True
+    ):
+        assert np.all(years[train_idx] < validation_year)
+        assert set(years[validation_idx].tolist()) == {validation_year}
+
+
+def test_saved_csv_legacy_columns_match_fresh_computation(baseline_run):
+    from scripts import course_supervised_baselines as mod
+
+    metrics, _, _, _ = baseline_run
+    on_disk = pd.read_csv(mod.ROOT / "results" / "course_supervised_baselines.csv")
+    pd.testing.assert_frame_equal(
+        on_disk[list(LEGACY_CSV_COLUMNS)].reset_index(drop=True),
+        metrics[list(LEGACY_CSV_COLUMNS)].reset_index(drop=True),
+        check_exact=True,
+    )
+
+
+def test_cv_std_non_negative_finite(baseline_run):
+    metrics, _, _, _ = baseline_run
+    assert "cv_std" in metrics.columns and "cv_folds" in metrics.columns
+    for _, row in metrics.iterrows():
+        folds = int(row["cv_folds"])
+        assert folds == len(CLASSIFICATION_CV_YEARS)
+        std = float(row["cv_std"])
+        assert np.isfinite(std) and std >= 0.0, row["model"]
