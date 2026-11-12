@@ -36,8 +36,12 @@ md(nbf.v4.new_markdown_cell("""# Notebook nộp bài — Phân cụm 63 tỉnh V
   với holdout 2023→2024.
 - **Cách chạy:** `python scripts/gen_submission_demo.py` (sinh + execute notebook này) hoặc
   `python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb`.
-- Phần lớn số liệu **tính lại từ dữ liệu** ngay trong notebook; các ô kiểm chứng đọc
-  `results/*.csv|md` và `assert` khớp artifact đã lưu — không gõ tay số kỳ vọng mới."""))
+- **Tái lập (không phải mọi bước chạy lại từ đầu trong một ô):** STING và metric PAPI tính lại
+  trong notebook; tiền xử lý Day 4 **đọc** `results/preprocessing_audit.csv`
+  (`python scripts/preprocessing_audit.py`); baseline classifier học phần **đọc**
+  `results/course_supervised_baselines.csv` (`python scripts/course_supervised_baselines.py`);
+  Ridge/RF nạp `models/sup_ridge.joblib`, `models/sup_rf.joblib`; các ô gate `assert` khớp
+  `results/metrics.csv`, `results/supervised_metrics.csv`, v.v. — không gõ tay số kỳ vọng mới."""))
 
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
@@ -240,6 +244,21 @@ print("Panel:", panel.shape, "| tỉnh:", panel.province_code.nunique(),
 assert panel.shape == (882, 41)
 print("Đặc trưng đóng băng:", feats, "→", [FEATURE_LABELS[f] for f in feats])"""))
 
+md(nbf.v4.new_markdown_cell("""### 4.1 Tiền xử lý theo Day 4 (Test → Decide)
+
+Thứ tự giảng dạy: **Cleaning** (trùng khóa đầu tiên → thiếu → nhất quán → ngoại lai cuối cùng)
+→ **Integration** (khóa nối, số dòng, xung đột, rò rỉ) → **Transformation** (chuẩn hóa).
+Bảng dưới **đọc** artifact `results/preprocessing_audit.csv` (sinh bởi
+`python scripts/preprocessing_audit.py`) — không tính lại panel trong notebook."""))
+
+cd(nbf.v4.new_code_cell("""_prep = pd.read_csv(ROOT / "results" / "preprocessing_audit.csv")
+_tbl = _prep.rename(
+    columns={"stage": "Giai đoạn", "test": "Kiểm tra", "result": "Kết quả", "decision": "Quyết định"}
+)[["Giai đoạn", "Kiểm tra", "Kết quả", "Quyết định"]]
+with pd.option_context("display.max_colwidth", 72, "display.width", 140):
+    print(_tbl.to_string(index=False))
+print(f"Tổng {len(_tbl)} kiểm tra — thứ tự khớp Day 4 trong CSV.")"""))
+
 cd(nbf.v4.new_code_cell("""ptr = panel[panel.year <= 2023].dropna(subset=feats)
 scaler = StandardScaler().fit(ptr[feats])
 Xz = scaler.transform(ptr[feats])
@@ -427,6 +446,28 @@ print(f"Dự báo 6.1 Y tế công lập năm sau — Ridge: {ridge.predict(prob
       f"RF: {rf.predict(probe)[0]:.4f}")
 
 display(Image(filename=str(ROOT / "results" / "figs" / "supervised_regression.png")))"""))
+
+md(nbf.v4.new_markdown_cell("""### 5.1 Bộ phân loại trong môn học (Naive Bayes, KNN, SVM, DT, RF)
+
+Pseudo-label STING (vùng dày vs ngoại vi) trên 8 chỉ tiêu; bảng và ma trận nhầm lẫn **đọc**
+artifact `results/course_supervised_baselines.csv` + `results/figs/course_confusion_matrix.png`
+(sinh bằng `python scripts/course_supervised_baselines.py`). Đây là đồng thuận với nhãn STING,
+không phải kiểm chứng ngoại lai độc lập (liên hệ nhóm, không phải nhân quả) như PCI/GRDP
+trong `results/external_validation.csv` (`python scripts/external_validation.py`)."""))
+
+cd(nbf.v4.new_code_cell("""_course = pd.read_csv(ROOT / "results" / "course_supervised_baselines.csv")
+print(_course.to_string(index=False))
+_best = _course.loc[_course["value_cv"].idxmax()]
+print(f"\\nCao nhất theo macro-F1 CV (không tính majority): {_best['model']} "
+      f"(value_cv={_best['value_cv']:.3f})")
+display(Image(filename=str(ROOT / "results" / "figs" / "course_confusion_matrix.png")))
+_notes = (
+    "- Nhãn là pseudo-label STING, không phải ground truth khảo sát.\\n"
+    "- Một holdout 2023→2024; chọn model theo macro-F1 CV (expanding origin), không theo holdout.\\n"
+    "- Holdout acc/F1 chỉ đo đồng thuận với nhãn STING — không khẳng định vượt trội tổng quát.\\n"
+    "- Ma trận nhầm lẫn (Day 2–3): hàng = nhãn STING thực, cột = dự báo; không suy luận nhân quả."
+)
+print(_notes)"""))
 
 md(nbf.v4.new_markdown_cell("""## 6. Kết luận & hạn chế
 
