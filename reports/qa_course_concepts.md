@@ -1,6 +1,6 @@
 # Q&A theo khái niệm bài giảng (Day 1–4) | Topic 6 · STING × PAPI
 
-_Quy tắc: ≤60 giây/câu; A trả lời chính câu thuật toán/dữ liệu, B trả lời chính câu kết quả/ý nghĩa — nhưng mỗi thành viên phải trả lời được CẢ 31 câu. Mọi số lấy từ file ghi ở dòng "Repo" của từng câu; không đọc số từ trí nhớ._
+_Quy tắc: ≤60 giây/câu; A trả lời chính câu thuật toán/dữ liệu, B trả lời chính câu kết quả/ý nghĩa — nhưng mỗi thành viên phải trả lời được CẢ 37 câu. Mọi số lấy từ file ghi ở dòng "Repo" của từng câu; không đọc số từ trí nhớ._
 
 ## Bảng số dùng chung — 8 baseline trên nhãn STING
 
@@ -177,3 +177,35 @@ _Quy tắc: ≤60 giây/câu; A trả lời chính câu thuật toán/dữ liệ
 31. **Cài đặt STING của nhóm có phải tái lập đầy đủ bài Wang et al. (1997)?** — Không, là bản đơn giản hóa và phải nói đúng như vậy. Bài gốc lưu thêm distribution type trong mỗi ô và phân tích top-down: bắt từ lớp cao, kiểm ô liên quan bằng confidence rồi mới hạ xuống lớp con. Cài đặt của nhóm: mỗi `Cell` giữ count/mean/std/min/max theo từng chiều cùng biên ô, không có distribution type; `fit` dựng đủ mọi mức, còn `cluster`/`query` dùng một mức cố định, không duyệt top-down. Tham số `significance_z` mặc định tắt và cấu hình đóng băng không dùng, nên thực tế không có pruning theo confidence. Vì thế kết quả là của cài đặt này trên PAPI, không được phát biểu như tái lập nguyên văn thực nghiệm của bài báo.
     - **Hỏi bẫy:** "Vậy có được ghi 'theo Wang et al. 1997'?" — Được, nhưng phải ghi là triển khai ý tưởng lưới thống kê phân cấp, kèm rõ phần lược bỏ; không được ngụ ý kết quả trùng bài gốc.
     - **Repo:** `src/sting.py:1-13, 39-51, 119-125, 130-136`; `reports/qa_final.md:77,79`.
+
+## Bổ sung — GV dễ hỏi (vấn đáp thêm)
+
+32. **Vì sao không xóa ngoại lai khi audit đã gắn cờ 122 ô |z|>3?** — Day 4 xếp xử lý ngoại lai CUỐI bước Cleaning vì phải biết phân bố sau dedup, thiếu và nhất quán; audit đo trên panel thật: 122 ô (0.4%), 98 dòng, 29 cột — quyết định GIỮ toàn bộ, chỉ đánh dấu, không xóa. Điểm PAPI là khảo sát thật; cắt 122 ô làm méo thống kê panel 882×41. Điểm cực trị thường rơi vào ô lưới thưa nên STING tự gán nhiễu −1 qua `min_count`, không cần phá dữ liệu gốc — đúng tinh thần outlier removal cuối nhưng lựa chọn là không loại.
+   - **Hỏi bẫy:** "122 ô >3 sigma thì bắt buộc cắt theo slide?" — Không; slide yêu cầu Test → Decide, và audit ghi rõ z-score gộp toàn panel nên cờ chỉ mang tính mô tả.
+   - **Repo:** `results/preprocessing_audit.md:15,26,113-114`; `scripts/preprocessing_audit.py:261-290`; `src/sting.py:12-13`.
+   - **Bài giảng:** Day 4, trang 7.
+
+33. **Vì sao `dropna` thay vì imputation, và khi nào imputation hợp lý?** — Audit: 4649/32634 ô thiếu trong 37 chỉ tiêu (14.2%), trong đó 4284 ô nằm NGOÀI cửa sổ thu thập của cột — thiếu cấu trúc, không phải ngẫu nhiên để median "vá". Chỉ 13/882 dòng (1.5%) thiếu trong cửa sổ (365 ô trên `sd_4_2` hoặc `sd_6_1`). Pipeline chính: không nội suy, `dropna` khi ghép cặp và `year_frame` — minh bạch hơn tạo giá trị không có trong khảo sát. Imputation hợp lý khi đã Test → Decide trên thiếu ngẫu nhiên, quy mô lớn và không làm sai mật độ cục bộ STING — ví dụ tham khảo `SimpleImputer(strategy="median")` trong ứng viên R4, chưa đưa vào pipeline công bố.
+   - **Hỏi bẫy:** "Slide Day 4 có imputation nên phải điền?" — Imputation nằm trong khung Cleaning, nhưng cùng slide yêu cầu Test → Decide; repo có bảng audit chứng minh quyết định không điền.
+   - **Repo:** `results/preprocessing_audit.md:20-21,112`; `scripts/papi_pred_common.py:53-57`; `scripts/predict_supervised.py:106`; `scripts/candidates_regression.py:172`.
+   - **Bài giảng:** Day 4, trang 7; trang 14.
+
+34. **Vì sao Naive Bayes macro-F1 CV 0.514 cao nhất mà vẫn không kết luận "NB tốt nhất"?** — Theo quy tắc chọn pipeline vẫn lấy gaussian naive bayes vì `value_cv` lớn nhất, nhưng khoảng cách tới hạng hai (KNN 0.486) chỉ 0.028, nhỏ hơn `cv_std` của NB là 0.120 trên 6 fold — biến động giữa các fold lớn hơn gap giữa hai model đầu. Holdout macro-F1 NB 0.566 ngang SVM RBF 0.566; tất cả số đó là đồng thuận với pseudo-label STING, không ground truth. "Tốt nhất" ngụ ý vượt trội có ý nghĩa; repo chỉ được nói đứng đầu theo tiêu chí CV đã chốt và phải nói kèm giới hạn thống kê.
+   - **Hỏi bẫy:** "0.514 > 0.486 là thắng rõ ràng?" — Không; `results/course_supervised_baselines.md:24` ghi gap 0.028 < cv_std 0.120 → thứ hạng mô tả, không khẳng định vượt trội.
+   - **Repo:** `results/course_supervised_baselines.csv:3-4`; `results/course_supervised_baselines.md:23-24`; `scripts/course_supervised_baselines.py:374-377`.
+   - **Bài giảng:** Day 2, trang 30-34 (đánh giá) — cv_std là chuẩn tự đặt của repo.
+
+35. **Pseudo-label có vòng lặp nhãn không, và điều đó giới hạn kết luận thế nào?** — Có phụ thuộc vòng: cấu hình STING đóng băng (`predict_sweep.py` fit ≤2020, chấm coverage trên 2021–2022) → `build_classification_pairs` fit STING/scaler ≤t để gán nhãn tỉnh năm t+1 (`y = int(labels[pc] != -1)`, 738 cặp train) → classifier học khớp lại quy tắc "vùng dày vs ngoại vi" do chính STING sinh → macro-F1 đo mức khớp, không đúng/sai xã hội. Thêm vòng chọn cấu hình: hai năm 2021–2022 dùng trong sweep trùng hai fold CV cuối của classifier (`results/supervised_summary.md:30`) nên macro-F1 CV hơi lạc quan. Giới hạn: chỉ so sánh model A vs B dưới cùng protocol và cùng pseudo-label; không suy ra dự báo thực tế, không gọi là semi-supervised (Day 1), không dùng holdout để chọn sau khi đã thấy điểm.
+   - **Hỏi bẫy:** "CV 0.514 chứng minh dự báo tốt?" — Không; nhãn y do STING tại từng cutoff tạo ra, classifier chỉ học tái hiện nhãn đó.
+   - **Repo:** `scripts/predict_supervised.py:92-96,187-211`; `scripts/predict_sweep.py:53-54,110-113`; `results/supervised_summary.md:29-30`; `results/course_supervised_baselines.md:4,37`.
+   - **Bài giảng:** Day 1, trang 36 (semi-supervised khác pseudo-label).
+
+36. **STING khác DBSCAN và K-Means ở điểm nào (đề tài 6)?** — STING chia không gian thành lưới phân cấp, mỗi ô giữ thống kê (count/mean/std) và gom các ô "dày" (`count >= min_count`) liền kề; số cụm k là đầu ra của mật độ lưới, không phải tham số bắt buộc như K-Means. K-Means phải chọn k trước và luôn gán mọi điểm vào cụm (noise_ratio 0.0 trong pooled `results/metrics.csv`). DBSCAN dựa mật độ điểm + bán kính `eps`, cũng có nhãn nhiễu. Trên panel pooled 2011–2023: STING đóng băng k=3, noise 0.196; DBSCAN eps=0.2 noise 0.142, ARI so với STING 0.647; k-means k=2 ARI 0.166 — ba phương pháp phân vùng khác nhau, đề 6 bắt grid-based.
+   - **Hỏi bẫy:** "K-Means k=3 cho cùng k=3 với STING?" — Không; STING k=3 từ lưới min_count=5, k-means k=3 ARI_vs_sting chỉ 0.139.
+   - **Repo:** `src/sting.py:8-13`; `results/metrics.csv:2-4,7`; `README.md:10`.
+   - **Bài giảng:** Day 1, trang 12 (đề 6 grid-based; K-Means/DBSCAN là đề khác).
+
+37. **Vì sao ưu tiên macro-F1 thay vì accuracy khi holdout mất cân 11/48?** — Holdout một lần 2023→2024 có 59 tỉnh: lớp 0 (ngoại vi STING) = 11, lớp 1 (vùng dày) = 48 — tỉ lệ 48/59 ≈ 0.814. Chiến lược luôn đoán 1 đạt accuracy 0.814 trong khi bỏ hết 11 tỉnh lớp 0. NB có accuracy holdout 0.746 (cao hơn majority 0.186) nhưng macro-F1 0.566 phản ánh cả hai lớp; majority macro-F1 chỉ 0.157. Macro-F1 là trung bình F1 từng lớp nên phạt bỏ rơi lớp thiểu số — phù hợp Day 2 khi đọc confusion matrix, không chỉ tổng đúng. CV cũng chọn theo macro-F1 vì prevalence nhãn 1 trôi từ 0.000 (2011) đến 0.917 (2021).
+   - **Hỏi bẫy:** "Accuracy 0.746 là rất cao?" — Cao hơn majority nhưng thấp hơn luôn-đoán-1 (0.814); phải đọc macro-F1 và `results/figs/course_confusion_matrix.png`.
+   - **Repo:** `results/course_supervised_baselines.md:28-29`; `results/course_supervised_baselines.csv:2-3`; `results/supervised_summary.md:31`; `scripts/course_supervised_baselines.py:65-68`.
+   - **Bài giảng:** Day 2, trang 30-34.
