@@ -4,5 +4,5 @@ ruff==0.12.9
 pytest-cov==7.1.0
 
 # Optional: render_check.py (mở Word/PowerPoint + render PNG kiểm tra bố cục; cần MS Office)
-pywin32==312
+pywin32==312; sys_platform == "win32"
 pymupdf==1.28.2
