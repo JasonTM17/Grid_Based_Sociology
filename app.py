@@ -187,6 +187,7 @@ with st.sidebar:
         options=province_options,
         default=[],
         format_func=lambda code: names.get(int(code), str(code)),
+        placeholder="Chọn tỉnh/thành phố…",
         help="Để trống để xem tất cả tỉnh trong năm đang chọn.",
     )
     year_clusters = sorted(
@@ -249,6 +250,55 @@ with overview_tab:
         )
     else:
         st.caption("Các năm 2011–2023 là dữ liệu train/in-sample của lưới STING đã lưu.")
+
+    selected_clf_name = ""
+    try:
+        selected_clf_name = select_classification_model(metrics)
+    except ValueError:
+        pass
+    reg_kpi = metrics.loc[
+        metrics.task.eq("regression")
+        & metrics.model.isin([selected_model, "carry-forward (giữ giá trị năm nay)"])
+    ]
+    clf_kpi = metrics.loc[
+        metrics.task.eq("classification")
+        & metrics.model.isin([selected_clf_name, "majority (lớp đa số)"])
+    ]
+    if (
+        len(reg_kpi) == 2
+        and reg_kpi.holdout_mae.notna().all()
+        and len(clf_kpi) == 2
+        and clf_kpi.holdout_acc.notna().all()
+        and clf_kpi.holdout_macro_f1.notna().all()
+    ):
+        st.markdown("#### Kết quả chính — holdout 2023 → 2024")
+        reg_sel = reg_kpi.loc[reg_kpi.model.eq(selected_model)].iloc[0]
+        reg_carry = reg_kpi.loc[reg_kpi.model.str.startswith("carry-forward")].iloc[0]
+        clf_sel = clf_kpi.loc[clf_kpi.model.eq(selected_clf_name)].iloc[0]
+        clf_maj = clf_kpi.loc[clf_kpi.model.str.startswith("majority")].iloc[0]
+        kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+        kpi1.metric(f"{selected_model.capitalize()} · CV R²", f"{reg_sel.value_cv:.3f}")
+        kpi2.metric(
+            "MAE holdout",
+            f"{reg_sel.holdout_mae:.4f}",
+            delta=f"{reg_sel.holdout_mae / reg_carry.holdout_mae - 1:.1%} so carry-forward",
+            delta_color="inverse",
+        )
+        kpi3.metric(
+            "Accuracy pseudo-label",
+            f"{clf_sel.holdout_acc:.3f}",
+            delta=f"{clf_sel.holdout_acc - clf_maj.holdout_acc:+.2f} so majority",
+        )
+        kpi4.metric(
+            "Macro-F1 pseudo-label",
+            f"{clf_sel.holdout_macro_f1:.3f}",
+            delta=f"{clf_sel.holdout_macro_f1 - clf_maj.holdout_macro_f1:+.2f} so majority",
+        )
+        st.caption(
+            f"Model chọn bằng CV train-only: hồi quy {selected_model}, phân loại "
+            f"{selected_clf_name}. Delta so với baseline trên cùng {holdout_pair_count} cặp "
+            "holdout; bảng chi tiết ở tab Hồi quy và Audit."
+        )
 
     st.markdown("#### Phạm vi đang xem")
     st.write(
@@ -378,6 +428,7 @@ if regression_tab.open:
                     options=sorted(int(code) for code in regression.province_code.unique()),
                     default=[],
                     format_func=lambda code: holdout_names.get(int(code), str(code)),
+                    placeholder="Chọn tỉnh/thành phố…",
                     help="Để trống để xem tất cả cặp holdout.",
                 )
             with reg_col2:
@@ -389,6 +440,7 @@ if regression_tab.open:
                     options=origin_clusters,
                     default=[],
                     format_func=cluster_label,
+                    placeholder="Chọn cụm STING…",
                     help="Chỉ dùng assignment năm 2023; không lọc theo cụm 2024 vì có thể điều kiện hóa trên target.",
                 )
             regression_view, filter_counts = filter_regression_holdout(
