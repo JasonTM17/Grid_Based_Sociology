@@ -15,6 +15,7 @@ Hai bài toán minh hoạ (khác với `predict_demo.py` — STING.predict khôn
 
 Đầu ra:
   models/sup_ridge.joblib, models/sup_rf.joblib           — model local (joblib)
+  models/sup_classifier.joblib                            — classifier được CV chọn (joblib)
   results/supervised_metrics.csv, results/supervised_summary.md
   results/figs/supervised_regression.png                  — dự báo vs thực tế + độ quan trọng
   results/figs/supervised_confusion.png                   — confusion (bài toán 2, model chọn bằng CV)
@@ -457,6 +458,7 @@ def main() -> int:
         "random forest": grid_rfc,
     }
     _selected_clf_grid = _clf_grids[_selected_clf_name]
+    joblib.dump(_selected_clf_grid.best_estimator_, MODELS / "sup_classifier.joblib")
     classes = sorted(set(yc_tr.tolist()) | set(yc_te.tolist()))
     with style_context():
         fig, ax = new_fig()  # preset "docx": 6.5 x 4.3 in — đủ chỗ cho tiêu đề 2 dòng
@@ -585,13 +587,15 @@ def main() -> int:
         f"{_cv_no_target:.3f}; corr(dự báo, carry-forward) holdout = {_corr_carry:.2f}.\n"
         "- Một holdout 2023→2024 và pseudo-label không đủ để khẳng định năng lực dự báo xã hội tổng quát.\n"
         "- Nạp lại dự báo không cần train lại:\n"
-        "  `import joblib; m = joblib.load('models/sup_ridge.joblib')` rồi truyền vector 8 chỉ số."
+        "  `import joblib; m = joblib.load('models/sup_ridge.joblib')` rồi truyền vector 8 chỉ số; "
+        f"classifier tương tự qua `models/sup_classifier.joblib` ({_selected_clf_name}, nhãn 0/1)."
     )
     lines.append("")
     (RESULTS / "supervised_summary.md").write_text("\n".join(lines), encoding="utf-8")
 
-    print("\nđã lưu: sup_ridge.joblib, sup_rf.joblib, supervised_metrics.csv, "
-          "supervised_summary.md, supervised_regression.png, supervised_confusion.png")
+    print("\nđã lưu: sup_ridge.joblib, sup_rf.joblib, sup_classifier.joblib, "
+          "supervised_metrics.csv, supervised_summary.md, supervised_regression.png, "
+          "supervised_confusion.png")
     return 0
 
 

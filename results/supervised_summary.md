@@ -33,4 +33,4 @@
 - REGRESSION_TARGET (sd_6_1) nằm trong REGRESSION_FEATURES (scripts/papi_pred_common.py:19-23): không leakage thời gian (target lấy từ năm t+1) nhưng lợi thế 6.3% so với carry-forward chủ yếu là thông tin lag-1 của chính target — bỏ sd_6_1 khỏi features, CV R² 0.265 → -0.264; corr(dự báo, carry-forward) holdout = 0.99.
 - Một holdout 2023→2024 và pseudo-label không đủ để khẳng định năng lực dự báo xã hội tổng quát.
 - Nạp lại dự báo không cần train lại:
-  `import joblib; m = joblib.load('models/sup_ridge.joblib')` rồi truyền vector 8 chỉ số.
+  `import joblib; m = joblib.load('models/sup_ridge.joblib')` rồi truyền vector 8 chỉ số; classifier tương tự qua `models/sup_classifier.joblib` (logistic regression, nhãn 0/1).

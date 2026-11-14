@@ -49,6 +49,7 @@ for f in [
     "models/predict_config.json",
     "models/sup_ridge.joblib",
     "models/sup_rf.joblib",
+    "models/sup_classifier.joblib",
 ]:
     file_nonempty(f)
 

@@ -150,7 +150,8 @@ python scripts/predict_supervised.py   # 3) model ML có giám sát (scikit-lear
      carry-forward 0.0683 (giảm 6.3%). Random Forest có R² CV thấp hơn (0.197) và
      MAE holdout thấp hơn (0.0616); việc chọn model không dựa vào holdout. Đây vẫn
      chỉ là một năm holdout.
-     Lưu `models/sup_ridge.joblib`, `models/sup_rf.joblib`; kết quả
+     Lưu `models/sup_ridge.joblib`, `models/sup_rf.joblib` (hồi quy) và
+     `models/sup_classifier.joblib` (classifier được CV chọn); kết quả
      `results/supervised_metrics.csv` + `results/supervised_summary.md`.
    - **Phân loại phụ:** dự báo pseudo-label STING cutoff-local cho năm sau, với expanding
      CV theo origin 2017–2022 (warm-up 2011–2016). CV chọn Logistic Regression

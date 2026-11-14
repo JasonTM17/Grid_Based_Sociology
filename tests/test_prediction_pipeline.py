@@ -201,6 +201,14 @@ def test_ridge_pipeline_joblib_roundtrip_and_saved_model_prediction(tmp_path):
     assert np.isfinite(prediction).all()
 
 
+def test_saved_classifier_artifact_predicts_binary_label():
+    probe = np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])
+    saved_model = joblib.load(ROOT / "models" / "sup_classifier.joblib")
+    prediction = saved_model.predict(probe)
+    assert prediction.shape == (1,)
+    assert set(prediction.tolist()) <= {0, 1}
+
+
 def test_expanding_year_splits_require_both_classes_in_training_history():
     years = np.repeat(np.arange(2011, 2023), 2)
     labels = np.zeros(len(years), dtype=int)
