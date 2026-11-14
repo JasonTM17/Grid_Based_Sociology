@@ -27,6 +27,7 @@ _REGRESSION_MODEL_ARTIFACTS = {
     "ridge": Path("models/sup_ridge.joblib"),
     "random_forest": Path("models/sup_rf.joblib"),
 }
+_CLASSIFIER_ARTIFACT = Path("models/sup_classifier.joblib")
 
 
 def _require_unique_keys(frame: pd.DataFrame, keys: list[str], label: str) -> None:
@@ -101,6 +102,17 @@ def load_regression_models(root: Path = ROOT) -> dict:
         label: joblib.load(root / relative_path)
         for label, relative_path in _REGRESSION_MODEL_ARTIFACTS.items()
     }
+
+
+def load_classifier_model(root: Path = ROOT):
+    """Load the CV-selected pseudo-label classifier artifact on demand."""
+    path = Path(root) / _CLASSIFIER_ARTIFACT
+    if not path.is_file():
+        raise DashboardDataError(
+            f"Thiếu artifact {_CLASSIFIER_ARTIFACT.as_posix()} (classifier). "
+            "Tạo lại bằng `python scripts/predict_supervised.py`."
+        )
+    return joblib.load(path)
 
 
 def _cluster_label(value, feature_missing: bool = False) -> str:
@@ -272,6 +284,56 @@ def filter_regression_holdout(
         "after_origin_cluster_filter": int(len(visible)),
     }
     return visible, counts
+
+
+def prepare_classification_holdout(
+    panel: pd.DataFrame,
+    assignments: pd.DataFrame,
+    classifier_model,
+) -> tuple[pd.DataFrame, dict[str, int]]:
+    """Holdout 2023→2024: predict pseudo-labels with the saved classifier.
+
+    Actual labels mirror the pipeline contract in predict_supervised.py —
+    label 1 when STING assigns the province to a cluster in 2024, 0 for
+    noise — taken from the same ≤2023-fit assignments artifact
+    (`results/predict_all_years.csv`) instead of refitting a labeler.
+    """
+    _require_unique_keys(panel, ["province_code", "year"], "Panel PAPI")
+    _require_unique_keys(assignments, ["province_code", "year"], "STING assignments")
+    missing_panel_columns = (set(REGRESSION_FEATURES) | {"province_vi"}) - set(panel.columns)
+    if missing_panel_columns:
+        raise DashboardDataError(
+            "Panel PAPI thiếu cột classifier: " + ", ".join(sorted(missing_panel_columns))
+        )
+    if "pred_cluster" not in assignments.columns:
+        raise DashboardDataError("STING assignments thiếu cột pred_cluster.")
+
+    origin = panel.loc[panel.year == 2023].dropna(subset=REGRESSION_FEATURES)
+    target = assignments.loc[
+        assignments.year == 2024, ["province_code", "pred_cluster"]
+    ].dropna(subset=["pred_cluster"])
+    pairs = origin[["province_code", "province_vi", *REGRESSION_FEATURES]].merge(
+        target, on="province_code", how="inner", validate="one_to_one"
+    )
+    if pairs.empty:
+        raise DashboardDataError(
+            "Không có cặp holdout 2023→2024 nào đủ feature cho classifier."
+        )
+
+    pairs["actual_label"] = pairs.pred_cluster.ne(-1).astype(int)
+    pairs["predicted_label"] = np.asarray(
+        classifier_model.predict(pairs[REGRESSION_FEATURES].to_numpy()), dtype=int
+    )
+    pairs["correct"] = pairs.predicted_label.eq(pairs.actual_label)
+    pairs = pairs.sort_values("province_code").reset_index(drop=True)
+
+    counts = {
+        "holdout_pairs": int(len(pairs)),
+        "correct": int(pairs.correct.sum()),
+        "actual_dense": int(pairs.actual_label.sum()),
+        "predicted_dense": int(pairs.predicted_label.sum()),
+    }
+    return pairs, counts
 
 
 def select_regression_model(metrics: pd.DataFrame) -> str:

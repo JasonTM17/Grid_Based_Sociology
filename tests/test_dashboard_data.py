@@ -15,10 +15,12 @@ from scripts.dashboard_data import (
     filter_regression_holdout,
     format_p_value,
     format_poverty_window,
+    load_classifier_model,
     load_dashboard_assets,
     load_external_validation_assets,
     load_poverty_assets,
     load_regression_models,
+    prepare_classification_holdout,
     prepare_external_pci_view,
     prepare_poverty_cluster_view,
     prepare_regression_holdout,
@@ -278,6 +280,33 @@ def test_regression_holdout_asymmetric_models_raise_dashboard_error():
         prepare_regression_holdout(
             panel, assignments, ridge_model=None, random_forest_model=DummyRegressor()
         )
+
+
+def test_classification_holdout_maps_labels_and_drops_unlabeled():
+    panel = _make_regression_panel(provinces=(1, 2, 3))
+    assignments = pd.DataFrame(
+        {
+            "province_code": [1, 2, 3],
+            "year": [2024, 2024, 2024],
+            "pred_cluster": [0, -1, np.nan],
+            "split": ["test", "test", "test"],
+        }
+    )
+    pairs, counts = prepare_classification_holdout(panel, assignments, DummyRegressor())
+
+    # Province 3 có pred_cluster NaN -> không có pseudo-label, bị loại như pipeline
+    assert counts["holdout_pairs"] == 2
+    assert pairs.actual_label.tolist() == [1, 0]  # cụm -> vùng dày, nhiễu -> ngoại vi
+    assert pairs.predicted_label.tolist() == [0, 0]
+    assert pairs.correct.tolist() == [False, True]
+    assert counts["correct"] == 1
+    assert counts["actual_dense"] == 1
+    assert counts["predicted_dense"] == 0
+
+
+def test_classifier_artifact_missing_reports_rebuild_command(tmp_path):
+    with pytest.raises(DashboardDataError, match=r"predict_supervised\.py"):
+        load_classifier_model(tmp_path)
 
 
 def test_missing_artifact_errors_contain_rebuild_commands(tmp_path):

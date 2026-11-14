@@ -16,12 +16,14 @@ from scripts.dashboard_data import (
     filter_regression_holdout,
     format_p_value,
     format_poverty_window,
+    load_classifier_model,
     load_dashboard_assets,
     load_external_validation_assets,
     load_poverty_assets,
     load_regression_models,
     poverty_cluster_tests,
     poverty_noise_vs_c2,
+    prepare_classification_holdout,
     prepare_external_pci_view,
     prepare_poverty_cluster_view,
     select_classification_model,
@@ -75,6 +77,7 @@ _REGRESSION_MODEL_FILES = (
     "models/sup_ridge.joblib",
     "models/sup_rf.joblib",
 )
+_CLASSIFIER_MODEL_FILES = ("models/sup_classifier.joblib",)
 _EXTERNAL_FILES = (
     "data/processed/external_pci_63_full.csv",
     "results/external_validation.csv",
@@ -105,6 +108,12 @@ def get_assets(artifact_identity: tuple[tuple[str, int | None, int | None], ...]
 def get_regression_models(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
     del artifact_identity
     return load_regression_models()
+
+
+@st.cache_resource(show_spinner="Đang nạp model phân loại…")
+def get_classifier_model(artifact_identity: tuple[tuple[str, int | None, int | None], ...]):
+    del artifact_identity
+    return load_classifier_model()
 
 
 @st.cache_resource(show_spinner="Đang đọc artifact kiểm chứng ngoại lai…")
@@ -950,6 +959,53 @@ if audit_tab.open:
                         "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
                     },
                 )
+
+                try:
+                    classifier_model = get_classifier_model(
+                        artifact_identity(_CLASSIFIER_MODEL_FILES)
+                    )
+                    clf_pairs, clf_counts = prepare_classification_holdout(
+                        panel, assignments, classifier_model
+                    )
+                except DashboardDataError as exc:
+                    st.error(str(exc))
+                except Exception as exc:
+                    st.error(f"Không thể nạp hoặc áp dụng classifier local: {exc}")
+                else:
+                    st.markdown("#### Dự báo nhãn từng tỉnh — holdout 2023 → 2024")
+                    st.caption(
+                        f"Artifact `models/sup_classifier.joblib` ({classifier}) dự báo "
+                        "pseudo-label từ 8 chỉ số năm 2023. Nhãn thực tế lấy từ "
+                        "`results/predict_all_years.csv` — cùng phép gán nhãn STING "
+                        "của pipeline, không fit lại labeler."
+                    )
+                    clf_col1, clf_col2, clf_col3 = st.columns(3)
+                    clf_col1.metric("Cặp holdout", clf_counts["holdout_pairs"])
+                    clf_col2.metric(
+                        "Dự báo đúng",
+                        f"{clf_counts['correct']} · "
+                        f"{clf_counts['correct'] / clf_counts['holdout_pairs']:.0%}",
+                    )
+                    clf_col3.metric(
+                        "Vùng dày (dự báo / thực tế)",
+                        f"{clf_counts['predicted_dense']} / {clf_counts['actual_dense']}",
+                    )
+                    label_names = {0: "ngoại vi", 1: "vùng dày"}
+                    clf_view = clf_pairs.assign(
+                        predicted=clf_pairs.predicted_label.map(label_names),
+                        actual=clf_pairs.actual_label.map(label_names),
+                    )
+                    st.dataframe(
+                        clf_view[["province_vi", "predicted", "actual", "correct"]],
+                        hide_index=True,
+                        width="stretch",
+                        column_config={
+                            "province_vi": "Tỉnh / thành phố",
+                            "predicted": "Nhãn dự báo",
+                            "actual": "Nhãn thực tế (pseudo-label)",
+                            "correct": st.column_config.CheckboxColumn("Đúng"),
+                        },
+                    )
 
 st.divider()
 st.caption(

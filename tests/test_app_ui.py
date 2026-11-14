@@ -42,7 +42,7 @@ from scripts.dashboard_data import (
     select_classification_model,
     select_regression_model,
 )
-from scripts.papi_pred_common import ROOT
+from scripts.papi_pred_common import REGRESSION_FEATURES, ROOT
 
 # Nhãn UI của app (app.py:130, 193-203).
 APP_TITLE = "Khám phá kết quả STING và dự báo PAPI"
@@ -463,7 +463,7 @@ def test_tab5_audit_renders_scale_flags_and_classification_from_csv(assets):
     assert values["Feature STING đang dùng"] == f"{len(config['features'])}"
     assert values[f"Thiếu feature toàn năm {year}"] == f"{counts['missing_feature_rows']}"
 
-    assert len(audit.dataframe) == 3
+    assert len(audit.dataframe) == 4
     feature_table = audit.dataframe[0].value
     for _, row in feature_table.iterrows():
         assert int(row["Thiếu trong panel"]) == int(panel[row["Feature"]].isna().sum())
@@ -486,11 +486,29 @@ def test_tab5_audit_renders_scale_flags_and_classification_from_csv(assets):
     ].tolist()
     assert chosen == [classifier]
 
+    prediction_table = next(
+        frame.value
+        for frame in audit.dataframe
+        if {"predicted", "actual", "correct"} <= set(frame.value.columns)
+    )
+    origin_codes = panel.loc[
+        panel.year.eq(2023) & panel[REGRESSION_FEATURES].notna().all(axis=1),
+        "province_code",
+    ]
+    expected_pairs = assignments.loc[
+        assignments.year.eq(2024)
+        & assignments.pred_cluster.notna()
+        & assignments.province_code.isin(origin_codes)
+    ]
+    assert len(prediction_table) == len(expected_pairs)
+    assert set(prediction_table["predicted"]) <= {"ngoại vi", "vùng dày"}
+    assert set(prediction_table["actual"]) <= {"ngoại vi", "vùng dày"}
+
 
 def test_tab5_audit_content_is_lazy_until_tab_opened(assets):
     """Tab 5 Audit phải lazy như Tab 3/4: ở lần load mặc định (chưa mở tab)
     panel Audit KHÔNG có dataframe nào trong DOM (fix vòng 1 — trước đây
-    `with audit_tab:` không bọc Tab.open nên 3 dataframe render sẵn 0-kết quả)."""
+    `with audit_tab:` không bọc Tab.open nên các dataframe render sẵn 0-kết quả)."""
     at_default = run_app()
     assert not at_default.exception
     assert not at_default.error
@@ -499,7 +517,7 @@ def test_tab5_audit_content_is_lazy_until_tab_opened(assets):
     at_open = run_app(TAB_AUDIT)
     assert not at_open.exception
     assert not at_open.error
-    assert len(at_open.tabs[4].dataframe) == 3
+    assert len(at_open.tabs[4].dataframe) == 4
 
 
 # --------------------------------------------------------------------- #
