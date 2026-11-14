@@ -1,5 +1,5 @@
 {
-  "frozen_at": "2026-11-04",
+  "frozen_at": "2026-11-14",
   "selection_protocol": "Candidates: pairwise allowlist of screened sub-dimensions; mean-jump heuristic checked on train years ≤2020; dimension-level d1–d6 excluded pending cross-year comparability evidence. Fit ≤2020; chấm trên tương lai giả 2021–2022; 2024 không tham gia chọn. Lọc: k 2–6, noise≤0.25, largest≤0.85, coverage≥0.75. Điểm = coverage - 0.5*noise - 0.15*largest - 0.02*|k-3| + 0.03*stable(mc±1).",
   "features": [
     "sd_4_2",
