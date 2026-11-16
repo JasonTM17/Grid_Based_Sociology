@@ -1,4 +1,4 @@
-"""STING – STatistical INformation Grid (cài đặt từ đầu, không dùng thư viện ngoài).
+"""Biến thể STING – STatistical INformation Grid (tự cài với NumPy).
 
 Tham khảo: Wang, Yang & Muntz (1997), "STING: A Statistical Information Grid
 Approach to Spatial Data Mining", Proc. of VLDB.
@@ -8,7 +8,7 @@ Approach to Spatial Data Mining", Proc. of VLDB.
 1. Không gian dữ liệu được chia thành lưới phân cấp: mức ``l`` chia mỗi chiều
    thành ``factor ** l`` đoạn bằng nhau (mức 0 = một ô duy nhất).
 2. Mỗi ô lưu thống kê độc lập theo từng chiều: count, mean, std, min, max.
-3. Dữ liệu được quét một lần cho mỗi mức → chi phí O(n) theo số điểm.
+3. Tính thống kê từ dữ liệu ở từng mức. Chi phí phụ thuộc số điểm, số chiều và số mức.
 4. Phân cụm: gom các ô "dày" (count >= min_count) liền kề thành cụm; điểm
    thuộc ô không dày nhận nhãn -1 (nhiễu).
 
@@ -78,16 +78,18 @@ class STING:
         self.min_count = min_count
         self.significance_z = significance_z
 
-    # ------------------------------------------------------------------ #
     # Huấn luyện: xây lưới phân cấp và thống kê từng ô
-    # ------------------------------------------------------------------ #
     def fit(self, X: np.ndarray) -> STING:
-        """Xây lưới phân cấp và thống kê từng ô từ ma trận điểm ``X``."""
+        """Xây lưới từ ``X``; cần cluster() lại trước predict() sau mỗi fit()."""
         X = np.asarray(X, dtype=float)
         if X.ndim != 2 or X.shape[0] == 0:
             raise ValueError("X phải là mảng 2 chiều (n_samples, n_dims) không rỗng")
         if not np.all(np.isfinite(X)):
             raise ValueError("X chứa NaN/inf; xử lý trước khi fit")
+
+        # Nhãn thuộc lưới cũ không còn hợp lệ khi fit lại, kể cả cùng số chiều.
+        for name in ("label_of_", "n_clusters_", "cluster_level_", "_cell_comp_"):
+            self.__dict__.pop(name, None)
 
         n, d = X.shape
         self.n_samples_, self.n_dims_ = n, d
@@ -96,7 +98,9 @@ class STING:
         hi = X.max(axis=0)
         width = hi - lo
         width[width == 0.0] = 1.0  # chiều hằng số: nới giả để chia được lưới
-        self.bounds_min_, self.bounds_max_ = lo, lo + width
+        # lo + (hi - lo) có thể nhỏ hơn hi một ULP vì làm tròn; luôn bao
+        # cả cực đại tập học, đồng thời giữ phần nới cho chiều hằng số.
+        self.bounds_min_, self.bounds_max_ = lo, np.maximum(hi, lo + width)
 
         self.min_count_ = (
             int(self.min_count)
@@ -124,9 +128,7 @@ class STING:
             self.cells_[level] = self._accumulate(X, flat, res, level)
         return self
 
-    # ------------------------------------------------------------------ #
     # Phân cụm
-    # ------------------------------------------------------------------ #
     def cluster(self, level: int | None = None, connectivity: int = 1) -> np.ndarray:
         """Gán nhãn cụm cho từng điểm tại mức lưới ``level``.
 
@@ -233,9 +235,7 @@ class STING:
             raise TypeError("File không chứa đối tượng STING")
         return obj
 
-    # ------------------------------------------------------------------ #
     # Truy vấn & tiện ích
-    # ------------------------------------------------------------------ #
     def query_rect(
         self,
         rect: Sequence[Sequence[float]] | np.ndarray,
@@ -284,9 +284,7 @@ class STING:
         """Danh sách các ô có dữ liệu tại mức `level`, sắp xếp theo chỉ số."""
         return [self.cells_[level][k] for k in sorted(self.cells_[level])]
 
-    # ------------------------------------------------------------------ #
     # Nội bộ
-    # ------------------------------------------------------------------ #
     def _assign(self, X: np.ndarray, res: int) -> tuple[np.ndarray, np.ndarray]:
         """Tính chỉ số ô của từng điểm tại lưới `res` ô/chiều."""
         span = self.bounds_max_ - self.bounds_min_
@@ -355,6 +353,14 @@ class STING:
         self, index: tuple[int, ...], res: int, connectivity: int
     ) -> Iterator[tuple[int, ...]]:
         """Sinh chỉ số các ô kề hợp lệ (số tọa độ khác 0 <= connectivity)."""
+        if connectivity == 1:
+            for axis, coord in enumerate(index):
+                for step in (-1, 1):
+                    neighbor = coord + step
+                    if 0 <= neighbor < res:
+                        yield (*index[:axis], neighbor, *index[axis + 1:])
+            return
+
         for offset in itertools.product((-1, 0, 1), repeat=self.n_dims_):
             if all(o == 0 for o in offset):
                 continue

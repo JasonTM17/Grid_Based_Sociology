@@ -5,6 +5,7 @@ Chạy: python -m pytest tests -q
 import inspect
 import warnings
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -53,6 +54,16 @@ def test_boundary_point_goes_to_last_cell():
     assert tuple(idx[1]) == (1, 1)
     assert tuple(idx[2]) == (0, 0)
     assert model.cells_[1][(1, 1)].count == 1
+
+
+@pytest.mark.parametrize("dimensions", [2, 3])
+def test_training_extrema_remain_inside_support(dimensions):
+    """Floating-point reconstruction of hi must not reject training maxima."""
+    points = np.random.default_rng(97).normal(size=(120, dimensions))
+    model = STING(n_levels=2, factor=2, min_count=1).fit(points)
+    labels = model.cluster()
+    assert np.all(model.bounds_max_ >= points.max(axis=0))
+    np.testing.assert_array_equal(model.predict(points), labels)
 
 
 def test_two_blobs_recovered():
@@ -179,6 +190,22 @@ def test_cluster_before_fit_raises():
         model.cluster()
 
 
+@pytest.mark.parametrize("new_dims", [2, 3])
+def test_refit_requires_fresh_clustering(new_dims):
+    """A new fit must never reuse labels from the previous fitted grid."""
+    model = STING(n_levels=2, factor=2, min_count=1)
+    model.fit(np.array([[0.0, 0.0], [1.0, 1.0]])).cluster()
+    new_points = np.array([[10.0] * new_dims, [20.0] * new_dims])
+
+    model.fit(new_points)
+    with pytest.raises(RuntimeError, match="cluster"):
+        model.predict(new_points)
+    assert not hasattr(model, "n_clusters_")
+
+    new_labels = model.cluster()
+    np.testing.assert_array_equal(model.predict(new_points), new_labels)
+
+
 def test_predict_accepts_1d_input():
     """predict() nhận mảng 1 chiều (1 điểm) và reshape tự động."""
     X, _ = make_blobs(n_samples=120, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=42)
@@ -265,6 +292,22 @@ def test_connectivity_semantics():
     lab_diag = model.cluster(level=1, connectivity=2)
     assert np.all(lab_diag >= 0)
     assert sorted(set(lab_diag.tolist())) == [0]  # kề cả góc: gộp thành 1 cụm
+
+
+def test_face_neighbors_8d_do_not_enumerate_diagonals(monkeypatch):
+    def unexpected_product(*args, **kwargs):
+        pytest.fail("Face neighbors should not enumerate all offsets")
+
+    monkeypatch.setattr("sting.itertools", SimpleNamespace(product=unexpected_product))
+    model = STING().fit(np.array([[0.0] * 8, [2.0] * 8]))
+    center = (1,) * 8
+    neighbors = set(model._neighbors(center, res=3, connectivity=1))
+    assert len(neighbors) == 16
+    assert all(sum(abs(parent - value) for parent, value in zip(center, cell)) == 1
+               for cell in neighbors)
+    corner = set(model._neighbors((0,) * 8, res=3, connectivity=1))
+    assert len(corner) == 8
+    assert all(sum(cell) == 1 and min(cell) == 0 for cell in corner)
 
 
 def test_cluster_invalid_level():
