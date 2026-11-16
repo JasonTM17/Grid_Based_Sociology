@@ -3,55 +3,39 @@
 [![CI](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-<p align="center"><img src="assets/social_preview.png" alt="STING × PAPI — Grid-based clustering on Vietnam PAPI 2011-2024" width="100%"></p>
+Nhóm 15 · Môn Học máy · Chủ đề 6 — Grid-based clustering · Sociology / History
 
-_Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên (`scripts/build_banner.py`, rng seed 11, mật độ giả định), không phải dữ liệu/kết quả thật. Mọi hình kết quả trong `results/figs/` sinh từ dữ liệu thật._
+## Nộp bài
 
-Đồ án môn Học máy · Chủ đề 6: **Grid-based (clustering)** · Domain: Sociology / History.
+Toàn bộ file nộp nằm trong [`submissions/`](submissions/). Các notebook đã lưu kết quả chạy.
 
-**Sắp demo/thi?** Xem [`DEMO.md`](DEMO.md) — một lệnh kiểm tra sẵn sàng: `python scripts/demo_smoke.py` (phải in "SAN SANG DEMO" với toàn bộ mục PASS).
-
-## File nộp và notebook
-
-Các notebook đã lưu kết quả chạy. Bản nộp có nội dung thực nghiệm và kết luận.
-Bản học lưu các giải thích và hướng dẫn thao tác.
-
-| Mốc | Bản nộp | Bản học có giải thích |
+| Mốc | File nộp | Mã và dữ liệu để chạy lại |
 |---|---|---|
-| Giữa kỳ | [Notebook giữa kỳ](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.ipynb) | [Bản học giữa kỳ](study/01-giua-ky/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) |
-| Cuối kỳ | [Notebook cuối kỳ](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.ipynb) | [Bản học cuối kỳ](study/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) |
-| Bài nhóm Day 4 | [Notebook tiền xử lý](submissions/03-day-4/Nhom15_Day4_TienXuLy_PAPI.ipynb) | [Bản học Day 4](study/03-day-4/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb) |
+| Giữa kỳ | [Slide PPTX](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx) và [notebook](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.ipynb) | [ZIP giữa kỳ](submissions/Nhom15_GiuaKy_STING_PAPI.zip) |
+| Cuối kỳ | [Báo cáo DOCX](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx) và [notebook](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.ipynb) | [ZIP cuối kỳ](submissions/Nhom15_CuoiKy_STING_PAPI.zip) |
+| Bài nhóm Day 4 | [Notebook tiền xử lý](submissions/03-day-4/Nhom15_Day4_TienXuLy_PAPI.ipynb) | [Thư mục Day 4](submissions/03-day-4/) |
 
-Hai gói ZIP giữa kỳ và cuối kỳ nằm trong `submissions/`. Khi chuyển sang máy khác, giải nén cả ZIP để có mã nguồn và dữ liệu. Xem `submissions/HUONG-DAN.txt` để chọn file theo mốc.
+Khi chuyển sang máy khác, giải nén cả ZIP của mốc tương ứng. Slide cuối kỳ dùng khi vấn đáp là tài liệu tùy chọn. [Hướng dẫn](submissions/HUONG-DAN.txt) · [Slide vấn đáp](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
+
+## Ôn tập
+
+Ba notebook có giải thích nằm ngay trong `study/`. [Giữa kỳ](study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) · [Cuối kỳ](study/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) · [Day 4](study/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb)
+
+Chuẩn bị thuyết trình và vấn đáp tại [Hướng dẫn demo](DEMO.md) và [Câu hỏi ôn tập](reports/qa_course_concepts.md).
 
 ## Cấu trúc dự án
 
-| Thư mục | Nội dung |
+| Khi cần | Mở thư mục |
 |---|---|
-| `plans/` | Kế hoạch triển khai & báo cáo kiểm tra nội bộ (thư mục làm việc cục bộ — không commit) |
-| `data/raw/papi/` | 14 workbook PAPI 2011–2024 (nguồn: papi.org.vn, dữ liệu công khai; manifest+hash: `PROVENANCE.md`) |
-| `data/raw/mendeley/` | Gói replication CC BY 4.0 — 4 file nhỏ dùng trực tiếp được commit (+`PROVENANCE.md`); phần còn lại tải theo DOI |
-| `data/raw/boundaries/` | GeoJSON 63 tỉnh (Open Development Vietnam, CC-BY-SA 4.0; lưu ý join: xem `PROVENANCE.md`) |
-| `data/raw/pci/` | PCI VCCI–USAID — workbook + trang xếp hạng 2011/2023/2024, báo cáo PDF (dữ liệu công khai, ghi nguồn VCCI–USAID; `PROVENANCE.md`) |
-| `data/raw/gso/` | GSO/NSO — HTML PX-Web (GRDP, dân số, **nghèo cấp tỉnh V14.47**) + PDF Niên giám Thống kê (thống kê chính thức công khai; `PROVENANCE.md`) |
-| `data/processed/external_poverty_63.csv` | Nghèo cấp tỉnh: tỷ lệ hộ nghèo 63 tỉnh × 17 năm (2006, 2008, 2010 + 2012–2025 liên tục) — pxweb GSO **V14.47** (882 dòng; raw: `pxweb_V14.47_poverty_step2.html`) + 2017–2019 điền từ Niên giám Thống kê 2020/2021 (189 dòng; `scripts/build_poverty_gap.py`); cột `source` ghi nguồn theo từng dòng (builder gộp: `scripts/build_poverty_63.py`); 1070/1071 ô có số (thiếu TP.HCM 2016 — nguồn ghi ".."), không nội suy (`reports/external_data_expansion.md` §3.6–§3.7) |
-| `data/raw/odmekong/` | OD Mekong — nghèo 6 vùng 1998–2016 (CC BY-SA), bệnh viện 2020 (ODbL; `PROVENANCE.md`) |
-| `data/raw/worldbank/` | World Bank WDI — 4 chỉ số vĩ mô VNM 2010–2024 (CC BY 4.0; `PROVENANCE.md`) |
-| `data/processed/` | Panel sạch (kết quả Phase 2) + các file `external_*` (nguồn ngoài; ma trận độ phủ: `reports/external_data_expansion.md`) |
-| `src/` | Thư viện STING (tự viết từ đầu) |
-| `scripts/` | Script dữ liệu & phân tích |
-| `scripts/preprocessing_audit.py` | Kiểm chứng tiền xử lý (Day 4): chỉ đọc dữ liệu, ghi bảng Test → Decide → `results/preprocessing_audit.{md,csv}` |
-| `scripts/course_supervised_baselines.py` | So sánh classifier học phần (NB, KNN, SVM, cây, RF) trên pseudo-label STING → `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` |
-| `scripts/classifier_label_baselines.py` | Baseline đánh giá: hoán vị nhãn train, chỉ `year_t`/prevalence năm trước, so cặp fold (NB−KNN/LR) → `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary) |
-| `data/raw/course/` | Slide bài giảng + mẫu báo cáo GV — **chỉ lưu local, không commit** (tài liệu bên thứ ba); không script nào trong repo phụ thuộc thư mục này |
-| `models/` | Model STING đã huấn luyện + tham số chuẩn hóa (dùng cho dự đoán) |
-| `notebooks/` | Notebook Jupyter giữa kỳ, cuối kỳ, Day 4 và các notebook thử nghiệm |
-| `study/` | Bản học có giải thích của ba notebook |
-| `tests/` | Unit test |
-| `results/figs/` | Hình kết quả |
-| `reports/` | Báo cáo, ghi chú |
-| `reports/qa_course_concepts.md` | Q&A ánh xạ khái niệm Day 1–4 ↔ artifact trong repo (kèm số từ CSV thật) |
-| `slides/` | Slide nộp bài `submission.pptx` (10 slide) + deck phụ lục mở rộng `final.pptx` (16 slide) |
+| Gửi bài cho thầy | `submissions/` có file nộp đặt tên theo từng mốc và hai gói ZIP. |
+| Đọc giải thích để học | `study/` có ba notebook ôn tập. |
+| Xem thuật toán và cách chạy | `src/` chứa STING tự cài đặt. `scripts/` xử lý dữ liệu, chạy phân tích và tạo file. |
+| Tìm dữ liệu | `data/raw/` chứa workbook và các nguồn tham chiếu. `data/processed/` chứa panel PAPI và dữ liệu đã xử lý. |
+| Xem kết quả đã lưu | `models/` chứa model và cấu hình. `results/` chứa bảng và hình kết quả. |
+| Tái tạo bài nộp | `notebooks/`, `slides/` và `reports/` chứa notebook, slide và báo cáo dùng để tạo các gói nộp. `reports/` cũng có tài liệu chuyên môn. |
+| Kiểm tra hoặc chỉnh tài liệu | `tests/` có bộ kiểm thử. `assets/` chứa ảnh bìa repo và mẫu bìa báo cáo. |
+
+`plans/` lưu hồ sơ làm việc cục bộ. Các thư mục bắt đầu bằng dấu chấm chứa cấu hình Git, CI, dashboard hoặc công cụ phát triển. Tư liệu giảng viên lưu cục bộ trong `data/raw/course/`.
 
 ## Nguồn dữ liệu & giấy phép
 
