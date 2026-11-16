@@ -57,7 +57,7 @@ try:
 except Exception:
     pass
 
-# ---------------------------------------------------------------- hằng số --
+# hằng số
 SEED = 11                 # seed cố định cho TOÀN BỘ phần ngẫu nhiên (đặc tả lane)
 N_BOOT = 200              # số lần resample bootstrap theo tỉnh
 TRAIN_MAX_YEAR = 2023     # khớp scripts/predict_demo.py (fit 2011–2023)
@@ -97,7 +97,7 @@ def rnd(v, nd: int):
     return None if np.isnan(v) else round(v, nd)
 
 
-# ------------------------------------------------------------------- dữ liệu --
+# dữ liệu
 def load_labels() -> pd.DataFrame:
     """Nhãn cụm tỉnh-năm từ artifact của model đóng băng (đọc, không ghi)."""
     lab = pd.read_csv(LABELS_CSV)
@@ -154,7 +154,7 @@ def join_labels(d: pd.DataFrame, lab: pd.DataFrame, value_cols: list[str]):
     return j, n_missing
 
 
-# ------------------------------------------------------- hồ sơ chỉ số ngoài --
+# hồ sơ chỉ số ngoài
 def load_pci(lab):
     pci = pd.read_csv(PCI_CSV)
     d = pci[pci.year.between(*PCI_YEARS) & pci.pci_weighted_score.notna()]
@@ -256,7 +256,7 @@ def kruskal_test(d: pd.DataFrame, col: str) -> dict:
     return out
 
 
-# ------------------------------------------------- ổn định bootstrap (seed) --
+# ổn định bootstrap (seed)
 def match_by_jaccard(lab_b: np.ndarray, orig: np.ndarray,
                      orig_ids: list[int]):
     """Ghép từng cụm mẫu về cụm gốc bằng Jaccard tối đa (1-1 tối ưu).
@@ -379,7 +379,7 @@ def bootstrap_stability(fit: pd.DataFrame, feats: list[str], sp: dict,
     }
 
 
-# ---------------------------------------------------------------- hình ảnh --
+# hình ảnh
 SOURCE_LINE = "PCI VCCI–USAID · GSO V14.47 · OD Mekong — provenance trong repo"
 SHORT_NAMES = {
     "pci": "PCI 2011–22",
@@ -497,7 +497,7 @@ def make_fig(inds: list[dict], boot: dict, sil0: float, out_path: Path) -> None:
         plt.close(fig)
 
 
-# ---------------------------------------------------------------- outputs --
+# outputs
 CSV_COLS = ["section", "indicator", "group", "n", "mean", "median", "std",
             "min", "max", "note"]
 
@@ -615,7 +615,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
         "nghĩa gate `tests/test_artifact_reproduction.py`.\n"
     )
 
-    # ---------------- 1) nhãn tỉnh-năm ----------------
+    # 1) nhãn tỉnh-năm
     lines.append("## 1) Nhãn cụm theo tỉnh-năm\n")
     ov = []
     for c, sub in lab.groupby("pred_cluster"):
@@ -638,7 +638,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
         "trục này trước khi đọc các bảng dưới.\n"
     )
 
-    # ---------------- 2) hồ sơ × chỉ số ngoài ----------------
+    # 2) hồ sơ × chỉ số ngoài
     lines.append("## 2) Hồ sơ nhóm × chỉ số ngoài (Kruskal–Wallis + trung vị)\n")
     lines.append(
         "*Lưu ý chung*: nhóm cụm 0 / cụm 1 có n rất nhỏ (cụm li ti) — thống kê "
@@ -672,7 +672,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
                     f"không phải lỗi nối tên): {', '.join(zeros)}.\n"
                 )
 
-    # ---------------- 3) ổn định bootstrap ----------------
+    # 3) ổn định bootstrap
     rd, sd = boot["rate_dist"], boot["sil_dist"]
     lines.append(
         f"## 3) Ổn định bootstrap — {N_BOOT} lần, seed {SEED}, resample theo tỉnh\n"
@@ -748,7 +748,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
         "vững chỉ nên dựa trên tương phản nhiễu vs cụm 2.\n"
     )
 
-    # ---------------- 4) tái lập ----------------
+    # 4) tái lập
     lines.append("## 4) Tái lập\n")
     lines.append("```powershell\npython -E scripts/cluster_profile.py\n```\n")
     lines.append(
@@ -767,7 +767,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
     return "\n".join(lines) + "\n"
 
 
-# -------------------------------------------------------------------- main --
+# main
 def main() -> int:
     cfg = load_config()
     feats = list(cfg["features"])

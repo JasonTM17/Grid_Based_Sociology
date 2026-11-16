@@ -134,7 +134,7 @@ def main() -> int:
     papi_by_ascii = papi_map.set_index("province_ascii")["province_code"]
     assert papi_by_ascii.index.is_unique
 
-    # ------------------------------------------------------- bảng pxweb V14.47
+    # bảng pxweb V14.47
     tables = html_tables(RAW / SRC_HTML)
     grid = next(t for t in tables if any(re.fullmatch(r"20\d\d", c.strip()) for r in t for c in r) and len(t) > 60)
     header = next(r for r in grid if sum(1 for c in r if re.fullmatch(r"20\d\d", c.strip())) >= 2)
@@ -187,7 +187,7 @@ def main() -> int:
         bad = sorted(pov.loc[pov["papi_province_code"].isna(), "province_ascii"].unique())
         raise SystemExit(f"LỖI: province_ascii không có trong panel PAPI: {bad}")
 
-    # ----------------------------- điền 2017–2019 từ gap CSV (không đụng ô cũ)
+    # điền 2017–2019 từ gap CSV (không đụng ô cũ)
     # Cột source phân biệt nguồn THEO TỪNG DÒNG; concat sau phần pxweb.
     pov["source"] = "gso_pxweb_V14.47"
     gap_path = OUT / "external_poverty_gap_63.csv"
@@ -222,7 +222,7 @@ def main() -> int:
     print("Cột source theo dòng:", pov["source"].value_counts().to_dict())
     print("Giá trị TỔNG SỐ (cả nước) theo bảng, cho đối chiếu nhanh:", national)
 
-    # ---------------------------------------- đối chiếu Niên giám 2025 (verification)
+    # đối chiếu Niên giám 2025 (verification)
     def yb_table(pdf: str, pages: tuple[int, ...], years_map: dict[int, int]) -> dict[tuple[str, int], float]:
         import pymupdf
 

@@ -164,7 +164,7 @@ def main() -> int:
         raise SystemExit(f"LỖI: merge waste làm đổi số dòng: {n0} -> {len(master)}")
     print(f"  + waste: nối xong, mask present = {int(master['kg_pc'].notna().sum())}/{n0}")
 
-    # ------------------------- mask thiếu tường minh cho từng nguồn --------- #
+    # mask thiếu tường minh cho từng nguồn
     master["pci_present"] = master["pci_weighted_score"].notna()
     master["pop_present"] = master["gso_pop_total_thousand"].notna()
     master["grdp_present"] = master["grdp_per_capita_million_vnd"].notna()
@@ -186,7 +186,7 @@ def main() -> int:
     master.to_csv(out_csv, index=False, encoding="utf-8-sig")
     print(f"Đã ghi {out_csv}: {len(master)} dòng × {len(master.columns)} cột")
 
-    # --------------------------------------- tóm tắt md cho results/ ------- #
+    # tóm tắt md cho results/
     cov = coverage_by_year(master, mask_cols)
     lines = []
     lines.append("# Master table ngoại lai 63 tỉnh × 2011–2024 — tóm tắt\n")

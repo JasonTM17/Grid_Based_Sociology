@@ -293,7 +293,7 @@ def main() -> int:
     np.random.seed(SEED)
     RESULTS.mkdir(exist_ok=True)
 
-    # ---------------- Giao thức: import đúng từ predict_supervised.py -------- #
+    # Giao thức: import đúng từ predict_supervised.py
     df = load_panel()
     pairs = build_regression_pairs(df)
     tr = pairs[pairs.year_t < HOLDOUT_YEAR].reset_index(drop=True)
@@ -337,7 +337,7 @@ def main() -> int:
         f"warm-up 2011–{val_years[0] - 1}"
     )
 
-    # ---------------- Baseline tái lập IN-MEMORY trên cùng fold -------------- #
+    # Baseline tái lập IN-MEMORY trên cùng fold
     grid_ridge, grid_rf = reproduce_baselines(X, y, reg_cv)
     ridge_raw = float(grid_ridge.best_score_)
     rf_raw = float(grid_rf.best_score_)
@@ -369,7 +369,7 @@ def main() -> int:
         )
         return 1
 
-    # ---------------- Biến ngoài: áp quy tắc loại pre-registered ------------- #
+    # Biến ngoài: áp quy tắc loại pre-registered
     miss = external_missingness(keys)
     kept_ext: list[dict] = []
     excluded_ext: list[dict] = []
@@ -391,7 +391,7 @@ def main() -> int:
 
     ext_col = kept_ext[0]["column"] if kept_ext else None
 
-    # ---------------- Chạy ứng viên trên cùng fold --------------------------- #
+    # Chạy ứng viên trên cùng fold
     rows: list[dict] = []
 
     def add_row(
@@ -510,7 +510,7 @@ def main() -> int:
             f"{MISSING_EXCLUDE_FRAC:.0%} — nguồn {m['source']}",
         )
 
-    # ---------------- Ghi output (chỉ 2 tệp phân tích MỚI) ------------------- #
+    # Ghi output (chỉ 2 tệp phân tích MỚI)
     csv_header = list(rows[0].keys())
     with open(CSV_PATH, "w", encoding="utf-8", newline="\n") as fh:
         writer = csv.writer(fh, lineterminator="\n")

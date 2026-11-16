@@ -115,7 +115,7 @@ def as_score(x, where: str) -> float:
     return v
 
 
-# ---------------------------------------------------------------- 2011 (xls)
+# 2011 (xls)
 def parse_2011() -> tuple[list[tuple[str, float]], str]:
     """Summary 2011 xếp dòng theo rank sub-index đầu tiên; mỗi chỉ số là cặp (tên tỉnh, điểm).
 
@@ -136,7 +136,7 @@ def parse_2011() -> tuple[list[tuple[str, float]], str]:
     return recs, note
 
 
-# ------------------------------------------------- trang xếp hạng (2023 + kiểm chứng)
+# trang xếp hạng (2023 + kiểm chứng)
 def parse_ranking_html(path: Path, year: str) -> list[tuple[str, float | None, str]]:
     raw = path.read_text(encoding="utf-8", errors="replace")
     sel = re.findall(rf'<option value="{year}"\s+selected', raw)
@@ -161,7 +161,7 @@ def parse_ranking_html(path: Path, year: str) -> list[tuple[str, float | None, s
     return recs
 
 
-# ---------------------------------------------------------------- 2024 (xlsx)
+# 2024 (xlsx)
 def parse_2024() -> tuple[list[tuple[str, float | None]], str]:
     wb = openpyxl.load_workbook(RAW / F_XLSX_2024, read_only=True, data_only=True)
     ws = wb["Summary"]
@@ -285,7 +285,7 @@ def main() -> int:
 
     name2code = load_name2code()
 
-    # ---- 2011
+    # 2011
     rec_2011, note_2011 = parse_2011()
     names_2011 = {n for n, _ in rec_2011}
     rank_2011 = parse_ranking_html(RAW / "pci_ranking_page_2011.html", "2011")
@@ -319,7 +319,7 @@ def main() -> int:
           f"Bắc Giang/Bắc Cạn trên trang xếp hạng — lấy theo workbook (khớp Báo cáo PCI 2014)")
     print(f"2011 workbook: {note_2011}")
 
-    # ---- 2023 (điểm tổng từ trang xếp hạng — workbook không có cột điểm tổng)
+    # 2023 (điểm tổng từ trang xếp hạng — workbook không có cột điểm tổng)
     rank_2023 = parse_ranking_html(RAW / "pci_ranking_page_2023.html", "2023")
     # Xác nhận workbook 2023 (EN và VN) cùng tập 63 tỉnh, và đúng là không có cột điểm tổng
     for f in (F_XLSX_2023_EN, F_XLSX_2023_VN):
@@ -341,7 +341,7 @@ def main() -> int:
           f"{len(na_2023)} tỉnh không công bố (từ PCI 2022 báo cáo chỉ công bố Top 30 — "
           f"trang {RAW.name} VN-Bao-cao-dai-PCI-2023_VN.pdf tr.24, 43): {sorted(na_2023)}")
 
-    # ---- 2024
+    # 2024
     rec_2024, artifact_note = parse_2024()
     names_2024 = {n for n, _ in rec_2024}
     rank_2024 = parse_ranking_html(RAW / "pci_ranking_page_2024.html", "2024")
@@ -363,7 +363,7 @@ def main() -> int:
     if artifact_note:
         print(f"2024 workbook: {artifact_note}")
 
-    # ---- Base (2012-2022 từ extract Mendeley)
+    # Base (2012-2022 từ extract Mendeley)
     base = pd.read_csv(BASE, dtype={"province_code": str, "papi_province_code": str})
     base["source"] = "mendeley_extract"
 
@@ -422,7 +422,7 @@ def main() -> int:
                  "year", "pci_weighted_score", "source"]].reset_index(drop=True)
     full.to_csv(OUT / "external_pci_63_full.csv", index=False)
 
-    # ---- báo cáo phủ
+    # báo cáo phủ
     print(f"\nĐã ghi {OUT / 'external_pci_63_full.csv'}: {len(full)} dòng, "
           f"{full['province_code'].nunique()} tỉnh, năm {full['year'].min()}-{full['year'].max()}")
     per_year = full.groupby("year")["pci_weighted_score"].agg(["count", "size"])

@@ -65,7 +65,7 @@ TEN_TINH_ALIAS = {
 }
 
 
-# ---------------------------------------------------------------- poverty ---
+# poverty
 def build_poverty() -> None:
     src = RAW / "poverty" / "poverty_rate_1998_2016.csv"
     # file uses TAB separators despite the .csv extension
@@ -87,7 +87,7 @@ def build_poverty() -> None:
           f"{long['year'].min()}-{long['year'].max()}) -> {out.name}")
 
 
-# ------------------------------------------------------------------ health --
+# health
 def parse_ewkb_point(hexs: str):
     b = bytes.fromhex(hexs)
     if b[0] != 1:
@@ -204,7 +204,7 @@ def build_health() -> None:
     print("[health] top 5:", top.to_dict("records"))
 
 
-# -------------------------------------------------------------- provenance --
+# provenance
 def print_manifest() -> None:
     files = [
         RAW / "poverty" / "poverty_rate_1998_2016.csv",

@@ -44,7 +44,7 @@ try:
 except Exception:
     pass
 
-# --- Ứng viên đã sàng lọc trước, không bao gồm dimension-level scores ---
+# Ứng viên đã sàng lọc trước, không bao gồm dimension-level scores
 STABLE_SUBDIMS = ["sd_1_3", "sd_1_4", "sd_4_1", "sd_4_2", "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3"]
 CONFIGS = [
     (3, 3, 4, 2), (3, 3, 5, 2), (3, 3, 8, 2), (3, 3, 12, 2),

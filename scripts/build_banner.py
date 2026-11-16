@@ -50,7 +50,7 @@ ax.set_ylim(0, 640)
 ax.axis("off")
 ax.add_patch(Rectangle((0, 0), 1280, 640, color=NAVY, zorder=0))
 
-# ---------------- Lưới STING phía bên phải ----------------
+# Lưới STING phía bên phải
 rng = np.random.default_rng(11)
 cell, gap = 60, 11
 cols, rows = 8, 7
@@ -90,7 +90,7 @@ n_noise = 26
 ax.scatter(rng.uniform(x0 - 60, x0 + 6.6, n_noise), rng.uniform(60, 610, n_noise),
            s=2.5, c=MIST, alpha=0.35, zorder=1, linewidths=0)
 
-# ---------------- Chữ bên trái ----------------
+# Chữ bên trái
 # Cỡ chữ = 1/2 bản gốc (12.8×6.4 @100dpi) vì figure nhỏ đi một nửa @200dpi.
 ax.text(96, 470, "STING × PAPI", fontsize=46, fontweight="bold",
         color=CREAM, va="center", zorder=3)

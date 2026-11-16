@@ -312,9 +312,7 @@ def main() -> int:
     labels = pd.read_csv(LABELS_CSV)
     assert not labels.duplicated(["year", "province_code"]).any(), "nhãn trùng khóa"
 
-    # ================================================================== #
     # 1) Kiểm định CHÍNH: PCI 2011–2022 theo nhãn cụm STING
-    # ================================================================== #
     main = pci[(pci.year >= 2011) & (pci.year <= 2022) & pci.pci_weighted_score.notna()]
     m = main.merge(labels[["year", "province_code", "pred_cluster"]],
                    on=["year", "province_code"], how="left", validate="one_to_one")
@@ -339,9 +337,7 @@ def main() -> int:
         retrieved=RETRIEVED_DATE,
     )
 
-    # ================================================================== #
     # 2) Kiểm tra PHỤ: Top-30 2023–2024 (chọn mẫu — chỉ tỉnh tốt)
-    # ================================================================== #
     t30 = pci[(pci.year >= 2023) & pci.pci_weighted_score.notna()]
     mt = t30.merge(labels[["year", "province_code", "pred_cluster"]],
                    on=["year", "province_code"], how="left", validate="one_to_one")
@@ -359,9 +355,7 @@ def main() -> int:
           f"({fmt_p(t_top['p_anova'])}) | Kruskal H={t_top['h']:.4f} "
           f"({fmt_p(t_top['p_kw'])})")
 
-    # ================================================================== #
     # 3) Mật độ y tế 2020 theo cụm (ODM health + dân số GSO)
-    # ================================================================== #
     odm = pd.read_csv(ODM_CSV)
     pop = pd.read_csv(POP_CSV)
     p20 = pop[pop.year == 2020][["province_code", "gso_pop_total_thousand"]]
@@ -426,9 +420,7 @@ def main() -> int:
     save_png(fig, FIGS / "external_health_density_2020.png")
     plt.close(fig)
 
-    # ================================================================== #
     # 4) GRDP/người theo cụm, cửa sổ 2018–2024 (2024 = Sơ bộ)
-    # ================================================================== #
     grdp = pd.read_csv(GRDP_CSV)
     mg = grdp.merge(labels[["year", "province_code", "pred_cluster"]],
                     on=["year", "province_code"], how="left", validate="one_to_one")
@@ -491,9 +483,7 @@ def main() -> int:
     save_png(fig, FIGS / "external_grdp_by_cluster.png", dpi=FIG_DPI_PRINT)
     plt.close(fig)
 
-    # ================================================================== #
     # 5) WDI — bối cảnh vĩ mô quốc gia 2010–2024 (chuỗi không đều)
-    # ================================================================== #
     wdi = pd.read_csv(WDI_CSV)
     # (tên panel, đơn vị trục y): đơn vị đưa về nhãn trục y riêng của từng
     # panel thay vì chỉ nằm trong tiêu đề (nhận xét soi hình vòng 1).
@@ -563,9 +553,7 @@ def main() -> int:
     save_png(fig, FIGS / "external_wdi_panel.png", dpi=FIG_DPI_PRINT)
     plt.close(fig)
 
-    # ================================================================== #
     # 6) Xuất CSV + md
-    # ================================================================== #
     rows = (
         stats_rows("pci_2011_2022", tab_main) + test_rows("pci_2011_2022", t_main)
         + stats_rows("pci_top30_2023_2024", tab_top) + test_rows("pci_top30_2023_2024", t_top)

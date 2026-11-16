@@ -228,7 +228,7 @@ def main() -> int:
         "không đọc nhầm thành gãy model."
     )
 
-    # --- Hạn chế diễn giải: số liệu tính từ chính artifacts của script này ---
+    # Hạn chế diễn giải: số liệu tính từ chính artifacts của script này
     import ast
 
     nn_total = int((labels >= 0).sum())

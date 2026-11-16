@@ -382,7 +382,7 @@ def main() -> int:
     total_cells = len(panel) * len(columns)
     total_missing = int(panel[columns].isna().sum().sum())
 
-    # --- 1. Cleaning ---------------------------------------------------- #
+    # 1. Cleaning
     duplicates = duplicate_key_rows(panel)
     full_row_duplicates = int(panel.duplicated().sum())
     window = missing_window_summary(panel, metadata)
@@ -399,7 +399,7 @@ def main() -> int:
     outlier_cells = int(outlier_table["flagged"].sum())
     outlier_rows = int(outlier_mask(panel, columns).any(axis=1).sum())
 
-    # --- 2. Integration -------------------------------------------------- #
+    # 2. Integration
     cardinality = join_cardinality(panel, master)
     merged_rows = len(
         panel.merge(master[list(KEY_COLUMNS)], on=list(KEY_COLUMNS), how="left")
@@ -441,7 +441,7 @@ def main() -> int:
         scaler["scale"],
     )
 
-    # --- 3. Transformation ------------------------------------------------ #
+    # 3. Transformation
     history = panel.loc[panel["year"] <= TRAIN_MAX_YEAR, features].dropna()
     ddof1_scale_diff = _max_abs_diff(
         history.std(ddof=1).to_numpy(), scaler["scale"]

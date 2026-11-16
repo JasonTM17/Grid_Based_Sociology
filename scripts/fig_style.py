@@ -57,7 +57,7 @@ __all__ = [
     "save_png",
 ]
 
-# ---------------------------------------------------------------- palette --
+# palette
 # Okabe–Ito (CVD-safe), tối đa 6 màu. Thứ tự hue trùng với palette cụm cũ
 # của repo (xám / xanh dương / cam / xanh lá) để hình cũ và mới cùng ngữ nghĩa.
 PALETTE = {
@@ -98,7 +98,7 @@ UNIT_LABELS = {
     "pci": "thang 0–100",
 }
 
-# ------------------------------------------------------------ kích thước --
+# kích thước
 DEFAULT_DPI = 200
 MIN_DPI = 200  # chuẩn repo: PNG lưu ra phải >= 200 DPI
 # "docx":  6.5 inch rộng — khớp lề khổ A4 của reports/final_report.docx.
@@ -109,7 +109,7 @@ FIG_SIZE_IN = {
 }
 SOURCE_FONTSIZE = 8  # dòng nguồn nhỏ hơn chú thích nhưng vẫn đọc được khi in
 
-# --------------------------------------------------------------- rcParams --
+# rcParams
 RC = {
     "font.family": "sans-serif",
     # DejaVu Sans đi kèm matplotlib, phủ đủ ký tự tiếng Việt (kiểm chứng
@@ -155,7 +155,7 @@ def style_context() -> Iterator[None]:
         mpl.rcParams.update(old)
 
 
-# ---------------------------------------------------------------- helper ---
+# helper
 def new_fig(
     target: Optional[str] = "docx", **subplots_kw: object
 ) -> tuple["mpl.figure.Figure", "mpl.axes.Axes"]:

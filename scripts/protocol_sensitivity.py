@@ -53,11 +53,9 @@ try:
 except Exception:
     pass
 
-# ---------------------------------------------------------------------------
 # Giao thức gốc — sao chép NGUYÊN VĂN từ scripts/predict_sweep.py:48-59.
 # Tính trung thực của bản sao được kiểm chứng bằng đối chiếu 224/224 dòng với
 # results/predict_config_search.csv (mục 3 của results/protocol_sensitivity.md).
-# ---------------------------------------------------------------------------
 STABLE_SUBDIMS = ["sd_1_3", "sd_1_4", "sd_4_1", "sd_4_2",
                   "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3"]
 CONFIGS = [

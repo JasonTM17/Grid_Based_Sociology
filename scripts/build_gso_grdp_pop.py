@@ -111,7 +111,7 @@ def main() -> int:
     papi_by_ascii = papi_map.set_index("province_ascii")["province_code"]
     assert papi_by_ascii.index.is_unique
 
-    # ------------------------------------------------------------------ GRDP
+    # GRDP
     tables = html_tables(RAW / "pxweb_V03.12_grdp_pc_step2.html")
     grid = next(t for t in tables if any("2018" in c for r in t for c in r) and len(t) > 60)
     header = next(r for r in grid if any(re.fullmatch(r"20\d\d", c.strip()) for c in r))
@@ -163,7 +163,7 @@ def main() -> int:
         bad = sorted(grdp.loc[grdp["papi_province_code"].isna(), "province_ascii"].unique())
         raise SystemExit(f"LỖI: province_ascii không có trong panel PAPI: {bad}")
 
-    # -------------------------------------------------- đối chiếu Niên giám
+    # đối chiếu Niên giám
     def yb_table(pdf: str, pages: tuple[int, ...], years: dict[int, int]) -> dict[tuple[str, int], float]:
         import pymupdf
 
@@ -211,7 +211,7 @@ def main() -> int:
                     print(f"  LỆCH {name}: {key} pxweb={g[key]} vs {v}")
         print(f"Đối chiếu {name}: trùng {n_ok}, lệch {n_diff}, thiếu {n_miss} / {len(yb)} | lệch theo năm: {diff_by_year}")
 
-    # ------------------------------------------------------------- dân số
+    # dân số
     pop_rows = []
     for fname in (
         "pxweb_V02.01_pop_step2.html",
@@ -257,7 +257,7 @@ def main() -> int:
     dup = pop[pop.duplicated(["province_code", "year"], keep=False)]
     assert dup.empty, f"Trùng tỉnh-năm trong dữ liệu pxweb: {dup.head()}"
 
-    # ------------------------------------------------- gộp file dân số đầy đủ
+    # gộp file dân số đầy đủ
     base = pd.read_csv(OUT / "external_gso_population_63.csv")
     base["province_code"] = base["province_code"].astype(str)
     base["source"] = "gso_nien_giam_extract (Mendeley replication package)"
@@ -284,7 +284,7 @@ def main() -> int:
     print("  chênh lệch trung bình:", round(chk["diff"].mean(), 2), "nghìn người; max:",
           round(chk["diff"].max(), 2), "| dòng lệch >1%:", int((chk["diff"] / chk["gso_pop_total_thousand_base"] > 0.01).sum()))
 
-    # --------------------------------------------------------------- ghi file
+    # ghi file
     OUT.mkdir(parents=True, exist_ok=True)
     grdp.to_csv(OUT / "external_gso_grdp_63.csv", index=False)
     full.to_csv(OUT / "external_gso_population_63_full.csv", index=False)

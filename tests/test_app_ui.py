@@ -196,9 +196,7 @@ def expected_poverty_tables(assignments: pd.DataFrame) -> dict:
     }
 
 
-# --------------------------------------------------------------------- #
 # Happy path — từng section trong danh sách của ask
-# --------------------------------------------------------------------- #
 
 
 def test_app_renders_clean_with_title_tabs_and_sidebar_filters(assets):
@@ -520,9 +518,7 @@ def test_tab5_audit_content_is_lazy_until_tab_opened(assets):
     assert len(at_open.tabs[4].dataframe) == 4
 
 
-# --------------------------------------------------------------------- #
 # Widget-test cho các rủi ro scout nêu (mục 1-11)
-# --------------------------------------------------------------------- #
 
 
 def test_risk1_metrics_without_regression_cv_rows_crash_app_uncaught(

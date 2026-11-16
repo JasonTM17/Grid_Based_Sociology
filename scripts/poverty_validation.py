@@ -182,7 +182,7 @@ def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
                         gridspec_kw={"height_ratios": [1.15, 1.0]})
     ax1, ax2 = axes
 
-    # ---------------- hàng 1: boxplot gộp (external_validation.py:256-294) --
+    # hàng 1: boxplot gộp (external_validation.py:256-294)
     labels = sorted(int(x) for x in d.pred_cluster.unique())
     arrays = [d.loc[d.pred_cluster == lab, "poverty_rate_pct"].to_numpy()
               for lab in labels]
@@ -211,7 +211,7 @@ def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
              va="bottom", fontsize=9, color="#444444")
     ax1.grid(axis="y", alpha=0.25)
 
-    # ---------------- hàng 2: median theo năm (template GRDP :455-490) ------
+    # hàng 2: median theo năm (template GRDP :455-490)
     med_year = d.groupby("year").poverty_rate_pct.median()
     series: list[tuple[int, list[tuple[float, float, int]]]] = []
     for lab in labels:
@@ -266,9 +266,7 @@ def main() -> int:
     apply_style()  # rcParams chuẩn repo — gọi đầu script
     FIGS.mkdir(parents=True, exist_ok=True)
 
-    # ====================================================================== #
     # 1) Đọc dữ liệu + join đúng protocol (year, province_code)
-    # ====================================================================== #
     pov = pd.read_csv(POVERTY_CSV)
     lab = pd.read_csv(LABELS_CSV)
     assert not lab.duplicated(["year", "province_code"]).any(), "nhãn trùng khóa"
@@ -315,9 +313,7 @@ def main() -> int:
     print(f"Left-join nhãn: {n_panel} ô vào kiểm định; {n_no_label} ô không có "
           f"nhãn (loại khỏi kiểm định, liệt kê tường minh)")
 
-    # ====================================================================== #
     # 2) Kiểm định: gộp thô + đã-trừ-median-năm (báo cáo CÙNG nhau)
-    # ====================================================================== #
     t_raw = anova_kruskal(d, "poverty_rate_pct")
     t_dm = anova_kruskal(d, "pov_dm")
     mw_raw = mw_noise_vs_c2(d, "poverty_rate_pct")
@@ -339,9 +335,7 @@ def main() -> int:
           f"({fmt_p(mw_raw['p'])}); đã trừ median năm U={mw_dm['u']:.0f} "
           f"({fmt_p(mw_dm['p'])})")
 
-    # ====================================================================== #
     # 3) CSV — cùng schema external_validation.csv
-    # ====================================================================== #
     year_rows = [dict(r) for r in tab_year.to_dict("records")]
     mw_rows = [
         {"section": "test_mw_noise_vs_c2",
@@ -367,9 +361,7 @@ def main() -> int:
     pd.DataFrame(rows)[cols].to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
     print(f"Đã ghi {OUT_CSV} ({len(rows)} dòng)")
 
-    # ====================================================================== #
     # 4) MD — báo cáo + caveats đầy đủ (mọi số f-string từ biến đã tính)
-    # ====================================================================== #
     med_year = d.groupby("year").poverty_rate_pct.median()
     cnt = d.pred_cluster.value_counts().sort_index()
     noise_by_year = d[d.pred_cluster == -1].groupby("year").size()

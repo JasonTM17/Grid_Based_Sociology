@@ -408,9 +408,7 @@ def test_regression_holdout_unassigned_origin_province():
     assert row2.origin_cluster_label == "Không có assignment trong artifact"
 
 
-# --------------------------------------------------------------------- #
 # Kiểm chứng ngoại lai — PCI · y tế 2020 · GRDP 2018–2024
-# --------------------------------------------------------------------- #
 
 
 def _make_pci_frame():
@@ -843,9 +841,7 @@ def test_external_section_frame_maps_labels_and_sorts():
         external_section_frame(pci_like, "pci_2011_2022")
 
 
-# --------------------------------------------------------------------- #
 # Kiểm chứng bổ trợ — nghèo cấp tỉnh GSO V14.47 theo nhãn cụm
-# --------------------------------------------------------------------- #
 
 
 def _make_poverty_frame() -> pd.DataFrame:

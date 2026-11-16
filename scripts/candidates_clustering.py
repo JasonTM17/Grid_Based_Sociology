@@ -288,7 +288,7 @@ def main() -> int:
     short_years = {int(y): int(n) for y, n in per_year.items() if n != 63}
     print(f"n theo năm: {dict(per_year)} | năm không đủ 63: {short_years}")
 
-    # ---- Mốc + deconfound ------------------------------------------------
+    # Mốc + deconfound
     rows = [
         metric_row(
             "STING đóng băng — nhãn gốc CSV (mốc)", "sting_frozen",
@@ -304,7 +304,7 @@ def main() -> int:
         ),
     ]
 
-    # ---- K1: DBSCAN grid suy từ k-distance -------------------------------
+    # K1: DBSCAN grid suy từ k-distance
     labels_by_method: dict[str, np.ndarray] = {}
     eps_summary: list[tuple[int, float, float, float]] = []
     for ms in MIN_SAMPLES_GRID:
@@ -327,7 +327,7 @@ def main() -> int:
             labels_by_method[method] = labels
     print("DBSCAN grid: 10 combo xong")
 
-    # ---- K2/K3: k-means + Ward -------------------------------------------
+    # K2/K3: k-means + Ward
     km = KMeans(n_clusters=3, random_state=SEED, n_init=10).fit_predict(X)
     km_method = f"KMeans k=3 (seed {SEED}, n_init=10)"
     rows.append(
@@ -347,7 +347,7 @@ def main() -> int:
     out.to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
     print(f"đã ghi {OUT_CSV}")
 
-    # ---- Ngưỡng thắng (chốt trước) ---------------------------------------
+    # Ngưỡng thắng (chốt trước)
     bench = next(r for r in rows if r["family"] == "sting_frozen")
     cand = [r for r in rows if r["family"] in ("dbscan", "kmeans", "ward")]
 
@@ -361,7 +361,7 @@ def main() -> int:
 
     winners = [r for r in cand if beats(r)]
 
-    # ---- DBSCAN narrative --------------------------------------------------
+    # DBSCAN narrative
     db_rows = [r for r in rows if r["family"] == "dbscan"]
     best_db = sorted(
         db_rows,
@@ -370,7 +370,7 @@ def main() -> int:
         ),
     )[0]
 
-    # ---- Đọc theo thành phần (trung thực, sinh từ chính bảng) -------------
+    # Đọc theo thành phần (trung thực, sinh từ chính bảng)
     sil_beat = [
         r for r in cand
         if r["silhouette"] is not None and r["silhouette"] > bench["silhouette"]
@@ -395,7 +395,7 @@ def main() -> int:
             + "."
         )
 
-    # ---- Sanity vs phiên thiết kế ----------------------------------------
+    # Sanity vs phiên thiết kế
     km_row = next(r for r in rows if r["family"] == "kmeans")
     km_sizes = [int(v) for v in km_row["sizes_top5"].strip("[]").split(",")]
     km_sizes_sorted = sorted(km_sizes)
@@ -404,10 +404,10 @@ def main() -> int:
         abs(km_row["ari_full_vs_frozen"] - EXPECTED_KMEANS_ARI) < 5e-5
     )
 
-    # ---- Deconfound số đọc ------------------------------------------------
+    # Deconfound số đọc
     refit_row = next(r for r in rows if r["family"] == "sting_refit")
 
-    # ---- Bảng md -----------------------------------------------------------
+    # Bảng md
     cols = [
         ("method", "phương pháp"), ("min_samples", "min_samples"),
         ("eps", "eps"), ("kdist_pct", "phân vị k-dist (%)"),

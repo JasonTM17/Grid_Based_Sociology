@@ -261,9 +261,7 @@ def main() -> int:
 
     met_rows: list[dict] = []
 
-    # ================================================================== #
     # (1) HỒI QUY: dự báo "6.1 Y tế công lập" năm t+1
-    # ================================================================== #
     P = build_regression_pairs(df)
     tr = P[P.year_t < HOLDOUT_YEAR]
     te = P[P.year_t == HOLDOUT_YEAR]
@@ -330,9 +328,7 @@ def main() -> int:
     joblib.dump(grid_ridge.best_estimator_, MODELS / "sup_ridge.joblib")
     joblib.dump(grid_rf.best_estimator_, MODELS / "sup_rf.joblib")
 
-    # ================================================================== #
     # (2) PHÂN LOẠI pseudo-label STING, với forward CV
-    # ================================================================== #
     C = build_classification_pairs(df, cfg["features"], cfg["sting"])
     ctr = C[C.year_t < HOLDOUT_YEAR]
     cte = C[C.year_t == HOLDOUT_YEAR]
@@ -373,9 +369,7 @@ def main() -> int:
     met.to_csv(RESULTS / "supervised_metrics.csv", index=False, encoding="utf-8-sig")
     print("\n" + met.to_string(index=False))
 
-    # ================================================================== #
     # Hình (a): dự báo vs thực tế + độ quan trọng đặc trưng
-    # ================================================================== #
     import matplotlib
 
     matplotlib.use("Agg")
@@ -444,9 +438,7 @@ def main() -> int:
         save_png(fig, FIGS / "supervised_regression.png", dpi=FIG_DPI)
         plt.close(fig)
 
-    # ================================================================== #
     # Hình (b): confusion của bài toán phân loại (model chọn bằng CV)
-    # ================================================================== #
     _clf_rows = met[met.task == "classification"]
     _clf = _clf_rows.set_index("model")
     _clf_models = _clf_rows[_clf_rows.model != "majority (lớp đa số)"]
@@ -489,9 +481,7 @@ def main() -> int:
         save_png(fig, FIGS / "supervised_confusion.png", dpi=FIG_DPI)
         plt.close(fig)
 
-    # ================================================================== #
     # Tóm tắt
-    # ================================================================== #
     lines = []
     lines.append("# Model local có giám sát (scikit-learn, huấn luyện hoàn toàn local)\n")
     lines.append("## 1) Hồi quy — dự báo 6.1 Y tế công lập năm t+1 (bài toán chính)\n")
@@ -525,7 +515,7 @@ def main() -> int:
     _acc_delta = (_selected_clf["holdout_acc"] - _majority_clf["holdout_acc"]) * 100
     _f1_delta = (_selected_clf["holdout_macro_f1"] - _majority_clf["holdout_macro_f1"]) * 100
 
-    # --- Số liệu cho phần disclosure: tính từ chính dữ liệu/fold/grid của script này ---
+    # Số liệu cho phần disclosure: tính từ chính dữ liệu/fold/grid của script này
     _prev = C.groupby("year_t")["y"].mean()
     _val_prev = _prev.loc[list(CLASSIFICATION_CV_YEARS)]
     _train_majority: list[int] = []

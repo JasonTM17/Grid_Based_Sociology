@@ -353,13 +353,11 @@ def select_classification_model(metrics: pd.DataFrame) -> str:
     return select_model_by_cv(candidates)
 
 
-# --------------------------------------------------------------------- #
 # Kiểm chứng ngoại lai — PCI (VCCI–USAID) · y tế 2020 · GRDP 2018–2024.
 # Nguồn: data/processed/external_pci_63_full.csv + results/external_validation.csv
 # (sinh bởi scripts/external_validation.py, provenance trong
 # data/processed/external_provenance.md). Mọi số tính lại từ CSV — không
 # hardcode, không nội suy ô thiếu.
-# --------------------------------------------------------------------- #
 
 _EXTERNAL_PCI_CSV = Path("data/processed/external_pci_63_full.csv")
 _EXTERNAL_VALIDATION_CSV = Path("results/external_validation.csv")
@@ -714,7 +712,6 @@ def external_section_frame(validation: pd.DataFrame, section: str) -> pd.DataFra
     return rows.sort_values(["pred_cluster", "year"]).reset_index(drop=True)
 
 
-# --------------------------------------------------------------------- #
 # Kiểm chứng bổ trợ — nghèo cấp tỉnh GSO (pxweb V14.47) theo nhãn cụm.
 # Nguồn: data/processed/external_poverty_63.csv (sinh bởi
 # scripts/build_poverty_63.py) + results/predict_all_years.csv (model chốt,
@@ -725,7 +722,6 @@ def external_section_frame(validation: pd.DataFrame, section: str) -> pd.DataFra
 # nhau — gộp thô và đã-trừ-median-năm (pov_dm) — vì chuẩn nghèo đổi theo giai
 # đoạn: chỉ so GIỮA CỤM trong cùng một năm là hợp lệ. Mọi số tự tính lại từ
 # CSV — không hardcode.
-# --------------------------------------------------------------------- #
 
 _POVERTY_CSV = Path("data/processed/external_poverty_63.csv")
 _POVERTY_REBUILD_COMMAND = "python scripts/build_poverty_63.py"

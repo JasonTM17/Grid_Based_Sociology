@@ -103,7 +103,7 @@ OUT_FIG_LC = FIGS / "supervised_learning_curve.png"
 OUT_FIG_IMP = FIGS / "supervised_importance.png"
 
 
-# ------------------------------------------------------------------ helpers --
+# helpers
 def fmt(value: object, nd: int = 4) -> str:
     """Số thập phân cố định; NaN/None → chuỗi rỗng (ổn định byte khi chạy lại)."""
     if value is None or (isinstance(value, float) and np.isnan(value)):
@@ -183,7 +183,7 @@ def md_table(headers: list[str], rows: Iterable[Iterable[str]]) -> str:
     return "\n".join(lines)
 
 
-# --------------------------------------------------------------------- main --
+# main
 def main() -> int:
     for d in (RESULTS, FIGS):
         d.mkdir(parents=True, exist_ok=True)
@@ -191,7 +191,7 @@ def main() -> int:
     cfg = load_config()          # CHỈ ĐỌC cấu hình đóng băng — không ghi lại
     df = load_panel()
 
-    # ---- ghép cặp đúng pipeline, gắn code tỉnh (kiểm tra chéo giá trị) ----
+    # ghép cặp đúng pipeline, gắn code tỉnh (kiểm tra chéo giá trị)
     P = attach_pair_codes(df, build_regression_pairs(df))
     tr = P[P.year_t < HOLDOUT_YEAR]
     te = P[P.year_t == HOLDOUT_YEAR]
@@ -199,7 +199,7 @@ def main() -> int:
     Xte, yte = te[REGRESSION_FEATURES].to_numpy(), te["y"].to_numpy()
     print(f"[Cặp] train {len(tr)} (2011–2022) · holdout {len(te)} (2023→2024)")
 
-    # ---- siêu tham số: TÍNH LẠI đúng lưới + fold CV train-only 2017–2022 ----
+    # siêu tham số: TÍNH LẠI đúng lưới + fold CV train-only 2017–2022
     reg_cv_select = expanding_origin_folds(
         tr["year_t"].to_numpy(), first_validation_origin=CLASSIFICATION_CV_FIRST_YEAR
     )
@@ -230,7 +230,7 @@ def main() -> int:
     best_c = float(grid_lr.best_params_["clf__C"])
     print(f"[Spec cố định] Ridge alpha={best_alpha:g} · LR C={best_c:g} · RF {grid_rf.best_params_}")
 
-    # ---- kiểm đối: tái tính trong bộ nhớ phải khớp artifact đã công bố ----
+    # kiểm đối: tái tính trong bộ nhớ phải khớp artifact đã công bố
     repro_note = "không có file results/supervised_metrics.csv — bỏ qua kiểm đối"
     repro_ok: bool | None = None
     ridge_mae_holdout = float(mean_absolute_error(yte, grid_ridge.best_estimator_.predict(Xte)))
@@ -252,7 +252,7 @@ def main() -> int:
         )
     print(f"[Kiểm đối] {repro_note}")
 
-    # =================== (1) LEARNING CURVE expanding origin =================
+    # (1) LEARNING CURVE expanding origin
     # Cặp hồi quy (740 train) và cặp phân loại (738 train) là HAI tập dòng
     # khác nhau → mỗi tập có fold expanding riêng, cùng các origin 2016→2022.
     lc_folds = expanding_origin_folds(tr["year_t"].to_numpy(), first_validation_origin=LC_FIRST_ORIGIN)
@@ -302,7 +302,7 @@ def main() -> int:
         m = "nan" if np.isnan(r["metric"]) else f"{r['metric']:.4f}"
         print(f"[LC] LR    origin {r['origin']}: năm train={r['n_train_years']} macro-F1={m}")
 
-    # =============== (2) PERMUTATION IMPORTANCE — RF hồi quy =================
+    # (2) PERMUTATION IMPORTANCE — RF hồi quy
     imp_sets: dict[str, dict] = {}
     for name, X, y in (("train", Xtr, ytr), ("holdout", Xte, yte)):
         imp = permutation_importance(
@@ -317,7 +317,7 @@ def main() -> int:
         top = ", ".join(f"{FEATURE_LABELS[REGRESSION_FEATURES[i]]}={mean[i]:.4f}" for i in order[:3])
         print(f"[Perm/{name}] top-3: {top}")
 
-    # =================== (3) RESIDUAL DIAGNOSTICS — holdout ==================
+    # (3) RESIDUAL DIAGNOSTICS — holdout
     pred_te = grid_ridge.best_estimator_.predict(Xte)
     resid_te = yte - pred_te
     hold = pd.DataFrame({
@@ -356,7 +356,7 @@ def main() -> int:
     top_order = sorted(range(len(hold)), key=lambda i: (-abs(float(resid_te[i])), int(hold["province_code"].iloc[i])))[:5]
     top5 = hold.iloc[top_order].reset_index(drop=True)
 
-    # ============================== CSV (long) ===============================
+    # CSV (long)
     csv_rows: list[tuple[str, str, str, str]] = []
     for r in reg_lc:
         csv_add(csv_rows, "learning_curve_ridge", f"origin={r['origin']}", {
@@ -419,7 +419,7 @@ def main() -> int:
     )
     print(f"[Ghi] {OUT_CSV} ({len(csv_rows)} dòng)")
 
-    # ===================== HÌNH 1 — learning curve ===========================
+    # HÌNH 1 — learning curve
     with style_context():
         fig, axes = new_fig(target="slide", ncols=2)
         ax = axes[0]
@@ -454,7 +454,7 @@ def main() -> int:
         plt.close(fig)
     print(f"[Ghi] {OUT_FIG_LC}")
 
-    # ===================== HÌNH 2 — permutation importance ===================
+    # HÌNH 2 — permutation importance
     with style_context():
         # Nhãn tiếng Việt dài (3 dòng) × 8 tick: cần canvas cao hơn preset slide
         # để tick không đè nhau; new_fig(target=None) nhận figsize riêng.
@@ -482,7 +482,7 @@ def main() -> int:
         plt.close(fig)
     print(f"[Ghi] {OUT_FIG_IMP}")
 
-    # ============================== MARKDOWN =================================
+    # MARKDOWN
     lines: list[str] = []
     lines.append("# Chẩn đoán chuyên sâu phần supervised — chỉ mô tả, không chọn model\n")
     lines.append(

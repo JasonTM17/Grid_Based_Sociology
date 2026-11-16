@@ -787,7 +787,7 @@ if external_tab.open:
                 "cụm 2 (cụm 0 rỗng, cụm 1 còn ít điểm)."
             )
 
-            # ----- Block bổ trợ: nghèo cấp tỉnh GSO V14.47 (thứ hai sau PCI).
+            # Block bổ trợ: nghèo cấp tỉnh GSO V14.47 (thứ hai sau PCI).
             # try/except RIÊNG để lỗi artifact poverty không che 4 section kiểm
             # chứng phía trên; số hiển thị đều tự tính từ CSV (không hardcode).
             try:

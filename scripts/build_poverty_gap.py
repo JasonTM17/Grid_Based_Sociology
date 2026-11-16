@@ -172,7 +172,7 @@ def main() -> int:
     papi_by_ascii = papi_map.set_index("province_ascii")["province_code"]
     assert papi_by_ascii.index.is_unique
 
-    # -------------------------------------------------- trích 4 bảng Niên giám
+    # trích 4 bảng Niên giám
     extracted: dict[str, dict[tuple[str, int], float]] = {}
     nationals: dict[str, dict[int, float]] = {}
     for pdf, pages, ncols, colmap, label in YEARBOOKS:
@@ -193,7 +193,7 @@ def main() -> int:
         extracted[pdf] = vals
         nationals[pdf] = national
 
-    # --------------------------------------------- đối chiếu chéo giữa các vintage
+    # đối chiếu chéo giữa các vintage
     all_years = sorted({y for _p, _pg, _n, cm, _l in YEARBOOKS for y in cm.values()})
     print("\nĐối chiếu chéo các vintage (dung sai 0,051):")
     vintage_conflict = False
@@ -217,7 +217,7 @@ def main() -> int:
             vintage_conflict = True
         print(f"  năm {y}: {len(holders)} nguồn {[(Path(p).stem, q) for p, q in holders]} — {n_diff} ô lệch")
 
-    # --------------- sanity: cột 2020/2021 NGTK 2021 phải trùng external_poverty_63.csv
+    # sanity: cột 2020/2021 NGTK 2021 phải trùng external_poverty_63.csv
     existing = pd.read_csv(OUT / "external_poverty_63.csv")
     g2020 = existing.set_index(["province_ascii", "year"])["poverty_rate_pct"]
     n_ok = n_diff = n_skip = 0
@@ -239,7 +239,7 @@ def main() -> int:
           f"lệch {n_diff}, bỏ qua {n_skip} (TP.HCM trống trong Niên giám)")
     assert n_diff == 0, "NGTK 2021 cột 2020/2021 lệch pxweb — kiểm tra parser"
 
-    # --------------------------------------------- dựng bảng chỉ 2017–2019
+    # dựng bảng chỉ 2017–2019
     rows = []
     for year, (yi, pos) in PRIMARY.items():
         pdf = YEARBOOKS[yi][0]

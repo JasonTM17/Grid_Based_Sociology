@@ -185,9 +185,7 @@ def main() -> int:
     years = sorted(df.year.unique())
     print(f"features đóng băng: {feats} | năm {years[0]}–{years[-1]}")
 
-    # ================================================================== #
     # 1) Per-year STING (fit riêng từng năm; lưới thô vì mẫu nhỏ)
-    # ================================================================== #
     labels_rows = []
     per_year_rows = []
     for y in years:
@@ -209,9 +207,7 @@ def main() -> int:
     pd.DataFrame(per_year_rows).to_csv(RES / "per_year.csv", index=False, encoding="utf-8-sig")
     print("1) per-year STING: xong ->", RES / "cluster_labels.csv")
 
-    # ================================================================== #
     # 2) Pooled metrics: frozen STING vs k-means vs DBSCAN
-    # ================================================================== #
     ptr = df[df.year <= 2023].dropna(subset=feats)
     X = StandardScaler().fit(ptr[feats]).transform(ptr[feats])
     m = STING(n_levels=cfg["sting"]["n_levels"], factor=cfg["sting"]["factor"],
@@ -247,9 +243,7 @@ def main() -> int:
     pd.DataFrame(rows).to_csv(RES / "metrics.csv", index=False, encoding="utf-8-sig")
     print("   xong ->", RES / "metrics.csv")
 
-    # ================================================================== #
     # 3) Robustness: PCA(d1–d6) toàn panel + 8 chiều 2018–2024
-    # ================================================================== #
     robust = []
     X6 = df[[f"d{i}" for i in range(1, 7)]].copy()
     # z trong từng năm (khử bước nhảy do đổi thang đo/phương pháp theo năm)
@@ -319,9 +313,7 @@ def main() -> int:
     pd.DataFrame(robust).to_csv(RES / "robustness.csv", index=False, encoding="utf-8-sig")
     print("   xong ->", RES / "robustness.csv")
 
-    # ================================================================== #
     # 4) Evolution heatmap (nhãn từ lưới TOÀN CỤC — so sánh được các năm)
-    # ================================================================== #
     import matplotlib
 
     matplotlib.use("Agg")
@@ -362,9 +354,7 @@ def main() -> int:
     plt.close(fig)
     print("4) evolution ->", FIGS / "evolution.png")
 
-    # ================================================================== #
     # 5) Bản đồ centroid tô màu theo cụm (2020, 2024)
-    # ================================================================== #
     cent = pd.read_csv(ROOT / "data" / "raw" / "mendeley" / "Replication_package" / "data"
                        / "centroids_63_naturalearth.csv")
     cent["province_code"] = cent["province_code"].astype(int)
@@ -403,9 +393,7 @@ def main() -> int:
         plt.close(fig)
         print(f"5) map {yr} ->", FIGS / f"map_{yr}.png")
 
-    # ================================================================== #
     # 6) Tóm tắt
-    # ================================================================== #
     lines = []
     lines.append("# Phân tích cuối kỳ — tóm tắt số liệu\n")
     lines.append("## 1) STING theo từng năm (lưới thô 3×3, mc=3; trong-năm z)\n")
