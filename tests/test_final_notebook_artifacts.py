@@ -10,6 +10,7 @@ Chạy: python -m pytest tests/test_final_notebook_artifacts.py -q
 from __future__ import annotations
 
 import copy
+import csv
 import json
 import re
 from pathlib import Path
@@ -108,6 +109,14 @@ def test_final_notebook_has_code_cells(final_notebook: dict):
         cell for cell in final_notebook.get("cells", []) if cell.get("cell_type") == "code"
     ]
     assert len(code_cells) >= 10, f"chỉ có {len(code_cells)} ô code"
+
+
+def test_per_year_summary_matches_published_clusters(final_notebook: dict):
+    with (ROOT / "results" / "per_year.csv").open(encoding="utf-8-sig", newline="") as table:
+        rows = list(csv.DictReader(table))
+    single_cluster_years = sum(row["k"] == "1" for row in rows)
+    summary = f"{single_cluster_years}/{len(rows)} năm có một cụm"
+    assert summary in notebook_output_text(final_notebook)
 
 
 def test_gate_detects_stderr_in_memory(final_notebook: dict):

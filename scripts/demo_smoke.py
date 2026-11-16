@@ -8,6 +8,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from notebook_checks import notebook_issues
+
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
@@ -27,7 +29,7 @@ def file_nonempty(rel: str, min_bytes: int = 200) -> None:
     check(rel, ok, f"{p.stat().st_size if p.is_file() else 0:,} bytes" if p.is_file() else "MISSING")
 
 
-# --- 1) Dataset va model --- #
+# 1) Dataset va model
 check(
     "panel 882x41, >=500x10",
     (ROOT / "data" / "processed" / "papi_panel_63_2011_2024.csv").is_file(),
@@ -53,7 +55,7 @@ for f in [
 ]:
     file_nonempty(f)
 
-# --- 2) Artifacts ket qua --- #
+# 2) Artifacts ket qua
 for f in [
     "results/figs/predict_2024.png",
     "results/figs/00_synthetic_sting.png",
@@ -72,7 +74,7 @@ for f in [
 ]:
     file_nonempty(f, min_bytes=100)
 
-# --- 3) Deliverables nop bai --- #
+# 3) Deliverables nop bai
 for f in [
     "notebooks/midterm_demo.ipynb",
     "notebooks/final_analysis.ipynb",
@@ -85,7 +87,7 @@ for f in [
 ]:
     file_nonempty(f, min_bytes=500)
 
-# --- 4) Docs mo duoc --- #
+# 4) Docs mo duoc
 try:
     import docx  # noqa: E402
 
@@ -103,7 +105,7 @@ try:
 except Exception as e:  # noqa: BLE001
     check("final.pptx mo duoc", False, str(e))
 
-# --- 5) Notebook execute san --- #
+# 5) Notebook execute san
 import nbformat  # noqa: E402
 
 for nb in [
@@ -114,10 +116,11 @@ for nb in [
     try:
         n = nbformat.read(ROOT / nb, as_version=4)
         n_cells = len(n.cells)
-        n_err = sum(
-            1 for c in n.cells for o in c.get("outputs", []) if o.get("output_type") == "error"
+        issues = notebook_issues(n)
+        check(
+            f"{nb} da execute, 0 loi", not issues,
+            f"{n_cells} cells; " + ("; ".join(issues) if issues else "Run All, 0 error/stderr"),
         )
-        check(f"{nb} da execute, 0 loi", n_err == 0, f"{n_cells} cells, {n_err} loi")
     except Exception as e:  # noqa: BLE001
         check(f"{nb} doc duoc", False, str(e))
 
@@ -130,7 +133,7 @@ try:
 except Exception as e:  # noqa: BLE001
     check("submission.pptx mo duoc", False, str(e))
 
-# --- Bao cao --- #
+# Bao cao
 print("=" * 64)
 print("KIỂM TRA SẴN SÀNG DEMO — STING × PAPI")
 print("=" * 64)

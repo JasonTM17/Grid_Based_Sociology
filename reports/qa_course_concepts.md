@@ -1,6 +1,6 @@
-# Q&A theo khái niệm bài giảng (Day 1–4) | Topic 6 · STING × PAPI
+# Q&A theo khái niệm bài giảng (Day 1–4, Day 9) | Topic 6 · STING × PAPI
 
-_Quy tắc: ≤60 giây/câu; A trả lời chính câu thuật toán/dữ liệu, B trả lời chính câu kết quả/ý nghĩa — nhưng mỗi thành viên phải trả lời được CẢ 37 câu. Mọi số lấy từ file ghi ở dòng "Repo" của từng câu; không đọc số từ trí nhớ._
+_Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được toàn bộ câu hỏi. Mọi số lấy từ file ghi ở dòng "Repo" của từng câu; không đọc số từ trí nhớ._
 
 ## Bảng số dùng chung — 8 baseline trên nhãn STING
 
@@ -214,3 +214,33 @@ _Quy tắc: ≤60 giây/câu; A trả lời chính câu thuật toán/dữ liệ
    - **Hỏi bẫy:** "p=0.005 chứng minh model tốt?" — Chỉ nói điểm quan sát cao hơn phân phối hoán vị nhãn train dưới cùng feature/năm; vẫn là khớp pseudo-label STING + drift năm, không ground truth xã hội.
    - **Repo:** `results/classifier_label_baselines.md`; `results/classifier_label_baselines.csv`; `scripts/classifier_label_baselines.py`.
    - **Bài giảng:** Day 2, trang 30-34 (đánh giá / baseline).
+
+
+## Day 9 — Clustering (đối chiếu PDF mới, 2026-11-16)
+
+39. **Không có nhãn chuẩn, đánh giá clustering thế nào?** — Day 9 tr.25 phân biệt goodness of fit với accuracy/precision/recall của supervised. Nhóm dùng silhouette/DB/CH kèm k, cỡ cụm và noise; ARI synthetic có nhãn thật, ARI PAPI chỉ đo đồng thuận hai phân hoạch. Accuracy của classifier không phải accuracy xã hội của STING.
+   - **Repo:** `results/metrics.csv`; `notebooks/submission_demo.ipynb`.
+   - **Bài giảng:** Day 9, tr.25–31.
+
+40. **WCSS nhỏ nhất có phải k tốt nhất?** — WCSS = tổng bình phương khoảng cách từ điểm tới centroid cụm; tăng k làm giá trị tối ưu không tăng, k=n cho WCSS=0. Elbow tìm điểm lợi ích giảm dần, không chứng minh số nhóm xã hội thật. Không bỏ noise rồi so tổng WCSS giữa các phương pháp trên tập điểm khác nhau.
+   - **Repo:** `scripts/run_analysis.py`; `results/metrics.csv`.
+   - **Bài giảng:** Day 9, tr.27–31.
+
+41. **Hierarchy của STING có phải HC/dendrogram?** — Không: STING chia không gian thành ô lồng nhau; agglomerative HC bắt đầu mỗi điểm là một cụm rồi ghép cặp cụm gần nhau theo linkage. Dendrogram ghi thứ tự/khoảng cách ghép. Bản nhóm chọn một mức lưới để gom ô dày, không xây dendrogram HC.
+   - **Repo:** `src/sting.py`; `notebooks/final_analysis.ipynb`.
+   - **Bài giảng:** Day 9, tr.32–47.
+
+42. **Nhóm đã tái hiện đầy đủ STING gốc chưa?** — Chưa. Nhóm công bố biến thể rút gọn: không distribution type, không confidence-based top-down pruning; fit từng mức và cluster/query một mức. Kết quả test chứng minh các tính chất đã kiểm tra của bản này; nếu GV yêu cầu đầy đủ bản gốc phải xác nhận thêm, không gọi test xanh là bảo đảm mọi chức năng STING.
+   - **Repo:** `src/sting.py`; `scripts/build_report.py`; `notebooks/submission_demo.ipynb`.
+   - **Nguồn gốc:** Wang, Yang & Muntz (1997), https://www.vldb.org/conf/1997/P186.PDF.
+
+43. **Có thiếu dataset vì model chỉ dùng hai feature?** — Dataset chính có 882 dòng, 41 cột, trong đó 37 chỉ tiêu (không tính mã tỉnh/năm). Ngưỡng >=500×10 áp dụng dataset theo yêu cầu môn hiện có. Không ép dùng mọi cột: hai feature cho clustering và tám feature hồi quy do protocol đã công bố; d7/d8 thiếu lịch sử và một số thang thay đổi. 2024 có 61/63 tỉnh đủ feature, hai tỉnh thiếu giữ thiếu.
+   - **Repo:** `data/processed/papi_panel_scale_metadata.csv`; `scripts/check_data.py`; `models/predict_config.json`.
+   - **Bài giảng:** Day 1 (quy mô dataset); Day 9 không bổ sung dataset thật cho đồ án nhóm.
+
+44. **Bài tập trang 48 có phải bổ sung cho đồ án nhóm?** — Trang ghi Homework (indv.): dữ liệu tổng hợp hai cột, KMeans, HC, dendrogram. Đây là bài cá nhân riêng trong PDF; không có yêu cầu trong trang đó thay đề tài nhóm STING hay thêm dataset thật. Hỏi lại GV nếu có chỉ dẫn miệng khác; không đưa bài cá nhân thành kết quả nghiên cứu nhóm.
+   - **Repo:** `reports/course_requirements.md`.
+   - **Bài giảng:** Day 9, tr.48; bản PDF lưu local tại `data/raw/course/lecture-day9-clustering.pdf`, không đưa vào ZIP.
+
+45. **Vì sao chưa kết luận nghèo khác nhau giữa noise và cụm lớn?** — Mann–Whitney trong artifact hiện tại: thô p=0.767, trừ median năm p=0.269; cả hai >0.05. Kruskal–Wallis sau tách năm có tín hiệu trên toàn bộ nhóm nhưng hai cụm nhỏ n=2/10: không thay kết luận cặp noise-vs-cụm2. Đây là kiểm chứng bổ trợ; tỉnh lặp qua năm còn làm giả định độc lập của kiểm định gộp hạn chế.
+   - **Repo:** `results/poverty_validation.csv`; `results/poverty_validation.md`.

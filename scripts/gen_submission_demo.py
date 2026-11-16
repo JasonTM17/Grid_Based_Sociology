@@ -33,18 +33,15 @@ md(nbf.v4.new_markdown_cell("""# Notebook nộp bài — Phân cụm 63 tỉnh V
 
 - **Mục tiêu:** trình bày lý thuyết STING, cài đặt lại từ đầu (`src/sting.py`), kiểm chứng
   trên dữ liệu tổng hợp bằng ARI, rồi áp dụng lên panel PAPI 63 tỉnh 2011–2024, so sánh với
-  k-means/DBSCAN và khảo sát độ nhạy tham số; cuối cùng minh họa mô hình giám sát Ridge/RF
-  với holdout 2023→2024.
+  k-means và DBSCAN. Thử thay ngưỡng mật độ để xem kết quả đổi thế nào.
 - **Cách chạy:** `python scripts/gen_submission_demo.py` (sinh + execute notebook này) hoặc
   `python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb`.
-- **Tái lập (không phải mọi bước chạy lại từ đầu trong một ô):** STING và metric PAPI tính lại
-  trong notebook; tiền xử lý Day 4 **đọc** `results/preprocessing_audit.csv`
-  (`python scripts/preprocessing_audit.py`); baseline classifier học phần **đọc**
-  `results/course_supervised_baselines.csv` (`python scripts/course_supervised_baselines.py`);
-  Ridge/RF nạp `models/sup_ridge.joblib`, `models/sup_rf.joblib`; các ô gate `assert` khớp
-  `results/metrics.csv`, `results/supervised_metrics.csv`, v.v. — không gõ tay số kỳ vọng mới."""))
+- **Tái lập:** notebook chạy STING trên dữ liệu tổng hợp và panel PAPI, rồi đối chiếu
+  nhãn và metric đã công bố. Bảng tiền xử lý đọc từ `results/preprocessing_audit.csv`."""))
 
-cd(nbf.v4.new_code_cell("""import os
+cd(nbf.v4.new_code_cell("""import ast
+import os
+import re
 import sys
 from pathlib import Path
 
@@ -96,7 +93,6 @@ ROOT = _find_repo_root()
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import joblib
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -112,120 +108,52 @@ from sklearn.metrics import (
 )
 
 from sting import STING
-from papi_pred_common import (
-    FEATURE_LABELS,
-    REGRESSION_FEATURES,
-    load_config,
-    load_panel,
-    select_model_by_cv,
-)
-from predict_supervised import HOLDOUT_YEAR, build_regression_pairs, expanding_origin_folds
-from fig_style import CLUSTER_COLORS, CLUSTER_LABELS, apply_style
+from papi_pred_common import FEATURE_LABELS, load_config, load_panel
+from fig_style import CLUSTER_COLORS, apply_style
 
 apply_style()
 print("import OK")"""))
 
 md(nbf.v4.new_markdown_cell("""## 1. Lý thuyết STING
 
-STING (STatistical INformation Grid — Wang, Yang & Muntz, VLDB 1997) chia không gian đặc trưng
-thành **lưới phân cấp** và lưu thống kê cho từng ô, thay vì quét từng cặp điểm.
+STING (Statistical Information Grid, Wang, Yang & Muntz, 1997) chia không gian
+đặc trưng thành lưới từ thô đến mịn. Ở mức `l`, mỗi trục có `factor**l` đoạn.
+Mỗi ô lưu số điểm, trung bình, độ lệch chuẩn, giá trị nhỏ nhất và lớn nhất.
 
-### 1.1 Lưới phân cấp (hierarchical grid)
-- Mức $l$ chia mỗi chiều thành $factor^l$ đoạn bằng nhau → mức 0 = 1 ô duy nhất; mức $l$ có tới
-  $factor^{l \\cdot d}$ ô ($d$ = số chiều).
-- Mỗi ô xác định bởi chỉ số $(i_1, \\dots, i_d)$ và lưu thống kê **độc lập theo từng chiều**:
-  count, mean, std, min, max. Bài gốc (Wang et al.) còn lưu **loại phân phối** (distribution type);
-  **cài đặt của chúng ta bỏ qua distribution type (đơn giản hóa)**.
+1. Dựng lưới và đếm số điểm trong mỗi ô.
+2. Chọn một mức lưới, đánh dấu ô có ít nhất `min_count` điểm.
+3. Nối các ô dày chung cạnh để tạo cụm. Điểm trong ô thưa nhận nhãn `-1`.
 
-### 1.2 Thống kê mỗi ô
-Với ô $c$ chứa $n_c$ điểm:
-$$\\mu_j(c) = \\frac{1}{n_c}\\sum_{x \\in c} x_j, \\qquad
-\\sigma_j^2(c) = \\frac{1}{n_c}\\sum_{x \\in c}\\bigl(x_j - \\mu_j(c)\\bigr)^2$$
-Một ô "dày" (dense) khi $count(c) \\ge min\\_count$. (Chỉ count/mean/std/min/max — không có distribution type như bài gốc.)
+Đây là biến thể Grid-based rút gọn. Bài gốc có thêm mô hình phân phối cho ô và
+cắt tỉa khi duyệt lưới từ trên xuống. Demo gom ô ở một mức đã chọn."""))
 
-### 1.3 STING gốc (top-down) vs cài đặt `src/sting.py`
-**Bài gốc:** truy vấn/phân tích **top-down** — bắt đầu từ lớp cao, kiểm định mức liên quan thống kê
-của từng ô (confidence), chỉ hạ xuống các ô con của ô “có liên quan”; nhờ đó cắt tỉa không gian tìm kiếm.
+md(nbf.v4.new_markdown_cell("""## 2. Cài đặt từ đầu — lưới 3 × 3
 
-**Cài đặt của chúng ta (đơn giản hóa):** `fit()` xây lưới **từng mức một** (level 0 → … → cuối),
-không có bước cắt tỉa theo confidence như bài gốc. `query_rect` quét mọi ô tại **một mức `level` chọn sẵn**
-và cộng dồn thống kê các ô nằm **trọn** trong vùng chữ nhật — không quét lại điểm thô, nhưng **không**
-phải truy vấn top-down. `cluster()` cũng gom các ô dày liền kề tại **một mức cố định** (tham số `level`).
+Cùng ví dụ với slide 5. Lấy 3 điểm làm ngưỡng ô dày. Trong bảng này, hai vùng
+chỉ chạm góc. Chạy ô dưới để xem kết quả khi nối các ô chung cạnh."""))
 
-### 1.4 Hợp ô liền kề (connected components)
-Các ô dày liền kề được gom thành cụm bằng DFS. `connectivity=1` gom ô kề **mặt** (4 hướng trong
-2D); `connectivity=d` gom thêm ô kề **góc** (8 hướng). Điểm thuộc ô không dày nhận nhãn
-**nhiễu (−1)** — STING không ép mọi điểm vào cụm.
+cd(nbf.v4.new_code_cell("""counts = np.array([[4, 3, 0], [1, 0, 4], [0, 0, 3]])
+positions = [(col, 2 - row) for row in range(3) for col in range(3)]
+points = np.repeat(positions, counts.ravel(), axis=0)
+model = STING(n_levels=2, factor=3, min_count=3).fit(points)
+labels = model.cluster(level=1, connectivity=1)
 
-### 1.5 Độ phức tạp
-Dữ liệu quét **1 lượt cho mỗi mức** → xây lưới là $O(n)$ theo số điểm (mỗi mức thêm hệ số
-$factor^d$ ô, không đổi theo $n$).
+cell_counts = np.zeros_like(counts)
+for (x, y), cell in model.cells_[1].items():
+    cell_counts[2 - y, x] = cell.count
+print("Số điểm trong từng ô:")
+print(cell_counts)
+assert np.array_equal(cell_counts, counts)
 
-### 1.6 So sánh k-means / DBSCAN
-| | k-means | DBSCAN | STING |
-|---|---|---|---|
-| Mô hình | centroid | mật độ điểm | lưới + thống kê ô |
-| Hình dạng cụm | cầu (convex) | bất kỳ | bất kỳ (theo ô) |
-| Nhiễu | gán hết điểm | nhãn −1 | nhãn −1 |
-| Chi phí | $O(nkd)$/vòng | $O(n \\log n)$ (có chỉ mục) | $O(n)$ |
-| Tham số chính | $k$ | $eps, min\\_samples$ | $factor, min\\_count, level$ |"""))
-
-md(nbf.v4.new_markdown_cell("""## 2. Cài đặt từ đầu — ví dụ chạy từng bước
-
-Dùng `src/sting.py` (STING tự viết, không thư viện ngoài). Ví dụ nhỏ 2D với 2 cụm + vài điểm
-ngoại vi để thấy rõ cơ chế lưới phân cấp: **mức 1 → mức 2**, bảng thống kê vài ô, rồi gom cụm."""))
-
-cd(nbf.v4.new_code_cell("""rng = np.random.default_rng(7)
-X_blob, _ = make_blobs(n_samples=90, centers=[(-4, -4), (4, 4)],
-                       cluster_std=0.7, random_state=7)
-X_out = rng.uniform(-9, 9, size=(6, 2))
-X = np.vstack([X_blob, X_out])
-
-model = STING(n_levels=3, factor=2, min_count=3).fit(X)
-for level in range(model.n_levels):
-    counts = np.array([c.count for c in model.cells_[level].values()])
-    print(f"Mức {level}: {len(model.cells_[level])} ô có dữ liệu | "
-          f"tổng điểm = {counts.sum()} | ô đông nhất = {counts.max()}")"""))
-
-cd(nbf.v4.new_code_cell("""level = 2
-rows = []
-for cell in model.cells_[level].values():
-    rows.append({
-        "ô": cell.index,
-        "count": cell.count,
-        "mean x1": round(cell.mean[0], 2),
-        "mean x2": round(cell.mean[1], 2),
-        "std x1": round(cell.std[0], 2),
-    })
-df_cells = pd.DataFrame(rows).sort_values("count", ascending=False)
-print(f"Bảng thống kê các ô đông nhất ở mức {level}:")
-print(df_cells.head(6).to_string(index=False))"""))
-
-cd(nbf.v4.new_code_cell("""labels = model.cluster(level=2, connectivity=1)
-sizes = sorted([int((labels == c).sum()) for c in range(model.n_clusters_)], reverse=True)
-print(f"k = {model.n_clusters_} | cỡ cụm = {sizes} | nhiễu = {(labels == -1).mean():.1%}")
-
-fig, ax = plt.subplots(figsize=(6, 6))
-step = (model.bounds_max_ - model.bounds_min_) / (model.factor ** 2)
-for cell in model.cells_[2].values():
-    x0, y0 = cell.bounds_min
-    ax.add_patch(plt.Rectangle((x0, y0), step[0], step[1], fill=False,
-                               edgecolor="#cccccc", linewidth=0.6))
-for c in sorted(set(labels.tolist())):
-    m = labels == c
-    ax.scatter(X[m, 0], X[m, 1], s=28, c=CLUSTER_COLORS.get(c, "#333333"),
-               label=CLUSTER_LABELS.get(c, f"cụm {c}") + f" ({int(m.sum())})")
-ax.set_title("STING: lưới mức 2 + cụm tìm được (xám = nhiễu)")
-ax.set_xlabel("x1 (đơn vị tùy ý)")
-ax.set_ylabel("x2 (đơn vị tùy ý)")
-ax.legend()
-plt.tight_layout()
-plt.show()"""))
+group_sizes = sorted(np.bincount(labels[labels >= 0]).tolist())
+noise_count = int((labels == -1).sum())
+assert group_sizes == [7, 7] and noise_count == 1
+print(f"{model.n_clusters_} cụm, mỗi cụm {group_sizes[0]} điểm. {noise_count} điểm nhiễu.")"""))
 
 md(nbf.v4.new_markdown_cell("""## 3. Kiểm chứng tổng hợp (ARI)
 
 Kiểm chứng cài đặt bằng **ARI** trên dữ liệu giả lập 2 cụm tách biệt (seed cố định) — cùng gate
-với `tests/test_sting.py::test_two_blobs_recovered` (ARI ≥ 0.9). Sau đó xem độ nhạy theo `min_count`."""))
+với `tests/test_sting.py::test_two_blobs_recovered` (ARI ≥ 0.9)."""))
 
 cd(nbf.v4.new_code_cell("""X_syn, y_true = make_blobs(n_samples=240, centers=[(-6, -6), (6, 6)],
                            cluster_std=0.6, random_state=42)
@@ -234,49 +162,14 @@ lab_syn = m_syn.cluster(level=2, connectivity=1)
 ari = adjusted_rand_score(y_true, lab_syn)
 assert ari >= 0.9, f"ARI quá thấp: {ari:.3f}"
 print(f"ARI = {ari:.3f} | nhiễu = {(lab_syn == -1).mean():.1%} | k = {m_syn.n_clusters_}")
-print("Khớp gate tests/test_sting.py::test_two_blobs_recovered (ARI >= 0.9).")
-
-rows = []
-for mc in (2, 3, 5, 8, 12):
-    mm = STING(n_levels=3, factor=4, min_count=mc).fit(X_syn)
-    ll = mm.cluster(level=2, connectivity=1)
-    rows.append((mc, adjusted_rand_score(y_true, ll), (ll == -1).mean(), mm.n_clusters_))
-print(f"{'min_count':>9} | {'ARI':>6} | {'nhiễu':>7} | k")
-for mc, a, nz, k in rows:
-    print(f"{mc:>9} | {a:>6.3f} | {nz:>7.1%} | {k}")"""))
-
-md(nbf.v4.new_markdown_cell("""### 3.1 Minh họa `query_rect` và `connectivity`
-
-Ở mức 2, `query_rect` cộng thống kê các ô **nằm trọn** trong vùng chữ nhật (không quét lại điểm thô).
-So sánh `connectivity=1` (4 hướng) với `connectivity=2` (8 hướng) trên cùng lưới tổng hợp."""))
-
-cd(nbf.v4.new_code_cell("""import re
-import ast
-
-rect = np.array([[-9.0, -3.0], [-9.0, -3.0]])
-q = m_syn.query_rect(rect, level=2)
-print("query_rect vùng cụm trái (−9…−3):", q)
-assert q["count"] and q["count"] > 50
-
-lab4 = m_syn.cluster(level=2, connectivity=1)
-k4, nz4 = m_syn.n_clusters_, (lab4 == -1).mean()
-lab8 = m_syn.cluster(level=2, connectivity=2)
-k8, nz8 = m_syn.n_clusters_, (lab8 == -1).mean()
-print(f"connectivity=1 → k={k4}, nhiễu={nz4:.1%}")
-print(f"connectivity=2 → k={k8}, nhiễu={nz8:.1%}")"""))
+print("Kiểm tra ARI ≥ 0.9: đạt.")"""))
 
 md(nbf.v4.new_markdown_cell("""## 4. Ứng dụng PAPI
 
-**Tiền xử lý / chuẩn hóa (nêu lý do):**
-- Panel `papi_panel_63_2011_2024.csv` đã sạch: `0.0` quy về NaN (khớp quy ước gói replication Mendeley);
-  23/37 chỉ tiêu bị đánh dấu bởi kiểm tra heuristic (bước nhảy trung bình > 0.25); chưa chứng minh là
-  đổi thang — các cột đó bị loại khỏi pipeline xuyên năm (chỉ dùng chỉ tiêu qua audit; ví dụ đã chứng minh:
-  `sd_5_4`, xem `data/raw/papi/PROVENANCE.md`).
-- Chọn cặp chỉ tiêu đóng băng `sd_4_2 × sd_6_1` (theo `models/predict_config.json`, chọn bằng quy trình
-  train-only — không nhìn 2024).
-- **Chuẩn hóa z-score** từng cột (`StandardScaler`) để hai trục có cùng thang, biên ô lưới không bị lệch
-  theo giá trị tuyệt đối của một chỉ tiêu; STING bất biến với biến đổi affine từng chiều nên nhãn không
-  đổi, chỉ đổi độ rộng ô tương đối."""))
+- Panel PAPI gồm 882 quan sát tỉnh–năm và 41 cột. Giá trị `0.0` dùng để
+  biểu thị ô thiếu được quy về NaN. Bước nhảy trung bình là dấu hiệu cần đối chiếu thang đo.
+- Demo dùng hai chỉ tiêu `sd_4_2` và `sd_6_1` theo `models/predict_config.json`.
+- Tính z-score trên dữ liệu đến 2023 và áp dụng cùng phép chuẩn hóa cho năm 2024."""))
 
 cd(nbf.v4.new_code_cell("""cfg = load_config()
 feats = cfg["features"]
@@ -322,27 +215,14 @@ assert abs(noise - float(_sting.noise_ratio)) < 1e-3"""))
 cd(nbf.v4.new_code_cell("""saved = pd.read_csv(ROOT / "results" / "predict_all_years.csv", encoding="utf-8-sig")
 
 
-def refit_labels(df, feats, sp):
-    train = df[df.year <= 2023]
-    ptr = train[feats].dropna()
-    sc = StandardScaler().fit(ptr)
-    model = STING(n_levels=sp["n_levels"], factor=sp["factor"],
-                  min_count=sp["min_count"]).fit(sc.transform(ptr))
-    model.cluster(level=sp["cluster_level"], connectivity=sp["connectivity"])
-    rows = []
-    for year in sorted(df.year.unique()):
-        sub = df[df.year == year].dropna(subset=feats)
-        if sub.empty:
-            continue
-        pred = model.predict(sc.transform(sub[feats]))
-        rows.append(pd.DataFrame({"year": int(year),
-                                  "province_code": sub["province_code"].to_numpy(),
-                                  "pred_cluster": pred}))
-    return pd.concat(rows, ignore_index=True)
-
-
-refit = refit_labels(panel, feats, cfg["sting"])
-merged = saved.merge(refit, on=["year", "province_code"], suffixes=("_saved", "_refit"))
+complete = panel.dropna(subset=feats)
+predicted = complete[["year", "province_code"]].assign(
+    pred_cluster=m_frozen.predict(scaler.transform(complete[feats]))
+)
+merged = saved.merge(
+    predicted, on=["year", "province_code"],
+    suffixes=("_saved", "_refit"), validate="one_to_one",
+)
 n_diff = int((merged.pred_cluster_saved != merged.pred_cluster_refit).sum())
 assert len(merged) == len(saved) == 869
 assert n_diff == 0
@@ -350,7 +230,9 @@ print(f"Refit khớp {len(saved)}/{len(saved)} nhãn (0 lệch) — gate test_ar
 
 cd(nbf.v4.new_code_cell("""metrics = pd.read_csv(ROOT / "results" / "metrics.csv")
 metrics_pooled = metrics[metrics.scope == "pooled 2011-2023"]
-print(metrics_pooled.to_string(index=False))
+methods = ["STING (frozen)", "k-means k=2", "DBSCAN eps=0.2"]
+print(metrics_pooled.loc[metrics_pooled.method.isin(methods),
+                         ["method", "k", "noise_ratio", "silhouette"]].to_string(index=False))
 print()
 
 
@@ -396,11 +278,14 @@ display(Image(filename=str(ROOT / "results" / "figs" / "predict_2024.png")))""")
 cd(nbf.v4.new_code_cell("""test2024 = panel[panel.year == 2024].dropna(subset=feats)
 Xte = scaler.transform(test2024[feats])
 base = m_frozen.predict(Xte)
-print(f"Dự đoán 2024 (out-of-sample): phủ {(base != -1).mean():.0%} | "
-      f"phân bố {dict(sorted({int(k): int((base == k).sum()) for k in set(base)}.items()))}")
+n_provinces = panel.loc[panel.year == 2024, "province_code"].nunique()
+n_noise = int((base == -1).sum())
+print(f"2024: {len(base)}/{n_provinces} tỉnh đủ dữ liệu, "
+      f"{len(base) - n_noise} vào cụm, {n_noise} nhiễu.")
 
+min_counts = (3, 5, 8)
 sens = []
-for mc in (3, 5, 8):
+for mc in min_counts:
     mm = STING(n_levels=cfg["sting"]["n_levels"], factor=cfg["sting"]["factor"],
                min_count=mc).fit(Xz)
     mm.cluster(level=cfg["sting"]["cluster_level"], connectivity=cfg["sting"]["connectivity"])
@@ -417,19 +302,20 @@ def _sensitivity_expectations(md_path):
     exp = {}
     in_tbl = False
     for line in md_path.read_text(encoding="utf-8").splitlines():
-        if line.startswith("| min_count |"):
-            in_tbl = True
-            continue
-        if not in_tbl:
-            continue
+        line = line.strip()
         if not line.startswith("|"):
-            break
-        if line.startswith("|---"):
+            if in_tbl:
+                break
             continue
         cols = [c.strip() for c in line.split("|")[1:-1]]
-        if len(cols) >= 4 and cols[0].isdigit():
+        if not in_tbl:
+            in_tbl = bool(cols) and cols[0] == "min_count"
+        elif len(cols) >= 4 and cols[0].isdigit():
             mc = int(cols[0])
             exp[mc] = (float(cols[1].rstrip("%")) / 100, float(cols[3]))
+    if exp.keys() != set(min_counts):
+        expected = ", ".join(map(str, min_counts))
+        raise ValueError(f"Bảng độ nhạy cần đủ các ngưỡng {expected}. Nhận được {sorted(exp)}.")
     return exp
 
 exp_sens = _sensitivity_expectations(ROOT / "results" / "predict_summary.md")
@@ -438,97 +324,13 @@ for mc, (ecov, eari) in exp_sens.items():
     assert ari_map[mc] == round(eari, 3)
 print("Độ nhạy min_count khớp results/predict_summary.md (đã assert).")"""))
 
-md(nbf.v4.new_markdown_cell("""## 5. Mô hình giám sát: Ridge/RF
+md(nbf.v4.new_markdown_cell("""## 5. Kết luận và hạn chế
 
-Dự báo *6.1 Y tế công lập* năm sau từ 8 chỉ tiêu sạch của năm hiện tại:
-- **CV expanding-origin** (train-only) 2017–2022, warm-up 2011–2016 — chọn model theo R² CV, không nhìn holdout.
-- **Holdout 2023→2024** đánh giá đúng MỘT lần.
-- Nạp lại `models/*.joblib` (không cần huấn luyện lại) và dự báo cho 1 mẫu 8 chỉ tiêu."""))
-
-cd(nbf.v4.new_code_cell("""P = build_regression_pairs(panel)
-tr = P[P.year_t < HOLDOUT_YEAR]
-te = P[P.year_t == HOLDOUT_YEAR]
-print(f"Regression: train {len(tr)} cặp (2011–2022) · holdout {len(te)} cặp (2023→2024)")
-assert len(tr) == 740 and len(te) == 59
-
-training_origins = tr["year_t"].to_numpy()
-folds = expanding_origin_folds(training_origins, first_validation_origin=2017)
-for n, (ti, vi) in enumerate(folds, start=1):
-    print(f"Fold {n}: max train origin={training_origins[ti].max()}, "
-          f"validation origin={training_origins[vi][0]}")"""))
-
-cd(nbf.v4.new_code_cell("""sup = pd.read_csv(ROOT / "results" / "supervised_metrics.csv")
-reg = sup[sup.task == "regression"]
-print(reg.to_string(index=False))
-print()
-
-reg_models = reg[~reg.model.isin(
-    ["carry-forward (giữ giá trị năm nay)", "trung bình train"]
-)].dropna(subset=["value_cv"])
-chosen = select_model_by_cv(reg_models)
-chosen_row = reg[reg.model == chosen].iloc[0]
-print(f"Model chọn theo CV: {chosen} (R² CV = {chosen_row.value_cv:.3f})")
-assert chosen == "ridge"
-assert abs(chosen_row.value_cv - 0.265) < 1e-3
-assert abs(chosen_row.holdout_mae - 0.064) < 1e-3
-
-carry = reg[reg.model == "carry-forward (giữ giá trị năm nay)"].iloc[0]
-improve = (1 - chosen_row.holdout_mae / carry.holdout_mae) * 100
-print(f"Ridge MAE holdout {chosen_row.holdout_mae:.4f} thấp hơn carry-forward "
-      f"{carry.holdout_mae:.4f} → {improve:.1f}%")
-assert abs(improve - 6.3) < 0.1"""))
-
-cd(nbf.v4.new_code_cell("""ridge = joblib.load(ROOT / "models" / "sup_ridge.joblib")
-rf = joblib.load(ROOT / "models" / "sup_rf.joblib")
-
-probe = np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])
-print("8 đặc trưng đầu vào:", REGRESSION_FEATURES)
-print("Vector mẫu:", probe.tolist()[0])
-print(f"Dự báo 6.1 Y tế công lập năm sau — Ridge: {ridge.predict(probe)[0]:.4f} | "
-      f"RF: {rf.predict(probe)[0]:.4f}")
-
-display(Image(filename=str(ROOT / "results" / "figs" / "supervised_regression.png")))"""))
-
-md(nbf.v4.new_markdown_cell("""### 5.1 Bộ phân loại trong môn học (Naive Bayes, KNN, SVM, DT, RF)
-
-Pseudo-label STING (vùng dày vs ngoại vi) trên 8 chỉ tiêu; bảng và ma trận nhầm lẫn **đọc**
-artifact `results/course_supervised_baselines.csv` + `results/figs/course_confusion_matrix.png`
-(sinh bằng `python scripts/course_supervised_baselines.py`). Đây là đồng thuận với nhãn STING,
-không phải kiểm chứng bên ngoài độc lập (liên hệ giữa các nhóm, không phải nhân quả) như PCI/GRDP
-trong `results/external_validation.csv` (`python scripts/external_validation.py`)."""))
-
-cd(nbf.v4.new_code_cell("""_course = pd.read_csv(ROOT / "results" / "course_supervised_baselines.csv")
-print(_course.to_string(index=False))
-_best = _course.loc[_course["value_cv"].idxmax()]
-print(f"\\nCao nhất theo macro-F1 CV (không tính majority): {_best['model']} "
-      f"(value_cv={_best['value_cv']:.3f})")
-display(Image(filename=str(ROOT / "results" / "figs" / "course_confusion_matrix.png")))
-_notes = (
-    "- Nhãn là pseudo-label STING, không phải ground truth khảo sát.\\n"
-    "- Một holdout 2023→2024; chọn model theo macro-F1 CV (expanding origin), không theo holdout.\\n"
-    "- Holdout acc/F1 chỉ đo đồng thuận với nhãn STING — không khẳng định vượt trội tổng quát.\\n"
-    "- Ma trận nhầm lẫn (Day 2–3): hàng = nhãn STING thực, cột = dự báo; không suy luận nhân quả."
-)
-print(_notes)"""))
-
-md(nbf.v4.new_markdown_cell("""## 6. Kết luận & hạn chế
-
-**Kết luận:**
-- STING tự viết hoạt động đúng: ARI = 0.950 trên dữ liệu tổng hợp; trên dữ liệu thật cho 1 cụm lớn
-  (629) + 2 cụm li ti (16, 5) + nhiễu 19.6% — dữ liệu PAPI cấp tỉnh/năm **gần như một khối**, cấu trúc
-  tách biệt chỉ ở ngoại vi.
-- So sánh: ARI STING vs k-means thấp (0.07–0.17); STING đồng thuận với DBSCAN(eps=0.2) hơn (ARI ≈ 0.65)
-  — cùng họ mật độ-lưới.
-- Mô hình giám sát: Ridge chọn theo CV (R²=0.265), MAE holdout 2023→2024 thấp hơn carry-forward 6.3%.
-
-**Hạn chế (trung thực):**
-- Lưới song song trục; metric hình học (silhouette/DB/CH) không bản địa với lưới — chỉ so sánh thô, tách nhiễu.
-- Cấu trúc “k=3” thực chất là 1 cụm khổng lồ + 2 cụm li ti; 2 cụm li ti chỉ có điểm 2011–2018 (concept drift).
-- Một holdout 2023→2024 chưa đủ để khẳng định năng lực dự báo tổng quát; lợi thế so với carry-forward chủ yếu
-  là thông tin lag-1 của chính target (xem `results/supervised_summary.md`).
-- 23/37 chỉ tiêu bị đánh dấu bởi kiểm tra heuristic (bước nhảy trung bình > 0.25); chưa chứng minh là
-  đổi thang — giới hạn phân tích xuyên năm. Ví dụ đã đối chiếu workbook: `sd_5_4` (đổi thang 2021;
-  `data/raw/papi/PROVENANCE.md`).
+- Demo tổng hợp kiểm tra cách chia lưới và gom ô. ARI 0.950 đo độ khớp với nhãn tổng hợp.
+- PAPI 2011–2023 có một cụm lớn và hai cụm nhỏ. Số cụm và tỷ lệ nhiễu thay đổi
+  theo ngưỡng mật độ. Năm 2024 cho thấy cách gán tỉnh mới vào lưới đã học.
+- Khi so sánh silhouette, đọc kèm tỷ lệ nhiễu vì mỗi phương pháp có thể được chấm
+  trên tập điểm khác nhau. Các cụm mô tả hai chỉ tiêu PAPI được chọn.
 
 **Tài liệu tham khảo:** Wang, Yang & Muntz (VLDB'97); PAPI (CECODES/VFF-CRT/RTA/UNDP);
 Le et al., Mendeley Data (DOI 10.17632/wbk42j9wc8.1, CC BY 4.0)."""))

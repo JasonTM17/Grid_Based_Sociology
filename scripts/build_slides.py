@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FIGS = ROOT / "results" / "figs"
 OUT = ROOT / "slides" / "final.pptx"
 
-# ==== Số liệu đọc từ artifact do script khác sinh (không hardcode số đo) ====
+# Số liệu đọc từ artifact do script khác sinh (không hardcode số đo)
 
 
 def _read_results_csv(name):
@@ -165,7 +165,7 @@ def pic(slide, path, x, y, w=None, h=None):
     slide.shapes.add_picture(str(p), Inches(x), Inches(y), **kw)
 
 
-# ---------- Slide 1 — Bìa ----------
+# Slide 1 — Bìa
 s = slide_new()
 rect(s, 0, 0, SW, SH, NAVY)
 rect(s, 0, SH - 0.18, SW, 0.18, GOLD)
@@ -175,42 +175,48 @@ for r in range(4):
         x0, y0 = SW - 4.6 + c * 0.78, 1.05 + r * 0.78
         fill = GOLD if (r, c) in ((1, 1), (2, 2)) else RGBColor(0x1E, 0x3D, 0x5E)
         rect(s, x0, y0, 0.66, 0.66, fill)
-text(s, 0.85, 1.15, 7.6, 0.4, [("ĐỒ ÁN MÔN HỌC MÁY", 13, True, GOLD)])
-text(s, 0.85, 1.75, 8.6, 2.6, [("Phân cụm 63 tỉnh", 44, True, WHITE),
-                               ("với STING trên dữ liệu PAPI 2011–2024", 30, True, WHITE)])
+text(s, 0.85, 1.15, 7.6, 0.4, [("HỌC MÁY · BÁO CÁO CUỐI KỲ", 13, True, GOLD)])
+text(s, 0.85, 1.75, 8.6, 2.6, [("Phân cụm dữ liệu PAPI", 40, True, WHITE),
+                               ("bằng thuật toán STING", 30, True, WHITE)])
 text(s, 0.85, 4.65, 8.4, 1.6, [
-    ("Topic 6 · Grid-based (clustering) · Domain: Sociology / History", 15, True, GOLD),
-    ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
-    ("15' trình bày + 5' Q&A", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
+    ("Phân cụm dựa trên lưới · 63 tỉnh · 2011–2024", 17, True, GOLD),
+    ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 14, False, RGBColor(0xB9, 0xCD, 0xDE)),
+    ("Nhóm 15 · Chủ đề 6 · Grid-based clustering", 13, False, RGBColor(0xB9, 0xCD, 0xDE)),
 ])
-note(s, "Mở đầu: giới thiệu đề tài 20s; nêu thesis: dữ liệu PAPI khá đồng nhất — nhóm xin trình bày trung thực cả kết quả thuận lẫn robustness mở rộng chiều (PCA không nhận diện; nhánh 8 chiều đọc theo ablation OFAT — mc=2 đạt ngưỡng k/noise nhưng silhouette âm).")
+note(s, "Kính thưa thầy, nhóm 15 xin trình bày kết quả đồ án phân cụm dữ liệu PAPI bằng STING. "
+     "Nhóm xây dựng lưới thống kê, kiểm tra trên dữ liệu giả lập, sau đó áp dụng lên hai chỉ tiêu "
+     "PAPI của 63 tỉnh trong giai đoạn 2011–2024. Phần cuối trình bày giới hạn và các phân tích bổ trợ.")
 
-# ---------- Slide 2 — Vì sao grid-based? ----------
+# Slide 2 — Vì sao grid-based?
 s = slide_new()
-header(s, "VẤN ĐỀ", "Vì sao grid-based? Vì sao STING?", 2)
+header(s, "BÀI TOÁN", "Phân cụm các quan sát tỉnh–năm theo PAPI", 2)
 bullets(s, 0.55, 1.5, 6.6, 5.4, [
-    ("Bài toán.", "Nhóm cụm 63 tỉnh × 14 năm (882 dòng, ≥41 cột — vượt chuẩn ≥500×10)."),
-    ("Grid-based.", "Chia không gian thành lưới; mỗi ô lưu thống kê; không giả định hình dạng cụm; O(n)."),
-    ("STING.", "Lưới phân cấp theo factor; mỗi ô: count/mean/std/min/max; ô “dày” ghép cụm; điểm lẻ = nhiễu."),
-    ("Khác biệt.", "DBSCAN gom theo mật độ điểm-kề; k-means ép mọi điểm về centroid; STING tách nhiễu trung thực."),
-], size=16, gap_pt=44)
+    ("Dữ liệu.", "882 quan sát. Mỗi quan sát là một tỉnh trong một năm."),
+    ("Mục tiêu.", "Tìm các nhóm gần nhau trên hai chỉ tiêu PAPI được chọn."),
+    ("STING rút gọn.", "Chia không gian thành lưới, lưu thống kê và gom ô dày liên thông."),
+    ("Đối chứng.", "So sánh STING với K-means và DBSCAN trên cùng hai chỉ tiêu."),
+], size=17, gap_pt=34)
 rect(s, 7.6, 1.45, 5.1, 5.6, LIGHT)
-text(s, 7.9, 1.72, 4.6, 0.4, [("SO SÁNH NHANH", 12.5, True, TEAL)])
-cmp_rows = [("STING", "lưới + thống kê ô", "O(n)"), ("k-means", "centroid, ép k", "O(n·k·i)"), ("DBSCAN", "mật độ kề điểm", "O(n log n)")]
+text(s, 7.9, 1.72, 4.6, 0.4, [("CƠ SỞ TẠO CỤM", 13, True, TEAL)])
+cmp_rows = [("STING", "Ô lưới", "Mật độ ô"),
+            ("K-means", "Tâm cụm", "Khoảng cách"),
+            ("DBSCAN", "Lân cận điểm", "Mật độ điểm")]
 for i, (a, b, c) in enumerate(cmp_rows):
     y = 2.25 + i * 1.55
     rect(s, 7.9, y, 4.5, 1.15, WHITE)
     text(s, 8.05, y + 0.18, 3.0, 0.7, [(a, 14, True, NAVY), (b, 11, False, GREY)])
     text(s, 10.6, y + 0.18, 1.6, 0.4, [(c, 11, True, TEAL)], align=PP_ALIGN.RIGHT)
-note(s, "So sánh ngắn; nhấn mạnh lưới phân cấp + nhiễu tách riêng là lợi thế phương pháp.")
+note(s, "Đơn vị phân tích là quan sát tỉnh–năm. Nhóm dùng biến thể STING rút gọn, xác định "
+     "vùng dày bằng số điểm trong ô lưới. K-means dựa vào khoảng cách đến tâm cụm, còn DBSCAN "
+     "dựa vào mật độ lân cận từng điểm. Ba cách tạo cụm được đối chiếu trong phần thực nghiệm.")
 
-# ---------- Slide 3 — STING cơ chế ----------
+# Slide 3 — STING cơ chế
 s = slide_new()
-header(s, "CƠ CHẾ", "STING trong 3 bước", 3)
+header(s, "CƠ CHẾ GRID-BASED", "Biến thể STING của nhóm trong 3 bước", 3)
 steps = [
-    ("1", "LƯỚI PHÂN CẤP", "Mức 0: 1 ô bao trùm;\nmỗi mức chia mỗi chiều\nthành factor ô mới."),
-    ("2", "THỐNG KÊ Ô", "count, mean, std, min, max\ntheo từng chiều —\nquét dữ liệu 1 lượt/mức."),
-    ("3", "GOM CỤM", "Ô “dày” (count ≥ min_count)\nliền kề → cụm;\nđiểm ở ô thưa → nhiễu (−1)."),
+    ("1", "LƯỚI PHÂN CẤP", "Mức 0 có một ô bao trùm.\nMỗi mức tiếp theo chia nhỏ\ncác ô của mức trước."),
+    ("2", "THỐNG KÊ Ô", "Lưu số điểm, trung bình,\nđộ lệch chuẩn và các\ngiá trị nhỏ nhất, lớn nhất."),
+    ("3", "GOM CỤM", "Ô có số điểm ≥ min_count\nđược nối qua cạnh.\nÔ thưa nhận nhãn nhiễu −1."),
 ]
 for i, (n, title, body) in enumerate(steps):
     x0 = 0.55 + i * 4.19
@@ -219,110 +225,136 @@ for i, (n, title, body) in enumerate(steps):
     rect(s, x0, 2.12, 3.85, 2.55, LIGHT)
     text(s, x0 + 0.22, 2.62, 3.41, 1.9, [(body, 15.5, False, INK)])
 text(s, 0.55, 5.35, 12.23, 1.6, [
-    ("Chi phí xây lưới O(n) · truy vấn vùng dùng thống kê ô · không cần gán cụm trước", 15, True, NAVY),
-    ("Nhược điểm: lưới song song trục, nhạy độ phân giải & min_count — nhóm đo độ nhạy, báo cáo trung thực.", 12.5, False, GREY),
+    ("Số cụm được xác định từ các vùng ô dày liên thông tại mức lưới đã chọn.", 16, True, NAVY),
+    ("Độ phân giải lưới và ngưỡng min_count ảnh hưởng đến số cụm và tỷ lệ nhiễu.", 15, False, GREY),
+    ("Cài đặt dùng ngưỡng số đếm. STING gốc còn dùng phân phối và kiểm định thống kê.", 14, False, GREY),
 ])
-note(s, "Vẽ 1 lần, chỉ tay 3 ô. Nhấn mạnh O(n) và tách nhiễu.")
+note(s, "Cài đặt gồm ba bước. Đầu tiên chia không gian thành lưới phân cấp, tiếp theo tính thống kê "
+     "cho từng ô, cuối cùng gom các ô đạt min_count và liên thông qua cạnh. Nhóm chọn một mức lưới "
+     "để phân cụm. STING gốc của Wang, Yang và Muntz còn mô hình hóa loại phân phối và "
+     "dùng kiểm định thống kê để duyệt từ trên xuống. Biến thể này dùng ngưỡng số đếm.")
 
-# ---------- Slide 4 — Dữ liệu ----------
+# Slide 4 — Dữ liệu
 s = slide_new()
-header(s, "DỮ LIỆU", "PAPI: 14 năm × 63 tỉnh, sạch và đã audit", 4)
+header(s, "DỮ LIỆU", "PAPI 2011–2024 và lựa chọn chỉ tiêu", 4)
 bullets(s, 0.55, 1.5, 6.7, 5.3, [
-    ("Nguồn.", "PAPI 2011–2024 (papi.org.vn) — 14 workbook, 2 định dạng (tỉnh-hàng / ma trận chuyển vị)."),
-    ("Panel.", "882 × 41: d1–d6 (mọi năm) + d7/d8 (2018+) + 29 sub-dim; 39 cột số."),
-    ("0.0 → NaN.", "“Không có dữ liệu” theo quy ước gói replication Mendeley (đối chiếu khớp 100%)."),
-    ("PROVENANCE.", "URL + hash SHA-256 mọi nguồn trong repo — tái lập được."),
-    ("Nguồn ngoài (kiểm chứng).", "PCI VCCI–USAID · GSO (dân số, GRDP) · OD Mekong y tế 2020 · WDI — chỉ dùng kiểm chứng bên ngoài, không đưa vào feature."),
-], size=16, gap_pt=30)
+    ("Nguồn.", "14 workbook PAPI do CECODES, VFF-CRT, RTA và UNDP công bố."),
+    ("Bảng dữ liệu.", "882 dòng và 41 cột. Có 8 chiều nội dung và 29 chỉ tiêu thành phần."),
+    ("Giá trị thiếu.", "Chuyển điểm 0 theo quy ước nguồn về NaN và chọn dòng đủ hai chỉ tiêu."),
+    ("Chuẩn hóa.", "Ước lượng trung bình và độ lệch chuẩn từ dữ liệu huấn luyện."),
+    ("Đối chiếu.", "Các giá trị giai đoạn 2011–2022 khớp gói dữ liệu Le và cộng sự."),
+], size=16, gap_pt=25)
 rect(s, 7.55, 1.35, 5.2, 2.45, RGBColor(0xFD, 0xF3, 0xDC))
-text(s, 7.85, 1.55, 4.7, 0.35, [("⚠ GÃY THANG ĐO (phát hiện khi làm sạch)", 13, True, RGBColor(0x8A, 0x5A, 0x00))])
-text(s, 7.85, 2.1, 4.8, 1.6, [("23/37 cột chỉ tiêu có bước nhảy trung bình năm > 0.25 điểm (vd sd_5_4 đổi thang 2021; sd_2_1 đổi 2018).", 12.5, False, INK),
-                              ("→ Pipeline xuyên năm chỉ dùng chỉ tiêu qua audit; báo cáo ghi rõ.", 12, True, RGBColor(0x8A, 0x5A, 0x00))])
+text(s, 7.85, 1.55, 4.7, 0.35, [("KIỂM TRA TÍNH SO SÁNH QUA CÁC NĂM", 13, True, RGBColor(0x8A, 0x5A, 0x00))])
+text(s, 7.85, 2.1, 4.65, 1.5, [
+    ("23/37 chỉ tiêu có biến động trung bình giữa hai năm liên tiếp vượt 0,25.", 14, False, INK),
+    ("Nhóm đối chiếu thang đo với workbook trước khi chọn chỉ tiêu.", 14, True, RGBColor(0x8A, 0x5A, 0x00)),
+])
 rect(s, 7.55, 4.15, 5.2, 1.85, LIGHT)
-text(s, 7.85, 4.4, 4.7, 0.35, [("VÍ DỤ CHỈ TIÊU SẠCH (dùng để phân cụm)", 12, True, TEAL)])
-text(s, 7.85, 4.9, 4.8, 0.9, [("sd_4_2 · Kiểm soát tham nhũng dịch vụ công", 12, False, INK),
-                              ("sd_6_1 · Y tế công lập — ổn định 2011–2024", 12, False, INK)])
-note(s, "Nhấn mạnh: khác biệt dữ liệu thật so với dữ liệu làm sẵn — audit bắt buộc.")
+text(s, 7.85, 4.4, 4.7, 0.35, [("HAI CHỈ TIÊU DÙNG CHO PHÂN CỤM", 13, True, TEAL)])
+text(s, 7.85, 4.9, 4.8, 0.9, [("sd_4_2 · Kiểm soát tham nhũng dịch vụ công", 14, False, INK),
+                              ("sd_6_1 · Y tế công lập", 14, False, INK)])
+note(s, "Nhóm thống nhất hai định dạng workbook thành bảng tỉnh–năm. Các chiều d7 và d8 chỉ có "
+     "từ năm 2018, vì vậy cần kiểm tra độ phủ trước khi mở rộng đặc trưng. Quy tắc chênh lệch "
+     "trung bình lớn hơn 0,25 giúp nhận diện chỉ tiêu cần rà soát. Đây là dấu hiệu để đối chiếu "
+     "nguồn, chưa đủ để kết luận mọi chỉ tiêu bị đánh dấu đều đổi thang. Ví dụ sd_5_4 đổi thang "
+     "năm 2021 đã được đối chiếu với workbook.")
 
-# ---------- Slide 5 — Demo synthetic ----------
+# Slide 5 — Demo synthetic
 s = slide_new()
-header(s, "DEMO 1", "STING thực thi đúng trên dữ liệu giả lập", 5)
+header(s, "DỮ LIỆU GIẢ LẬP", "Đối chiếu kết quả với hai cụm đã biết", 5)
 pic(s, "00_synthetic_sting.png", 0.55, 1.7, h=4.55)
 bullets(s, 7.9, 1.8, 4.85, 4.9, [
-    ("Dữ liệu.", "2 blob Gauss, 240 điểm, seed 42."),
-    ("Kết quả.", "ARI = 0.950 · nhiễu 2.5% · đúng 2 cụm."),
-    ("Lưới.", "Factor=4, 3 mức; ô dày → gom cụm."),
-    ("Kiểm thử.", "src/sting.py: 28 unit test (pytest) xanh — chính xác thống kê ô từng ô."),
-], size=15.5, gap_pt=60)
+    ("Dữ liệu.", "240 điểm từ hai phân bố Gauss, seed 42."),
+    ("Kết quả.", "Tìm được 2 cụm và 2,5% điểm nhiễu."),
+    ("Đối chiếu.", "ARI bằng 0,950 so với nhãn đã biết khi sinh dữ liệu."),
+    ("Kiểm thử.", "Đối chiếu thống kê ô, liên thông, biên lưới và tái lập nhãn bằng pytest."),
+], size=17, gap_pt=25)
 
-note(s, "Show hình bên trái; nói ARI và tests.")
+note(s, "Trên ví dụ 240 điểm, STING tìm được hai cụm với ARI bằng 0,950 và tỷ lệ nhiễu 2,5%. "
+     "Các kiểm thử khác đối chiếu thống kê ô, quan hệ liên thông và điểm nằm trên biên. "
+     "Kết quả này cho phép kiểm tra cách cài đặt trước khi áp dụng cho dữ liệu PAPI.")
 
-# ---------- Slide 6 — Dữ liệu thật 2023 ----------
+# Slide 6 — Dữ liệu thật 2023
 s = slide_new()
-header(s, "DEMO 2", "Kết quả thật: dữ liệu rất đồng nhất", 6)
+header(s, "PAPI NĂM 2023", "Hai cấu hình lưới cho kết quả khác nhau", 6)
 pic(s, "sting_first_real.png", 0.55, 1.55, h=4.15)
 bullets(s, 8.1, 1.75, 4.7, 4.9, [
-    ("61 điểm/năm", "— không thể đòi cấu trúc tách biệt rõ."),
-    ("(a) Lưới thô 3×3:", "k=1 · 55/61 trong vùng dày · nhiễu 10%."),
-    ("(b) Lưới mịn 9×9:", "k=3 · nhiễu 31% — độ phân giải đổi quyết định!"),
-    ("→ Kết luận:", "cấu trúc PAPI cấp tỉnh/năm khá đồng nhất — báo cáo trung thực, không ép cụm."),
-], size=15, gap_pt=50)
-note(s, "Đây là phát hiện quan trọng nhất về dữ liệu — trình bày như một kết quả nghiên cứu, không phải thất bại.")
+    ("Dữ liệu.", "61 tỉnh có đủ hai chỉ tiêu trong năm 2023."),
+    ("Lưới 3 × 3.", "Ngưỡng 5 cho 1 cụm, với 55/61 điểm trong vùng dày."),
+    ("Lưới 9 × 9.", "Ngưỡng 2 cho 3 cụm và khoảng 31% nhiễu."),
+    ("Nhận xét.", "Số cụm và tỷ lệ nhiễu phụ thuộc cấu hình lưới."),
+], size=17, gap_pt=28)
+note(s, "Hai hình dùng cùng dữ liệu 2023. Lưới 3×3 với ngưỡng 5 cho một cụm, "
+     "trong khi lưới 9×9 với ngưỡng 2 cho ba cụm. Cả độ phân giải và ngưỡng đều thay đổi "
+     "giữa hai phép thử, nên cần khảo sát riêng từng tham số để đọc ảnh hưởng của chúng.")
 
-# ---------- Slide 7 — Pipeline dự đoán ----------
+# Slide 7 — Pipeline dự đoán
 s = slide_new()
-header(s, "DỰ ĐOÁN", "Hai mô hình local, cùng nạp từ file", 7)
+header(s, "GÁN CỤM NGOÀI MẪU", "Dùng lưới 2011–2023 cho dữ liệu năm 2024", 7)
 rect(s, 0.6, 1.85, 3.1, 0.72, TEAL)
-text(s, 0.6, 1.91, 3.1, 0.4, [("TRAIN 2011–2023", 14, True, WHITE)], align=PP_ALIGN.CENTER)
+text(s, 0.6, 1.91, 3.1, 0.4, [("DỮ LIỆU 2011–2023", 14, True, WHITE)], align=PP_ALIGN.CENTER)
 rect(s, 4.5, 1.7, 3.3, 1.1, LIGHT)
-text(s, 4.5, 1.82, 3.3, 0.9, [("models/", 13, True, NAVY), ("sting_predict_model.pkl\nsup_ridge.joblib", 11.5, False, GREY)], align=PP_ALIGN.CENTER)
+text(s, 4.5, 1.82, 3.3, 0.9, [("LƯỚI STING ĐÃ HỌC", 14, True, NAVY),
+                             ("Biên lưới và các ô dày", 13, False, GREY)], align=PP_ALIGN.CENTER)
 rect(s, 8.6, 1.85, 3.1, 0.72, GOLD)
-text(s, 8.6, 1.91, 3.1, 0.4, [("PREDICT 2024", 14, True, NAVY)], align=PP_ALIGN.CENTER)
+text(s, 8.6, 1.91, 3.1, 0.4, [("GÁN CỤM NĂM 2024", 14, True, NAVY)], align=PP_ALIGN.CENTER)
 for x0 in (3.7, 7.8):
     a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, Inches(x0), Inches(2.01), Inches(0.8), Inches(0.4))
     a.fill.solid()
     a.fill.fore_color.rgb = TEAL
     a.line.fill.background()
 bullets(s, 0.6, 3.9, 12.1, 3.0, [
-    ("STING.predict (không giám sát).", "Gán tính vào ô lưới đã học; điểm ngoài vùng học → −1. 2024 là năm out-of-sample duy nhất khi chọn cấu hình."),
-    ("Chọn cấu hình train-only.", "Quét ứng viên ≤2020; kiểm trên tương lai giả 2021–2022; 2024 không tham gia chọn (tránh selection-on-test) — predict_sweep.py."),
-    ("Model giám sát (Ridge/RF).", "Dự báo “6.1 Y tế công lập” năm sau từ 8 chỉ tiêu sạch năm nay; Ridge được chọn, MAE thấp hơn carry-forward 6.3%; RF 9.8% nhưng CV R² thấp hơn nên không chọn (holdout 2023→2024)."),
-], size=14.5, gap_pt=28)
-note(s, "Vẽ tay sơ đồ 3 khối; nhấn: không có dịch vụ ngoài — mọi model lưu local.")
+    ("Chọn cấu hình.", "Dùng dữ liệu đến 2020 và đối chiếu trên các năm 2021–2022."),
+    ("Học lưới.", "Fit cấu hình đã chọn trên các quan sát đủ dữ liệu giai đoạn 2011–2023."),
+    ("Năm 2024.", "Dùng lại bộ chuẩn hóa và lưới đã học để gán điểm mới vào cụm hoặc nhãn nhiễu."),
+], size=17, gap_pt=24)
+note(s, "Cấu hình được chọn từ dữ liệu các năm trước, sau đó nhóm học lưới trên giai đoạn "
+     "2011–2023. Năm 2024 dùng bộ chuẩn hóa và biên lưới này. Điểm mới nằm trong ô dày được "
+     "gán nhãn cụm tương ứng. Các điểm còn lại nhận nhãn −1. Kết quả thể hiện việc gán "
+     "dữ liệu mới vào các vùng đã học.")
 
-# ---------- Slide 8 — Kết quả dự đoán ----------
+# Slide 8 — Kết quả dự đoán
 s = slide_new()
-header(s, "KẾT QUẢ DỰ ĐOÁN 2024", "48 tỉnh vào cụm lớn · 13 tỉnh ngoại vi", 8)
+header(s, "KẾT QUẢ NĂM 2024", "48 tỉnh được gán cụm, 13 tỉnh nhận nhãn nhiễu", 8)
 pic(s, "predict_2024.png", 0.55, 1.3, h=4.9)
 bullets(s, 8.15, 1.75, 4.6, 5.0, [
-    ("Phủ 79%", "(48/61 có đủ chỉ tiêu)."),
-    ("13 tỉnh", "rơi vào ô thưa → nhiễu (không ép vào cụm)."),
-    ("Độ nhạy", "coverage 82% (mc=3) → 79% (mc=5) → 70% (mc=8) — ngưỡng-phụ thuộc, báo cáo bảng."),
-    ("Chuyển cụm", "0 “chuyển thật” (phát biểu rỗng — cả 2023 lẫn 2024 không có điểm cụm 0/1), 7 sang nhiễu, 5 từ nhiễu ra."),
-], size=14, gap_pt=52)
-note(s, "Đọc 4 con số chính; kết thúc: 2024 là năm test thật sự. Caveat: “0 chuyển thật” là phát biểu rỗng (vacuous) — cả 2023 lẫn 2024 không có điểm nào thuộc cụm 0/1, nên 0/59 không chứng minh độ ổn định nhãn (báo cáo §5.5).")
+    ("Đủ dữ liệu.", "61/63 tỉnh có hai chỉ tiêu được chọn."),
+    ("Gán cụm.", "48 tỉnh vào cụm lớn, tương đương khoảng 79% trong 61 tỉnh."),
+    ("Nhiễu.", "13 tỉnh nằm ngoài các ô dày của lưới đã học."),
+    ("Độ nhạy.", "Ngưỡng 3, 5, 8 cho tỷ lệ gán cụm khoảng 82%, 79%, 70%."),
+], size=17, gap_pt=25)
+note(s, "Trong 61 tỉnh đủ dữ liệu năm 2024, có 48 tỉnh vào cụm lớn và 13 tỉnh nhận nhãn nhiễu. "
+     "Hai tỉnh thiếu chỉ tiêu được để trống. Trên 59 tỉnh có đủ dữ liệu ở cả hai năm 2023 và "
+     "2024, có 7 tỉnh từ cụm sang nhiễu và 5 tỉnh từ nhiễu vào cụm. Cả hai năm đều chỉ có "
+     "điểm thuộc cụm lớn hoặc nhiễu, vì vậy cần thận trọng khi diễn giải mức ổn định của nhãn.")
 
-# ---------- Slide 9 — Model giám sát ----------
+# Slide 9 — Model giám sát
 s = slide_new()
-header(s, "MODEL GIÁM SÁT", "Ridge dự báo 6.1 Y tế công lập năm sau", 9)
+header(s, "PHÂN TÍCH BỔ TRỢ", "Dự báo chỉ tiêu y tế công lập bằng Ridge", 9)
 pic(s, "supervised_regression.png", 0.55, 1.7, h=3.85)
 bullets(s, 8.2, 1.75, 4.6, 5.0, [
-    ("Đặc trưng.", "8 chỉ tiêu sạch năm t (sd 2011–2024 ổn định)."),
-    ("CV train-only.", f"Expanding origin 2017–2022; chọn Ridge (CV R² 0.265; RF 0.197); hai baseline cũng có CV thật trên cùng fold — carry {CV_CARRY} vs ridge {CV_RIDGE}."),
-    ("Holdout 2023→2024.", "MAE 0.0640 (Ridge, −6.3%) / 0.0616 (RF, −9.8%, không chọn) vs carry-forward 0.0683."),
-    ("Phân loại pseudo-label STING.", "LR/RF vượt majority trên một holdout (acc 0.644/0.678 vs 0.186; F1 0.541/0.600 vs 0.157); một năm không kết luận tổng quát."),
-], size=13, gap_pt=34)
-note(s, f"Nhấn: cải thiện khiêm tốn, honest; 1 holdout duy nhất — cần thêm năm để chắc chắn. Nếu hỏi 'baseline có chạy CV không?': có — cùng 6 fold, carry {CV_CARRY} vs ridge {CV_RIDGE} (trung bình train âm), Ridge vẫn được chọn; caveat: một holdout không chứng minh tổng quát.")
+    ("Đầu vào.", "8 chỉ tiêu năm hiện tại để dự báo chỉ tiêu y tế năm sau."),
+    ("Chọn mô hình.", f"Kiểm định theo thời gian 2017–2022 chọn Ridge, với R² bằng {CV_RIDGE}."),
+    ("Kết quả 2024.", "MAE bằng 0,0640, so với 0,0683 của cách giữ giá trị năm trước."),
+    ("Phạm vi.", "Đánh giá trên 59 cặp tỉnh–năm của giai đoạn 2023→2024."),
+], size=16, gap_pt=26)
+note(s, f"Đây là phân tích bổ trợ về học có giám sát. Nhóm dự báo chỉ tiêu y tế năm sau "
+     f"từ tám chỉ tiêu năm hiện tại. Kiểm định theo thời gian dùng sáu lần chia có năm huấn luyện "
+     f"đứng trước năm kiểm định. Ridge có R² kiểm định {CV_RIDGE}, so với {CV_CARRY} của cách "
+     "giữ giá trị năm trước. MAE trên 59 cặp của 2023→2024 giảm khoảng 6,3%. Random Forest "
+     "có MAE trên năm này thấp hơn, nhưng điểm kiểm định theo thời gian thấp hơn Ridge. "
+     "Kết quả hiện giới hạn ở một năm đánh giá.")
 
-# ---------- Slide 10 — Baselines ----------
+# Slide 10 — Baselines
 s = slide_new()
-header(s, "SO SÁNH", "STING vs k-means vs DBSCAN (pooled 2011–2023)", 10)
+header(s, "ĐỐI CHỨNG PHÂN CỤM", "STING, K-means và DBSCAN trên PAPI 2011–2023", 10)
 rows = [
-    ("Method", "k", "Noise", "Silh.", "ARI vs STING"),
-    ("STING (frozen)", "3", "20%", "0.361*", "—"),
+    ("Phương pháp", "Số cụm", "Nhiễu", "Silhouette", "ARI với STING"),
+    ("STING", "3", "19.6%", "0.361*", "—"),
     ("k-means k=2", "2", "0%", "0.445", "0.166"),
     ("k-means k=3", "3", "0%", "0.336", "0.139"),
-    ("DBSCAN eps=0.2", "5", "14%", "0.218*", "0.647"),
+    ("DBSCAN eps=0.2", "5", "14.2%", "0.218*", "0.647"),
     ("DBSCAN eps=0.4+", "1", "≤3%", "n/a", "≤0.135"),
 ]
 tb = s.shapes.add_table(len(rows), 5, Inches(0.6), Inches(1.5), Inches(12.18), Inches(3.7)).table
@@ -354,94 +386,109 @@ for i, row in enumerate(rows):
             cell.fill.solid()
             cell.fill.fore_color.rgb = WHITE if i % 2 else LIGHT
 text(s, 0.6, 5.6, 12, 0.8, [
-    ("* Metric hình học tính trên điểm thuộc cụm (loại −1). k-means ép mọi điểm vào cụm.", 12, False, GREY),
-    ("STING ≈ DBSCAN khi eps nhỏ (ARI 0.65); k-means tách khác nhau — dữ liệu gần như một khối.", 12, False, GREY),
+    ("* Silhouette được tính trên các điểm thuộc cụm. Cần đọc cùng tỷ lệ nhiễu.", 14, False, GREY),
+    ("ARI với DBSCAN ở eps=0,2 bằng 0,647, cho biết mức đồng thuận giữa hai cách phân cụm.", 14, False, GREY),
 ])
-note(s, "Chỉ vào hàng STING; giải thích vì sao noise được tách.")
+note(s, "Bảng đối chiếu các cấu hình trên cùng hai chỉ tiêu PAPI của giai đoạn 2011–2023. "
+     "STING cho ba cụm với 19,6% nhiễu. Silhouette chỉ tính trên điểm thuộc cụm, nên "
+     "phạm vi điểm được chấm có thể khác giữa các phương pháp. ARI mô tả mức đồng thuận "
+     "giữa hai cách phân cụm và cần được đọc trong cấu hình cụ thể.")
 
-# ---------- Slide 11 — Bản đồ ----------
+# Slide 11 — Bản đồ
 s = slide_new()
-header(s, "BẢN ĐỒ", "61/63 tỉnh có điểm 2024 — 13 ngoại vi rải rác", 11)
+header(s, "BẢN ĐỒ NĂM 2024", "Phân bố các tỉnh theo nhãn STING", 11)
 pic(s, "map_2024.png", 0.55, 1.3, h=5.75)
 bullets(s, 5.6, 1.8, 7.15, 4.9, [
-    ("Join qua code.", "GeoJSON 'AD01' → centroids theo province_code (63/63). Vĩnh Phúc, Tiền Giang thiếu điểm 2024."),
-    ("2024.", "48 tỉnh cụm lớn (xanh), 13 tỉnh nhiễu (xám, chú thích tên)."),
-    ("2020 vs 2024.", "Hai mốc — cùng lưới toàn cục nên nhãn so sánh được giữa các năm."),
-    ("Ý nghĩa.", "Nhóm ngoại vi rải đều các miền — không phải một vùng địa lý riêng."),
-], size=15, gap_pt=56)
-note(s, "Chỉ tay 2–3 tỉnh nhiễu rải rác (Quảng Ninh, Hà Nội, Cà Mau). 61 dot = 48 cụm lớn + 13 nhiễu; Vĩnh Phúc/Tiền Giang không có điểm 2024. Lào Cai, Điện Biên thuộc cụm lớn (xanh).")
+    ("Cụm lớn.", "48 tỉnh được biểu diễn bằng màu xanh."),
+    ("Nhiễu.", "13 tỉnh màu xám nằm rải rác ở nhiều vùng."),
+    ("Thiếu dữ liệu.", "Vĩnh Phúc và Tiền Giang thiếu một trong hai chỉ tiêu."),
+    ("Cách đọc.", "Vị trí trên bản đồ thể hiện địa lý. Nhãn cụm được xác định từ hai chỉ tiêu PAPI."),
+], size=17, gap_pt=29)
+note(s, "Bản đồ nối nhãn STING với vị trí tỉnh thông qua mã tỉnh. Màu xanh biểu diễn 48 tỉnh "
+     "thuộc cụm lớn, màu xám biểu diễn 13 tỉnh nhiễu. Vĩnh Phúc và Tiền Giang thiếu dữ liệu "
+     "để gán nhãn. Các tỉnh nhiễu phân bố ở nhiều vùng. Đặc trưng phân cụm là hai chỉ tiêu PAPI, "
+     "còn tọa độ địa lý dùng để trình bày kết quả trên bản đồ.")
 
-# ---------- Slide 12 — Hạn chế ----------
+# Slide 12 — Hạn chế
 s = slide_new()
-header(s, "TRUNG THỰC", "Hạn chế — nói rõ trước khi được hỏi", 12)
+header(s, "THẢO LUẬN", "Giới hạn của kết quả phân cụm", 12)
 bullets(s, 0.55, 1.7, 12.2, 5.2, [
-    ("Đồng nhất.", "Dữ liệu PAPI cấp tỉnh/năm gần như một khối — cấu trúc tách biệt chỉ ở ngoại vi nhỏ."),
-    ("Gãy thang đo.", "23/37 cột đổi thang giữa các năm; phân tích xuyên năm chỉ dùng chỉ tiêu qua audit."),
-    ("Robustness OFAT.", f"PCA d1–d6 ({_pct(R_PCA['explained_var_total'])} phương sai) → không nhận diện; 8 chiều 2018–2024 so với gốc (k={R_GOC['k']}, nhiễu {_pct(R_GOC['noise_ratio'])}): f=3 → k={R_F3['k']}/{_pct(R_F3['noise_ratio'])}, lv=2 → k={R_LV2['k']}/100% → không nhận diện; mc=2 → k={R_MC2['k']}/{_pct(R_MC2['noise_ratio'])} đạt ngưỡng k/noise NHƯNG silhouette âm — tách yếu."),
-    ("Metrics không bản địa.", "Silhouette/DB/CH với lưới song song trục chỉ để so sánh thô; noise tách riêng."),
-    ("Một holdout.", "2024 là năm test duy nhất; Ridge (được chọn) thấp hơn carry-forward 6.3% MAE — cần thêm năm để khẳng định."),
-], size=15.5, gap_pt=40)
-note(s, "Đây là slide ghi điểm: tự nêu hạn chế trước, Q&A sẽ dễ trả lời.")
+    ("Phạm vi đặc trưng.", "Kết quả chính mô tả hai chỉ tiêu PAPI được chọn."),
+    ("Kích thước cụm.", "Giai đoạn 2011–2023 có một cụm 629 điểm và hai cụm 16, 5 điểm."),
+    ("Tham số.", "Độ phân giải và ngưỡng mật độ làm thay đổi số cụm, tỷ lệ nhiễu."),
+    ("Mở rộng số chiều.", "Các nhánh PCA và 8 chiều cho kết quả nhạy với cấu hình."),
+    ("Đánh giá ngoài mẫu.", "Năm 2024 là mốc đánh giá hiện có. Cần thêm các năm để khảo sát độ ổn định."),
+], size=18, gap_pt=25)
+note(s, f"Kết quả cần được đọc trong phạm vi hai chỉ tiêu và các cấu hình đã thử. "
+     f"Hai thành phần PCA đầu giữ {_pct(R_PCA['explained_var_total'])} phương sai. "
+     f"Ở nhánh 8 chiều, cấu hình gốc cho {R_GOC['k']} cụm và {_pct(R_GOC['noise_ratio'])} nhiễu. "
+     f"Khi chỉ thay factor thành 3, kết quả còn {R_F3['k']} cụm và {_pct(R_F3['noise_ratio'])} nhiễu. "
+     f"Đổi mức lưới cho {R_LV2['k']} cụm. Giảm ngưỡng còn 2 cho {R_MC2['k']} cụm "
+     f"với {_pct(R_MC2['noise_ratio'])} nhiễu, nhưng silhouette âm. "
+     "Các phép thử bổ sung cho thấy cần thận trọng khi diễn giải cụm ở số chiều cao hơn.")
 
-# ---------- Slide 13 — Kế hoạch cuối kỳ ----------
+# Slide 13 — Kế hoạch cuối kỳ
 s = slide_new()
-header(s, "LỘ TRÌNH", "Cuối kỳ: từ demo đến báo cáo", 13)
+header(s, "KẾT LUẬN", "Kết quả chính và hướng phát triển", 13)
 steps = [
-    ("P5 · Cuối tháng 12", "Baselines đầy đủ · robustness PCA · bản đồ & evolution · bảng metrics"),
-    ("P6 · Đầu tháng 1", "Báo cáo .docx (7 chương, tiếng Việt) · notebook cuối chạy sạch · Q&A ≥12 câu · mock defense"),
-    ("P7 · Giữa tháng 1", "Buffer + nộp bài · tag v1.0-final · checklist nộp"),
+    ("PHƯƠNG PHÁP", "Cài đặt STING dựa trên lưới phân cấp, thống kê ô và liên thông giữa các ô dày."),
+    ("THỰC NGHIỆM", "Đối chiếu trên dữ liệu giả lập, áp dụng lên PAPI và khảo sát ảnh hưởng của tham số."),
+    ("HƯỚNG PHÁT TRIỂN", "Đánh giá trên thêm các năm dữ liệu và các bộ chỉ tiêu có thang đo tương thích."),
 ]
 for i, (a, b) in enumerate(steps):
     y = 1.5 + i * 1.5
     rect(s, 0.6, y, 3.1, 1.25, TEAL if i == 0 else (GOLD if i == 1 else RGBColor(0x33, 0x41, 0x55)))
     text(s, 0.72, y + 0.18, 2.9, 0.9, [(a, 15, True, WHITE)])
     rect(s, 3.7, y, 8.95, 1.25, LIGHT)
-    text(s, 4.0, y + 0.14, 8.4, 1.0, [(b, 11.5, False, INK)])
-note(s, "Nói ngắn: cuối kỳ làm gì, khi nào, deliverable gì.")
+    text(s, 4.0, y + 0.14, 8.4, 1.0, [(b, 18, False, INK)])
+note(s, "Nhóm đã cài đặt biến thể STING và kiểm tra cách chia lưới, thống kê ô, gom cụm và gán "
+     "điểm mới. Trên hai chỉ tiêu PAPI, kích thước cụm chênh lệch và độ nhạy tham số là những "
+     "yếu tố cần chú ý khi đọc kết quả. Hướng tiếp theo là mở rộng mốc thời gian đánh giá "
+     "và đối chiếu thêm các bộ chỉ tiêu có thang đo tương thích. Tài liệu chi tiết kèm theo "
+     "gồm final_report.docx, final_analysis.ipynb và bản trình chiếu final.pptx.")
 
-# ---------- Slide 14 — Kiểm chứng bên ngoài ----------
+# Slide 14 — Kiểm chứng bên ngoài
 s = slide_new()
-header(s, "KIỂM CHỨNG BÊN NGOÀI", "Cụm STING khớp PCI — thước đo độc lập", 14)
+header(s, "PHÂN TÍCH BỔ TRỢ", "Đối chiếu các nhóm STING với dữ liệu PCI", 14)
 pic(s, "external_pci_by_cluster.png", 0.55, 1.45, h=4.75)
 bullets(s, 8.0, 1.5, 4.8, 4.8, [
-    ("PCI.", "Khảo sát DOANH NGHIỆP (VCCI–USAID) — tách khỏi PAPI (hộ dân); chưa từng dùng khi học."),
-    ("756 ô 2011–2022.", "Join 747 điểm có nhãn — {nhiễu: 149, cụm 0: 5, cụm 1: 16, cụm 2: 577}."),
-    ("Ý nghĩa thống kê.", "ANOVA F(3,743) = 9.04, p = 6.9e-06 · Kruskal–Wallis H = 31.78, p = 5.8e-07."),
-    ("Đọc thận trọng.", "Tương phản đáng tin: nhiễu vs cụm 2 (hai cụm nhỏ n=5/16); không chứng minh nhân quả."),
-    ("Nguồn khác.", "Y tế/1.000 dân 2020 · GRDP 2018–2024 · WDI — results/external_validation.md."),
-], size=13, gap_pt=32)
+    ("Nguồn đối chiếu.", "PCI khảo sát doanh nghiệp, do VCCI–USAID công bố."),
+    ("Dữ liệu ghép.", "747 quan sát có nhãn STING trong giai đoạn 2011–2022."),
+    ("Kiểm định.", "ANOVA cho F=9,04, p<0,001. Kruskal–Wallis cho H=31,78, p<0,001."),
+    ("Giới hạn.", "Hai cụm nhỏ chỉ có 5 và 16 điểm, nên cần thận trọng khi diễn giải khác biệt."),
+], size=16, gap_pt=28)
 note(
     s,
-    "Kiểm chứng bên ngoài độc lập (PCI): liên hệ thống kê giữa các nhóm, không chứng minh nhân quả hay dự báo. "
-    "Nhấn: PCI là khảo sát doanh nghiệp, PAPI là khảo sát hộ dân — hai đường ống dữ liệu khác nhau. "
-    "Cụm 0/1 quá nhỏ để tự kết luận; đọc cặp nhiễu vs cụm 2. "
-    "Chi tiết: results/external_validation.md; provenance: data/processed/external_provenance.md.",
+    "PCI cung cấp nguồn đối chiếu về cảm nhận của doanh nghiệp. Nhóm ghép được 747 quan sát "
+    "có nhãn STING, gồm 149 điểm nhiễu, 5 điểm cụm 0, 16 điểm cụm 1 và 577 điểm cụm 2. "
+    "Hai kiểm định cho thấy có khác biệt thống kê giữa các nhóm trong mẫu ghép này. "
+    "Cỡ cụm chênh lệch lớn và phép thử hiện gộp nhiều năm, nên kết quả chỉ là bằng chứng "
+    "mô tả bổ sung. Nguồn số liệu là results/external_validation.md.",
 )
 
-# ---------- Slide 15 — Tài liệu ----------
+# Slide 15 — Tài liệu
 s = slide_new()
-header(s, "NGUỒN", "Tài liệu tham khảo & dữ liệu mở", 15)
+header(s, "TÀI LIỆU THAM KHẢO", "Nguồn phương pháp và dữ liệu", 15)
 bullets(s, 0.55, 1.35, 12.1, 5.4, [
     ("PAPI 2011–2024.", "CECODES/VFF-CRT/RTA/UNDP — papi.org.vn."),
-    ("Gói replication.", "Le et al., Mendeley Data — DOI 10.17632/wbk42j9wc8.1 · CC BY 4.0 (4 file dùng trực tiếp đã commit)."),
+    ("Dữ liệu đối chiếu.", "Le và cộng sự, Mendeley Data, DOI 10.17632/wbk42j9wc8.1."),
     ("STING gốc.", "Wang, Yang & Muntz (1997), “STING: A Statistical Information Grid Approach to Spatial Data Mining”, VLDB."),
     ("GeoJSON ranh giới.", "Open Development Vietnam (OD Mekong) — CC-BY-SA 4.0."),
-    ("Nguồn ngoài kiểm chứng.", "PCI VCCI–USAID (công khai) · GSO PX-Web (“Bản quyền: Không”) · OD Mekong Health 2020 (ODbL) · WDI (CC BY 4.0) — data/processed/external_provenance.md."),
-    ("Code & dữ liệu.", "Repo gồm: src/sting.py (28 unit test) · scripts/ · tests/ · models/ · results/ · PROVENANCE.md từng nguồn."),
-], size=14.5, gap_pt=40, gap_first=14)
-note(s, "Nếu GV hỏi về nguồn: chỉ PROVENANCE.md trong repo (data/raw/*/PROVENANCE.md + data/processed/external_provenance.md).")
+    ("Nguồn bổ trợ.", "PCI VCCI–USAID, GSO PX-Web, Open Development Vietnam và World Bank WDI."),
+], size=17, gap_pt=29)
+note(s, "Phương pháp dựa trên bài STING của Wang, Yang và Muntz tại VLDB 1997. Dữ liệu chính "
+     "là PAPI 2011–2024. Gói Le và cộng sự dùng để đối chiếu dữ liệu. Bản đồ và các phân tích "
+     "bổ trợ có nguồn riêng được ghi trong báo cáo và hồ sơ nguồn dữ liệu kèm dự án.")
 
-# ---------- Slide 16 — Q&A ----------
+# Slide 16 — Q&A
 s = slide_new()
 rect(s, 0, 0, SW, SH, NAVY)
 rect(s, 0, SH - 0.18, SW, 0.18, GOLD)
-text(s, 0.2, 1.3, SW, 1.5, [("Q & A", 88, True, GOLD)], align=PP_ALIGN.CENTER)
-text(s, 0.2, 3.0, SW, 0.6, [("5 phút phản biện — nhóm sẵn sàng cho mọi câu hỏi.", 26, True, WHITE)], align=PP_ALIGN.CENTER)
-bullets(s, 2.0, 4.65, 9.53, 2.4, [
-    ("Câu hỏi đầu tiên.", "“Vì sao grid-based?”"),
-    ("Nghi thức phản biện.", "Nếu không chắc — nhóm nói thẳng “chưa chắc, sẽ kiểm và trả lời”."),
-], size=19, color=WHITE, bold_first=True, lead_color=GOLD, align=PP_ALIGN.CENTER, hang_in=0, gap_pt=26)
-note(s, "Kết thúc: cảm ơn + mời GV hỏi. Không đọc slide.")
+text(s, 0.55, 3.1, 12.23, 1.2, [
+    ("Cảm ơn thầy và các bạn đã lắng nghe", 40, True, GOLD),
+], align=PP_ALIGN.CENTER)
+note(s, "Phần trình bày của nhóm đến đây là kết thúc. Nhóm xin cảm ơn thầy và các bạn đã lắng nghe. "
+     "Nhóm mong nhận được câu hỏi, góp ý về phương pháp cũng như kết quả thực nghiệm.")
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 prs.save(str(OUT))

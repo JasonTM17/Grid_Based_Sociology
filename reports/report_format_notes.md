@@ -1,43 +1,51 @@
-# Định dạng báo cáo cuối kỳ — ghi chú nghiên cứu từ tài liệu mẫu
+# Định dạng báo cáo theo mẫu người dùng gửi ngày16/11/2026
 
-_Nguồn mẫu: file báo cáo môn khác của nhóm (OneDrive Đại học). Chỉ học **bố cục/định dạng/kỷ luật trình bày** — nội dung dưới đây tự soạn cho đồ án ML của chúng ta, không sao chép nội dung/số liệu của nhóm khác._
+Nguồn: `File báo cáo tiến độ dự án nhóm.docx` của môn khác; chỉ dùng làm
+tham chiếu trình bày. Không lấy nội dung WEB, nhóm13, phân công, cam kết hay
+rubric tự chấm vào bài Học máy. Mẫu gốc giữ nguyên, SHA256:
+`39803646dfd0aa0050926bd5fe27d4c9478771039eecfa683120686e844aca5c`.
 
-## Trang & lề (đo từ file mẫu)
+## Thông số đo trực tiếp từ DOCX
 
-- A4 21.0 × 29.7 cm; 3 sections (bìa / front matter / nội dung).
-- Lề: trái 2.5 cm, phải 2.0 cm, trên 2.0 cm, dưới 2.0 cm.
-- Font: Normal 13pt; Title 20pt bold; Heading 1 16pt bold; Heading 2 14pt bold; Heading 3 12pt bold.
-  (Font chữ: mặc định theme — sẽ tự chọn Times New Roman hoặc giữ bộ theo mẫu khi soạn.)
-- Header/footer trống ở section nội dung; có 3 sections (bìa → danh mục → nội dung).
+| Thành phần | Mẫu và cách áp dụng |
+|---|---|
+| Khổ trang |A4 làm tròn11909×16834twips, khoảng21.006×29.693cm |
+| Lề |Trái/phải1080twips=1.905cm; trên/dưới1008twips=1.778cm |
+| Header/footer |Header1.27cm,footer0.8008cm; header trống, số trang PAGE giữa chân trang |
+| Thân bài |Times New Roman12pt, đen, giãn dòng1.1, sau đoạn6pt; căn trái, không thụt dòng đầu |
+| Tiêu đề đầu |20pt đậm, căn giữa; trước6pt/sau2pt |
+| Dòng học phần |12pt nghiêng, căn giữa, sau8pt |
+| Heading1 |14pt đậm, trước24pt |
+| Heading2/3 |12pt đậm, trước10pt |
+| Bảng thông tin |Hai cột, căn giữa bảng, viền đen0.5pt, không tô màu |
+| Đoạn trong ô |12pt; trước/sau1pt,giãn1.05; căn giữa theo chiều dọc |
+| Đệm ô |Trên/dưới30twips,trái/phải60twips |
 
-## Cấu trúc front matter (theo mẫu)
+Trang bìa dùng trực tiếp hai đoạn tiêu đề và bảng ba hàng, hai cột ở đầu
+trang 1 của tài liệu mẫu. Các khối Word giữ vị trí, lề ô và đường viền gốc.
+Các ô điền mã nhóm 15, đề tài STING/PAPI, học phần, giảng viên và hai thành viên.
+Dòng cuối trang giữ thông tin trường, khoa, bộ môn và tháng 11/2026.
 
-1. Trang bìa (mẫu `BÌA TIỂU LUẬN.docx`: BỘ GIÁO DỤC VÀ ĐÀO TẠO → trường → khoa → tên đề tài → sinh viên/nhóm → Thành phố …, tháng … năm …).
-2. TÓM TẮT (abstract ~½ trang).
-3. LỜI MỞ ĐẦU (bối cảnh, lý do chọn đề tài).
-4. MỤC LỤC (TOC tự động, đánh số trang).
-5. DANH MỤC CHỮ VIẾT TẮT.
-6. DANH MỤC HÌNH ẢNH + DANH MỤC BẢNG (caption tự động: "Hình N.x. …", "Bảng N.x. …").
+## Áp dụng cho báo cáo Học máy
 
-## Kỷ luật trình bày quan sát được ở mẫu (đáng học theo)
+Giữ ba section bìa/frontmatter/nội dung và bảy chương đã soạn. Đây là phạm vi
+nội dung của bài Học máy; số section của mẫu tiến độ không thay đề cương này.
+Giữ nguyên mọi đoạn kỹ thuật, số liệu, bảng, hình, field và tài liệu tham khảo.
+Đổi typography/màu/căn chỉnh đồng nhất. Bảng dài có header lặp và chiều rộng
+không vượt vùng chữ; không tái hiện bảng mẫu vốn rộng hơn vùng chữ.
 
-- Đánh số chương/mục kiểu `CHƯƠNG 1.` → `1.1` → `1.1.1`; caption luôn kèm số + tên + được tham chiếu trong text.
-- Mỗi hình/bảng đều có caption kiểu "Hình 2.1. <mô tả>" / "Bảng 3.2. <mô tả>" và được trích dẫn trong nội dung.
-- Mục tiêu/phạm vi nằm ở Chương 1; phần lý thuyết ở Chương 2; phần lõi kỹ thuật ngâm sâu ở Chương 2–4; đánh giá thực nghiệm + hạn chế riêng; kết luận riêng; TÀI LIỆU THAM KHẢO cuối.
-- Front matter đầy đủ (tóm tắt, mở đầu, mục lục, danh mục viết tắt, danh mục hình, danh mục bảng).
+Hình/caption/TOC không có mẫu tương ứng: giữ cấu trúc và cỡ hình/caption đã có,
+đổi font/màu cho thống nhất. Bìa không đánh số; nội dung dùng PAGE giữa chân
+trang. Bỏ ngắt trang kép sau bìa. Các field có updateFields để Word cập nhật.
 
-## Dàn ý áp dụng cho đồ án ML (Topic 6 – Grid-based clustering, PAPI)
+`assets/report-cover.xml` giữ các khối Word đã sao chép và điền thông tin.
+`scripts/build_report.py` dùng `scripts/report_style.py` để ghép bìa trước khi lưu.
+Thay bìa của bản hiện có bằng lệnh sau:
 
-_Soạn mới hoàn toàn theo dàn ý môn, bám yêu cầu báo cáo ML; chỉ mượn "khung" trên._
+```powershell
+python scripts/report_style.py reports/final_report.docx --cover-only
+# Nếu bản chính đang được Word mở, dùng --output <bản-mới.docx>
+```
 
-1. TÓM TẮT · 2. LỜI MỞ ĐẦU · 3. MỤC LỤC · 4. DANH MỤC CHỮ VIẾT TẮT · 5. HÌNH / BẢNG
-6. CHƯƠNG 1. TỔNG QUAN — bối cảnh PAPI & quản trị công; mục tiêu; phạm vi (14 năm, 63 tỉnh); đóng góp.
-7. CHƯƠNG 2. CƠ SỞ LÝ THUYẾT — grid-based clustering; STING (lưới phân cấp, thống kê ô, phân cụm, O(n)); baselines k-means/DBSCAN; chỉ số đánh giá; PAPI & các chỉ tiêu.
-8. CHƯƠNG 3. DỮ LIỆU & TIỀN XỬ LÝ — nguồn + PROVENANCE; panel 882×41; kiểm tra chất lượng (PASS); **audit gãy thang đo**; chuẩn hóa/mã hóa tên tỉnh.
-9. CHƯƠNG 4. PHƯƠNG PHÁP — STING tự cài chi tiết; chọn cấu hình (quy trình train-only, `predict_sweep.py`); mô hình giám sát dự báo năm sau; kiểm thử (22 test).
-10. CHƯƠNG 5. KẾT QUẢ — phân cụm theo năm; so sánh STING vs k-means/DBSCAN (bảng metrics, tách noise); robustness (PCA d1–d6 + nhánh 8 chiều); bản đồ 63 tỉnh; **pipeline dự đoán** (STING.predict OUT-of-sample 2024; hồi quy Ridge vượt carry-forward; phân loại ngoại vi — kết quả ÂM TÍNH); hình dịch chuyển cụm.
-11. CHƯƠNG 6. THẢO LUẬN & HẠN CHẾ — gãy thang đo xuyên năm (23/37 cột); nhiễu −1; lưới song song trục; dữ liệu khá đồng nhất; ngoại suy giữa các năm nhạy với thang đo; kết quả âm tính giữ nguyên.
-12. CHƯƠNG 7. KẾT LUẬN & HƯỚNG PHÁT TRIỂN — tổng kết; hướng tiếp theo (rank-based normalization, mở rộng chỉ tiêu, dự báo nhiều năm).
-13. TÀI LIỆU THAM KHẢO — PAPI; Mendeley (DOI 10.17632/wbk42j9wc8.1); Wang & Yang & Muntz (VLDB 1997); OD Mekong (GeoJSON).
-
-**Kích thước kỳ vọng:** ML course report nên ~20–35 trang (mẫu môn khác của nhóm ~120+ trang — không cần lớn như vậy).
+Kiểm tra riêng việc bảo toàn nội dung và render. Không lấy kiểm XML làm bằng
+chứng bố cục trực quan; kết quả thực tế lưu tại kế hoạch261116-1540-report-template.

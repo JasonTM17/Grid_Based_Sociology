@@ -1,0 +1,23 @@
+﻿NHÓM 15 · HỌC MÁY · PHÂN CỤM STING TRÊN PAPI
+
+01-giua-ky
+  Nhom15_GiuaKy_STING_PAPI.pptx    Slide giữa kỳ
+  Nhom15_GiuaKy_STING_PAPI.ipynb   Notebook giữa kỳ đã chạy
+
+02-cuoi-ky
+  Nhom15_CuoiKy_STING_PAPI.docx    Báo cáo Word
+  Nhom15_CuoiKy_STING_PAPI.ipynb   Notebook cuối kỳ đã chạy
+  Nhom15_CuoiKy_STING_PAPI.pptx    Slide vấn đáp cuối kỳ
+
+03-day-4
+  Nhom15_Day4_TienXuLy_PAPI.ipynb  Bài thực hành tiền xử lý
+  data, models, scripts và requirements.txt đi kèm để chạy lại.
+
+Hai ZIP Nhom15_GiuaKy_STING_PAPI.zip và Nhom15_CuoiKy_STING_PAPI.zip
+chứa mã và dữ liệu theo đúng cấu trúc để chạy notebook. Giải nén toàn bộ
+khi chuyển sang máy khác. Cài môi trường bằng requirements.txt, sau đó
+mở notebook trong thư mục notebooks của bản giải nén.
+
+Các file rời đã lưu kết quả, có thể đọc hoặc chiếu ngay.
+SHA256SUMS.txt ghi mã kiểm tra hai ZIP.
+verification.json ghi kết quả chạy lại từ từng ZIP.

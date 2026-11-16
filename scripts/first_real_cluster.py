@@ -4,8 +4,8 @@ Fit STING trực tiếp trên 1 năm dữ liệu PAPI thật (mặc định 2023
 đã chốt trong `models/predict_config.json`. Hai mức phân giải để thấy độ nhạy:
   (a) lưới thô 3×3 ô (L=2, f=3, mc=5)  → 1 vùng dày + ngoại vi;
   (b) lưới mịn 9×9 ô (L=3, f=3, mc=2) → nhiều nhóm nhỏ + nhiều nhiễu.
-Kết luận trình bày: mẫu 1 năm chỉ 61 điểm; dữ liệu thật khá đồng nhất —
-phân tích chính dùng nhiều năm (xem `predict_demo.py`, `phase-05`).
+Hai cấu hình thay đổi cả độ phân giải và ngưỡng mật độ.
+Phân tích chính dùng nhiều năm (xem `predict_demo.py`, `phase-05`).
 
 Chạy: python scripts/first_real_cluster.py
 Đầu ra: results/figs/sting_first_real.png
@@ -106,16 +106,16 @@ def main() -> int:
     lab_coarse = m_coarse.cluster(level=1, connectivity=1)
     s1 = sorted([int((lab_coarse == c).sum()) for c in range(m_coarse.n_clusters_)], reverse=True)
     panel(axes[0], x, y, lab_coarse, m_coarse, res=3,
-          title=f"(a) lưới thô 3×3, min_count=5\n"
-                f"k={m_coarse.n_clusters_} sizes={s1}, "
+          title=f"(a) Lưới 3×3, ngưỡng 5\n"
+                f"{m_coarse.n_clusters_} cụm, cỡ cụm {s1}, "
                 f"nhiễu {(lab_coarse == -1).mean():.0%}")
 
     m_fine = STING(n_levels=3, factor=3, min_count=2).fit(X)
     lab_fine = m_fine.cluster(level=2, connectivity=1)
     s2 = sorted([int((lab_fine == c).sum()) for c in range(m_fine.n_clusters_)], reverse=True)
     panel(axes[1], x, y, lab_fine, m_fine, res=9,
-          title=f"(b) lưới mịn 9×9, min_count=2\n"
-                f"k={m_fine.n_clusters_} sizes={s2}, "
+          title=f"(b) Lưới 9×9, ngưỡng 2\n"
+                f"{m_fine.n_clusters_} cụm, cỡ cụm {s2}, "
                 f"nhiễu {(lab_fine == -1).mean():.0%}")
 
     # Đơn vị trục: cặp sd_* CHƯA đối chiếu workbook (data/processed/
@@ -127,8 +127,8 @@ def main() -> int:
     for ax in axes:
         ax.set_xlabel(f"{wrap_label(labels_map[feats[0]])}\n{sd_unit}")
     axes[0].set_ylabel(f"{wrap_label(labels_map[feats[1]])}\n{sd_unit}")
-    fig.suptitle(f"STING trên dữ liệu thật — {YEAR} ({len(sub)} tỉnh, 2 chỉ tiêu):\n"
-                 "độ phân giải lưới thay đổi kết quả; dữ liệu khá đồng nhất")
+    fig.suptitle(f"STING trên PAPI năm {YEAR} — {len(sub)} tỉnh, hai chỉ tiêu\n"
+                "So sánh hai cấu hình lưới và ngưỡng mật độ")
     add_source(fig, PAPI_SOURCE, retrieved=PAPI_RETRIEVED)
     fig.tight_layout(rect=(0, 0.05, 1, 0.95))
     save_png(fig, OUT, dpi=200)

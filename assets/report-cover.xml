@@ -1,0 +1,304 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<cover xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:p>
+    <w:pPr>
+      <w:pStyle w:val="Title"/>
+      <w:spacing w:before="120" w:after="40"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
+        <w:szCs w:val="40"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:cs="Times New Roman" w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>
+        <w:b/>
+        <w:color w:val="000000"/>
+        <w:sz w:val="40"/>
+        <w:szCs w:val="40"/>
+        <w:lang w:val="vi-VN"/>
+      </w:rPr>
+      <w:t>BÁO CÁO KẾT QUẢ DỰ ÁN</w:t>
+    </w:r>
+  </w:p>
+  <w:p>
+    <w:pPr>
+      <w:spacing w:after="160"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
+        <w:sz w:val="26"/>
+        <w:szCs w:val="26"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+        <w:i/>
+        <w:color w:val="000000"/>
+        <w:sz w:val="24"/>
+        <w:szCs w:val="24"/>
+        <w:lang w:val="vi-VN"/>
+      </w:rPr>
+      <w:t>Học phần: HỌC MÁY (MALE431984) — Báo cáo cuối kỳ</w:t>
+      <w:br/>
+      <w:t>Đề tài: PHÂN CỤM 63 TỈNH VIỆT NAM VỚI STING TRÊN DỮ LIỆU PAPI 2011–2024</w:t>
+    </w:r>
+  </w:p>
+  <w:tbl>
+    <w:tblPr>
+      <w:tblW w:w="9792" w:type="dxa"/>
+      <w:jc w:val="center"/>
+      <w:tblBorders>
+        <w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+        <w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+        <w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+        <w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/>
+      </w:tblBorders>
+      <w:tblLayout w:type="fixed"/>
+      <w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/>
+    </w:tblPr>
+    <w:tblGrid>
+      <w:gridCol w:w="4896"/>
+      <w:gridCol w:w="4896"/>
+    </w:tblGrid>
+    <w:tr>
+      <w:trPr>
+        <w:cantSplit/>
+        <w:jc w:val="center"/>
+      </w:trPr>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="4896" w:type="dxa"/>
+          <w:tcMar>
+            <w:top w:w="30" w:type="dxa"/>
+            <w:left w:w="60" w:type="dxa"/>
+            <w:bottom w:w="30" w:type="dxa"/>
+            <w:right w:w="60" w:type="dxa"/>
+          </w:tcMar>
+          <w:vAlign w:val="center"/>
+        </w:tcPr>
+        <w:p>
+          <w:pPr>
+            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
+            <w:rPr>
+              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
+              <w:sz w:val="26"/>
+              <w:szCs w:val="26"/>
+            </w:rPr>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+              <w:color w:val="000000"/>
+              <w:sz w:val="24"/>
+              <w:szCs w:val="24"/>
+              <w:lang w:val="vi-VN"/>
+            </w:rPr>
+            <w:t>Mã nhóm: 15</w:t>
+          </w:r>
+        </w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="4896" w:type="dxa"/>
+          <w:tcMar>
+            <w:top w:w="30" w:type="dxa"/>
+            <w:left w:w="60" w:type="dxa"/>
+            <w:bottom w:w="30" w:type="dxa"/>
+            <w:right w:w="60" w:type="dxa"/>
+          </w:tcMar>
+          <w:vAlign w:val="center"/>
+        </w:tcPr>
+        <w:p>
+          <w:pPr>
+            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
+            <w:rPr>
+              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
+              <w:sz w:val="26"/>
+              <w:szCs w:val="26"/>
+              <w:lang w:val="vi-VN"/>
+            </w:rPr>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+              <w:color w:val="000000"/>
+              <w:sz w:val="24"/>
+              <w:szCs w:val="24"/>
+              <w:lang w:val="vi-VN"/>
+            </w:rPr>
+            <w:t>Số lượng thành viên: 2</w:t>
+          </w:r>
+        </w:p>
+      </w:tc>
+    </w:tr>
+    <w:tr>
+      <w:trPr>
+        <w:cantSplit/>
+        <w:jc w:val="center"/>
+      </w:trPr>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="4896" w:type="dxa"/>
+          <w:tcMar>
+            <w:top w:w="30" w:type="dxa"/>
+            <w:left w:w="60" w:type="dxa"/>
+            <w:bottom w:w="30" w:type="dxa"/>
+            <w:right w:w="60" w:type="dxa"/>
+          </w:tcMar>
+          <w:vAlign w:val="center"/>
+        </w:tcPr>
+        <w:p>
+          <w:pPr>
+            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
+            <w:rPr>
+              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
+              <w:sz w:val="26"/>
+              <w:szCs w:val="26"/>
+              <w:lang w:val="vi-VN"/>
+            </w:rPr>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+              <w:color w:val="000000"/>
+              <w:sz w:val="24"/>
+              <w:szCs w:val="24"/>
+              <w:lang w:val="vi-VN"/>
+            </w:rPr>
+            <w:t>Giảng viên hướng dẫn: ThS. Lê Minh Tân</w:t>
+          </w:r>
+        </w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="4896" w:type="dxa"/>
+          <w:tcMar>
+            <w:top w:w="30" w:type="dxa"/>
+            <w:left w:w="60" w:type="dxa"/>
+            <w:bottom w:w="30" w:type="dxa"/>
+            <w:right w:w="60" w:type="dxa"/>
+          </w:tcMar>
+          <w:vAlign w:val="center"/>
+        </w:tcPr>
+        <w:p>
+          <w:pPr>
+            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
+            <w:rPr>
+              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
+              <w:sz w:val="26"/>
+              <w:szCs w:val="26"/>
+            </w:rPr>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+              <w:color w:val="000000"/>
+              <w:sz w:val="24"/>
+              <w:szCs w:val="24"/>
+              <w:lang w:val="vi-VN"/>
+            </w:rPr>
+            <w:t>Chủ đề 6: Grid-based (clustering)</w:t>
+          </w:r>
+        </w:p>
+      </w:tc>
+    </w:tr>
+    <w:tr>
+      <w:trPr>
+        <w:cantSplit/>
+        <w:jc w:val="center"/>
+      </w:trPr>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="4896" w:type="dxa"/>
+          <w:tcMar>
+            <w:top w:w="30" w:type="dxa"/>
+            <w:left w:w="60" w:type="dxa"/>
+            <w:bottom w:w="30" w:type="dxa"/>
+            <w:right w:w="60" w:type="dxa"/>
+          </w:tcMar>
+          <w:vAlign w:val="center"/>
+        </w:tcPr>
+        <w:p>
+          <w:pPr>
+            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
+            <w:rPr>
+              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
+              <w:sz w:val="26"/>
+              <w:szCs w:val="26"/>
+            </w:rPr>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+              <w:color w:val="000000"/>
+              <w:sz w:val="24"/>
+              <w:szCs w:val="24"/>
+              <w:lang w:val="vi-VN"/>
+            </w:rPr>
+            <w:t>Nguyễn Tiến Sơn</w:t>
+            <w:br/>
+            <w:t>MSSV: 24110054</w:t>
+          </w:r>
+        </w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="4896" w:type="dxa"/>
+          <w:tcMar>
+            <w:top w:w="30" w:type="dxa"/>
+            <w:left w:w="60" w:type="dxa"/>
+            <w:bottom w:w="30" w:type="dxa"/>
+            <w:right w:w="60" w:type="dxa"/>
+          </w:tcMar>
+          <w:vAlign w:val="center"/>
+        </w:tcPr>
+        <w:p>
+          <w:pPr>
+            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
+            <w:rPr>
+              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
+              <w:sz w:val="26"/>
+              <w:szCs w:val="26"/>
+            </w:rPr>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+              <w:color w:val="000000"/>
+              <w:sz w:val="24"/>
+              <w:szCs w:val="24"/>
+              <w:lang w:val="vi-VN"/>
+            </w:rPr>
+            <w:t>Trần Thị Ngọc Quyên</w:t>
+            <w:br/>
+            <w:t>MSSV: 24110051</w:t>
+          </w:r>
+        </w:p>
+      </w:tc>
+    </w:tr>
+  </w:tbl>
+  <w:p>
+    <w:pPr>
+      <w:spacing w:before="160" w:after="40"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+        <w:color w:val="000000"/>
+        <w:sz w:val="24"/>
+      </w:rPr>
+      <w:t>TRƯỜNG ĐẠI HỌC CÔNG NGHỆ KỸ THUẬT TP. HỒ CHÍ MINH</w:t>
+      <w:br/>
+      <w:t>KHOA CÔNG NGHỆ THÔNG TIN · BỘ MÔN TRÍ TUỆ NHÂN TẠO</w:t>
+      <w:br/>
+      <w:t>Thành phố Hồ Chí Minh, tháng 11 năm 2026</w:t>
+    </w:r>
+  </w:p>
+</cover>

@@ -9,7 +9,7 @@ _Quy tắc trả lời: ≤60 giây/câu; không chắc → nói "chưa chắc, 
 3. **STING khác k-means thế nào?** — k-means gán mọi điểm về centroid gần nhất (ép mọi điểm vào cụm); STING không ép điểm thưa vào cụm — nhận nhãn −1 (nhiễu), nên kết quả trung thực hơn với dữ liệu nhiễu.
 4. **min_count chọn thế nào?** — Không cố định trước: nhóm sweep trên dữ liệu giả lập (ARI ≥ 0.9 khi mc=3–8) và trên dữ liệu thật; cấu hình cuối cùng được chốt bằng **quy trình train-only** (`predict_sweep.py`): chọn trên ≤2020, kiểm trên 2021–2022, hoàn toàn không nhìn 2024 — tránh "chọn theo test".
 5. **Noise (−1) là gì?** — Điểm thuộc ô lưới không đạt mật độ min_count; STING không ép chúng vào cụm. Ta luôn tách noise khỏi silhouette/DB/CH (metric hình học chỉ tính trên điểm thuộc cụm) và báo cáo noise ratio riêng.
-6. **Độ phức tạp của STING?** — Xây lưới O(n) mỗi mức — tổng O(n × số mức) ≈ O(n log n); gom cụm trên các ô dày (số ô nhỏ) tại một mức cố định; `query_rect` chỉ duyệt ô **một mức** nằm trọn trong vùng (không hạ top-down theo confidence như STING gốc).
+6. **Độ phức tạp của STING?** — Với L mức, n điểm, d chiều: xây lưới khoảng O(L·n·d) trên NumPy đang dùng (stable radix sort khóa ô nguyên). L không mặc nhiên bằng log n. `cluster` còn sắp M ô dày và duyệt lân cận tối đa 3^d−1 hướng; `query_rect` quét M ô có dữ liệu **một mức**, O(M·d), không hạ top-down theo confidence như STING gốc. O(n) chỉ là cách nói theo n khi cố định các yếu tố còn lại, không phải toàn bộ chi phí vô điều kiện.
 7. **Nhược điểm lớn nhất của STING?** — Lưới song song trục; nhạy với độ phân giải lưới và min_count; ở không gian ít chiều/nhiều mẫu thưa dễ mất cụm (curse of dimensionality — nhóm đo được: 8 chiều trên 430 điểm cho k=0/100% nhiễu).
 
 ## Dữ liệu & chất lượng
@@ -30,7 +30,7 @@ _Quy tắc trả lời: ≤60 giây/câu; không chắc → nói "chưa chắc, 
 15. **Gom cụm?** — Chỉ ô đạt `min_count` (dày); ô kề liên thông được gộp; điểm ô thưa → nhiễu −1.
 16. **STING vs k-means/DBSCAN (một câu)?** — STING: lưới + nhiễu tùy chọn, không cần k; k-means ép k và mọi điểm vào cụm; DBSCAN mật độ điểm, không có thống kê ô phân cấp.
 17. **Tham số chính?** — `n_levels`, `factor` (độ mịn), `min_count` (ngưỡng dày), `cluster_level` (mức gán nhãn).
-18. **Demo 2-D 240 điểm seed 42?** — Hai blob; ARI ≈0.950; chứng minh code trước PAPI; cùng tham số với slide 5 và `tests/test_sting.py`.
+18. **Demo 2D 240 điểm seed 42?** Hai cụm giả lập cho ARI ≈ 0.950. Xem slide 6 và `tests/test_sting.py`.
 19. **PAPI vì sao thường k=1?** — Panel cấp tỉnh/năm rất đồng nhất — `per_year.csv` gần như mọi năm một cụm lớn; tăng độ phân giải lưới mới tách ngoại vi.
 20. **Chạy lại notebook nộp bài?** — `python scripts/gen_submission_demo.py` hoặc nbconvert execute `notebooks/submission_demo.ipynb`.
 21. **10 slide nộp bài vs 16 slide phụ lục?** — Nộp chính: `slides/submission.pptx` (10 trang, `build_slides_10.py`). Phụ lục cuối kỳ: `slides/final.pptx` (16 trang). Giữa kỳ cũ: `midterm.pptx` 15 trang — không nhầm ba bộ.

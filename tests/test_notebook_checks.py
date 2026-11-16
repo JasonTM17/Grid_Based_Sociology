@@ -1,0 +1,54 @@
+"""Negative controls for the saved-notebook readiness gate."""
+
+import copy
+
+import pytest
+
+from scripts.notebook_checks import notebook_issues
+
+
+def executed_notebook():
+    return {"cells": [{
+        "cell_type": "code", "source": "print('ok')", "execution_count": 1,
+        "outputs": [{"output_type": "stream", "name": "stdout", "text": "ok\n"}],
+    }]}
+
+
+def test_complete_run_passes():
+    assert not notebook_issues(executed_notebook())
+
+
+@pytest.mark.parametrize("count", [None, 0, 7])
+def test_outputs_without_a_complete_run_are_rejected(count):
+    notebook = executed_notebook()
+    notebook["cells"][0]["execution_count"] = count
+    # The former smoke condition (no error output) incorrectly passed this.
+    assert all(o["output_type"] != "error" for o in notebook["cells"][0]["outputs"])
+    assert notebook_issues(notebook)
+
+
+def test_out_of_order_run_is_rejected():
+    notebook = executed_notebook()
+    notebook["cells"].append(copy.deepcopy(notebook["cells"][0]))
+    assert notebook_issues(notebook)
+
+
+@pytest.mark.parametrize("outputs", [
+    [],
+    [{"output_type": "error", "ename": "ValueError"}],
+    [{"output_type": "stream", "name": "stderr", "text": "warning"}],
+])
+def test_missing_or_failed_outputs_are_rejected(outputs):
+    notebook = executed_notebook()
+    notebook["cells"][0]["outputs"] = outputs
+    assert notebook_issues(notebook)
+
+
+def test_empty_notebook_is_rejected():
+    assert notebook_issues({"cells": []})
+
+
+def test_warning_suppression_is_rejected():
+    notebook = executed_notebook()
+    notebook["cells"][0]["source"] = 'warnings.filterwarnings("ignore")'
+    assert notebook_issues(notebook)

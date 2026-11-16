@@ -1,7 +1,8 @@
 """Build reports/final_report.docx — báo cáo cuối kỳ (tiếng Việt, 7 chương).
 
-Định dạng học theo ghi chú báo cáo tự biên soạn (`reports/report_format_notes.md`):
-A4, lề 2.5/2.0/2.0/2.0 cm, Times New Roman, Title 20pt bold, H1 16pt, H2 14pt, H3 12pt,
+Định dạng cuối áp dụng bằng report_style theo mẫu người dùng gửi
+(`reports/report_format_notes.md`): A4, lề trái/phải1.905cm, trên/dưới1.778cm,
+Times New Roman12pt, giãn dòng1.1, tiêu đề đen; bìa gọn với bảng thông tin nhóm,
 front matter đầy đủ (LỜI CẢM ƠN · TÓM TẮT · LỜI MỞ ĐẦU · MỤC LỤC(TOC field) · danh mục các loại).
 
 Cách dùng: python scripts/build_report.py
@@ -20,11 +21,16 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from docx.shared import Cm, Pt, RGBColor
 
+if __package__:
+    from .report_style import apply_reference_style
+else:
+    from report_style import apply_reference_style
+
 ROOT = Path(__file__).resolve().parent.parent
 FIGS = ROOT / "results" / "figs"
 OUT = ROOT / "reports" / "final_report.docx"
 
-# ==== Số liệu đọc từ artifact do script khác sinh (không hardcode số đo) ====
+# Số liệu đọc từ artifact do script khác sinh (không hardcode số đo)
 
 
 def _read_results_csv(name):
@@ -262,7 +268,7 @@ GREY = RGBColor(0x5A, 0x5A, 0x5A)
 
 doc = Document()
 
-# ================= Page setup & styles =================
+# Page setup & styles
 def apply_page_setup(section):
     section.page_width, section.page_height = Cm(21.0), Cm(29.7)
     section.left_margin, section.right_margin = Cm(2.5), Cm(2.0)
@@ -362,16 +368,6 @@ def add_page_number_footer(sec):
     _append_field_to_run(r2, "PAGE")
 
 
-def p(text, size=12, bold=False, color=INK, align=None, space_after=6, italic=False):
-    para = doc.add_paragraph()
-    para.paragraph_format.space_after = Pt(space_after)
-    if align is not None:
-        para.alignment = align
-    r = para.add_run(text)
-    set_run(r, size, bold, color, italic)
-    return para
-
-
 def h1(text):
     para = doc.add_heading("", level=1)
     para.paragraph_format.space_before = Pt(18)
@@ -429,6 +425,8 @@ def table(headers, rows, widths=None, caption=None, header_fill="1B6E77"):
     t = doc.add_table(rows=len(rows) + 1, cols=len(headers))
     t.style = doc.styles["Table Grid"]
     t.autofit = widths is None
+    for column, width in zip(t.columns, widths or []):
+        column.width = Cm(width)
     for j, (h, w) in enumerate(zip(headers, widths or [])):
         cell = t.cell(0, j)
         if widths:
@@ -526,26 +524,12 @@ def toc_field():
 
 configure_cover_section(doc.sections[0])
 
-# ================= BÌA =================
-p("TRƯỜNG ĐẠI HỌC CÔNG NGHỆ KỸ THUẬT TP. HỒ CHÍ MINH", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
-p("KHOA CÔNG NGHỆ THÔNG TIN", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
-p("BỘ MÔN TRÍ TUỆ NHÂN TẠO", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-p("—  ◆  —", 14, False, TEAL, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-p("BÁO CÁO CUỐI KỲ", 20, True, NAVY, WD_ALIGN_PARAGRAPH.CENTER, space_after=10)
-p("Topic 6 — Grid-based (clustering)", 14, True, TEAL, WD_ALIGN_PARAGRAPH.CENTER, space_after=30)
-p("PHÂN CỤM 63 TỈNH VIỆT NAM\nVỚI STING TRÊN DỮ LIỆU PAPI 2011–2024", 20, True, NAVY, WD_ALIGN_PARAGRAPH.CENTER, space_after=50)
-p("ĐỒ ÁN MÔN HỌC MÁY (MALE431984)", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
-p("Giáo viên hướng dẫn: ThS. Lê Minh Tân", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
-p("Nhóm: 15", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
-p("Sinh viên 1: Nguyễn Tiến Sơn — MSSV: 24110054", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
-p("Sinh viên 2: Trần Thị Ngọc Quyên — MSSV: 24110051", 12, False, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=40)
-p("Thành phố Hồ Chí Minh, tháng 11 năm 2026", 11, False, GREY, WD_ALIGN_PARAGRAPH.CENTER)
-doc.add_page_break()
+# Dành section đầu cho bìa được chèn từ assets/report-cover.xml khi lưu.
 front_matter_sec = doc.add_section(WD_SECTION_START.NEW_PAGE)
 apply_page_setup(front_matter_sec)
 add_page_number_footer(front_matter_sec)
 
-# ================= LỜI CẢM ƠN =================
+# LỜI CẢM ƠN
 h1("LỜI CẢM ƠN")
 body(
     "Nhóm xin chân thành cảm ơn ThS. Lê Minh Tân — giảng viên hướng dẫn — và Bộ môn Trí tuệ "
@@ -562,24 +546,24 @@ body(
 )
 doc.add_page_break()
 
-# ================= TÓM TẮT =================
+# TÓM TẮT
 h1("TÓM TẮT")
 body(f"Đồ án áp dụng STING (STatistical INformation Grid) — thuật toán phân cụm dựa trên lưới phân cấp, cài đặt từ đầu — lên dữ liệu chỉ số PAPI (Provincial Governance and Public Administration Performance Index) [2] của 63 tỉnh/thành Việt Nam giai đoạn 2011–2024. Dữ liệu gốc gồm 14 workbook chính thức, được parse thành panel 882 dòng × 41 cột (d1–d8 các yếu tố quản trị + 29 chỉ tiêu thành phần), vượt yêu cầu đề bài (≥ 500 × ≥ 10) [8]. Trong quá trình làm sạch, heuristic audit (`scripts/check_data.py`) đánh dấu 23/37 cột chỉ tiêu có bước nhảy trung bình năm > 0.25 điểm (chưa chứng minh đổi thang); ví dụ đã đối chiếu workbook: sd_5_4 đổi từ 0.25–2.5 lên 0.33–3.33 tại năm 2021; pipeline dự đoán xuyên năm do đó chỉ dùng 8 chỉ tiêu qua audit thang đo. Kết quả chính thức: dữ liệu PAPI cấp tỉnh/năm gần như một khối đồng nhất — STING thu được một vùng dày chiếm ưu thế và hai cụm nhỏ 16 và 5 điểm (tổng 21) trong tập gộp 2011–2023; robustness khi mở rộng chiều: PCA d1–d6 ({_pct(R_PCA['explained_var_total'])} phương sai) → k={R_PCA['k']} — không nhận diện; nhánh 8 chiều 2018–2024 đọc theo ablation OFAT — gốc k={R_GOC['k']} nhiễu {_pct(R_GOC['noise_ratio'])}, f=3 → k={R_F3['k']}/{_pct(R_F3['noise_ratio'])}, lv=2 → k={R_LV2['k']} toàn nhiễu, riêng mc=2 đạt ngưỡng k/noise (k={R_MC2['k']}, nhiễu {_pct(R_MC2['noise_ratio'])}) nhưng silhouette âm — tách yếu (Bảng 5; kết quả được báo cáo trung thực). Pipeline dự đoán 2024 (năm out-of-sample duy nhất khi chốt cấu hình theo quy trình train-only) đạt phủ 79% với lưới toàn cục; mô hình hồi quy Ridge (được chọn qua CV — hai baseline hồi quy cũng có CV thật trên cùng fold: carry {_vn(CV_CARRY)} vs ridge {_vn(CV_RIDGE)}) dự báo chỉ số 6.1 Y tế công lập năm sau có MAE holdout 0.0640, thấp hơn carry-forward 0.0683 là 6.3%. Kết luận chính: PAPI ở cấp tỉnh/năm chưa cho thấy cấu trúc cụm tách biệt mạnh — giá trị nghiên cứu nằm ở quy trình dữ liệu nghiêm ngặt (audit thang đo, quy trình chọn cấu hình train-only) và cách báo cáo trung thực các kết quả khó nhìn.")
 doc.add_page_break()
 
-# ================= LỜI MỞ ĐẦU =================
+# LỜI MỞ ĐẦU
 h1("LỜI MỞ ĐẦU")
 body("Đề tài thuộc Topic 6 — Grid-based (clustering), với hai yêu cầu khắt khe: (1) thuật toán tự viết, không dùng thư viện có sẵn cho phần lõi; (2) dataset thật ≥ 500 dòng × ≥ 10 cột. Nhóm chọn PAPI vì đây là bộ chỉ số quản trị công chính thức, công bố hàng năm, có lịch sử 2011–2024 đủ dài và đủ chiều (8 yếu tố + 29 chỉ tiêu thành phần) để thử thách một thuật toán lưới vốn phát huy tốt ở chiều thấp.")
 body(f"Đồ án gồm: cài đặt STING từ đầu (src/sting.py); pipeline dữ liệu từ 14 workbook gốc; đối chiếu chéo với gói replication nghiên cứu công bố (Mendeley, CC BY 4.0 — lệch 0.0 trên {MENDELEY_OVERLAP_TXT} quan sát trùng khớp trên 8 chiều, tính từ reports/crosscheck_mendeley.md) [3]; phân cụm các năm; so sánh với k-means/DBSCAN; robustness đa chỉ tiêu; bản đồ 63 tỉnh; và pipeline dự đoán năm 2024 với hai mô hình local.")
 body("Mọi tuyên bố số liệu trong báo cáo tái lập được từ mã nguồn: python scripts/build_panel.py → python scripts/check_data.py → python scripts/predict_sweep.py → python scripts/predict_demo.py → python scripts/predict_supervised.py → python scripts/run_analysis.py. Notebook cuối (notebooks/final_analysis.ipynb) chạy sạch end-to-end.")
 doc.add_page_break()
 
-# ================= MỤC LỤC =================
+# MỤC LỤC
 h1("MỤC LỤC")
 toc_field()
 doc.add_page_break()
 
-# ================= DANH MỤC =================
+# DANH MỤC
 h1("DANH MỤC CHỮ VIẾT TẮT")
 table(["Viết tắt", "Nghĩa"], [
     ["STING", "STatistical INformation Grid — phân cụm dựa trên lưới thống kê phân cấp (Wang, Yang & Muntz, VLDB 1997) [1]"],
@@ -603,7 +587,7 @@ body_sec = doc.add_section(WD_SECTION_START.NEW_PAGE)
 apply_page_setup(body_sec)
 _clear_footer_block(body_sec.footer)
 
-# ================= CHƯƠNG 1 =================
+# CHƯƠNG 1
 h1("CHƯƠNG 1. TỔNG QUAN ĐỀ TÀI")
 h2("1.1. Bối cảnh và vấn đề đặt ra")
 body("Chỉ số PAPI (Vietnam Provincial Governance and Public Administration Performance Index) được CECODES, VFF-CRT, RTA & UNDP công bố hàng năm từ 2011, đo lường chất lượng quản trị và cung ứng dịch vụ công ở cấp tỉnh trên 8 yếu tố (từ 2018): Tham gia ở cấp cơ sở (d1), Minh bạch (d2), Trách nhiệm giải trình (d3), Kiểm soát tham nhũng (d4), Thủ tục hành chính công (d5), Cung ứng dịch vụ công (d6), Quản trị môi trường (d7), Quản trị điện tử (d8). Đề bài môn Học máy (Topic 6 — Grid-based clustering) yêu cầu một thuật toán phân cụm dựa trên lưới, dataset thật ≥ 500 dòng × ≥ 10 cột, và nhóm chọn PAPI vì hai lý do: (i) dữ liệu công khai, có chuỗi thời gian dài (14 năm × 63 tỉnh); (ii) cơ sở dữ liệu đủ chiều để thử thách grid-based clustering ở chiều thấp.")
@@ -624,18 +608,19 @@ bullets([
     ("Khoa học.", f"Phát hiện trung thực: PAPI cấp tỉnh/năm gần như một khối đồng nhất; cấu trúc tách biệt chỉ ở nhóm ngoại vi nhỏ; robustness 8 chiều đọc theo ablation OFAT — lv=2 sập toàn nhiễu, f=3 cho {_pct(R_F3['noise_ratio'])} nhiễu, riêng mc=2 đạt ngưỡng k/noise nhưng silhouette âm — không có cấu trúc tách mạnh."),
 ])
 
-# ================= CHƯƠNG 2 =================
+# CHƯƠNG 2
 h1("CHƯƠNG 2. CƠ SỞ LÝ THUYẾT")
 h2("2.1. Grid-based clustering")
 body("Grid-based chia không gian dữ liệu thành lưới (grid) hữu hạn ô, thay vì gom điểm theo khoảng cách từng đôi. Mỗi ô lưu thông tin tóm tắt; các cụm được suy ra từ mật độ/thống kê ô. Ưu điểm: (i) chi phí xây lưới tuyến tính O(n) mỗi mức; (ii) truy vấn vùng nhanh; (iii) song song hóa tự nhiên. Nhược điểm: lưới song song trục; nhạy với độ phân giải và ngưỡng mật độ; ở chiều cao, lưới bị thưa (curse of dimensionality).")
 h2("2.2. STING (STatistical INformation Grid)")
-body("Wang, Yang & Muntz, “STING: A Statistical Information Grid Approach to Spatial Data Mining”, Proc. VLDB 1997. Thuật toán: (1) chọn mức lưới; (2) mỗi ô ở mỗi mức lưu count, mean, std, min, max theo từng chiều; (3) ô được coi là “dày” nếu count ≥ ngưỡng (và tùy chọn: khác biệt ý nghĩa so với ô cha theo kiểm định); (4) gom các ô dày liền kề (4/8-connectivity) thành cụm; điểm thuộc ô không dày nhận nhãn −1. Ở đây STING dùng factor=3 hoặc 4, 2–3 mức, connectivity=1 (4-hướng).")
+body("STING gốc của Wang, Yang & Muntz (VLDB 1997) lưu count, mean, std, min, max và loại phân phối theo thuộc tính. Truy vấn bắt đầu từ lớp cao, đánh giá độ liên quan bằng confidence rồi chỉ duyệt các ô con liên quan (top-down pruning); thống kê lớp trên có thể gộp từ lớp dưới. Đây là cơ chế của bài gốc, khác với biến thể rút gọn dùng trong đồ án [1].")
+body("Bản nhóm tự cài bỏ loại phân phối và pruning top-down: fit tính thống kê trực tiếp từ điểm ở từng mức; cluster chọn một mức cố định, coi count ≥ min_count là ô dày rồi gom các ô kề bằng DFS; ô thưa nhận −1. Tùy chọn significance_z chỉ là heuristic so với ô cha, không phải toàn bộ phép đánh giá confidence của bài gốc; pipeline chính tắt tùy chọn này. Dự án là một ứng dụng grid-based dựa trên STING, không tuyên bố tái hiện đầy đủ mọi chức năng của STING gốc.")
 h2("2.3. Cài đặt trong đồ án (src/sting.py)")
 bullets([
-    ("fit(X).", "Một lượt O(n) cho mỗi mức: gán điểm vào ô, tích lũy thống kê ô (count/mean/std/min/max)."),
+    ("fit(X).", "Dựng L mức trên n điểm d chiều; với khóa ô nguyên và stable radix sort của NumPy đang dùng, chi phí theo dữ liệu khoảng O(L·n·d). Không coi số mức và số chiều luôn bằng hằng số khi phân tích tổng quát. Refit hủy nhãn cũ, cần cluster lại trước predict."),
     ("cluster(level).", "Chọn ô dày → gom thành phần liên thông trên đồ thị kề ô (BFS/DFS) → gán nhãn điểm; nhãn −1 cho điểm không nằm trong ô dày."),
     ("predict(X).", "Điểm MỚI: tìm ô chứa nó ở mức đã dùng → cụm của ô đó; nếu ô không dày hoặc điểm ngoài vùng huấn luyện → −1."),
-    ("query_rect(rect).", "Truy vấn vùng chữ nhật: chỉ duyệt các ô nằm trọn trong vùng; hỗ trợ count/mean/std/min/max tổng hợp."),
+    ("query_rect(rect).", "Quét M ô có dữ liệu tại một mức, chọn ô nằm trọn trong vùng rồi gộp count/mean/std/min/max; O(M·d), không có top-down pruning. cluster còn sắp M ô dày và xét lân cận (tối đa 3^d−1 hướng), nên không dùng O(n) để mô tả vô điều kiện toàn bộ pipeline."),
     ("save/load.", "Pickle model + JSON scaler/provenance — nạp lại dự báo không cần huấn luyện lại."),
 ])
 h2("2.4. Baselines & chỉ số đánh giá")
@@ -647,9 +632,10 @@ bullets([
     ("ARI.", "Adjusted Rand Index so với STING và giữa các năm."),
 ])
 h2("2.5. Chỉ số PAPI & thang đo")
+body("Liên hệ Day 9: WCSS là tổng khoảng cách bình phương từ điểm tới centroid của cụm. K-Means tối ưu WCSS với k cố định; tăng k thường làm WCSS giảm nên cần đọc elbow cùng chỉ số khác. STING sinh k từ lưới và có noise: không so WCSS hay silhouette giữa các tập điểm khác nhau như một bảng xếp hạng tuyệt đối; luôn báo cả cỡ cụm và tỷ lệ noise. Dendrogram của Hierarchical Clustering ghi thứ tự ghép cụm theo khoảng cách, còn hierarchy của STING là chia không gian hình học; hai loại cây không đồng nghĩa.")
 body("Mỗi yếu tố PAPI chuẩn hóa về 1–10 điểm theo năm; chỉ tiêu thành phần có thang riêng và có thể đổi thang giữa các phiên bản (vd 5.4 đổi 0.25–2.5 → 0.33–3.33 tại 2021 khi cấu trúc chỉ tiêu thay đổi). Vì vậy sử dụng xuyên năm buộc phải kiểm tra thang từng chỉ tiêu — làm bằng audit bước nhảy trung bình năm trong scripts/check_data.py (ngưỡng 0.25 điểm).")
 
-# ================= CHƯƠNG 3 =================
+# CHƯƠNG 3
 h1("CHƯƠNG 3. DỮ LIỆU VÀ TIỀN XỬ LÝ")
 h2("3.1. Nguồn dữ liệu và PROVENANCE")
 bullets([
@@ -745,12 +731,12 @@ table(
     ),
 )
 
-# ================= CHƯƠNG 4 =================
+# CHƯƠNG 4
 h1("CHƯƠNG 4. PHƯƠNG PHÁP")
 h2("4.1. Cấu hình STING và quy trình chọn train-only")
 body(f"Ứng viên cặp chỉ tiêu được giới hạn ở các cột qua audit thang đo: 28 cặp từ 8 sub-dim sạch × 8 cấu hình lưới được chọn ({SWEEP_CONFIG_TXT}) = 224 tổ hợp (không phải tích Descartes đầy đủ của mọi (n_levels, factor, min_count); d1–d6 bị loại khỏi sweep — thang 1–10 chưa chứng minh tương đương xuyên năm). Tiêu chí chọn đặt TRƯỚC khi nhìn năm 2024 và PHÂN RÃ THEO BÀI TOÁN: hồi quy chọn model bằng CV expanding origin 2017–2022 thuần train; cặp chỉ tiêu + tham số STING (cho cả STING.predict và nhãn phân loại) do sweep chọn bằng cách fit ≤ 2020 và chấm coverage trên “tương lai giả” 2021–2022 (kèm k, nhiễu, độ vững mc±1) — 2 năm này trùng 2 fold CV cuối của phân loại, nên CV score phân loại hơi lạc quan. Allowlist của sweep dùng cả kiến thức ngoại sinh về PAPI 2021: sd_5_1/5_3/5_4 bị loại vì bước nhảy 2021 nằm ngoài giai đoạn train, heuristic train-only không tự bắt được. Hàm điểm = coverage − 0.5·noise − 0.15·largest − 0.02·|k−3| + 0.03·stable là heuristic chỉnh tay, không có dẫn xuất; bảo đảm chính nằm ở bộ lọc cứng (k ∈ [2,6], noise ≤ 25%, cụm lớn nhất ≤ 85%, coverage ≥ 75%) — cấu hình thoái hóa k=1 đạt điểm 0.84 cao hơn winner 0.6213 và chỉ bị chặn bởi bộ lọc này; margin top-1/top-2 = 0.018, nhỏ hơn một thành phần điểm đơn lẻ; stable_mc_pm1 = false của cấu hình thắng được đo (−0.03 điểm) nhưng không có ứng viên stable nào qua lọc, nên không dùng làm gate. Kết quả đóng băng vào models/predict_config.json: cặp sd_4_2 (4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công) × sd_6_1 (6.1 Y tế công lập); STING(L=3, factor=4, min_count=5, cluster level=2, connectivity=1); coverage 2021–2022 = 0.851. Năm 2024 không tham gia bất kỳ bước chọn nào; đánh giá cuối chỉ thực hiện MỘT LẦN sau khi đóng băng: coverage 2024 = 79%, phân bố {{nhiễu: 13, cụm 2: 48}}.")
 h2("4.2. Kiểm thử")
-body(f"Bộ test STING trong tests/test_sting.py (pytest, tất cả xanh; {SUITE_OK}, coverage 98% cho src/sting.py đo bằng pytest --cov): thống kê ô khớp với numpy (tol 1e-9); phục hồi 2 Gaussian blobs (ARI ≥ 0.8); biên (điểm trên biên, 1 điểm, ô rỗng); predict trước cluster → RuntimeError; out-of-support → −1; save/load khôi phục chính xác nhãn. Runtime: ~18 giây cho notebook giữa kỳ.")
+body(f"Bộ test STING trong tests/test_sting.py (pytest; {SUITE_OK}; coverage được đo bằng pytest --cov tại checkpoint kiểm tra): thống kê ô khớp numpy; phục hồi 2 Gaussian blobs với gate ARI ≥ 0.9; biên, 1 điểm, ô rỗng; predict trước cluster và sau refit chưa cluster → RuntimeError; out-of-support → −1; save/load khôi phục chính xác nhãn. Notebook cuối kỳ trực tiếp kiểm chứng synthetic, tái lập nhãn STING từ panel/cấu hình đóng băng và tính lại MAE Ridge trên holdout, bên cạnh các bảng/hình đọc từ artifact.")
 h2("4.3. Baselines")
 bullets([
     ("k-means.", "k ∈ {2, 3, 4, 5}; n_init=10; seed=42. Ép mọi điểm vào cụm (không có nhiễu)."),
@@ -770,7 +756,7 @@ bullets([
     ("Persistence.", "joblib local (models/sup_ridge.joblib, sup_rf.joblib); nạp lại dự báo không cần huấn luyện lại."),
 ])
 
-# ================= CHƯƠNG 5 =================
+# CHƯƠNG 5
 h1("CHƯƠNG 5. KẾT QUẢ")
 h2("5.1. Kiểm chứng thuật toán trên dữ liệu giả lập")
 body("STING cài đặt từ đầu phục hồi đúng 2 cụm Gauss trên dữ liệu tổng hợp 240 điểm: ARI = 0.950, tỷ lệ nhiễu 2.5%, đúng 2 cụm (Hình 1). Kết quả này xác nhận thuật toán đúng trước khi dùng dữ liệu thật.")
@@ -891,7 +877,7 @@ bullets([
     ("Nguồn ngoài.", "python scripts/external_validation.py → results/external_validation.md + results/external_validation.csv + 4 hình external_* (từ data/processed/external_*.csv; provenance: data/processed/external_provenance.md, data/raw/*/PROVENANCE.md)."),
 ])
 
-# ================= CHƯƠNG 6 =================
+# CHƯƠNG 6
 h1("CHƯƠNG 6. THẢO LUẬN VÀ HẠN CHẾ")
 h2("6.1. Vì sao dữ liệu PAPI “gần như một khối”?")
 body("Ba nguyên nhân hợp lý (không khẳng định ngoài dữ liệu): (1) PAPI chuẩn hóa về 1–10 theo năm — nén mọi biến động vào thang ngắn, nên phương sai giữa các tỉnh nhỏ; (2) khảo sát cấp tỉnh bám dân số/đô thị hóa — các tỉnh hội tụ dần theo thời gian; (3) phần lớn chỉ tiêu thành phần đã được thiết kế để tương quan với yếu tố tổng hợp, làm giàu miền trung tâm. Empirically: trên cặp chỉ tiêu đóng băng sd_4_2 × sd_6_1 (thang workbook 0.25–2.5 điểm mỗi chiều, xem `scripts/build_scale_metadata.py`), 808 quan sát tỉnh-năm có đủ hai chỉ tiêu tập trung trong một lõi ~2.0±0.25, ngoại lệ rải rác hai đầu; Hình 2 và Hình 6 cho thấy ngoại vi không gom thành một vùng địa lý — không phải “hai Việt Nam” theo vùng kinh tế, mà là vài tỉnh dao động ở từng chỉ tiêu.")
@@ -966,7 +952,7 @@ bullets([
     ("Định tính.", "phỏng vấn sâu 3–5 tỉnh ngoại vi để kiểm tra giả thuyết “hai tốc độ” quản trị."),
 ])
 
-# ================= CHƯƠNG 7 =================
+# CHƯƠNG 7
 h1("CHƯƠNG 7. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN")
 h2("7.1. Kết luận")
 bullets([
@@ -978,11 +964,11 @@ bullets([
 h2("7.2. Hướng phát triển")
 body("Xem 6.7 — trọng tâm: (1) rank-normalization xuyên năm; (2) quỹ đạo tỉnh; (3) backtest cuốn chiếu; (4) phân cụm có ràng buộc không gian; (5) nghiên cứu định tính bổ trợ. Ngoài ra, bản đồ choropleth đầy đủ (plotly + GeoJSON) và dashboard tương tác là bước trực quan tiếp theo.")
 h2("7.3. Lời cuối")
-body("Đồ án không “tạo ra” một cấu trúc cụm đẹp nếu dữ liệu không có nó; đồ án cung cấp: (i) một cài đặt STING hoàn chỉnh, kiểm thử kỹ; (ii) một quy trình dữ liệu nghiêm ngặt (audit thang đo, train-only selection) mà mọi phân tích PAPI xuyên năm nên áp dụng; (iii) báo cáo trung thực cả robustness mở rộng chiều (PCA âm tính; nhánh 8 chiều OFAT — mc=2 vượt ngưỡng k/noise với silhouette âm, các nhánh còn lại không nhận diện) lẫn kết quả dương tính. Nhóm tin rằng đây là cách học máy được ứng dụng có trách nhiệm vào nghiên cứu chính sách công.")
+body("Đồ án không “tạo ra” một cấu trúc cụm đẹp nếu dữ liệu không có nó; đồ án cung cấp: (i) một biến thể grid-based dựa trên STING, đã kiểm thử trong phạm vi cài đặt công bố; (ii) quy trình dữ liệu có audit thang đo và lựa chọn không dùng holdout 2024; (iii) báo cáo trung thực cả robustness mở rộng chiều (PCA âm tính; nhánh 8 chiều OFAT — mc=2 vượt ngưỡng k/noise với silhouette âm, các nhánh còn lại không nhận diện) lẫn kết quả dương tính. Kết quả không chứng minh cấu trúc xã hội hay quan hệ nhân quả.")
 h2("7.4. Khai báo sử dụng công cụ hỗ trợ")
 body("Nhóm sử dụng trợ lý AI lập trình trong một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, và dry-run đo thời gian chuẩn bị demo (nhật ký rehearsal_log.md mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Mọi quyết định phương pháp, quy trình chọn cấu hình, đánh giá và kết luận do hai thành viên quyết định và kiểm chứng lại; cả hai thành viên chịu trách nhiệm giải thích mọi phần của đồ án. Môn học chưa quy định rubric khai báo cụ thể — nhóm chủ động khai báo theo thông lệ liêm chính học thuật.")
 
-# ================= PHỤ LỤC A =================
+# PHỤ LỤC A
 h1("PHỤ LỤC A — LỆNH TÁI LẬP & KIỂM TRA")
 body("Mọi bước dưới đây chạy từ thư mục gốc repo và cho kết quả như cột kỳ vọng; môi trường đã kiểm chứng: Python 3.14.2, Windows 11, dependencies trong requirements.txt.")
 table(["Lệnh", "Kỳ vọng"], [
@@ -1003,7 +989,7 @@ table(["Lệnh", "Kỳ vọng"], [
 ], widths=[9.8, 6.0], caption="Bảng A1. Danh sách lệnh tái lập và kết quả kỳ vọng")
 body("Môi trường: jupyter/pytest/nbconvert không cài trên PATH — luôn dùng python -m pytest / python -m nbconvert. Dữ liệu gốc data/raw/ bất biến; panel tái tạo từ raw bằng build_panel.py; Mendeley đầy đủ tải theo DOI 10.17632/wbk42j9wc8.1 (chỉ commit 4 file nhỏ dùng trực tiếp).")
 
-# ================= PHỤ LỤC B =================
+# PHỤ LỤC B
 # THUẦN ADDITIVE — tóm tắt 3 lane phân tích chuyên sâu model của
 # reports/model_deep_dive.md (A: độ nhạy giao thức/B5, B: hồ sơ cụm +
 # bootstrap, C: chẩn đoán supervised). Lane chỉ chạy script mới in-memory,
@@ -1051,7 +1037,7 @@ def _grpm(med_list, cl):
     return f"{m['median']} (n = {m['n']})"
 
 
-# ---- Lane A: results/protocol_sensitivity.md ----
+# Lane A: results/protocol_sensitivity.md
 _A = _md_read("protocol_sensitivity.md")
 _A3 = _md_between(_A, "## 3.", "## 4.")
 _A4 = _md_between(_A, "## 4.", "## 5.")
@@ -1105,7 +1091,7 @@ _A_ST_TOP = _md_rx(r"top-1 toàn bảng `([\w+]+)` \(([\d/]+)\) có stable_mc_pm
 _A_ST_CONT = _md_rx(r"`([\w+]+)` \(([\d/]+)\): stable_mc_pm1 = \*\*(True|False)\*\*",
                     _A8)
 
-# ---- Lane B: results/cluster_profile.md ----
+# Lane B: results/cluster_profile.md
 _B = _md_read("cluster_profile.md")
 _B_PCI = _md_between(_B, "### 2.1)", "### 2.2)")
 _B_POV = _md_between(_B, "### 2.2)", "### 2.3)")
@@ -1146,7 +1132,7 @@ _B_ZERO_N = len([p for p in next(ln for ln in _B_HEA.splitlines()
                                  if "0-thật" in ln).split("):", 1)[1].split(",")
                  if p.strip()])
 
-# ---- Lane C: results/supervised_depth.md ----
+# Lane C: results/supervised_depth.md
 _C = _md_read("supervised_depth.md")
 _C_RIDGE = _md_between(_C, "### Ridge hồi quy — R²", "### LogisticRegression")
 _C_LR = _md_between(_C, "### LogisticRegression", "- Hình:")
@@ -1336,7 +1322,7 @@ body("Đọc gộp (mô tả, chưa duyệt GV): những gì vững là cụm l�
      "đặc trưng ngoài sd_6_1. Danh sách hành động đã tách theo quyền duyệt GV ở "
      "reports/model_deep_dive.md — nhóm viết báo cáo không tự chốt thay đổi nào.")
 
-# ================= TÀI LIỆU THAM KHẢO =================
+# TÀI LIỆU THAM KHẢO
 h1("TÀI LIỆU THAM KHẢO")
 refs = [
     "Wang, S., Yang, J., Muntz, R. (1997). STING: A Statistical Information Grid Approach to Spatial Data Mining. Proc. 23rd International Conference on Very Large Data Bases (VLDB), Athens, Greece, 186–195.",
@@ -1361,5 +1347,6 @@ for i, r in enumerate(refs, start=1):
     r2 = para.add_run(r)
     set_run(r2, 12, False, INK)
 
+apply_reference_style(doc)
 doc.save(str(OUT))
 print("saved:", OUT)

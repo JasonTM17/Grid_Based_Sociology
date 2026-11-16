@@ -1,0 +1,20 @@
+[
+  {
+    "milestone": "midterm",
+    "status": "PASS",
+    "sha256": "eb29c95868142a5b4c3b1786a16657891cd97812093958dadfef9da88b8179aa",
+    "code_cells": 11,
+    "isolation_guard": true,
+    "python": "3.14.2",
+    "launcher_messages": true
+  },
+  {
+    "milestone": "final",
+    "status": "PASS",
+    "sha256": "98d3a6177da8a485177e71c187d53922c57d2c55260c0b5b1ce204007322f86c",
+    "code_cells": 15,
+    "isolation_guard": true,
+    "python": "3.14.2",
+    "launcher_messages": true
+  }
+]

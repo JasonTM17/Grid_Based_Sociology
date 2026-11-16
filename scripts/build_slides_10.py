@@ -32,7 +32,7 @@ FIGS = ROOT / "results" / "figs"
 OUT = ROOT / "slides" / "submission.pptx"
 TOTAL = 10
 
-# ==== Số liệu đọc từ artifact (không hardcode số đo clustering / supervised) ====
+# Số liệu đọc từ artifact (không hardcode số đo phân cụm)
 
 
 def _read_results_csv(name: str) -> list[dict[str, str]]:
@@ -56,79 +56,9 @@ def _metric_row(method_sub: str) -> dict[str, str]:
     raise KeyError(method_sub)
 
 
-ROBUSTNESS = _read_results_csv("robustness.csv")
-
-
-def _rob(branch_sub: str) -> dict[str, str]:
-    for r in ROBUSTNESS:
-        if branch_sub in r["branch"]:
-            return r
-    raise KeyError(branch_sub)
-
-
-R_PCA = _rob("PCA(2)")
-R_GOC = _rob("(gốc OFAT)")
-R_F3 = _rob("OFAT f=3")
-R_MC2 = _rob("OFAT mc=2")
-R_LV2 = _rob("OFAT lv=2")
-
-SUP_ROWS = _read_results_csv("supervised_metrics.csv")
-
-
-def _reg_cv(model_sub: str) -> str:
-    for r in SUP_ROWS:
-        if r["task"] == "regression" and model_sub in r["model"]:
-            return r["value_cv"].strip()
-    raise KeyError(model_sub)
-
-
-def _reg_holdout_mae(model_sub: str) -> str:
-    for r in SUP_ROWS:
-        if r["task"] == "regression" and model_sub in r["model"]:
-            return r["holdout_mae"].strip()
-    raise KeyError(model_sub)
-
-
-CV_CARRY = _reg_cv("carry-forward")
-CV_RIDGE = _reg_cv("ridge")
-MAE_CARRY = _reg_holdout_mae("carry-forward")
-MAE_RIDGE = _reg_holdout_mae("ridge")
-MAE_RF = _reg_holdout_mae("random forest")
-
 M_STING = _metric_row("STING (frozen)")
 M_KM2 = _metric_row("k-means k=2")
-M_KM3 = _metric_row("k-means k=3")
 M_DB = _metric_row("DBSCAN eps=0.2")
-
-# Bảng classifier theo nội dung học phần (Day 2–3): nhãn pseudo-label STING.
-COURSE_CLF = _read_results_csv("course_supervised_baselines.csv")
-COURSE_METRIC = "f1_macro (expanding origin 2017–2022)"
-# Tên hiển thị trên slide; khoá là tên model trong CSV.
-COURSE_LABELS = (
-    ("majority", "majority"),
-    ("gaussian naive bayes", "Naive Bayes"),
-    ("knn", "KNN"),
-    ("svm (linear)", "SVM tuyến tính"),
-    ("svm (rbf)", "SVM RBF"),
-    ("decision tree", "Cây quyết định"),
-    ("random forest", "Random forest"),
-)
-
-
-def _course_row(model_sub: str) -> dict[str, str]:
-    hits = [r for r in COURSE_CLF if model_sub in r["model"]]
-    if len(hits) != 1:
-        raise KeyError(f"{model_sub}: {len(hits)} dòng trong course_supervised_baselines.csv")
-    return hits[0]
-
-
-assert all(r["metric_cv"] == COURSE_METRIC for r in COURSE_CLF), (
-    "course_supervised_baselines.csv: cột metric_cv đã đổi"
-)
-COURSE_ROWS = []
-for _key, _label in COURSE_LABELS:
-    _row = _course_row(_key)
-    COURSE_ROWS.append((_label, _f3(_row["value_cv"]), _f3(_row["holdout_macro_f1"])))
 
 # Số đo tiền xử lý — đọc từ audit Day 4, không gõ tay.
 AUDIT = _read_results_csv("preprocessing_audit.csv")
@@ -194,24 +124,6 @@ def _callout_cell(model: STING, level: int = 2) -> tuple[tuple[int, ...], object
     key, cell = max(dense, key=lambda kv: kv[1].count)
     return key, cell
 
-
-def _fmt_cell_callout(cell) -> list[str]:
-    m0, m1 = float(cell.mean[0]), float(cell.mean[1])
-    s0, s1 = float(cell.std[0]), float(cell.std[1])
-    lo0, lo1 = float(cell.min_[0]), float(cell.min_[1])
-    hi0, hi1 = float(cell.max_[0]), float(cell.max_[1])
-    return [
-        f"n = {cell.count}",
-        f"μ = ({m0:.2f}, {m1:.2f})",
-        f"σ = ({s0:.3f}, {s1:.3f})",
-        f"min = ({lo0:.2f}, {lo1:.2f})",
-        f"max = ({hi0:.2f}, {hi1:.2f})",
-        "loại phân phối: bỏ (đơn giản hóa)",
-    ]
-
-
-_CALLOUT_KEY, _CALLOUT_CELL = _callout_cell(_syn_model, level=2)
-CALLOUT_LINES = _fmt_cell_callout(_CALLOUT_CELL)
 
 NAVY = RGBColor(0x0F, 0x2B, 0x46)
 TEAL = RGBColor(0x1B, 0x6E, 0x77)
@@ -342,17 +254,6 @@ def pic(slide, path, x, y, w=None, h=None):
     slide.shapes.add_picture(str(p), Inches(x), Inches(y), **kw)
 
 
-def _cell_counts_2d(X: np.ndarray, lo: np.ndarray, hi: np.ndarray, res: int) -> dict[tuple[int, int], int]:
-    span = hi - lo
-    idx = np.floor((X - lo) / span * res).astype(np.int64)
-    np.clip(idx, 0, res - 1, out=idx)
-    counts: dict[tuple[int, int], int] = {}
-    for i in range(X.shape[0]):
-        key = (int(idx[i, 0]), int(idx[i, 1]))
-        counts[key] = counts.get(key, 0) + 1
-    return counts
-
-
 def _sting_hierarchy_figure_png(model: STING, X: np.ndarray) -> BytesIO:
     """Ba panel STING mức 0/1/2 — độ phân giải factor**level (1×1, 4×4, 16×16 khi f=4)."""
     import matplotlib
@@ -373,13 +274,13 @@ def _sting_hierarchy_figure_png(model: STING, X: np.ndarray) -> BytesIO:
     bio = BytesIO()
     with style_context():
         fig, axes = plt.subplots(1, 3, figsize=(12.2, 3.35), dpi=200)
-        for ax, (res, title) in zip(axes, panels):
-            counts = _cell_counts_2d(X, lo, hi, res)
-            max_c = max(counts.values()) if counts else 1
+        for level, (ax, (res, title)) in enumerate(zip(axes, panels)):
+            cells = model.cells_[level]
+            max_count = max(cell.count for cell in cells.values())
             step = span / res
-            for (ix, iy), cnt in counts.items():
-                x0, y0 = lo[0] + ix * step[0], lo[1] + iy * step[1]
-                alpha = min(0.1 + 0.65 * (cnt / max_c), 0.85)
+            for cell in cells.values():
+                x0, y0 = cell.bounds_min
+                alpha = 0.1 + 0.65 * cell.count / max_count
                 ax.add_patch(
                     Rectangle(
                         (x0, y0),
@@ -457,7 +358,7 @@ def pic_bytes(slide, bio: BytesIO, x, y, w=None, h=None):
     slide.shapes.add_picture(bio, Inches(x), Inches(y), **kw)
 
 
-# ---------- 1 — Bìa + thesis ----------
+# 1 — Bìa + thesis
 s = slide_new()
 rect(s, 0, 0, SW, SH, NAVY)
 rect(s, 0, SH - 0.18, SW, 0.18, GOLD)
@@ -466,435 +367,299 @@ for r in range(4):
         x0, y0 = SW - 4.6 + c * 0.78, 1.05 + r * 0.78
         fill = GOLD if (r, c) in ((1, 1), (2, 2)) else RGBColor(0x1E, 0x3D, 0x5E)
         rect(s, x0, y0, 0.66, 0.66, fill)
-text(s, 0.85, 1.15, 7.6, 0.4, [("ĐỒ ÁN MÔN HỌC MÁY · TRÌNH BÀY 15'", 13, True, GOLD)])
+text(s, 0.85, 1.15, 7.6, 0.4, [("HỌC MÁY · BÁO CÁO GIỮA KỲ", 13, True, GOLD)])
 text(
     s, 0.85, 1.75, 8.6, 2.6,
     [
-        ("STING trên dữ liệu PAPI", 40, True, WHITE),
-        ("Lý thuyết grid-based + minh họa 63 tỉnh × 14 năm", 26, True, WHITE),
+        ("Phân cụm dữ liệu PAPI", 40, True, WHITE),
+        ("bằng thuật toán STING", 30, True, WHITE),
     ],
 )
 text(
     s, 0.85, 4.5, 8.4, 1.8,
     [
-        ("Luận điểm: dữ liệu PAPI cấp tỉnh/năm rất đồng nhất — nhóm báo cáo trung thực.", 14, True, GOLD),
-        ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
-        ("Topic 6 · Grid-based clustering · Sociology", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
+        ("Phân cụm dựa trên lưới · 63 tỉnh · 2011–2024", 17, True, GOLD),
+        ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 14, False, RGBColor(0xB9, 0xCD, 0xDE)),
+        ("Nhóm 15 · Chủ đề 6 · Grid-based clustering", 13, False, RGBColor(0xB9, 0xCD, 0xDE)),
     ],
 )
 note(
     s,
-    "Mở đầu ~20 giây: giới thiệu nhóm và đề tài. Thesis trung tâm: PAPI không cho cấu trúc cụm "
-    "tách mạnh ở cấp tỉnh — đó là phát hiện, không phải thất bại. Hứa với GV: mọi con số lấy từ "
-    "results/ và model đã audit; phần notebook tách riêng. Chuyển sang bài toán.",
+    "Kính thưa thầy, nhóm 15 xin trình bày đề tài phân cụm dữ liệu PAPI bằng thuật toán STING. "
+    "Nhóm sử dụng dữ liệu của 63 tỉnh trong giai đoạn 2011–2024 để tìm hiểu cách chia lưới, "
+    "xác định ô dày và hình thành cụm. Phần thực nghiệm gồm ví dụ minh họa và hai chỉ tiêu PAPI.",
 )
 
-# ---------- 2 — Bài toán & dữ liệu ----------
+# 2 — Bài toán & dữ liệu
 s = slide_new()
-header(s, "BÀI TOÁN", "Phân cụm tỉnh theo PAPI — panel 882 × 41", 2)
+header(s, "BÀI TOÁN", "Phân cụm các quan sát tỉnh–năm theo PAPI", 2)
 bullets(
     s, 0.55, 1.45, 6.5, 4.15,
     [
-        ("Mục tiêu.", "Khám phá cấu trúc không gian chỉ tiêu hành chính; so STING với baseline; dự đoán/giám sát holdout."),
-        ("Phạm vi.", "63 tỉnh × 14 năm (2011–2024) → 882 quan sát; 41 cột (d1–d8 + 29 sub-dim; 39 số)."),
-        ("Nguồn.", "PAPI (CECODES/VFF-CRT/RTA/UNDP) — audit 0.0→NaN, PROVENANCE trong repo."),
-        ("Grid-based.", "Không giả định hình dạng cụm; mỗi ô lưới lưu thống kê — phù hợp dữ liệu không gian/tabular."),
+        ("Mục tiêu.", "Tìm các nhóm quan sát có đặc điểm gần nhau trên hai chỉ tiêu PAPI được chọn."),
+        ("Phạm vi.", "63 tỉnh trong 14 năm. Mỗi quan sát tương ứng với một tỉnh trong một năm."),
+        ("Nguồn.", "Bộ dữ liệu PAPI của CECODES, VFF-CRT, RTA và UNDP."),
+        ("Phương pháp.", "STING chia không gian đặc trưng thành ô lưới và gom các ô dày liền kề."),
     ],
     size=15, gap_pt=32,
 )
 rect(s, 7.4, 1.4, 5.35, 4.22, LIGHT)
 text(s, 7.65, 1.52, 4.9, 0.32, [("MA TRẬN DỮ LIỆU", 12, True, TEAL)])
-for i, (lbl, val) in enumerate([("Hàng (tỉnh×năm)", "882"), ("Cột", "41"), ("Số đo chính", "≥500×10 ✓")]):
+for i, (lbl, val) in enumerate([("Quan sát tỉnh–năm", "882"), ("Số cột", "41"), ("Giai đoạn", "2011–2024")]):
     y = 2.0 + i * 1.02
     rect(s, 7.65, y, 4.85, 0.86, WHITE)
     text(s, 7.8, y + 0.08, 3.2, 0.7, [(lbl, 12.5, False, GREY), (val, 21, True, NAVY)])
 text(
     s, 7.65, 5.02, 4.85, 0.55,
-    [("Minh họa thuật toán: tập 2-D tổng hợp · Ứng dụng: chuẩn hóa trong-năm + lưới STING", 12.5, False, GREY)],
+    [("Hai chỉ tiêu dùng cho phân cụm được chuẩn hóa bằng thống kê của tập huấn luyện.", 12.5, False, GREY)],
 )
 
 # Dải tiền xử lý Day 4 — thứ tự dạy học + số đo audit, đọc từ preprocessing_audit.csv.
 rect(s, 0.55, 5.7, 12.23, 1.2, LIGHT)
-text(s, 0.72, 5.74, 11.8, 0.26, [
-    ("TIỀN XỬ LÝ THEO DAY 4 — MỖI BƯỚC: TEST → DECIDE", 11, True, TEAL),
+text(s, 0.72, 5.73, 11.8, 0.38, [
+    ("TIỀN XỬ LÝ DỮ LIỆU", 12, True, TEAL),
 ])
 text_line(
-    s, 0.72, 5.99, 11.9, 0.34,
+    s, 0.72, 6.11, 11.9, 0.33,
     [
         ("Làm sạch", True, NAVY),
-        (" (trùng khóa → thiếu → nhất quán → ngoại lai, để cuối)", False, INK),
+        (" (trùng khóa, thiếu dữ liệu, ngoại lai)", False, INK),
         ("  →  ", False, GREY),
         ("Tích hợp", True, NAVY),
-        (" (join, rò rỉ)", False, INK),
+        (" (mã tỉnh, năm)", False, INK),
         ("  →  ", False, GREY),
         ("Biến đổi", True, NAVY),
-        (" (scale)", False, INK),
+        (" (chuẩn hóa)", False, INK),
     ],
     size=13,
 )
-text(s, 0.72, 6.36, 11.9, 0.34, [(PP_FACTS, 11, False, GREY)])
+text(s, 0.72, 6.49, 11.9, 0.34, [(PP_FACTS, 11, False, GREY)])
 note(
     s,
-    "Giải thích vì sao đủ lớn cho đồ án: 882 dòng vượt chuẩn. Nhấn đây là dữ liệu thật đã làm sạch, "
-    "không phải toy CSV. Dải dưới theo đúng thứ tự Day 4: làm sạch (trùng khóa trước, ngoại lai để cuối) "
-    "→ tích hợp (join one-to-one, kiểm tra rò rỉ) → biến đổi (scale đóng băng); mỗi bước Test → Decide, "
-    "số đo đọc từ results/preprocessing_audit.csv. 1.5 phút: liên hệ Topic 6 grid-based.",
+    "Bảng dữ liệu có 882 quan sát và 41 cột, gồm mã tỉnh, tên tỉnh, năm và 37 chỉ tiêu. "
+    "Nhóm kiểm tra trùng khóa tỉnh–năm, dữ liệu thiếu, tính nhất quán và ngoại lai, "
+    "sau đó ghép dữ liệu theo mã tỉnh và chuẩn hóa. Các ô thiếu được giữ để ghi nhận "
+    "độ phủ. Bước phân cụm chỉ dùng những dòng có đủ hai chỉ tiêu được chọn. "
+    "Thống kê chuẩn hóa được ước lượng từ tập huấn luyện.",
 )
 
-# ---------- 3 — STING lý thuyết I ----------
-FIG3_W = SW - 1.1
-FIG3_H = FIG3_W * (3.35 / 12.2)
-FIG3_Y = 1.32
-FIG3_BOT = FIG3_Y + FIG3_H
+# 3 — Các mức lưới
 s = slide_new()
-header(s, "LÝ THUYẾT I", "STING — lưới thống kê phân cấp", 3)
-_hier_png = _sting_hierarchy_figure_png(_syn_model, _X_SYN)
-pic_bytes(s, _hier_png, 0.55, FIG3_Y, w=FIG3_W)
-_btm_h = SH - 0.42 - FIG3_BOT - 0.08
+header(s, "LƯỚI THỐNG KÊ", "Lưới từ thô đến mịn", 3)
+pic_bytes(s, _sting_hierarchy_figure_png(_syn_model, _X_SYN), 0.55, 1.32, w=SW - 1.1)
+_, example_cell = _callout_cell(_syn_model, level=2)
 bullets(
-    s, 0.55, FIG3_BOT + 0.1, 7.35, _btm_h,
+    s, 0.75, 5.02, 11.8, 1.76,
     [
-        ("Ý tưởng.", "Chia không gian đa chiều thành lưới lồng nhau; không cần k cố định trước."),
-        ("Ô lưới.", "Mỗi ô lưu n, μ, σ, min, max; bỏ loại phân phối (đơn giản hóa) — quét O(n) mỗi mức."),
-        ("Minh họa.", "Scatter 2-D tổng hợp (240 điểm, seed 42) — thống kê ô từ STING.fit."),
-        ("Tham số (slide 5).", "n_levels=3 · factor=4 · min_count=3."),
+        ("Cùng một tập điểm.", "Mức sau chia mỗi ô thành những ô nhỏ hơn."),
+        ("Thống kê theo ô.", f"Ô viền cam chứa {example_cell.count} điểm. Mỗi ô còn lưu trung bình, "
+         "độ lệch chuẩn, giá trị nhỏ nhất và lớn nhất."),
     ],
-    size=14, gap_pt=14,
-)
-rect(s, 8.15, FIG3_BOT + 0.08, 4.65, _btm_h, WHITE, line=TEAL)
-text(s, 8.3, FIG3_BOT + 0.18, 4.35, 0.32, [
-    ("Thống kê một ô (level 2)", 14, True, NAVY),
-])
-_stats_lines = CALLOUT_LINES
-text(
-    s, 8.3, FIG3_BOT + 0.48, 4.35, _btm_h - 0.55,
-    [(ln, 14, False, INK) for ln in _stats_lines],
+    size=17, gap_pt=14,
 )
 note(
     s,
-    "Dùng sơ đồ bên phải: chỉ tay từ mức thô xuống mịn. Giải thích ô dày đủ thống kê. "
-    "Gốc STING lưu thêm loại phân phối; Cell trong src/sting.py chỉ count/mean/std/min/max. "
-    "fit() xây lưới lần lượt từng mức trực tiếp từ điểm, không duyệt top-down cắt tỉa như VLDB 1997. "
-    "~90 giây.",
+    "Ba hình thể hiện cùng một tập điểm ở các mức lưới khác nhau. Mức 0 có một ô, "
+    "mức 1 có lưới 4×4 và mức 2 có lưới 16×16. Ô viền cam minh họa số đếm do chương trình "
+    "tính từ dữ liệu. Ý tưởng lưới phân cấp và thống kê ô dựa trên "
+    "Wang, Yang & Muntz (VLDB 1997).",
 )
 
-# ---------- 4 — STING lý thuyết II ----------
+# 4 — Quy tắc gom cụm
 s = slide_new()
-header(s, "LÝ THUYẾT II", "Gom cụm · truy vấn vùng · độ phức tạp", 4)
+header(s, "CƠ CHẾ", "STING tạo cụm từ các ô dày", 4)
 steps = [
-    (
-        "TRUY VẤN",
-        "query_rect: gộp thống kê ô\nnằm trọn trong vùng —\ntại một level đã chọn.",
-        "Không duyệt cây top-down\ncắt tỉa như STING gốc.",
-    ),
-    (
-        "GOM CỤM",
-        "Ô dày (count ≥ min_count)\nliền kề → một cụm;\nđiểm ô thưa → nhiễu (−1).",
-        "Một level cố định: DFS\nô dense + connectivity.",
-    ),
-    (
-        "STING GỐC",
-        "VLDB 1997: top-down —\nkiểm định độ tin cậy,\nchỉ hạ vào ô con liên quan.",
-        "Ta: từng mức dựng từ điểm;\ncluster/query chọn level L.",
-    ),
+    ("1. Đếm điểm", "Chọn một mức lưới và đọc số điểm trong từng ô."),
+    ("2. Chọn ô dày", "Đánh dấu ô có ít nhất min_count điểm."),
+    ("3. Nối qua cạnh", "Các ô dày nối được qua cạnh thuộc cùng một cụm."),
 ]
-for i, (title, body, step) in enumerate(steps):
-    x0 = 0.55 + i * 4.19
-    rect(s, x0, 1.45, 3.85, 0.5, TEAL)
-    text(s, x0, 1.48, 3.85, 0.38, [(title, 14, True, WHITE)], align=PP_ALIGN.CENTER)
-    rect(s, x0, 1.95, 3.85, 1.75, LIGHT)
-    text(
-        s, x0 + 0.18, 2.08, 3.5, 1.55,
-        [(body, 14, False, INK), (step, 13, True, TEAL)],
-    )
-cmp_rows = [
-    ("Phương pháp", "Độ phức tạp", "Giả định chính"),
-    ("STING", "O(n) xây lưới + gom ô", "Không cố định k; hình dạng cụm tự do"),
-    ("k-means", "O(n·k·i)", "k cho trước; cụm gần cầu"),
-    ("DBSCAN", "O(n log n) (index)", "Mật độ đồng nhất; ε, minPts"),
-]
-tb4 = s.shapes.add_table(
-    len(cmp_rows), 3, Inches(0.55), Inches(3.85), Inches(12.23), Inches(1.55)
-).table
-for c, wd in enumerate([2.4, 2.85, 6.85]):
-    tb4.columns[c].width = Inches(wd)
-for i, row in enumerate(cmp_rows):
-    for j, v in enumerate(row):
-        cell = tb4.cell(i, j)
-        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
-        tf = cell.text_frame
-        tf.text = v
-        r = tf.paragraphs[0].runs[0]
-        r.font.size = Pt(14)
-        r.font.name = "Calibri"
-        if i == 0:
-            r.font.bold = True
-            r.font.color.rgb = WHITE
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = TEAL
-        else:
-            r.font.color.rgb = INK
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = WHITE if i % 2 else LIGHT
-text(
-    s, 0.55, 5.52, 12.1, 0.85,
-    [
-        (
-            "Điều chỉnh STING: n_levels, factor, min_count, cluster_level, connectivity — "
-            "OFAT/sweep trên panel PAPI (robustness.csv).",
-            14,
-            False,
-            GREY,
-        ),
-    ],
-)
+for i, (title, description) in enumerate(steps):
+    x = 0.6 + i * 4.12
+    rect(s, x, 2.03, 3.86, 2.25, LIGHT)
+    text(s, x + 0.2, 2.28, 3.46, 0.55, [(title, 21, True, TEAL)])
+    text(s, x + 0.2, 3.03, 3.46, 0.95, [(description, 17, False, INK)])
+text(s, 0.6, 4.95, 12.1, 0.52, [
+    ("Điểm trong ô thưa nhận nhãn −1, tức nhiễu.", 19, True, NAVY),
+])
 note(
     s,
-    "Slide cầu nối lý thuyết–thực hành: nhấn O(n) và tách nhiễu so k-means. "
-    "Phân biệt rõ: Wang et al. truy vấn/Phân vùng top-down có pruning; "
-    "src/sting.py query_rect và cluster() chỉ dùng ô tại một level — đơn giản hóa có chủ đích. "
-    "min_count quay lại ở slide PAPI. ~90 giây.",
+    "Trong cài đặt của nhóm, một ô được xem là dày khi số điểm trong ô đạt min_count. "
+    "Tại mức lưới đã chọn, các ô dày liên thông qua cạnh được gom thành cụm. "
+    "Điểm trong ô thưa nhận nhãn nhiễu −1. Đây là biến thể STING dùng ngưỡng số đếm. "
+    "STING gốc còn mô hình hóa phân phối và dùng kiểm định thống kê để duyệt lưới từ trên xuống.",
 )
 
-# ---------- 5 — Ví dụ tổng hợp ----------
+# 5 — Đọc một lưới mẫu
 s = slide_new()
-header(s, "DEMO", f"Chạy tay: 2-D tổng hợp — ARI = {SYN_ARI_S}", 5)
+header(s, "VÍ DỤ", "Đọc cụm từ bảng đếm 3 × 3", 5)
+text(s, 0.85, 1.43, 6.1, 0.45, [("Số trong ô là số điểm", 17, True, NAVY)])
+for row, values in enumerate(((4, 3, 0), (1, 0, 4), (0, 0, 3))):
+    for col, count in enumerate(values):
+        x, y = 0.85 + col * 1.35, 2.0 + row * 1.35
+        fill = (TEAL if row == 0 else NAVY) if count >= 3 else GOLD if count else GRID_LO
+        rect(s, x, y, 1.29, 1.29, fill)
+        text(s, x, y + 0.35, 1.29, 0.62, [
+            (str(count), 26, True, WHITE if count >= 3 else INK),
+        ], align=PP_ALIGN.CENTER)
+rect(s, 5.6, 1.96, 7.08, 4.05, LIGHT)
+text(s, 5.88, 2.17, 6.48, 0.52, [("Ngưỡng ô dày là 3 điểm", 21, True, NAVY)])
+for i, (label, fill, detail) in enumerate((
+    ("Cụm A", TEAL, "Hai ô chung cạnh, tổng 7 điểm."),
+    ("Cụm B", NAVY, "Hai ô chung cạnh, tổng 7 điểm."),
+    ("Nhiễu", GOLD, "Ô có 1 điểm dưới ngưỡng, nhận nhãn −1."),
+)):
+    y = 2.98 + i * 0.76
+    rect(s, 5.9, y + 0.12, 0.27, 0.27, fill)
+    text(s, 6.35, y, 5.95, 0.58, [
+        (f"{label}. {detail}", 17, False, INK),
+    ])
+text(s, 0.85, 6.3, 11.8, 0.42, [
+    ("Hai vùng màu chỉ chạm góc nên tách thành 2 cụm.", 17, True, NAVY),
+])
+note(
+    s,
+    "Ví dụ có 15 điểm và ngưỡng ô dày bằng 3. Cặp ô chứa 4 và 3 điểm ở hàng trên tạo cụm A. "
+    "Cặp ô bên phải tạo cụm B. Hai vùng này chỉ chạm góc, nên với quy tắc nối qua cạnh "
+    "chúng thuộc hai cụm khác nhau. Điểm trong ô chứa 1 điểm nhận nhãn nhiễu.",
+)
+
+# 6 — Kiểm tra trên dữ liệu giả lập
+s = slide_new()
+header(s, "DỮ LIỆU GIẢ LẬP", "Đối chiếu kết quả với hai cụm đã biết", 6)
 pic(s, "00_synthetic_sting.png", 0.55, 1.55, h=4.65)
 bullets(
-    s, 7.85, 1.65, 4.9, 4.9,
+    s, 7.85, 1.73, 4.9, 4.6,
     [
-        ("Dữ liệu.", "2 blob Gauss, 240 điểm, seed 42 (khớp tests/test_sting.py)."),
-        ("Kết quả.", f"ARI = {SYN_ARI_S} · nhiễu {_pct(SYN_NOISE)} · k = {SYN_K}."),
-        ("Lưới.", "n_levels=3, factor=4, cluster_level=2, min_count=3."),
-        ("Kiểm chứng.", "bộ test STING (tests/test_sting.py) pass — thống kê ô khớp numpy."),
+        ("Dữ liệu.", "240 điểm, biết trước hai cụm khi sinh dữ liệu."),
+        ("Kết quả.", f"STING tìm {SYN_K} cụm, nhiễu {_pct(SYN_NOISE)}."),
+        ("Độ khớp.", f"ARI {SYN_ARI_S} khi so với nhãn giả lập."),
     ],
-    size=15, gap_pt=52,
+    size=17, gap_pt=33,
 )
 note(
     s,
-    f"Trái: hình đã sinh trong repo. Phải: ARI {SYN_ARI_S} vừa tái lập khi build slide (assert). "
-    "Mục đích: chứng minh implementation đúng trước khi đụng PAPI. ~90 giây.",
+    "Với 240 điểm sinh từ hai phân bố Gauss, STING tìm được hai cụm và đánh dấu 2,5% điểm là nhiễu. "
+    "ARI bằng 0,950 đo mức khớp giữa kết quả và nhãn đã biết khi sinh dữ liệu. "
+    "Phép thử này kiểm tra cách cài đặt trên ví dụ có nhãn tham chiếu.",
 )
 
-# ---------- 6 — Ứng dụng PAPI ----------
+# 7 — Ứng dụng PAPI
 s = slide_new()
-header(s, "ỨNG DỤNG", "Pipeline PAPI: chuẩn hóa · lưới thô · đa số k≈1", 6)
+header(s, "ỨNG DỤNG", "Cùng dữ liệu PAPI, hai cách đặt lưới", 7)
 pic(s, "sting_first_real.png", 0.55, 1.45, h=4.2)
 bullets(
-    s, 7.95, 1.55, 4.75, 5.0,
+    s, 7.95, 1.57, 4.75, 4.8,
     [
-        ("(a) n_levels=2, 3×3, mc=5:", "k=1 · 55/61 trong vùng dày · nhiễu 10% · đặc trưng thô, năm 2023 (61 tỉnh)."),
-        ("(b) n_levels=3, 9×9, mc=2:", "k=3 · nhiễu 31% · cùng năm/không gian — nhiễu tăng."),
-        ("Đóng băng.", "STING(3,4,5) level=2 · pooled z (fit 2011–2023); holdout 2024 một lần."),
-        ("Cặp đặc trưng.", "sd_4_2 × sd_6_1 (allowlist audit)."),
+        ("Dữ liệu 2023.", "61 tỉnh đủ hai chỉ tiêu được chọn."),
+        ("Lưới 3 × 3.", "Ngưỡng 5, tìm 1 cụm và 10% nhiễu."),
+        ("Lưới 9 × 9.", "Ngưỡng 2, tìm 3 cụm và 31% nhiễu."),
+        ("Gán dữ liệu mới.", "Dùng lưới học từ 2011–2023 cho năm 2024."),
     ],
-    size=14.5, gap_pt=44,
+    size=16, gap_pt=26,
 )
 note(
     s,
-    "Phát hiện chính: PAPI rất đồng nhất — đa số năm k=1. So sánh (a) vs (b) để giải thích sensitivity. "
-    "Không gọi là fail. ~90 giây.",
+    "Năm 2023 có 61 tỉnh đủ hai chỉ tiêu. Cấu hình lưới 3×3 với ngưỡng 5 cho một cụm và khoảng 10% nhiễu. "
+    "Cấu hình 9×9 với ngưỡng 2 cho ba cụm và khoảng 31% nhiễu. Hai cấu hình thay đổi cả "
+    "độ phân giải và ngưỡng mật độ. Phần sau khảo sát riêng ngưỡng mật độ.",
 )
 
-# ---------- 7 — Đánh giá clustering + supervised ----------
+# 8 — Đối chứng phân cụm
 s = slide_new()
-header(s, "ĐÁNH GIÁ", "So baseline · classifier học phần · Ridge holdout", 7)
-rows = [
-    ("Phương pháp", "k", "Nhiễu", "Silh.", "ARI"),
-    (
-        "STING",
-        M_STING["k"],
-        _pct(M_STING["noise_ratio"]),
-        _f3(M_STING["silhouette"]),
-        "—",
-    ),
-    (
-        "k-means k=2",
-        M_KM2["k"],
-        _pct(M_KM2["noise_ratio"]),
-        _f3(M_KM2["silhouette"]),
-        _f3(M_KM2["ari_vs_sting"]),
-    ),
-    (
-        "k-means k=3",
-        M_KM3["k"],
-        _pct(M_KM3["noise_ratio"]),
-        _f3(M_KM3["silhouette"]),
-        _f3(M_KM3["ari_vs_sting"]),
-    ),
-    (
-        "DBSCAN ε=0.2",
-        M_DB["k"],
-        _pct(M_DB["noise_ratio"]),
-        _f3(M_DB["silhouette"]),
-        _f3(M_DB["ari_vs_sting"]),
-    ),
-]
+header(s, "ĐÁNH GIÁ", "Kết quả STING và hai đối chứng", 8)
+rows = [("Phương pháp", "Số cụm", "Nhiễu", "Silhouette")]
+for label, result in [("STING", M_STING), ("K-means (k=2)", M_KM2), ("DBSCAN (ε=0.2)", M_DB)]:
+    rows.append((label, result["k"], _pct(result["noise_ratio"]), _f3(result["silhouette"])))
 tb = s.shapes.add_table(
-    len(rows), 5, Inches(0.55), Inches(1.42), Inches(5.75), Inches(2.65)
+    len(rows), 4, Inches(0.6), Inches(1.85), Inches(7.2), Inches(2.8)
 ).table
-for c, wd in enumerate([2.0, 0.45, 0.75, 0.7, 0.7]):
-    tb.columns[c].width = Inches(wd)
+for j, width in enumerate([2.65, 1.2, 1.25, 2.1]):
+    tb.columns[j].width = Inches(width)
 for i, row in enumerate(rows):
-    for j, v in enumerate(row):
+    for j, value in enumerate(row):
         cell = tb.cell(i, j)
         cell.vertical_anchor = MSO_ANCHOR.MIDDLE
-        tf = cell.text_frame
-        tf.text = v
-        r = tf.paragraphs[0].runs[0]
-        r.font.size = Pt(14)
-        r.font.name = "Calibri"
-        if i == 0:
-            r.font.bold = True
-            r.font.color.rgb = WHITE
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = TEAL
-        else:
-            r.font.color.rgb = INK
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = WHITE if i % 2 else LIGHT
-text(s, 0.55, 4.18, 5.6, 0.55, [
-    ("Pooled 2011–2023 · metrics.csv · STING ≈ DBSCAN (ARI 0.647); k-means khác vùng.", 14, False, GREY),
+        cell.text_frame.text = value
+        run = cell.text_frame.paragraphs[0].runs[0]
+        run.font.name = "Calibri"
+        run.font.size = Pt(17)
+        run.font.bold = i == 0
+        run.font.color.rgb = WHITE if i == 0 else INK
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = TEAL if i == 0 else WHITE if i % 2 else LIGHT
+text(s, 0.6, 4.98, 7.2, 0.6, [
+    ("Hai chỉ tiêu PAPI · gộp 2011–2023", 14, False, GREY),
 ])
-rect(s, 6.55, 1.38, 6.25, 5.55, LIGHT)
-# Cột phải xếp dọc: hình Ridge (thu nhỏ) → chú thích hình → tiêu đề bảng → bảng classifier.
-pic(s, "supervised_regression.png", 7.0, 1.46, w=5.35)
-text(s, 6.66, 4.45, 6.0, 0.22, [
-    ("Hình: Ridge holdout 2023→2024 (một lần)", 11, False, GREY),
-])
-text(s, 6.62, 4.68, 6.05, 0.24, [
-    ("PHÂN LOẠI HỌC PHẦN · nhãn pseudo-label STING · một năm holdout 2023→2024", 11, True, TEAL),
-])
-clf_rows = [("Mô hình", "CV macro-F1", "Holdout")] + list(COURSE_ROWS)
-tb7 = s.shapes.add_table(
-    len(clf_rows), 3, Inches(6.62), Inches(4.96), Inches(6.0), Inches(1.86)
-).table
-for c, wd in enumerate([2.25, 1.55, 2.2]):
-    tb7.columns[c].width = Inches(wd)
-for i, row in enumerate(clf_rows):
-    for j, v in enumerate(row):
-        cell = tb7.cell(i, j)
-        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
-        cell.margin_top = cell.margin_bottom = Inches(0.01)
-        tf = cell.text_frame
-        tf.text = v
-        r = tf.paragraphs[0].runs[0]
-        r.font.size = Pt(12.5)
-        r.font.name = "Calibri"
-        if i == 0:
-            r.font.bold = True
-            r.font.color.rgb = WHITE
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = TEAL
-        else:
-            r.font.color.rgb = INK
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = WHITE if i % 2 else LIGHT
+rect(s, 8.2, 1.85, 4.53, 3.75, LIGHT)
 bullets(
-    s, 0.55, 4.75, 5.75, 2.25,
+    s, 8.43, 2.03, 4.0, 3.2,
     [
-        ("Mục tiêu.", "Dự báo sd_6_1 năm t+1 · 8 feature sạch."),
-        ("CV.", f"Ridge R² {CV_RIDGE} vs carry {CV_CARRY} (expanding origin 2017–2022)."),
-        ("Holdout.", f"MAE Ridge {MAE_RIDGE} vs carry {MAE_CARRY} · RF {MAE_RF} (không chọn)."),
+        ("K-means.", "Ấn định số cụm và gán mọi điểm."),
+        ("STING và DBSCAN.", "Có thể đánh dấu ngoại vi là nhiễu."),
+        ("Cách đọc.", "Xem silhouette cùng tỷ lệ nhiễu."),
     ],
-    size=14, gap_pt=20,
+    size=16, gap_pt=19,
 )
 note(
     s,
-    "Bảng trái đọc từ metrics.csv. Bảng phải: course_supervised_baselines.csv — 6 classifier học phần "
-    "(Naive Bayes, KNN, SVM, cây quyết định, random forest) trên nhãn pseudo-label STING, chọn theo "
-    "macro-F1 CV; majority chỉ để so. Holdout 2023→2024 báo cáo một lần, không dùng để chọn. "
-    "Ridge: supervised_metrics.csv — chọn theo CV. ~100 giây.",
+    "Ba phương pháp cùng dùng hai chỉ tiêu và giai đoạn 2011–2023. STING cho ba cụm "
+    "với 19,6% nhiễu, K-means cho hai cụm và DBSCAN cho năm cụm ở các cấu hình đã nêu. "
+    "Silhouette được tính trên điểm đã vào cụm, vì vậy mỗi phương pháp có thể được đánh giá "
+    "trên tập điểm khác nhau. Khi so sánh cần đọc cùng tỷ lệ nhiễu.",
 )
 
-# ---------- 8 — Kiểm chứng · robustness · hạn chế ----------
+# 9 — Tham số và giới hạn
 s = slide_new()
-header(s, "TRUNG THỰC", "Kiểm chứng ngoài · robustness · hạn chế", 8)
-rect(s, 0.55, 1.42, 4.85, 3.95, LIGHT)
-text(s, 0.7, 1.5, 4.5, 0.3, [("PCI vs cụm STING (external)", 14, True, TEAL)])
-pic(s, "external_pci_by_cluster.png", 0.65, 1.82, w=4.65)
-text(s, 0.65, 5.02, 4.65, 0.28, [("Nguồn: results/figs/external_pci_by_cluster.png", 14, False, GREY)])
+header(s, "THAM SỐ", "Ngưỡng ô dày thay đổi kết quả ra sao?", 9)
+rect(s, 0.6, 1.65, 6.1, 4.6, LIGHT)
+text(s, 0.84, 1.86, 5.5, 0.55, [("THỬ TRÊN NOTEBOOK", 16, True, TEAL)])
 bullets(
-    s, 5.65, 1.45, 7.15, 3.85,
+    s, 0.84, 2.55, 5.55, 3.5,
     [
-        ("PCI (doanh nghiệp).", "747 điểm join · ANOVA p≈6.9e-06 · đọc nhiễu vs cụm 2."),
-        (
-            "Kiểm chứng bên ngoài độc lập (PCI):",
-            "liên hệ giữa các nhóm, không phải nhân quả — PCI không dùng khi học STING.",
-        ),
+        ("Giữ lưới cố định.", "Chỉ đổi ngưỡng số điểm tối thiểu mỗi ô."),
+        ("Thử 3, 5 và 8.", "So số cụm và tỷ lệ tỉnh năm 2024 vào vùng dày."),
+        ("Cách hiểu.", "Ngưỡng cao hơn làm ít ô đạt điều kiện dày hơn."),
     ],
-    size=14, gap_pt=28,
+    size=17, gap_pt=24,
 )
+text(s, 7.06, 1.86, 5.4, 0.55, [("GIỚI HẠN KẾT LUẬN", 16, True, TEAL)])
 bullets(
-    s, 0.55, 5.75, 12.1, 1.45,
+    s, 7.06, 2.55, 5.45, 3.5,
     [
-        ("Robustness.", f"PCA d1–d6 {_pct(R_PCA['explained_var_total'])} PV → k={R_PCA['k']}; "
-         f"OFAT gốc k={R_GOC['k']}, nhiễu {_pct(R_GOC['noise_ratio'])}; "
-         f"f=3 → k={R_F3['k']}/{_pct(R_F3['noise_ratio'])}; lv=2 → k={R_LV2['k']}/100%; "
-         f"mc=2 k={R_MC2['k']}/{_pct(R_MC2['noise_ratio'])} sil {_f3(R_MC2['silhouette'])} âm."),
-        (
-            "Hạn chế.",
-            "Một holdout 2024; 23/37 chỉ tiêu bị đánh dấu bởi kiểm tra heuristic "
-            "(bước nhảy trung bình > 0.25); chưa chứng minh là đổi thang "
-            "(vd sd_5_4 — PROVENANCE); metric hình học chỉ so sánh thô.",
-        ),
+        ("Đặc trưng.", "Kết quả mô tả hai chỉ tiêu PAPI được chọn."),
+        ("Dữ liệu thực.", "Một cụm lớn và hai cụm rất nhỏ."),
+        ("Năm 2024.", "Minh họa gán điểm mới vào lưới đã học."),
     ],
-    size=14, gap_pt=22,
+    size=17, gap_pt=24,
 )
 note(
     s,
-    "Slide điểm Q&A: tự nêu hạn chế. PCI là doanh nghiệp vs PAPI hộ dân — kiểm chứng bên ngoài độc lập "
-    "(PCI): liên hệ giữa các nhóm, không phải nhân quả; không nói quá thành kiểm chứng nhân quả. "
-    "23/37 là cờ scale_audit (check_data.py) — heuristic, chưa tự chứng minh đổi thang; "
-    "sd_5_4 (0.25–2.5 → 0.33–3.33, 2021) đã đối chiếu workbook. Robustness từ robustness.csv. ~90 giây.",
+    "Khi giữ nguyên đặc trưng, biên và mức lưới, nhóm thử các ngưỡng 3, 5 và 8. "
+    "Tỷ lệ tỉnh năm 2024 được gán vào cụm lần lượt khoảng 82%, 79% và 70%. "
+    "Kết quả cho thấy việc chọn ngưỡng ảnh hưởng đến độ phủ. Cấu hình chính được chọn "
+    "từ dữ liệu các năm trước, sau đó mới dùng để gán cụm cho năm 2024.",
 )
 
-# ---------- 9 — Kết luận ----------
+# 10 — Kết luận
 s = slide_new()
-header(s, "KẾT LUẬN", "Đóng góp · hướng phát triển", 9)
+header(s, "KẾT LUẬN", "Kết quả thực nghiệm với STING", 10)
 bullets(
     s, 0.55, 1.5, 12.0, 5.3,
     [
-        ("Thuật toán.", "STING tự viết + test suite; O(n); tách nhiễu trung thực trên panel thật."),
-        ("Phát hiện.", "PAPI cấp tỉnh gần một khối — cấu trúc chỉ ở ngoại vi; không ép k cụm."),
-        ("Pipeline.", "Chọn cấu hình train-only; dự đoán 2024; Ridge cải thiện khiêm tốn vs carry-forward."),
-        ("Hướng tới.", "Thêm năm holdout; mở rộng external; notebook/ứng dụng tách (không trên slide)."),
+        ("Cài đặt.", "STING chia lưới, lưu thống kê ô và gom các ô dày liên thông."),
+        ("PAPI 2011–2023.", "Trên hai chỉ tiêu đã chọn, có một cụm lớn gồm 629 điểm và hai cụm nhỏ gồm 16 và 5 điểm."),
+        ("Đánh giá.", "Cần xem số cụm cùng kích thước cụm, tỷ lệ nhiễu và độ nhạy tham số."),
     ],
     size=16, gap_pt=42,
 )
 note(
     s,
-    "Tóm 4 ý trong 60 giây; dành 30 giây nhấn trung thực khoa học. Chuyển tài liệu + Q&A.",
-)
-
-# ---------- 10 — Tài liệu + Q&A ----------
-s = slide_new()
-header(s, "NGUỒN", "Tài liệu tham khảo", 10)
-bullets(
-    s, 0.55, 1.35, 7.0, 4.5,
-    [
-        ("PAPI 2011–2024.", "papi.org.vn · CECODES/VFF-CRT/RTA/UNDP."),
-        ("Replication.", "Le et al., Mendeley DOI 10.17632/wbk42j9wc8.1."),
-        ("STING.", "Wang, Yang & Muntz (1997), VLDB."),
-        ("Repo.", "src/sting.py · scripts/ · results/ · PROVENANCE.md."),
-    ],
-    size=14, gap_pt=36,
-)
-rect(s, 7.85, 1.35, 4.9, 5.5, NAVY)
-text(s, 7.95, 2.0, 4.7, 1.2, [("Q & A", 52, True, GOLD)], align=PP_ALIGN.CENTER)
-text(
-    s, 7.95, 3.35, 4.7, 1.0,
-    [("5 phút phản biện", 20, True, WHITE)],
-    align=PP_ALIGN.CENTER,
-)
-text(
-    s, 7.95, 4.55, 4.7, 1.8,
-    [("Sẵn sàng: vì sao grid-based?\nĐồng nhất PAPI?\nChọn Ridge?\nRobustness OFAT?", 14, False, RGBColor(0xB9, 0xCD, 0xDE))],
-    align=PP_ALIGN.CENTER,
-)
-note(
-    s,
-    "Không đọc slide 10 — mời hỏi. Nếu hỏi nguồn: PROVENANCE.md. Cảm ơn.",
+    "Qua thực nghiệm, STING minh họa cách phân cụm bằng các ô dày liên thông. "
+    "Trên hai chỉ tiêu PAPI giai đoạn 2011–2023, các cụm có kích thước chênh lệch lớn. "
+    "Vì vậy, số cụm cần được đọc cùng tỷ lệ nhiễu và độ nhạy tham số. "
+    "Nhóm xin kết thúc phần trình bày và cảm ơn thầy và các bạn đã lắng nghe. "
+    "Nguồn phương pháp là Wang, Yang và Muntz, VLDB 1997. Nguồn dữ liệu là PAPI "
+    "và gói đối chiếu Le cùng cộng sự, DOI 10.17632/wbk42j9wc8.1.",
 )
 
 OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -4,7 +4,7 @@ _Cập nhật: 2026-11-12 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 
 ## Deliverable bắt buộc của môn
 
-- [x] **Báo cáo (.docx tiếng Việt)** — `reports/final_report.docx` (7 chương + phụ lục + TLTK; hình và bảng nhúng đầy đủ — hiện 12 hình, 12 bảng đo bằng `python-docx`; bìa đã điền: Nguyễn Tiến Sơn — 24110054 · Trần Thị Ngọc Quyên — 24110051; định dạng tự biên soạn đã được chấp nhận không phụ thuộc template môn — xem `reports/report_format_notes.md`).
+- [x] **Báo cáo DOCX tiếng Việt** — `reports/final_report.docx`, cùng nội dung với bản Word trong gói cuối kỳ. Đã kiểm tra 34 trang xuất từ Word, gồm bìa và mục lục theo phân trang mới, 12 hình và 13 bảng nội dung.
 - [x] **Notebook cuối kỳ** — `notebooks/final_analysis.ipynb` (execute sạch, 5 output `image/png` nhúng; lệnh: `python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb`).
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/check_data.py` → PASS.
 - [x] **Notebook nộp bài (giữa kỳ)** — `notebooks/submission_demo.ipynb` (execute sạch, 0 lỗi; sinh bằng `python scripts/gen_submission_demo.py`).
@@ -12,7 +12,7 @@ _Cập nhật: 2026-11-12 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 
 ## Đối chiếu môn học (2026-11-12)
 
-- [x] **Audit tiền xử lý Day 4** — `scripts/preprocessing_audit.py` + `results/preprocessing_audit.{md,csv}`; notebook cuối kỳ đọc CSV (`tests/test_submission_artifacts.py` gate).
+- [x] **Bài nhóm Day 4** — `notebooks/day4_preprocessing.ipynb` là bài riêng đã chạy từ workbook gốc và có bảng kết quả. Hai notebook đồ án dùng panel và bảng kiểm tra tiền xử lý đã lưu.
 - [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
 - [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).
 - [x] **Q&A theo khái niệm bài giảng** — `reports/qa_course_concepts.md`.
@@ -36,14 +36,31 @@ _Cập nhật: 2026-11-12 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 - [ ] Chốt định dạng nộp cuối cùng với GV nếu khác đề xuất (TASK P4 bước 6)
 - [ ] Khai báo liêm chính học thuật theo quy định môn (nếu trường yêu cầu)
 
-## Cách tạo gói nộp (default đến khi GV chốt khác)
+## Tạo gói tự chứa cho cả hai mốc (kiểm tra 2026-11-16)
 
+Không chỉ chép notebook và đổi tên panel: notebook còn cần `src/`, `scripts/`,
+`models/`, `results/` và đúng đường dẫn `data/processed/`.
+
+```powershell
+python scripts/build_submission_packages.py
+python scripts/build_submission_packages.py --verify
 ```
-Nhom15_HocMay_Topic6_STING_CuoiKy/
-├── bao-cao.docx                 (copy từ reports/final_report.docx, đổi tên)
-├── notebooks/final_analysis.ipynb
-└── data/panel.csv               (nếu GV yêu cầu kèm dữ liệu)
-```
+
+Đầu ra tại `submissions/`:
+
+- `Nhom15_GiuaKy_STING_PAPI.zip`: slide 10 trang + notebook giữa kỳ + phụ thuộc.
+- `Nhom15_CuoiKy_STING_PAPI.zip`: báo cáo Word + notebook cuối kỳ + PPTX tùy chọn + phụ thuộc.
+- `SHA256SUMS.txt`: hash hai ZIP; mỗi ZIP có `MANIFEST.json` ghi hash/vai trò từng file.
+- `verification.json`: chỉ sinh sau khi notebook trong cả hai gói giải nén chạy qua.
+
+Verifier xóa output cũ ở bản sao notebook, dùng kernel mới, kiểm tra đếm lần chạy
+và chặn đọc kho mã gốc/Downloads. Giữ 14 workbook PAPI, metadata thang đo và nguồn
+trích dẫn. Không kèm agent config, PDF bài giảng, cache và các dump/probe tải nguồn.
+PDF nguồn ngoài lớn vẫn ở repository, có URL trong provenance.
+
+Cấu trúc này là đề xuất; tên file/nơi nộp/deadline chính thức cần theo GV/LMS.
+Xem báo cáo kiểm tra mới: `reports/submission-readiness-261116.md`.
+Kịch bản giữa kỳ 15 phút + Q&A 5 phút: `reports/presentation-script-261116.md`.
 
 ## Git tag
 

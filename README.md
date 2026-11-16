@@ -11,6 +11,18 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 
 **Sắp demo/thi?** Xem [`DEMO.md`](DEMO.md) — một lệnh kiểm tra sẵn sàng: `python scripts/demo_smoke.py` (phải in "SAN SANG DEMO" với toàn bộ mục PASS).
 
+## File nộp và notebook
+
+Các notebook dưới đây mở được trong Jupyter và đã lưu kết quả chạy.
+
+| Mốc | Notebook trong dự án | Bản rời trên máy |
+|---|---|---|
+| Giữa kỳ | [`submission_demo.ipynb`](notebooks/submission_demo.ipynb) | `submissions/01-giua-ky/` có notebook và slide |
+| Cuối kỳ | [`final_analysis.ipynb`](notebooks/final_analysis.ipynb) | `submissions/02-cuoi-ky/` có notebook, báo cáo Word và slide tùy chọn |
+| Bài nhóm Day 4 | [`day4_preprocessing.ipynb`](notebooks/day4_preprocessing.ipynb) | `submissions/03-day-4/` có notebook, 14 workbook và các tệp để chạy độc lập |
+
+Hai gói ZIP giữa kỳ và cuối kỳ nằm trong `submissions/`. Khi chuyển sang máy khác, giải nén cả ZIP để có mã nguồn và dữ liệu. Xem `submissions/HUONG-DAN.txt` để chọn file theo mốc.
+
 ## Cấu trúc dự án
 
 | Thư mục | Nội dung |
@@ -32,7 +44,7 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 | `scripts/classifier_label_baselines.py` | Baseline đánh giá: hoán vị nhãn train, chỉ `year_t`/prevalence năm trước, so cặp fold (NB−KNN/LR) → `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary) |
 | `data/raw/course/` | Slide bài giảng + mẫu báo cáo GV — **chỉ lưu local, không commit** (tài liệu bên thứ ba); không script nào trong repo phụ thuộc thư mục này |
 | `models/` | Model STING đã huấn luyện + tham số chuẩn hóa (dùng cho dự đoán) |
-| `notebooks/` | Notebook nộp bài (Jupyter): `submission_demo.ipynb` (giữa kỳ) + `final_analysis.ipynb` (cuối kỳ) |
+| `notebooks/` | Notebook Jupyter giữa kỳ, cuối kỳ, Day 4 và các notebook thử nghiệm |
 | `tests/` | Unit test |
 | `results/figs/` | Hình kết quả |
 | `reports/` | Báo cáo, ghi chú |
@@ -86,7 +98,7 @@ Bảng dưới ánh xạ chủ đề đã dạy (Day 1–4, môn Học máy — 
 | Confusion matrix, precision/recall (Day 2) | Ma trận 6 model học phần: `results/figs/course_confusion_matrix.png`; LR đã chọn (một model): `results/figs/supervised_confusion.png` |
 | SVM tuyến tính + kernel RBF (Day 3) | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
 | Decision Tree, Random Forest (Day 3) | Cùng `scripts/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/predict_supervised.py` (chọn model theo CV, không theo holdout) |
-| Tiền xử lý: Cleaning (dedup → imputation → consistency → outlier **cuối**) → Integration → Transformation; mỗi bước Test → Decide (Day 4) | `scripts/preprocessing_audit.py` → `results/preprocessing_audit.{md,csv}`; notebook cuối kỳ đọc CSV: `notebooks/final_analysis.ipynb` |
+| Tiền xử lý Day 4 (Cleaning → Integration → Transformation) | `notebooks/day4_preprocessing.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
 | Q&A thi / vấn đáp theo slide | `reports/qa_course_concepts.md` (midterm/cuối kỳ bổ sung: `reports/qa_midterm.md`, `reports/qa_final.md`) |
 
 Tái tạo audit và bảng classifier (nếu artifact cũ):

@@ -1,14 +1,14 @@
 """Gate artifact nộp bài: slide, notebook demo, và provenance PDF PAPI.
 
-Đọc số từ ``results/supervised_metrics.csv`` (không hard-code MAE Ridge). Các
-hàm ``check_*`` tách riêng để test artifact thật và bản sao đột biến trong RAM —
-không sửa file tracked.
+Đối chiếu demo tổng hợp và kết quả phân cụm PAPI với artifact. Các hàm
+``check_*`` dùng chung cho artifact thật và bản sao đột biến trong RAM.
 
 Chạy: python -m pytest tests/test_submission_artifacts.py -q
 """
 
 from __future__ import annotations
 
+import ast
 import copy
 import hashlib
 import json
@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 SUBMISSION_PPTX = ROOT / "slides" / "submission.pptx"
 SUBMISSION_NB = ROOT / "notebooks" / "submission_demo.ipynb"
-SUPERVISED_METRICS = ROOT / "results" / "supervised_metrics.csv"
+PAPI_LABELS = ROOT / "results" / "predict_all_years.csv"
 PROVENANCE = ROOT / "data" / "raw" / "papi" / "PROVENANCE.md"
 PAPI_PDF = ROOT / "data" / "raw" / "papi" / "PAPI_2024_REPORT_VIE_final.pdf"
 EXPECTED_ARI_STR = "0.950"
@@ -49,17 +49,6 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
-
-
-def ridge_holdout_mae_from_csv(metrics_path: Path = SUPERVISED_METRICS) -> float:
-    """MAE holdout Ridge đọc từ artifact CSV."""
-    frame = pd.read_csv(metrics_path)
-    rows = frame[(frame["task"] == "regression") & (frame["model"] == "ridge")]
-    if len(rows) != 1:
-        raise AssertionError(
-            f"{metrics_path}: cần đúng 1 dòng ridge, có {len(rows)}"
-        )
-    return float(rows.iloc[0]["holdout_mae"])
 
 
 def check_pptx_submission(prs: Presentation) -> list[str]:
@@ -157,22 +146,6 @@ def check_notebook_no_absolute_host_paths(nb: dict) -> list[str]:
     return violations
 
 
-def check_notebook_key_numbers(nb: dict, ridge_mae: float) -> list[str]:
-    """Output đã chạy phải chứa ARI 0.950 và MAE holdout Ridge từ CSV."""
-    violations: list[str] = []
-    blob = notebook_executed_text(nb)
-
-    if EXPECTED_ARI_STR not in blob:
-        violations.append("output notebook thiếu ARI 0.950")
-
-    mae_formats = {f"{ridge_mae:.4f}", f"{ridge_mae:.3f}", repr(ridge_mae)}
-    if not any(token in blob for token in mae_formats):
-        violations.append(
-            f"output notebook thiếu MAE holdout Ridge ({ridge_mae}) từ supervised_metrics.csv"
-        )
-    return violations
-
-
 def provenance_pdf_sha256(md_text: str) -> str | None:
     match = _PDF_HASH_RE.search(md_text)
     return match.group(1).lower() if match else None
@@ -215,17 +188,17 @@ def submission_notebook() -> dict:
     return json.loads(SUBMISSION_NB.read_text(encoding="utf-8"))
 
 
-@pytest.fixture(scope="module")
-def ridge_holdout_mae() -> float:
-    assert SUPERVISED_METRICS.is_file(), "thiếu results/supervised_metrics.csv"
-    return ridge_holdout_mae_from_csv()
-
-
 def test_submission_pptx_exists_and_notes():
     assert SUBMISSION_PPTX.is_file(), "thiếu slides/submission.pptx"
     presentation = Presentation(str(SUBMISSION_PPTX))
     violations = check_pptx_submission(presentation)
     assert not violations, "\n".join(violations)
+    titles_and_text = "\n".join(shape.text for slide in presentation.slides
+                                for shape in slide.shapes if shape.has_text_frame)
+    assert "Đọc cụm từ bảng đếm 3 × 3" in titles_and_text
+    assert "Tài liệu tham khảo" not in titles_and_text
+    assert "nhóm báo cáo trung thực" not in titles_and_text.lower()
+    assert "Phân cụm dựa trên lưới" in titles_and_text
 
 
 def test_submission_notebook_cells(submission_notebook: dict):
@@ -239,7 +212,7 @@ def test_submission_notebook_no_absolute_host_paths(submission_notebook: dict):
 
 
 def test_submission_notebook_course_rubric_sections(submission_notebook: dict):
-    """Notebook nộp bài phải hiện thứ tự Day 4 và baseline classifier học phần."""
+    """Giữa kỳ cần tiền xử lý, demo Grid-based và đánh giá phân cụm."""
     md_text = notebook_markdown_text(submission_notebook)
     code_cells = [
         c for c in submission_notebook.get("cells", []) if c.get("cell_type") == "code"
@@ -247,22 +220,44 @@ def test_submission_notebook_course_rubric_sections(submission_notebook: dict):
     missing: list[str] = []
     if "Tiền xử lý theo Day 4" not in md_text:
         missing.append("thiếu mục Tiền xử lý theo Day 4")
-    if "Bộ phân loại trong môn học" not in md_text:
-        missing.append("thiếu mục Bộ phân loại trong môn học")
+    for section in ("Lý thuyết STING", "Cài đặt từ đầu", "Ứng dụng PAPI"):
+        if section not in md_text:
+            missing.append(f"thiếu mục {section}")
     if not any("preprocessing_audit.csv" in _cell_source_text(c) for c in code_cells):
         missing.append("không có ô đọc preprocessing_audit.csv")
-    if not any("course_supervised_baselines.csv" in _cell_source_text(c) for c in code_cells):
-        missing.append("không có ô đọc course_supervised_baselines.csv")
-    if not any("course_confusion_matrix.png" in _cell_source_text(c) for c in code_cells):
-        missing.append("không có ô hiển thị course_confusion_matrix.png")
+    if not any("KMeans(" in _cell_source_text(c) and "DBSCAN(" in _cell_source_text(c)
+               for c in code_cells):
+        missing.append("thiếu ô so sánh K-means và DBSCAN")
     assert not missing, "\n".join(missing)
 
 
-def test_submission_notebook_key_numbers(
-    submission_notebook: dict, ridge_holdout_mae: float
-):
-    violations = check_notebook_key_numbers(submission_notebook, ridge_holdout_mae)
-    assert not violations, "\n".join(violations)
+def test_submission_notebook_key_numbers(submission_notebook: dict):
+    output = notebook_executed_text(submission_notebook)
+    labels = pd.read_csv(PAPI_LABELS)
+    holdout = labels.loc[labels.year == 2024, "pred_cluster"]
+    noise = int(holdout.eq(-1).sum())
+    assert "2 cụm, mỗi cụm 7 điểm. 1 điểm nhiễu." in output
+    assert f"ARI = {EXPECTED_ARI_STR}" in output
+    assert f"Refit khớp {len(labels)}/{len(labels)} nhãn (0 lệch)" in output
+    assert f"{len(holdout) - noise} vào cụm, {noise} nhiễu." in output
+
+
+def test_submission_checks_all_three_sensitivity_rows(submission_notebook: dict, tmp_path):
+    source = next(_cell_source_text(c) for c in submission_notebook["cells"]
+                  if "def _sensitivity_expectations(" in _cell_source_text(c))
+    parser = next(node for node in ast.parse(source).body
+                  if isinstance(node, ast.FunctionDef) and node.name == "_sensitivity_expectations")
+    scope = {"min_counts": (3, 5, 8)}
+    exec(compile(ast.Module(body=[parser], type_ignores=[]), "<notebook>", "exec"), scope)
+    parse = scope[parser.name]
+    path = tmp_path / "sensitivity.md"
+    path.write_text("| min_count  | coverage 2024 | số cụm | ARI |\n"
+                    "|---|---|---|---|\n| 3 | 82% | 3 | 0.852 |\n"
+                    "| 5 | 79% | 3 | 1.000 |\n| 8 | 70% | 1 | 0.678 |\n", encoding="utf-8")
+    assert parse(path) == {3: (0.82, 0.852), 5: (0.79, 1.0), 8: (0.70, 0.678)}
+    path.write_text(path.read_text(encoding="utf-8").split("| 8 |")[0], encoding="utf-8")
+    with pytest.raises(ValueError, match="3, 5, 8"):
+        parse(path)
 
 
 def test_papi_pdf_provenance_chain():
@@ -310,3 +305,31 @@ def test_gate_detects_missing_output_in_memory(submission_notebook: dict):
             break
     violations = check_notebook_cells(mutant)
     assert any("không có output" in message for message in violations)
+
+
+def test_optional_final_slides_match_grid_method_and_presentation_scope():
+    """Keep the method caveat and teacher-facing results in the oral deck."""
+    deck = Presentation(ROOT / "slides/final.pptx")
+    text = "\n".join(
+        shape.text for slide in deck.slides for shape in slide.shapes if shape.has_text_frame
+    )
+    assert len(deck.slides) == 16
+    assert all(slide.has_notes_slide and slide.notes_slide.notes_text_frame.text.strip()
+               for slide in deck.slides)
+    assert "STING rút gọn" in text
+    assert "Cài đặt dùng ngưỡng số đếm" in text
+    assert "STING gốc còn dùng phân phối và kiểm định thống kê" in text
+    assert "23/37 cột đổi thang" not in text
+    assert "28 unit test" not in text
+    assert "Kết quả chính và hướng phát triển" in text
+    assert "Cảm ơn thầy và các bạn đã lắng nghe" in text
+    closing_text = "\n".join(
+        shape.text for shape in deck.slides[-1].shapes if shape.has_text_frame
+    ).strip()
+    assert closing_text == "Cảm ơn thầy và các bạn đã lắng nghe"
+    assert all(phrase not in text.lower() for phrase in (
+        "báo cáo trung thực", "slide ghi điểm", "nói rõ trước khi được hỏi",
+        "nghi thức phản biện", "bộ nộp cuối kỳ",
+    ))
+    notes = "\n".join(slide.notes_slide.notes_text_frame.text for slide in deck.slides)
+    assert all(name in notes for name in ["final_report.docx", "final_analysis.ipynb", "final.pptx"])
