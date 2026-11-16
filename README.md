@@ -13,13 +13,14 @@ _Banner trên là minh họa trang trí — vị trí chấm sinh ngẫu nhiên 
 
 ## File nộp và notebook
 
-Các notebook dưới đây mở được trong Jupyter và đã lưu kết quả chạy.
+Các notebook đã lưu kết quả chạy. Bản nộp có nội dung thực nghiệm và kết luận.
+Bản học lưu các giải thích và hướng dẫn thao tác.
 
-| Mốc | Notebook trong dự án | Bản rời trên máy |
+| Mốc | Bản nộp | Bản học có giải thích |
 |---|---|---|
-| Giữa kỳ | [`submission_demo.ipynb`](notebooks/submission_demo.ipynb) | `submissions/01-giua-ky/` có notebook và slide |
-| Cuối kỳ | [`final_analysis.ipynb`](notebooks/final_analysis.ipynb) | `submissions/02-cuoi-ky/` có notebook, báo cáo Word và slide tùy chọn |
-| Bài nhóm Day 4 | [`day4_preprocessing.ipynb`](notebooks/day4_preprocessing.ipynb) | `submissions/03-day-4/` có notebook, 14 workbook và các tệp để chạy độc lập |
+| Giữa kỳ | [Notebook giữa kỳ](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.ipynb) | [Bản học giữa kỳ](study/01-giua-ky/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) |
+| Cuối kỳ | [Notebook cuối kỳ](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.ipynb) | [Bản học cuối kỳ](study/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) |
+| Bài nhóm Day 4 | [Notebook tiền xử lý](submissions/03-day-4/Nhom15_Day4_TienXuLy_PAPI.ipynb) | [Bản học Day 4](study/03-day-4/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb) |
 
 Hai gói ZIP giữa kỳ và cuối kỳ nằm trong `submissions/`. Khi chuyển sang máy khác, giải nén cả ZIP để có mã nguồn và dữ liệu. Xem `submissions/HUONG-DAN.txt` để chọn file theo mốc.
 
@@ -45,6 +46,7 @@ Hai gói ZIP giữa kỳ và cuối kỳ nằm trong `submissions/`. Khi chuyể
 | `data/raw/course/` | Slide bài giảng + mẫu báo cáo GV — **chỉ lưu local, không commit** (tài liệu bên thứ ba); không script nào trong repo phụ thuộc thư mục này |
 | `models/` | Model STING đã huấn luyện + tham số chuẩn hóa (dùng cho dự đoán) |
 | `notebooks/` | Notebook Jupyter giữa kỳ, cuối kỳ, Day 4 và các notebook thử nghiệm |
+| `study/` | Bản học có giải thích của ba notebook |
 | `tests/` | Unit test |
 | `results/figs/` | Hình kết quả |
 | `reports/` | Báo cáo, ghi chú |

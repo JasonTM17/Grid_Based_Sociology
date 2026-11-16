@@ -19,5 +19,6 @@ khi chuyển sang máy khác. Cài môi trường bằng requirements.txt, sau �
 mở notebook trong thư mục notebooks của bản giải nén.
 
 Các file rời đã lưu kết quả, có thể đọc hoặc chiếu ngay.
+Bản học có giải thích nằm riêng trong thư mục study của dự án.
 SHA256SUMS.txt ghi mã kiểm tra hai ZIP.
 verification.json ghi kết quả chạy lại từ từng ZIP.

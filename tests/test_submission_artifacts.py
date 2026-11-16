@@ -218,8 +218,8 @@ def test_submission_notebook_course_rubric_sections(submission_notebook: dict):
         c for c in submission_notebook.get("cells", []) if c.get("cell_type") == "code"
     ]
     missing: list[str] = []
-    if "Tiền xử lý theo Day 4" not in md_text:
-        missing.append("thiếu mục Tiền xử lý theo Day 4")
+    if "Tiền xử lý dữ liệu" not in md_text:
+        missing.append("thiếu mục Tiền xử lý dữ liệu")
     for section in ("Lý thuyết STING", "Cài đặt từ đầu", "Ứng dụng PAPI"):
         if section not in md_text:
             missing.append(f"thiếu mục {section}")
@@ -229,6 +229,9 @@ def test_submission_notebook_course_rubric_sections(submission_notebook: dict):
                for c in code_cells):
         missing.append("thiếu ô so sánh K-means và DBSCAN")
     assert not missing, "\n".join(missing)
+    assert all(phrase not in md_text for phrase in (
+        "Thứ tự giảng dạy", "Test → Decide", "Cách chạy", "Cùng ví dụ với slide",
+    ))
 
 
 def test_submission_notebook_key_numbers(submission_notebook: dict):

@@ -16,16 +16,11 @@ cells = []
 md = cells.append
 cd = cells.append
 
-md(nbf.v4.new_markdown_cell("""# Báo cáo phân tích cuối kỳ — Phân cụm 63 tỉnh Việt Nam với STING trên dữ liệu PAPI
+md(nbf.v4.new_markdown_cell("""# Phân cụm dữ liệu PAPI bằng STING
 
-**Đồ án môn Học máy** · Topic 6: *Grid-based (clustering)* · Sociology / History · Nhóm 2 người.
+**Học máy · Báo cáo cuối kỳ · Nhóm 15 · Grid-based clustering**
 
-Phần chính trình bày tiền xử lý, STING, đối chứng phân cụm và kết quả PAPI.
-Phần phụ lục gồm kiểm tra nhiều chiều, bài toán giám sát và đối chiếu nguồn ngoài.
-
-Chạy tất cả các ô từ thư mục gói đã giải nén. Notebook tính lại STING trên dữ liệu
-giả lập, đối chiếu nhãn đã công bố và tính MAE Ridge ở phụ lục B. Các bảng và hình
-mở rộng đọc từ thư mục `results/`."""))
+Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)"""))
 
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
@@ -55,32 +50,33 @@ print("panel:", panel.shape, "| tỉnh:", panel.province_code.nunique(), "| năm
 
 md(nbf.v4.new_markdown_cell("""## 1. Dữ liệu & chất lượng
 
-- 14 workbook PAPI gốc → panel sạch `882×41`; đạt yêu cầu quy mô cuối kỳ.
+- Dữ liệu PAPI 2011–2024 gồm 882 quan sát tỉnh–năm và 41 cột.
 - 0.0 quy về NaN (khớp quy ước gói replication Mendeley).
-- **Kiểm tra thang đo:** 23/37 cột có bước nhảy trung bình năm > 0.25. Đây là cờ sàng lọc, cần đối chiếu workbook.
-  Pipeline xuyên năm CHỈ dùng chỉ tiêu qua audit: `sd_1_3, sd_1_4, sd_4_1–4_4, sd_6_1, sd_6_3`.
-- `d7/d8` chỉ có từ 2018 → robustness 8 chiều giới hạn 2018–2024."""))
+- Có 23/37 chỉ tiêu có biến động trung bình năm vượt 0,25. Các chỉ tiêu này
+  được đối chiếu với workbook trước khi lựa chọn đặc trưng.
+- Hai chiều nội dung `d7/d8` có từ năm 2018."""))
 
 cd(nbf.v4.new_code_cell("""cfg = json.loads((ROOT / "models/predict_config.json").read_text(encoding="utf-8"))
-print("Cặp chỉ tiêu đóng băng:", cfg["features"])
+print("Cặp chỉ tiêu phân cụm:", cfg["features"])
 print("STING:", cfg["sting"])
 print("Giao thức chọn (train-only):", cfg["selection_protocol"])"""))
 
 cd(nbf.v4.new_code_cell("""audit = pd.read_csv(ROOT / "results/preprocessing_audit.csv")
-show_md(audit[["stage", "test", "result", "decision"]].to_markdown(index=False))"""))
+audit_table = audit[["test", "result"]].rename(
+    columns={"test": "Kiểm tra", "result": "Kết quả"}
+)
+audit_table["Kiểm tra"] = audit_table["Kiểm tra"].str.replace(", dedup chạy ĐẦU TIÊN", "", regex=False)
+with pd.option_context("display.max_colwidth", None):
+    display(audit_table)"""))
 
-md(nbf.v4.new_markdown_cell("""### 1.1 Kiểm chứng cài đặt STING và tái lập model
+md(nbf.v4.new_markdown_cell("""### 1.1 Phương pháp STING và kiểm chứng cài đặt
 
 STING gốc [Wang, Yang & Muntz, VLDB 1997](https://www.vldb.org/conf/1997/P186.PDF)
-lưu cả loại phân phối và duyệt truy vấn top-down theo confidence. Bản nhóm tự viết là
-**biến thể rút gọn**: count/mean/std/min/max từng ô, chọn ô có `count >= min_count`,
-gom thành phần liên thông ở **một mức**; không triển khai pruning top-down.
-Cây lưới hình học này khác dendrogram của Hierarchical Clustering trong Day 9.
+lưu thống kê và phân phối của từng ô lưới. Cài đặt của nhóm dùng ngưỡng số đếm,
+gom các ô dày liên thông qua cạnh tại một mức lưới.
 
-Hai ô sau **thực sự chạy STING**: kiểm chứng với nhãn tổng hợp, rồi fit scaler/lưới chỉ
-trên 2011–2023 và so mọi nhãn với artifact/model đã lưu. Không chọn lại tham số trên 2024.
-Các metric silhouette/DB/CH ở phần sau là đánh giá nội tại; ARI trên PAPI chỉ đo đồng
-thuận giữa hai phân hoạch, không phải accuracy so với nhãn xã hội chuẩn."""))
+ARI trên dữ liệu giả lập được đối chiếu với nhãn đã biết. Với PAPI, ARI giữa
+các phương pháp biểu thị mức đồng thuận giữa các phân hoạch."""))
 
 cd(nbf.v4.new_code_cell("""from sklearn.datasets import make_blobs
 from sklearn.metrics import adjusted_rand_score
@@ -120,19 +116,18 @@ test = rebuilt[rebuilt.year == 2024]
 print(f"Refit STING: {len(comparison)}/{len(saved)} nhãn khớp; model đã lưu khớp")
 print(f"2024: {len(test)}/63 tỉnh đủ chỉ tiêu; phân bố {test.pred_cluster.value_counts().sort_index().to_dict()}")"""))
 
-md(nbf.v4.new_markdown_cell("""## 2. So sánh STING vs k-means vs DBSCAN (pooled 2011–2023)
+md(nbf.v4.new_markdown_cell("""## 2. So sánh STING, K-means và DBSCAN trên PAPI 2011–2023
 
-Noise (−1) **được tách khỏi** silhouette/DB/CH (metric hình học tính trên điểm thuộc cụm).
-k-means luôn gán hết điểm (ép k), STING không ép — đây là khác biệt phương pháp cần nói rõ."""))
+Silhouette, Davies–Bouldin và Calinski–Harabasz được tính trên các điểm thuộc cụm."""))
 
 cd(nbf.v4.new_code_cell("""metrics = pd.read_csv(ROOT / "results/metrics.csv")
 show_md(metrics[metrics.scope == "pooled 2011-2023"].to_markdown(index=False))"""))
 
-md(nbf.v4.new_markdown_cell("""**Đọc bảng (trung thực):**
-- Dữ liệu PAPI rất đồng nhất — STING frozen cho 1 vùng dày lớn (629) + 2 nhóm ngoại vi nhỏ (16 và 5).
-- ARI STING vs k-means thấp (0.07–0.17): hai phân vùng khác nhau trên gần như một khối điểm.
-- STING đồng thuận với DBSCAN(eps=0.2) hơn (ARI ≈ 0.65) — cùng họ mật độ.
-- k-means cho silhouette cao hơn (0.445) nhưng **ép mọi điểm vào cụm**; STING có nhiễu 20% tách riêng."""))
+md(nbf.v4.new_markdown_cell("""### Kết quả so sánh
+
+STING tạo một cụm 629 điểm, hai cụm nhỏ 16 và 5 điểm, với 19,6% nhiễu.
+ARI giữa STING và DBSCAN ở `eps=0.2` bằng 0,647. Tỷ lệ nhiễu làm thay đổi
+tập điểm được dùng để tính các chỉ số hình học."""))
 
 md(nbf.v4.new_markdown_cell("## 3. STING theo từng năm"))
 
@@ -153,9 +148,7 @@ for year in (2020, 2024):
 
 cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/evolution.png")))"""))
 
-md(nbf.v4.new_markdown_cell("""**Chú thích evolution:** lưới TOÀN CỤC (không refit per-year) để nhãn có thể so sánh giữa các năm;
-xám = nhiễu (−1); trắng = thiếu chỉ tiêu năm đó. Đọc được xu hướng: phần lớn tỉnh nằm trong cụm lớn
-trong mọi năm; một số tỉnh vào/ra vùng ngoại vi theo thời gian."""))
+md(nbf.v4.new_markdown_cell("### Phân bố các tỉnh năm 2024 trên lưới đã học"))
 
 cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/predict_2024.png")))"""))
 
@@ -179,21 +172,18 @@ _mc2 = _rob[_rob["branch"].str.contains("OFAT mc=2")].iloc[0]
 _lv2 = _rob[_rob["branch"].str.contains("OFAT lv=2")].iloc[0]
 md(nbf.v4.new_markdown_cell(f"""## Phụ lục A. Kiểm tra bổ sung trên nhiều chỉ tiêu
 
-- **Thử PCA:** ≥2 thành phần trên d1–d6 toàn panel (trong-năm z để khử bước nhảy).
-  Kết quả: 2 PC đầu chỉ giữ {_pca.explained_var_total:.1%} phương sai; STING trên không gian PCA → k={_pca.k:.0f} → **không nhận diện cấu trúc** (trung thực).
-- **Nhánh 8 chiều OFAT** (chỉ 2018–2024, 430 điểm — lưới 8-D quá thưa; đổi MỘT tham số mỗi lần từ gốc `{_goc.branch.split(", ")[-1]}`):
-  gốc → k={_goc.k:.0f}, noise={_goc.noise_ratio:.1%} (silhouette {_goc.silhouette:.3f});
-  chỉ f=3 → k={_f3.k:.0f}, noise={_f3.noise_ratio:.1%}; chỉ mc=2 → k={_mc2.k:.0f}, noise={_mc2.noise_ratio:.1%} (verdict "{_mc2.verdict}" — silhouette {_mc2.silhouette:.3f}, tách yếu); chỉ lv=2 → k={_lv2.k:.0f}, noise={_lv2.noise_ratio:.0%}.
-  → ablation chỉ ra **kết quả nhạy với factor và cluster_level**; nhánh mc=2 tuy verdict "có cấu trúc" nhưng silhouette âm nên không phải cụm dùng được.
-- Kết luận: không tìm thấy cụm ổn định khi mở rộng chiều; cluster hóa hiện hữu chỉ có ý nghĩa ở không gian 2D cục bộ.
-  Đây là **kết quả âm tính đáng báo cáo** — dữ liệu quản trị công PAPI ở cấp tỉnh/năm khá đồng nhất."""))
+- Hai thành phần PCA giữ {_pca.explained_var_total:.1%} phương sai và cho {_pca.k:.0f} cụm.
+- Với 8 chiều giai đoạn 2018–2024, cấu hình gốc cho {_goc.k:.0f} cụm và {_goc.noise_ratio:.1%} nhiễu.
+- Khi chỉ đổi factor thành 3, tỷ lệ nhiễu là {_f3.noise_ratio:.1%}. Khi đổi mức lưới,
+  có {_lv2.k:.0f} cụm. Khi giảm min_count còn 2, có {_mc2.k:.0f} cụm và
+  {_mc2.noise_ratio:.1%} nhiễu, với silhouette {_mc2.silhouette:.3f}."""))
 
 cd(nbf.v4.new_code_cell("""rob = pd.read_csv(ROOT / "results/robustness.csv")
 show_md(rob.to_markdown(index=False))"""))
 
 md(nbf.v4.new_markdown_cell("""## Phụ lục B. Mô hình giám sát bổ trợ
 
-Ridge và Random Forest minh họa dự báo chỉ tiêu y tế năm sau. Chọn bằng CV theo
+Ridge và Random Forest dự báo chỉ tiêu y tế năm sau. Chọn bằng CV theo
 thời gian và đánh giá trên 2023→2024. Bài phân loại dùng nhãn do STING sinh.
 Kết quả phân loại đo mức khớp với nhãn lưới trong một holdout."""))
 
@@ -244,13 +234,9 @@ print(f"Ridge holdout recalculated: n={len(holdout)}, MAE={ridge_mae:.4f}; carry
 
 md(nbf.v4.new_markdown_cell("""## Phụ lục C. Đối chiếu PCI và nghèo GSO
 
-- Bảng đối chiếu PCI có trong `results/external_validation.md`.
-- Nguồn GSO: tỷ lệ hộ nghèo cấp tỉnh **GSO pxweb V14.47** (thống kê chính thức,
-  tách khỏi PAPI); 2017–2019 lấy từ Niên giám Thống kê 2020/2021.
-  KHÔNG vào feature, KHÔNG nội suy ô thiếu (TP.HCM 2016 thiếu phía nguồn).
-- Mọi số dưới đây **đọc trực tiếp từ `results/poverty_validation.csv`** (sinh bởi `scripts/poverty_validation.py`) — không hardcode.
-- Nên đọc hai kiểm định cùng nhau: gộp thô (nhiễm hiệu ứng năm — chuẩn nghèo đổi theo giai đoạn,
-  median nghèo giảm sâu xuyên giai đoạn) và đã-trừ-median-trong-năm (tách hiệu ứng năm)."""))
+Nguồn đối chiếu gồm PCI của VCCI–USAID và tỷ lệ hộ nghèo cấp tỉnh GSO
+PX-Web V14.47. Dữ liệu nghèo 2017–2019 lấy từ Niên giám Thống kê 2020/2021.
+Kiểm định gồm dữ liệu gộp thô và dữ liệu đã trừ trung vị theo năm."""))
 
 cd(nbf.v4.new_code_cell("""pov = pd.read_csv(ROOT / "results/poverty_validation.csv")
 
@@ -271,13 +257,6 @@ print("Đã trừ median trong năm:", _pov_note("poverty_pooled_demeaned", "Kru
 for _, r in pov[pov.section == "test_mw_noise_vs_c2"].iterrows():
     print(f"{r['group']}: {r['note']}")
 print()
-_c0 = int(pov_pool[has_stats & pov_pool["group"].str.contains("cụm 0", regex=False)].iloc[0]["n"])
-_c1 = int(pov_pool[has_stats & pov_pool["group"].str.contains("cụm 1", regex=False)].iloc[0]["n"])
-print("Đọc trung thực: gộp thô KHÔNG đáng kể (nhiễm hiệu ứng năm); đã-trừ-median-năm đáng kể ở mức yếu.")
-print(f"Cặp tương phản đáng tin duy nhất là nhiễu vs cụm 2 (cụm 0 n={_c0}, cụm 1 n={_c1} quá nhỏ):")
-print("Các p-value Mann–Whitney ở trên không cho bằng chứng khác biệt ở mức 0.05;")
-print("Đọc bảng PCI và nghèo GSO như phân tích bổ trợ theo nguồn độc lập.")
-
 display(Image(filename=str(ROOT / "results/figs/external_poverty_by_cluster.png")))"""))
 
 nb["cells"] = cells

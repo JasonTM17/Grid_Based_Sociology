@@ -25,19 +25,11 @@ cells = []
 md = cells.append
 cd = cells.append
 
-md(nbf.v4.new_markdown_cell("""# Notebook nộp bài — Phân cụm 63 tỉnh Việt Nam với STING trên dữ liệu PAPI
+md(nbf.v4.new_markdown_cell("""# Phân cụm dữ liệu PAPI bằng STING
 
-**Đồ án môn Học máy** · Topic 6: *Grid-based (clustering)* · Domain: Sociology / History.
+**Học máy · Nhóm 15 · Chủ đề 6 — Grid-based clustering**
 
-## 0. Mục tiêu & cách chạy
-
-- **Mục tiêu:** trình bày lý thuyết STING, cài đặt lại từ đầu (`src/sting.py`), kiểm chứng
-  trên dữ liệu tổng hợp bằng ARI, rồi áp dụng lên panel PAPI 63 tỉnh 2011–2024, so sánh với
-  k-means và DBSCAN. Thử thay ngưỡng mật độ để xem kết quả đổi thế nào.
-- **Cách chạy:** `python scripts/gen_submission_demo.py` (sinh + execute notebook này) hoặc
-  `python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb`.
-- **Tái lập:** notebook chạy STING trên dữ liệu tổng hợp và panel PAPI, rồi đối chiếu
-  nhãn và metric đã công bố. Bảng tiền xử lý đọc từ `results/preprocessing_audit.csv`."""))
+Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)"""))
 
 cd(nbf.v4.new_code_cell("""import ast
 import os
@@ -120,17 +112,11 @@ STING (Statistical Information Grid, Wang, Yang & Muntz, 1997) chia không gian
 đặc trưng thành lưới từ thô đến mịn. Ở mức `l`, mỗi trục có `factor**l` đoạn.
 Mỗi ô lưu số điểm, trung bình, độ lệch chuẩn, giá trị nhỏ nhất và lớn nhất.
 
-1. Dựng lưới và đếm số điểm trong mỗi ô.
-2. Chọn một mức lưới, đánh dấu ô có ít nhất `min_count` điểm.
-3. Nối các ô dày chung cạnh để tạo cụm. Điểm trong ô thưa nhận nhãn `-1`.
+Trong cài đặt này, ô có số điểm đạt `min_count` được gom qua quan hệ chung cạnh
+tại một mức lưới. Điểm trong ô thưa nhận nhãn `-1`. Đây là biến thể dùng
+ngưỡng số đếm. STING gốc còn mô hình hóa phân phối và duyệt lưới từ trên xuống."""))
 
-Đây là biến thể Grid-based rút gọn. Bài gốc có thêm mô hình phân phối cho ô và
-cắt tỉa khi duyệt lưới từ trên xuống. Demo gom ô ở một mức đã chọn."""))
-
-md(nbf.v4.new_markdown_cell("""## 2. Cài đặt từ đầu — lưới 3 × 3
-
-Cùng ví dụ với slide 5. Lấy 3 điểm làm ngưỡng ô dày. Trong bảng này, hai vùng
-chỉ chạm góc. Chạy ô dưới để xem kết quả khi nối các ô chung cạnh."""))
+md(nbf.v4.new_markdown_cell("## 2. Cài đặt từ đầu — lưới 3 × 3"))
 
 cd(nbf.v4.new_code_cell("""counts = np.array([[4, 3, 0], [1, 0, 4], [0, 0, 3]])
 positions = [(col, 2 - row) for row in range(3) for col in range(3)]
@@ -150,10 +136,7 @@ noise_count = int((labels == -1).sum())
 assert group_sizes == [7, 7] and noise_count == 1
 print(f"{model.n_clusters_} cụm, mỗi cụm {group_sizes[0]} điểm. {noise_count} điểm nhiễu.")"""))
 
-md(nbf.v4.new_markdown_cell("""## 3. Kiểm chứng tổng hợp (ARI)
-
-Kiểm chứng cài đặt bằng **ARI** trên dữ liệu giả lập 2 cụm tách biệt (seed cố định) — cùng gate
-với `tests/test_sting.py::test_two_blobs_recovered` (ARI ≥ 0.9)."""))
+md(nbf.v4.new_markdown_cell("## 3. Đánh giá trên dữ liệu giả lập"))
 
 cd(nbf.v4.new_code_cell("""X_syn, y_true = make_blobs(n_samples=240, centers=[(-6, -6), (6, 6)],
                            cluster_std=0.6, random_state=42)
@@ -162,14 +145,14 @@ lab_syn = m_syn.cluster(level=2, connectivity=1)
 ari = adjusted_rand_score(y_true, lab_syn)
 assert ari >= 0.9, f"ARI quá thấp: {ari:.3f}"
 print(f"ARI = {ari:.3f} | nhiễu = {(lab_syn == -1).mean():.1%} | k = {m_syn.n_clusters_}")
-print("Kiểm tra ARI ≥ 0.9: đạt.")"""))
+"""))
 
 md(nbf.v4.new_markdown_cell("""## 4. Ứng dụng PAPI
 
 - Panel PAPI gồm 882 quan sát tỉnh–năm và 41 cột. Giá trị `0.0` dùng để
   biểu thị ô thiếu được quy về NaN. Bước nhảy trung bình là dấu hiệu cần đối chiếu thang đo.
-- Demo dùng hai chỉ tiêu `sd_4_2` và `sd_6_1` theo `models/predict_config.json`.
-- Tính z-score trên dữ liệu đến 2023 và áp dụng cùng phép chuẩn hóa cho năm 2024."""))
+- Phân cụm dùng hai chỉ tiêu `sd_4_2` và `sd_6_1`.
+- Bộ chuẩn hóa được ước lượng từ dữ liệu 2011–2023 và áp dụng cho năm 2024."""))
 
 cd(nbf.v4.new_code_cell("""cfg = load_config()
 feats = cfg["features"]
@@ -177,22 +160,20 @@ panel = load_panel()
 print("Panel:", panel.shape, "| tỉnh:", panel.province_code.nunique(),
       "| năm:", panel.year.min(), "→", panel.year.max())
 assert panel.shape == (882, 41)
-print("Đặc trưng đóng băng:", feats, "→", [FEATURE_LABELS[f] for f in feats])"""))
+print("Đặc trưng phân cụm:", feats, "→", [FEATURE_LABELS[f] for f in feats])"""))
 
-md(nbf.v4.new_markdown_cell("""### 4.1 Tiền xử lý theo Day 4 (Test → Decide)
-
-Thứ tự giảng dạy: **Cleaning** (trùng khóa đầu tiên → thiếu → nhất quán → ngoại lai cuối cùng)
-→ **Integration** (khóa nối, số dòng, xung đột, rò rỉ) → **Transformation** (chuẩn hóa).
-Bảng dưới **đọc** artifact `results/preprocessing_audit.csv` (sinh bởi
-`python scripts/preprocessing_audit.py`) — không tính lại panel trong notebook."""))
+md(nbf.v4.new_markdown_cell("### 4.1 Tiền xử lý dữ liệu"))
 
 cd(nbf.v4.new_code_cell("""_prep = pd.read_csv(ROOT / "results" / "preprocessing_audit.csv")
-_tbl = _prep.rename(
-    columns={"stage": "Giai đoạn", "test": "Kiểm tra", "result": "Kết quả", "decision": "Quyết định"}
-)[["Giai đoạn", "Kiểm tra", "Kết quả", "Quyết định"]]
-with pd.option_context("display.max_colwidth", 72, "display.width", 140):
-    print(_tbl.to_string(index=False))
-print(f"Tổng {len(_tbl)} kiểm tra — thứ tự khớp Day 4 trong CSV.")"""))
+_tbl = _prep[["stage", "test", "result"]].rename(
+    columns={"stage": "Giai đoạn", "test": "Kiểm tra", "result": "Kết quả"}
+)
+_tbl["Giai đoạn"] = _prep["stage"].str[0].map(
+    {"1": "Làm sạch", "2": "Tích hợp", "3": "Chuẩn hóa"}
+)
+_tbl["Kiểm tra"] = _tbl["Kiểm tra"].str.replace(", dedup chạy ĐẦU TIÊN", "", regex=False)
+with pd.option_context("display.max_colwidth", None):
+    display(_tbl)"""))
 
 cd(nbf.v4.new_code_cell("""ptr = panel[panel.year <= 2023].dropna(subset=feats)
 scaler = StandardScaler().fit(ptr[feats])
@@ -226,7 +207,7 @@ merged = saved.merge(
 n_diff = int((merged.pred_cluster_saved != merged.pred_cluster_refit).sum())
 assert len(merged) == len(saved) == 869
 assert n_diff == 0
-print(f"Refit khớp {len(saved)}/{len(saved)} nhãn (0 lệch) — gate test_artifact_reproduction.")"""))
+print(f"Refit khớp {len(saved)}/{len(saved)} nhãn (0 lệch).")"""))
 
 cd(nbf.v4.new_code_cell("""metrics = pd.read_csv(ROOT / "results" / "metrics.csv")
 metrics_pooled = metrics[metrics.scope == "pooled 2011-2023"]
@@ -260,7 +241,7 @@ assert abs(silhouette_score(Xz, km2.labels_) - km2_row.silhouette) < 1e-3
 db2 = DBSCAN(eps=0.2, min_samples=5).fit(Xz)
 db2_row = metrics_pooled[metrics_pooled.method == "DBSCAN eps=0.2"].iloc[0]
 assert abs(adjusted_rand_score(lab, db2.labels_) - db2_row.ari_vs_sting) < 1e-3
-print("STING frozen + k-means k=2 + DBSCAN eps=0.2: khớp metrics.csv (đã assert).")"""))
+print("Kết quả STING, K-means và DBSCAN khớp bảng đối chiếu.")"""))
 
 cd(nbf.v4.new_code_cell("""fig, axes = plt.subplots(1, 2, figsize=(11, 5))
 axes[0].scatter(Xz[:, 0], Xz[:, 1], s=12, c=[CLUSTER_COLORS[int(c)] for c in lab])
@@ -322,11 +303,11 @@ exp_sens = _sensitivity_expectations(ROOT / "results" / "predict_summary.md")
 for mc, (ecov, eari) in exp_sens.items():
     assert abs(cov_map[mc] - round(ecov, 2)) < 1e-9
     assert ari_map[mc] == round(eari, 3)
-print("Độ nhạy min_count khớp results/predict_summary.md (đã assert).")"""))
+"""))
 
 md(nbf.v4.new_markdown_cell("""## 5. Kết luận và hạn chế
 
-- Demo tổng hợp kiểm tra cách chia lưới và gom ô. ARI 0.950 đo độ khớp với nhãn tổng hợp.
+- Trên dữ liệu giả lập, ARI 0.950 đo độ khớp với nhãn đã biết khi sinh dữ liệu.
 - PAPI 2011–2023 có một cụm lớn và hai cụm nhỏ. Số cụm và tỷ lệ nhiễu thay đổi
   theo ngưỡng mật độ. Năm 2024 cho thấy cách gán tỉnh mới vào lưới đã học.
 - Khi so sánh silhouette, đọc kèm tỷ lệ nhiễu vì mỗi phương pháp có thể được chấm

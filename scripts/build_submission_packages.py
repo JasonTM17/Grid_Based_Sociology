@@ -93,8 +93,8 @@ def package_files(root: Path, milestone: str) -> dict[str, str]:
     ]
     for path in figures:
         add(path.relative_to(root).as_posix(), "notebook / report / slide figure")
-    for name in ("course_requirements", "qa_course_concepts", "panel_lock", "presentation-script-261116"):
-        add(f"reports/{name}.md", "course boundary / defense / data lock")
+    for name in ("course_requirements", "panel_lock"):
+        add(f"reports/{name}.md", "course boundary / data lock")
     _, notebook = PACKAGES[milestone]
     add(f"notebooks/{notebook}", "graded executed notebook")
     if milestone == "midterm":

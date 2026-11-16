@@ -32,7 +32,10 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
         assert sum(p.endswith(".xlsx") and p.startswith("data/raw/papi/") for p in files) == 14
         if kind == "final":
             assert {"slides/final.pptx", "scripts/build_slides.py"} <= files
-        assert not any(p.startswith((".git", ".codex", ".agentkit", "plans/", "data/raw/course/")) for p in files)
+        assert not any(p.startswith((".git", ".codex", ".agentkit", "plans/", "study/", "data/raw/course/")) for p in files)
+        assert not {
+            "reports/qa_course_concepts.md", "reports/presentation-script-261116.md"
+        } & files
         assert not any("__pycache__" in p or "probe" in p or p.endswith(".pdf") for p in files)
 
 
