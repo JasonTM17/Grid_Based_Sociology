@@ -1,7 +1,7 @@
-"""Sinh notebooks/final_analysis.ipynb — notebook nộp cuối kỳ (end-to-end).
+"""Sinh notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb — notebook nộp cuối kỳ (end-to-end).
 
 Cách dùng: python scripts/gen_final_analysis.py
-Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb
+Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb
 """
 from pathlib import Path
 
@@ -9,7 +9,7 @@ import nbformat as nbf
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "notebooks" / "final_analysis.ipynb"
+OUT = ROOT / "notebooks" / "Nhom15_CuoiKy_STING_PAPI.ipynb"
 
 nb = nbf.v4.new_notebook()
 cells = []

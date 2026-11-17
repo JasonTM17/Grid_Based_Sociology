@@ -445,7 +445,7 @@ note(s, "Nhóm đã cài đặt biến thể STING và kiểm tra cách chia lư
      "điểm mới. Trên hai chỉ tiêu PAPI, kích thước cụm chênh lệch và độ nhạy tham số là những "
      "yếu tố cần chú ý khi đọc kết quả. Hướng tiếp theo là mở rộng mốc thời gian đánh giá "
      "và đối chiếu thêm các bộ chỉ tiêu có thang đo tương thích. Tài liệu chi tiết kèm theo "
-     "gồm final_report.docx, final_analysis.ipynb và bản trình chiếu final.pptx.")
+     "gồm final_report.docx, Nhom15_CuoiKy_STING_PAPI.ipynb và bản trình chiếu final.pptx.")
 
 # Slide 14 — Kiểm chứng bên ngoài
 s = slide_new()

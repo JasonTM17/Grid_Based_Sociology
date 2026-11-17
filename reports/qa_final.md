@@ -72,7 +72,7 @@ _Quy tắc: ≤60 giây/câu; người trả lời A (thuật toán/dữ liệu)
 
     (nguồn: results/model_improvement_candidates.md; results/candidates_regression.md:76; results/candidates_classification.md:82; reports/model_deep_dive.md:293-299)
 
-## Lý thuyết thuật toán & demo nộp bài (`submission.pptx` / `submission_demo.ipynb`)
+## Lý thuyết thuật toán & demo nộp bài (`submission.pptx` / `Nhom15_GiuaKy_STING_PAPI.ipynb`)
 
 32. **Vì sao STING dùng lưới phân cấp chứ không chỉ một lưới cố định?** — Mức `l` chia mỗi chiều thành `factor**l` đoạn; mức 0 là một ô, mức sâu hơn tinh chỉnh vùng dày/thưa mà vẫn quét dữ liệu O(n) mỗi mức. **STING gốc (Wang et al., 1997)** truy vấn/phân tích **top-down**: bắt từ lớp cao, kiểm ô liên quan bằng confidence, chỉ hạ xuống con của ô relevant. **Cài đặt của nhóm** dựng toàn bộ hierarchy từng mức trực tiếp từ điểm trong `fit()`, rồi `cluster()` và `query_rect()` chỉ dùng **một** `level`/`cluster_level` cố định — đơn giản hóa, không nhân bản pruning top-down. (nguồn: src/sting.py:8-12; src/sting.py:106-111; src/sting.py:117; src/sting.py:223)
 
@@ -88,7 +88,7 @@ _Quy tắc: ≤60 giây/câu; người trả lời A (thuật toán/dữ liệu)
 
 38. **Vì sao kết quả PAPI “đa số k=1”?** — `results/per_year.csv`: mọi năm 2011–2024 với lưới thô 3×3 (mc=3) đều **k=1** — một vùng dày chiếm đa số tỉnh-năm; cấu trúc tách chỉ ở ngoại vi hoặc khi tăng độ phân giải lưới (slide 6b). Đây là phát hiện đồng nhất, không phải lỗi implementation. (nguồn: results/per_year.csv:2; scripts/run_analysis.py:9)
 
-39. **Tái tạo notebook nộp bài thế nào?** — `python scripts/gen_submission_demo.py` (sinh + `nbconvert --execute --inplace`, kiểm mọi code cell có output, 0 lỗi); hoặc chỉ execute `python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb` sau khi đã sinh file. (nguồn: scripts/gen_submission_demo.py:7; scripts/gen_submission_demo.py:406)
+39. **Tái tạo notebook nộp bài thế nào?** — `python scripts/gen_submission_demo.py` (sinh + `nbconvert --execute --inplace`, kiểm mọi code cell có output, 0 lỗi); hoặc chỉ execute `python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` sau khi đã sinh file. (nguồn: scripts/gen_submission_demo.py:7; scripts/gen_submission_demo.py:406)
 
 40. **Mười slide `submission.pptx` lần lượt nói gì?** — 1 bìa/thesis · 2 bài toán panel 882×41 · 3 lưới phân cấp + thống kê ô · 4 gom cụm/O(n)/so sánh tham số · 5 demo synthetic ARI · 6 PAPI đồng nhất (a/b lưới) · 7 baseline + Ridge holdout · 8 PCI/robustness/hạn chế · 9 kết luận · 10 nguồn/Q&A. Build: `python scripts/build_slides_10.py`. (nguồn: scripts/build_slides_10.py:373; scripts/build_slides_10.py:714)
 

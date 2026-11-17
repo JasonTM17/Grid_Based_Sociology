@@ -1,14 +1,14 @@
-"""Sinh notebooks/01_params_sweep.ipynb — sweep độ nhạy tham số STING (Phase 4).
+"""Sinh notebooks/STING_KhaoSat_ThamSo.ipynb — sweep độ nhạy tham số STING (Phase 4).
 
 Cách dùng: python scripts/gen_params_sweep.py
-Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/01_params_sweep.ipynb
+Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/STING_KhaoSat_ThamSo.ipynb
 """
 from pathlib import Path
 
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "notebooks" / "01_params_sweep.ipynb"
+OUT = ROOT / "notebooks" / "STING_KhaoSat_ThamSo.ipynb"
 
 nb = nbf.v4.new_notebook()
 cells = []

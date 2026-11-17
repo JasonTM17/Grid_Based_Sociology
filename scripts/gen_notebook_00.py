@@ -1,14 +1,14 @@
-"""Sinh notebook 00_synthetic_check.ipynb (chạy một lần khi tạo dự án).
+"""Sinh notebook STING_KiemChung_GiaLap.ipynb (chạy một lần khi tạo dự án).
 
 Cách dùng: python scripts/gen_notebook_00.py
-Ghi ra: notebooks/00_synthetic_check.ipynb
+Ghi ra: notebooks/STING_KiemChung_GiaLap.ipynb
 """
 from pathlib import Path
 
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "notebooks" / "00_synthetic_check.ipynb"
+OUT = ROOT / "notebooks" / "STING_KiemChung_GiaLap.ipynb"
 
 nb = nbf.v4.new_notebook()
 cells = []

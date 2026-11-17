@@ -32,7 +32,7 @@ _Quy tắc trả lời: ≤60 giây/câu; không chắc → nói "chưa chắc, 
 17. **Tham số chính?** — `n_levels`, `factor` (độ mịn), `min_count` (ngưỡng dày), `cluster_level` (mức gán nhãn).
 18. **Demo 2D 240 điểm seed 42?** Hai cụm giả lập cho ARI ≈ 0.950. Xem slide 6 và `tests/test_sting.py`.
 19. **PAPI vì sao thường k=1?** — Panel cấp tỉnh/năm rất đồng nhất — `per_year.csv` gần như mọi năm một cụm lớn; tăng độ phân giải lưới mới tách ngoại vi.
-20. **Chạy lại notebook nộp bài?** — `python scripts/gen_submission_demo.py` hoặc nbconvert execute `notebooks/submission_demo.ipynb`.
+20. **Chạy lại notebook nộp bài?** — `python scripts/gen_submission_demo.py` hoặc nbconvert execute `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`.
 21. **10 slide nộp bài vs 16 slide phụ lục?** — Nộp chính: `slides/submission.pptx` (10 trang, `build_slides_10.py`). Phụ lục cuối kỳ: `slides/final.pptx` (16 trang). Giữa kỳ cũ: `midterm.pptx` 15 trang — không nhầm ba bộ.
 
 ## Bẫy thường gặp (trả lời gọn)

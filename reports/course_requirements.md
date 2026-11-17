@@ -41,7 +41,7 @@ Nguyên tắc: **với mỗi giai đoạn: Test → Decide** (có bằng chứng
 
 _Áp dụng trong repo:_ `scripts/preprocessing_audit.py` ghi bảng Test | Result | Decision | Evidence vào `results/preprocessing_audit.{md,csv}`; quyết định “cứng” nằm trong `scripts/build_panel.py`, `predict_demo.py`, `predict_supervised.py`, v.v.
 
-Slide Day 4 trang 17 yêu cầu bài nhóm chạy pipeline tiền xử lý, in kết quả và ghi lại các bước đã chọn. Bài thực hành riêng `notebooks/day4_preprocessing.ipynb` dựng panel từ 14 workbook, đối chiếu panel 882 × 41 và chạy chuẩn hóa bằng thống kê của tập 2011–2023. Giữ notebook trong thư mục `notebooks/` của dự án để chạy lại với các tệp dữ liệu đi kèm.
+Slide Day 4 trang 17 yêu cầu bài nhóm chạy pipeline tiền xử lý, in kết quả và ghi lại các bước đã chọn. Bài thực hành riêng `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` dựng panel từ 14 workbook, đối chiếu panel 882 × 41 và chạy chuẩn hóa bằng thống kê của tập 2011–2023. Giữ notebook trong thư mục `notebooks/` của dự án để chạy lại với các tệp dữ liệu đi kèm.
 
 ### Mẫu báo cáo GV (`Report-proj.docx`) — quan sát một lần, không có trong repo
 
@@ -59,8 +59,8 @@ _File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản 
 
 | Mốc | Yêu cầu đề | Sản phẩm dự kiến | Trạng thái |
 |---|---|---|---|
-| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (≤10 slide) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (10 slide) + `notebooks/submission_demo.ipynb` (execute sạch) | Sẵn sàng kỹ thuật (smoke + test) — rehearsal: con người |
-| Cuối kỳ | Thi vấn đáp trực tiếp, nộp DOCX + notebook, PPTX tùy chọn, dataset ≥500×10 | `reports/final_report.docx` và bản rời `submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx`, `notebooks/final_analysis.ipynb` và `slides/final.pptx` | Báo cáo đã kiểm tra từ bản xuất Word 34 trang. Còn lịch luyện vấn đáp của nhóm. |
+| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (≤10 slide) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (10 slide) + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch) | Sẵn sàng kỹ thuật (smoke + test) — rehearsal: con người |
+| Cuối kỳ | Thi vấn đáp trực tiếp, nộp DOCX + notebook, PPTX tùy chọn, dataset ≥500×10 | `reports/final_report.docx` và bản rời `submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx`, `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` và `slides/final.pptx` | Báo cáo đã kiểm tra từ bản xuất Word 34 trang. Còn lịch luyện vấn đáp của nhóm. |
 
 ## Quyết định cần chốt (hỏi GV — xem `open-questions.md`)
 
@@ -80,9 +80,9 @@ Trong kho dự án, hai gói được sinh bằng
 vào `submissions/` và kiểm tra bằng `python scripts/build_submission_packages.py --verify`.
 
 - Giữa kỳ: `Nhom15_GiuaKy_STING_PAPI.zip`, trọng tâm
-  `slides/submission.pptx` + `notebooks/submission_demo.ipynb`.
+  `slides/submission.pptx` + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`.
 - Cuối kỳ: `Nhom15_CuoiKy_STING_PAPI.zip`, trọng tâm
-  `reports/final_report.docx` + `notebooks/final_analysis.ipynb`, thêm
+  `reports/final_report.docx` + `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb`, thêm
   `slides/final.pptx` tùy chọn cho vấn đáp.
 
 Cả hai giữ đủ `src/`, `scripts/`, `models/`, `results/`, `data/` và nguồn;

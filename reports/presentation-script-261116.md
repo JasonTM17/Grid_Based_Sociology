@@ -2,7 +2,7 @@
 
 Kế hoạch thời lượng, không phải bằng chứng đã rehearsal với người thật.
 Output đúng rubric: `slides/submission.pptx` và
-`notebooks/submission_demo.ipynb` (Jupyter, đã có output).
+`notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (Jupyter, đã có output).
 
 | Slide | Thời gian | Nội dung và thao tác |
 |---|---|---|
@@ -31,7 +31,7 @@ Output đúng rubric: `slides/submission.pptx` và
 ## Cuối kỳ
 
 Thi vấn đáp offline: `reports/final_report.docx` +
-`notebooks/final_analysis.ipynb`; `slides/final.pptx` là phụ trợ tùy chọn.
+`notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb`; `slides/final.pptx` là phụ trợ tùy chọn.
 Trình bày theo luồng dữ liệu PAPI, chọn cặp chỉ tiêu, cơ chế ô dày, cụm và nhiễu,
 đối chứng phân cụm, độ nhạy và giới hạn kết luận. Dùng hồi quy, phân loại và
 đối chiếu nguồn ngoài khi cần trả lời câu hỏi về phần phân tích bổ trợ.

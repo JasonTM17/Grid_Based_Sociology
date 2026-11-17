@@ -1,4 +1,4 @@
-"""Sinh + execute notebooks/submission_demo.ipynb — notebook nộp bài (STING × PAPI).
+"""Sinh + execute notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb — notebook nộp bài (STING × PAPI).
 
 Pattern theo scripts/gen_midterm_demo.py và scripts/gen_final_analysis.py nhưng
 tự execute (nbconvert inplace) và tự kiểm tra: mọi code cell có output, 0 output
@@ -18,7 +18,7 @@ from pathlib import Path
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "notebooks" / "submission_demo.ipynb"
+OUT = ROOT / "notebooks" / "Nhom15_GiuaKy_STING_PAPI.ipynb"
 
 nb = nbf.v4.new_notebook()
 cells = []

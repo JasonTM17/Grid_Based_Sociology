@@ -76,13 +76,13 @@ Bảng dưới ánh xạ chủ đề đã dạy (Day 1–4, môn Học máy — 
 
 | Chủ đề (Day) | Trong repo |
 |---|---|
-| Ý tưởng ML, học có/không giám sát, clustering grid-based (Day 1) | `src/sting.py`; demo synthetic + test: `notebooks/submission_demo.ipynb`, `tests/test_sting.py`; PAPI thật: `scripts/predict_demo.py`, `results/predict_summary.md` |
+| Ý tưởng ML, học có/không giám sát, clustering grid-based (Day 1) | `src/sting.py`; demo synthetic + test: `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`, `tests/test_sting.py`; PAPI thật: `scripts/predict_demo.py`, `results/predict_summary.md` |
 | Regression vs classification (Day 1) | Hồi quy: `scripts/predict_supervised.py` → `results/supervised_metrics.csv`; phân loại pseudo-label: cùng script + `results/supervised_summary.md` |
 | Naive Bayes, KNN, đánh giá accuracy / F1 (Day 2) | `scripts/course_supervised_baselines.py` → `results/course_supervised_baselines.{csv,md}`; sàn chance/drift: `scripts/classifier_label_baselines.py` → `results/classifier_label_baselines.{csv,md}`; pipeline chọn LR: `scripts/predict_supervised.py` |
 | Confusion matrix, precision/recall (Day 2) | Ma trận 6 model học phần: `results/figs/course_confusion_matrix.png`; LR đã chọn (một model): `results/figs/supervised_confusion.png` |
 | SVM tuyến tính + kernel RBF (Day 3) | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
 | Decision Tree, Random Forest (Day 3) | Cùng `scripts/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/predict_supervised.py` (chọn model theo CV, không theo holdout) |
-| Tiền xử lý Day 4 (Cleaning → Integration → Transformation) | `notebooks/day4_preprocessing.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
+| Tiền xử lý Day 4 (Cleaning → Integration → Transformation) | `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
 | Q&A thi / vấn đáp theo slide | `reports/qa_course_concepts.md` (midterm/cuối kỳ bổ sung: `reports/qa_midterm.md`, `reports/qa_final.md`) |
 
 Tái tạo audit và bảng classifier (nếu artifact cũ):
@@ -102,7 +102,7 @@ python scripts/gen_submission_demo.py
 
 # Cuối kỳ
 python scripts/gen_final_analysis.py
-python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb
+python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb
 python scripts/build_report.py
 python scripts/update_report_fields.py   # cập nhật mục lục/số trang của báo cáo bằng Word (Windows)
 python scripts/build_slides.py           # slide vấn đáp tùy chọn

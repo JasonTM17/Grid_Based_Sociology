@@ -5,14 +5,14 @@ _Cập nhật: 2026-11-12 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 ## Deliverable bắt buộc của môn
 
 - [x] **Báo cáo DOCX tiếng Việt** — `reports/final_report.docx`, cùng nội dung với bản Word trong gói cuối kỳ. Đã kiểm tra 34 trang xuất từ Word, gồm bìa và mục lục theo phân trang mới, 12 hình và 13 bảng nội dung.
-- [x] **Notebook cuối kỳ** — `notebooks/final_analysis.ipynb` (execute sạch, 5 output `image/png` nhúng; lệnh: `python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb`).
+- [x] **Notebook cuối kỳ** — `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` (execute sạch, 5 output `image/png` nhúng; lệnh: `python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb`).
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/check_data.py` → PASS.
-- [x] **Notebook nộp bài (giữa kỳ)** — `notebooks/submission_demo.ipynb` (execute sạch, 0 lỗi; sinh bằng `python scripts/gen_submission_demo.py`).
+- [x] **Notebook nộp bài (giữa kỳ)** — `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch, 0 lỗi; sinh bằng `python scripts/gen_submission_demo.py`).
 - [x] **Slides nộp bài (giữa kỳ)** — `slides/submission.pptx` (10 slide, tiếng Việt, notes kèm từng slide; build bằng `python scripts/build_slides_10.py`). Deck phụ lục mở rộng cho cuối kỳ: `slides/final.pptx` (16 slide).
 
 ## Đối chiếu môn học (2026-11-12)
 
-- [x] **Bài nhóm Day 4** — `notebooks/day4_preprocessing.ipynb` là bài riêng đã chạy từ workbook gốc và có bảng kết quả. Hai notebook đồ án dùng panel và bảng kiểm tra tiền xử lý đã lưu.
+- [x] **Bài nhóm Day 4** — `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` là bài riêng đã chạy từ workbook gốc và có bảng kết quả. Hai notebook đồ án dùng panel và bảng kiểm tra tiền xử lý đã lưu.
 - [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
 - [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).
 - [x] **Q&A theo khái niệm bài giảng** — `reports/qa_course_concepts.md`.

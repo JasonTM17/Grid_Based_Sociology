@@ -1,4 +1,4 @@
-"""Gate artifact notebook nộp cuối kỳ: ``notebooks/final_analysis.ipynb``.
+"""Gate artifact notebook nộp cuối kỳ: ``notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb``.
 
 Notebook đã execute phải có output ở mọi ô code, không lỗi, không stderr, không dòng
 cảnh báo trong output và không lệnh bỏ qua cảnh báo. Các hàm ``check_*`` tách riêng
@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-FINAL_NOTEBOOK = ROOT / "notebooks" / "final_analysis.ipynb"
+FINAL_NOTEBOOK = ROOT / "notebooks" / "Nhom15_CuoiKy_STING_PAPI.ipynb"
 
 _IGNORE_PATTERNS = (
     re.compile(r"""filterwarnings\s*\(\s*['"]ignore['"]""", re.IGNORECASE),
@@ -95,7 +95,7 @@ def check_executed_notebook(nb: dict) -> list[str]:
 
 @pytest.fixture(scope="module")
 def final_notebook() -> dict:
-    assert FINAL_NOTEBOOK.is_file(), "thiếu notebooks/final_analysis.ipynb"
+    assert FINAL_NOTEBOOK.is_file(), "thiếu notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb"
     return json.loads(FINAL_NOTEBOOK.read_text(encoding="utf-8"))
 
 

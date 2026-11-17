@@ -28,8 +28,11 @@ else:
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "submissions"
 PACKAGES = {
-    "midterm": ("Nhom15_GiuaKy_STING_PAPI", "submission_demo.ipynb"),
-    "final": ("Nhom15_CuoiKy_STING_PAPI", "final_analysis.ipynb"),
+    milestone: (name, f"{name}.ipynb")
+    for milestone, name in (
+        ("midterm", "Nhom15_GiuaKy_STING_PAPI"),
+        ("final", "Nhom15_CuoiKy_STING_PAPI"),
+    )
 }
 SCRIPTS = (
     "build_panel", "build_scale_metadata", "check_data", "crosscheck_mendeley", "first_real_cluster",

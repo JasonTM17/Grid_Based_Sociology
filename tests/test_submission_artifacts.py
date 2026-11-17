@@ -22,7 +22,7 @@ from pptx import Presentation
 ROOT = Path(__file__).resolve().parents[1]
 
 SUBMISSION_PPTX = ROOT / "slides" / "submission.pptx"
-SUBMISSION_NB = ROOT / "notebooks" / "submission_demo.ipynb"
+SUBMISSION_NB = ROOT / "notebooks" / "Nhom15_GiuaKy_STING_PAPI.ipynb"
 PAPI_LABELS = ROOT / "results" / "predict_all_years.csv"
 PROVENANCE = ROOT / "data" / "raw" / "papi" / "PROVENANCE.md"
 PAPI_PDF = ROOT / "data" / "raw" / "papi" / "PAPI_2024_REPORT_VIE_final.pdf"
@@ -184,7 +184,7 @@ def check_papi_pdf_provenance(
 
 @pytest.fixture(scope="module")
 def submission_notebook() -> dict:
-    assert SUBMISSION_NB.is_file(), "thiếu notebooks/submission_demo.ipynb"
+    assert SUBMISSION_NB.is_file(), "thiếu notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb"
     return json.loads(SUBMISSION_NB.read_text(encoding="utf-8"))
 
 
@@ -335,4 +335,4 @@ def test_optional_final_slides_match_grid_method_and_presentation_scope():
         "nghi thức phản biện", "bộ nộp cuối kỳ",
     ))
     notes = "\n".join(slide.notes_slide.notes_text_frame.text for slide in deck.slides)
-    assert all(name in notes for name in ["final_report.docx", "final_analysis.ipynb", "final.pptx"])
+    assert all(name in notes for name in ["final_report.docx", "Nhom15_CuoiKy_STING_PAPI.ipynb", "final.pptx"])

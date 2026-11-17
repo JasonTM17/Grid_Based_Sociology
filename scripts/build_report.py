@@ -255,7 +255,7 @@ assert POV["n_join"] == sum(int(r["n"]) for r in POV_GROUPS) == \
     int(POV_ANOVA_RAW["n"]), "số ô join không khớp poverty_validation.csv"
 
 # Notebook cuối kỳ — đếm cell/hình nhúng trực tiếp từ file đã execute (bảng A1).
-_nb = json.loads((ROOT / "notebooks" / "final_analysis.ipynb").read_text(
+_nb = json.loads((ROOT / "notebooks" / "Nhom15_CuoiKy_STING_PAPI.ipynb").read_text(
     encoding="utf-8"))
 NB_CELLS = len(_nb["cells"])
 NB_IMGS = sum(1 for c in _nb["cells"] for out in c.get("outputs", [])
@@ -555,7 +555,7 @@ doc.add_page_break()
 h1("LỜI MỞ ĐẦU")
 body("Đề tài thuộc Topic 6 — Grid-based (clustering), với hai yêu cầu khắt khe: (1) thuật toán tự viết, không dùng thư viện có sẵn cho phần lõi; (2) dataset thật ≥ 500 dòng × ≥ 10 cột. Nhóm chọn PAPI vì đây là bộ chỉ số quản trị công chính thức, công bố hàng năm, có lịch sử 2011–2024 đủ dài và đủ chiều (8 yếu tố + 29 chỉ tiêu thành phần) để thử thách một thuật toán lưới vốn phát huy tốt ở chiều thấp.")
 body(f"Đồ án gồm: cài đặt STING từ đầu (src/sting.py); pipeline dữ liệu từ 14 workbook gốc; đối chiếu chéo với gói replication nghiên cứu công bố (Mendeley, CC BY 4.0 — lệch 0.0 trên {MENDELEY_OVERLAP_TXT} quan sát trùng khớp trên 8 chiều, tính từ reports/crosscheck_mendeley.md) [3]; phân cụm các năm; so sánh với k-means/DBSCAN; robustness đa chỉ tiêu; bản đồ 63 tỉnh; và pipeline dự đoán năm 2024 với hai mô hình local.")
-body("Mọi tuyên bố số liệu trong báo cáo tái lập được từ mã nguồn: python scripts/build_panel.py → python scripts/check_data.py → python scripts/predict_sweep.py → python scripts/predict_demo.py → python scripts/predict_supervised.py → python scripts/run_analysis.py. Notebook cuối (notebooks/final_analysis.ipynb) chạy sạch end-to-end.")
+body("Mọi tuyên bố số liệu trong báo cáo tái lập được từ mã nguồn: python scripts/build_panel.py → python scripts/check_data.py → python scripts/predict_sweep.py → python scripts/predict_demo.py → python scripts/predict_supervised.py → python scripts/run_analysis.py. Notebook cuối (notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb) chạy sạch end-to-end.")
 doc.add_page_break()
 
 # MỤC LỤC
@@ -983,8 +983,8 @@ table(["Lệnh", "Kỳ vọng"], [
     ["python scripts/build_external_master.py", "data/processed/external_master_63_2011_2024.csv (882×59, mask tường minh) + results/external_master_summary.md"],
     ["python scripts/external_validation.py", "results/external_validation.md + results/external_validation.csv + 4 hình external_* (ANOVA/Kruskal PCI, y tế 2020, GRDP, WDI)"],
     ["python scripts/poverty_validation.py", "results/poverty_validation.md + results/poverty_validation.csv + results/figs/external_poverty_by_cluster.png (KW gộp thô & đã-trừ-median-năm; Mann–Whitney nhiễu vs cụm 2)"],
-    ["python -m nbconvert --to notebook --execute --inplace notebooks/midterm_demo.ipynb", "execute sạch ~18s, 18 cells, 0 lỗi"],
-    ["python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb", f"execute sạch, {NB_CELLS} cells, {NB_IMGS} hình nhúng (đếm từ notebook đã execute)"],
+    ["python -m nbconvert --to notebook --execute --inplace notebooks/STING_PAPI_Demo_MoRong.ipynb", "execute sạch ~18s, 18 cells, 0 lỗi"],
+    ["python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb", f"execute sạch, {NB_CELLS} cells, {NB_IMGS} hình nhúng (đếm từ notebook đã execute)"],
     ["python scripts/build_report.py", "reports/final_report.docx"],
 ], widths=[9.8, 6.0], caption="Bảng A1. Danh sách lệnh tái lập và kết quả kỳ vọng")
 body("Môi trường: jupyter/pytest/nbconvert không cài trên PATH — luôn dùng python -m pytest / python -m nbconvert. Dữ liệu gốc data/raw/ bất biến; panel tái tạo từ raw bằng build_panel.py; Mendeley đầy đủ tải theo DOI 10.17632/wbk42j9wc8.1 (chỉ commit 4 file nhỏ dùng trực tiếp).")

@@ -4,7 +4,7 @@ _Cập nhật: 2026-11-04 · Owner rehearsal: A + B · Freeze gói nộp: 2026-1
 
 ## A. Dry-run thời gian (AI/từng cá nhân tự chạy — đã đo)
 
-- Notebook demo `notebooks/midterm_demo.ipynb`: **execute sạch ~18 giây** (đo bằng `nbconvert --execute`), yêu cầu ≤ 5' ⇒ dòng thông qua.
+- Notebook demo `notebooks/STING_PAPI_Demo_MoRong.ipynb`: **execute sạch ~18 giây** (đo bằng `nbconvert --execute`), yêu cầu ≤ 5' ⇒ dòng thông qua.
 - Slide `slides/midterm.pptx`: 15 trang; kịch bản thời gian (tổng ≈ 14–15'):
 
 | # | Slide | Phút | Người nói |

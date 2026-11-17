@@ -13,8 +13,8 @@ và hạn nộp vẫn theo GV/LMS.
 
 | Mốc | File | Kích thước | Sản phẩm chính |
 |---|---|---:|---|
-| Giữa kỳ | `submissions/Nhom15_GiuaKy_STING_PAPI.zip` | 10.02 MB | `slides/submission.pptx` (10 slide), `notebooks/submission_demo.ipynb` |
-| Cuối kỳ | `submissions/Nhom15_CuoiKy_STING_PAPI.zip` | 18.92 MB | Bản Word đã căn chỉnh ở `reports/final_report.docx`, `notebooks/final_analysis.ipynb` và `slides/final.pptx` tùy chọn (16 slide) |
+| Giữa kỳ | `submissions/Nhom15_GiuaKy_STING_PAPI.zip` | 10.02 MB | `slides/submission.pptx` (10 slide), `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` |
+| Cuối kỳ | `submissions/Nhom15_CuoiKy_STING_PAPI.zip` | 18.92 MB | Bản Word đã căn chỉnh ở `reports/final_report.docx`, `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` và `slides/final.pptx` tùy chọn (16 slide) |
 
 ZIP giữa kỳ có 124 file, cuối kỳ 145 file (chưa tính manifest tự mô tả).
 Trong mỗi ZIP, `HUONG_DAN.txt` ghi cách chạy và giới hạn;
@@ -26,8 +26,8 @@ Giải nén toàn bộ, giữ nguyên cấu trúc. Không tách notebook ra kh�
 
 ```powershell
 python -m pip install -r requirements.txt
-python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb
-# Trong gói cuối kỳ, thay tên bằng notebooks/final_analysis.ipynb
+python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb
+# Trong gói cuối kỳ, thay tên bằng notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb
 ```
 
 Môi trường đã chạy: Windows, Python 3.14.2. Chưa cài lại trong một môi trường

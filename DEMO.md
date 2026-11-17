@@ -8,7 +8,7 @@ _Mục tiêu: bạn mở repo ra và demo được ngay — không cần mạng,
 python scripts/demo_smoke.py
 ```
 
-Phải in ra: **KET LUAN: SAN SANG DEMO (N/N muc dat)** với N = số mục kiểm tra (gom cả `submission.pptx` ≤10 slide và `submission_demo.ipynb` 0 lỗi). Nếu có FAIL → sửa xong chạy lại.
+Phải in ra: **KET LUAN: SAN SANG DEMO (N/N muc dat)** với N = số mục kiểm tra (gom cả `submission.pptx` ≤10 slide và `Nhom15_GiuaKy_STING_PAPI.ipynb` 0 lỗi). Nếu có FAIL → sửa xong chạy lại.
 
 ## 1. Lắp ráp máy demo
 

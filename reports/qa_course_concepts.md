@@ -219,7 +219,7 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
 ## Day 9 — Clustering (đối chiếu PDF mới, 2026-11-16)
 
 39. **Không có nhãn chuẩn, đánh giá clustering thế nào?** — Day 9 tr.25 phân biệt goodness of fit với accuracy/precision/recall của supervised. Nhóm dùng silhouette/DB/CH kèm k, cỡ cụm và noise; ARI synthetic có nhãn thật, ARI PAPI chỉ đo đồng thuận hai phân hoạch. Accuracy của classifier không phải accuracy xã hội của STING.
-   - **Repo:** `results/metrics.csv`; `notebooks/submission_demo.ipynb`.
+   - **Repo:** `results/metrics.csv`; `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`.
    - **Bài giảng:** Day 9, tr.25–31.
 
 40. **WCSS nhỏ nhất có phải k tốt nhất?** — WCSS = tổng bình phương khoảng cách từ điểm tới centroid cụm; tăng k làm giá trị tối ưu không tăng, k=n cho WCSS=0. Elbow tìm điểm lợi ích giảm dần, không chứng minh số nhóm xã hội thật. Không bỏ noise rồi so tổng WCSS giữa các phương pháp trên tập điểm khác nhau.
@@ -227,11 +227,11 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
    - **Bài giảng:** Day 9, tr.27–31.
 
 41. **Hierarchy của STING có phải HC/dendrogram?** — Không: STING chia không gian thành ô lồng nhau; agglomerative HC bắt đầu mỗi điểm là một cụm rồi ghép cặp cụm gần nhau theo linkage. Dendrogram ghi thứ tự/khoảng cách ghép. Bản nhóm chọn một mức lưới để gom ô dày, không xây dendrogram HC.
-   - **Repo:** `src/sting.py`; `notebooks/final_analysis.ipynb`.
+   - **Repo:** `src/sting.py`; `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb`.
    - **Bài giảng:** Day 9, tr.32–47.
 
 42. **Nhóm đã tái hiện đầy đủ STING gốc chưa?** — Chưa. Nhóm công bố biến thể rút gọn: không distribution type, không confidence-based top-down pruning; fit từng mức và cluster/query một mức. Kết quả test chứng minh các tính chất đã kiểm tra của bản này; nếu GV yêu cầu đầy đủ bản gốc phải xác nhận thêm, không gọi test xanh là bảo đảm mọi chức năng STING.
-   - **Repo:** `src/sting.py`; `scripts/build_report.py`; `notebooks/submission_demo.ipynb`.
+   - **Repo:** `src/sting.py`; `scripts/build_report.py`; `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`.
    - **Nguồn gốc:** Wang, Yang & Muntz (1997), https://www.vldb.org/conf/1997/P186.PDF.
 
 43. **Có thiếu dataset vì model chỉ dùng hai feature?** — Dataset chính có 882 dòng, 41 cột, trong đó 37 chỉ tiêu (không tính mã tỉnh/năm). Ngưỡng >=500×10 áp dụng dataset theo yêu cầu môn hiện có. Không ép dùng mọi cột: hai feature cho clustering và tám feature hồi quy do protocol đã công bố; d7/d8 thiếu lịch sử và một số thang thay đổi. 2024 có 61/63 tỉnh đủ feature, hai tỉnh thiếu giữ thiếu.

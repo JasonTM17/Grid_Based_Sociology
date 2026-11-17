@@ -1,17 +1,17 @@
-"""Sinh notebooks/midterm_demo.ipynb — demo giữa kỳ (15' nói + 5' Q&A).
+"""Sinh notebooks/STING_PAPI_Demo_MoRong.ipynb — demo giữa kỳ (15' nói + 5' Q&A).
 
 Nội dung: STING tự viết kiểm chứng trên dữ liệu giả lập → dữ liệu PAPI thật
 (panel 882×41) → phân cụm + pipeline dự đoán → hạn chế & kế hoạch cuối kỳ.
 
 Cách dùng: python scripts/gen_midterm_demo.py
-Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/midterm_demo.ipynb
+Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/STING_PAPI_Demo_MoRong.ipynb
 """
 from pathlib import Path
 
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "notebooks" / "midterm_demo.ipynb"
+OUT = ROOT / "notebooks" / "STING_PAPI_Demo_MoRong.ipynb"
 
 nb = nbf.v4.new_notebook()
 cells = []

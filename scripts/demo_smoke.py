@@ -76,9 +76,9 @@ for f in [
 
 # 3) Deliverables nop bai
 for f in [
-    "notebooks/midterm_demo.ipynb",
-    "notebooks/final_analysis.ipynb",
-    "notebooks/submission_demo.ipynb",
+    "notebooks/STING_PAPI_Demo_MoRong.ipynb",
+    "notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb",
+    "notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb",
     "slides/final.pptx",
     "slides/submission.pptx",
     "reports/final_report.docx",
@@ -109,9 +109,9 @@ except Exception as e:  # noqa: BLE001
 import nbformat  # noqa: E402
 
 for nb in [
-    "notebooks/midterm_demo.ipynb",
-    "notebooks/final_analysis.ipynb",
-    "notebooks/submission_demo.ipynb",
+    "notebooks/STING_PAPI_Demo_MoRong.ipynb",
+    "notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb",
+    "notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb",
 ]:
     try:
         n = nbformat.read(ROOT / nb, as_version=4)
