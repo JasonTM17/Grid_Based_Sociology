@@ -2,7 +2,7 @@
   {
     "milestone": "midterm",
     "status": "PASS",
-    "sha256": "2a85fdcd53b66cfe1c41d58384031d9c1273618f8993a5bee9da94b0141ee03f",
+    "sha256": "82bb3adcaa745def1d4372f4f0f7850a75a296439a8285b172d1c3983a65d4a3",
     "code_cells": 11,
     "isolation_guard": true,
     "python": "3.14.2",
@@ -11,7 +11,7 @@
   {
     "milestone": "final",
     "status": "PASS",
-    "sha256": "794453ee117a518bda51438513007a0fe8b637afd0052bd14a63e1a609f4bb46",
+    "sha256": "314a8fbc2dd35813a6bd5da919681d580b48d6c936b41ed361a1bc625c9e2832",
     "code_cells": 15,
     "isolation_guard": true,
     "python": "3.14.2",

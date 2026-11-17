@@ -19,10 +19,6 @@ python -m pip install -r requirements.txt
 # Windows — hiển thị Unicode đẹp (tránh ký tự lạ khi chiếu)
 chcp 65001
 
-# mở sẵn 2 thứ nộp bài
-notebooks\submission_demo.ipynb   # notebook nộp bài (execute sẵn — chiếu trực tiếp không cần chạy)
-slides\submission.pptx            # 10 slide, có speaker notes từng slide
-
 # đối chiếu môn học — mở sẵn trước Q&A (không cần mạng)
 results\preprocessing_audit.md              # audit Day 4 (bảng Test → Decide)
 results\course_supervised_baselines.md      # bảng NB/KNN/SVM/cây/RF (pseudo-label STING)
@@ -31,36 +27,20 @@ results\figs\course_confusion_matrix.png    # 6 panel confusion (học phần)
 reports\qa_course_concepts.md               # cheat sheet Q&A Day 1–4
 ```
 
-Môi trường đã kiểm chứng: Python 3.14.2, Windows 11.
+Mở [slide giữa kỳ](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx) và
+[notebook giữa kỳ](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.ipynb).
+Notebook đã lưu bảng, số liệu và biểu đồ để trình chiếu.
 
-_Tái tạo nếu thiếu/hỏng (deck + notebook nộp bài):_
+Môi trường đã kiểm chứng là Python 3.14.2 trên Windows 11. Cách tạo lại file
+nằm trong [README](README.md#tái-tạo-file-nộp-và-zip).
 
-```powershell
-python scripts/build_slides_10.py                                     # build slides/submission.pptx (10 slide)
-python scripts/gen_submission_demo.py                                 # sinh notebooks/submission_demo.ipynb
-python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb
-```
+## 2. Kịch bản 15 phút
 
-Deck phụ lục mở rộng (cuối kỳ): `slides\final.pptx` (16 slide) — không phải deck nộp bài.
+Xem [kịch bản theo 10 slide](reports/presentation-script-261116.md). Slide 5
+dùng bảng đếm 3 × 3, slide 6 trình bày dữ liệu giả lập, slide 10 chốt kết quả.
 
-## 2. Kịch bản 15 phút (khớp `reports/rehearsal_log.md`)
-
-| Phút | Màn hình | Nội dung |
-|---|---|---|
-| 0–0:30 | Slide 1 | Bìa — thesis: dữ liệu PAPI rất đồng nhất, nhóm báo cáo trung thực |
-| 0:30–2 | Slide 2 | Bài toán & dữ liệu: vì sao grid-based (O(n), không giả định hình dạng) · panel 882×41, 23/37 cột bị cờ heuristic audit thang đo |
-| 2–3:30 | Slide 3 | Lý thuyết STING (1/2): lưới phân cấp → thống kê ô |
-| 3:30–5 | Slide 4 | Lý thuyết STING (2/2): gom cụm ô dày — STING vs k-means vs DBSCAN (noise tách khỏi metric) |
-| 5–7 | Slide 5 + notebook | Ví dụ minh họa: demo synthetic — ARI 0.950, bộ test STING (`tests/test_sting.py`) xanh |
-| 7–9:30 | Slide 6 + notebook | Ứng dụng PAPI: kết quả thật đồng nhất (k≈1); bản đồ centroid 2024; pipeline dự đoán train ≤2023 → predict 2024 — 48 tỉnh cụm lớn / 13 ngoại vi (coverage 79%) |
-| 9:30–11:30 | Slide 7 | Đánh giá: Ridge (chọn theo CV) dự báo 6.1 Y tế công lập năm sau — MAE 0.064, giảm 6.3% so với carry-forward 0.0683 |
-| 11:30–13 | Slide 8 | Kiểm chứng ngoài (PCI theo cụm) & hạn chế trung thực (robustness âm tính, gãy thang đo) |
-| 13–14 | Slide 9 | Kết luận + lộ trình cuối kỳ |
-| 14–15 | Slide 10 | TLTK / Q&A |
-
-Mẹo: notebook đã **execute sẵn** (0 lỗi) — chiếu thẳng không cần chạy live; muốn chạy lại live: `python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb`.
-
-Ngoài 15′ (khi Q&A hoặc GV muốn xem thêm): mở dashboard — `python -m streamlit run app.py` → tab **"Kiểm chứng ngoại lai"** (`app.py:193`) hiển thị PCI theo cụm STING + ANOVA/Kruskal/eta² tính lại trực tiếp từ CSV và tự đối chiếu `results/external_validation.csv` — lệch quá sai số làm tròn thì tab dừng thay vì hiện số khác số đã công bố.
+Khi cần minh họa kết quả đối chiếu PCI, mở dashboard bằng
+`python -m streamlit run app.py` và chọn tab **Kiểm chứng ngoại lai**.
 
 ## 3. Dự phòng sự cố
 
@@ -79,7 +59,7 @@ Ngoài 15′ (khi Q&A hoặc GV muốn xem thêm): mở dashboard — `python -m
 |---|---|
 | Dataset | 882 × 41 (đáp ứng ≥500×10) · 63 tỉnh × 14 năm · 39 cột số |
 | Nguồn | PAPI 2011–2024 (papi.org.vn) · Mendeley CC BY 4.0 (DOI 10.17632/wbk42j9wc8.1, crosscheck lệch 0.0) |
-| STING synthetic | ARI = **0.950** · nhiễu 2.5% · bộ test STING (`tests/test_sting.py`) xanh · coverage `src/sting.py` **99%** (`pytest --cov=src`) · toàn bộ test suite pass |
+| STING trên dữ liệu giả lập | ARI = **0.950**, tỷ lệ nhiễu 2.5%. Bộ kiểm thử thuật toán ở `tests/test_sting.py`. |
 | Tiền xử lý (Day 4) | `results/preprocessing_audit.md` — 0 trùng khóa / 882 dòng; không nội suy; outlier giữ + đánh dấu |
 | Classifier học phần | `results/course_supervised_baselines.csv` — CV macro-F1; holdout 2023→2024 **một lần**; so **khớp pseudo-label STING**, không ground truth xã hội (NB CV cao nhất ≠ “tốt nhất” tổng quát — xem `qa_course_concepts.md` câu 7) |
 | Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột bị cờ heuristic audit (`check_data.py`; chưa chứng minh đổi thang) |

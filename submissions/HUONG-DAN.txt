@@ -17,6 +17,8 @@ Hai ZIP Nhom15_GiuaKy_STING_PAPI.zip và Nhom15_CuoiKy_STING_PAPI.zip
 chứa mã và dữ liệu theo đúng cấu trúc để chạy notebook. Giải nén toàn bộ
 khi chuyển sang máy khác. Cài môi trường bằng requirements.txt, sau đó
 mở notebook trong thư mục notebooks của bản giải nén.
+Để chạy Day 4 riêng trên máy khác, sao chép cả thư mục 03-day-4, cài
+requirements.txt trong thư mục đó rồi mở notebook cùng cấp.
 
 Các file rời đã lưu kết quả, có thể đọc hoặc chiếu ngay.
 Bản học có giải thích nằm riêng trong thư mục study của dự án.

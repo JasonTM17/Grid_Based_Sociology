@@ -38,7 +38,6 @@ SCRIPTS = (
     "course_supervised_baselines", "classifier_label_baselines",
     "external_validation", "poverty_validation", "cluster_profile",
     "supervised_depth", "preprocessing_sensitivity", "protocol_sensitivity",
-    "gen_submission_demo", "gen_final_analysis", "build_report", "report_style", "build_slides_10",
     "notebook_checks",
 )
 MIDTERM_FIGURES = (
@@ -63,7 +62,6 @@ def package_files(root: Path, milestone: str) -> dict[str, str]:
         add(relative, "environment / algorithm / attribution")
     for name in SCRIPTS:
         add(f"scripts/{name}.py", "analysis and canonical generators")
-    add("assets/report-cover.xml", "report cover copied from the supplied Word reference")
     for name in ("test_sting", "test_artifact_reproduction", "test_notebook_checks"):
         add(f"tests/{name}.py", "algorithm / frozen-label / execution regressions")
     for name in (*OLD_FILES.values(), *NEW_FILES.values(), "PROVENANCE.md"):
@@ -93,69 +91,58 @@ def package_files(root: Path, milestone: str) -> dict[str, str]:
     ]
     for path in figures:
         add(path.relative_to(root).as_posix(), "notebook / report / slide figure")
-    for name in ("course_requirements", "panel_lock"):
-        add(f"reports/{name}.md", "course boundary / data lock")
+    add("reports/panel_lock.md", "data provenance and verification")
     _, notebook = PACKAGES[milestone]
     add(f"notebooks/{notebook}", "graded executed notebook")
     if milestone == "midterm":
+        for name in ("gen_submission_demo", "build_slides_10"):
+            add(f"scripts/{name}.py", "midterm file generator")
         add("slides/submission.pptx", "graded deck, ten slides")
     else:
+        for name in ("gen_final_analysis", "build_report", "report_style", "build_slides"):
+            add(f"scripts/{name}.py", "final file generator")
+        add("assets/report-cover.xml", "report cover template")
         add("reports/final_report.docx", "graded report, current seven-chapter format")
-        for name in ("crosscheck_mendeley", "model_deep_dive", "report_format_notes"):
-            add(f"reports/{name}.md", "report generator input / measured reference formatting")
+        for name in ("crosscheck_mendeley", "model_deep_dive"):
+            add(f"reports/{name}.md", "report generator input")
         add("slides/final.pptx", "optional final oral-defense slides")
-        add("scripts/build_slides.py", "canonical generator for optional final slides")
     return files
 
 
 def instructions(milestone: str) -> str:
     _, notebook = PACKAGES[milestone]
-    graded = "slides/submission.pptx + notebooks/submission_demo.ipynb" if milestone == "midterm" else (
-        "reports/final_report.docx + notebooks/final_analysis.ipynb"
+    document = "slides/submission.pptx" if milestone == "midterm" else "reports/final_report.docx"
+    optional = "\n- Slide vấn đáp tùy chọn  slides/final.pptx" if milestone == "final" else ""
+    appendix = (
+        "\nCác lệnh tái tạo toàn bộ đồ án ở phụ lục báo cáo chạy từ kho mã đầy đủ.\n"
+        if milestone == "final" else ""
     )
-    return f"""NHÓM 15 — HỌC MÁY — TOPIC 6: GRID-BASED / STING
+    return f"""NHÓM 15 · HỌC MÁY · PHÂN CỤM STING TRÊN PAPI
 Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)
 
-SẢN PHẨM CHÍNH: {graded}
-Giữa kỳ: trình bày 15 phút + hỏi đáp 5 phút. Cuối kỳ: thi vấn đáp offline;
-gói cuối có thêm slides/final.pptx hỗ trợ (tùy chọn, không thay DOCX/notebook).
-Giải nén TOÀN BỘ gói trước khi chạy, giữ cấu trúc thư mục.
-Mở terminal tại thư mục có requirements.txt, src/, data/, notebooks/.
+FILE NỘP
+- {document}
+- notebooks/{notebook}{optional}
 
-MÔI TRƯỜNG: Python 3.14; đã kiểm chứng trên Windows/Python 3.14.2.
+CHẠY LẠI NOTEBOOK
+Notebook đã lưu kết quả. Để chạy lại, giải nén toàn bộ ZIP, giữ cấu trúc
+thư mục và mở terminal ở thư mục chứa requirements.txt. Dùng Python 3.14.
+
 python -m pip install -r requirements.txt
 python -m nbconvert --to notebook --execute --inplace notebooks/{notebook}
+
+KIỂM TRA DỮ LIỆU VÀ THUẬT TOÁN
 python scripts/check_data.py
 python -m pytest tests/test_sting.py tests/test_artifact_reproduction.py tests/test_notebook_checks.py -q
 
-Notebook đã lưu output, có thể đọc trước khi cài môi trường. Chạy lại cần các
-dependency ở requirements.txt; sau khi cài không có bước tải dữ liệu từ mạng.
-MANIFEST.json ghi từng đường dẫn, vai trò, kích thước và SHA-256; không đổi
-tên panel hay tách notebook khỏi src/scripts/models/results.
+Panel PAPI 2011–2024 có 882 dòng, 41 cột và 14 workbook gốc đi kèm.
+Năm 2024 có 61/63 tỉnh đủ hai chỉ tiêu phân cụm. Có thể dựng lại panel
+từ workbook bằng python scripts/build_panel.py.
 
-DATA: PAPI 2011–2024, 882 dòng × 41 cột, 63 tỉnh × 14 năm.
-14 workbook gốc + crosswalk và metadata thang đo kèm trong data/.
-2024 chỉ 61/63 tỉnh đủ hai feature; thiếu giữ thiếu, không bịa/nội suy.
-PCI/GSO là kiểm chứng bổ trợ, không làm feature STING. Nguồn/giấy phép xem
-data/raw/*/PROVENANCE.md và data/processed/external_provenance.md.
-
-TÁI TẠO PANEL: python scripts/build_panel.py
-Notebook tái lập trực tiếp STING và metric đã công bố; bảng mở rộng/bản đồ
-đọc các artifact có sẵn. Có mã sinh các phân tích để xem phương pháp. Các
-PDF nguồn ngoài dung lượng lớn không kèm ZIP; giữ trong kho mã và có URL
-trong provenance. Tái tải toàn bộ nguồn ngoài là công việc riêng với chạy notebook.
-
-PHẠM VI: bản STING rút gọn, không distribution type/confidence pruning như
-bài gốc. PAPI có một vùng dày lớn và hai cụm nhỏ; không chứng minh ba nhóm
-xã hội tách biệt. Classifier học pseudo-label; holdout duy nhất 2023→2024.
-Day 9 tr.48 là bài tập cá nhân KMeans/HC, không đưa vào đồ án nhóm này.
-
-Đây là cấu trúc đề xuất, chưa tự nộp lên LMS. Chốt tên/nơi nộp/deadline và
-việc chấp nhận báo cáo bảy chương với GV nếu có yêu cầu khác. Hai thành viên
-cần tự luyện trình bày/vấn đáp và giải thích mọi quyết định của bài.
-Không kèm tài liệu GV, agent config, caches, .git hay các dump/probe nguồn.
-Mã MIT; dữ liệu giữ giấy phép nguồn; không coi MIT là giấy phép cho dữ liệu.
-"""
+Thông tin nguồn và giấy phép nằm trong data/raw/*/PROVENANCE.md và
+data/processed/external_provenance.md. MANIFEST.json ghi danh mục và mã
+SHA-256 các tệp. Địa chỉ kho mã nằm trong CITATION.cff.
+{appendix}"""
 
 
 def build_package(root: Path, output: Path, milestone: str, *, report_source: Path | None = None) -> Path:
@@ -169,7 +156,7 @@ def build_package(root: Path, output: Path, milestone: str, *, report_source: Pa
         # Preserve the graded filename when Word locks the report being viewed.
         payload["reports/final_report.docx"] = report_source.read_bytes()
     payload["HUONG_DAN.txt"] = instructions(milestone).encode("utf-8")
-    files["HUONG_DAN.txt"] = "launch instructions / limits / remaining human decisions"
+    files["HUONG_DAN.txt"] = "submitted files and notebook run instructions"
     manifest = {
         "schema_version": 1, "milestone": milestone, "root": name,
         "files": [{"path": p, "bytes": len(payload[p]), "sha256": sha256(payload[p]),

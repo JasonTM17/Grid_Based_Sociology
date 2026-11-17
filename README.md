@@ -58,10 +58,8 @@ Chuẩn bị thuyết trình và vấn đáp tại [Hướng dẫn demo](DEMO.md
 # Kiểm tra môi trường
 python -c "import pandas, openpyxl, plotly, sklearn, streamlit; print('ok')"
 
-# Unit test — toàn bộ test pass (gồm tests/test_sting.py cho STING)
+# Chạy bộ kiểm thử
 python -m pytest tests -q
-python -m pytest tests --cov=src -q
-# Coverage đo được: src/sting.py 99%
 
 # Lint (tùy chọn): python -m pip install -r requirements-dev.txt
 python -m ruff check .
@@ -95,23 +93,28 @@ python scripts/course_supervised_baselines.py
 python scripts/classifier_label_baselines.py   # tùy chọn — sàn hoán vị / drift thời gian
 ```
 
-## Tái tạo deliverable nộp bài (slides + notebook)
+## Tái tạo file nộp và ZIP
 
 ```powershell
-# Deck nộp bài (10 slide) — build bằng python-pptx
+# Giữa kỳ
 python scripts/build_slides_10.py
+python scripts/gen_submission_demo.py
 
+# Cuối kỳ
+python scripts/gen_final_analysis.py
+python -m nbconvert --to notebook --execute --inplace notebooks/final_analysis.ipynb
 python scripts/build_report.py
 python scripts/update_report_fields.py   # cập nhật mục lục/số trang của báo cáo bằng Word (Windows)
+python scripts/build_slides.py           # slide vấn đáp tùy chọn
 
-# Notebook nộp bài — sinh bằng nbformat rồi execute
-python scripts/gen_submission_demo.py
-python -m nbconvert --to notebook --execute --inplace notebooks/submission_demo.ipynb
+# Đóng gói và chạy thử từ bản giải nén
+python scripts/build_submission_packages.py
+python scripts/build_submission_packages.py --verify
 ```
 
-- Deck nộp bài: `slides/submission.pptx` (10 slide, tiếng Việt, notes từng slide).
-- Notebook nộp bài: `notebooks/submission_demo.ipynb` (execute sạch, 0 lỗi).
-- Deck phụ lục mở rộng (cuối kỳ): `slides/final.pptx` (16 slide).
+ZIP lấy các bản gốc trong `notebooks/`, `slides/` và `reports/`. Khi đổi các
+bản gốc, đồng bộ cả bản rời trong `submissions/01-giua-ky/` hoặc
+`submissions/02-cuoi-ky/` theo bảng file nộp ở đầu trang.
 
 ## Dự đoán (train quá khứ → dự đoán năm mới)
 
