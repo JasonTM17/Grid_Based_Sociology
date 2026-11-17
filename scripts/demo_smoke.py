@@ -82,8 +82,8 @@ for f in [
     "slides/final.pptx",
     "slides/submission.pptx",
     "reports/final_report.docx",
-    "reports/qa_midterm.md",
-    "reports/qa_final.md",
+    "reports/on-tap/qa_midterm.md",
+    "reports/on-tap/qa_final.md",
 ]:
     file_nonempty(f, min_bytes=500)
 

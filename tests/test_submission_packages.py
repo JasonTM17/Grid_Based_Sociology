@@ -36,10 +36,10 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
         else:
             assert {"slides/submission.pptx", "scripts/build_slides_10.py"} <= files
             assert not {"scripts/build_report.py", "scripts/gen_final_analysis.py", "assets/report-cover.xml"} & files
-        assert not any(p.startswith((".git", ".codex", ".agentkit", "plans/", "study/", "data/raw/course/")) for p in files)
+        assert not any(p.startswith((".git", ".codex", ".agentkit", "plans/", "study/", "reports/on-tap/", "data/raw/course/")) for p in files)
         assert not {
             "reports/course_requirements.md", "reports/report_format_notes.md",
-            "reports/qa_course_concepts.md", "reports/presentation-script-261116.md",
+            "reports/on-tap/qa_course_concepts.md", "reports/on-tap/presentation-script-261116.md",
         } & files
         assert not any("__pycache__" in p or "probe" in p or p.endswith(".pdf") for p in files)
         with zipfile.ZipFile(path) as archive:

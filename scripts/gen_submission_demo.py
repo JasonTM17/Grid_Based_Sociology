@@ -25,7 +25,7 @@ cells = []
 md = cells.append
 cd = cells.append
 
-md(nbf.v4.new_markdown_cell("""# Phân cụm dữ liệu PAPI bằng STING
+md(nbf.v4.new_markdown_cell("""# Phân cụm dựa trên lưới với STING
 
 **Học máy · Nhóm 15 · Chủ đề 6 — Grid-based clustering**
 
@@ -108,16 +108,20 @@ print("Đã nạp mã STING và các thư viện phân tích.")"""))
 
 md(nbf.v4.new_markdown_cell("""## 1. Lý thuyết STING
 
-STING (Statistical Information Grid) tổ chức dữ liệu thành lưới nhiều mức, từ thô đến mịn.
+**Grid-based clustering** tìm cụm bằng cách chia không gian dữ liệu thành các ô lưới.
+**STING** (Statistical Information Grid) thuộc nhóm phương pháp này và dùng lưới nhiều mức, từ thô đến mịn.
 Mỗi ô lưu số điểm và các thống kê tóm tắt.
 
-**Cách nhóm tạo cụm tại một mức lưới**
+**Nhóm sử dụng biến thể STING rút gọn, tạo cụm tại một mức lưới**
 
 1. Gán các điểm vào lưới và đếm số điểm trong từng ô.
 2. Đánh dấu ô có số điểm đạt ngưỡng là ô dày.
 3. Nối các ô dày chung cạnh thành cụm. Điểm trong ô thưa được xem là nhiễu."""))
 
-md(nbf.v4.new_markdown_cell("## 2. Cài đặt từ đầu — lưới 3 × 3"))
+md(nbf.v4.new_markdown_cell("""## 2. Cài đặt từ đầu — lưới 3 × 3
+
+Ví dụ gồm 15 điểm trên một mặt phẳng. Mỗi ô có ít nhất 3 điểm được xem là ô dày.
+Các ô dày chỉ chạm góc được giữ thành những cụm riêng khi dùng quy tắc nối qua cạnh."""))
 
 cd(nbf.v4.new_code_cell("""counts = np.array([[4, 3, 0], [1, 0, 4], [0, 0, 3]])
 positions = [(col, 2 - row) for row in range(3) for col in range(3)]
@@ -151,9 +155,11 @@ print(f"ARI = {ari:.3f} | Số cụm {m_syn.n_clusters_} | Tỷ lệ nhiễu {(l
 md(nbf.v4.new_markdown_cell("""## 4. Ứng dụng PAPI
 
 - PAPI gồm 882 dòng và 41 cột, theo dõi 63 tỉnh trong giai đoạn 2011–2024.
+- Mỗi dòng là một tỉnh trong một năm. Mỗi điểm biểu diễn quan sát đó bằng hai chỉ tiêu đã chọn.
 - Hai chỉ tiêu phân cụm là kiểm soát tham nhũng trong cung ứng dịch vụ công và y tế công lập.
 - Giá trị 0 được ghi nhận là thiếu theo quy ước của bộ dữ liệu.
-- Thống kê chuẩn hóa lấy từ dữ liệu 2011–2023. Cùng phép chuẩn hóa được áp dụng cho năm 2024."""))
+- Thống kê chuẩn hóa lấy từ dữ liệu 2011–2023. Cùng phép chuẩn hóa được áp dụng cho năm 2024.
+- Phân cụm dùng dữ liệu chuẩn hóa. Biểu đồ dự đoán năm 2024 hiển thị điểm thành phần PAPI gốc; đơn vị được ghi trên trục."""))
 
 cd(nbf.v4.new_code_cell("""cfg = load_config()
 feats = cfg["features"]

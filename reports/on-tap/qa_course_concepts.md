@@ -176,7 +176,7 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
 
 31. **Cài đặt STING của nhóm có phải tái lập đầy đủ bài Wang et al. (1997)?** — Không, là bản đơn giản hóa và phải nói đúng như vậy. Bài gốc lưu thêm distribution type trong mỗi ô và phân tích top-down: bắt từ lớp cao, kiểm ô liên quan bằng confidence rồi mới hạ xuống lớp con. Cài đặt của nhóm: mỗi `Cell` giữ count/mean/std/min/max theo từng chiều cùng biên ô, không có distribution type; `fit` dựng đủ mọi mức, còn `cluster`/`query` dùng một mức cố định, không duyệt top-down. Tham số `significance_z` mặc định tắt và cấu hình đóng băng không dùng, nên thực tế không có pruning theo confidence. Vì thế kết quả là của cài đặt này trên PAPI, không được phát biểu như tái lập nguyên văn thực nghiệm của bài báo.
     - **Hỏi bẫy:** "Vậy có được ghi 'theo Wang et al. 1997'?" — Được, nhưng phải ghi là triển khai ý tưởng lưới thống kê phân cấp, kèm rõ phần lược bỏ; không được ngụ ý kết quả trùng bài gốc.
-    - **Repo:** `src/sting.py:1-13, 39-51, 119-125, 130-136`; `reports/qa_final.md:77,79`.
+    - **Repo:** `src/sting.py:1-13, 39-51, 119-125, 130-136`; `reports/on-tap/qa_final.md:77,79`.
 
 ## Bổ sung — GV dễ hỏi (vấn đáp thêm)
 

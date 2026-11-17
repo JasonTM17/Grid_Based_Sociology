@@ -88,7 +88,7 @@ vào `submissions/` và kiểm tra bằng `python scripts/build_submission_packa
 Cả hai giữ đủ `src/`, `scripts/`, `models/`, `results/`, `data/` và nguồn;
 không đổi tên panel thành `data/panel.csv` vì notebook cần đường dẫn chuẩn.
 Mỗi gói có `HUONG_DAN.txt`, `MANIFEST.json`; hash ZIP và receipt chạy lại ở
-thư mục output. Kịch bản 15'+5': `reports/presentation-script-261116.md`.
+thư mục output. Kịch bản 15'+5': `reports/on-tap/presentation-script-261116.md`.
 
 ## Liêm chính học thuật
 
@@ -104,7 +104,7 @@ unsupervised bằng goodness of fit/WCSS/elbow ở tr.25–31; HC/linkage/dendro
 ở tr.32–47. Tr.48 ghi rõ bài tập **cá nhân** trên dữ liệu tổng hợp hai cột,
 KMeans + HC + dendrogram. Không có yêu cầu mới trong PDF này buộc đồ án nhóm
 Topic 6 đổi thuật toán hoặc bổ sung dataset thật. Quy mô PAPI 882×41 vẫn đủ
-ngưỡng hiện có. Xem Q&A 39–45 trong `reports/qa_course_concepts.md`.
+ngưỡng hiện có. Xem Q&A 39–45 trong `reports/on-tap/qa_course_concepts.md`.
 
 Bản nhóm là biến thể STING rút gọn (không distribution type / confidence
 pruning top-down); cần trình bày đúng phạm vi. Nếu GV yêu cầu tái hiện đầy đủ

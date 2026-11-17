@@ -24,7 +24,7 @@ results\preprocessing_audit.md              # audit Day 4 (bảng Test → Decid
 results\course_supervised_baselines.md      # bảng NB/KNN/SVM/cây/RF (pseudo-label STING)
 results\classifier_label_baselines.md       # sàn hoán vị nhãn + drift năm (exploratory)
 results\figs\course_confusion_matrix.png    # 6 panel confusion (học phần)
-reports\qa_course_concepts.md               # cheat sheet Q&A Day 1–4
+reports\on-tap\qa_course_concepts.md               # cheat sheet Q&A Day 1–4
 ```
 
 Mở [slide giữa kỳ](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx) và
@@ -36,7 +36,7 @@ nằm trong [README](README.md#tái-tạo-file-nộp-và-zip).
 
 ## 2. Kịch bản 15 phút
 
-Xem [kịch bản theo 10 slide](reports/presentation-script-261116.md). Slide 5
+Xem [kịch bản theo 10 slide](reports/on-tap/presentation-script-261116.md). Slide 5
 dùng bảng đếm 3 × 3, slide 6 trình bày dữ liệu giả lập, slide 10 chốt kết quả.
 
 Khi cần minh họa kết quả đối chiếu PCI, mở dashboard bằng
@@ -72,6 +72,6 @@ Khi cần minh họa kết quả đối chiếu PCI, mở dashboard bằng
 
 ## 5. Sau khi thi
 
-1. Điền `reports/rehearsal_log.md` (thời gian thực tế từng phần).
-2. Điền `reports/midterm_feedback.md` ngay sau buổi thi (câu hỏi GV, góp ý).
+1. Điền `reports/on-tap/rehearsal_log.md` (thời gian thực tế từng phần).
+2. Điền `reports/on-tap/midterm_feedback.md` ngay sau buổi thi (câu hỏi GV, góp ý).
 3. Nếu GV yêu cầu thay đổi → làm trong P4; cập nhật `reports/submission_checklist.md`.

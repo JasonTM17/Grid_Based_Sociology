@@ -21,7 +21,10 @@ Khi chuyển sang máy khác, giải nén cả ZIP của mốc tương ứng. Sl
 
 Ba notebook có giải thích nằm ngay trong `study/`. [Giữa kỳ](study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) · [Cuối kỳ](study/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) · [Day 4](study/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb)
 
-Chuẩn bị thuyết trình và vấn đáp tại [Hướng dẫn demo](DEMO.md) và [Câu hỏi ôn tập](reports/qa_course_concepts.md).
+Tài liệu hỏi đáp, kịch bản nói và nhật ký luyện tập nằm trong `reports/on-tap/`.
+Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đó mở
+[Kịch bản 10 slide](reports/on-tap/presentation-script-261116.md).
+[Hướng dẫn demo](DEMO.md) chỉ cách mở các file khi trình bày.
 
 ## Cấu trúc dự án
 
@@ -83,7 +86,7 @@ Bảng dưới ánh xạ chủ đề đã dạy (Day 1–4, môn Học máy — 
 | SVM tuyến tính + kernel RBF (Day 3) | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
 | Decision Tree, Random Forest (Day 3) | Cùng `scripts/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/predict_supervised.py` (chọn model theo CV, không theo holdout) |
 | Tiền xử lý Day 4 (Cleaning → Integration → Transformation) | `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
-| Q&A thi / vấn đáp theo slide | `reports/qa_course_concepts.md` (midterm/cuối kỳ bổ sung: `reports/qa_midterm.md`, `reports/qa_final.md`) |
+| Q&A thi / vấn đáp theo slide | `reports/on-tap/qa_course_concepts.md` (midterm/cuối kỳ bổ sung: `reports/on-tap/qa_midterm.md`, `reports/on-tap/qa_final.md`) |
 
 Tái tạo audit và bảng classifier (nếu artifact cũ):
 
@@ -216,7 +219,7 @@ khi học xuyên năm trên panel.
 
 ## Khai báo sử dụng công cụ hỗ trợ
 
-Nhóm sử dụng trợ lý AI lập trình cho một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, và dry-run đo thời gian chuẩn bị demo (`reports/rehearsal_log.md` mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Mọi quyết định phương pháp, quy trình chọn cấu hình, đánh giá và kết luận do hai thành viên quyết định và kiểm chứng lại; cả hai thành viên chịu trách nhiệm giải thích mọi phần của đồ án. Môn học chưa quy định rubric khai báo cụ thể — nhóm chủ động khai báo theo thông lệ liêm chính học thuật.
+Nhóm sử dụng trợ lý AI lập trình cho một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, và dry-run đo thời gian chuẩn bị demo (`reports/on-tap/rehearsal_log.md` mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Mọi quyết định phương pháp, quy trình chọn cấu hình, đánh giá và kết luận do hai thành viên quyết định và kiểm chứng lại; cả hai thành viên chịu trách nhiệm giải thích mọi phần của đồ án. Môn học chưa quy định rubric khai báo cụ thể — nhóm chủ động khai báo theo thông lệ liêm chính học thuật.
 
 ## Giấy phép
 

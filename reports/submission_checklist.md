@@ -15,7 +15,7 @@ _Cập nhật: 2026-11-12 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 - [x] **Bài nhóm Day 4** — `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` là bài riêng đã chạy từ workbook gốc và có bảng kết quả. Hai notebook đồ án dùng panel và bảng kiểm tra tiền xử lý đã lưu.
 - [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
 - [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).
-- [x] **Q&A theo khái niệm bài giảng** — `reports/qa_course_concepts.md`.
+- [x] **Q&A theo khái niệm bài giảng** — `reports/on-tap/qa_course_concepts.md`.
 
 ## Tái lập / chất lượng mã
 
@@ -29,9 +29,9 @@ _Cập nhật: 2026-11-12 · Owner: A + B · Mốc: M7 (nộp trước 2027-01-1
 
 ## Còn lại (cần CON NGƯỜI, không thể tự động hóa)
 
-- [ ] Rehearsal live ≤ 15' + Q&A 5' ×2 buổi (`reports/rehearsal_log.md`)
-- [ ] Trình bày giữa kỳ 24/11–01/12 + điền `reports/midterm_feedback.md`
-- [ ] Mock defense cuối kỳ (`reports/mock_defense_log.md`)
+- [ ] Rehearsal live ≤ 15' + Q&A 5' ×2 buổi (`reports/on-tap/rehearsal_log.md`)
+- [ ] Trình bày giữa kỳ 24/11–01/12 + điền `reports/on-tap/midterm_feedback.md`
+- [ ] Mock defense cuối kỳ (`reports/on-tap/mock_defense_log.md`)
 - [x] Điền họ tên/MSSV lên bìa `final_report.docx` (Nguyễn Tiến Sơn — 24110054 · Trần Thị Ngọc Quyên — 24110051)
 - [ ] Chốt định dạng nộp cuối cùng với GV nếu khác đề xuất (TASK P4 bước 6)
 - [ ] Khai báo liêm chính học thuật theo quy định môn (nếu trường yêu cầu)
@@ -59,8 +59,8 @@ trích dẫn. Không kèm agent config, PDF bài giảng, cache và các dump/pr
 PDF nguồn ngoài lớn vẫn ở repository, có URL trong provenance.
 
 Cấu trúc này là đề xuất; tên file/nơi nộp/deadline chính thức cần theo GV/LMS.
-Xem báo cáo kiểm tra mới: `reports/submission-readiness-261116.md`.
-Kịch bản giữa kỳ 15 phút + Q&A 5 phút: `reports/presentation-script-261116.md`.
+Hồ sơ kiểm tra ngày 16/11 nằm ở `reports/submission-readiness-261116.md`. Các file nộp hiện tại được liệt kê trong README và submissions/HUONG-DAN.txt.
+Kịch bản giữa kỳ 15 phút + Q&A 5 phút: `reports/on-tap/presentation-script-261116.md`.
 
 ## Git tag
 

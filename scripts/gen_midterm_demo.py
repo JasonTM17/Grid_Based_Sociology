@@ -191,7 +191,7 @@ md(nbf.v4.new_markdown_cell("""## 7. Câu hỏi phản biện trước (5 câu)
 4. *Noise −1 là gì?* — Điểm thuộc ô không dày — STING không ép mọi điểm vào cụm; ta tách noise khỏi metrics.
 5. *Ý nghĩa cho chính sách?* — Nhóm ngoại vi nhỏ gợi ý "hai tốc độ" quản trị dịch vụ công giữa các tỉnh; cần thêm dữ liệu định tính để diễn giải.
 
-Chi tiết ≥10 câu: `reports/qa_midterm.md`."""))
+Chi tiết ≥10 câu: `reports/on-tap/qa_midterm.md`."""))
 
 nb["cells"] = cells
 nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}

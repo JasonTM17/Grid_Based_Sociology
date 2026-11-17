@@ -7,7 +7,7 @@ _Trạng thái: **chưa chạy live** — cần có mặt cả nhóm (hoặc nh�
 | Phút | Việc |
 |---|---|
 | 0–2 | Người hỏi (đóng vai GV) nêu bối cảnh: "Tôi là GV phản biện, 15 phút" |
-| 2–17 | Hỏi 12 câu bất kỳ trong `reports/qa_final.md` (random 6 + tự nghĩ 6) |
+| 2–17 | Hỏi 12 câu bất kỳ trong `reports/on-tap/qa_final.md` (random 6 + tự nghĩ 6) |
 | 17–20 | Người trả lời tự chấm theo thang (rõ/đúng một nửa/sai) |
 | 20–28 | Sửa câu yếu: đọc lại phần tương ứng trong báo cáo/slide |
 | 28–30 | Ghi biên bản: câu nào yếu nhất → giao cho ai ôn trước ngày bảo vệ |
@@ -18,11 +18,11 @@ _Trạng thái: **chưa chạy live** — cần có mặt cả nhóm (hoặc nh�
 - **Tạm**: đúng ý nhưng thiếu số/thiếu nguồn → ôn lại trước ngày thi.
 - **Yếu**: sai hoặc không trả lời được → xếp vào top-3 câu phải học thuộc.
 
-## Câu bắt buộc phải thuộc (top 5)
+## Câu hỏi nên luyện
 
 1. STING tự cài như thế nào; khác DBSCAN/k-means ra sao. (qa_final #2, #8, #10)
-2. Gãy thang đo: nguyên nhân, bằng chứng, cách loại khỏi phân tích. (#3, #4)
-3. Vì sao dữ liệu "gần như một khối" và điều đó nói gì cho chính sách công. (#10–11, report Ch.6)
+2. Phân biệt cờ biến động thang đo và bằng chứng từ workbook, giải thích cách chọn chỉ tiêu. (#3, #4)
+3. Giải thích một cụm lớn và hai cụm nhỏ trên hai chỉ tiêu đang xét, cùng giới hạn khi liên hệ thực tế. (#10–11, report Ch.6)
 4. Pipeline train-only chống selection-on-test — nói được "2024 không tham gia chọn cấu hình". (#9)
 5. Kết quả âm tính là kết quả — không giấu, không tô vẽ. (#5, #13)
 

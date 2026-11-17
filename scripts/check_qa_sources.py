@@ -13,9 +13,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 QA_FILES = [
-    ROOT / "reports" / "qa_final.md",
-    ROOT / "reports" / "qa_midterm.md",
-    ROOT / "reports" / "qa_course_concepts.md",
+    ROOT / "reports" / "on-tap" / "qa_final.md",
+    ROOT / "reports" / "on-tap" / "qa_midterm.md",
+    ROOT / "reports" / "on-tap" / "qa_course_concepts.md",
 ]
 
 REF_RE = re.compile(r"\(nguồn:\s*([^)]+)\)", re.IGNORECASE)

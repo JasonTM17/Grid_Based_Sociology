@@ -371,40 +371,40 @@ text(s, 0.85, 1.15, 7.6, 0.4, [("HỌC MÁY · BÁO CÁO GIỮA KỲ", 13, True,
 text(
     s, 0.85, 1.75, 8.6, 2.6,
     [
-        ("Phân cụm dữ liệu PAPI", 40, True, WHITE),
-        ("bằng thuật toán STING", 30, True, WHITE),
+        ("Phân cụm dựa trên lưới", 40, True, WHITE),
+        ("với thuật toán STING", 30, True, WHITE),
     ],
 )
 text(
     s, 0.85, 4.5, 8.4, 1.8,
     [
-        ("Phân cụm dựa trên lưới · 63 tỉnh · 2011–2024", 17, True, GOLD),
+        ("Demo thuật toán và ứng dụng trên dữ liệu PAPI", 17, True, GOLD),
         ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 14, False, RGBColor(0xB9, 0xCD, 0xDE)),
         ("Nhóm 15 · Chủ đề 6 · Grid-based clustering", 13, False, RGBColor(0xB9, 0xCD, 0xDE)),
     ],
 )
 note(
     s,
-    "Kính thưa thầy, nhóm 15 xin trình bày đề tài phân cụm dữ liệu PAPI bằng thuật toán STING. "
-    "Nhóm sử dụng dữ liệu của 63 tỉnh trong giai đoạn 2011–2024 để tìm hiểu cách chia lưới, "
-    "xác định ô dày và hình thành cụm. Phần thực nghiệm gồm ví dụ minh họa và hai chỉ tiêu PAPI.",
+    "Kính thưa thầy, nhóm 15 phụ trách chủ đề phân cụm dựa trên lưới và chọn thuật toán STING. "
+    "Nhóm minh họa bằng lưới 3 × 3 và dữ liệu giả lập để giải thích cách đếm điểm, chọn ô dày "
+    "và tạo cụm. Nhóm cũng đã chuẩn bị dữ liệu PAPI để minh họa thêm phần ứng dụng.",
 )
 
 # 2 — Bài toán & dữ liệu
 s = slide_new()
-header(s, "BÀI TOÁN", "Phân cụm các quan sát tỉnh–năm theo PAPI", 2)
+header(s, "CHỦ ĐỀ VÀ DỮ LIỆU", "Grid-based clustering, STING và dữ liệu PAPI", 2)
 bullets(
     s, 0.55, 1.45, 6.5, 4.15,
     [
-        ("Mục tiêu.", "Tìm các nhóm quan sát có đặc điểm gần nhau trên hai chỉ tiêu PAPI được chọn."),
-        ("Phạm vi.", "63 tỉnh trong 14 năm. Mỗi quan sát tương ứng với một tỉnh trong một năm."),
-        ("Nguồn.", "Bộ dữ liệu PAPI của CECODES, VFF-CRT, RTA và UNDP."),
-        ("Phương pháp.", "STING chia không gian đặc trưng thành ô lưới và gom các ô dày liền kề."),
+        ("Chủ đề.", "Grid-based clustering — phân cụm dựa trên lưới."),
+        ("Thuật toán.", "Nhóm chọn biến thể STING dùng ngưỡng số điểm trong ô."),
+        ("Demo.", "Lưới 3 × 3 và dữ liệu giả lập có nhãn tham chiếu."),
+        ("Ứng dụng.", "Dữ liệu PAPI. Mỗi quan sát là một tỉnh trong một năm."),
     ],
     size=15, gap_pt=32,
 )
 rect(s, 7.4, 1.4, 5.35, 4.22, LIGHT)
-text(s, 7.65, 1.52, 4.9, 0.32, [("MA TRẬN DỮ LIỆU", 12, True, TEAL)])
+text(s, 7.65, 1.52, 4.9, 0.32, [("DỮ LIỆU PAPI ĐÃ CHUẨN BỊ", 12, True, TEAL)])
 for i, (lbl, val) in enumerate([("Quan sát tỉnh–năm", "882"), ("Số cột", "41"), ("Giai đoạn", "2011–2024")]):
     y = 2.0 + i * 1.02
     rect(s, 7.65, y, 4.85, 0.86, WHITE)
@@ -436,7 +436,10 @@ text_line(
 text(s, 0.72, 6.49, 11.9, 0.34, [(PP_FACTS, 11, False, GREY)])
 note(
     s,
-    "Bảng dữ liệu có 882 quan sát và 41 cột, gồm mã tỉnh, tên tỉnh, năm và 37 chỉ tiêu. "
+    "Grid-based clustering là chủ đề chung. STING là thuật toán nhóm chọn, còn PAPI là dữ liệu ứng dụng. "
+    "Giữa kỳ tập trung vào định nghĩa và demo cơ bản. Phần PAPI cho thấy hướng ứng dụng đã chuẩn bị. "
+    "Bảng dữ liệu có 882 quan sát và 41 cột. Một điểm ứng với một tỉnh trong một năm, "
+    "được biểu diễn bằng hai chỉ tiêu PAPI đã chuẩn hóa. Nguồn PAPI do CECODES, VFF-CRT, RTA và UNDP công bố. "
     "Nhóm kiểm tra trùng khóa tỉnh–năm, dữ liệu thiếu, tính nhất quán và ngoại lai, "
     "sau đó ghép dữ liệu theo mã tỉnh và chuẩn hóa. Các ô thiếu được giữ để ghi nhận "
     "độ phủ. Bước phân cụm chỉ dùng những dòng có đủ hai chỉ tiêu được chọn. "
@@ -467,10 +470,10 @@ note(
 
 # 4 — Quy tắc gom cụm
 s = slide_new()
-header(s, "CƠ CHẾ", "STING tạo cụm từ các ô dày", 4)
+header(s, "CƠ CHẾ", "Biến thể STING tạo cụm từ các ô dày", 4)
 steps = [
     ("1. Đếm điểm", "Chọn một mức lưới và đọc số điểm trong từng ô."),
-    ("2. Chọn ô dày", "Đánh dấu ô có ít nhất min_count điểm."),
+    ("2. Chọn ô dày", "Đánh dấu ô có số điểm đạt ngưỡng đã chọn."),
     ("3. Nối qua cạnh", "Các ô dày nối được qua cạnh thuộc cùng một cụm."),
 ]
 for i, (title, description) in enumerate(steps):
