@@ -241,8 +241,8 @@ def test_submission_notebook_key_numbers(submission_notebook: dict):
     noise = int(holdout.eq(-1).sum())
     assert "2 cụm, mỗi cụm 7 điểm. 1 điểm nhiễu." in output
     assert f"ARI = {EXPECTED_ARI_STR}" in output
-    assert f"Refit khớp {len(labels)}/{len(labels)} nhãn (0 lệch)" in output
-    assert f"{len(holdout) - noise} vào cụm, {noise} nhiễu." in output
+    assert f"{len(labels)}/{len(labels)} nhãn khớp với kết quả đã lưu" in output
+    assert f"{len(holdout) - noise} tỉnh được gán cụm, {noise} tỉnh nhận nhãn nhiễu." in output
 
 
 def test_submission_checks_all_three_sensitivity_rows(submission_notebook: dict, tmp_path):

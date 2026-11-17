@@ -104,17 +104,18 @@ from papi_pred_common import FEATURE_LABELS, load_config, load_panel
 from fig_style import CLUSTER_COLORS, apply_style
 
 apply_style()
-print("import OK")"""))
+print("Đã nạp mã STING và các thư viện phân tích.")"""))
 
 md(nbf.v4.new_markdown_cell("""## 1. Lý thuyết STING
 
-STING (Statistical Information Grid, Wang, Yang & Muntz, 1997) chia không gian
-đặc trưng thành lưới từ thô đến mịn. Ở mức `l`, mỗi trục có `factor**l` đoạn.
-Mỗi ô lưu số điểm, trung bình, độ lệch chuẩn, giá trị nhỏ nhất và lớn nhất.
+STING (Statistical Information Grid) tổ chức dữ liệu thành lưới nhiều mức, từ thô đến mịn.
+Mỗi ô lưu số điểm và các thống kê tóm tắt.
 
-Trong cài đặt này, ô có số điểm đạt `min_count` được gom qua quan hệ chung cạnh
-tại một mức lưới. Điểm trong ô thưa nhận nhãn `-1`. Đây là biến thể dùng
-ngưỡng số đếm. STING gốc còn mô hình hóa phân phối và duyệt lưới từ trên xuống."""))
+**Cách nhóm tạo cụm tại một mức lưới**
+
+1. Gán các điểm vào lưới và đếm số điểm trong từng ô.
+2. Đánh dấu ô có số điểm đạt ngưỡng là ô dày.
+3. Nối các ô dày chung cạnh thành cụm. Điểm trong ô thưa được xem là nhiễu."""))
 
 md(nbf.v4.new_markdown_cell("## 2. Cài đặt từ đầu — lưới 3 × 3"))
 
@@ -144,23 +145,23 @@ m_syn = STING(n_levels=3, factor=4, min_count=3).fit(X_syn)
 lab_syn = m_syn.cluster(level=2, connectivity=1)
 ari = adjusted_rand_score(y_true, lab_syn)
 assert ari >= 0.9, f"ARI quá thấp: {ari:.3f}"
-print(f"ARI = {ari:.3f} | nhiễu = {(lab_syn == -1).mean():.1%} | k = {m_syn.n_clusters_}")
+print(f"ARI = {ari:.3f} | Số cụm {m_syn.n_clusters_} | Tỷ lệ nhiễu {(lab_syn == -1).mean():.1%}")
 """))
 
 md(nbf.v4.new_markdown_cell("""## 4. Ứng dụng PAPI
 
-- Panel PAPI gồm 882 quan sát tỉnh–năm và 41 cột. Giá trị `0.0` dùng để
-  biểu thị ô thiếu được quy về NaN. Bước nhảy trung bình là dấu hiệu cần đối chiếu thang đo.
-- Phân cụm dùng hai chỉ tiêu `sd_4_2` và `sd_6_1`.
-- Bộ chuẩn hóa được ước lượng từ dữ liệu 2011–2023 và áp dụng cho năm 2024."""))
+- PAPI gồm 882 dòng và 41 cột, theo dõi 63 tỉnh trong giai đoạn 2011–2024.
+- Hai chỉ tiêu phân cụm là kiểm soát tham nhũng trong cung ứng dịch vụ công và y tế công lập.
+- Giá trị 0 được ghi nhận là thiếu theo quy ước của bộ dữ liệu.
+- Thống kê chuẩn hóa lấy từ dữ liệu 2011–2023. Cùng phép chuẩn hóa được áp dụng cho năm 2024."""))
 
 cd(nbf.v4.new_code_cell("""cfg = load_config()
 feats = cfg["features"]
 panel = load_panel()
-print("Panel:", panel.shape, "| tỉnh:", panel.province_code.nunique(),
-      "| năm:", panel.year.min(), "→", panel.year.max())
 assert panel.shape == (882, 41)
-print("Đặc trưng phân cụm:", feats, "→", [FEATURE_LABELS[f] for f in feats])"""))
+print(f"Bảng PAPI có {len(panel)} dòng và {len(panel.columns)} cột.")
+print("Hai chỉ tiêu phân cụm")
+print("\\n".join(f"• {FEATURE_LABELS[feature]}" for feature in feats))"""))
 
 md(nbf.v4.new_markdown_cell("### 4.1 Tiền xử lý dữ liệu"))
 
@@ -184,7 +185,8 @@ lab = m_frozen.cluster(level=cfg["sting"]["cluster_level"],
                        connectivity=cfg["sting"]["connectivity"])
 sizes = sorted([int((lab == c).sum()) for c in range(m_frozen.n_clusters_)], reverse=True)
 noise = float((lab == -1).mean())
-print(f"STING frozen: k={m_frozen.n_clusters_} | cỡ={sizes} | nhiễu={noise:.1%} (n={len(ptr)})")
+print(f"STING tìm được {m_frozen.n_clusters_} cụm trên {len(ptr)} quan sát giai đoạn 2011–2023.")
+print(f"Các cụm có lần lượt {', '.join(map(str, sizes))} điểm. Tỷ lệ nhiễu là {noise:.1%}.")
 _exp = pd.read_csv(ROOT / "results" / "metrics.csv")
 _sting = _exp[(_exp.scope == "pooled 2011-2023") & (_exp.method == "STING (frozen)")].iloc[0]
 _sizes_m = re.search(r"\\[(\\d+,\\s*\\d+,\\s*\\d+)\\]", str(_sting.note))
@@ -207,13 +209,20 @@ merged = saved.merge(
 n_diff = int((merged.pred_cluster_saved != merged.pred_cluster_refit).sum())
 assert len(merged) == len(saved) == 869
 assert n_diff == 0
-print(f"Refit khớp {len(saved)}/{len(saved)} nhãn (0 lệch).")"""))
+print(f"Khi chạy lại STING, {len(merged) - n_diff}/{len(saved)} nhãn khớp với kết quả đã lưu.")"""))
 
 cd(nbf.v4.new_code_cell("""metrics = pd.read_csv(ROOT / "results" / "metrics.csv")
 metrics_pooled = metrics[metrics.scope == "pooled 2011-2023"]
 methods = ["STING (frozen)", "k-means k=2", "DBSCAN eps=0.2"]
-print(metrics_pooled.loc[metrics_pooled.method.isin(methods),
-                         ["method", "k", "noise_ratio", "silhouette"]].to_string(index=False))
+comparison = metrics_pooled.loc[metrics_pooled.method.isin(methods),
+                                ["method", "k", "noise_ratio", "silhouette"]].rename(
+    columns={"method": "Phương pháp", "k": "Số cụm",
+             "noise_ratio": "Tỷ lệ nhiễu", "silhouette": "Silhouette"}
+)
+comparison["Phương pháp"] = comparison["Phương pháp"].replace(
+    {"STING (frozen)": "STING", "k-means k=2": "K-means (2 cụm)"}
+)
+print(comparison.to_string(index=False, formatters={"Tỷ lệ nhiễu": "{:.1%}".format}))
 print()
 
 
@@ -245,9 +254,9 @@ print("Kết quả STING, K-means và DBSCAN khớp bảng đối chiếu.")""")
 
 cd(nbf.v4.new_code_cell("""fig, axes = plt.subplots(1, 2, figsize=(11, 5))
 axes[0].scatter(Xz[:, 0], Xz[:, 1], s=12, c=[CLUSTER_COLORS[int(c)] for c in lab])
-axes[0].set_title(f"STING frozen — k=3, nhiễu {noise:.0%}")
+axes[0].set_title(f"STING — {m_frozen.n_clusters_} cụm, {noise:.1%} nhiễu")
 axes[1].scatter(Xz[:, 0], Xz[:, 1], s=12, c=[CLUSTER_COLORS[int(c)] for c in km2.labels_])
-axes[1].set_title("k-means k=2")
+axes[1].set_title("K-means — 2 cụm")
 for ax in axes:
     ax.set_xlabel(f"{FEATURE_LABELS[feats[0]]} (z-score)")
     ax.set_ylabel(f"{FEATURE_LABELS[feats[1]]} (z-score)")
@@ -261,8 +270,8 @@ Xte = scaler.transform(test2024[feats])
 base = m_frozen.predict(Xte)
 n_provinces = panel.loc[panel.year == 2024, "province_code"].nunique()
 n_noise = int((base == -1).sum())
-print(f"2024: {len(base)}/{n_provinces} tỉnh đủ dữ liệu, "
-      f"{len(base) - n_noise} vào cụm, {n_noise} nhiễu.")
+print(f"Năm 2024 có {len(base)}/{n_provinces} tỉnh đủ dữ liệu. "
+      f"{len(base) - n_noise} tỉnh được gán cụm, {n_noise} tỉnh nhận nhãn nhiễu.")
 
 min_counts = (3, 5, 8)
 sens = []
@@ -273,9 +282,10 @@ for mc in min_counts:
     p = mm.predict(Xte)
     sens.append((mc, round(float((p != -1).mean()), 2), mm.n_clusters_,
                  round(float(adjusted_rand_score(p, base)), 3)))
-print(f"{'min_count':>9} | {'coverage 2024':>13} | k | ARI vs chốt")
+print(f"{'Ngưỡng ô dày':>12} | {'Gán cụm 2024':>13} | {'Số cụm 2011–2023':>17} | "
+      f"ARI so với ngưỡng {cfg['sting']['min_count']}")
 for mc, cov, k, ari in sens:
-    print(f"{mc:>9} | {cov:>13.0%} | {k} | {ari:.3f}")
+    print(f"{mc:>12} | {cov:>13.0%} | {k:>17} | {ari:.3f}")
 cov_map = {mc: round(cov, 2) for mc, cov, _, _ in sens}
 ari_map = {mc: round(ari, 3) for mc, _, _, ari in sens}
 
@@ -309,7 +319,7 @@ md(nbf.v4.new_markdown_cell("""## 5. Kết luận và hạn chế
 
 - Trên dữ liệu giả lập, ARI 0.950 đo độ khớp với nhãn đã biết khi sinh dữ liệu.
 - PAPI 2011–2023 có một cụm lớn và hai cụm nhỏ. Số cụm và tỷ lệ nhiễu thay đổi
-  theo ngưỡng mật độ. Năm 2024 cho thấy cách gán tỉnh mới vào lưới đã học.
+  theo ngưỡng số điểm. Dữ liệu năm 2024 được gán vào lưới đã học.
 - Khi so sánh silhouette, đọc kèm tỷ lệ nhiễu vì mỗi phương pháp có thể được chấm
   trên tập điểm khác nhau. Các cụm mô tả hai chỉ tiêu PAPI được chọn.
 
