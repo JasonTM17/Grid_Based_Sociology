@@ -329,26 +329,9 @@ note(s, "Trong 61 tỉnh đủ dữ liệu năm 2024, có 48 tỉnh vào cụm l
      "2024, có 7 tỉnh từ cụm sang nhiễu và 5 tỉnh từ nhiễu vào cụm. Cả hai năm đều chỉ có "
      "điểm thuộc cụm lớn hoặc nhiễu, vì vậy cần thận trọng khi diễn giải mức ổn định của nhãn.")
 
-# Slide 9 — Model giám sát
+# Slide 9 — Baselines
 s = slide_new()
-header(s, "PHÂN TÍCH BỔ TRỢ", "Dự báo chỉ tiêu y tế công lập bằng Ridge", 9)
-pic(s, "supervised_regression.png", 0.55, 1.7, h=3.85)
-bullets(s, 8.2, 1.75, 4.6, 5.0, [
-    ("Đầu vào.", "8 chỉ tiêu năm hiện tại để dự báo chỉ tiêu y tế năm sau."),
-    ("Chọn mô hình.", f"Kiểm định theo thời gian 2017–2022 chọn Ridge, với R² bằng {CV_RIDGE}."),
-    ("Kết quả 2024.", "MAE bằng 0,0640, so với 0,0683 của cách giữ giá trị năm trước."),
-    ("Phạm vi.", "Đánh giá trên 59 cặp tỉnh–năm của giai đoạn 2023→2024."),
-], size=16, gap_pt=26)
-note(s, f"Đây là phân tích bổ trợ về học có giám sát. Nhóm dự báo chỉ tiêu y tế năm sau "
-     f"từ tám chỉ tiêu năm hiện tại. Kiểm định theo thời gian dùng sáu lần chia có năm huấn luyện "
-     f"đứng trước năm kiểm định. Ridge có R² kiểm định {CV_RIDGE}, so với {CV_CARRY} của cách "
-     "giữ giá trị năm trước. MAE trên 59 cặp của 2023→2024 giảm khoảng 6,3%. Random Forest "
-     "có MAE trên năm này thấp hơn, nhưng điểm kiểm định theo thời gian thấp hơn Ridge. "
-     "Kết quả hiện giới hạn ở một năm đánh giá.")
-
-# Slide 10 — Baselines
-s = slide_new()
-header(s, "ĐỐI CHỨNG PHÂN CỤM", "STING, K-means và DBSCAN trên PAPI 2011–2023", 10)
+header(s, "ĐỐI CHỨNG PHÂN CỤM", "STING, K-means và DBSCAN trên PAPI 2011–2023", 9)
 rows = [
     ("Phương pháp", "Số cụm", "Nhiễu", "Silhouette", "ARI với STING"),
     ("STING", "3", "19.6%", "0.361*", "—"),
@@ -394,9 +377,9 @@ note(s, "Bảng đối chiếu các cấu hình trên cùng hai chỉ tiêu PAPI
      "phạm vi điểm được chấm có thể khác giữa các phương pháp. ARI mô tả mức đồng thuận "
      "giữa hai cách phân cụm và cần được đọc trong cấu hình cụ thể.")
 
-# Slide 11 — Bản đồ
+# Slide 10 — Bản đồ
 s = slide_new()
-header(s, "BẢN ĐỒ NĂM 2024", "Phân bố các tỉnh theo nhãn STING", 11)
+header(s, "BẢN ĐỒ NĂM 2024", "Phân bố các tỉnh theo nhãn STING", 10)
 pic(s, "map_2024.png", 0.55, 1.3, h=5.75)
 bullets(s, 5.6, 1.8, 7.15, 4.9, [
     ("Cụm lớn.", "48 tỉnh được biểu diễn bằng màu xanh."),
@@ -409,9 +392,9 @@ note(s, "Bản đồ nối nhãn STING với vị trí tỉnh thông qua mã t�
      "để gán nhãn. Các tỉnh nhiễu phân bố ở nhiều vùng. Đặc trưng phân cụm là hai chỉ tiêu PAPI, "
      "còn tọa độ địa lý dùng để trình bày kết quả trên bản đồ.")
 
-# Slide 12 — Hạn chế
+# Slide 11 — Hạn chế
 s = slide_new()
-header(s, "THẢO LUẬN", "Giới hạn của kết quả phân cụm", 12)
+header(s, "THẢO LUẬN", "Giới hạn của kết quả phân cụm", 11)
 bullets(s, 0.55, 1.7, 12.2, 5.2, [
     ("Phạm vi đặc trưng.", "Kết quả chính mô tả hai chỉ tiêu PAPI được chọn."),
     ("Kích thước cụm.", "Giai đoạn 2011–2023 có một cụm 629 điểm và hai cụm 16, 5 điểm."),
@@ -427,9 +410,9 @@ note(s, f"Kết quả cần được đọc trong phạm vi hai chỉ tiêu và 
      f"với {_pct(R_MC2['noise_ratio'])} nhiễu, nhưng silhouette âm. "
      "Các phép thử bổ sung cho thấy cần thận trọng khi diễn giải cụm ở số chiều cao hơn.")
 
-# Slide 13 — Kế hoạch cuối kỳ
+# Slide 12 — Kế hoạch cuối kỳ
 s = slide_new()
-header(s, "KẾT LUẬN", "Kết quả chính và hướng phát triển", 13)
+header(s, "KẾT LUẬN", "Kết quả chính và hướng phát triển", 12)
 steps = [
     ("PHƯƠNG PHÁP", "Cài đặt STING dựa trên lưới phân cấp, thống kê ô và liên thông giữa các ô dày."),
     ("THỰC NGHIỆM", "Đối chiếu trên dữ liệu giả lập, áp dụng lên PAPI và khảo sát ảnh hưởng của tham số."),
@@ -447,21 +430,38 @@ note(s, "Nhóm đã cài đặt biến thể STING và kiểm tra cách chia lư
      "và đối chiếu thêm các bộ chỉ tiêu có thang đo tương thích. Tài liệu chi tiết kèm theo "
      "gồm final_report.docx, Nhom15_CuoiKy_STING_PAPI.ipynb và bản trình chiếu final.pptx.")
 
+# Slide 13 — Phụ lục: mô hình giám sát
+s = slide_new()
+header(s, "PHỤ LỤC A · PHÂN TÍCH BỔ TRỢ", "Dự báo chỉ tiêu y tế công lập bằng Ridge", 13)
+pic(s, "supervised_regression.png", 0.55, 1.7, h=3.85)
+bullets(s, 8.2, 1.75, 4.6, 5.0, [
+    ("Đầu vào.", "8 chỉ tiêu năm hiện tại để dự báo chỉ tiêu y tế năm sau."),
+    ("Chọn mô hình.", f"Kiểm định theo thời gian 2017–2022 chọn Ridge, với R² bằng {CV_RIDGE}."),
+    ("Kết quả 2024.", "MAE bằng 0,0640, so với 0,0683 của cách giữ giá trị năm trước."),
+    ("Phạm vi.", "Đánh giá trên 59 cặp tỉnh–năm của giai đoạn 2023→2024."),
+], size=16, gap_pt=26)
+note(s, f"Đây là phân tích bổ trợ về học có giám sát. Nhóm dự báo chỉ tiêu y tế năm sau "
+     f"từ tám chỉ tiêu năm hiện tại. Kiểm định theo thời gian dùng sáu lần chia có năm huấn luyện "
+     f"đứng trước năm kiểm định. Ridge có R² kiểm định {CV_RIDGE}, so với {CV_CARRY} của cách "
+     "giữ giá trị năm trước. MAE trên 59 cặp của 2023→2024 giảm khoảng 6,3%. Random Forest "
+     "có MAE trên năm này thấp hơn, nhưng điểm kiểm định theo thời gian thấp hơn Ridge. "
+     "Kết quả hiện giới hạn ở một năm đánh giá.")
+
 # Slide 14 — Kiểm chứng bên ngoài
 s = slide_new()
-header(s, "PHÂN TÍCH BỔ TRỢ", "Đối chiếu các nhóm STING với dữ liệu PCI", 14)
+header(s, "PHỤ LỤC B · PHÂN TÍCH BỔ TRỢ", "Đối chiếu các nhóm STING với dữ liệu PCI", 14)
 pic(s, "external_pci_by_cluster.png", 0.55, 1.45, h=4.75)
 bullets(s, 8.0, 1.5, 4.8, 4.8, [
     ("Nguồn đối chiếu.", "PCI khảo sát doanh nghiệp, do VCCI–USAID công bố."),
     ("Dữ liệu ghép.", "747 quan sát có nhãn STING trong giai đoạn 2011–2022."),
     ("Kiểm định.", "ANOVA cho F=9,04, p<0,001. Kruskal–Wallis cho H=31,78, p<0,001."),
-    ("Giới hạn.", "Hai cụm nhỏ chỉ có 5 và 16 điểm, nên cần thận trọng khi diễn giải khác biệt."),
+    ("Giới hạn.", "Kiểm định gộp chưa hiệu chỉnh quan sát lặp theo tỉnh và năm; hai cụm nhỏ chỉ có 5 và 16 điểm."),
 ], size=16, gap_pt=28)
 note(
     s,
     "PCI cung cấp nguồn đối chiếu về cảm nhận của doanh nghiệp. Nhóm ghép được 747 quan sát "
     "có nhãn STING, gồm 149 điểm nhiễu, 5 điểm cụm 0, 16 điểm cụm 1 và 577 điểm cụm 2. "
-    "Hai kiểm định cho thấy có khác biệt thống kê giữa các nhóm trong mẫu ghép này. "
+    "Các p-value gộp chỉ mang tính tham khảo vì chưa hiệu chỉnh sự phụ thuộc giữa các quan sát cùng tỉnh và giữa các năm. "
     "Cỡ cụm chênh lệch lớn và phép thử hiện gộp nhiều năm, nên kết quả chỉ là bằng chứng "
     "mô tả bổ sung. Nguồn số liệu là results/external_validation.md.",
 )

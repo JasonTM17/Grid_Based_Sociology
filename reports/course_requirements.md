@@ -31,6 +31,8 @@ Các **hạng mục** (tên category) đọc được từ text trích PDF bài 
 
 Trọng số (Group +8, Individual +2; render trang 10 của `data/raw/course/lecture-day1-ideas-of-machine-learning.pdf`): tiền xử lý **1.5**, học model **1**, đánh giá & thảo luận **2**, quy ước code + cảnh báo **1**, báo cáo **2.5** (nhóm, tổng 8); thi vấn đáp **2** (cá nhân). Chia theo Group/Individual nên phần Q&A mỗi thành viên phải tự trả lời được.
 
+Bộ giữa kỳ gồm 10 slide là lựa chọn trình bày của nhóm để phù hợp thời lượng; PDF được cung cấp không ghi giới hạn số slide.
+
 ### Day 4 — tiền xử lý và bài thực hành nhóm
 
 1. **Cleaning** — theo thứ tự: **dedup trước** → imputation → consistency → **outlier removal cuối cùng**
@@ -59,19 +61,19 @@ _File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản 
 
 | Mốc | Yêu cầu đề | Sản phẩm dự kiến | Trạng thái |
 |---|---|---|---|
-| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (≤10 slide) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (10 slide) + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch) | Sẵn sàng kỹ thuật (smoke + test) — rehearsal: con người |
-| Cuối kỳ | Thi vấn đáp trực tiếp, nộp DOCX + notebook, PPTX tùy chọn, dataset ≥500×10 | `reports/final_report.docx` và bản rời `submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx`, `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` và `slides/final.pptx` | Báo cáo đã kiểm tra từ bản xuất Word 34 trang. Còn lịch luyện vấn đáp của nhóm. |
+| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (PPTX) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (10 slide) + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch) | Sẵn sàng kỹ thuật (smoke + test) — rehearsal: con người |
+| Cuối kỳ | Thi vấn đáp trực tiếp, nộp DOCX + notebook, PPTX tùy chọn, dataset ≥500×10 | `reports/final_report.docx` và bản rời `submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx`, `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` và `slides/final.pptx` | Báo cáo đã kiểm tra từ bản xuất Word 35 trang. Còn lịch luyện vấn đáp của nhóm. |
 
 ## Quyết định cần chốt (hỏi GV — xem `open-questions.md`)
 
 - [x] **Định dạng `.docx`** đã áp dụng theo file mẫu người dùng chọn (`reports/report_format_notes.md`). Đã khảo sát dàn ý ba chương trong tài liệu mẫu GV.
-- [x] **Template slide:** chưa có → tự thiết kế, ≤10 slide (`slides/submission.pptx`); phụ lục cuối kỳ: `slides/final.pptx` (16 slide).
+- [x] **Template slide:** nhóm tự thiết kế và chọn 10 slide (`slides/submission.pptx`); phụ lục cuối kỳ: `slides/final.pptx` (16 slide).
 - [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051).
 - [ ] **Định dạng nộp (tên file/cấu trúc/zip/nơi nộp) và deadline chính thức** — chờ GV/LMS.
 - [ ] **Người trình bày & Q&A** — rehearsal (con người).
 - [x] **Trọng số rubric cuối kỳ** — đã xác minh Day 1 trang 10 (Group 8 + oral 2); xem mục rubric phía trên và `open-questions.md` câu 6.
 - [ ] **Skeleton báo cáo 3 chương (mẫu GV) vs 7 chương (báo cáo hiện tại)** — chờ GV; mặc định giữ 7 chương.
-- [x] **Ngày giữa kỳ: 24/11–01/12** (mặc định đã giữ) → freeze gói giữa kỳ 20/11.
+- [ ] **Ngày thi, deadline và nơi nộp chính thức** — chưa được xác nhận từ các PDF được cung cấp; các mốc nội bộ không thay lịch GV/LMS.
 
 ## Định dạng nộp đề xuất (default đến khi GV chốt khác)
 

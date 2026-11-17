@@ -17,6 +17,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from docx import Document
 from pptx import Presentation
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +50,23 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def test_report_embeds_current_canonical_figures():
+    figures = (
+        "00_synthetic_sting.png", "sting_first_real.png", "predict_2024.png",
+        "supervised_regression.png", "course_confusion_matrix.png", "evolution.png",
+        "map_2024.png", "external_pci_by_cluster.png", "external_health_density_2020.png",
+        "external_grdp_by_cluster.png", "external_wdi_panel.png", "external_poverty_by_cluster.png",
+    )
+    report = Document(ROOT / "reports" / "final_report.docx")
+    assert len(report.inline_shapes) == len(figures)
+    for index, (shape, name) in enumerate(zip(report.inline_shapes, figures, strict=True), 1):
+        relation = shape._inline.graphic.graphicData.pic.blipFill.blip.embed
+        embedded = report.part.related_parts[relation].blob
+        assert hashlib.sha256(embedded).hexdigest() == _sha256_file(ROOT / "results" / "figs" / name), (
+            f"Hình {index} chưa cập nhật từ {name}; cần tạo lại báo cáo."
+        )
 
 
 def check_pptx_submission(prs: Presentation) -> list[str]:

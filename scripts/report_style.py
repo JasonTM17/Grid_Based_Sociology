@@ -63,8 +63,10 @@ def _format_table(table):
             item.set(qn(f"w:{attribute}"), value)
     for row_index, row in enumerate(table.rows):
         row.height = None
+        props = row._tr.get_or_add_trPr()
+        if props.find(qn("w:cantSplit")) is None:
+            props.append(OxmlElement("w:cantSplit"))
         if row_index == 0:
-            props = row._tr.get_or_add_trPr()
             if props.find(qn("w:tblHeader")) is None:
                 props.append(OxmlElement("w:tblHeader"))
         for column_index, cell in enumerate(row.cells):
@@ -90,6 +92,7 @@ def _format_table(table):
                 fmt.line_spacing = 1.05
                 if row_index == 0:
                     paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    fmt.keep_with_next = True
                 for run in paragraph.runs:
                     _font(run, 12)
 

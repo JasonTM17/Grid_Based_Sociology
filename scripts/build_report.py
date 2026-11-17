@@ -414,6 +414,7 @@ def table(headers, rows, widths=None, caption=None, header_fill="1B6E77"):
     if caption:
         cp = doc.add_paragraph()
         cp.paragraph_format.space_before = Pt(10)
+        cp.paragraph_format.keep_with_next = True
         r0 = cp.add_run("Bảng ")
         set_run(r0, 10.5, True, GREY)
         _paragraph_field(
@@ -548,14 +549,15 @@ doc.add_page_break()
 
 # TÓM TẮT
 h1("TÓM TẮT")
-body(f"Đồ án áp dụng STING (STatistical INformation Grid) — thuật toán phân cụm dựa trên lưới phân cấp, cài đặt từ đầu — lên dữ liệu chỉ số PAPI (Provincial Governance and Public Administration Performance Index) [2] của 63 tỉnh/thành Việt Nam giai đoạn 2011–2024. Dữ liệu gốc gồm 14 workbook chính thức, được parse thành panel 882 dòng × 41 cột (d1–d8 các yếu tố quản trị + 29 chỉ tiêu thành phần), vượt yêu cầu đề bài (≥ 500 × ≥ 10) [8]. Trong quá trình làm sạch, heuristic audit (`scripts/check_data.py`) đánh dấu 23/37 cột chỉ tiêu có bước nhảy trung bình năm > 0.25 điểm (chưa chứng minh đổi thang); ví dụ đã đối chiếu workbook: sd_5_4 đổi từ 0.25–2.5 lên 0.33–3.33 tại năm 2021; pipeline dự đoán xuyên năm do đó chỉ dùng 8 chỉ tiêu qua audit thang đo. Kết quả chính thức: dữ liệu PAPI cấp tỉnh/năm gần như một khối đồng nhất — STING thu được một vùng dày chiếm ưu thế và hai cụm nhỏ 16 và 5 điểm (tổng 21) trong tập gộp 2011–2023; robustness khi mở rộng chiều: PCA d1–d6 ({_pct(R_PCA['explained_var_total'])} phương sai) → k={R_PCA['k']} — không nhận diện; nhánh 8 chiều 2018–2024 đọc theo ablation OFAT — gốc k={R_GOC['k']} nhiễu {_pct(R_GOC['noise_ratio'])}, f=3 → k={R_F3['k']}/{_pct(R_F3['noise_ratio'])}, lv=2 → k={R_LV2['k']} toàn nhiễu, riêng mc=2 đạt ngưỡng k/noise (k={R_MC2['k']}, nhiễu {_pct(R_MC2['noise_ratio'])}) nhưng silhouette âm — tách yếu (Bảng 5; kết quả được báo cáo trung thực). Pipeline dự đoán 2024 (năm out-of-sample duy nhất khi chốt cấu hình theo quy trình train-only) đạt phủ 79% với lưới toàn cục; mô hình hồi quy Ridge (được chọn qua CV — hai baseline hồi quy cũng có CV thật trên cùng fold: carry {_vn(CV_CARRY)} vs ridge {_vn(CV_RIDGE)}) dự báo chỉ số 6.1 Y tế công lập năm sau có MAE holdout 0.0640, thấp hơn carry-forward 0.0683 là 6.3%. Kết luận chính: PAPI ở cấp tỉnh/năm chưa cho thấy cấu trúc cụm tách biệt mạnh — giá trị nghiên cứu nằm ở quy trình dữ liệu nghiêm ngặt (audit thang đo, quy trình chọn cấu hình train-only) và cách báo cáo trung thực các kết quả khó nhìn.")
+body("Đồ án nghiên cứu phân cụm dựa trên lưới, chọn một biến thể STING rút gọn theo ngưỡng số điểm và áp dụng lên dữ liệu PAPI cấp tỉnh [1,2]. Từ 14 workbook giai đoạn 2011–2024, nhóm xây dựng bảng 882 quan sát tỉnh–năm và 41 cột, đáp ứng quy mô dữ liệu của học phần [8]. Các bước tiền xử lý gồm kiểm tra trùng khóa, giữ giá trị thiếu có cấu trúc, đối chiếu thang đo và chuẩn hóa bằng dữ liệu huấn luyện. Phân tích chính sử dụng hai chỉ tiêu: kiểm soát tham nhũng trong cung ứng dịch vụ công và y tế công lập.")
+body("Trên 240 điểm giả lập có hai nhóm tham chiếu, cài đặt cho ARI 0,950 và 2,5% nhiễu. Với hai chỉ tiêu PAPI giai đoạn 2011–2023, cấu hình chính tạo một cụm 629 điểm, hai cụm nhỏ 16 và 5 điểm, cùng 19,6% nhiễu. Lưới đã học gán 48/61 tỉnh đủ dữ liệu năm 2024 vào cụm và 13 tỉnh vào nhãn nhiễu. Kết quả thay đổi theo cấu hình lưới và tập đặc trưng; các thử nghiệm mở rộng chưa cho thấy sự phân tách mạnh trong phạm vi đã khảo sát. Báo cáo tập trung vào cơ chế STING, khả năng tái lập và giới hạn khi diễn giải cụm; kết quả trên hai chỉ tiêu không đại diện cho toàn bộ chất lượng quản trị của địa phương.")
 doc.add_page_break()
 
 # LỜI MỞ ĐẦU
 h1("LỜI MỞ ĐẦU")
-body("Đề tài thuộc Topic 6 — Grid-based (clustering), với hai yêu cầu khắt khe: (1) thuật toán tự viết, không dùng thư viện có sẵn cho phần lõi; (2) dataset thật ≥ 500 dòng × ≥ 10 cột. Nhóm chọn PAPI vì đây là bộ chỉ số quản trị công chính thức, công bố hàng năm, có lịch sử 2011–2024 đủ dài và đủ chiều (8 yếu tố + 29 chỉ tiêu thành phần) để thử thách một thuật toán lưới vốn phát huy tốt ở chiều thấp.")
-body(f"Đồ án gồm: cài đặt STING từ đầu (src/sting.py); pipeline dữ liệu từ 14 workbook gốc; đối chiếu chéo với gói replication nghiên cứu công bố (Mendeley, CC BY 4.0 — lệch 0.0 trên {MENDELEY_OVERLAP_TXT} quan sát trùng khớp trên 8 chiều, tính từ reports/crosscheck_mendeley.md) [3]; phân cụm các năm; so sánh với k-means/DBSCAN; robustness đa chỉ tiêu; bản đồ 63 tỉnh; và pipeline dự đoán năm 2024 với hai mô hình local.")
-body("Mọi tuyên bố số liệu trong báo cáo tái lập được từ mã nguồn: python scripts/build_panel.py → python scripts/check_data.py → python scripts/predict_sweep.py → python scripts/predict_demo.py → python scripts/predict_supervised.py → python scripts/run_analysis.py. Notebook cuối (notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb) chạy sạch end-to-end.")
+body("Đề tài thuộc Topic 6 — Grid-based clustering. Theo bài giảng, cuối kỳ cần dữ liệu thật có hơn 500 dòng và 10 cột, báo cáo Word và notebook. Nhóm chọn tự cài đặt biến thể STING bằng NumPy để giải thích cơ chế lưới; đây là lựa chọn triển khai của nhóm. Scikit-learn hỗ trợ chuẩn hóa, chỉ số đánh giá và các mô hình đối chứng. PAPI được chọn vì dữ liệu công khai, có 14 năm và nhiều chỉ tiêu về quản trị, dịch vụ công.")
+body(f"Đồ án gồm: cài đặt STING từ đầu (src/sting.py); pipeline dữ liệu từ 14 workbook gốc; đối chiếu chéo với gói replication nghiên cứu công bố (Mendeley, CC BY 4.0 — lệch 0.0 trên {MENDELEY_OVERLAP_TXT} cặp giá trị có dữ liệu trên 8 chiều, tính từ reports/crosscheck_mendeley.md) [3]; phân cụm các năm; so sánh với k-means/DBSCAN; robustness đa chỉ tiêu; bản đồ 63 tỉnh; và gán cụm năm 2024 cùng các mô hình giám sát bổ trợ.")
+body("Mã nguồn lưu các bước dựng panel, kiểm tra dữ liệu, chọn cấu hình và phân tích kết quả. Notebook cuối kỳ tái lập ví dụ giả lập, nhãn STING và sai số dự báo từ panel đã lưu, đồng thời đọc các bảng và hình thực nghiệm. Notebook Day 4 thực hiện riêng pipeline tiền xử lý từ workbook gốc; lệnh tái lập được tổng hợp ở Phụ lục A.")
 doc.add_page_break()
 
 # MỤC LỤC
@@ -603,15 +605,15 @@ bullets([
 body("Phạm vi: 63 tỉnh/thành Việt Nam, 2011–2024, cấp tỉnh/năm. Không phân tích cấp huyện, không dự đoán sau 2024; các nguồn khảo sát ngoài (PCI, GSO, OD Mekong, WDI — mục 3.1) chỉ dùng để kiểm chứng bên ngoài, không đưa vào huấn luyện (mục 6.5).")
 h2("1.3. Đóng góp của đồ án")
 bullets([
-    ("Kỹ thuật.", f"STING tự cài (src/sting.py); bộ test STING (`tests/test_sting.py`) xanh ({SUITE_OK}); pipeline dự đoán hai mô hình local; quy trình chọn cấu hình chống selection-on-test."),
+    ("Kỹ thuật.", f"STING tự cài (src/sting.py); bộ test STING (`tests/test_sting.py`) xanh ({SUITE_OK}); quy trình gán cụm và dự báo bổ trợ; quy trình chọn cấu hình chống selection-on-test."),
     ("Dữ liệu.", "Panel 882×41; audit thang đo xuyên năm (23/37 cột bị cờ heuristic bước nhảy > 0.25) — lần đầu được hệ thống hóa cho PAPI trong phạm vi đồ án; PROVENANCE + hash cho mọi nguồn."),
-    ("Khoa học.", f"Phát hiện trung thực: PAPI cấp tỉnh/năm gần như một khối đồng nhất; cấu trúc tách biệt chỉ ở nhóm ngoại vi nhỏ; robustness 8 chiều đọc theo ablation OFAT — lv=2 sập toàn nhiễu, f=3 cho {_pct(R_F3['noise_ratio'])} nhiễu, riêng mc=2 đạt ngưỡng k/noise nhưng silhouette âm — không có cấu trúc tách mạnh."),
+    ("Thực nghiệm.", "Trên hai chỉ tiêu và cấu hình chính, một cụm lớn chiếm ưu thế so với hai cụm nhỏ. Các thử nghiệm PCA và 8 chiều cho thấy kết quả nhạy với đặc trưng, mức lưới và ngưỡng số điểm; chưa đủ cơ sở để suy ra cấu trúc chung của toàn bộ dữ liệu PAPI."),
 ])
 
 # CHƯƠNG 2
 h1("CHƯƠNG 2. CƠ SỞ LÝ THUYẾT")
 h2("2.1. Grid-based clustering")
-body("Grid-based chia không gian dữ liệu thành lưới (grid) hữu hạn ô, thay vì gom điểm theo khoảng cách từng đôi. Mỗi ô lưu thông tin tóm tắt; các cụm được suy ra từ mật độ/thống kê ô. Ưu điểm: (i) chi phí xây lưới tuyến tính O(n) mỗi mức; (ii) truy vấn vùng nhanh; (iii) song song hóa tự nhiên. Nhược điểm: lưới song song trục; nhạy với độ phân giải và ngưỡng mật độ; ở chiều cao, lưới bị thưa (curse of dimensionality).")
+body("Grid-based clustering chia không gian đặc trưng thành các ô lưới và dùng thông tin tóm tắt của ô để tìm vùng điểm dày. Lưới được đặt trên các chỉ tiêu phân tích, không phải lưới chia bản đồ địa lý. Khi số chiều và cấu hình được giữ cố định, chi phí thống kê có thể tăng gần tuyến tính theo số điểm. Phương pháp nhạy với độ phân giải, ngưỡng số điểm và hướng trục; khi số chiều tăng, dữ liệu dễ phân tán vào nhiều ô thưa.")
 h2("2.2. STING (STatistical INformation Grid)")
 body("STING gốc của Wang, Yang & Muntz (VLDB 1997) lưu count, mean, std, min, max và loại phân phối theo thuộc tính. Truy vấn bắt đầu từ lớp cao, đánh giá độ liên quan bằng confidence rồi chỉ duyệt các ô con liên quan (top-down pruning); thống kê lớp trên có thể gộp từ lớp dưới. Đây là cơ chế của bài gốc, khác với biến thể rút gọn dùng trong đồ án [1].")
 body("Bản nhóm tự cài bỏ loại phân phối và pruning top-down: fit tính thống kê trực tiếp từ điểm ở từng mức; cluster chọn một mức cố định, coi count ≥ min_count là ô dày rồi gom các ô kề bằng DFS; ô thưa nhận −1. Tùy chọn significance_z chỉ là heuristic so với ô cha, không phải toàn bộ phép đánh giá confidence của bài gốc; pipeline chính tắt tùy chọn này. Dự án là một ứng dụng grid-based dựa trên STING, không tuyên bố tái hiện đầy đủ mọi chức năng của STING gốc.")
@@ -620,7 +622,7 @@ bullets([
     ("fit(X).", "Dựng L mức trên n điểm d chiều; với khóa ô nguyên và stable radix sort của NumPy đang dùng, chi phí theo dữ liệu khoảng O(L·n·d). Không coi số mức và số chiều luôn bằng hằng số khi phân tích tổng quát. Refit hủy nhãn cũ, cần cluster lại trước predict."),
     ("cluster(level).", "Chọn ô dày → gom thành phần liên thông trên đồ thị kề ô (BFS/DFS) → gán nhãn điểm; nhãn −1 cho điểm không nằm trong ô dày."),
     ("predict(X).", "Điểm MỚI: tìm ô chứa nó ở mức đã dùng → cụm của ô đó; nếu ô không dày hoặc điểm ngoài vùng huấn luyện → −1."),
-    ("query_rect(rect).", "Quét M ô có dữ liệu tại một mức, chọn ô nằm trọn trong vùng rồi gộp count/mean/std/min/max; O(M·d), không có top-down pruning. cluster còn sắp M ô dày và xét lân cận (tối đa 3^d−1 hướng), nên không dùng O(n) để mô tả vô điều kiện toàn bộ pipeline."),
+    ("query_rect(rect).", "Quét M ô có dữ liệu tại một mức, chọn các ô nằm trọn trong vùng và gộp thống kê; chi phí O(M·d), không có top-down pruning. Khi phân cụm, chế độ nối qua cạnh xét tối đa 2d ô kề mỗi ô; chế độ có cả góc có thể tới 3^d−1 hướng. Còn có bước sắp xếp các ô dày, nên không mô tả vô điều kiện cả pipeline bằng O(n)."),
     ("save/load.", "Pickle model + JSON scaler/provenance — nạp lại dự báo không cần huấn luyện lại."),
 ])
 h2("2.4. Baselines & chỉ số đánh giá")
@@ -644,7 +646,7 @@ bullets([
     ("GeoJSON tỉnh.", "Open Development Vietnam (OD Mekong), CC-BY-SA 4.0 [4]. Lưu ý: `code` hằng 'AD01' — join bản đồ qua centroids theo province_code; 6 tên tỉnh lệch có bảng alias."),
     ("PCI 2011–2024.", "Chỉ số Năng lực cạnh tranh cấp tỉnh — VCCI – USAID: workbook + trang xếp hạng từ pcivietnam.vn (dữ liệu công khai, ghi nguồn VCCI–USAID) [9]. Đủ 63 tỉnh × 12 năm 2011–2022 = 756 ô; 2023–2024 chỉ công bố Top-30 (chỉ dùng kiểm tra phụ, cảnh báo chọn mẫu). raw: data/raw/pci/PROVENANCE.md; chuẩn hóa: data/processed/external_provenance.md."),
     ("GSO/NSO — dân số & GRDP.", "PX-Web chính thức pxweb.nso.gov.vn (“Bản quyền: Không”) + Niên giám Thống kê [10]: dân số theo tỉnh đủ 882 tỉnh-năm (2 vintage — 378 dòng pxweb + 504 dòng Niên giám — giữ nguyên từng vintage, không trộn bình quân); GRDP/người 441 ô 2018–2024 (2024 = Sơ bộ). raw: data/raw/gso/PROVENANCE.md."),
-    ("OD Mekong — Health Facilities 2020.", "2.169 điểm cơ sở y tế các nước Mekong (ODbL) [11]; 423 điểm rơi vào Việt Nam qua point-in-polygon với GeoJSON 63 tỉnh; 10 tỉnh count=0 là 0-thật (nguồn điểm không phủ tỉnh đó), không phải dữ liệu thiếu."),
+    ("OD Mekong — Health Facilities 2020.", "2.169 điểm cơ sở y tế các nước Mekong (ODbL) [11]; 423 điểm rơi vào Việt Nam qua point-in-polygon với GeoJSON 63 tỉnh; 10 tỉnh không có điểm cơ sở y tế trong nguồn; số 0 chỉ là số điểm quan sát được, không khẳng định địa phương thực tế không có cơ sở y tế."),
     ("World Bank WDI.", "4 chỉ số vĩ mô quốc gia VNM 2010–2024, CC BY 4.0 [12] — dùng làm bối cảnh, không phải feature cấp tỉnh."),
     ("Bảng master nối nguồn.", "scripts/build_external_master.py nối panel PAPI + các nguồn trên theo khóa (papi_province_code, year) — validate one-to-one giữ đúng 882 dòng, cột mask thiếu tường minh từng nguồn (PCI 816/882; dân số 882/882; GRDP 441/882; y tế 63/882; rác thải 305/882, trống hoàn toàn 2018), không nội suy: data/processed/external_master_63_2011_2024.csv (882×59)."),
 ])
@@ -665,17 +667,10 @@ table(["Tiêu chí yêu cầu", "Kết quả"], [
     ["Tên tỉnh 63/63 mỗi năm", "Đạt (assert trong parser)"],
 ], widths=[8.0, 8.0], caption=tbl_caption("Kiểm chứng chất lượng dữ liệu"))
 h2("3.4. Audit thang đo xuyên năm (điểm mới)")
-body("PAPI đổi thang nhiều chỉ tiêu thành phần theo từng phiên bản. Nhóm thiết lập audit: với mỗi cột chỉ tiêu, lấy trung bình năm, tính bước nhảy lớn nhất; nếu > 0.25 điểm thì cờ “cần kiểm tra thang” — đây là heuristic sàng lọc, không tự chứng minh đổi thang. Kết quả: 23/37 cột bị cờ. Các ví dụ có bằng chứng workbook gốc: sd_5_4 (đổi 0.25–2.5 → 0.33–3.33 tại 2021, bước nhảy +0.576, hệ số 1.333 nhất quán với đổi thang — nhân thuần mean 2020 × 1.333 sẽ +0.632, cùng hướng nhưng không chứng minh chỉ do hệ số đó), sd_2_1 (+1.355 tại 2018), sd_5_1/5_3 (+0.585/+0.538 tại 2021). Các flag còn lại — trong đó sd_3_2 (+0.511 tại 2021) và sd_6_4 (+0.453 tại 2021) — là heuristic, chưa đối chiếu thang: workbook gốc cho thấy hai cột này giữ nguyên thang 1–10, bước nhảy là biến động dữ liệu thực. Hệ quả: pipeline dự đoán và phân tích xuyên năm CHỈ dùng 8 chỉ tiêu qua audit (sd_1_3, sd_1_4, sd_4_1–4_4, sd_6_1, sd_6_3); chiều d1–d6 có bước nhảy theo năm nhưng thang 1–10 cố định theo thiết kế nên được ghi chú hạn chế riêng.")
-body("Đây là phát hiện phương pháp quan trọng nhất của đồ án: nếu dùng sd_5_4 xuyên năm mà không audit, “cấu trúc 3 cụm ổn định” thu được hoàn toàn là artifact của việc đổi thang đo (cụm tách thuần theo giai đoạn ≤2020 vs ≥2021) — mọi số liệu huấn luyện trên cặp chỉ tiêu này đã được loại bỏ (xem Chương 6).")
+body("Nhóm đánh dấu 23/37 chỉ tiêu có chênh lệch trung bình giữa hai năm liền kề vượt 0,25 điểm. Đối chiếu workbook cho thấy sd_5_1, sd_5_3 và sd_5_4 đổi từ thang 0,25–2,5 sang 0,33–3,33 vào năm 2021. Với sd_2_1, mức tăng 1,355 điểm vào năm 2018 là dấu hiệu cần kiểm tra thêm. Các workbook đối chiếu quanh năm 2021 ghi cùng khoảng điểm cho sd_3_2 (0,33–3,33) và sd_6_4 (0,25–2,5). Cùng khoảng điểm vẫn cần đối chiếu nội dung chỉ tiêu và cách khảo sát khi so sánh qua các năm.")
+body("Nhóm dùng tám chỉ tiêu đã đối chiếu khoảng điểm để tạo các cặp ứng viên STING và làm đầu vào cho mô hình hồi quy bổ trợ. Phân tích STING chính chọn hai chỉ tiêu sd_4_2 và sd_6_1. Bảng metadata ở data/processed/papi_panel_scale_metadata.csv ghi các khoảng điểm và nguồn đối chiếu.")
 h2("3.5. Kiểm tra tiền xử lý theo thứ tự Day 4")
-body(
-    "Theo lộ trình làm sạch Day 4: Cleaning (trùng khóa trước, thiếu, nhất quán, đánh dấu ngoại lai cuối) "
-    "→ Integration (nối khóa one-to-one, kiểm rò rỉ) → Transformation (chuẩn hóa z-score). "
-    "Mỗi bước: Test → Quyết định; số đo đọc từ results/preprocessing_audit.csv (sinh bởi "
-    "scripts/preprocessing_audit.py). Nhóm không nội suy giá trị thiếu — giữ NaN và chỉ loại dòng "
-    "khi ghép cặp feature. Outlier được cờ (z-score |z|>3) nhưng giữ nguyên trong panel: điểm cực trị "
-    "rơi vào ô lưới thưa và tự nhận nhãn nhiễu (−1) theo min_count STING, không xóa khỏi dữ liệu gốc."
-)
+body("Theo Day 4, pipeline gồm Cleaning (kiểm tra trùng khóa, giá trị thiếu, tính nhất quán và ngoại lai) → Integration (nối khóa và kiểm tra số dòng) → Transformation (chuẩn hóa). Bảng kiểm tra đọc từ results/preprocessing_audit.csv, sinh bởi scripts/preprocessing_audit.py. Giá trị thiếu được giữ là NaN; chỉ các dòng đủ đặc trưng mới được đưa vào từng phép phân tích. Các ô có |z|>3 được đánh dấu để khảo sát và vẫn giữ trong panel. Cờ ngoại lai z-score và nhãn nhiễu STING là hai quy tắc khác nhau: điểm chỉ nhận nhãn −1 khi không thuộc ô dày hoặc nằm ngoài vùng lưới đã học.")
 table(
     ["Test", "Kết quả", "Quyết định"],
     PREPROCESSING_AUDIT_TABLE,
@@ -702,8 +697,8 @@ table(
         [
             "Giữ ngoại lai, không xóa",
             "122 ô |z|>3 (0,4%)",
-            "Bước ngoại lai cuối Day 4: chỉ cờ; điểm khảo sát thật, cực trị rơi ô lưới thưa "
-            "và nhận nhãn nhiễu STING thay vì bị loại khỏi panel.",
+            "Giữ điểm khảo sát và chỉ đánh dấu. Cờ z-score không quyết định nhãn STING; "
+            "nhãn nhiễu phụ thuộc ô chứa điểm và lưới đã học.",
         ],
         [
             "Scaler + STING chỉ fit ≤2023",
@@ -746,33 +741,34 @@ bullets([
 ])
 h2("4.4. Robustness đa chỉ tiêu (điều kiện đặt trước)")
 bullets([
-    ("Nhánh A — PCA.", "≥2 thành phần giữ tối đa phương sai trên d1–d6 (trong-năm z, gộp); STING cùng cấu hình. Yêu cầu chấp nhận: ≥2 cụm & noise ≤ 50%, nếu không → “không nhận diện cấu trúc”. Thực tế: 2 PC đầu giữ 63.2% phương sai (< mục tiêu 80% — ghi rõ); STING cho k=1 → nhánh chính chỉ mang tính tham chiếu."),
-    ("Nhánh B — 8 chiều (OFAT).", f"2018–2024 (n={N8}), trong-năm z; cấu hình gốc STING(L=3, f=2, mc=10, lv=1) + 3 nhánh OFAT đổi đúng MỘT tham số mỗi lần (f=3; mc=2; lv=2). Quy tắc chấp nhận giữ nguyên cho mọi nhánh: k≥2 & noise ≤ 50% → “có cấu trúc”, nếu không → “không nhận diện”; silhouette/db/ch tính tại từng nhánh (k<2 → n/a). Kết quả ở mục 5.4."),
+    ("Nhánh A — PCA.", "Chuẩn hóa d1–d6 trong từng năm rồi gộp để lấy hai thành phần chính. Trên hai thành phần này, STING dùng 3 mức, hệ số chia 3, ngưỡng 5 điểm và phân cụm ở mức 2 theo các ô chung cạnh. Mốc đánh giá là ít nhất 2 cụm và tỷ lệ nhiễu tối đa 50%. Hai thành phần giữ 63,2% phương sai và cấu hình này cho một cụm."),
+    ("Nhánh B — 8 chiều (OFAT).", f"2018–2024 (n={N8}), trong-năm z; cấu hình gốc STING(L=3, f=2, mc=10, lv=1) + 3 nhánh OFAT đổi đúng MỘT tham số mỗi lần (f=3; mc=2; lv=2). Quy tắc chấp nhận giữ nguyên cho mọi nhánh: k≥2 & noise ≤ 50% → “đạt ngưỡng k/nhiễu”, nếu không → “không đạt ngưỡng”; silhouette/db/ch tính tại từng nhánh (k<2 → n/a). Kết quả ở mục 5.4."),
 ])
-h2("4.5. Pipeline dự đoán (hai mô hình local)")
+h2("4.5. Gán cụm và các mô hình dự báo bổ trợ")
 bullets([
     ("STING.predict.", "Lưới toàn cục fit trên ≤2023; gán cụm cho mọi năm; 2024 out-of-sample; điểm ngoài vùng học → −1."),
-    ("Giám sát (Ridge/RF).", CLASSIFICATION_SUP_BULLET),
+    ("Hồi quy (Ridge/RF).", "Dùng 8 chỉ tiêu năm t để dự báo giá trị liên tục sd_6_1 năm t+1. Tập huấn luyện có 740 cặp, holdout 2023→2024 có 59 cặp. Chọn mô hình bằng CV expanding origin 2017–2022; so với carry-forward và trung bình tập huấn luyện."),
+    ("Phân loại (LR/RF).", "Dự báo trạng thái vùng dày (1) hoặc nhiễu (0) năm t+1 do STING sinh. Có 738 cặp huấn luyện và 59 cặp holdout; tổng 797 cặp, gồm 454 nhãn nhiễu. Nhãn do mô hình sinh không phải ground truth xã hội. Chọn theo macro-F1 CV, kèm giới hạn về trùng giai đoạn lựa chọn cấu hình ở mục 4.1."),
     ("Persistence.", "joblib local (models/sup_ridge.joblib, sup_rf.joblib); nạp lại dự báo không cần huấn luyện lại."),
 ])
 
 # CHƯƠNG 5
 h1("CHƯƠNG 5. KẾT QUẢ")
 h2("5.1. Kiểm chứng thuật toán trên dữ liệu giả lập")
-body("STING cài đặt từ đầu phục hồi đúng 2 cụm Gauss trên dữ liệu tổng hợp 240 điểm: ARI = 0.950, tỷ lệ nhiễu 2.5%, đúng 2 cụm (Hình 1). Kết quả này xác nhận thuật toán đúng trước khi dùng dữ liệu thật.")
+body("Trên ví dụ 240 điểm từ hai nhóm Gauss, cài đặt thu được 2 cụm, ARI 0,950 và 2,5% nhiễu (Hình 1). Kết quả kiểm chứng hành vi trên ví dụ này; các kiểm tra thống kê ô, biên lưới và lưu/nạp mô hình được đánh giá riêng bằng bộ kiểm thử.")
 figure("00_synthetic_sting.png", "Demo STING trên dữ liệu giả lập — blobs 2 cụm (ARI = 0.950)", 11)
 
 h2("5.2. STING theo từng năm (fit riêng từng năm)")
-body("Nhìn chung mọi năm đều cho k = 1 (một vùng dày chiếm ưu thế), kể cả 2017 — xem Bảng 3 (nguồn results/per_year.csv; lưới L=2 f=3 mc=3, within-year z). Điều này khẳng định đặc trưng đồng nhất của dữ liệu PAPI ở cấp tỉnh/năm; độ nhạy lưới minh họa trong Hình 2.")
+body("Với cấu hình L=2, factor=3, min_count=3 và phân cụm ở mức 1, các năm trong Bảng 4 đều cho một cụm. Đây là kết quả của hai chỉ tiêu dưới cấu hình đang xét, không chứng minh toàn bộ PAPI đồng nhất. Hình 2 minh họa rằng thay đổi cấu hình trên cùng dữ liệu năm 2023 có thể cho số cụm khác.")
 table(["Năm", "n", "k", "noise", "Kích thước cụm (giảm dần)"], PER_YEAR_TABLE,
       widths=[1.6, 1.6, 1.2, 1.6, 6.0],
       caption=tbl_caption(
           "STING theo từng năm (lưới L=2 f=3 mc=3, within-year z) — sinh từ results/per_year.csv"
       ))
-figure("sting_first_real.png", "Kết quả STING trên dữ liệu thật 2023 — hai mức phân giải lưới", 15.5)
+figure("sting_first_real.png", "Hai cấu hình lưới và ngưỡng số điểm trên PAPI năm 2023", 15.5)
 
 h2("5.3. Pooled 2011–2023: STING vs k-means vs DBSCAN")
-body("Tập gộp 2011–2023 (n=808, chỉ 8 chỉ tiêu sạch, z theo tập gộp): STING frozen cho k=3 (kích thước 629/16/5), nhiễu 20%; các chỉ số hình học tính trên điểm thuộc cụm. Hai cụm nhỏ chỉ chứa điểm 2011–2018 (không có điểm nào từ 2019) và 96.8% điểm non-noise (629/650) nằm trong cụm lớn nhất — cấu trúc “một lõi + hai vệ tinh li ti”; dịch chuyển giữa hai cụm cần đọc theo lưu ý ở 5.5.")
+body("Phân tích chính dùng 808 quan sát đủ hai chỉ tiêu sd_4_2 và sd_6_1 giai đoạn 2011–2023, chuẩn hóa bằng thống kê của chính giai đoạn này. STING cho 3 cụm với kích thước 629, 16 và 5 điểm, cùng 19,6% nhiễu. Các chỉ số hình học được tính trên điểm thuộc cụm. Cụm lớn chứa 629/650 điểm được gán cụm, tương đương 96,8%; hai cụm nhỏ chỉ có điểm thuộc giai đoạn 2011–2018. Cách diễn giải chuyển nhãn theo thời gian được nêu ở mục 5.5.")
 table(["Scope", "Method", "k", "Noise", "Silh.", "DB", "Silh.→ARI"], [
     ["pooled", "STING (frozen)", "3", "20%", "0.361", "0.472", "—"],
     ["pooled", "k-means k=2", "2", "0%", "0.445", "0.876", "0.166"],
@@ -786,10 +782,10 @@ table(["Scope", "Method", "k", "Noise", "Silh.", "DB", "Silh.→ARI"], [
     ["pooled", "DBSCAN eps=1.0", "1", "0%", "n/a", "n/a", "0.006"],
 ], widths=[1.8, 3.4, 0.9, 1.5, 1.5, 1.5, 1.7],
       caption=tbl_caption("STING vs baselines (noise tách khỏi metric hình học)"))
-body("Đọc bảng: k-means ép mọi điểm vào cụm và đạt silhouette 0.445 (cao nhất, k=2); STING và DBSCAN (eps nhỏ) đồng thuận tốt hơn (ARI 0.65); k-means phân vùng khác hẳn STING (ARI 0.07–0.17). Không metric nào “thắng tuyệt đối” — dữ liệu gần như một khối; mọi kết luận cần kèm noise và độ ổn định.")
+body("K-means k=2 có silhouette 0,445 và gán mọi điểm vào cụm. STING và DBSCAN có thể loại các tập điểm khác nhau khỏi chỉ số hình học, nên không dùng riêng silhouette để xếp hạng tuyệt đối. ARI 0,647 giữa STING và DBSCAN ở eps=0,2 mô tả mức đồng thuận của hai cách phân hoạch, không phải độ chính xác so với nhãn khảo sát.")
 
 h2("5.4. Robustness đa chỉ tiêu — ablation OFAT ở chiều cao")
-body(f"PCA d1–d6 (trong-năm z, n={R_PCA['n']}): 2 thành phần đầu giữ {_pct(R_PCA['explained_var_total'])} phương sai; STING trên không gian PCA → k={R_PCA['k']}, nhiễu {_pct(R_PCA['noise_ratio'])}, ARI vs 2D = {R_PCA['ari_vs_2d']} — không nhận diện cấu trúc. Nhánh 8 chiều (2018–2024, n={N8}) đọc theo ablation OFAT — mỗi lần đổi đúng MỘT tham số so với cấu hình gốc (L=3 f=2 mc=10 lv=1): gốc → k={R_GOC['k']}, nhiễu {_pct(R_GOC['noise_ratio'])} (noise > 50% → không nhận diện); đổi f=3 → k={R_F3['k']}, nhiễu {_pct(R_F3['noise_ratio'])}; đổi lv=2 → k={R_LV2['k']}, nhiễu {_pct(R_LV2['noise_ratio'])}; đổi mc=2 → k={R_MC2['k']}, nhiễu {_pct(R_MC2['noise_ratio'])} — nhánh duy nhất đạt quy tắc chấp nhận cũ (k≥2 & noise ≤50%), CSV ghi verdict “có cấu trúc”, nhưng silhouette âm ({_f3(R_MC2['silhouette'])}) cho thấy hai cụm tách yếu, không phải cấu trúc mạnh. Ablation chỉ định thủ phạm thay vì chỉ kết luận âm tính chung: lv=2 làm sập hoàn toàn (toàn nhiễu), f=3 khi giữ mc=10 mất gần hết điểm; riêng mc=2 chứng tỏ nhánh 8 chiều không trống rỗng theo ngưỡng k/noise — dù không tách mạnh.")
+body(f"PCA d1–d6 (trong-năm z, n={R_PCA['n']}): 2 thành phần đầu giữ {_pct(R_PCA['explained_var_total'])} phương sai; STING trên không gian PCA → k={R_PCA['k']}, nhiễu {_pct(R_PCA['noise_ratio'])}, ARI vs 2D = {R_PCA['ari_vs_2d']} — không nhận diện cấu trúc. Nhánh 8 chiều (2018–2024, n={N8}) đọc theo ablation OFAT — mỗi lần đổi đúng MỘT tham số so với cấu hình gốc (L=3 f=2 mc=10 lv=1): gốc → k={R_GOC['k']}, nhiễu {_pct(R_GOC['noise_ratio'])} (noise > 50% → không nhận diện); đổi f=3 → k={R_F3['k']}, nhiễu {_pct(R_F3['noise_ratio'])}; đổi lv=2 → k={R_LV2['k']}, nhiễu {_pct(R_LV2['noise_ratio'])}; đổi mc=2 → k={R_MC2['k']}, nhiễu {_pct(R_MC2['noise_ratio'])} — nhánh duy nhất đạt quy tắc chấp nhận cũ (k≥2 & noise ≤50%), CSV ghi verdict “có cấu trúc”, nhưng silhouette âm ({_f3(R_MC2['silhouette'])}) cho thấy hai cụm tách yếu, không phải cấu trúc mạnh. So sánh OFAT cho thấy sự nhạy với tham số trong các nhánh đã thử: lv=2 làm sập hoàn toàn (toàn nhiễu), f=3 khi giữ mc=10 mất gần hết điểm; riêng mc=2 chứng tỏ nhánh 8 chiều không trống rỗng theo ngưỡng k/noise — dù không tách mạnh.")
 _rob_rows = []
 for _r in ROBUSTNESS:
     _branch = _r["branch"]
@@ -799,7 +795,7 @@ for _r in ROBUSTNESS:
     _sil = (_r["silhouette"] or "").strip()
     _verdict = _r["verdict"]
     if _verdict == "có cấu trúc" and _sil and float(_sil) < 0:
-        _verdict += " — silhouette âm, tách yếu"
+        _verdict = "đạt ngưỡng k/nhiễu; silhouette âm, tách yếu"
     _rob_rows.append([_branch, _r["n"], _r["k"], _pct(_r["noise_ratio"]),
                       "n/a" if _sil == "" else _f3(_r["silhouette"]), _verdict])
 table(["Nhánh", "n", "k", "noise", "Silh.", "Kết luận"], _rob_rows,
@@ -810,8 +806,8 @@ table(["Nhánh", "n", "k", "noise", "Silh.", "Kết luận"], _rob_rows,
       ))
 
 h2("5.5. Pipeline dự đoán 2024 (out-of-sample)")
-body("STING.predict (lưới toàn cục fit ≤2023) gán cụm 2024: 48/61 tỉnh đủ chỉ tiêu → cụm lớn; 13 → nhiễu. Không có “chuyển cụm thật” 2023→2024: 7 tỉnh chuyển sang nhiễu, 5 từ nhiễu ra (Bảng 7) — phát biểu này mang tính cấu trúc: cả 2023 lẫn 2024 không có điểm nào thuộc cụm 0/1 (hai cụm li ti chỉ có điểm 2011–2018), nên 0/59 là phát biểu rỗng, không chứng minh độ ổn định nhãn; 13/61 tỉnh vào nhiễu do ô lưới thưa (count < min_count), không phải do scaler — STING bất biến với biến đổi affine từng chiều. Lưu ý metadata: selection_metrics trong predict_config.json mô tả fit ≤ 2020 ([453,16,5]) trong khi model.pkl đóng gói là fit 2011–2023 ([629,16,5]). Hình 3 minh họa phủ cụm 2024 sau khi lưới học trên 2011–2023.")
-body("Hồi quy dự báo 6.1 Y tế công lập năm sau (train 740 cặp 2011–2022, holdout 59 cặp 2023→2024). Ridge, mô hình được chọn qua CV, có MAE 0.0640 và R² 0.381, thấp hơn carry-forward (MAE 0.0683, R² 0.198) 6.3%. Random forest có MAE holdout 0.0616 (thấp hơn carry-forward 9.8%, R² 0.423) nhưng không được chọn vì R² CV thấp hơn (0.197 so với 0.265 của Ridge). Hình 4 đối chiếu dự báo hồi quy với độ quan trọng đặc trưng. CV hồi quy là expanding origin 2017–2022 theo thứ tự thời gian (không origin tương lai nào nằm trong fold huấn luyện), và holdout không được dùng để chọn mô hình. value_cv là best_score_ của GridSearchCV sau khi chọn trên chính 6 fold đó (không nested CV — hơi lạc quan, bias nhỏ vì lưới thô: spread alpha Ridge ≈ 0.001). sd_6_1 (target) nằm trong 8 đặc trưng (scripts/papi_pred_common.py:19-23) nên lợi thế 6.3% so với carry-forward chủ yếu đến từ lag-1 của chính target: bỏ sd_6_1 khỏi features, CV R² 0.265 → −0.264; corr dự báo vs carry-forward = 0.99.")
+body("STING.predict (lưới toàn cục fit ≤2023) gán cụm 2024: 48/61 tỉnh đủ chỉ tiêu → cụm lớn; 13 → nhiễu. Không có “chuyển cụm thật” 2023→2024: 7 tỉnh chuyển sang nhiễu, 5 từ nhiễu ra (Bảng 8) — phát biểu này mang tính cấu trúc: cả 2023 lẫn 2024 không có điểm nào thuộc cụm 0/1 (hai cụm li ti chỉ có điểm 2011–2018), nên 0/59 là phát biểu rỗng, không chứng minh độ ổn định nhãn; 13/61 tỉnh nhận nhãn nhiễu vì không được gán vào vùng ô dày của lưới đã học. Lưu ý metadata: selection_metrics trong predict_config.json mô tả fit ≤ 2020 ([453,16,5]) trong khi model.pkl đóng gói là fit 2011–2023 ([629,16,5]). Hình 3 minh họa phủ cụm 2024 sau khi lưới học trên 2011–2023.")
+body("Hồi quy dự báo 6.1 Y tế công lập năm sau (train 740 cặp 2011–2022, holdout 59 cặp 2023→2024). Ridge được chọn qua CV; MAE holdout là 0.0640, thấp hơn carry-forward (0.0683) khoảng 6.3%. R² holdout tương ứng là 0.381 và 0.198. Random forest có MAE holdout 0.0616 (thấp hơn carry-forward 9.8%, R² 0.423) nhưng không được chọn vì R² CV thấp hơn (0.197 so với 0.265 của Ridge). Hình 4 đối chiếu dự báo hồi quy với độ quan trọng đặc trưng. CV hồi quy là expanding origin 2017–2022 theo thứ tự thời gian (không origin tương lai nào nằm trong fold huấn luyện), và holdout không được dùng để chọn mô hình. value_cv là best_score_ của GridSearchCV sau khi chọn trên chính 6 fold đó (không nested CV — hơi lạc quan, bias nhỏ vì lưới thô: spread alpha Ridge ≈ 0.001). sd_6_1 (target) nằm trong 8 đặc trưng (scripts/papi_pred_common.py:19-23) nên lợi thế 6.3% so với carry-forward chủ yếu đến từ lag-1 của chính target: bỏ sd_6_1 khỏi features, CV R² 0.265 → −0.264; corr dự báo vs carry-forward = 0.99.")
 body("Phân loại dùng pseudo-label do STING sinh, trên một năm holdout 2023→2024. Logistic regression và random forest vượt baseline lớp đa số trên holdout này: accuracy 0.644 / 0.678 so với 0.186; macro-F1 0.541 / 0.600 so với 0.157. Một năm holdout không đủ để khẳng định năng lực dự báo tổng quát. Cấu hình STING/allowlist được chọn bằng cách chấm coverage trên 2021–2022 — trùng hai fold CV cuối của phân loại (mục 4.1; results/supervised_summary.md), nên điểm macro-F1 CV mang tính thăm dò, không dùng để khẳng định vượt trội. Prevalence nhãn 1 trôi 0% (2011) → 92% (2021): trong mọi fold CV 2017–2022, lớp đa số train là 0 còn validation luôn đa số 1 (44–92%), nên macro-F1 CV 0.434 thực chất đo drift độ phủ; baseline mù thời gian “always dự đoán 1” đạt 0.400, chỉ thấp hơn LR 0.034.")
 figure("predict_2024.png", "STING học 2011–2023 → dự đoán cụm 2024 (out-of-sample)", 13)
 figure("supervised_regression.png", "Hồi quy: dự báo 6.1 Y tế công lập năm sau + độ quan trọng đặc trưng", 14.5)
@@ -865,7 +861,7 @@ body(
 )
 
 h2("5.7. Dịch chuyển cụm qua thời gian và bản đồ")
-body("Hình 6 vẽ nhãn lưới toàn cục cho mọi tỉnh-năm (xám = nhiễu, trắng = thiếu chỉ tiêu); Hình 7 — bản đồ centroid 2024, tỉnh ngoại vi rải đều các miền, không gom một vùng địa lý.")
+body("Hình 6 vẽ nhãn lưới toàn cục cho mọi tỉnh-năm (xám = nhiễu, trắng = thiếu chỉ tiêu); Hình 7 — bản đồ centroid 2024, các tỉnh nhận nhãn nhiễu nằm ở nhiều vùng, không gom một vùng địa lý.")
 figure("evolution.png", "Dịch chuyển cụm STING 2011–2024 (lưới toàn cục; xám = nhiễu; trắng = thiếu dữ liệu)", 10.5)
 figure("map_2024.png", "Bản đồ centroid tô màu theo cụm — 2024 (nhãn chú thích các tỉnh nhiễu)", 10.0)
 
@@ -879,10 +875,10 @@ bullets([
 
 # CHƯƠNG 6
 h1("CHƯƠNG 6. THẢO LUẬN VÀ HẠN CHẾ")
-h2("6.1. Vì sao dữ liệu PAPI “gần như một khối”?")
-body("Ba nguyên nhân hợp lý (không khẳng định ngoài dữ liệu): (1) PAPI chuẩn hóa về 1–10 theo năm — nén mọi biến động vào thang ngắn, nên phương sai giữa các tỉnh nhỏ; (2) khảo sát cấp tỉnh bám dân số/đô thị hóa — các tỉnh hội tụ dần theo thời gian; (3) phần lớn chỉ tiêu thành phần đã được thiết kế để tương quan với yếu tố tổng hợp, làm giàu miền trung tâm. Empirically: trên cặp chỉ tiêu đóng băng sd_4_2 × sd_6_1 (thang workbook 0.25–2.5 điểm mỗi chiều, xem `scripts/build_scale_metadata.py`), 808 quan sát tỉnh-năm có đủ hai chỉ tiêu tập trung trong một lõi ~2.0±0.25, ngoại lệ rải rác hai đầu; Hình 2 và Hình 6 cho thấy ngoại vi không gom thành một vùng địa lý — không phải “hai Việt Nam” theo vùng kinh tế, mà là vài tỉnh dao động ở từng chỉ tiêu.")
+h2("6.1. Giới hạn khi diễn giải cụm chiếm ưu thế")
+body("Kết quả chính có một cụm chiếm ưu thế và hai cụm nhỏ trên hai chỉ tiêu. Điều này phụ thuộc tập đặc trưng, phạm vi năm, độ phân giải và ngưỡng số điểm. Kết quả một cụm của cấu hình theo năm chỉ mô tả hành vi của cấu hình đó; Hình 2 cho thấy một lựa chọn lưới khác tạo ba cụm trên dữ liệu 2023. Nhãn lưới không đủ để kết luận các tỉnh tương đồng trên toàn bộ 37 chỉ tiêu, hoặc để chia địa phương thành nhóm phát triển cao và thấp.")
 h2("6.2. Bài học từ gãy thang đo")
-body("Trước khi audit, nhóm có kết quả “3 cụm rõ rệt” với cặp sd_5_4 × sd_6_2 (nghiên cứu ban đầu). Audit chỉ ra đó là artifact: mọi cụm tách thuần theo giai đoạn ≤2020 (cũ) vs ≥2021 (mới) do sd_5_4 đổi thang (0.25–2.5 → 0.33–3.33; mean 2020 = 1.897, bước nhảy 2020→2021 +0.576; hệ số 1.333 nhất quán với đổi thang nhưng nhân thuần mean 2020 sẽ +0.632 — workbook không chứng minh bước nhảy chỉ do hệ số đó). Sau khi áp dụng quy trình audit và chỉ dùng chỉ tiêu sạch, cấu trúc tách biệt gần như biến mất. Bài học cho quy trình ML: (i) luôn audit bước nhảy phân phối theo thời gian trước khi gộp; (ii) bước nhảy trùng khớp hệ số đổi thang trong workbook gốc là bằng chứng mạnh của gãy thang đo, không phải cải thiện thực chất; (iii) mọi kết quả phân cụm xuyên năm đều phải được kiểm tra “tách theo thời gian” như một giả thuyết cạnh tranh với giả thuyết “cấu trúc quản trị”.")
+body("Trong thử nghiệm ban đầu, nhóm đã xem xét cặp sd_5_4 và sd_6_2. Workbook cho thấy sd_5_4 đổi thang từ 0,25–2,5 sang 0,33–3,33 tại năm 2021. Bước nhảy trung bình quan sát là +0,576, trong khi nhân trung bình năm 2020 với hệ số 1,333 sẽ tăng khoảng +0,632. Hai giá trị cùng hướng nhưng không tách được ảnh hưởng của đổi thang và biến động khảo sát. Vì vậy, nhóm không dùng cặp này để kết luận về khác biệt quản trị. Khi gộp nhiều phiên bản dữ liệu cần kiểm tra cả tính tương thích của thang đo và khả năng cụm phản ánh giai đoạn thu thập.")
 h2("6.3. Metrics & lưới song song trục")
 bullets([
     ("k-means “thắng” silhouette nhưng ép k.", "k-means không có nhiễu — mọi điểm thuộc cụm; silhouette 0.445 là giá trị nội tại của phân vùng bắt buộc, không phải bằng chứng cấu trúc thật."),
@@ -890,11 +886,11 @@ bullets([
     ("STING k=3.", "cụm 629 + 16 + 5 + 20% nhiễu: cấu trúc “một lõi + vệ tinh nhỏ” — hợp lý về mặt dữ liệu, không phải lỗi."),
     ("Silhouette không bản địa.", "metric khoảng cách Euclide không hiểu lưới song song; dùng để so sánh thô, tách noise; không dùng để chọn model."),
 ])
-h2("6.4. Robustness — ablation OFAT chỉ định thủ phạm khi mở rộng chiều")
-body(f"PCA d1–d6 không nhận diện cấu trúc ({_pct(R_PCA['explained_var_total'])} phương sai, k={R_PCA['k']}). Nhánh 8 chiều được đọc qua ablation OFAT: thủ phạm là tổ hợp tham số, không phải dữ liệu “quá sạch” — lv=2 sập hoàn toàn (k={R_LV2['k']}, {_pct(R_LV2['noise_ratio'])} nhiễu), f=3 khi giữ mc=10 mất gần hết điểm (k={R_F3['k']}, {_pct(R_F3['noise_ratio'])} nhiễu), gốc mc=10/lv=1 vượt ngưỡng nhiễu (k={R_GOC['k']}, {_pct(R_GOC['noise_ratio'])}); duy nhất mc=2 đạt ngưỡng k/noise (k={R_MC2['k']}, {_pct(R_MC2['noise_ratio'])}) nhưng silhouette âm ({_f3(R_MC2['silhouette'])}) — hai cụm tách yếu, không phải cấu trúc mạnh. Đây là kết quả cần báo cáo, không lược bỏ: nó bác bỏ khả năng “cấu trúc ẩn ở chiều cao”. Một cấu trúc 2D dựng lại bằng cách chọn cặp-post-hoc sẽ bị PCA phủ định — vì vậy nhóm cũng loại bỏ mọi “cấu trúc 2D post-hoc” khỏi tuyên bố khoa học.")
+h2("6.4. Ảnh hưởng của cấu hình khi mở rộng số chiều")
+body("Hai thành phần PCA giữ 63,2% phương sai và cấu hình STING đang xét cho một cụm. Trong nhánh 8 chiều, thay riêng mức lưới hoặc ngưỡng số điểm tạo các tỷ lệ nhiễu rất khác nhau; cấu hình min_count=2 đạt ngưỡng số cụm và tỷ lệ nhiễu đã đặt nhưng silhouette âm. Các kết quả cho thấy sự phụ thuộc vào cấu hình trong phạm vi thử nghiệm. Chúng không bác bỏ mọi khả năng có cấu trúc ở chiều cao, vì chỉ khảo sát một số cấu hình và PCA có thể bỏ thông tin ngoài hai thành phần đầu.")
 h2("6.5. Kiểm chứng bên ngoài độc lập")
 body("Robustness nội tại (mục 5.4) là âm tính; câu hỏi còn lại: cấu trúc học không giám sát có tương ứng với một thước đo chưa từng dùng khi học — kiểm chứng bên ngoài độc lập (liên hệ giữa nhóm, không phải nhân quả) — hay không? Nhóm đối chiếu nhãn cụm STING (model chốt, results/predict_all_years.csv) với các nguồn ngoài ở mục 3.1: không đưa vào feature, không nội suy ô trống; mọi thống kê tính lại trực tiếp từ CSV trong scripts/external_validation.py (số liệu đầy đủ: results/external_validation.md).")
-body("Kiểm định chính — PCI [9] (khảo sát doanh nghiệp của VCCI – USAID, tách hoàn toàn khỏi PAPI là khảo sát hộ dân của CECODES/UNDP): 756 ô 2011–2022, join được 747 điểm có nhãn (9 ô có PCI nhưng panel thiếu chỉ tiêu nên không có nhãn). Phân nhóm theo nhãn STING (Bảng 8): nhiễu −1 (n=149, PCI trung bình 59.80), cụm 0 (n=5, 59.00), cụm 1 (n=16, 58.78), cụm 2 (n=577, 61.66). One-way ANOVA F(3,743) = 9.04, p = 6.9e-06; Kruskal–Wallis (phi tham số, có sửa tie) H = 31.78, p = 5.8e-07; eta² = 0.035. Đọc thận trọng: hai cụm nhỏ quá ít điểm để tự kết luận; cặp tương phản đáng tin là nhiễu vs cụm 2; Top-30 2023–2024 chỉ là kiểm tra phụ vì chọn mẫu (58/60 ô có nhãn; ANOVA p = 0.35 — không gộp với lưới đủ 63 tỉnh).")
+body("PCI [9] là nguồn khảo sát doanh nghiệp dùng để đối chiếu mô tả với nhãn PAPI. Có 756 quan sát tỉnh–năm 2011–2022, trong đó 747 quan sát có nhãn STING. Bảng 10 gồm 149 điểm nhiễu, 5 điểm cụm 0, 16 điểm cụm 1 và 577 điểm cụm 2. ANOVA cho F(3,743)=9,04, p≈6,9×10⁻⁶; Kruskal–Wallis cho H=31,78, p≈5,8×10⁻⁷; eta²=0,035. Các phép thử gộp chưa hiệu chỉnh sự phụ thuộc giữa các lần quan sát cùng tỉnh và giữa các năm, nên p-value chỉ mang tính tham khảo. Hai cụm nhỏ có ít điểm; kết quả không chứng minh quan hệ nhân quả hoặc xác nhận nhãn cụm là nhóm xã hội thực. Dữ liệu PCI Top-30 năm 2023–2024 được đọc riêng vì có chọn mẫu.")
 table(["Nhãn nhóm", "n", "PCI trung bình", "Trung vị", "Độ lệch chuẩn"], [
     ["nhiễu (−1)", "149", "59.80", "59.16", "5.04"],
     ["cụm 0", "5", "59.00", "58.47", "1.06"],
@@ -906,7 +902,7 @@ table(["Nhãn nhóm", "n", "PCI trung bình", "Trung vị", "Độ lệch chuẩ
           "ANOVA F(3,743)=9.04, p=6.9e-06; Kruskal–Wallis H=31.78, p=5.8e-07"
       ))
 figure("external_pci_by_cluster.png", "PCI theo nhãn cụm STING 2011–2022 — boxplot theo nhóm (nguồn: PCI VCCI–USAID; kết quả: results/external_validation.md)", 13.5)
-body("Mật độ cơ sở y tế 2020 [11]: 423 điểm OD Mekong rơi vào 63 tỉnh (point-in-polygon), chuẩn hóa theo dân số GSO — theo quy mô nhóm: nhiễu 0.0026 cơ sở/1.000 dân (16 cơ sở/6,19 triệu người) so với cụm 2: 0.0045 (407 cơ sở/91,39 triệu); trung vị theo tỉnh 0.00075 so với 0.0022. 10 tỉnh count=0 là 0-thật (nguồn điểm không phủ tỉnh đó), không phải dữ liệu thiếu; snapshot một năm và đếm số điểm chứ không phải số giường → chỉ dùng làm external check, không đưa vào feature.")
+body("Mật độ cơ sở y tế 2020 [11]: 423 điểm OD Mekong rơi vào 63 tỉnh (point-in-polygon), chuẩn hóa theo dân số GSO — theo quy mô nhóm: nhiễu 0.0026 cơ sở/1.000 dân (16 cơ sở/6,19 triệu người) so với cụm 2: 0.0045 (407 cơ sở/91,39 triệu); trung vị theo tỉnh 0.00075 so với 0.0022. 10 tỉnh không có điểm trong nguồn; số 0 không chứng minh thực tế không có cơ sở y tế; snapshot một năm và đếm số điểm chứ không phải số giường → chỉ dùng làm external check, không đưa vào feature.")
 figure("external_health_density_2020.png", "Mật độ cơ sở y tế/1.000 dân theo cụm STING — 2020 (nguồn: OD Mekong Health Facilities + GSO dân số)", 13.5)
 body("GRDP/người [10] chỉ có cửa sổ 2018–2024 (441 ô; 2024 = Sơ bộ) — quyết định thiết kế: không nội suy 441 ô 2011–2017, dân số là normalizer chính xuyên panel. Join nhãn được 430/441 ô; 11 ô thiếu nhãn (panel PAPI thiếu chỉ tiêu) mask tường minh, không vẽ. Trong cửa sổ này gần như chỉ còn nhiễu vs cụm 2 (cụm 0 rỗng, cụm 1 còn 1 dòng) — hình chỉ nói điều dữ liệu cho phép.")
 figure("external_grdp_by_cluster.png", "GRDP/người theo cụm STING — cửa sổ 2018–2024 (nguồn: GSO pxweb V03.12; 2024 = Sơ bộ)", 13.5)
@@ -930,22 +926,23 @@ _pov_fig_no = figure("external_poverty_by_cluster.png",
                      "Tỷ lệ hộ nghèo GSO theo cụm STING — cửa sổ giao 2012–2024: "
                      "boxplot gộp (trên) và median theo năm từng cụm (dưới) (nguồn: GSO pxweb "
                      "V14.47 + NGTK 2020/2021 điền 2017–2019; kết quả: results/poverty_validation.md)", 13.5)
-body(f"Đọc kết quả CÙNG nhau: gộp thô KHÔNG đáng kể (Kruskal–Wallis H = {_note_val(POV_KW_RAW, 'H = ')}, p = {_note_val(POV_KW_RAW, 'p = ')}; {POV_ANOVA_RAW['group']} = {_note_val(POV_ANOVA_RAW['note'], 'F = ')}, p = {_note_val(POV_ANOVA_RAW['note'], 'p = ')}; eta² = {_note_eta(_pov_note('poverty_pooled_raw', 'eta squared'))}) vì test gộp nhiễm hiệu ứng năm — median nghèo toàn panel giảm sâu xuyên giai đoạn và tỷ trọng cụm trôi theo năm (hàng dưới của Hình {_pov_fig_no}); đã-trừ-median-trong-năm đáng kể ở mức yếu (H = {_note_val(POV_KW_DM, 'H = ')}, p = {_note_val(POV_KW_DM, 'p = ')}; {POV_ANOVA_DM['group']} = {_note_val(POV_ANOVA_DM['note'], 'F = ')}, p = {_note_val(POV_ANOVA_DM['note'], 'p = ')}; eta² = {_note_eta(_pov_note('poverty_pooled_demeaned', 'eta squared'))}). Cặp tương phản đáng tin duy nhất nhiễu vs cụm 2 (cụm 0 n={_pov_group_n('cụm 0')}, cụm 1 n={_pov_group_n('cụm 1')} quá nhỏ để tự kết luận) không khác biệt ở mức gộp (Mann–Whitney U = {_note_val(POV_MW_RAW['note'], 'U = ')}, p = {_note_val(POV_MW_RAW['note'], 'p = ')}) và vẫn không khác biệt sau khi tách năm (U = {_note_val(POV_MW_DM['note'], 'U = ')}, p = {_note_val(POV_MW_DM['note'], 'p = ')}). Kết luận trung thực: ở mức gộp KHÔNG thấy khác biệt nghèo có ý nghĩa giữa các nhóm; tín hiệu chỉ xuất hiện sau khi tách hiệu ứng năm và yếu hơn nhiều so với kiểm định chính PCI (eta² {_note_eta(_pov_note('poverty_pooled_demeaned', 'eta squared'))} so với 0.035) — nghèo GSO đọc như kiểm chứng bổ trợ, không thay thế kiểm định chính và không chứng minh nhân quả. Tái lập: python scripts/poverty_validation.py.")
-body("Tổng hợp: cấu trúc cụm STING tương ứng với PCI như kiểm chứng bên ngoài độc lập (liên hệ giữa nhóm, không phải nhân quả) ở mức ý nghĩa thống kê — luận cứ ngoài dữ liệu PAPI cho một mô hình học không giám sát. Kết quả này không chứng minh quan hệ nhân quả và không phủ định kết luận “dữ liệu gần như một khối” (eta² nhỏ; khác biệt chủ yếu giữa nhiễu và cụm lớn). Tái lập: python scripts/external_validation.py.")
+body(f"Đọc kết quả CÙNG nhau: gộp thô KHÔNG đáng kể (Kruskal–Wallis H = {_note_val(POV_KW_RAW, 'H = ')}, p = {_note_val(POV_KW_RAW, 'p = ')}; {POV_ANOVA_RAW['group']} = {_note_val(POV_ANOVA_RAW['note'], 'F = ')}, p = {_note_val(POV_ANOVA_RAW['note'], 'p = ')}; eta² = {_note_eta(_pov_note('poverty_pooled_raw', 'eta squared'))}) vì test gộp nhiễm hiệu ứng năm — median nghèo toàn panel giảm sâu xuyên giai đoạn và tỷ trọng cụm trôi theo năm (hàng dưới của Hình {_pov_fig_no}); đã-trừ-median-trong-năm đáng kể ở mức yếu (H = {_note_val(POV_KW_DM, 'H = ')}, p = {_note_val(POV_KW_DM, 'p = ')}; {POV_ANOVA_DM['group']} = {_note_val(POV_ANOVA_DM['note'], 'F = ')}, p = {_note_val(POV_ANOVA_DM['note'], 'p = ')}; eta² = {_note_eta(_pov_note('poverty_pooled_demeaned', 'eta squared'))}). Cặp đối chiếu có nhiều quan sát hơn là nhiễu với cụm 2 (cụm 0 n={_pov_group_n('cụm 0')}, cụm 1 n={_pov_group_n('cụm 1')} quá nhỏ để tự kết luận) không khác biệt ở mức gộp (Mann–Whitney U = {_note_val(POV_MW_RAW['note'], 'U = ')}, p = {_note_val(POV_MW_RAW['note'], 'p = ')}) và vẫn không khác biệt sau khi tách năm (U = {_note_val(POV_MW_DM['note'], 'U = ')}, p = {_note_val(POV_MW_DM['note'], 'p = ')}). Kết luận trung thực: ở mức gộp KHÔNG thấy khác biệt nghèo có ý nghĩa giữa các nhóm; tín hiệu chỉ xuất hiện sau khi tách hiệu ứng năm và yếu hơn nhiều so với kiểm định chính PCI (eta² {_note_eta(_pov_note('poverty_pooled_demeaned', 'eta squared'))} so với 0.035) — nghèo GSO đọc như kiểm chứng bổ trợ, không thay thế kiểm định chính và không chứng minh nhân quả. Tái lập: python scripts/poverty_validation.py.")
+body("Tổng hợp, các nguồn ngoài cung cấp đối chiếu mô tả bổ sung cho nhãn STING. Cỡ nhóm chênh lệch, hiệu ứng năm và sự phụ thuộc giữa các quan sát giới hạn việc suy luận. Những kết quả này không xác nhận toàn bộ PAPI đồng nhất, không biến nhãn mô hình thành ground truth và không chứng minh quan hệ nhân quả.")
+body("Các kiểm định gộp với nguồn ngoài chưa hiệu chỉnh đầy đủ quan sát lặp theo tỉnh và năm. Các p-value được trình bày để đối chiếu mô tả trong mẫu hiện có, không phải bằng chứng xác nhận nhãn cụm hay quan hệ nhân quả.")
 h2("6.6. Các hạn chế còn lại")
 bullets([
-    ("Một holdout duy nhất (2024).", "mọi kết luận dự đoán cần thêm nhiều năm; độ bất định lớn; backtest cuốn chiếu chỉ khả thi khi có thêm dữ liệu lịch sử — cấu trúc cụm thay vào đó đã được kiểm chứng bằng nguồn ngoài độc lập (mục 6.5)."),
+    ("Một holdout duy nhất (2024).", "Cần đánh giá ở nhiều mốc để biết kết quả dự báo có lặp lại qua thời gian. Mục 6.5 trình bày đối chiếu mô tả với nguồn dữ liệu bên ngoài trong phạm vi mẫu quan sát."),
     ("Cỡ mẫu per-year nhỏ.", "61–63 điểm/năm — nhiễu cao ở lưới mịn; cấu hình per-year bị giới hạn ở lưới thô."),
     ("Thang đo 1–10 che giấu phương sai thực.", "theo thời gian, d6 tăng 7.0→7.6 (2021) khả năng là thay đổi phương pháp khảo sát, không chỉ cải thiện; cần thận trọng khi diễn giải xu hướng."),
     ("Bản đồ chỉ có centroid.", "chưa dùng ranh giới GeoJSON (chỉ có scatter); bản đồ choropleth đầy đủ không nằm trong phạm vi báo cáo này."),
     ("Nhãn DBSCAN n/a khi 1 cụm.", "một số cấu hình DBSCAN cho metric n/a — ghi rõ trong bảng, không giấu."),
     ("Nguồn ngoài không đồng đều.", "PCI 2023–2024 chỉ Top-30 (chọn mẫu — tách khỏi lưới đủ 63 tỉnh); GRDP chỉ 2018–2024 (2024 = Sơ bộ); rác thải GSO trống hoàn toàn 2018 (305/882 ô); WDI chuỗi không đều (giường bệnh dừng 2017, chi y tế thiếu 2024) — mọi thống kê external khai báo số ô chạy/tổng ô và không nội suy."),
-    ("Mật độ y tế snapshot 2020.", "một năm duy nhất, đếm số điểm không phải số giường; 10 tỉnh count=0 là 0-thật (nguồn không phủ tỉnh đó)."),
-    ("External validation không chứng minh nhân quả.", "eta² = 0.035 nhỏ; khác biệt PCI có ý nghĩa thống kê nhưng không cho phép suy luận quan hệ nhân quả; cụm 0 (n=5) và cụm 1 (n=16) quá ít điểm để tự kết luận."),
+    ("Mật độ y tế snapshot 2020.", "một năm duy nhất, đếm số điểm không phải số giường; 10 tỉnh không có điểm trong nguồn; độ phủ nguồn hạn chế nên không coi đó là không có cơ sở y tế trên thực tế."),
+    ("Giới hạn kiểm định gộp.", "Các nguồn ngoài chỉ hỗ trợ đối chiếu mô tả. Quan sát lặp theo tỉnh và năm chưa được hiệu chỉnh trong các phép thử gộp; cỡ hai cụm nhỏ hạn chế và eta²=0,035, nên không diễn giải p-value thành bằng chứng nhân quả hay xác nhận cấu trúc xã hội."),
 ])
 h2("6.7. Hướng phát triển")
 bullets([
-    ("Rank-normalization.", "chuẩn hóa theo hạng trong từng năm (hết phụ thuộc thang đo tuyệt đối) — xử lý triệt để gãy thang đo."),
+    ("Chuẩn hóa theo hạng.", "Khảo sát việc đưa chỉ tiêu về thứ hạng trong từng năm để giảm nhạy với thang tuyệt đối; vẫn phải kiểm tra nội dung chỉ tiêu và thiết kế khảo sát có tương thích giữa các năm hay không."),
     ("Feature trajectory.", "mỗi tỉnh = vector quỹ đạo 2011–2024 (đặc trưng theo thời gian) — phân cụm quỹ đạo, không phân cụm từng mốc."),
     ("Nhiều holdout.", "backtest cuốn chiếu 2015→2024 — độ tin cậy dự báo cao hơn."),
     ("Spatial.", "thêm tự tương quan không gian (láng giềng) — GeoJSON CC-BY-SA 4.0 đã có."),
@@ -956,17 +953,17 @@ bullets([
 h1("CHƯƠNG 7. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN")
 h2("7.1. Kết luận")
 bullets([
-    ("STING tự viết hoạt động đúng.", f"ARI 0.950 trên dữ liệu giả lập; bộ test STING (`tests/test_sting.py`) xanh ({SUITE_OK}); truy vấn vùng O(n); predict/save/load local."),
-    ("Dữ liệu PAPI rất đồng nhất.", f"phân cụm theo năm đa số k=1; cấu trúc tách biệt chỉ ở ngoại vi nhỏ; robustness 8 chiều đọc theo ablation OFAT — lv=2 toàn nhiễu, f=3 {_pct(R_F3['noise_ratio'])} nhiễu, gốc {_pct(R_GOC['noise_ratio'])} nhiễu → không nhận diện; riêng mc=2 đạt ngưỡng k/noise nhưng silhouette âm — không có cấu trúc tách mạnh (báo cáo)."),
+    ("Kiểm tra cài đặt STING.", f"ARI 0.950 trên bộ dữ liệu giả lập. Các kiểm thử trong `tests/test_sting.py` đạt ({SUITE_OK}). Truy vấn vùng có chi phí O(M·d) với M ô có dữ liệu và d chiều."),
+    ("Kết quả phụ thuộc phạm vi phân tích.", "Trên hai chỉ tiêu và cấu hình chính, một cụm lớn chiếm ưu thế. Các thử nghiệm mở rộng cho kết quả nhạy với cấu hình và chưa có bằng chứng phân tách mạnh trong phạm vi đã thử; không suy ra toàn bộ PAPI hay các địa phương đồng nhất."),
     ("Pipeline dự đoán hợp lệ phương pháp.", "chọn cấu hình train-only; 2024 out-of-sample một lần; STING.predict phủ 79%; Ridge (được chọn) thấp hơn carry-forward 6.3% MAE, RF 9.8% nhưng không được chọn vì CV R² thấp hơn; phân loại pseudo-label STING: LR và RF vượt majority trên một holdout 2023→2024 (accuracy 0.644/0.678 vs 0.186; macro-F1 0.541/0.600 vs 0.157); disclosure: value_cv là best_score_ sau chọn (không nested CV), sd_6_1 nằm trong features nên lợi thế so với carry-forward chủ yếu từ lag-1, prevalence pseudo-label trôi 0→92% nên CV phân loại đo drift độ phủ — một năm không đủ cho kết luận tổng quát."),
-    ("Chất lượng dữ liệu là bài học cốt lõi.", "audit thang đo (23/37 cột bị cờ heuristic) tách biệt “cấu trúc thật” và artifact đổi thang — áp dụng được cho bất kỳ dữ liệu chuỗi thời gian đa phiên bản nào."),
+    ("Rà soát thang đo.", "Bước sàng lọc đánh dấu 23/37 chỉ tiêu để đối chiếu với workbook. Việc đối chiếu giúp chọn đầu vào và giới hạn cách diễn giải các thay đổi theo thời gian."),
 ])
 h2("7.2. Hướng phát triển")
 body("Xem 6.7 — trọng tâm: (1) rank-normalization xuyên năm; (2) quỹ đạo tỉnh; (3) backtest cuốn chiếu; (4) phân cụm có ràng buộc không gian; (5) nghiên cứu định tính bổ trợ. Ngoài ra, bản đồ choropleth đầy đủ (plotly + GeoJSON) và dashboard tương tác là bước trực quan tiếp theo.")
 h2("7.3. Lời cuối")
 body("Đồ án không “tạo ra” một cấu trúc cụm đẹp nếu dữ liệu không có nó; đồ án cung cấp: (i) một biến thể grid-based dựa trên STING, đã kiểm thử trong phạm vi cài đặt công bố; (ii) quy trình dữ liệu có audit thang đo và lựa chọn không dùng holdout 2024; (iii) báo cáo trung thực cả robustness mở rộng chiều (PCA âm tính; nhánh 8 chiều OFAT — mc=2 vượt ngưỡng k/noise với silhouette âm, các nhánh còn lại không nhận diện) lẫn kết quả dương tính. Kết quả không chứng minh cấu trúc xã hội hay quan hệ nhân quả.")
 h2("7.4. Khai báo sử dụng công cụ hỗ trợ")
-body("Nhóm sử dụng trợ lý AI lập trình trong một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, và dry-run đo thời gian chuẩn bị demo (nhật ký rehearsal_log.md mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Mọi quyết định phương pháp, quy trình chọn cấu hình, đánh giá và kết luận do hai thành viên quyết định và kiểm chứng lại; cả hai thành viên chịu trách nhiệm giải thích mọi phần của đồ án. Môn học chưa quy định rubric khai báo cụ thể — nhóm chủ động khai báo theo thông lệ liêm chính học thuật.")
+body("Nhóm sử dụng trợ lý AI lập trình để hỗ trợ xây dựng một số script dữ liệu và trực quan, gỡ lỗi, kiểm tra kết quả và chạy thử kỹ thuật. Nhật ký rehearsal_log.md mục A ghi rõ lượt chạy thử kỹ thuật cá nhân do AI thực hiện. Hai thành viên chịu trách nhiệm rà soát nguồn, chạy lại kết quả và giải thích phương pháp, lựa chọn cấu hình cùng giới hạn của bài nộp. Việc chạy thử kỹ thuật không thay cho buổi luyện thuyết trình và hỏi đáp của nhóm.")
 
 # PHỤ LỤC A
 h1("PHỤ LỤC A — LỆNH TÁI LẬP & KIỂM TRA")
@@ -986,7 +983,7 @@ table(["Lệnh", "Kỳ vọng"], [
     ["python -m nbconvert --to notebook --execute --inplace notebooks/STING_PAPI_Demo_MoRong.ipynb", "execute sạch ~18s, 18 cells, 0 lỗi"],
     ["python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb", f"execute sạch, {NB_CELLS} cells, {NB_IMGS} hình nhúng (đếm từ notebook đã execute)"],
     ["python scripts/build_report.py", "reports/final_report.docx"],
-], widths=[9.8, 6.0], caption="Bảng A1. Danh sách lệnh tái lập và kết quả kỳ vọng")
+], widths=[9.8, 6.0], caption=tbl_caption("Danh sách lệnh tái lập và kết quả kỳ vọng"))
 body("Môi trường: jupyter/pytest/nbconvert không cài trên PATH — luôn dùng python -m pytest / python -m nbconvert. Dữ liệu gốc data/raw/ bất biến; panel tái tạo từ raw bằng build_panel.py; Mendeley đầy đủ tải theo DOI 10.17632/wbk42j9wc8.1 (chỉ commit 4 file nhỏ dùng trực tiếp).")
 
 # PHỤ LỤC B
@@ -1193,20 +1190,9 @@ _MDD_DATE = _md_rx(r"\*\*Ngày:\*\* (\d{4}-\d{2}-\d{2})", _MDD).group(1)
 
 doc.add_page_break()
 h1("PHỤ LỤC B — PHÂN TÍCH CHUYÊN SÂU MODEL")
-body(f"Tóm tắt báo cáo phân tích chuyên sâu model — reports/model_deep_dive.md "
-     f"(phiên bản {_MDD_VER}, ngày {_MDD_DATE}): ba lane phân tích MỚI, THUẦN "
-     "ADDITIVE — lane A: độ nhạy giao thức chọn cấu hình (câu hỏi B5: largest "
-     "trên tổng n vs trên non-noise); lane B: hồ sơ cụm × chỉ số ngoài + ổn định "
-     "bootstrap; lane C: chẩn đoán chuyên sâu phần supervised. Các lane chỉ chạy "
-     "script mới in-memory — KHÔNG ghi models/predict_config.json, KHÔNG chạy "
-     "scripts/predict_sweep.py, KHÔNG sửa bất kỳ số đã công bố; toàn bộ kết quả "
-     "lane là [THAM KHẢO — CHƯA DUYỆT GV], quyền chốt thay đổi giao thức thuộc "
-     "giảng viên. Mọi số dưới đây do script báo cáo PARSE trực tiếp lúc build từ "
-     "results/*.md (không hardcode); hai lane có bước ngẫu nhiên dùng chung seed "
-     f"{_B_SEED} và chạy 2 lần cho md/csv sha256 byte-giống. Số liệu đầy đủ: "
-     "reports/model_deep_dive.md.")
+body("Phụ lục tổng hợp các kiểm tra bổ sung về độ nhạy của quy trình chọn cấu hình, hồ sơ và độ ổn định của cụm, cùng chẩn đoán mô hình giám sát. Các phép thử giữ nguyên cấu hình chính đã công bố. Số liệu chi tiết và mã tái lập được lưu trong reports/model_deep_dive.md và các kết quả được dẫn ở từng mục dưới đây.")
 
-h2("B.1. Lane A — Độ nhạy giao thức chọn cấu hình (câu hỏi B5)")
+h2("B.1. Độ nhạy quy trình chọn cấu hình")
 bullets([
     ("Tái lập bộ lọc CŨ — bắt buộc trước khi tin bộ lọc sửa.",
      f"{_A_MATCH} dòng khớp từng trường (k, sizes_top5, noise, largest, coverage, "
@@ -1247,7 +1233,7 @@ body("Số liệu đầy đủ: results/protocol_sensitivity.md (kèm protocol_s
      "results/figs/protocol_sensitivity_grid.png). Tái lập: "
      "python -E scripts/protocol_sensitivity.py.", italic=True)
 
-h2("B.2. Lane B — Hồ sơ cụm × chỉ số ngoài & ổn định bootstrap")
+h2("B.2. Hồ sơ và độ ổn định của cụm")
 bullets([
     ("PCI tái hiện đúng số đã công bố — kiểm chứng chéo độc lập trên cùng join.",
      f"Kruskal–Wallis H = {_B_KW['pci'].group(1)}, df = {_B_KW['pci'].group(2)}, "
@@ -1262,7 +1248,7 @@ bullets([
      f"{_grpm(_B_MED_POV, '1')}, cụm 2 {_grpm(_B_MED_POV, '2')}); y tế 2020: "
      f"H = {_B_KW['hea'].group(1)}, p = {_B_KW['hea'].group(3)}, "
      f"n = {_B_KW['hea'].group(4)}, df = {_B_KW['hea'].group(2)} — {_B_ZERO_N} "
-     f"tỉnh count = 0 là 0-thật; GRDP/người 2018–2024: H = {_B_KW['grd'].group(1)}, "
+     f"tỉnh không có điểm cơ sở y tế trong nguồn; GRDP/người 2018–2024: H = {_B_KW['grd'].group(1)}, "
      f"p = {_B_KW['grd'].group(3)}, n = {_B_KW['grd'].group(4)} (trung vị nhiễu "
      f"{_grpm(_B_MED_GRD, '-1')} vs cụm 2 {_grpm(_B_MED_GRD, '2')}); % đô thị: "
      f"H = {_B_KW['urb'].group(1)}, p = {_B_KW['urb'].group(3)}, "
@@ -1283,12 +1269,12 @@ body("Số liệu đầy đủ: results/cluster_profile.md (kèm cluster_profile
      "results/figs/deep_cluster_profile.png). Tái lập: "
      "python -E scripts/cluster_profile.py.", italic=True)
 
-h2("B.3. Lane C — Chẩn đoán chuyên sâu phần supervised")
+h2("B.3. Chẩn đoán mô hình giám sát")
 bullets([
     ("Kiểm đối tái dùng pipeline — khớp 100% số đã công bố.",
      f"tái tính in-memory cho ridge CV R² = {_C_CHECK.group(1)} / holdout MAE = "
      f"{_C_CHECK.group(2)} / RF CV R² = {_C_CHECK.group(3)} — KHỚP "
-     "results/supervised_metrics.csv (MAE holdout bằng chính số Bảng 6); siêu "
+     "results/supervised_metrics.csv (MAE holdout bằng chính số Bảng 7); siêu "
      "tham số cố định (CV train-only 2017–2022 của pipeline): Ridge alpha = "
      f"{_C_HYPER.group(1)}, LR C = {_C_HYPER.group(2)}, RF max_depth = "
      f"{_C_HYPER.group(3)} / min_samples_leaf = {_C_HYPER.group(4)}."),
@@ -1317,10 +1303,7 @@ body("Số liệu đầy đủ: results/supervised_depth.md (kèm supervised_dep
      "results/figs/supervised_learning_curve.png, "
      "results/figs/supervised_importance.png). Tái lập: "
      "python -E scripts/supervised_depth.py.", italic=True)
-body("Đọc gộp (mô tả, chưa duyệt GV): những gì vững là cụm lớn và tương phản "
-     "nhiễu vs cụm 2; những gì mong manh là cụm li ti và độ quan trọng của các "
-     "đặc trưng ngoài sd_6_1. Danh sách hành động đã tách theo quyền duyệt GV ở "
-     "reports/model_deep_dive.md — nhóm viết báo cáo không tự chốt thay đổi nào.")
+body("Các kiểm tra bổ sung cần được đọc riêng cho từng nhóm: tỷ lệ giữ nhãn toàn bộ chịu ảnh hưởng lớn từ cụm chiếm ưu thế, còn hai cụm nhỏ và các đặc trưng ngoài giá trị y tế năm trước kém ổn định hơn. Những nhận xét này mô tả phạm vi thử nghiệm hiện có và không xác nhận một phân hoạch xã hội tổng quát.")
 
 # TÀI LIỆU THAM KHẢO
 h1("TÀI LIỆU THAM KHẢO")

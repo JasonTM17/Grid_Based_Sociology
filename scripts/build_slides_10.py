@@ -334,7 +334,7 @@ def _sting_hierarchy_figure_png(model: STING, X: np.ndarray) -> BytesIO:
                     )
                 )
                 ax.annotate(
-                    f"ô cha → {f ** 2} ô con",
+                    f"ô mức 2: {_cell.count} điểm",
                     xy=(cx0 + step[0] * 0.5, cy0 + step[1] * 0.5),
                     xytext=(px0 + pstep[0] * 0.15, py0 + pstep[1] * 1.05),
                     fontsize=8.5,
@@ -611,6 +611,8 @@ note(
     "trên tập điểm khác nhau. Khi so sánh cần đọc cùng tỷ lệ nhiễu.",
 )
 
+text(s, 0.65, 6.15, 12.0, 0.4, [("Silhouette tính trên điểm thuộc cụm; tập điểm của các phương pháp có thể khác nhau.", 12, False, GREY)])
+
 # 9 — Tham số và giới hạn
 s = slide_new()
 header(s, "THAM SỐ", "Ngưỡng ô dày thay đổi kết quả ra sao?", 9)
@@ -647,7 +649,7 @@ note(
 s = slide_new()
 header(s, "KẾT LUẬN", "Kết quả thực nghiệm với STING", 10)
 bullets(
-    s, 0.55, 1.5, 12.0, 5.3,
+    s, 0.55, 1.5, 12.0, 4.1,
     [
         ("Cài đặt.", "STING chia lưới, lưu thống kê ô và gom các ô dày liên thông."),
         ("PAPI 2011–2023.", "Trên hai chỉ tiêu đã chọn, có một cụm lớn gồm 629 điểm và hai cụm nhỏ gồm 16 và 5 điểm."),
@@ -655,6 +657,7 @@ bullets(
     ],
     size=16, gap_pt=42,
 )
+text(s, 0.6, 6.0, 12.1, 0.55, [("Cảm ơn thầy và các bạn đã lắng nghe", 20, True, NAVY)], align=PP_ALIGN.CENTER)
 note(
     s,
     "Qua thực nghiệm, STING minh họa cách phân cụm bằng các ô dày liên thông. "

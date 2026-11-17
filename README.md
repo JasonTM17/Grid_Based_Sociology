@@ -17,6 +17,8 @@ Toàn bộ file nộp nằm trong [`submissions/`](submissions/). Các notebook 
 
 Khi chuyển sang máy khác, giải nén cả ZIP của mốc tương ứng. Slide cuối kỳ dùng khi vấn đáp là tài liệu tùy chọn. [Hướng dẫn](submissions/HUONG-DAN.txt) · [Slide vấn đáp](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
 
+Slide cuối kỳ có phần chính về STING ở trang 1–12, phụ lục Ridge và PCI ở trang 13–14, nguồn ở trang 15 và lời cảm ơn ở trang 16.
+
 ## Ôn tập
 
 Ba notebook có giải thích nằm ngay trong `study/`. [Giữa kỳ](study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) · [Cuối kỳ](study/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) · [Day 4](study/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb)
@@ -219,7 +221,7 @@ khi học xuyên năm trên panel.
 
 ## Khai báo sử dụng công cụ hỗ trợ
 
-Nhóm sử dụng trợ lý AI lập trình cho một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, và dry-run đo thời gian chuẩn bị demo (`reports/on-tap/rehearsal_log.md` mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Mọi quyết định phương pháp, quy trình chọn cấu hình, đánh giá và kết luận do hai thành viên quyết định và kiểm chứng lại; cả hai thành viên chịu trách nhiệm giải thích mọi phần của đồ án. Môn học chưa quy định rubric khai báo cụ thể — nhóm chủ động khai báo theo thông lệ liêm chính học thuật.
+Nhóm sử dụng trợ lý AI lập trình cho một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, và dry-run đo thời gian chuẩn bị demo (`reports/on-tap/rehearsal_log.md` mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Hai thành viên chịu trách nhiệm rà soát nguồn, chạy lại kết quả và giải thích phương pháp, lựa chọn cấu hình cùng giới hạn của đồ án. Nhóm ghi nhận việc sử dụng công cụ hỗ trợ và chịu trách nhiệm về nội dung bài nộp.
 
 ## Giấy phép
 

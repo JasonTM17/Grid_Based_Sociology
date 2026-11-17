@@ -23,7 +23,7 @@ Thứ tự trong Day 4: trùng khóa → thiếu → nhất quán → ngoại la
 | Khoảng giá trị vs metadata thang đo | 0 ô ngoài khoảng / 32634 ô (37 cột × 882 dòng) | Giữ nguyên giá trị; không cắt, không sửa theo metadata. | data/processed/papi_panel_scale_metadata.csv:2-38 (cột thang_2011_2020, thang_2021_2024); scripts/check_data.py:34-58 |
 | Giá trị ngoài cửa sổ thu thập của từng cột | 0 ô | Giữ; cửa sổ năm là metadata kiểm chứng, không dùng để xóa ô. | data/processed/papi_panel_scale_metadata.csv:2-38 (cột nam_bat_dau, nam_ket_thuc) |
 | Điểm 0.0 (quy ước 'tỉnh không được xếp hạng') | 0 ô điểm = 0.0 còn lại | 0.0 → NaN ngay khi dựng panel để không lẫn với điểm thật. | scripts/build_panel.py:218-226 |
-| Đánh dấu ngoại lai z-score > 3 (trị tuyệt đối) | 122 ô (0.4%), 98 dòng, 29 cột | GIỮ toàn bộ — chỉ đánh dấu, không xóa. Đây là điểm khảo sát thật; điểm cực trị rơi vào ô lưới thưa và tự nhận nhãn nhiễu (-1) theo cơ chế min_count của STING, dữ liệu gốc không bị loại. | src/sting.py:12-13; src/sting.py:334; scripts/predict_demo.py:110 |
+| Đánh dấu ngoại lai z-score > 3 (trị tuyệt đối) | 122 ô (0.4%), 98 dòng, 29 cột | GIỮ toàn bộ — chỉ đánh dấu, không xóa. Cờ z-score không quyết định nhãn STING; điểm nhận -1 khi không thuộc ô dày hoặc ngoài vùng lưới đã học. Dữ liệu gốc không bị loại. | src/sting.py:12-13; src/sting.py:334; scripts/predict_demo.py:110 |
 
 ### 1.1 Thiếu theo năm (chỉ cột còn trong cửa sổ thu thập)
 

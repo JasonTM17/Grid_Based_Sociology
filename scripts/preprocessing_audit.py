@@ -557,9 +557,9 @@ def main() -> int:
                 f"{outlier_rows} dòng, {len(outlier_table)} cột"
             ),
             "decision": (
-                "GIỮ toàn bộ — chỉ đánh dấu, không xóa. Đây là điểm khảo sát thật; "
-                "điểm cực trị rơi vào ô lưới thưa và tự nhận nhãn nhiễu (-1) theo "
-                "cơ chế min_count của STING, dữ liệu gốc không bị loại."
+                "GIỮ toàn bộ — chỉ đánh dấu, không xóa. Cờ z-score không quyết định "
+                "nhãn STING; điểm nhận -1 khi không thuộc ô dày hoặc ngoài "
+                "vùng lưới đã học. Dữ liệu gốc không bị loại."
             ),
             "evidence": (
                 "src/sting.py:12-13; src/sting.py:334; scripts/predict_demo.py:110"

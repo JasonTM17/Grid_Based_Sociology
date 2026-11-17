@@ -30,15 +30,20 @@ def main() -> int:
 
     word = None
     try:
-        word = win32.Dispatch("Word.Application")
+        word = win32.DispatchEx("Word.Application")
         word.Visible = False
         word.DisplayAlerts = 0
         doc = word.Documents.Open(str(DOCX), ReadOnly=False)
+        doc.Fields.Update()
         for i in range(1, doc.TablesOfContents.Count + 1):
             doc.TablesOfContents(i).Update()
         for i in range(1, doc.TablesOfFigures.Count + 1):
             doc.TablesOfFigures(i).Update()
-        doc.Fields.Update()
+        doc.Repaginate()
+        for i in range(1, doc.TablesOfContents.Count + 1):
+            doc.TablesOfContents(i).UpdatePageNumbers()
+        for i in range(1, doc.TablesOfFigures.Count + 1):
+            doc.TablesOfFigures(i).UpdatePageNumbers()
         doc.Save()
         doc.Close(False)
         print("Da cap nhat field:", DOCX.relative_to(ROOT))
