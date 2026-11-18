@@ -1,24 +1,16 @@
-"""Biến thể STING – STatistical INformation Grid (tự cài với NumPy).
+"""STING (STatistical INformation Grid) rút gọn, cài đặt bằng NumPy.
 
 Tham khảo: Wang, Yang & Muntz (1997), "STING: A Statistical Information Grid
-Approach to Spatial Data Mining", Proc. of VLDB.
+Approach to Spatial Data Mining", VLDB.
 
-Ý tưởng chính
--------------
-1. Không gian dữ liệu được chia thành lưới phân cấp: mức ``l`` chia mỗi chiều
-   thành ``factor ** l`` đoạn bằng nhau (mức 0 = một ô duy nhất).
-2. Mỗi ô lưu thống kê độc lập theo từng chiều: count, mean, std, min, max.
-3. Tính thống kê từ dữ liệu ở từng mức. Chi phí phụ thuộc số điểm, số chiều và số mức.
-4. Phân cụm: gom các ô "dày" (count >= min_count) liền kề thành cụm; điểm
-   thuộc ô không dày nhận nhãn -1 (nhiễu).
+Lưới phân cấp: mức ``l`` chia mỗi chiều thành ``factor ** l`` đoạn bằng nhau.
+Mỗi ô lưu count, mean, std, min, max theo từng chiều. Cụm là thành phần liên
+thông của các ô dày (count >= min_count); điểm ở ô không dày nhận nhãn -1.
 
-Ví dụ
------
 >>> import numpy as np
 >>> from sting import STING
 >>> X = np.random.default_rng(0).normal(size=(100, 2))
->>> model = STING(n_levels=3, factor=4, min_count=5).fit(X)
->>> labels = model.cluster(level=2)
+>>> labels = STING(n_levels=3, factor=4, min_count=5).fit(X).cluster(level=2)
 """
 from __future__ import annotations
 
@@ -33,7 +25,7 @@ import numpy as np
 
 __all__ = ["Cell", "STING"]
 
-_MAX_GRID_CELLS = 2**62  # flat index phải vừa int64 (np.ravel_multi_index)
+_MAX_GRID_CELLS = 2**62  # flat index phải vừa int64
 
 
 @dataclass
@@ -41,9 +33,9 @@ class Cell:
     """Một ô lưới tại một mức phân cấp."""
 
     level: int
-    index: tuple[int, ...]          # chỉ số ô theo từng chiều
-    bounds_min: np.ndarray          # cận dưới (mỗi chiều)
-    bounds_max: np.ndarray          # cận trên (mỗi chiều)
+    index: tuple[int, ...]
+    bounds_min: np.ndarray
+    bounds_max: np.ndarray
     count: int = 0
     mean: np.ndarray | None = None
     std: np.ndarray | None = None
@@ -52,7 +44,7 @@ class Cell:
 
 
 class STING:
-    """Lưới thống kê phân cấp cho phân cụm không gian nhiều chiều."""
+    """Lưới thống kê phân cấp cho phân cụm nhiều chiều."""
 
     def __init__(
         self,
@@ -61,12 +53,7 @@ class STING:
         min_count: int | None = None,
         significance_z: float | None = None,
     ) -> None:
-        """Khởi tạo tham số lưới STING.
-
-        ``min_count`` None → ``max(1, round(0.02 * n))`` khi ``fit()``; nếu đặt
-        tường minh thì phải ``>= 0`` (âm làm mọi ô dày sai).
-        ``significance_z`` None → tắt kiểm định z so với ô cha.
-        """
+        """``min_count=None`` -> ``max(1, round(0.02 * n))``; ``significance_z=None`` tắt kiểm định z."""
         if n_levels < 1:
             raise ValueError("n_levels phải >= 1")
         if factor < 2:
@@ -78,16 +65,14 @@ class STING:
         self.min_count = min_count
         self.significance_z = significance_z
 
-    # Huấn luyện: xây lưới phân cấp và thống kê từng ô
     def fit(self, X: np.ndarray) -> STING:
-        """Xây lưới từ ``X``; cần cluster() lại trước predict() sau mỗi fit()."""
+        """Xây lưới và thống kê từng ô; gọi lại cluster() trước predict()."""
         X = np.asarray(X, dtype=float)
         if X.ndim != 2 or X.shape[0] == 0:
             raise ValueError("X phải là mảng 2 chiều (n_samples, n_dims) không rỗng")
         if not np.all(np.isfinite(X)):
             raise ValueError("X chứa NaN/inf; xử lý trước khi fit")
 
-        # Nhãn thuộc lưới cũ không còn hợp lệ khi fit lại, kể cả cùng số chiều.
         for name in ("label_of_", "n_clusters_", "cluster_level_", "_cell_comp_"):
             self.__dict__.pop(name, None)
 
@@ -97,9 +82,7 @@ class STING:
         lo = X.min(axis=0)
         hi = X.max(axis=0)
         width = hi - lo
-        width[width == 0.0] = 1.0  # chiều hằng số: nới giả để chia được lưới
-        # lo + (hi - lo) có thể nhỏ hơn hi một ULP vì làm tròn; luôn bao
-        # cả cực đại tập học, đồng thời giữ phần nới cho chiều hằng số.
+        width[width == 0.0] = 1.0  # chiều hằng số
         self.bounds_min_, self.bounds_max_ = lo, np.maximum(hi, lo + width)
 
         self.min_count_ = (
@@ -128,13 +111,10 @@ class STING:
             self.cells_[level] = self._accumulate(X, flat, res, level)
         return self
 
-    # Phân cụm
     def cluster(self, level: int | None = None, connectivity: int = 1) -> np.ndarray:
-        """Gán nhãn cụm cho từng điểm tại mức lưới ``level``.
+        """Nhãn cụm của từng điểm tại mức ``level``; -1 là nhiễu.
 
-        connectivity = 1: chỉ gom ô kề mặt (4 hướng trong 2D);
-        connectivity = số chiều: gom cả ô kề góc (8 hướng trong 2D).
-        Điểm thuộc ô không dày nhận nhãn -1 (nhiễu).
+        connectivity=1: ô kề mặt; connectivity=số chiều: gồm cả ô kề góc.
         """
         if not hasattr(self, "cells_"):
             raise RuntimeError("Hãy gọi fit(X) trước khi cluster()")
@@ -159,10 +139,10 @@ class STING:
             warnings.warn(
                 "significance_z loại mọi ô dày → k=0 (toàn bộ điểm nhận -1); "
                 "hãy giảm significance_z hoặc min_count.",
-                stacklevel=2,  # trỏ về dòng gọi cluster(), không phải dòng warn
+                stacklevel=2,
             )
 
-        # Gom thành phần liên thông trên các ô dày (DFS lặp, thứ tự ổn định).
+        # Thành phần liên thông trên các ô dày (DFS lặp, thứ tự ổn định).
         label_of: dict[tuple[int, ...], int] = {}
         comp = 0
         for start in sorted(dense_set):
@@ -178,7 +158,6 @@ class STING:
                         stack.append(nb)
             comp += 1
 
-        # Gán nhãn cho từng điểm theo ô chứa nó.
         cell_to_comp = {
             int(np.ravel_multi_index(key, (res,) * self.n_dims_)): cid
             for key, cid in label_of.items()
@@ -194,12 +173,10 @@ class STING:
         return labels
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """Dự đoán cụm cho các điểm MỚI sau khi đã fit() + cluster().
+        """Nhãn cụm cho điểm mới (sau fit + cluster).
 
-        Điểm mới được gán vào cụm của ô chứa nó tại mức lưới dùng trong cluster();
-        nhận -1 nếu ô đó không thuộc cụm nào (nhiễu hoặc ô chưa từng có dữ liệu),
-        HOẶC nếu điểm nằm ngoài vùng dữ liệu huấn luyện (out-of-support) hoặc
-        chứa NaN/inf (không finite) — không âm thầm kẹp vào ô biên.
+        Trả -1 nếu ô chứa điểm không thuộc cụm nào, điểm nằm ngoài vùng dữ liệu
+        huấn luyện, hoặc chứa NaN/inf.
         """
         if not hasattr(self, "_cell_comp_"):
             raise RuntimeError("Hãy gọi fit(X) rồi cluster() trước khi predict()")
@@ -222,29 +199,25 @@ class STING:
         return preds
 
     def save(self, path: str | PathLike[str]) -> None:
-        """Lưu model đã huấn luyện thành file local (pickle)."""
+        """Lưu model bằng pickle."""
         with open(path, "wb") as fh:
             pickle.dump(self, fh)
 
     @classmethod
     def load(cls, path: str | PathLike[str]) -> STING:
-        """Nạp model đã lưu bằng save() — dự đoán không cần huấn luyện lại."""
+        """Nạp model từ save(); chỉ nạp file tin cậy (pickle)."""
         with open(path, "rb") as fh:
             obj = pickle.load(fh)
         if not isinstance(obj, cls):
             raise TypeError("File không chứa đối tượng STING")
         return obj
 
-    # Truy vấn & tiện ích
     def query_rect(
         self,
         rect: Sequence[Sequence[float]] | np.ndarray,
         level: int | None = None,
     ) -> dict[str, int | np.ndarray | None]:
-        """Thống kê tổng hợp vùng chữ nhật (chỉ gồm các ô nằm trọn trong vùng).
-
-        rect: danh sách [(lo0, hi0), (lo1, hi1), ...] theo từng chiều.
-        """
+        """Thống kê gộp của các ô nằm trọn trong ``rect`` = [(lo0, hi0), ...]."""
         if level is None:
             level = self.n_levels - 1
         rect = np.asarray(rect, dtype=float)
@@ -277,19 +250,18 @@ class STING:
         }
 
     def point_cell_index(self, level: int) -> np.ndarray:
-        """Chỉ số ô (theo từng chiều) của mỗi điểm tại mức `level` — shape (n, d)."""
+        """Chỉ số ô của mỗi điểm tại ``level``, shape (n, d)."""
         return self._point_idx_[level].copy()
 
     def cell_stats(self, level: int) -> list[Cell]:
-        """Danh sách các ô có dữ liệu tại mức `level`, sắp xếp theo chỉ số."""
+        """Các ô có dữ liệu tại ``level``, sắp theo chỉ số."""
         return [self.cells_[level][k] for k in sorted(self.cells_[level])]
 
-    # Nội bộ
     def _assign(self, X: np.ndarray, res: int) -> tuple[np.ndarray, np.ndarray]:
-        """Tính chỉ số ô của từng điểm tại lưới `res` ô/chiều."""
+        """Chỉ số ô (theo chiều và phẳng) của từng điểm trên lưới ``res`` ô/chiều."""
         span = self.bounds_max_ - self.bounds_min_
         idx = np.floor((X - self.bounds_min_) / span * res).astype(np.int64)
-        np.clip(idx, 0, res - 1, out=idx)  # điểm ở biên trên cùng vào ô cuối
+        np.clip(idx, 0, res - 1, out=idx)  # biên trên vào ô cuối
         flat = np.ravel_multi_index(
             tuple(idx[:, k] for k in range(self.n_dims_)), (res,) * self.n_dims_
         )
@@ -298,7 +270,7 @@ class STING:
     def _accumulate(
         self, X: np.ndarray, flat: np.ndarray, res: int, level: int
     ) -> dict[tuple[int, ...], Cell]:
-        """Tính thống kê từng ô từ nhóm điểm theo `flat` (một lượt O(n))."""
+        """Thống kê từng ô bằng một lượt nhóm điểm theo ``flat``."""
         span = self.bounds_max_ - self.bounds_min_
         step = span / res
         cells: dict[tuple[int, ...], Cell] = {}
@@ -323,13 +295,7 @@ class STING:
         return cells
 
     def _is_dense(self, cell: Cell, level: int) -> bool:
-        """Ô dày nếu đủ số điểm; tùy chọn thêm kiểm định ý nghĩa so với ô cha.
-
-        Thứ tự điều kiện: ``count >= min_count`` là ngưỡng CẦN; khi
-        ``significance_z`` được đặt và level > 0, kiểm định z so với ô cha là
-        điều kiện CUỐI CÙNG — có thể loại cả những ô đã đủ min_count, nên z
-        đủ lớn sẽ làm KHÔNG còn ô dày nào (k=0; ``cluster()`` cảnh báo khi vậy).
-        """
+        """``count >= min_count``; nếu có ``significance_z`` thì thêm kiểm định z so với ô cha."""
         if cell.count < self.min_count_:
             return False
         if self.significance_z is None or level == 0:
@@ -343,7 +309,7 @@ class STING:
             return bool(np.any(diff > self.significance_z * se))
 
     def _parent_of(self, cell: Cell) -> Cell | None:
-        """Ô cha gộp ``factor`` ô con theo từng chiều; None ở mức 0."""
+        """Ô cha ở mức trên; None ở mức 0."""
         if cell.level == 0:
             return None
         pidx = tuple(i // self.factor for i in cell.index)
@@ -352,7 +318,7 @@ class STING:
     def _neighbors(
         self, index: tuple[int, ...], res: int, connectivity: int
     ) -> Iterator[tuple[int, ...]]:
-        """Sinh chỉ số các ô kề hợp lệ (số tọa độ khác 0 <= connectivity)."""
+        """Các ô kề hợp lệ có tối đa ``connectivity`` tọa độ khác 0."""
         if connectivity == 1:
             for axis, coord in enumerate(index):
                 for step in (-1, 1):

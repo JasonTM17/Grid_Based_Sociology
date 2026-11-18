@@ -1,4 +1,8 @@
-# Đồ án Học máy — Phân cụm 63 tỉnh Việt Nam bằng STING (PAPI 2011–2024)
+# Ứng dụng thuật toán phân cụm dựa trên lưới STING để phân tích đặc điểm và sự biến động của các chỉ số quản trị, hành chính công tại 63 tỉnh, thành phố Việt Nam dựa trên dữ liệu PAPI giai đoạn 2011–2024
+
+*Application of STING grid-based clustering to analyze governance and public administration performance patterns and temporal changes across 63 Vietnamese provinces using PAPI data (2011–2024)*
+
+Đồ án môn Học máy — Nhóm 15.
 
 [![CI](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -33,7 +37,7 @@ Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đ
 | Khi cần | Mở thư mục |
 |---|---|
 | Gửi bài cho thầy | `submissions/` có file nộp đặt tên theo từng mốc và hai gói ZIP. |
-| Đọc giải thích để học | `study/` có ba notebook ôn tập. |
+| Đọc giải thích để học | `study/` có ba notebook ôn tập và `sting_GiaiThich.py` (bản `src/sting.py` có chú thích đầy đủ, cùng logic). |
 | Xem thuật toán và cách chạy | `src/` chứa STING tự cài đặt. `scripts/` xử lý dữ liệu, chạy phân tích và tạo file. |
 | Tìm dữ liệu | `data/raw/` chứa workbook và các nguồn tham chiếu. `data/processed/` chứa panel PAPI và dữ liệu đã xử lý. |
 | Xem kết quả đã lưu | `models/` chứa model và cấu hình. `results/` chứa bảng và hình kết quả. |

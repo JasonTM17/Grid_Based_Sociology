@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "Nếu bạn sử dụng phần mềm này, vui lòng trích dẫn theo thông tin dưới đây.\nIf you use this software, please cite it as below."
-title: "Phân cụm 63 tỉnh Việt Nam với STING trên dữ liệu PAPI 2011-2024"
+title: "Ứng dụng thuật toán phân cụm dựa trên lưới STING để phân tích đặc điểm và sự biến động của các chỉ số quản trị, hành chính công tại 63 tỉnh, thành phố Việt Nam dựa trên dữ liệu PAPI giai đoạn 2011–2024"
 authors:
   - family-names: Son
     given-names: Nguyen Tien
