@@ -18,7 +18,7 @@ cells = []
 md = cells.append
 cd = cells.append
 
-md(nbf.v4.new_markdown_cell("""# Demo giữa kỳ — Phân cụm 63 tỉnh Việt Nam với STING trên dữ liệu PAPI
+md(nbf.v4.new_markdown_cell("""# Demo giữa kỳ — Ứng dụng thuật toán phân cụm dựa trên lưới STING để phân tích đặc điểm và sự biến động của các chỉ số quản trị, hành chính công tại 63 tỉnh, thành phố Việt Nam dựa trên dữ liệu PAPI giai đoạn 2011–2024
 
 **Đồ án môn Học máy** · Topic 6: *Grid-based (clustering)* · Domain: Sociology / History · Nhóm 2 người.
 

@@ -216,7 +216,8 @@ def test_submission_pptx_exists_and_notes():
     assert "Đọc cụm từ bảng đếm 3 × 3" in titles_and_text
     assert "Tài liệu tham khảo" not in titles_and_text
     assert "nhóm báo cáo trung thực" not in titles_and_text.lower()
-    assert "Phân cụm dựa trên lưới" in titles_and_text
+    assert "PHÂN CỤM DỰA TRÊN LƯỚI STING" in titles_and_text
+    assert "APPLICATION OF STING GRID-BASED CLUSTERING" in titles_and_text
 
 
 def test_submission_notebook_cells(submission_notebook: dict):

@@ -369,16 +369,17 @@ for r in range(4):
         rect(s, x0, y0, 0.66, 0.66, fill)
 text(s, 0.85, 1.15, 7.6, 0.4, [("HỌC MÁY · BÁO CÁO GIỮA KỲ", 13, True, GOLD)])
 text(
-    s, 0.85, 1.75, 8.6, 2.6,
+    s, 0.85, 1.55, 7.6, 3.0,
     [
-        ("Phân cụm dựa trên lưới", 40, True, WHITE),
-        ("với thuật toán STING", 30, True, WHITE),
+        ("ỨNG DỤNG THUẬT TOÁN PHÂN CỤM DỰA TRÊN LƯỚI STING ĐỂ PHÂN TÍCH ĐẶC ĐIỂM VÀ SỰ BIẾN ĐỘNG CỦA CÁC CHỈ SỐ QUẢN TRỊ, HÀNH CHÍNH CÔNG TẠI 63 TỈNH, THÀNH PHỐ VIỆT NAM DỰA TRÊN DỮ LIỆU PAPI GIAI ĐOẠN 2011–2024", 19, True, WHITE),
+        ("APPLICATION OF STING GRID-BASED CLUSTERING TO ANALYZE GOVERNANCE AND PUBLIC ADMINISTRATION PERFORMANCE PATTERNS AND TEMPORAL CHANGES ACROSS 63 VIETNAMESE PROVINCES USING PAPI DATA (2011–2024)", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
     ],
 )
 text(
-    s, 0.85, 4.5, 8.4, 1.8,
+    s, 0.85, 4.7, 7.8, 1.9,
     [
-        ("Demo thuật toán và ứng dụng trên dữ liệu PAPI", 17, True, GOLD),
+        ("Báo cáo giữa kỳ · Demo thuật toán và ứng dụng trên dữ liệu PAPI", 14, True, GOLD),
+        ("STING: Statistical Information Grid · PAPI: Chỉ số Hiệu quả Quản trị và Hành chính công cấp tỉnh", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
         ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 14, False, RGBColor(0xB9, 0xCD, 0xDE)),
         ("Nhóm 15 · Chủ đề 6 · Grid-based clustering", 13, False, RGBColor(0xB9, 0xCD, 0xDE)),
     ],
