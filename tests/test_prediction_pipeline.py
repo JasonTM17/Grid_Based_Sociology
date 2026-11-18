@@ -8,7 +8,7 @@ from sklearn.linear_model import Ridge
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from scripts.predict_supervised import (
+from scripts.supervised.predict_supervised import (
     CLASSIFICATION_CV_YEARS,
     STING,
     build_regression_pairs,
@@ -19,13 +19,13 @@ from scripts.predict_supervised import (
     fit_sting_labeler,
     predict_sting_labels_for_origin,
 )
-from scripts.papi_pred_common import (
+from scripts.common.papi_pred_common import (
     REGRESSION_FEATURES,
     ROOT,
     load_panel,
     select_model_by_cv,
 )
-from scripts.dashboard_data import (
+from scripts.analysis.dashboard_data import (
     DashboardDataError,
     filter_regression_holdout,
     load_dashboard_assets,
@@ -33,7 +33,7 @@ from scripts.dashboard_data import (
     prepare_sting_view,
     select_regression_model,
 )
-from scripts.predict_sweep import STABLE_SUBDIMS, candidate_pairs
+from scripts.analysis.predict_sweep import STABLE_SUBDIMS, candidate_pairs
 
 
 STING_FEATURES = ["sd_4_2", "sd_6_1"]
@@ -380,5 +380,5 @@ def test_dashboard_selects_regression_family_by_cv_only():
 
 
 def test_dashboard_missing_artifact_error_has_rebuild_command(tmp_path):
-    with pytest.raises(DashboardDataError, match="python scripts/build_panel.py"):
+    with pytest.raises(DashboardDataError, match="python scripts/data/build_panel.py"):
         load_dashboard_assets(tmp_path)

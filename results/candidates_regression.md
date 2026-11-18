@@ -6,14 +6,14 @@
 
 ## 1) Giao thức — tái dùng qua import (không sao chép)
 
-- `build_regression_pairs` (`scripts/predict_supervised.py:99-120`) → 740 cặp **train** (year_t 2011–2022) + 59 cặp holdout (2023→2024). Holdout: KHÔNG fit, KHÔNG chọn, KHÔNG chấm, KHÔNG nhìn — script chỉ kiểm tra kích thước 59 cặp theo design; số holdout của `results/supervised_metrics.csv` không được tham chiếu khi quyết định ứng viên (`select_model_by_cv` vốn chỉ đọc `value_cv`, `scripts/papi_pred_common.py:60-66`).
-- Folds: `expanding_origin_folds(tr.year_t, first_validation_origin=2017)` (`scripts/predict_supervised.py:123-147`) → 6 fold validation origin 2017–2022, warm-up 2011–2016; kích thước fold-train: 374, 437, 498, 561, 621, 681.
-- Chấm điểm: `GridSearchCV(cv=folds, scoring='r2', n_jobs=1)` như `scripts/predict_supervised.py:278-285`; cột báo cáo y hệt `reg_metrics` (`scripts/predict_supervised.py:309-316`): `metric_cv` = 'r2 (expanding origin 2017–2022)', `value_cv` = best_score_ làm tròn 3.
-- Đặc trưng: 8 cột `REGRESSION_FEATURES` (`scripts/papi_pred_common.py:19-22`), target `sd_6_1` năm t+1. KHÔNG đưa PCI vào features (giữ vai trò external validation độc lập đã công bố, H=31.7751 — `reports/model_deep_dive.md:53`). KHÔNG chạy ablation bỏ `sd_6_1` (đổi spec công bố — đề xuất (b).1 chờ GV, `reports/model_deep_dive.md:295`).
+- `build_regression_pairs` (`scripts/supervised/predict_supervised.py:99-120`) → 740 cặp **train** (year_t 2011–2022) + 59 cặp holdout (2023→2024). Holdout: KHÔNG fit, KHÔNG chọn, KHÔNG chấm, KHÔNG nhìn — script chỉ kiểm tra kích thước 59 cặp theo design; số holdout của `results/supervised_metrics.csv` không được tham chiếu khi quyết định ứng viên (`select_model_by_cv` vốn chỉ đọc `value_cv`, `scripts/common/papi_pred_common.py:60-66`).
+- Folds: `expanding_origin_folds(tr.year_t, first_validation_origin=2017)` (`scripts/supervised/predict_supervised.py:123-147`) → 6 fold validation origin 2017–2022, warm-up 2011–2016; kích thước fold-train: 374, 437, 498, 561, 621, 681.
+- Chấm điểm: `GridSearchCV(cv=folds, scoring='r2', n_jobs=1)` như `scripts/supervised/predict_supervised.py:278-285`; cột báo cáo y hệt `reg_metrics` (`scripts/supervised/predict_supervised.py:309-316`): `metric_cv` = 'r2 (expanding origin 2017–2022)', `value_cv` = best_score_ làm tròn 3.
+- Đặc trưng: 8 cột `REGRESSION_FEATURES` (`scripts/common/papi_pred_common.py:19-22`), target `sd_6_1` năm t+1. KHÔNG đưa PCI vào features (giữ vai trò external validation độc lập đã công bố, H=31.7751 — `reports/model_deep_dive.md:53`). KHÔNG chạy ablation bỏ `sd_6_1` (đổi spec công bố — đề xuất (b).1 chờ GV, `reports/model_deep_dive.md:295`).
 
 ## 2) Gate tái lập baseline (quy tắc pre-registered số 6)
 
-Mọi baseline được TÍNH LẠI in-memory trên cùng fold bằng refit ĐÚNG lưới công bố (`scripts/predict_supervised.py:276-285`) — không hardcode số từ CSV. Đối chiếu mean với `results/supervised_metrics.csv` trước khi so ứng viên; nếu lệch → script DỪNG, không ghi output.
+Mọi baseline được TÍNH LẠI in-memory trên cùng fold bằng refit ĐÚNG lưới công bố (`scripts/supervised/predict_supervised.py:276-285`) — không hardcode số từ CSV. Đối chiếu mean với `results/supervised_metrics.csv` trước khi so ứng viên; nếu lệch → script DỪNG, không ghi output.
 
 | Baseline | Tái lập (raw) | round 3 | Công bố CSV | Kết quả |
 | --- | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ Per-fold R² của combo best (mốc cho điều kiện nhất quán (ii)):
 
 ## 3) Biến ngoài — quy tắc loại pre-registered
 
-Quy tắc (pre-registered trước khi chạy): cột ngoài thiếu >30% trên 740 cặp train → ứng viên ĐÓ BỊ LOẠI khỏi ma trận cùng-protocol. Join theo (province_code, year_t) — KHÔNG BAO GIỜ join năm t+1 (chống tin tức tương lai). `build_regression_pairs` không trả province_code trong frame cặp (`scripts/predict_supervised.py:112-119`), nên script dựng lại join-key (province_code, year_t) theo đúng điều kiện cặp hợp lệ của builder và gate `verify_key_alignment` so từng phần tử (8 features + carry + y + year_t, position-wise) với frame cặp thật — khớp 740/740 thì join mới được phép chạy, lệch thì script DỪNG.
+Quy tắc (pre-registered trước khi chạy): cột ngoài thiếu >30% trên 740 cặp train → ứng viên ĐÓ BỊ LOẠI khỏi ma trận cùng-protocol. Join theo (province_code, year_t) — KHÔNG BAO GIỜ join năm t+1 (chống tin tức tương lai). `build_regression_pairs` không trả province_code trong frame cặp (`scripts/supervised/predict_supervised.py:112-119`), nên script dựng lại join-key (province_code, year_t) theo đúng điều kiện cặp hợp lệ của builder và gate `verify_key_alignment` so từng phần tử (8 features + carry + y + year_t, position-wise) với frame cặp thật — khớp 740/740 thì join mới được phép chạy, lệch thì script DỪNG.
 
 | Ứng viên | Cột | Nguồn | Thiếu trên 740 cặp | % | Quy tắc |
 | --- | --- | --- | --- | --- | --- |
@@ -76,6 +76,6 @@ Quy tắc (pre-registered trước khi chạy): cột ngoài thiếu >30% trên 
 - **Đọc kết quả `beat` biên mỏng:** R1 ElasticNet raw 0.266933 (Δ vs ridge-best tái lập = +0.0018, beat 4/6) — đạt ngưỡng pre-registered nhưng biên nằm trong vùng nhiễu của best_score_ (bullet trên) và thua ridge ở 1–2 fold origin sớm; verdict `beat` ở đây là ĐẠT NGƯỠNG KỸ THUẬT, KHÔNG phải bằng chứng superiority. Adoption vẫn thuộc GV (nhóm (b)).
 - **Ứng viên kém — ghi kém, không làm đẹp:** R2 HistGradientBoosting value_cv 0.176 (Δ vs ridge -0.089, beat 0/6); R3 KNeighbors value_cv 0.168 (Δ vs ridge -0.097, beat 0/6); R4 Ridge+poverty value_cv 0.263 (Δ vs ridge -0.002, beat 3/6).
 - Kết quả là **THAM KHẢO [CHƯA DUYỆT GV]** — adoption cần GV duyệt (nhóm (b)); script KHÔNG ghi bất kỳ artifact đóng băng nào.
-- Determinism: numpy seed 11 (phòng hờ); estimator dùng đúng `random_state=42` theo thiết kế ứng viên và khớp SEED công bố (`scripts/predict_supervised.py:72`) cho baseline RF; ElasticNet (coordinate descent), HGB (early_stopping=False), KNN, Ridge đều deterministic và không tiêu thụ seed tự do. Yêu cầu kiểm chứng: chạy 2 lần → md/csv sha256 byte-giống (kiểm chứng do verify lane thực hiện ngoài tệp này).
+- Determinism: numpy seed 11 (phòng hờ); estimator dùng đúng `random_state=42` theo thiết kế ứng viên và khớp SEED công bố (`scripts/supervised/predict_supervised.py:72`) cho baseline RF; ElasticNet (coordinate descent), HGB (early_stopping=False), KNN, Ridge đều deterministic và không tiêu thụ seed tự do. Yêu cầu kiểm chứng: chạy 2 lần → md/csv sha256 byte-giống (kiểm chứng do verify lane thực hiện ngoài tệp này).
 - Môi trường chạy: python 3.14.2, sklearn 1.8.0, pandas 2.3.3, numpy 2.4.0.
 - Tệp ghi: `results/candidates_regression.csv` + tệp này. Không tệp khác.

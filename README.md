@@ -38,7 +38,7 @@ Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đ
 |---|---|
 | Gửi bài cho thầy | `submissions/` có file nộp đặt tên theo từng mốc và hai gói ZIP. |
 | Đọc giải thích để học | `study/` có bốn notebook ôn tập (gồm bài tập K-Means và HC của Day 9) và `sting_GiaiThich.py` (bản `src/sting.py` có chú thích đầy đủ, cùng logic). |
-| Xem thuật toán và cách chạy | `src/` chứa STING tự cài đặt. `scripts/` xử lý dữ liệu, chạy phân tích và tạo file. |
+| Xem thuật toán và cách chạy | `src/` chứa STING tự cài đặt. `scripts/` chia theo chức năng: `data/` dựng và kiểm tra dữ liệu, `analysis/` phân cụm STING và kiểm định, `supervised/` mô hình có giám sát, `figures/` vẽ hình, `notebooks/` sinh notebook, `deliverables/` báo cáo, slide và gói nộp, `common/` tiện ích dùng chung. Chạy từ thư mục gốc, ví dụ `python scripts/data/check_data.py`. |
 | Tìm dữ liệu | `data/raw/` chứa workbook và các nguồn tham chiếu. `data/processed/` chứa panel PAPI và dữ liệu đã xử lý. |
 | Xem kết quả đã lưu | `models/` chứa model và cấu hình. `results/` chứa bảng và hình kết quả. |
 | Tái tạo bài nộp | `notebooks/`, `slides/` và `reports/` chứa notebook, slide và báo cáo dùng để tạo các gói nộp. `reports/` cũng có tài liệu chuyên môn. |
@@ -74,7 +74,7 @@ python -m pytest tests -q
 python -m ruff check .
 
 # Kiểm tra dữ liệu (sau khi panel được tạo ở Phase 2)
-python scripts/check_data.py
+python scripts/data/check_data.py
 ```
 
 Ghi chú: `jupyter` CLI chưa vào PATH — dùng `python -m jupyter` / `python -m nbconvert`.
@@ -85,40 +85,40 @@ Bảng dưới ánh xạ chủ đề đã dạy (Day 1–4, môn Học máy — 
 
 | Chủ đề (Day) | Trong repo |
 |---|---|
-| Ý tưởng ML, học có/không giám sát, clustering grid-based (Day 1) | `src/sting.py`; demo synthetic + test: `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`, `tests/test_sting.py`; PAPI thật: `scripts/predict_demo.py`, `results/predict_summary.md` |
-| Regression vs classification (Day 1) | Hồi quy: `scripts/predict_supervised.py` → `results/supervised_metrics.csv`; phân loại pseudo-label: cùng script + `results/supervised_summary.md` |
-| Naive Bayes, KNN, đánh giá accuracy / F1 (Day 2) | `scripts/course_supervised_baselines.py` → `results/course_supervised_baselines.{csv,md}`; sàn chance/drift: `scripts/classifier_label_baselines.py` → `results/classifier_label_baselines.{csv,md}`; pipeline chọn LR: `scripts/predict_supervised.py` |
+| Ý tưởng ML, học có/không giám sát, clustering grid-based (Day 1) | `src/sting.py`; demo synthetic + test: `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`, `tests/test_sting.py`; PAPI thật: `scripts/analysis/predict_demo.py`, `results/predict_summary.md` |
+| Regression vs classification (Day 1) | Hồi quy: `scripts/supervised/predict_supervised.py` → `results/supervised_metrics.csv`; phân loại pseudo-label: cùng script + `results/supervised_summary.md` |
+| Naive Bayes, KNN, đánh giá accuracy / F1 (Day 2) | `scripts/supervised/course_supervised_baselines.py` → `results/course_supervised_baselines.{csv,md}`; sàn chance/drift: `scripts/supervised/classifier_label_baselines.py` → `results/classifier_label_baselines.{csv,md}`; pipeline chọn LR: `scripts/supervised/predict_supervised.py` |
 | Confusion matrix, precision/recall (Day 2) | Ma trận 6 model học phần: `results/figs/course_confusion_matrix.png`; LR đã chọn (một model): `results/figs/supervised_confusion.png` |
 | SVM tuyến tính + kernel RBF (Day 3) | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
-| Decision Tree, Random Forest (Day 3) | Cùng `scripts/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/predict_supervised.py` (chọn model theo CV, không theo holdout) |
-| Tiền xử lý Day 4 (Cleaning → Integration → Transformation) | `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
+| Decision Tree, Random Forest (Day 3) | Cùng `scripts/supervised/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/supervised/predict_supervised.py` (chọn model theo CV, không theo holdout) |
+| Tiền xử lý Day 4 (Cleaning → Integration → Transformation) | `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/data/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
 | Q&A thi / vấn đáp theo slide | `reports/on-tap/qa_course_concepts.md` (midterm/cuối kỳ bổ sung: `reports/on-tap/qa_midterm.md`, `reports/on-tap/qa_final.md`) |
 
 Tái tạo audit và bảng classifier (nếu artifact cũ):
 
 ```powershell
-python scripts/preprocessing_audit.py
-python scripts/course_supervised_baselines.py
-python scripts/classifier_label_baselines.py   # tùy chọn — sàn hoán vị / drift thời gian
+python scripts/data/preprocessing_audit.py
+python scripts/supervised/course_supervised_baselines.py
+python scripts/supervised/classifier_label_baselines.py   # tùy chọn — sàn hoán vị / drift thời gian
 ```
 
 ## Tái tạo file nộp và ZIP
 
 ```powershell
 # Giữa kỳ
-python scripts/build_slides_10.py
-python scripts/gen_submission_demo.py
+python scripts/deliverables/build_slides_10.py
+python scripts/notebooks/gen_submission_demo.py
 
 # Cuối kỳ
-python scripts/gen_final_analysis.py
+python scripts/notebooks/gen_final_analysis.py
 python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb
-python scripts/build_report.py
-python scripts/update_report_fields.py   # cập nhật mục lục/số trang của báo cáo bằng Word (Windows)
-python scripts/build_slides.py           # slide vấn đáp tùy chọn
+python scripts/deliverables/build_report.py
+python scripts/deliverables/update_report_fields.py   # cập nhật mục lục/số trang của báo cáo bằng Word (Windows)
+python scripts/deliverables/build_slides.py           # slide vấn đáp tùy chọn
 
 # Đóng gói và chạy thử từ bản giải nén
-python scripts/build_submission_packages.py
-python scripts/build_submission_packages.py --verify
+python scripts/deliverables/build_submission_packages.py
+python scripts/deliverables/build_submission_packages.py --verify
 ```
 
 ZIP lấy các bản gốc trong `notebooks/`, `slides/` và `reports/`. Khi đổi các
@@ -130,9 +130,9 @@ bản gốc, đồng bộ cả bản rời trong `submissions/01-giua-ky/` hoặ
 Toàn bộ chạy **local, không cần dịch vụ ngoài**. Ba bước:
 
 ```powershell
-python scripts/predict_sweep.py        # 1) chốt cấu hình (train-only, KHÔNG nhìn 2024)
-python scripts/predict_demo.py         # 2) STING: học 2011–2023 → dự đoán cụm 2024
-python scripts/predict_supervised.py   # 3) model ML có giám sát (scikit-learn)
+python scripts/analysis/predict_sweep.py        # 1) chốt cấu hình (train-only, KHÔNG nhìn 2024)
+python scripts/analysis/predict_demo.py         # 2) STING: học 2011–2023 → dự đoán cụm 2024
+python scripts/supervised/predict_supervised.py   # 3) model ML có giám sát (scikit-learn)
 ```
 
 1. **`predict_sweep.py`** — quét cặp sub-dimension trong allowlist đã sàng lọc;
@@ -206,7 +206,7 @@ ridge = joblib.load("models/sup_ridge.joblib")
 print(ridge.predict(np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])))  # dự báo 6.1 năm sau
 ```
 
-**Lưu ý thang đo:** `scripts/check_data.py` đánh dấu cột có bước nhảy mean năm >0.25;
+**Lưu ý thang đo:** `scripts/data/check_data.py` đánh dấu cột có bước nhảy mean năm >0.25;
 đây là heuristic cần đối chiếu workbook/codebook, không tự chứng minh đổi thang. Ví dụ
 `sd_5_4` có thay đổi khoảng điểm được ghi trong workbook. Sweep chỉ dùng allowlist
 sub-dimension không bị flag trong giai đoạn train; dimension-level scores không được

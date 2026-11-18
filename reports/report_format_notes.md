@@ -39,11 +39,11 @@ Hình/caption/TOC không có mẫu tương ứng: giữ cấu trúc và cỡ hì
 trang. Bỏ ngắt trang kép sau bìa. Các field có updateFields để Word cập nhật.
 
 `assets/report-cover.xml` giữ các khối Word đã sao chép và điền thông tin.
-`scripts/build_report.py` dùng `scripts/report_style.py` để ghép bìa trước khi lưu.
+`scripts/deliverables/build_report.py` dùng `scripts/deliverables/report_style.py` để ghép bìa trước khi lưu.
 Thay bìa của bản hiện có bằng lệnh sau:
 
 ```powershell
-python scripts/report_style.py reports/final_report.docx --cover-only
+python scripts/deliverables/report_style.py reports/final_report.docx --cover-only
 # Nếu bản chính đang được Word mở, dùng --output <bản-mới.docx>
 ```
 

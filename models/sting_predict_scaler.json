@@ -24,7 +24,7 @@
   },
   "provenance": {
     "config": "models/predict_config.json",
-    "frozen_via": "scripts/predict_sweep.py (train-only, không nhìn 2024)",
+    "frozen_via": "scripts/analysis/predict_sweep.py (train-only, không nhìn 2024)",
     "trained_on": "PAPI 2011–2023"
   }
 }

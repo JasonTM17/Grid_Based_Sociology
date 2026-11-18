@@ -2,7 +2,7 @@
 
 ## Quy trình
 - Nhãn: STING fit tới cutoff năm *t* gán tỉnh năm *t+1* vào **vùng dày** (1) hay **ngoại vi** (0) — pseudo-label, không phải ground truth khảo sát.
-- Đặc trưng: cùng 8 chỉ tiêu sub-dimension năm *t* như `scripts/predict_supervised.py`.
+- Đặc trưng: cùng 8 chỉ tiêu sub-dimension năm *t* như `scripts/supervised/predict_supervised.py`.
 - Huấn luyện/CV: expanding origin 2017–2022, warm-up 2011–2016; scaler trong Pipeline, fit chỉ trên phần train từng fold.
 - Holdout: một lần duy nhất cặp 2023→2024 (59 tỉnh); **không** dùng để chọn model.
 - Chọn model theo macro-F1 CV (cột `value_cv`); so sánh với majority và logistic regression có sẵn trong repo.

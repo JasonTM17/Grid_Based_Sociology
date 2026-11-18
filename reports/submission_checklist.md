@@ -6,21 +6,21 @@ _Cập nhật: 2026-11-17 · Nhóm 15 · Deadline và nơi nộp chính thức: 
 
 - [x] **Báo cáo DOCX tiếng Việt** — `reports/final_report.docx`, cùng nội dung với bản Word trong gói cuối kỳ. Đã kiểm tra 35 trang xuất từ Word, gồm bìa và mục lục theo phân trang mới, 12 hình, 12 bảng được đánh số và bảng chữ viết tắt.
 - [x] **Notebook cuối kỳ** — `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` (execute sạch, 5 output `image/png` nhúng; lệnh: `python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb`).
-- [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/check_data.py` → PASS.
-- [x] **Notebook nộp bài (giữa kỳ)** — `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch, 0 lỗi; sinh bằng `python scripts/gen_submission_demo.py`).
-- [x] **Slides nộp bài (giữa kỳ)** — `slides/submission.pptx` (10 slide, tiếng Việt, notes kèm từng slide; build bằng `python scripts/build_slides_10.py`). Deck phụ lục mở rộng cho cuối kỳ: `slides/final.pptx` (16 slide).
+- [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/data/check_data.py` → PASS.
+- [x] **Notebook nộp bài (giữa kỳ)** — `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch, 0 lỗi; sinh bằng `python scripts/notebooks/gen_submission_demo.py`).
+- [x] **Slides nộp bài (giữa kỳ)** — `slides/submission.pptx` (10 slide, tiếng Việt, notes kèm từng slide; build bằng `python scripts/deliverables/build_slides_10.py`). Deck phụ lục mở rộng cho cuối kỳ: `slides/final.pptx` (16 slide).
 
 ## Đối chiếu môn học (2026-11-12)
 
 - [x] **Bài nhóm Day 4** — `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` là bài riêng đã chạy từ workbook gốc và có bảng kết quả. Hai notebook đồ án dùng panel và bảng kiểm tra tiền xử lý đã lưu.
-- [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
-- [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).
+- [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/supervised/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
+- [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/supervised/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).
 - [x] **Q&A theo khái niệm bài giảng** — `reports/on-tap/qa_course_concepts.md`.
 
 ## Tái lập / chất lượng mã
 
 - [x] Toàn bộ test xanh (`python -m pytest tests -q`)
-- [x] Smoke demo (`python scripts/demo_smoke.py` → SAN SANG DEMO, toàn bộ mục PASS)
+- [x] Smoke demo (`python scripts/deliverables/demo_smoke.py` → SAN SANG DEMO, toàn bộ mục PASS)
 - [x] Đối chiếu chéo Mendeley: max |diff| = 0.0
 - [x] Mọi số liệu trong báo cáo/slide truy được về `results/*.csv` (metrics.csv, per_year.csv, robustness.csv, predict_summary.md, supervised_summary.md)
 - [x] PROVENANCE + SHA-256 cho 3 nguồn dữ liệu (`data/raw/*/PROVENANCE.md`)
@@ -42,8 +42,8 @@ Không chỉ chép notebook và đổi tên panel: notebook còn cần `src/`, `
 `models/`, `results/` và đúng đường dẫn `data/processed/`.
 
 ```powershell
-python scripts/build_submission_packages.py
-python scripts/build_submission_packages.py --verify
+python scripts/deliverables/build_submission_packages.py
+python scripts/deliverables/build_submission_packages.py --verify
 ```
 
 Đầu ra tại `submissions/`:

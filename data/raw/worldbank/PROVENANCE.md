@@ -12,7 +12,7 @@
 ## Xử lý
 - File `*.zip` là bản tải nguyên trạng; file `<MA_CHI_SO>.csv` là CSV dữ liệu tách từ ZIP (giữ nguyên nội dung, chỉ đổi tên). Hai file metadata khác trong ZIP (Metadata_Country, Metadata_Indicator) không tách ra; xem trong ZIP nếu cần.
 - Chuẩn hóa: `data/processed/external_worldbank_vnm.csv` — dạng long (indicator_code, indicator_name, year, value), lọc năm 2010–2024, bỏ hàng giá trị trống. Không nội suy, không bịa số liệu.
-- Script tạo lại file này mỗi lần chạy: `scripts/build_external_worldbank.py` (chạy từ thư mục gốc repo bằng `python -E scripts/build_external_worldbank.py`).
+- Script tạo lại file này mỗi lần chạy: `scripts/data/build_external_worldbank.py` (chạy từ thư mục gốc repo bằng `python -E scripts/data/build_external_worldbank.py`).
 
 ## Kiểm tra chéo với JSON API (cùng nguồn, render khác định dạng)
 

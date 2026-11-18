@@ -1,6 +1,6 @@
 # Chẩn đoán chuyên sâu phần supervised — chỉ mô tả, không chọn model
 
-- Script: `scripts/supervised_depth.py`, tái dùng pipeline `scripts/predict_supervised.py` (`build_regression_pairs` :99, `expanding_origin_folds` :123, `build_classification_pairs` :187, spec model :276-285 và :342-348; hằng số `scripts/papi_pred_common.py:15-23`).
+- Script: `scripts/supervised/supervised_depth.py`, tái dùng pipeline `scripts/supervised/predict_supervised.py` (`build_regression_pairs` :99, `expanding_origin_folds` :123, `build_classification_pairs` :187, spec model :276-285 và :342-348; hằng số `scripts/common/papi_pred_common.py:15-23`).
 - Provenance (sha256 12 ký tự đầu): panel `papi_panel_63_2011_2024.csv` `87404305f36b` · config `predict_config.json` `9d8fa43aeb9f` (chỉ đọc) · dân số `external_gso_population_63_full.csv` `66dde17c97df`.
 - Seed: model giữ seed 42 của pipeline; permutation importance dùng seed 11, n_repeats=30 (theo yêu cầu lane). Mọi số tự tính trong bộ nhớ từ CSV provenance.
 - Siêu tham số CỐ ĐỊNH (chọn một lần bởi CV train-only expanding origin 2017–2022 của pipeline, tính lại trong bộ nhớ): Ridge alpha=0.1, LogisticRegression C=1, RF max_depth=4, min_samples_leaf=2. Không chọn lại theo từng cửa sổ, không dựa vào holdout.
@@ -112,5 +112,5 @@ Median dân số 2023 (của chính 59 tỉnh holdout) = 1248.11 nghìn người
 - Caveat: siêu tham số cố định được chọn bằng CV 2017–2022 của pipeline nên với cửa sổ learning curve có origin sớm (2016–2017) thông tin đó nằm trong tương lai của cửa sổ — đây là đặc tả model đã công bố, không phải quy trình chọn lại.
 - Holdout chỉ 1 năm → mọi kết luận residual ngoài mẫu chỉ mô tả cho (2023→2024), không khái quát; bảng 3a mở rộng chỉ là mô tả trên các năm CV.
 - Permutation importance trên train là in-sample; trên holdout chỉ 59 cặp nên khoảng biến thiên rộng.
-- Script này KHÔNG ghi `models/*`, KHÔNG chạy `scripts/predict_sweep.py`, KHÔNG sửa dữ liệu, KHÔNG ghi đè artifact đã công bố — chỉ thêm 4 file: `supervised_depth.md`, `supervised_depth.csv`, `supervised_learning_curve.png`, `supervised_importance.png`.
+- Script này KHÔNG ghi `models/*`, KHÔNG chạy `scripts/analysis/predict_sweep.py`, KHÔNG sửa dữ liệu, KHÔNG ghi đè artifact đã công bố — chỉ thêm 4 file: `supervised_depth.md`, `supervised_depth.csv`, `supervised_learning_curve.png`, `supervised_importance.png`.
 - Kiểm đối tái lập: ĐẠT — tái tính trong bộ nhớ cho ridge CV R²=0.265 / holdout MAE=0.0640 và RF CV R²=0.197 — KHỚP results/supervised_metrics.csv (công bố: 0.265 / 0.064 / 0.197).

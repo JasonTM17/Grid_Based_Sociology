@@ -5,7 +5,7 @@ _Mục tiêu: bạn mở repo ra và demo được ngay — không cần mạng,
 ## 0. Một lệnh kiểm tra sẵn sàng (làm trước giờ thi 15′)
 
 ```powershell
-python scripts/demo_smoke.py
+python scripts/deliverables/demo_smoke.py
 ```
 
 Phải in ra: **KET LUAN: SAN SANG DEMO (N/N muc dat)** với N = số mục kiểm tra (gom cả `submission.pptx` ≤10 slide và `Nhom15_GiuaKy_STING_PAPI.ipynb` 0 lỗi). Nếu có FAIL → sửa xong chạy lại.
@@ -47,7 +47,7 @@ Khi cần minh họa kết quả đối chiếu PCI, mở dashboard bằng
 | Sự cố | Xử lý |
 |---|---|
 | Máy chiếu không có Python/x86 gói | Mở notebook đã có output sẵn + `results/figs/predict_2024.png` |
-| Chạy nbconvert báo lỗi | Mở notebook đã lưu (không cần chạy lại); chạy `python scripts/demo_smoke.py` để biết hỏng gì |
+| Chạy nbconvert báo lỗi | Mở notebook đã lưu (không cần chạy lại); chạy `python scripts/deliverables/demo_smoke.py` để biết hỏng gì |
 | Hình không hiện trong notebook | Mở trực tiếp `results/figs/predict_2024.png`, `evolution.png`, `map_2024.png` |
 | Font hiển thị lạ | `chcp 65001` rồi mở lại terminal; notebook/slides dùng DejaVu/Calibri (Unicode OK) |
 | Mất mạng | Không liên quan — mọi dữ liệu, model, hình đã nằm trong repo |

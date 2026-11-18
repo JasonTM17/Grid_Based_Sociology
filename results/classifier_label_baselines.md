@@ -1,7 +1,7 @@
 # Baseline nhãn hoán vị và drift thời gian (classifier pseudo-label)
 
 ## Phương pháp
-- CV: expanding origin 2017–2022, warm-up 2011–2016; giống `scripts/course_supervised_baselines.py`.
+- CV: expanding origin 2017–2022, warm-up 2011–2016; giống `scripts/supervised/course_supervised_baselines.py`.
 - Hoán vị nhãn: 200 lần, seed gốc 42; chỉ hoán vị nhãn **train** từng fold; fit bằng **fixed_best_params** (Pipeline/ siêu tham số từ GridSearchCV đã công bố, không chạy lại lưới).
 - Baseline thời gian: chỉ `year_t` hoặc chỉ prevalence nhãn 1 năm *t−1*.
 - Holdout 2023→2024 **không** dùng cho bất kỳ lựa chọn nào trong script này.

@@ -1,6 +1,6 @@
 # External validation của cụm STING — PCI · y tế 2020 · GRDP · WDI
 
-Sinh bởi `scripts/external_validation.py` (gaps [2], [8], [9] + phần GRDP của gap [3] — reports/external_data_expansion.md §4.2). Nhãn cụm lấy từ `results/predict_all_years.csv` (model đóng băng, refit tất định được gate bởi `tests/test_artifact_reproduction.py`); thống kê bằng scipy 1.16.3 (Python 3.14.2). Mọi số liệu tính lại trực tiếp từ CSV — không hardcode.
+Sinh bởi `scripts/analysis/external_validation.py` (gaps [2], [8], [9] + phần GRDP của gap [3] — reports/external_data_expansion.md §4.2). Nhãn cụm lấy từ `results/predict_all_years.csv` (model đóng băng, refit tất định được gate bởi `tests/test_artifact_reproduction.py`); thống kê bằng scipy 1.16.3 (Python 3.14.2). Mọi số liệu tính lại trực tiếp từ CSV — không hardcode.
 
 ## 1) Kiểm định CHÍNH: PCI theo nhãn cụm trên lưới đầy 2011–2022
 
@@ -86,7 +86,7 @@ Sinh bởi `scripts/external_validation.py` (gaps [2], [8], [9] + phần GRDP c�
 ## 6) Tái lập
 
 ```powershell
-python -E scripts/external_validation.py
+python -E scripts/analysis/external_validation.py
 ```
 - Đầu vào: `data/processed/external_{pci_63_full,gso_population_63_full,gso_grdp_63,odm_health_63,worldbank_vnm}.csv` + `results/predict_all_years.csv`.
 - Đầu ra: `results/external_validation.md` (file này), `results/external_validation.csv`, 4 hình trong `results/figs/external_*`.

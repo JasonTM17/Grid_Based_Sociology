@@ -2,7 +2,7 @@
 
 > **Trạng thái: PHÂN TÍCH THAM KHẢO cho GV duyệt B5.** Script chạy
 > in-memory, KHÔNG ghi `models/predict_config.json`, không lưu model,
-> không thực thi `scripts/predict_sweep.py`, không sửa số đã công bố.
+> không thực thi `scripts/analysis/predict_sweep.py`, không sửa số đã công bố.
 
 ## 0. Tóm tắt
 
@@ -15,7 +15,7 @@
 ## 1. Phạm vi & phương pháp
 
 - Dữ liệu: `data/processed/papi_panel_63_2011_2024.csv` (chỉ ĐỌC).
-- Preprocessing tái hiện nguyên văn `scripts/predict_sweep.py`:
+- Preprocessing tái hiện nguyên văn `scripts/analysis/predict_sweep.py`:
   train ≤ 2020, tương lai giả 2021–2022 (2024 không tham gia);
   StandardScaler fit trên train của từng cặp; dropna cặp gồm cột
   `year` (`predict_sweep.py:118`); ngưỡng 500/100 dòng
@@ -145,7 +145,7 @@ và y ≥ 0.05; kim cương = 4 tổ hợp pass bộ lọc cũ.
   theo ba mcs; `fail_mod_mcs005` = điều kiện bị phạm).
 - sha256(`protocol_sensitivity.csv`) = `05cf028ae34d38ca524cad197ade8ef046e712e5cfd27b23b137e2733cec609a`
 - sha256(`protocol_sensitivity_grid.png`) = `472f584483a198a1f75aae2cbaba404998618e9b8227b6995c3e2c1082e90027`
-- Kiểm định deterministic: chạy `python -E scripts/protocol_sensitivity.py`
+- Kiểm định deterministic: chạy `python -E scripts/analysis/protocol_sensitivity.py`
   2 lần từ thư mục gốc repo; md/csv/png phải sha256 byte-giống
   (người chạy đối chiếu ngoài script; output cố tình không chứa
   thời gian chạy).

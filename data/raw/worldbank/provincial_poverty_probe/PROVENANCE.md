@@ -59,8 +59,8 @@ KHÔNG TIN CẬY cho tới khi được kiểm chứng ở giai đoạn tích h�
 - `spid_vnm6_admin1_monetary_extract.csv` — 66 dòng (11 năm x 6 vùng, nhóm
   ALL): year, geo_code, sample, mean2021, poor300, poor420, poor830, gini, theil.
 - `spid_vnm6_admin1_mpm_extract.csv` — 42 dòng (7 năm x 6 vùng).
-- Script: `scripts/wb_undp_poverty_probe.py`, chạy từ thư mục gốc repo
-  `python -E scripts/wb_undp_poverty_probe.py`. KHÔNG merge vào
+- Script: `scripts/data/wb_undp_poverty_probe.py`, chạy từ thư mục gốc repo
+  `python -E scripts/data/wb_undp_poverty_probe.py`. KHÔNG merge vào
   data/processed ở giai đoạn truy tìm.
 
 ## Giấy phép

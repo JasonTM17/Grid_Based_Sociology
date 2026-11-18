@@ -7,7 +7,7 @@ là bảng "Tổng hợp số liệu hộ nghèo, hộ cận nghèo cả nước
 tỉnh/thành phố: Tổng số hộ dân, Số hộ nghèo, Tỷ lệ %, Số hộ cận nghèo, Tỷ lệ %.
 
 Ngày tải: **2026-11-08**. Mọi tệp trong thư mục này là **dữ liệu KHÔNG TIN CẬY**
-(chỉ đọc; script chuyển đổi nằm ở `scripts/build_molisa_poverty.py` và chạy từ
+(chỉ đọc; script chuyển đổi nằm ở `scripts/data/build_molisa_poverty.py` và chạy từ
 thư mục gốc repo).
 
 ## Văn bản gốc (bản phát hành chính thức của MOLISA)

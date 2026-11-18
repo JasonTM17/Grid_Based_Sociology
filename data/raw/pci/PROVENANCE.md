@@ -6,8 +6,8 @@
   <https://pcivietnam.vn/gioi-thieu/chinh-sach-trich-dan-du-lieu.html> (ghi nguồn
   VCCI — USAID khi sử dụng lại).
 - **Ngày tải:** 2026-11-07 (curl, không đăng nhập, không vượt cơ chế bảo vệ nào).
-- **Script chuyển đổi:** `scripts/build_pci_full.py` (chạy từ thư mục gốc repo:
-  `python -E scripts/build_pci_full.py`; chỉ đọc file gốc trong thư mục này, ghi
+- **Script chuyển đổi:** `scripts/data/build_pci_full.py` (chạy từ thư mục gốc repo:
+  `python -E scripts/data/build_pci_full.py`; chỉ đọc file gốc trong thư mục này, ghi
   `data/processed/external_pci_63_full.csv`).
 
 ## Điểm tổng hợp (weighted score) từng năm lấy từ đâu

@@ -30,7 +30,7 @@
 - Nhãn phân loại phụ thuộc allowlist + tham số STING do predict_sweep.py chọn bằng cách chấm coverage trên đúng 2021–2022 — trùng 2 fold CV cuối, nên macro-F1 CV 0.434 hơi lạc quan.
 - Prevalence nhãn 1 trôi mạnh theo năm: 0.000 (2011) → 0.917 (2021); trong mọi fold CV (2017–2022) lớp đa số train là 0 ở cả 6 fold còn validation luôn đa số 1 (prevalence 44%–92%), nên macro-F1 CV phần lớn phản ánh việc model học drift độ phủ; baseline mù thời gian “always dự đoán 1” đạt macro-F1 0.400 (chỉ thấp hơn LR 0.034).
 - value_cv là best_score_ của GridSearchCV — hiệu năng CV trung bình của combo TỐT NHẤT được chọn trên chính các fold đó (không nested CV), nên hơi lạc quan; bias nhỏ vì lưới thô (spread điểm trong lưới Ridge alpha {0.1, 1, 10} ≈ 0.001).
-- REGRESSION_TARGET (sd_6_1) nằm trong REGRESSION_FEATURES (scripts/papi_pred_common.py:19-23): không leakage thời gian (target lấy từ năm t+1) nhưng lợi thế 6.3% so với carry-forward chủ yếu là thông tin lag-1 của chính target — bỏ sd_6_1 khỏi features, CV R² 0.265 → -0.264; corr(dự báo, carry-forward) holdout = 0.99.
+- REGRESSION_TARGET (sd_6_1) nằm trong REGRESSION_FEATURES (scripts/common/papi_pred_common.py:19-23): không leakage thời gian (target lấy từ năm t+1) nhưng lợi thế 6.3% so với carry-forward chủ yếu là thông tin lag-1 của chính target — bỏ sd_6_1 khỏi features, CV R² 0.265 → -0.264; corr(dự báo, carry-forward) holdout = 0.99.
 - Một holdout 2023→2024 và pseudo-label không đủ để khẳng định năng lực dự báo xã hội tổng quát.
 - Nạp lại dự báo không cần train lại:
   `import joblib; m = joblib.load('models/sup_ridge.joblib')` rồi truyền vector 8 chỉ số; classifier tương tự qua `models/sup_classifier.joblib` (logistic regression, nhãn 0/1).

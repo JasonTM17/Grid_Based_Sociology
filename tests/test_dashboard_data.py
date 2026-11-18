@@ -1,11 +1,11 @@
-"""Kiểm thử scripts/dashboard_data.py: nạp artifact, view STING/holdout, kiểm chứng ngoại lai."""
+"""Kiểm thử scripts/analysis/dashboard_data.py: nạp artifact, view STING/holdout, kiểm chứng ngoại lai."""
 
 import numpy as np
 import pandas as pd
 import pytest
 from scipy import stats as scipy_stats
 
-from scripts.dashboard_data import (
+from scripts.analysis.dashboard_data import (
     POVERTY_OVERLAP_YEARS,
     DashboardDataError,
     ensure_external_pci_consistency,
@@ -30,7 +30,7 @@ from scripts.dashboard_data import (
     published_external_pci_tests,
     select_classification_model,
 )
-from scripts.papi_pred_common import REGRESSION_FEATURES, REGRESSION_TARGET, ROOT
+from scripts.common.papi_pred_common import REGRESSION_FEATURES, REGRESSION_TARGET, ROOT
 
 
 class DummyRegressor:
@@ -310,42 +310,42 @@ def test_classifier_artifact_missing_reports_rebuild_command(tmp_path):
 
 
 def test_missing_artifact_errors_contain_rebuild_commands(tmp_path):
-    # 1. Missing panel -> python scripts/build_panel.py
-    with pytest.raises(DashboardDataError, match=r"python scripts/build_panel\.py"):
+    # 1. Missing panel -> python scripts/data/build_panel.py
+    with pytest.raises(DashboardDataError, match=r"python scripts/data/build_panel\.py"):
         load_dashboard_assets(tmp_path)
 
     panel_file = tmp_path / "data" / "processed" / "papi_panel_63_2011_2024.csv"
     panel_file.parent.mkdir(parents=True, exist_ok=True)
     panel_file.write_text("province_code,year\n1,2024\n", encoding="utf-8")
 
-    # 2. Missing config -> python scripts/predict_sweep.py
-    with pytest.raises(DashboardDataError, match=r"python scripts/predict_sweep\.py"):
+    # 2. Missing config -> python scripts/analysis/predict_sweep.py
+    with pytest.raises(DashboardDataError, match=r"python scripts/analysis/predict_sweep\.py"):
         load_dashboard_assets(tmp_path)
 
     config_file = tmp_path / "models" / "predict_config.json"
     config_file.parent.mkdir(parents=True, exist_ok=True)
     config_file.write_text('{"features": []}', encoding="utf-8")
 
-    # 3. Missing assignments -> python scripts/predict_demo.py
-    with pytest.raises(DashboardDataError, match=r"python scripts/predict_demo\.py"):
+    # 3. Missing assignments -> python scripts/analysis/predict_demo.py
+    with pytest.raises(DashboardDataError, match=r"python scripts/analysis/predict_demo\.py"):
         load_dashboard_assets(tmp_path)
 
     assignments_file = tmp_path / "results" / "predict_all_years.csv"
     assignments_file.parent.mkdir(parents=True, exist_ok=True)
     assignments_file.write_text("province_code,year\n1,2024\n", encoding="utf-8")
 
-    # 4. Missing metrics -> python scripts/predict_supervised.py
-    with pytest.raises(DashboardDataError, match=r"python scripts/predict_supervised\.py"):
+    # 4. Missing metrics -> python scripts/supervised/predict_supervised.py
+    with pytest.raises(DashboardDataError, match=r"python scripts/supervised/predict_supervised\.py"):
         load_dashboard_assets(tmp_path)
 
-    # 5. Missing ridge model in load_regression_models -> python scripts/predict_supervised.py
-    with pytest.raises(DashboardDataError, match=r"python scripts/predict_supervised\.py"):
+    # 5. Missing ridge model in load_regression_models -> python scripts/supervised/predict_supervised.py
+    with pytest.raises(DashboardDataError, match=r"python scripts/supervised/predict_supervised\.py"):
         load_regression_models(tmp_path)
 
-    # 6. Missing random forest model in load_regression_models -> python scripts/predict_supervised.py
+    # 6. Missing random forest model in load_regression_models -> python scripts/supervised/predict_supervised.py
     ridge_file = tmp_path / "models" / "sup_ridge.joblib"
     ridge_file.write_text("dummy", encoding="utf-8")
-    with pytest.raises(DashboardDataError, match=r"python scripts/predict_supervised\.py"):
+    with pytest.raises(DashboardDataError, match=r"python scripts/supervised/predict_supervised\.py"):
         load_regression_models(tmp_path)
 
 
@@ -444,14 +444,14 @@ def _validation_row(section, group, n="", note="", **cells):
 
 
 def test_load_external_validation_assets_missing_files_point_to_rebuild(tmp_path):
-    with pytest.raises(DashboardDataError, match=r"python scripts/external_validation\.py"):
+    with pytest.raises(DashboardDataError, match=r"python scripts/analysis/external_validation\.py"):
         load_external_validation_assets(tmp_path)
 
     pci_file = tmp_path / "data" / "processed" / "external_pci_63_full.csv"
     pci_file.parent.mkdir(parents=True, exist_ok=True)
     _make_pci_frame().to_csv(pci_file, index=False, encoding="utf-8")
 
-    with pytest.raises(DashboardDataError, match=r"python scripts/external_validation\.py"):
+    with pytest.raises(DashboardDataError, match=r"python scripts/analysis/external_validation\.py"):
         load_external_validation_assets(tmp_path)
 
 
@@ -626,7 +626,7 @@ def test_published_external_pci_tests_parses_published_rows():
 
 def test_published_external_pci_tests_parses_bound_p_note():
     """Note dạng chặn trên 'p < 1e-12' (format_p_value cho p cực nhỏ, cùng quy
-    ước fmt_p của scripts/external_validation.py) phải đọc được — trước fix
+    ước fmt_p của scripts/analysis/external_validation.py) phải đọc được — trước fix
     parser raise 'không đọc được định dạng' dù artifact nhất quán."""
     validation = pd.DataFrame([
         _validation_row("pci_2011_2022", "nhiễu (–1)", n=149, mean=59.798),
@@ -888,7 +888,7 @@ def _make_poverty_assignments() -> pd.DataFrame:
 
 
 def test_load_poverty_assets_missing_file_points_to_rebuild(tmp_path):
-    with pytest.raises(DashboardDataError, match=r"python scripts/build_poverty_63\.py"):
+    with pytest.raises(DashboardDataError, match=r"python scripts/data/build_poverty_63\.py"):
         load_poverty_assets(tmp_path)
 
 

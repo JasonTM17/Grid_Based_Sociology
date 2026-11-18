@@ -10,7 +10,7 @@
   thiệp cơ chế bảo vệ nào.
 - **Cách tải bảng PX-Web:** giao diện PX-Web "cổ" của GSO không mở API v1 cho
   database Tài khoản quốc gia / Dân số (POST `/api/v1/...` trả 404; GET chỉ trả
-  metadata). Script `scripts/gso_pxweb_fetch.py` giả lập trình duyệt: GET trang
+  metadata). Script `scripts/data/gso_pxweb_fetch.py` giả lập trình duyệt: GET trang
   chọn biến → POST form ASP.NET (VIEWSTATE/EVENTVALIDATION + danh sách giá trị
   chọn + nút "Tiếp tục") → lưu HTML bảng kết quả vào thư mục này.
 
@@ -66,7 +66,7 @@ URL gốc:
 - Niên giám 2025: `https://www.nso.gov.vn/wp-content/uploads/2026/07/NG-TOAN-QUOC-2025-1.pdf`
 - Niên giám tóm tắt 2016: `https://www.nso.gov.vn/wp-content/uploads/2019/03/Ruot-nien-giam-TT-1.pdf`
 
-## Đối chiếu giữa các nguồn (đã chạy trong `scripts/build_gso_grdp_pop.py`)
+## Đối chiếu giữa các nguồn (đã chạy trong `scripts/data/build_gso_grdp_pop.py`)
 
 - GRDP pxweb V03.12 vs **Niên giám 2025** (bảng 86, tr.245–246; 2020/2022/2023/Sơ
   bộ 2024): **248/248 ô trùng khớp** (dung sai 0,051 = sai số làm tròn 1 chữ số).
@@ -89,7 +89,7 @@ URL gốc:
 | `external_gso_population_63_full.csv` | Dân số trung bình 63 tỉnh × 2011–2024: năm 2012–2014/2018–2022 giữ trích Niên giám (base), năm 2011/2015–2017/2023–2024 lấy từ pxweb V02.01; cột `source` phân biệt; không có cột đô thị cho năm lấp |
 | `external_poverty_63.csv` | Tỷ lệ hộ nghèo (`poverty_rate_pct`, %) 63 tỉnh × 14 năm (2006, 2008, 2010, 2012–2016, 2020–2025) từ pxweb V14.47; 882 dòng, 1 ô thiếu (TP.HCM 2016 — nguồn ghi "..") để trống; KHÔNG có 2017–2019 vì bảng nguồn không có, KHÔNG nội suy |
 
-Đối chiếu poverty V14.47 vs Niên giám (chạy trong `scripts/build_poverty_63.py`,
+Đối chiếu poverty V14.47 vs Niên giám (chạy trong `scripts/data/build_poverty_63.py`,
 dung sai 0,051):
 
 - vs **Niên giám 2025** bảng chương tr.934–935 (62 tỉnh × 2020, 2022, 2023,
@@ -145,7 +145,7 @@ hết, không có dòng nào bị bỏ/bịa mã**.
 | `V14.46` (bản PL.V14.23) "Tỷ lệ hộ nghèo phân theo thành thị, nông thôn và theo vùng" | Biến = CẢ NƯỚC / Kinh-Hoa / khác / Thành thị / Nông thôn / 6 vùng — **không có cấp tỉnh**; cột năm 1998–2016, 2020–2025 — **không có 2017–2019** | listbox trong `pxweb_V14.46_step1_2026-11-08.html` (dump 2026-11-08) |
 | `PL.V14.24` — bản vintage cũ của chính bảng theo địa phương | Cột năm **chỉ có 2020–2025** | listbox trong `pxweb_PL.V14.24_step1_2026-11-08.html` |
 | `V14.47` (kiểm tra lại lần 2) | Listbox "Năm": 2006, 2008, 2010, 2012–2016, 2020–2025 — xác nhận lại **không có 2017–2019** | trang chọn biến GET trực tiếp 2026-11-08 |
-| API v1 "Dân số và lao động" | `GET /api/v1/vi/Dân số và lao động/` — không bảng nào chứa "nghèo" (grep 0 match); database "Đầu tư" trả 404 | probe `scripts/gso_pxweb_probe.py tree` |
+| API v1 "Dân số và lao động" | `GET /api/v1/vi/Dân số và lao động/` — không bảng nào chứa "nghèo" (grep 0 match); database "Đầu tư" trả 404 | probe `scripts/data/gso_pxweb_probe.py tree` |
 | Cổng dữ liệu khác của GSO | `data.nso.gov.vn`, `opendata.nso.gov.vn`, `stat.gso.gov.vn`, `www.stat.gso.gov.vn`, `gso.gov.vn`, `www.gso.gov.vn`, `stat.gov.vn` — **đều không phân giải DNS**; chỉ `www.nso.gov.vn` (160.25.148.3) sống | `socket.gethostbyname` từng host, 2026-11-08 |
 
 ### 2. Nguồn điền 2017–2019: bảng nghèo đa chiều trong Niên giám Thống kê
@@ -170,7 +170,7 @@ TP. Hồ Chí Minh để trống cột 2020/2021 trong Niên giám 2021 (ô tr�
 không phải lỗi trích) — nhất quán với ghi chú cũ "TP.HCM 2020/2021 để trống
 trong Niên giám".
 
-### 3. Chuẩn hóa và kiểm tra (scripts/build_poverty_gap.py → 2026-11-08)
+### 3. Chuẩn hóa và kiểm tra (scripts/data/build_poverty_gap.py → 2026-11-08)
 
 - Chọn số theo **vintage mới nhất** chứa năm đó (quy ước như
   `external_gso_population_63_full.csv`): 2017 ← Niên giám 2020 (tr.879–880);
