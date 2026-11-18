@@ -41,7 +41,7 @@ SCRIPTS = (
     "course_supervised_baselines", "classifier_label_baselines",
     "external_validation", "poverty_validation", "cluster_profile",
     "supervised_depth", "preprocessing_sensitivity", "protocol_sensitivity",
-    "notebook_checks",
+    "notebook_checks", "fig_grid_levels_and_elbow",
 )
 MIDTERM_FIGURES = (
     "predict_2024", "00_synthetic_sting", "sting_first_real",

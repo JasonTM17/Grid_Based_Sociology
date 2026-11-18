@@ -118,12 +118,31 @@ test = rebuilt[rebuilt.year == 2024]
 print(f"Refit STING: {len(comparison)}/{len(saved)} nhãn khớp; model đã lưu khớp")
 print(f"2024: {len(test)}/63 tỉnh đủ chỉ tiêu; phân bố {test.pred_cluster.value_counts().sort_index().to_dict()}")"""))
 
+md(nbf.v4.new_markdown_cell("""### 1.2 Lưới STING trên PAPI
+
+Hình dưới cho thấy ba mức lưới của cấu hình đóng băng (`factor=4`, `min_count=5`).
+Mức 0 là một ô chứa toàn bộ điểm. Mức 1 chia mỗi chiều thành 4 đoạn và ghi số điểm
+trong từng ô. Mức 2 chia thành 16 đoạn; các ô có ít nhất 5 điểm là ô dày, các ô dày
+kề mặt được gom thành cụm, điểm ở ô còn lại là nhiễu."""))
+
+cd(nbf.v4.new_code_cell("""from IPython.display import Image, display
+display(Image(filename=str(ROOT / "results/figs/sting_grid_levels.png")))"""))
+
 md(nbf.v4.new_markdown_cell("""## 2. So sánh STING, K-means và DBSCAN trên PAPI 2011–2023
 
 Silhouette, Davies–Bouldin và Calinski–Harabasz được tính trên các điểm thuộc cụm."""))
 
 cd(nbf.v4.new_code_cell("""metrics = pd.read_csv(ROOT / "results/metrics.csv")
 show_md(metrics[metrics.scope == "pooled 2011-2023"].to_markdown(index=False))"""))
+
+md(nbf.v4.new_markdown_cell("""### Chọn k cho K-means đối chứng
+
+K-means cần chọn trước số cụm k. Hình dưới vẽ WCSS (tổng bình phương khoảng cách
+trong cụm) và silhouette theo k trên cùng hai chỉ tiêu đã chuẩn hóa. WCSS giảm
+dần, không có khuỷu rõ rệt. Silhouette cao nhất tại k = 2 (0,445), nên đối chứng
+dùng k = 2."""))
+
+cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/kmeans_elbow.png")))"""))
 
 md(nbf.v4.new_markdown_cell("""### Kết quả so sánh
 
