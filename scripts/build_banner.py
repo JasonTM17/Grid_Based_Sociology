@@ -8,10 +8,8 @@ Trình bày theo chuẩn ``scripts/fig_style.py``: lưu qua ``save_png`` ở 400
 Bố cục dựng trên khung toạ độ dữ liệu 1280×640, figure 6.4×3.2 inch × 400 DPI
 — cỡ chữ theo point giữ tỉ lệ như khung 1280 cũ (1 pt ≈ 2.78 px khung).
 
-Dòng nguồn ``add_source`` ghi trung thực: lưới ô bên phải là MÔ PHỎNG minh hoạ
-(seed cố định, không dựng từ dữ liệu), còn dữ liệu dự án được trích theo
-``data/raw/papi/PROVENANCE.md`` — PAPI — CECODES, VFF-CRT, RTA & UNDP, tải
-2026-11-03. Palette navy/gold là nhận diện riêng của ảnh trang trí, KHÔNG phải
+Ảnh không có dòng nguồn; lưới ô bên phải là mô phỏng minh hoạ (seed cố định),
+không dựng từ dữ liệu. Palette navy/gold là nhận diện riêng của ảnh trang trí, KHÔNG phải
 palette dữ liệu Okabe–Ito của fig_style. Chữ chân trang cỡ lớn hơn bản 1280×640
 để còn đọc được khi nền tảng thu nhỏ ảnh xem trước (~450 px).
 """
@@ -28,7 +26,7 @@ from matplotlib.patches import Rectangle  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from fig_style import add_source, apply_style, save_png  # noqa: E402
+from fig_style import apply_style, save_png  # noqa: E402
 
 OUT = ROOT / "assets" / "social_preview.png"
 
@@ -101,17 +99,6 @@ ax.text(96, 268, "Phân cụm 63 tỉnh Việt Nam\ntrên dữ liệu PAPI 2011�
         fontsize=10.25, color=MIST, linespacing=1.35, zorder=3)
 ax.text(96, 128, "TOPIC 6  ·  MACHINE LEARNING  ·  FROM-SCRATCH STING",
         fontsize=12, fontweight="bold", color=DIM, zorder=3)
-
-# Dòng nguồn — trung thực: lưới ô là mô phỏng minh hoạ (seed 11), KHÔNG dựng
-# từ dữ liệu; dữ liệu dự án trích theo data/raw/papi/PROVENANCE.md (tải
-# 2026-11-03). Dùng helper chuẩn, chỉnh màu/tạo độ cho nền navy.
-add_source(
-    fig,
-    "lưới ô minh hoạ — mô phỏng (seed 11), không dựng từ dữ liệu\n"
-    "dữ liệu dự án: PAPI — CECODES, VFF-CRT, RTA & UNDP",
-    retrieved="2026-11-03",
-    x=96 / 1280, y=22 / 640, color=DIM,
-)
 
 save_png(fig, OUT, dpi=400, bbox_inches=None, facecolor=NAVY)
 plt.close(fig)
