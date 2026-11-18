@@ -1,7 +1,7 @@
 """UI regression tests cho app.py qua streamlit.testing.v1.AppTest (Streamlit 1.58).
 
 Nguyên tắc số học: mọi kỳ vọng số ĐỌC TỪ artifact qua CÙNG hàm mà dashboard
-dùng (scripts/dashboard_data.py) — không hardcode giá trị kỳ vọng. Các chuỗi
+dùng (scripts/analysis/dashboard_data.py) — không hardcode giá trị kỳ vọng. Các chuỗi
 duy nhất được phép hardcode là nhãn UI/tiêu đề và thông điệp lỗi (hợp đồng của
 app), không phải số liệu.
 
@@ -25,9 +25,9 @@ import pytest
 import streamlit as st
 from streamlit.testing.v1 import AppTest
 
-from scripts import dashboard_data as dd
-from scripts.check_data import scale_audit
-from scripts.dashboard_data import (
+from scripts.analysis import dashboard_data as dd
+from scripts.data.check_data import scale_audit
+from scripts.analysis.dashboard_data import (
     PCI_TOP30_WINDOW,
     ensure_external_pci_consistency,
     external_pci_group_stats,
@@ -42,7 +42,7 @@ from scripts.dashboard_data import (
     select_classification_model,
     select_regression_model,
 )
-from scripts.papi_pred_common import REGRESSION_FEATURES, ROOT
+from scripts.common.papi_pred_common import REGRESSION_FEATURES, ROOT
 
 # Nhãn UI của app (app.py:130, 193-203).
 APP_TITLE = "Khám phá kết quả STING và dự báo PAPI"
@@ -58,7 +58,7 @@ TAB_EXTERNAL = "Kiểm chứng ngoại lai"
 TAB_AUDIT = "Audit dữ liệu"
 
 # Hằng số HÀNH VI của app (không phải số liệu): bộ tên model hardcode mà app.py:365
-# và scripts/dashboard_data.py:275-277/280-286 dùng để lọc bảng so sánh.
+# và scripts/analysis/dashboard_data.py:275-277/280-286 dùng để lọc bảng so sánh.
 APP_HOLDOUT_TABLE_MODELS = (
     "carry-forward (giữ giá trị năm nay)",
     "ridge",
@@ -431,7 +431,7 @@ def test_tab4_kiem_ngoai_numbers_match_external_validation_csv(assets, external_
     assert poverty_table.iloc[3]["Giá trị"] == f"{pov['mw_dm']['u']:.0f}"
     assert int(poverty_table.iloc[3]["n"]) == pov["mw_dm"]["n"]
     assert "Nghèo cấp tỉnh (GSO V14.47)" in text
-    assert "python scripts/build_poverty_63.py" in text  # caption nguồn block
+    assert "python scripts/data/build_poverty_63.py" in text  # caption nguồn block
     assert "không vẽ không test" in text  # 11 ô không nhãn được liệt kê tường minh
 
 

@@ -1,4 +1,4 @@
-"""Kiểm thử scripts/preprocessing_sensitivity.py."""
+"""Kiểm thử scripts/data/preprocessing_sensitivity.py."""
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from scripts.papi_pred_common import REGRESSION_FEATURES, load_panel
-from scripts.preprocessing_sensitivity import (
+from scripts.common.papi_pred_common import REGRESSION_FEATURES, load_panel
+from scripts.data.preprocessing_sensitivity import (
     CSV_COLUMNS,
     PUBLISHED_GATE,
     TrainFoldWinsorizer,
@@ -21,7 +21,7 @@ from scripts.preprocessing_sensitivity import (
     run_sensitivity,
     verify_published_gate,
 )
-from scripts.predict_supervised import (
+from scripts.supervised.predict_supervised import (
     CLASSIFICATION_CV_FIRST_YEAR,
     HOLDOUT_YEAR,
     build_regression_pairs,
@@ -105,7 +105,7 @@ def test_gridsearch_imputer_fold_median_excludes_validation_rows():
 
 
 def test_csv_schema_after_run(tmp_path, monkeypatch):
-    mod = importlib.import_module("scripts.preprocessing_sensitivity")
+    mod = importlib.import_module("scripts.data.preprocessing_sensitivity")
     tmp_csv = tmp_path / "preprocessing_sensitivity.csv"
     tmp_md = tmp_path / "preprocessing_sensitivity.md"
     monkeypatch.setattr(mod, "CSV_PATH", tmp_csv)

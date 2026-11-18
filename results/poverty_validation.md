@@ -1,6 +1,6 @@
 # Kiểm định bổ trợ — tỷ lệ hộ nghèo GSO theo nhãn cụm STING (cửa sổ giao 2012–2024)
 
-Sinh bởi `scripts/poverty_validation.py`. Kiểm chứng ngoại lai thứ hai của cụm STING sau PCI (nguồn độc lập với PAPI): nghèo GSO là số liệu thống kê chính thức, không phải khảo sát hộ dân. Nhãn cụm lấy từ `results/predict_all_years.csv` (model đóng băng, gate bởi `tests/test_artifact_reproduction.py`); join khóa (year, province_code) `validate="one_to_one"` đúng protocol `scripts/external_validation.py`. Thống kê bằng scipy 1.16.3 (Python 3.14.2), helper tái dùng nguyên xi (`group_table`, `anova_kruskal`, `source_note`, `place_n_labels`). Mọi số tự tính lại từ CSV — không hardcode, không nội suy.
+Sinh bởi `scripts/analysis/poverty_validation.py`. Kiểm chứng ngoại lai thứ hai của cụm STING sau PCI (nguồn độc lập với PAPI): nghèo GSO là số liệu thống kê chính thức, không phải khảo sát hộ dân. Nhãn cụm lấy từ `results/predict_all_years.csv` (model đóng băng, gate bởi `tests/test_artifact_reproduction.py`); join khóa (year, province_code) `validate="one_to_one"` đúng protocol `scripts/analysis/external_validation.py`. Thống kê bằng scipy 1.16.3 (Python 3.14.2), helper tái dùng nguyên xi (`group_table`, `anova_kruskal`, `source_note`, `place_n_labels`). Mọi số tự tính lại từ CSV — không hardcode, không nội suy.
 
 ## 1) Dữ liệu và join — cửa sổ giao 2012–2024
 
@@ -143,7 +143,7 @@ Sinh bởi `scripts/poverty_validation.py`. Kiểm chứng ngoại lai thứ hai
 
 4. 13 ô tỉnh-năm trong cửa sổ giao có poverty nhưng không có nhãn (panel PAPI thiếu sd_4_2/sd_6_1): Bắc Giang 2014; Đồng Tháp 2014; Quảng Ninh 2018; Đồng Tháp 2018; Quảng Ninh 2021; Bắc Giang 2021; Bắc Ninh 2021; Bắc Giang 2022; Bắc Ninh 2022; Quảng Ninh 2023; Bình Dương 2023; Vĩnh Phúc 2024; Tiền Giang 2024 — mask tường minh, không vẽ không test.
 
-5. Chuẩn nghèo ĐỔI theo giai đoạn (thu nhập 2011–2015 vs đa chiều từ ~2020 — data/raw/gso/PROVENANCE.md:48-58); các năm 2017–2019 điền thêm là ĐA CHIỀU theo footnote (*) của bảng Niên giám — cùng chuẩn với phần pxweb từ 2020, khớp 124/124 ở cột giao 2020/2021 (scripts/build_poverty_gap.py): so MỨC tuyệt đối xuyên năm không like-for-like; chỉ so GIỮA CỤM trong cùng một năm là hợp lệ — lý do bắt buộc phải có test đã-trừ-median-năm song song với test gộp.
+5. Chuẩn nghèo ĐỔI theo giai đoạn (thu nhập 2011–2015 vs đa chiều từ ~2020 — data/raw/gso/PROVENANCE.md:48-58); các năm 2017–2019 điền thêm là ĐA CHIỀU theo footnote (*) của bảng Niên giám — cùng chuẩn với phần pxweb từ 2020, khớp 124/124 ở cột giao 2020/2021 (scripts/data/build_poverty_gap.py): so MỨC tuyệt đối xuyên năm không like-for-like; chỉ so GIỮA CỤM trong cùng một năm là hợp lệ — lý do bắt buộc phải có test đã-trừ-median-năm song song với test gộp.
 
 6. KW gộp thô KHÔNG đáng kể (p = 0.198) trong khi đã-trừ-median-năm đáng kể (p = 0.000126): hai kết quả phải báo cáo cùng nhau; không được chọn trình bày một kết quả duy nhất (nguyên tắc trung thực của repo, build_report.py:628).
 
@@ -160,7 +160,7 @@ Sinh bởi `scripts/poverty_validation.py`. Kiểm chứng ngoại lai thứ hai
 ## 6) Tái lập
 
 ```powershell
-python -E scripts/poverty_validation.py
+python -E scripts/analysis/poverty_validation.py
 ```
 - Đầu vào: `data/processed/external_poverty_63.csv` + `results/predict_all_years.csv`.
 - Đầu ra: `results/poverty_validation.md` (file này), `results/poverty_validation.csv`, `results/figs/external_poverty_by_cluster.png`.

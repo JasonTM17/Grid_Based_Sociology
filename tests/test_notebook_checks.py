@@ -4,7 +4,7 @@ import copy
 
 import pytest
 
-from scripts.notebook_checks import notebook_issues
+from scripts.common.notebook_checks import notebook_issues
 
 
 def executed_notebook():

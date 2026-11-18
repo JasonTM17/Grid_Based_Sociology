@@ -15,7 +15,7 @@
 
 **Trạng thái repo** (tự báo cáo từ lệnh `git status --porcelain` — độc giả tái kiểm được bằng cách tự chạy lệnh này): **0 tệp tracked bị sửa**; tệp untracked gồm **13 tệp của 3 lane** + tệp báo cáo này:
 
-- 3 script: `scripts/protocol_sensitivity.py`, `scripts/cluster_profile.py`, `scripts/supervised_depth.py`;
+- 3 script: `scripts/analysis/protocol_sensitivity.py`, `scripts/analysis/cluster_profile.py`, `scripts/supervised/supervised_depth.py`;
 - 6 tệp md/csv: `results/protocol_sensitivity.{md,csv}`, `results/cluster_profile.{md,csv}`, `results/supervised_depth.{md,csv}`;
 - 4 hình: `results/figs/protocol_sensitivity_grid.png`, `results/figs/deep_cluster_profile.png`, `results/figs/supervised_learning_curve.png`, `results/figs/supervised_importance.png`.
 
@@ -56,7 +56,7 @@
 
 1. **Lane A — không có ứng viên thay thế theo bộ lọc sửa.** Mô phỏng bộ lọc chặt hơn (cân bằng cụm tính trên non-noise + ngưỡng `MIN_CLUSTER_SHARE`) trên đúng 224 tổ hợp: **0/224 pass tại cả ba mcs {0.02, 0.05, 0.10}**; điểm cao nhất toàn bảng là giải suy biến k=1; cấu hình đóng băng tự nó cũng fail bộ lọc sửa (`results/protocol_sensitivity.md:68`, `:122-128`). → Kết luận **đúng trong phạm vi giả định B5**: nếu coi "cân bằng trên non-noise" là chuẩn đánh giá đúng thì không có ứng viên thay thế. Việc bộ lọc sửa có nên trở thành chuẩn hay không **là quyết định của GV (mục 5b.2)** — tóm tắt này không chốt hướng.
 2. **Lane B — external validation giữ ở cặp tương phản lớn, vỡ ở cụm li ti.** PCI vẫn khác biệt mạnh (H = 31.7751, tái hiện đúng số công bố trên cùng join 747 ô); nghèo, GRDP, y tế, đô thị không phân hóa theo cụm. Bootstrap 200 lần (seed 11, resample theo tỉnh): giữ nhãn trung bình 0.8742, nhưng cụm li ti 0/1 chỉ giữ nhãn 14.5% / 49.8% — chỉ cặp **nhiễu vs cụm 2** đáng tin (`results/cluster_profile.md:34`, `:94-104`, `:127`).
-3. **Lane C — phần supervised chủ yếu là tự tương quan thời gian.** Permutation importance bị `sd_6_1` chiếm áp đảo (mean giảm R² = 0.9928 trên train; #2 chỉ 0.0305) — và `sd_6_1` chính là biến đích năm trước của pipeline (`scripts/papi_pred_common.py:19-23`). macro-F1 phân loại tăng tổng thể 0.3942 → 0.4968 (2/6 bước giảm); residual trên holdout dương (dự báo THẤP hơn thực tế 2024), tỉnh nhỏ lệch hơn tỉnh lớn (`results/supervised_depth.md:47-49`, `:29-35`, `:73-97`).
+3. **Lane C — phần supervised chủ yếu là tự tương quan thời gian.** Permutation importance bị `sd_6_1` chiếm áp đảo (mean giảm R² = 0.9928 trên train; #2 chỉ 0.0305) — và `sd_6_1` chính là biến đích năm trước của pipeline (`scripts/common/papi_pred_common.py:19-23`). macro-F1 phân loại tăng tổng thể 0.3942 → 0.4968 (2/6 bước giảm); residual trên holdout dương (dự báo THẤP hơn thực tế 2024), tỉnh nhỏ lệch hơn tỉnh lớn (`results/supervised_depth.md:47-49`, `:29-35`, `:73-97`).
 
 **Đọc gộp (mô tả, chưa duyệt):** những gì vững là cụm lớn + tương phản nhiễu; những gì mong manh là cụm li ti và độ quan trọng của các đặc trưng ngoài `sd_6_1`. Danh sách hành động đã tách theo quyền duyệt ở mục 5; **nhóm viết báo cáo không tự chốt thay đổi nào**.
 
@@ -64,13 +64,13 @@
 
 ## 2. Lane A — Độ nhạy giao thức chọn cấu hình (kết quả MÔ PHỎNG)
 
-> **⚠️ TRẠNG THÁI: PHÂN TÍCH THAM KHẢO CHO QUYẾT ĐỊNH THAY CẤU HÌNH — CẦN GV DUYỆT. KHÔNG phải thay đổi đã áp dụng.** Script chạy in-memory: không ghi `models/predict_config.json`, không lưu model, không thực thi `scripts/predict_sweep.py` (`results/protocol_sensitivity.md:3-5`). *Ngoại lệ*: các số tái lập bộ lọc CŨ ở 2.1 là giá trị **[ĐÃ ÁP DỤNG]** (đã công bố) được script tái tạo nguyên vẹn — được gắn nhãn riêng tại bảng.
+> **⚠️ TRẠNG THÁI: PHÂN TÍCH THAM KHẢO CHO QUYẾT ĐỊNH THAY CẤU HÌNH — CẦN GV DUYỆT. KHÔNG phải thay đổi đã áp dụng.** Script chạy in-memory: không ghi `models/predict_config.json`, không lưu model, không thực thi `scripts/analysis/predict_sweep.py` (`results/protocol_sensitivity.md:3-5`). *Ngoại lệ*: các số tái lập bộ lọc CŨ ở 2.1 là giá trị **[ĐÃ ÁP DỤNG]** (đã công bố) được script tái tạo nguyên vẹn — được gắn nhãn riêng tại bảng.
 
 **Câu hỏi nghiên cứu (B5 — mã đề bài của lane A, xem Thuật ngữ):** nếu định nghĩa "cụm lớn nhất chiếm bao nhiêu" trên **n non-noise** thay vì **n tổng**, và thêm ràng buộc cụm nhỏ nhất ≥ `MIN_CLUSTER_SHARE` (mcs) — bộ chọn cấu hình sẽ pick ai? Độ nhạy trên mcs ∈ {0.02, 0.05, 0.10}.
 
 ### 2.1 Bước bắt buộc: tái lập bộ lọc CŨ trước khi tin bộ lọc SỬA
 
-Script tái hiện nguyên văn preprocessing của `scripts/predict_sweep.py` (train ≤ 2020, dropna có cột `year` `predict_sweep.py:118`, ngưỡng 500/100 `predict_sweep.py:120`, 224 tổ hợp = 28 cặp × 8 cấu hình STING `predict_sweep.py:49-52`) — `results/protocol_sensitivity.md:15-28`.
+Script tái hiện nguyên văn preprocessing của `scripts/analysis/predict_sweep.py` (train ≤ 2020, dropna có cột `year` `predict_sweep.py:118`, ngưỡng 500/100 `predict_sweep.py:120`, 224 tổ hợp = 28 cặp × 8 cấu hình STING `predict_sweep.py:49-52`) — `results/protocol_sensitivity.md:15-28`.
 
 - **224/224 dòng khớp từng trường** (k, sizes_top5, noise, largest, coverage, stable, score, pass) và **khớp cả THỨ TỰ** 224 dòng sau sort (`results/protocol_sensitivity.md:51-54`).
 
@@ -132,7 +132,7 @@ Chỉ **5/224** tổ hợp có largest_sửa ≤ 0.85, và cả 5 đều có noi
 
 ### 2.7 Kiểm định lane A
 
-- Deterministic: lane **tự báo cáo** chạy `python -E scripts/protocol_sensitivity.py` 2 lần cho md/csv/png sha256 byte-giống (`results/protocol_sensitivity.md:148-151`). Ask v1 **không tái diễn được** kiểm chứng này vì chạy lại sẽ ghi đè artifact; bằng chứng thay thế: hash hiện tại khớp tuyên bố (6.3) + code không có nguồn thời hệ thống/ngẫu nhiên. Phương án kiểm chứng không-ghi-đè (chạy script với thư mục output tạm) **chưa làm — NOT_RUN**, xem 6.4.
+- Deterministic: lane **tự báo cáo** chạy `python -E scripts/analysis/protocol_sensitivity.py` 2 lần cho md/csv/png sha256 byte-giống (`results/protocol_sensitivity.md:148-151`). Ask v1 **không tái diễn được** kiểm chứng này vì chạy lại sẽ ghi đè artifact; bằng chứng thay thế: hash hiện tại khớp tuyên bố (6.3) + code không có nguồn thời hệ thống/ngẫu nhiên. Phương án kiểm chứng không-ghi-đè (chạy script với thư mục output tạm) **chưa làm — NOT_RUN**, xem 6.4.
 - Gate: `python -m ruff check .` → *All checks passed!*; `python -E -m pytest -q` → *101 passed*; `git diff --stat` rỗng (lane báo cáo; **ask v1 đã chạy lại cả hai gate — phụ lục 6.4**).
 - **Hình PNG**: nhãn "mcs=0.02" chồng nhẹ lên mũi tên chú thích cấu hình đóng băng (vẫn đọc được). Quyết định **giữ nguyên để bảo toàn hash** là đánh đổi cụ thể: hash chỉ chứng minh *tệp không đổi*, không chứng minh *hình đúng/đẹp* — nguyên tắc này KHÔNG nên là mặc định chung; sửa hình chỉ làm trong đợt re-run được duyệt để sinh hash mới (5b.5).
 
@@ -169,7 +169,7 @@ Trung vị PCI theo nhóm — nhiễu 59.16 · cụm 0 58.47 (n=5) · cụm 1 58
 
 ### 3.2 Ổn định bootstrap — 200 lần, seed 11, resample theo TỈNH
 
-**Phương pháp** (`results/cluster_profile.md:5`, `:89-90`; seed tại `scripts/cluster_profile.py:61`, `:317`): mỗi lần rút 63 tỉnh **có hoàn lại**, mẫu = toàn bộ dòng fit (2011–2023, 808 dòng gốc) của các tỉnh được rút (cluster bootstrap panel — tôn trọng tương quan trong tỉnh). Refit ĐỒNG CẤU HÌNH đóng băng (scaler fit trên mẫu + STING + cluster(level=2, connectivity=1)). Khớp nhãn mẫu → gốc bằng ghép cặp 1-1 tối ưu tổng Jaccard (`scipy.optimize.linear_sum_assignment`). Kiểm chứng tất định: refit đúng công thức cho lại **808/808** nhãn train (`results/cluster_profile.md:6`).
+**Phương pháp** (`results/cluster_profile.md:5`, `:89-90`; seed tại `scripts/analysis/cluster_profile.py:61`, `:317`): mỗi lần rút 63 tỉnh **có hoàn lại**, mẫu = toàn bộ dòng fit (2011–2023, 808 dòng gốc) của các tỉnh được rút (cluster bootstrap panel — tôn trọng tương quan trong tỉnh). Refit ĐỒNG CẤU HÌNH đóng băng (scaler fit trên mẫu + STING + cluster(level=2, connectivity=1)). Khớp nhãn mẫu → gốc bằng ghép cặp 1-1 tối ưu tổng Jaccard (`scipy.optimize.linear_sum_assignment`). Kiểm chứng tất định: refit đúng công thức cho lại **808/808** nhãn train (`results/cluster_profile.md:6`).
 
 | Đại lượng | mean | median | sd | CI95 | Nguồn |
 | --- | --- | --- | --- | --- | --- |
@@ -208,13 +208,13 @@ Trung vị PCI theo nhóm — nhiễu 59.16 · cụm 0 58.47 (n=5) · cụm 1 58
 
 ## 4. Lane C — Chiều sâu supervised (learning curve, importance, residual)
 
-> **⚠️ TRẠNG THÁI: [THAM KHẢO — CHƯA DUYỆT GV].** Chỉ MÔ TẢ, không chọn model — không chọn model/siêu tham số/đặc trưng trên holdout; tái dùng nguyên pipeline `scripts/predict_supervised.py` (`results/supervised_depth.md:1`, `:109-116`). Các số dưới đây **chưa phải số chính thức** cho tới khi GV duyệt.
+> **⚠️ TRẠNG THÁI: [THAM KHẢO — CHƯA DUYỆT GV].** Chỉ MÔ TẢ, không chọn model — không chọn model/siêu tham số/đặc trưng trên holdout; tái dùng nguyên pipeline `scripts/supervised/predict_supervised.py` (`results/supervised_depth.md:1`, `:109-116`). Các số dưới đây **chưa phải số chính thức** cho tới khi GV duyệt.
 
 ### 4.0 Siêu tham số cố định + kiểm đối pipeline (bắt buộc trước khi đọc tiếp)
 
 - Siêu tham số CỐ ĐỊNH (chọn một lần bởi CV train-only expanding origin 2017–2022 của pipeline, tính lại trong bộ nhớ, không dựa holdout): **Ridge alpha=0.1 · LogisticRegression C=1.0 · RF max_depth=4, min_samples_leaf=2** (`results/supervised_depth.md:6`).
 - Kiểm đối: tái tính trong bộ nhớ cho **ridge CV R² = 0.265 / holdout MAE = 0.0640 / RF CV R² = 0.197 — KHỚP 100%** `results/supervised_metrics.csv` (dòng `ridge`: cột `metric_cv` = 0.265, cột `holdout_mae` = 0.064; dòng `random forest`: cột `metric_cv` = 0.197) (`results/supervised_depth.md:7`).
-- Seed: model giữ seed **42** của pipeline (`scripts/predict_supervised.py:72` — đặc tả đã công bố); permutation importance dùng seed **11**, n_repeats=30 (`scripts/supervised_depth.py:96`, `results/supervised_depth.md:5`).
+- Seed: model giữ seed **42** của pipeline (`scripts/supervised/predict_supervised.py:72` — đặc tả đã công bố); permutation importance dùng seed **11**, n_repeats=30 (`scripts/supervised/supervised_depth.py:96`, `results/supervised_depth.md:5`).
 
 ### 4.1 Learning curve expanding origin 2016→2022 (không đụng holdout)
 
@@ -246,7 +246,7 @@ Mỗi điểm = train trên mọi cặp `year_t < v`, chấm trên đúng origin
 
 **Vì sao holdout = 1.0063 > 1?** (sinh viên sẽ hỏi đầu tiên): mean giảm R² có thể vượt 1 vì R² **sau hoán vị** có thể âm sâu. Số học nhất quán với số công bố: RF có holdout R² = 0.423 (`results/supervised_metrics.csv`, dòng `random forest`, cột `holdout_r2`); mean giảm 1.0063 hàm ý R² sau hoán vị trung bình ≈ 0.423 − 1.0063 ≈ **−0.58** — tức sau khi phá cột `sd_6_1`, dự báo tệ hơn cả dự báo bằng trung bình. Giải thích này là đọc mô tả, không phải tái tính.
 
-**Đọc quan trọng (diễn giải từ spec đã công bố):** `sd_6_1` là biến đích của hồi quy (`REGRESSION_TARGET = "sd_6_1"`, `scripts/papi_pred_common.py:23`) đồng thời nằm trong danh sách features (`scripts/papi_pred_common.py:19-22`) — tức model được dự báo **sd_6_1 năm sau từ sd_6_1 năm nay**. Permutation importance ≈ 1.0 nghĩa là hoán vị cột này gần như phá hết sức dự báo: phần lớn năng lực của Ridge là **tự tương quan thời gian** (giá trị năm nay là proxy tốt cho năm sau), không phải "kiến thức" về 7 chỉ tiêu còn lại (đóng góp mỗi chỉ tiêu chỉ 0.006–0.031, `results/supervised_depth.md:47-54`). Đây là đọc mô tả của lane — bất kỳ thay đổi spec (ablation bỏ `sd_6_1`) thuộc quyền GV (mục 5b.1 — đề xuất ưu tiên cao nhất).
+**Đọc quan trọng (diễn giải từ spec đã công bố):** `sd_6_1` là biến đích của hồi quy (`REGRESSION_TARGET = "sd_6_1"`, `scripts/common/papi_pred_common.py:23`) đồng thời nằm trong danh sách features (`scripts/common/papi_pred_common.py:19-22`) — tức model được dự báo **sd_6_1 năm sau từ sd_6_1 năm nay**. Permutation importance ≈ 1.0 nghĩa là hoán vị cột này gần như phá hết sức dự báo: phần lớn năng lực của Ridge là **tự tương quan thời gian** (giá trị năm nay là proxy tốt cho năm sau), không phải "kiến thức" về 7 chỉ tiêu còn lại (đóng góp mỗi chỉ tiêu chỉ 0.006–0.031, `results/supervised_depth.md:47-54`). Đây là đọc mô tả của lane — bất kỳ thay đổi spec (ablation bỏ `sd_6_1`) thuộc quyền GV (mục 5b.1 — đề xuất ưu tiên cao nhất).
 
 - Lưu ý độ ổn định: kiểm định viên lane C spot-check với n_repeats=5 thấy **thứ tự hạng 2/3 trên holdout đổi chỗ** (sd_1_4 > sd_1_3) so với 30-repeat; hạng #1 không đổi. Hạng 2/3 holdout chỉ mô tả và không ổn định khi giảm repeats — không đưa vào kết luận (báo cáo của verify lane C, phụ lục 6.4).
 - Hình: `results/figs/supervised_importance.png`.
@@ -266,7 +266,7 @@ Mỗi điểm = train trên mọi cặp `year_t < v`, chấm trên đúng origin
 1. **Leakage trong learning curve — phạm vi đầy đủ:** siêu tham số được chọn bằng CV có các origin đánh giá 2017–2022 (`results/supervised_depth.md:6`) nên **tất cả 7 origin của learning curve đều chịu rò rỉ ở mức này**: origin 2016 — thông tin chọn nằm trong tương lai của cửa sổ; origin 2017–2022 — năm đang đánh giá chính nằm trong tập chọn siêu tham số. (Bản v1 chỉ nêu 2016–2017 — đã sửa.) Đây là **đặc tả model đã công bố**, không phải quy trình chọn lại (md:112).
 2. Holdout chỉ 1 năm (2023→2024, 59 cặp) → mọi kết luận residual ngoài mẫu chỉ mô tả, không khái quát (md:113).
 3. Permutation importance trên train là in-sample; trên holdout chỉ 59 cặp nên khoảng biến thiên rộng (md:114).
-4. Script KHÔNG ghi `models/*`, KHÔNG chạy `scripts/predict_sweep.py`, KHÔNG ghi đè artifact công bố (md:115).
+4. Script KHÔNG ghi `models/*`, KHÔNG chạy `scripts/analysis/predict_sweep.py`, KHÔNG ghi đè artifact công bố (md:115).
 5. Ghi chú quy trình của lane: "LR" = LogisticRegression trên pseudo-label STING (metric macro-F1, cùng `CLASSIFICATION_SCORER`); bug đã sửa trong lúc chạy — cặp hồi quy (740 train) và cặp phân loại (738 train) là hai tập dòng khác nhau nên mỗi tập có fold expanding riêng (lần chạy đầu dùng chung index gây IndexError) (báo cáo lane, ghi ở md nguồn và mô tả lane).
 
 ### 4.5 Bài học ML (cho sinh viên)
@@ -293,7 +293,7 @@ Mỗi điểm = train trên mọi cặp `year_t < v`, chấm trên đúng origin
 ### (b) Cần GV duyệt — liên quan giao thức / cấu hình production / đầu ra công bố
 
 1. **[ĐỀ XUẤT ƯU TIÊN CAO NHẤT về giá trị thông tin] Ablation bỏ `sd_6_1` khỏi features.** Lý do lên đầu: perm importance cho thấy năng lực Ridge phần lớn là tự tương quan thời gian (mục 4.2), nên câu hỏi kế tiếp giá trị nhất là "7 chỉ tiêu còn lại đóng góp gì" — quyết định được rồi mới nói được giá trị của phần supervised cho công bố. Thay đổi spec model đã công bố ⇒ cần duyệt.
-2. **Quyết định về bộ lọc chọn cấu hình (B5):** giữ nguyên bộ lọc cũ (khuyến nghị mặc định — Lane A không cho ra ứng viên thay thế), hoặc nới giao thức (ví dụ chấp nhận largest_sửa > 0.85, hoặc đổi mốc chia mẫu). **Lane A chỉ mô phỏng — KHÔNG tự áp dụng; việc nới/đổi ngưỡng thuộc quyền GV** (`results/protocol_sensitivity.md:153-155`). Nếu GV quyết định thay: phải re-run `scripts/predict_sweep.py` theo quy trình đóng băng mới (script này bị cấm chạy trong lane phân tích).
+2. **Quyết định về bộ lọc chọn cấu hình (B5):** giữ nguyên bộ lọc cũ (khuyến nghị mặc định — Lane A không cho ra ứng viên thay thế), hoặc nới giao thức (ví dụ chấp nhận largest_sửa > 0.85, hoặc đổi mốc chia mẫu). **Lane A chỉ mô phỏng — KHÔNG tự áp dụng; việc nới/đổi ngưỡng thuộc quyền GV** (`results/protocol_sensitivity.md:153-155`). Nếu GV quyết định thay: phải re-run `scripts/analysis/predict_sweep.py` theo quy trình đóng băng mới (script này bị cấm chạy trong lane phân tích).
 3. **Quyết định những gì được đưa vào CÔNG BỐ từ kết quả tham khảo:** (i) render nhãn cụm — giữ nguyên hay gộp cụm li ti 0/1 vào nhiễu (dữ liệu quyết định: giữ nhãn 14.5%/49.8% + k′ thường >3, `results/cluster_profile.md:99-125`); (ii) các quan sát lane C (residual post hoc) có vào báo cáo chính thức không; (iii) trạng thái của bộ lọc sửa trong văn bản công bố.
 4. **Re-freeze / re-fit model với dữ liệu mở rộng** (ví dụ sau khi panel cập nhật) — ngoài phạm vi 3 lane này, phải do GV chỉ định quy trình.
 5. **Chỉnh PNG lane A (chồng-nhãn)** — làm kèm re-run lane A được duyệt để sinh lại hash mới; nguyên tắc: chất lượng hình ưu tiên hơn bảo toàn hash **khi đã có đợt re-run**.
@@ -306,33 +306,33 @@ Mỗi điểm = train trên mọi cặp `year_t < v`, chấm trên đúng origin
 
 | Dùng ở | Giá trị | Nguồn |
 | --- | --- | --- |
-| Bootstrap lane B (200 lần resample theo tỉnh) | **11** — `numpy.random.default_rng(11)` | `scripts/cluster_profile.py:61`, `:317`; `results/cluster_profile.md:5` |
-| Permutation importance lane C | **11**, n_repeats=30 | `scripts/supervised_depth.py:96`; `results/supervised_depth.md:5` |
-| Pipeline model (Ridge/RF/Logistic `random_state`) | **42** — đặc tả đã công bố, không đổi | `scripts/predict_supervised.py:72`; `results/supervised_depth.md:5` |
+| Bootstrap lane B (200 lần resample theo tỉnh) | **11** — `numpy.random.default_rng(11)` | `scripts/analysis/cluster_profile.py:61`, `:317`; `results/cluster_profile.md:5` |
+| Permutation importance lane C | **11**, n_repeats=30 | `scripts/supervised/supervised_depth.py:96`; `results/supervised_depth.md:5` |
+| Pipeline model (Ridge/RF/Logistic `random_state`) | **42** — đặc tả đã công bố, không đổi | `scripts/supervised/predict_supervised.py:72`; `results/supervised_depth.md:5` |
 | Lane A | Seed 11 được khai theo quy định nhưng **không tác động kết quả** — pipeline không có bước ngẫu nhiên | `results/protocol_sensitivity.md:26-28` |
 
 ### 6.2 Lệnh chạy (từ thư mục gốc repo, `python -E` theo ràng buộc — không `-I` vì pandas ở user site)
 
-**Lane A** (`scripts/protocol_sensitivity.py`):
+**Lane A** (`scripts/analysis/protocol_sensitivity.py`):
 ```
-python -E scripts/protocol_sensitivity.py            # chạy 2 lần — kiểm định deterministic
+python -E scripts/analysis/protocol_sensitivity.py            # chạy 2 lần — kiểm định deterministic
 python -m ruff check .
 python -E -m pytest -q
 sha256sum results/protocol_sensitivity.{md,csv} results/figs/protocol_sensitivity_grid.png   # ×2, diff → byte-giống
 git status --porcelain && git diff --stat            # 0 file tracked bị sửa
 ```
 
-**Lane B** (`scripts/cluster_profile.py`):
+**Lane B** (`scripts/analysis/cluster_profile.py`):
 ```
-python -E scripts/cluster_profile.py                 # chạy 2 lần (run 1 ~8s) — stdout identical, 3 artifact byte-giống
+python -E scripts/analysis/cluster_profile.py                 # chạy 2 lần (run 1 ~8s) — stdout identical, 3 artifact byte-giống
 python -E -m ruff check .
 python -E -m pytest -q                               # 101 passed
 git status --porcelain                               # 0 modified tracked
 ```
 
-**Lane C** (`scripts/supervised_depth.py`):
+**Lane C** (`scripts/supervised/supervised_depth.py`):
 ```
-python -E scripts/supervised_depth.py                # tổng 5 lần chạy (lần 1 lộ bug index folds — đã sửa; 2 lần cuối dùng kiểm định)
+python -E scripts/supervised/supervised_depth.py                # tổng 5 lần chạy (lần 1 lộ bug index folds — đã sửa; 2 lần cuối dùng kiểm định)
 python -E -m ruff check .
 python -E -m pytest -q                               # 101 passed, exit 0
 sha256sum results/supervised_depth.{md,csv} results/figs/supervised_{learning_curve,importance}.png
@@ -372,7 +372,7 @@ git status --porcelain             # → 0 tracked modified (trước và sau py
 | Gate test toàn repo | **CHẠY ở ask v1** | `python -E -m pytest -q` → "101 passed in 24.21s", exit 0; tái kiểm = chạy lại |
 | Không đụng artifact đóng băng | **CHẠY ở ask v1; xác nhận lại ở ask v2 sau khi ghi v2** | `git status --porcelain` → 0 tracked modified (v1: trước và sau pytest; v2: sau khi ghi bản này) |
 | Đối chiếu số với tệp nguồn | **CHẠY ở ask v1** (đọc nguyên văn); bổ sung ask v2: đọc `models/predict_config.json` | Các tệp `results/*.md`, CSV, `models/predict_config.json` còn nguyên trong repo — độc giả mở trực tiếp; mọi số trong báo cáo trỏ về đó |
-| Deterministic 2 lần chạy của 3 lane (md/csv/png byte-giống) | **TỰ BÁO CÁO của lane — NOT_RUN ở ask v1 và v2**: chạy lại script sẽ GHI ĐÈ artifact đã kiểm định hash. Phương án kiểm chứng không-ghi-đè (chạy với thư mục output tạm, vd chỉnh `--out-dir` hoặc chạy trên bản sao repo) **chưa thực hiện** | Chứng cứ hiện có: log phiên lane (KHÔNG lưu artifact) + hai suy luận gián tiếp: hash hiện tại khớp tuyên bố (6.3); code không có nguồn thời hệ thống/ngẫu nhiên ngoài `SEED=11` (`scripts/cluster_profile.py:61`, `:317`). Với độc giả chỉ-đọc: đây là niềm tin có căn cứ, KHÔNG phải kết quả đã kiểm chứng |
+| Deterministic 2 lần chạy của 3 lane (md/csv/png byte-giống) | **TỰ BÁO CÁO của lane — NOT_RUN ở ask v1 và v2**: chạy lại script sẽ GHI ĐÈ artifact đã kiểm định hash. Phương án kiểm chứng không-ghi-đè (chạy với thư mục output tạm, vd chỉnh `--out-dir` hoặc chạy trên bản sao repo) **chưa thực hiện** | Chứng cứ hiện có: log phiên lane (KHÔNG lưu artifact) + hai suy luận gián tiếp: hash hiện tại khớp tuyên bố (6.3); code không có nguồn thời hệ thống/ngẫu nhiên ngoài `SEED=11` (`scripts/analysis/cluster_profile.py:61`, `:317`). Với độc giả chỉ-đọc: đây là niềm tin có căn cứ, KHÔNG phải kết quả đã kiểm chứng |
 | Phân bố bootstrap 200 lần (mean 0.8742, CI95 [0.8138, 0.9407], bảng per-label, k′) | **KẾT QUẢ lưu trong artifact** `results/cluster_profile.{md,csv}` (mở đọc được); nhưng tính lại từ đầu = chạy lại script (ghi đè) — NOT_RUN. Verify lane B chỉ tái lập được **rep-0** trong phiên | Kết quả: tệp artifact. Rep-0 (0.8892 trong CI95, lệch mean ~0.4 sd; giữ nhãn cụm 2 rep-0 93.7% ≈ pooled 94.1%): **chỉ trong log phiên verify — KHÔNG có tệp trong repo**; coi là báo cáo phiên, không dùng làm bằng chứng duyệt chính thức |
 | Learning curve điểm đầu Ridge (origin 2016, R²=0.4588) + siêu tham số + kiểm đối metrics (0.265/0.0640/0.197; 740/59 cặp) | ĐÃ TÍNH LẠI **trong phiên** bởi verify lane C: builder riêng → 311 train / 63 val, R²=0.4588 KHỚP; siêu tham số khớp; metrics khớp `results/supervised_metrics.csv` | Tính lại trong phiên — **chỉ log phiên, KHÔNG có tệp trong repo**; kết quả cuối cùng đối chiếu được với artifact `results/supervised_depth.md:15-23` + `results/supervised_metrics.csv` |
 | Permutation importance spot-check n_repeats=5 | ĐÃ TÍNH LẠI trong phiên bởi verify lane C: top-3 train cùng thứ tự, lệch ≤0.009; **holdout hạng 2/3 đổi chỗ khi 5 repeats** | Chỉ log phiên — không có tệp; ghi chú ở mục 4.2 |

@@ -41,7 +41,7 @@ Bộ giữa kỳ gồm 10 slide là lựa chọn trình bày của nhóm để p
 
 Nguyên tắc: **với mỗi giai đoạn: Test → Decide** (có bằng chứng trước khi chốt).
 
-_Áp dụng trong repo:_ `scripts/preprocessing_audit.py` ghi bảng Test | Result | Decision | Evidence vào `results/preprocessing_audit.{md,csv}`; quyết định “cứng” nằm trong `scripts/build_panel.py`, `predict_demo.py`, `predict_supervised.py`, v.v.
+_Áp dụng trong repo:_ `scripts/data/preprocessing_audit.py` ghi bảng Test | Result | Decision | Evidence vào `results/preprocessing_audit.{md,csv}`; quyết định “cứng” nằm trong `scripts/data/build_panel.py`, `predict_demo.py`, `predict_supervised.py`, v.v.
 
 Slide Day 4 trang 17 yêu cầu bài nhóm chạy pipeline tiền xử lý, in kết quả và ghi lại các bước đã chọn. Bài thực hành riêng `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` dựng panel từ 14 workbook, đối chiếu panel 882 × 41 và chạy chuẩn hóa bằng thống kê của tập 2011–2023. Giữ notebook trong thư mục `notebooks/` của dự án để chạy lại với các tệp dữ liệu đi kèm.
 
@@ -78,8 +78,8 @@ _File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản 
 ## Định dạng nộp đề xuất (default đến khi GV chốt khác)
 
 Trong kho dự án, hai gói được sinh bằng
-`python scripts/build_submission_packages.py`
-vào `submissions/` và kiểm tra bằng `python scripts/build_submission_packages.py --verify`.
+`python scripts/deliverables/build_submission_packages.py`
+vào `submissions/` và kiểm tra bằng `python scripts/deliverables/build_submission_packages.py --verify`.
 
 - Giữa kỳ: `Nhom15_GiuaKy_STING_PAPI.zip`, trọng tâm
   `slides/submission.pptx` + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`.

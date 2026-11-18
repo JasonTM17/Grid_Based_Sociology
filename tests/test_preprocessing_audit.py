@@ -3,8 +3,8 @@
 import numpy as np
 import pandas as pd
 
-from scripts.papi_pred_common import load_panel
-from scripts.preprocessing_audit import (
+from scripts.common.papi_pred_common import load_panel
+from scripts.data.preprocessing_audit import (
     duplicate_key_rows,
     join_cardinality,
     missing_window_summary,

@@ -1,4 +1,4 @@
-"""Kiểm thử scripts/classifier_label_baselines.py."""
+"""Kiểm thử scripts/supervised/classifier_label_baselines.py."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from scripts.classifier_label_baselines import (
+from scripts.supervised.classifier_label_baselines import (
     CSV_COLUMNS,
     N_PERMUTATIONS,
     PUBLISHED_CV,
@@ -19,12 +19,12 @@ from scripts.classifier_label_baselines import (
     csv_sha256,
     shuffled_train_labels_cv,
 )
-from scripts.course_supervised_baselines import (
+from scripts.supervised.course_supervised_baselines import (
     MODEL_GAUSSIAN_NB,
     _classification_pairs,
 )
-from scripts.papi_pred_common import REGRESSION_FEATURES, load_config, load_panel
-from scripts.predict_supervised import HOLDOUT_YEAR, expanding_year_splits
+from scripts.common.papi_pred_common import REGRESSION_FEATURES, load_config, load_panel
+from scripts.supervised.predict_supervised import HOLDOUT_YEAR, expanding_year_splits
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_CSV = ROOT / "results" / "classifier_label_baselines.csv"
@@ -71,7 +71,7 @@ def test_permutation_does_not_mutate_validation_labels():
     ytr = train["y"].to_numpy(dtype=int)
     y_snapshot = ytr.copy()
     splits = expanding_year_splits(train["year_t"].to_numpy(), ytr)
-    from scripts.course_supervised_baselines import _fit_grids
+    from scripts.supervised.course_supervised_baselines import _fit_grids
 
     grids = _fit_grids(Xtr, ytr, splits, rf_n_estimators=50)
     shuffled_train_labels_cv(
@@ -92,7 +92,7 @@ def test_script_main_reproduction_gate(tmp_path):
     env = dict(os.environ)
     env["CLASSIFIER_LABEL_BASELINES_DIR"] = str(tmp_path)
     proc = subprocess.run(
-        [sys.executable, "-W", "error", "scripts/classifier_label_baselines.py"],
+        [sys.executable, "-W", "error", "scripts/supervised/classifier_label_baselines.py"],
         cwd=ROOT,
         capture_output=True,
         text=True,

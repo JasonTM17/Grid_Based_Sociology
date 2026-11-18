@@ -1,4 +1,4 @@
-"""Kiểm thử nhanh cho scripts/course_supervised_baselines.py."""
+"""Kiểm thử nhanh cho scripts/supervised/course_supervised_baselines.py."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 from sklearn.metrics import confusion_matrix
 
-from scripts.course_supervised_baselines import (
+from scripts.supervised.course_supervised_baselines import (
     BALANCED_SENSITIVITY_BASE_MODELS,
     COURSE_MODELS,
     GROUP_PRIMARY,
@@ -22,8 +22,8 @@ from scripts.course_supervised_baselines import (
     _fit_grids,
     build_metrics_table,
 )
-from scripts.papi_pred_common import REGRESSION_FEATURES, load_config, load_panel, select_model_by_cv
-from scripts.predict_supervised import (
+from scripts.common.papi_pred_common import REGRESSION_FEATURES, load_config, load_panel, select_model_by_cv
+from scripts.supervised.predict_supervised import (
     CLASSIFICATION_CV_YEARS,
     HOLDOUT_YEAR,
     SEED,
@@ -143,7 +143,7 @@ def test_scaler_not_fitted_on_holdout(baseline_run):
 
 
 def test_artifacts_on_disk():
-    from scripts import course_supervised_baselines as mod
+    from scripts.supervised import course_supervised_baselines as mod
 
     root = mod.ROOT
     assert (root / "results" / "course_supervised_baselines.csv").is_file()
@@ -168,7 +168,7 @@ def test_expanding_splits_train_years_strictly_before_validation(
 
 
 def test_primary_csv_matches_head_content():
-    from scripts import course_supervised_baselines as mod
+    from scripts.supervised import course_supervised_baselines as mod
 
     repo_root = Path(mod.ROOT)
     diff = subprocess.run(
@@ -185,7 +185,7 @@ def test_primary_csv_matches_head_content():
 
 
 def test_primary_csv_matches_fresh_computation(baseline_run):
-    from scripts import course_supervised_baselines as mod
+    from scripts.supervised import course_supervised_baselines as mod
 
     metrics, _, _, _ = baseline_run
     on_disk = pd.read_csv(mod.ROOT / "results" / "course_supervised_baselines.csv")
@@ -198,7 +198,7 @@ def test_primary_csv_matches_fresh_computation(baseline_run):
 
 
 def test_sensitivity_csv_has_three_rows_and_no_group_column(baseline_run):
-    from scripts import course_supervised_baselines as mod
+    from scripts.supervised import course_supervised_baselines as mod
 
     metrics, _, _, _ = baseline_run
     sens_path = mod.ROOT / "results" / "course_supervised_sensitivity.csv"

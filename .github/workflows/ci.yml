@@ -39,4 +39,4 @@ jobs:
         run: python -m pytest tests -q --cov=src --cov-report=term
 
       - name: Dataset compliance check
-        run: python scripts/check_data.py
+        run: python scripts/data/check_data.py

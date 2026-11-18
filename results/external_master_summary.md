@@ -1,6 +1,6 @@
 # Master table ngoại lai 63 tỉnh × 2011–2024 — tóm tắt
 
-Sinh bởi `scripts/build_external_master.py` (gap [1], reports/external_data_expansion.md §4.2). Nối LEFT theo khóa `(province_code, year)` — tức `papi_province_code` của panel PAPI — với validate="one_to_one": **882 dòng × 59 cột**, giữ đúng lưới panel, không nội suy.
+Sinh bởi `scripts/data/build_external_master.py` (gap [1], reports/external_data_expansion.md §4.2). Nối LEFT theo khóa `(province_code, year)` — tức `papi_province_code` của panel PAPI — với validate="one_to_one": **882 dòng × 59 cột**, giữ đúng lưới panel, không nội suy.
 
 ## 1) Mask thiếu tường minh từng nguồn
 

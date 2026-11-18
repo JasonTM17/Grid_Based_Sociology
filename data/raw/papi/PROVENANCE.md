@@ -36,7 +36,7 @@
 - Ghi chú cấu trúc: 2011–2019 sheet đầu tiên chứa điểm (tên sheet khác nhau từng năm);
   2020–2024 ma trận chuyển vị, header 2 dòng (Mã tỉnh dòng 1, tên tỉnh dòng 2). `d7/d8` chỉ có từ 2018.
 - **Gãy thang đo:** 23/37 cột chỉ tiêu có bước nhảy trung bình năm > 0.25 điểm
-  (vd `sd_5_4` đổi 0.25–2.5 → 0.33–3.33 tại 2021) — audit tự động: `python scripts/check_data.py`.
+  (vd `sd_5_4` đổi 0.25–2.5 → 0.33–3.33 tại 2021) — audit tự động: `python scripts/data/check_data.py`.
 
 ## Báo cáo PAPI 2024 (tiếng Việt)
 

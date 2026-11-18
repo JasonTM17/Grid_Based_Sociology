@@ -6,8 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from scripts.check_data import scale_audit
-from scripts.dashboard_data import (
+from scripts.data.check_data import scale_audit
+from scripts.analysis.dashboard_data import (
     PCI_TOP30_WINDOW,
     DashboardDataError,
     ensure_external_pci_consistency,
@@ -31,8 +31,8 @@ from scripts.dashboard_data import (
     prepare_sting_view,
     select_regression_model,
 )
-from scripts.fig_style import CLUSTER_COLORS
-from scripts.papi_pred_common import FEATURE_LABELS, ROOT
+from scripts.common.fig_style import CLUSTER_COLORS
+from scripts.common.papi_pred_common import FEATURE_LABELS, ROOT
 
 
 st.set_page_config(
@@ -413,7 +413,7 @@ if regression_tab.open:
             st.info("Phần STING và Tổng quan vẫn dùng được. Làm theo hướng dẫn trong thông báo rồi làm mới ứng dụng.")
         except Exception as exc:
             st.error(f"Không thể nạp hoặc áp dụng model hồi quy local: {exc}")
-            st.info("Phần STING và Tổng quan vẫn dùng được. Chạy lại `python scripts/predict_supervised.py`, rồi làm mới ứng dụng.")
+            st.info("Phần STING và Tổng quan vẫn dùng được. Chạy lại `python scripts/supervised/predict_supervised.py`, rồi làm mới ứng dụng.")
         else:
             st.subheader("Holdout hồi quy cố định: 2023 → 2024")
             st.caption(
@@ -574,7 +574,7 @@ if external_tab.open:
             st.error(str(exc))
             st.info(
                 "Phần STING, Tổng quan và Hồi quy vẫn dùng được. "
-                "Chạy lại `python scripts/external_validation.py`, rồi làm mới ứng dụng."
+                "Chạy lại `python scripts/analysis/external_validation.py`, rồi làm mới ứng dụng."
             )
         except Exception as exc:
             st.error(f"Không đọc được artifact kiểm chứng ngoại lai: {exc}")
@@ -935,8 +935,8 @@ if external_tab.open:
                 ) or "—"
                 st.caption(
                     f"Nguồn: GSO pxweb V14.47 → `data/processed/external_poverty_63.csv` "
-                    f"(tạo lại bằng `python scripts/build_poverty_63.py`), nhãn cụm "
-                    f"`results/predict_all_years.csv`; màu cụm theo `scripts/fig_style.py`. "
+                    f"(tạo lại bằng `python scripts/data/build_poverty_63.py`), nhãn cụm "
+                    f"`results/predict_all_years.csv`; màu cụm theo `scripts/common/fig_style.py`. "
                     f"Thiếu phía nguồn — KHÔNG nội suy: {missing_source_txt}. "
                     f"{len(poverty_counts['no_label_cells'])} ô có poverty nhưng KHÔNG có nhãn cụm "
                     f"(mask tường minh, không vẽ không test): {no_label_txt}. Ngoài cửa sổ: năm "
@@ -947,7 +947,7 @@ if external_tab.open:
             st.caption(
                 "Nguồn local: `data/processed/external_pci_63_full.csv` (PCI VCCI–USAID — provenance "
                 "`data/processed/external_provenance.md`, `data/raw/*/PROVENANCE.md`) và "
-                "`results/external_validation.csv`; tạo lại bằng `python scripts/external_validation.py`."
+                "`results/external_validation.csv`; tạo lại bằng `python scripts/analysis/external_validation.py`."
             )
 
 if audit_tab.open:

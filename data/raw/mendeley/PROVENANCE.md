@@ -20,7 +20,7 @@ Cơ chế: `.gitignore` chỉ mở 4 file trên (xem block "Mendeley" trong `.gi
 
 ## Đối chiếu chéo đã chạy
 
-- `python scripts/crosscheck_mendeley.py` → max |diff| = 0.0 trên 3.522 so sánh (8 chiều × tỉnh × năm),
+- `python scripts/data/crosscheck_mendeley.py` → max |diff| = 0.0 trên 3.522 so sánh (8 chiều × tỉnh × năm),
   ghi tại `reports/crosscheck_mendeley.md`.
 
 Ghi chú: 3 file CSV được git lưu với line-ending LF nên hash bản clone khác hash file tải về; cả hai đều được ghi ở trên (`gốc` = bản tải về từ gói replication).

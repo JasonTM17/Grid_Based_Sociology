@@ -1,6 +1,6 @@
 # Hồ sơ chuyên sâu cụm STING — chỉ số ngoài & ổn định bootstrap
 
-Sinh bởi `scripts/cluster_profile.py` — lane phân tích **MỚI**, không thay đổi bất kỳ artifact/số đã công bố. Nhãn cụm tỉnh-năm lấy từ `results/predict_all_years.csv` (model đóng băng `models/predict_config.json`: features **4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công** × **6.1 Y tế công lập**; STING(L=3, factor=4, min_count=5), level=2, connectivity=1; fit 2011–2023). Mọi số do script tự tính trong bộ nhớ từ CSV provenance — không hardcode; kiểm định bằng `scipy.stats.kruskal` (có sửa tie).
+Sinh bởi `scripts/analysis/cluster_profile.py` — lane phân tích **MỚI**, không thay đổi bất kỳ artifact/số đã công bố. Nhãn cụm tỉnh-năm lấy từ `results/predict_all_years.csv` (model đóng băng `models/predict_config.json`: features **4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công** × **6.1 Y tế công lập**; STING(L=3, factor=4, min_count=5), level=2, connectivity=1; fit 2011–2023). Mọi số do script tự tính trong bộ nhớ từ CSV provenance — không hardcode; kiểm định bằng `scipy.stats.kruskal` (có sửa tie).
 
 - **Bootstrap**: 200 lần resample CÓ hoàn lại **theo TỈNH** (cluster bootstrap panel), seed **11** = `numpy.random.default_rng(11)`; khớp nhãn mẫu → nhãn gốc bằng Jaccard tối đa từng cụm (ghép cặp 1-1 tối ưu, `scipy.optimize.linear_sum_assignment`).
 - Kiểm chứng tất định: refit đúng công thức `predict_demo.py` cho lại **đúng 808/808 nhãn train** của CSV (0 lệch) — cùng ngữ nghĩa gate `tests/test_artifact_reproduction.py`.
@@ -129,7 +129,7 @@ Sinh bởi `scripts/cluster_profile.py` — lane phân tích **MỚI**, không t
 ## 4) Tái lập
 
 ```powershell
-python -E scripts/cluster_profile.py
+python -E scripts/analysis/cluster_profile.py
 ```
 
 - Đầu vào: `results/predict_all_years.csv`, `data/processed/papi_panel_63_2011_2024.csv` (đọc), `data/processed/external_{pci_63_full,poverty_63,odm_health_63,gso_grdp_63,gso_population_63_full}.csv`, `models/predict_config.json` (đọc).

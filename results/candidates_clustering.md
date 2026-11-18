@@ -1,12 +1,12 @@
 # Ứng viên thuật toán phân cụm thay thế — cửa sổ 747 tỉnh-năm ≤2022, z-score trong từng năm
 
-**[THAM KHẢO — CHƯA DUYỆT GV]** — lane phân tích MỚI, sinh bởi `scripts/candidates_clustering.py`; CHỈ thêm 2 tệp này (`results/candidates_clustering.{csv,md}`), không đụng artifact đóng băng (`models/predict_config.json`, `results/predict_all_years.csv` — chỉ đọc), không thay model production, không đổi số đã công bố (Ridge 0.265, carry 0.145, LR 0.434, k=3). Holdout 2023→2024 không fit/chấm/nhìn; cửa sổ loại cả 61 dòng năm 2023 (origin holdout).
+**[THAM KHẢO — CHƯA DUYỆT GV]** — lane phân tích MỚI, sinh bởi `scripts/supervised/candidates_clustering.py`; CHỈ thêm 2 tệp này (`results/candidates_clustering.{csv,md}`), không đụng artifact đóng băng (`models/predict_config.json`, `results/predict_all_years.csv` — chỉ đọc), không thay model production, không đổi số đã công bố (Ridge 0.265, carry 0.145, LR 0.434, k=3). Holdout 2023→2024 không fit/chấm/nhìn; cửa sổ loại cả 61 dòng năm 2023 (origin holdout).
 
 ## Thiết kế chốt trước khi chạy (pre-registered trong ask của lane)
 
-- **Dữ liệu**: `results/predict_all_years.csv` (artifact đóng băng, đọc thôi) — 2D sd_4_2 × sd_6_1, nhãn STING đóng băng = cột `pred_cluster` (model fit 2011–2023, lưới toàn cục — `scripts/predict_demo.py`).
+- **Dữ liệu**: `results/predict_all_years.csv` (artifact đóng băng, đọc thôi) — 2D sd_4_2 × sd_6_1, nhãn STING đóng băng = cột `pred_cluster` (model fit 2011–2023, lưới toàn cục — `scripts/analysis/predict_demo.py`).
 - **Cửa sổ**: year ≤ 2022 → 747 dòng (869 tổng − 61 dòng 2023 − 61 dòng 2024; script fail-closed kiểm đúng phân bố nhãn −1: 149, 0: 5, 1: 16, 2: 577 — khớp join PCI 747, `results/cluster_profile.md:34`).
-- **Chuẩn hóa**: z-score TRONG TỪNG NĂM (ddof=0) trên 2 cột — cùng mẫu `scripts/run_analysis.py:256`; mỗi năm dùng mean/sd của chính năm đó. *Ghi chú trung thực*: đề bài nói 'mỗi năm 63 điểm' nhưng thực tế 4 năm trong cửa sổ không đủ 63 dòng ({2014: 61, 2018: 61, 2021: 60, 2022: 61}) — phương pháp không đổi: từng năm vẫn chuẩn hóa bằng mean/sd của chính năm đó.
+- **Chuẩn hóa**: z-score TRONG TỪNG NĂM (ddof=0) trên 2 cột — cùng mẫu `scripts/analysis/run_analysis.py:256`; mỗi năm dùng mean/sd của chính năm đó. *Ghi chú trung thực*: đề bài nói 'mỗi năm 63 điểm' nhưng thực tế 4 năm trong cửa sổ không đủ 63 dòng ({2014: 61, 2018: 61, 2021: 60, 2022: 61}) — phương pháp không đổi: từng năm vẫn chuẩn hóa bằng mean/sd của chính năm đó.
 - **Ứng viên**: DBSCAN min_samples ∈ {5, 10} × eps tại phân vị {50, 60, 70, 80, 90}% của phân phối k-distance (10 combo suy từ dữ liệu, không tune tay); KMeans(k=3, random_state=11, n_init=10); Ward(k=3, linkage=ward).
 - **Metrics**: ARI vs nhãn đóng băng 2 cách (đầy đủ / chỉ non-noise của nhãn đóng băng); ARI 2 cách vs refit (đọc deconfound); silhouette euclidean (DBSCAN/STING chỉ tính trên non-noise của nhãn đó, <2 cụm non-noise → n/a); noise rate; sizes_top5 (quy ước `models/predict_config.json:21` — non-noise, giảm dần); cờ noise ≤ 0.25 (mô tả theo bộ lọc cũ, KHÔNG phải bộ lọc ứng viên).
 - **Ngưỡng thắng (chốt trước)**: ứng viên thắng mốc CHỈ khi vượt 'STING đóng băng tính lại trên cùng 747 dòng' trên CẢ 3 chỉ số ARI đầy đủ, ARI non-noise, silhouette (đọc chặt nhất của '3 chỉ số' trong đề bài; noise rate chỉ mô tả). Exploratory — không tuyên bố p-value, không hiệu chỉnh đa so sánh; cấm trích 1 combo đẹp lẻ tẻ.
@@ -114,7 +114,7 @@ Phân phối k-distance theo min_samples:
 ## Tái lập
 
 ```powershell
-python -E scripts/candidates_clustering.py
+python -E scripts/supervised/candidates_clustering.py
 python -m ruff check .
 ```
 

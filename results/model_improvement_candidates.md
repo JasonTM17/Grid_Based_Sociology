@@ -14,7 +14,7 @@
 
 | Ứng viên | Metric | Mốc | Verdict | Nhận xét ngắn |
 |---|---|---|---|---|
-| REG · Gate tái lập baseline (ridge / RF / carry) | R² CV (value_cv, raw) | công bố 0.265 / 0.197 / 0.145 | **KHỚP 3/3** (gate) | Refit ĐÚNG lưới công bố `scripts/predict_supervised.py:276-285` trên cùng 6 fold; lệch → exit 1 (`results/candidates_regression.md:20-22`) |
+| REG · Gate tái lập baseline (ridge / RF / carry) | R² CV (value_cv, raw) | công bố 0.265 / 0.197 / 0.145 | **KHỚP 3/3** (gate) | Refit ĐÚNG lưới công bố `scripts/supervised/predict_supervised.py:276-285` trên cùng 6 fold; lệch → exit 1 (`results/candidates_regression.md:20-22`) |
 | REG · R1 ElasticNet (α=0.01, l1_ratio=0.2) | R² CV 0.267 (raw 0.266933) | ridge 0.265 | **BEAT** (ngưỡng kỹ thuật của lane — KHÔNG phải superiority) — (i) 0.267 > 0.265 VÀ (ii) beat 4/6 fold | Biên mỏng +0.0018 raw, nằm trong vùng nhiễu của best_score_ (không nested CV) — md §7 tự ghi "ĐẠT NGƯỠNG KỸ THUẬT, KHÔNG phải superiority" (`candidates_regression.md:76`); thắng CV ≠ adopt |
 | REG · R2 HistGradientBoosting (lr=0.05, max_leaf=8) | 0.176 | ridge 0.265 | **WORSE** (0/6, Δ −0.089) | Boosting không thắng trên ~740 cặp tỉnh-năm; ghi kém không làm đẹp (`candidates_regression.md:77`) |
 | REG · R3 KNeighbors (k=20, distance) | 0.168 | ridge 0.265 | **WORSE** (0/6, Δ −0.097) | Kém nhất lane; loại trừ giả thuyết quy nạp cục bộ |
@@ -40,12 +40,12 @@
 
 **Protocol giữ nguyên thế nào — tái dùng qua import, không sao chép:**
 
-- `build_regression_pairs` (`scripts/predict_supervised.py:99-120`) và `expanding_origin_folds` (`scripts/predict_supervised.py:123-147`) + `HOLDOUT_YEAR = 2023` (`scripts/predict_supervised.py:71`) import nguyên văn từ pipeline công bố. Kết quả: **740 cặp train** (year_t 2011–2022) — xác minh đúng bằng 740 — và **6 fold expanding origin 2017–2022** (kích thước fold-train: 374 / 437 / 498 / 561 / 621 / 681 — tính live trong lane, `candidates_regression.md:10`).
+- `build_regression_pairs` (`scripts/supervised/predict_supervised.py:99-120`) và `expanding_origin_folds` (`scripts/supervised/predict_supervised.py:123-147`) + `HOLDOUT_YEAR = 2023` (`scripts/supervised/predict_supervised.py:71`) import nguyên văn từ pipeline công bố. Kết quả: **740 cặp train** (year_t 2011–2022) — xác minh đúng bằng 740 — và **6 fold expanding origin 2017–2022** (kích thước fold-train: 374 / 437 / 498 / 561 / 621 / 681 — tính live trong lane, `candidates_regression.md:10`).
 - Holdout 59 cặp (2023→2024): **CHỈ kiểm tra kích thước** theo design; không fit, không chọn, không chấm, không nhìn.
 - Đặc trưng: 8 cột `REGRESSION_FEATURES` như công bố; KHÔNG thêm PCI vào features (giữ vai trò external validation độc lập); KHÔNG chạy ablation bỏ `sd_6_1` (đổi spec — chờ GV).
 - Chấm điểm: `GridSearchCV(cv=folds, scoring='r2', n_jobs=1)` y hệt pipeline công bố; `value_cv` = best_score_ làm tròn 3.
 
-**Gate tái lập baseline (quy tắc pre-registered số 6)** — baseline TÍNH LẠI in-memory bằng refit ĐÚNG lưới công bố (`scripts/predict_supervised.py:276-285`: ridge pipeline + lưới `m__alpha {0.1, 1.0, 10.0}`; RF + lưới `max_depth {4, 6, None} × min_samples_leaf {1, 2}`) trên cùng 6 fold, đối chiếu trước khi so ứng viên; lệch → script exit 1, không ghi output:
+**Gate tái lập baseline (quy tắc pre-registered số 6)** — baseline TÍNH LẠI in-memory bằng refit ĐÚNG lưới công bố (`scripts/supervised/predict_supervised.py:276-285`: ridge pipeline + lưới `m__alpha {0.1, 1.0, 10.0}`; RF + lưới `max_depth {4, 6, None} × min_samples_leaf {1, 2}`) trên cùng 6 fold, đối chiếu trước khi so ứng viên; lệch → script exit 1, không ghi output:
 
 | Baseline | Tái lập (raw) | round 3 | Công bố | Kết quả |
 |---|---|---|---|---|
@@ -73,7 +73,7 @@
 
 **Protocol giữ nguyên thế nào:**
 
-- Tái dùng NGUYÊN VĂN pipeline qua import: `build_classification_pairs` (`scripts/predict_supervised.py:187-211`), `expanding_year_splits` (`:214-233`), `expanding_majority_f1` (`:236-251`), `CLASSIFICATION_SCORER` (`:75-77`), spec + lưới LR/RF (`:342-348`), seed model (`:72`). Config đóng băng `models/predict_config.json` CHỈ ĐỌC.
+- Tái dùng NGUYÊN VĂN pipeline qua import: `build_classification_pairs` (`scripts/supervised/predict_supervised.py:187-211`), `expanding_year_splits` (`:214-233`), `expanding_majority_f1` (`:236-251`), `CLASSIFICATION_SCORER` (`:75-77`), spec + lưới LR/RF (`:342-348`), seed model (`:72`). Config đóng băng `models/predict_config.json` CHỈ ĐỌC.
 - Phạm vi CHỈ CV train: **738 cặp** year_t ≤ 2022 (khớp ghi chú `reports/model_deep_dive.md:270`), 6 fold expanding origin 2017–2022; nhãn y = 1 nếu STING gán cụm, 0 nếu nhiễu — **pseudo-label**, không phải ground truth.
 - 15 combo ứng viên + 9 combo baseline tái lập = 24 combo × 6 fold = 144 fit; `refit=False` cho mọi GridSearchCV — không fit model cuối nào ngoài CV. Holdout 59 cặp KHÔNG fit/chọn/chấm/nhìn; script không tạo biến holdout.
 
@@ -84,7 +84,7 @@
 | LR lưới công bố (C {0.1, 0.3, 1.0}) | 0.4342 | 0.434 | supervised_metrics.csv | KHỚP |
 | RF lưới công bố (depth {3, 6, None} × leaf {1, 2}) | 0.3972 | 0.397 | supervised_metrics.csv | KHỚP |
 | majority (expanding_majority_f1 nguyên văn) | 0.2282 | 0.228 | supervised_metrics.csv | KHỚP |
-| always dự đoán 1 (nguyên văn `scripts/predict_supervised.py:530-542`) | 0.4001 | 0.400 | supervised_summary.md:31 | KHỚP |
+| always dự đoán 1 (nguyên văn `scripts/supervised/predict_supervised.py:530-542`) | 0.4001 | 0.400 | supervised_summary.md:31 | KHỚP |
 
 **Cross-check độc lập:** per-fold LR-best tái lập (0.3389 / 0.4089 / 0.4569 / 0.4309 / 0.4725 / 0.4968) khớp 6/6 giá trị learning-curve LR đã công bố trong `reports/model_deep_dive.md` mục 4.1 — đã xác minh lại trong phiên viết báo cáo tại `reports/model_deep_dive.md:226-231`.
 
@@ -94,7 +94,7 @@
 |---|---|---|---|---|---|---|---|
 | C1 | LogisticRegression(class_weight='balanced'), lưới C y hệt công bố | C=0.3 | **0.4861** | +0.0519 | +0.2578 | 4/6 | **VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV]** |
 | C2 | LogisticRegression, lưới C mở rộng {0.03, 0.1, 0.3, 1.0, 3.0, 10.0} | C=1 | 0.4342 | +0.0000 | +0.2059 | 0/6 (toàn hoà) | KHÔNG VƯỢT |
-| C3 | RandomForestClassifier(class_weight='balanced', n_estimators=300, random_state=42, n_jobs=1) — lưới y hệt công bố; class_weight là tham số MỚI DUY NHẤT, n_estimators=300 giữ nguyên spec công bố (`scripts/predict_supervised.py:344`) | depth=6, leaf=2 | **0.5238** | +0.0896 | +0.2956 | 6/6 | **VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV]** |
+| C3 | RandomForestClassifier(class_weight='balanced', n_estimators=300, random_state=42, n_jobs=1) — lưới y hệt công bố; class_weight là tham số MỚI DUY NHẤT, n_estimators=300 giữ nguyên spec công bố (`scripts/supervised/predict_supervised.py:344`) | depth=6, leaf=2 | **0.5238** | +0.0896 | +0.2956 | 6/6 | **VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV]** |
 
 - **Vì sao C1/C3 thắng:** nhãn pseudo-label STING mất cân bằng mạnh và prevalence nhãn 1 trong validation trôi 44%→92% theo năm (`results/supervised_summary.md:31`; bảng fold ở `results/candidates_classification.md:24-32`). `class_weight='balanced'` đổi hàm mất mát để phạt sai lớp hiếm nhiều hơn — đúng đúng 1 tham số, trên ĐÚNG lưới công bố, nên chênh điểm gán được về hiệu ứng class_weight chứ không phải siêu tham số (chi tiết lưới từng combo: `results/candidates_classification.md:44-75`; ví dụ C3 depth=6/leaf=2: 0.3793 → 0.5238, Δ +0.1445). Biên per-fold của C3 dao động 0.4190–0.6028 (spread 0.1838 — `candidates_classification.md:26-31`), nên 0.5238 là trung bình trên 6 fold chứ không phải mức ổn định từng fold; `value_cv` là best_score_ GridSearchCV — hơi lạc quan theo disclosure đã công bố (`results/supervised_summary.md:32`).
 - **Vì sao C2 thua:** lưới C 3 điểm đã công bố ({0.1, 0.3, 1.0}) **đã chứa đỉnh** — mở rộng tới 6 điểm, optimum vẫn nằm tại C=1.0 trùng đúng optimum công bố, beat 0/6 toàn hoà. Spread điểm trong lưới C2 = 0.0660 (lưới công bố 0.0172 — `candidates_classification.md:64`) — đo độ nhạy siêu tham số, không phải cải tiến. Bài học: peak regularization KHÔNG nằm ngoài {0.1–1.0}; mở rộng lưới không phải cải tiến.
@@ -134,7 +134,7 @@
 1. **C3 — RF thêm `class_weight='balanced'`** (macro-F1 CV 0.5238 vs LR 0.434, beat 6/6 fold, Δ vs majority +0.2956) — **ưu tiên 1**.
 2. **C1 — LR balanced** (0.4861, beat 4/6, Δ vs majority +0.2578) — **ưu tiên 2**.
 
-Cả hai chỉ thêm **một tham số MỚI** (class_weight='balanced') trên ĐÚNG lưới công bố — mọi siêu tham số khác giữ nguyên giá trị spec công bố (RF công bố vốn đã có n_estimators=300, `scripts/predict_supervised.py:344`); là 2 ứng viên duy nhất đạt đủ ngưỡng (i)+(ii) và đã đối chiếu cả sàn mù always-1/majority. Đây là **THẮNG CV trên pseudo-label STING, chưa phải "đáng adopt"**: adoption cần GV duyệt (nhóm (b), `reports/model_deep_dive.md:293-299`) VÀ chốt holdout 2023→2024 (59 cặp chưa từng fit/chấm/nhìn).
+Cả hai chỉ thêm **một tham số MỚI** (class_weight='balanced') trên ĐÚNG lưới công bố — mọi siêu tham số khác giữ nguyên giá trị spec công bố (RF công bố vốn đã có n_estimators=300, `scripts/supervised/predict_supervised.py:344`); là 2 ứng viên duy nhất đạt đủ ngưỡng (i)+(ii) và đã đối chiếu cả sàn mù always-1/majority. Đây là **THẮNG CV trên pseudo-label STING, chưa phải "đáng adopt"**: adoption cần GV duyệt (nhóm (b), `reports/model_deep_dive.md:293-299`) VÀ chốt holdout 2023→2024 (59 cặp chưa từng fit/chấm/nhìn).
 
 3. **R1 ElasticNet** (R² CV 0.267, beat 4/6) đạt nhãn "beat" thứ ba theo verdict kỹ thuật của lane nhưng **ưu tiên thấp nhất, chỉ nhận nếu GV muốn thử trộn L1** để cắt feature nhiễu: biên +0.0018 raw nằm trong vùng nhiễu của best_score_ (không nested CV) và chính lane tự ghi "ĐẠT NGƯỠNG KỸ THUẬT, KHÔNG phải superiority" (`results/candidates_regression.md:76`) — đọc bảng mục 2 cần nhớ: chỉ C1/C3 là thắng rõ; R1 chỉ hơn ridge +0.0018 raw trong vùng nhiễu.
 
@@ -180,7 +180,7 @@ Cả hai chỉ thêm **một tham số MỚI** (class_weight='balanced') trên �
 ## 5) Kỷ luật thực nghiệm
 
 - **Multiple-testing:** ma trận exploratory — REG 21 combo × 6 fold (21 = 6 lưới R1 + 6 R2 + 6 R3 + 3 R4 poverty, baseline gate không tính vào 21 — `candidates_regression.md:5`), CLF 24 combo × 6 fold (144 fit), CLUS 12 combo × 1 cửa sổ — nhiều nơi có thể vượt mốc do may rủi. KHÔNG tuyên bố p-value hay hiệu chỉnh alpha hình thức; guard chống fishing là **ngưỡng thắng pre-registered trước khi chạy** (REG `candidates_regression.md:50`; CLF `candidates_classification.md:36`; CLUS `candidates_clustering.md:12`), cấm trích 1 fold/combo đẹp, cấm đổi metric/fold sau khi thấy số, và duyệt GV cuối cùng. CLUS không có fold nên tiêu chí "≥4/6 fold" không áp dụng được — chỉ so ngang chỉ số trên cùng cửa sổ như pre-registered (`candidates_clustering.md:108`). Kỷ luật hiện tại thuần **thủ tục**, không thống kê: không có permutation/null test hay nested CV để ước lượng xác suất thắng-do-may; nhận định "nằm trong vùng nhiễu" (vd R1 +0.0018) là lập luận định tính dựa trên disclosure best_score_ đã công bố (`results/supervised_summary.md:32`), không phải đo đạc.
-- **Seed 11:** seed lane 11 được khai báo theo quy ước (KMeans dùng seed 11; REG/CLF dùng seed 11 phòng hờ). Model giữ `random_state=42` đúng SEED công bố (`scripts/predict_supervised.py:72`); mọi bước còn lại (StandardScaler, LogisticRegression lbfgs, GridSearchCV n_jobs=1, DBSCAN, Ward) đều tất định nên seed lane không tác động kết quả (`candidates_classification.md:7`).
+- **Seed 11:** seed lane 11 được khai báo theo quy ước (KMeans dùng seed 11; REG/CLF dùng seed 11 phòng hờ). Model giữ `random_state=42` đúng SEED công bố (`scripts/supervised/predict_supervised.py:72`); mọi bước còn lại (StandardScaler, LogisticRegression lbfgs, GridSearchCV n_jobs=1, DBSCAN, Ward) đều tất định nên seed lane không tác động kết quả (`candidates_classification.md:7`).
 - **Deterministic ×2:** mỗi lane chạy 2 lần, so sha256 md/csv — REG: md `8bbdc6811ed2ffdcde4022a38dca2bcff59fc39ed6783ee405a844ab4a702060`, csv `f1a0280ce888cd56d644b7729170e9bae8b57720b38286c262642211e13bd733` byte-giống cả 2 lần (stdout cũng giống); CLF: md `b5422706…`, csv `38e4b07b…` byte-giống (diff rỗng); CLUS: lane tự báo ×2 byte-giống, hash lần đầu được ghi ở mục 6 để các phiên sau đối chiếu.
 - **Fail-closed gates:** lệch gate baseline → script exit 1 không ghi output; cửa sổ/phân bố nhãn CLUS lệch → dừng với lỗi rõ ràng (`candidates_clustering.md:124`).
 
@@ -188,7 +188,7 @@ Cả hai chỉ thêm **một tham số MỚI** (class_weight='balanced') trên �
 
 Ba kiểm tra dưới đây được **chạy lại trong phiên viết tài liệu này** và tái lập đúng kết quả lane báo cáo:
 
-1. **Ruff toàn repo:** `python -E -m ruff check .` → `All checks passed!`, exit 0. Phân xử mâu thuẫn lane: REG báo FAIL 2×F821 tại `scripts/candidates_clustering.py:375,378`, CLF báo PASS — cây hiện tại PASS, finding F821 stale (file untracked, không truy được thời điểm sửa).
+1. **Ruff toàn repo:** `python -E -m ruff check .` → `All checks passed!`, exit 0. Phân xử mâu thuẫn lane: REG báo FAIL 2×F821 tại `scripts/supervised/candidates_clustering.py:375,378`, CLF báo PASS — cây hiện tại PASS, finding F821 stale (file untracked, không truy được thời điểm sửa).
 2. **Repo integrity:** `git diff --name-only` → output rỗng (0 tệp tracked sửa); `git status --porcelain` → đúng 9 tệp untracked = 3 script lane (`scripts/candidates_{regression,classification,clustering}.py`) + 6 artifact (`results/candidates_*.{md,csv}`); models/, slides/, data/processed/, artifact đóng băng không đụng. Kiểm tra lại sau khi ghi tài liệu này (lần 2, cùng ngày): tổng 10 tệp untracked — thêm `results/model_improvement_candidates.md`; 0 tệp tracked sửa.
 3. **Determinism hash:** `sha256sum` trên 6 tệp `results/candidates_*` → REG md `8bbdc6811ed2ffdc…` và csv `f1a0280ce888cd5…` khớp đủ 64 ký tự với hash lane khai báo trong mục 5; CLF md `b54227066421a9e6…` và csv `38e4b07b06ddcef0…` khớp prefix; CLUS md `5b27eb2de3b1cff2…` và csv `1908d80bfdc3115c…` (hash lần đầu — chưa có mốc độc lập; neo vĩnh viễn cần commit — mục 4.7).
 
@@ -197,9 +197,9 @@ Cross-check thêm đã chạy trong phiên này: per-fold LR của lane CLF (0.3
 ## 7) Tái lập và tệp nguồn
 
 ```powershell
-python -E scripts/candidates_regression.py
-python -E scripts/candidates_classification.py
-python -E scripts/candidates_clustering.py
+python -E scripts/supervised/candidates_regression.py
+python -E scripts/supervised/candidates_classification.py
+python -E scripts/supervised/candidates_clustering.py
 python -E -m ruff check .
 ```
 

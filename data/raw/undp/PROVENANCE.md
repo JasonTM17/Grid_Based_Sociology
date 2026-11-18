@@ -39,8 +39,8 @@ TIN CẬY cho tới khi được kiểm chứng ở giai đoạn tích hợp.
 - `ophi_vnm6_mpi_extract.csv` — 6 dòng (6 vùng, MICS 2020-2021): survey,
   survey_year, region_name, mpi, headcount_h_pct, intensity_a_pct,
   vulnerable_to_poverty_pct, severe_poverty_pct.
-- Script: `scripts/wb_undp_poverty_probe.py`, chạy từ thư mục gốc repo
-  `python -E scripts/wb_undp_poverty_probe.py`. KHÔNG merge vào
+- Script: `scripts/data/wb_undp_poverty_probe.py`, chạy từ thư mục gốc repo
+  `python -E scripts/data/wb_undp_poverty_probe.py`. KHÔNG merge vào
   data/processed ở giai đoạn truy tìm.
 
 ## Kết luận

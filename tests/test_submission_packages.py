@@ -7,7 +7,7 @@ import zipfile
 
 import pytest
 
-from scripts.build_submission_packages import (
+from scripts.deliverables.build_submission_packages import (
     PACKAGES, ROOT, build_package, check_member, package_files, verify_package,
 )
 
@@ -23,7 +23,7 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
         manifest = verify_package(path, kind)
         files = {row["path"] for row in manifest["files"]}
         assert {
-            "scripts/predict_supervised.py", "scripts/papi_pred_common.py", "scripts/fig_style.py",
+            "scripts/supervised/predict_supervised.py", "scripts/common/papi_pred_common.py", "scripts/common/fig_style.py",
             "models/sup_ridge.joblib", "models/sting_predict_model.pkl",
             "results/supervised_metrics.csv", "results/predict_all_years.csv",
             "data/processed/papi_panel_scale_metadata.csv",
@@ -31,11 +31,11 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
         } <= files
         assert sum(p.endswith(".xlsx") and p.startswith("data/raw/papi/") for p in files) == 14
         if kind == "final":
-            assert {"slides/final.pptx", "scripts/build_slides.py", "scripts/build_report.py"} <= files
-            assert not {"scripts/build_slides_10.py", "scripts/gen_submission_demo.py"} & files
+            assert {"slides/final.pptx", "scripts/deliverables/build_slides.py", "scripts/deliverables/build_report.py"} <= files
+            assert not {"scripts/deliverables/build_slides_10.py", "scripts/notebooks/gen_submission_demo.py"} & files
         else:
-            assert {"slides/submission.pptx", "scripts/build_slides_10.py"} <= files
-            assert not {"scripts/build_report.py", "scripts/gen_final_analysis.py", "assets/report-cover.xml"} & files
+            assert {"slides/submission.pptx", "scripts/deliverables/build_slides_10.py"} <= files
+            assert not {"scripts/deliverables/build_report.py", "scripts/notebooks/gen_final_analysis.py", "assets/report-cover.xml"} & files
         assert not any(p.startswith((".git", ".codex", ".agentkit", "plans/", "study/", "reports/on-tap/", "data/raw/course/")) for p in files)
         assert not {
             "reports/course_requirements.md", "reports/report_format_notes.md",
@@ -65,7 +65,7 @@ def _rewrite(source: Path, target: Path, transform):
 def test_removed_dependency_is_rejected(packages, tmp_path):
     broken = tmp_path / "missing.zip"
     _rewrite(packages["final"], broken,
-             lambda name, data: None if name.endswith("/scripts/predict_supervised.py") else data)
+             lambda name, data: None if name.endswith("/scripts/supervised/predict_supervised.py") else data)
     with pytest.raises(ValueError, match="manifest"):
         verify_package(broken, "final")
 
@@ -104,7 +104,7 @@ def test_preprocessing_reproduces_from_extracted_package(packages, tmp_path):
         archive.extractall(tmp_path)
     package = tmp_path / name
     result = subprocess.run(
-        [sys.executable, "-X", "utf8", str(package / "scripts/preprocessing_audit.py")],
+        [sys.executable, "-X", "utf8", str(package / "scripts/data/preprocessing_audit.py")],
         cwd=package, capture_output=True, text=True, encoding="utf-8", timeout=60,
     )
     assert result.returncode == 0, result.stderr

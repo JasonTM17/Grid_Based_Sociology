@@ -20,8 +20,8 @@ Tài liệu dành cho sinh viên học Học máy đang làm đồ án: giải t
 Dự án hiện có đúng **một** nguồn chính: panel PAPI 2011–2024 (`data/processed/papi_panel_63_2011_2024.csv` — đếm trực tiếp trong phiên tài liệu: **882 dòng × 41 cột** = **4 cột khóa** (`province_code`, `province_ascii`, `province_vi`, `year` — `province_code` của panel chính là `papi_province_code` dùng trong các file external) + 37 cột chỉ số = 8 dimension `d1–d8` + 29 sub-indicator `sd_1_1`–`sd_8_3`). Vấn đề của đồ án khi chỉ có một nguồn:
 
 1. **Clustering là học không giám sát** (unsupervised): STING gom nhóm tỉnh mà không có "đáp án đúng", nên cần một biến **nằm ngoài khung đo PAPI** để kiểm tra các cụm có nghĩa xã hội hay chỉ là artifact của thang đo (xem §5.1).
-2. **Nghi vấn "nhảy thang đo" PAPI xuyên năm**: `scripts/check_data.py` flag cột có bước nhảy mean năm > 0,25; workbook PAPI ghi rõ có nội dung thay đổi năm 2021 và thang dimension 1–10 chưa được chứng minh tương đương xuyên năm (README.md, mục "Lưu ý thang đo" — `README.md:131`–`140`). Cần một mỏ neo ngoài để phân biệt "thang đo đổi" với "cấu trúc thật đổi" (§5.2).
-3. **Phần hồi quy** (dự báo Y tế công lập t+1, `scripts/predict_supervised.py`) chưa có biến kiểm soát kinh tế cấp tỉnh nào (README.md:79–87).
+2. **Nghi vấn "nhảy thang đo" PAPI xuyên năm**: `scripts/data/check_data.py` flag cột có bước nhảy mean năm > 0,25; workbook PAPI ghi rõ có nội dung thay đổi năm 2021 và thang dimension 1–10 chưa được chứng minh tương đương xuyên năm (README.md, mục "Lưu ý thang đo" — `README.md:131`–`140`). Cần một mỏ neo ngoài để phân biệt "thang đo đổi" với "cấu trúc thật đổi" (§5.2).
+3. **Phần hồi quy** (dự báo Y tế công lập t+1, `scripts/supervised/predict_supervised.py`) chưa có biến kiểm soát kinh tế cấp tỉnh nào (README.md:79–87).
 
 ### 1.2 Đã có thêm gì trong đợt mở rộng này
 
@@ -107,13 +107,13 @@ Giấy phép nêu rõ cho người học: **CC BY 4.0** = được dùng lại/v
 ### 3.2 GSO — Cục Thống kê (PX-Web + Niên giám Thống kê)
 
 - **Nguồn gốc + URL:** cổng PX-Web của NSO thực tế nằm tại **<https://pxweb.nso.gov.vn>** (được nhúng từ `nso.gov.vn/px-web-2`); Niên giám Thống kê dạng PDF tại `nso.gov.vn`. **Cổng cũ `stat.gso.gov.vn` trong đề bài đã chết DNS** (`curl: Could not resolve host` — theo tuyên bố phiên tải, `data/raw/gso/PROVENANCE.md` dòng 21). Hai bảng dùng: **V03.12** "Tổng sản phẩm trên địa bàn bình quân đầu người phân theo địa phương" và **V02.01** "Diện tích, dân số và mật độ dân số phân theo địa phương".
-- **Cơ sở phương pháp tải (đã kiểm tra trực tiếp ngày 2026-11-07):** `curl https://pxweb.nso.gov.vn/robots.txt` trả về đúng 2 dòng — `User-agent: *` và `Sitemap: …` — **không có dòng `Disallow` nào**, tức cổng không cấm tải tự động trang công khai. API v1 của PX-Web GSO chỉ mở 3 database và từ chối POST (thông báo 404 của **IIS** — *Internet Information Services*, web server của Microsoft) → `scripts/gso_pxweb_fetch.py` dùng đúng luồng bình thường của trang: GET trang chọn biến → POST form (**VIEWSTATE/EVENTVALIDATION** là hai trường ẩn của web form *ASP.NET* phải gửi lại để server xác thực trạng thái trang; script tự khai báo User-Agent "…research-download"). Không đăng nhập, không CAPTCHA, không rate-limit cần né — đây là cách dùng tiêu chuẩn của một trang công khai, không phải đi vòng lọc bot.
+- **Cơ sở phương pháp tải (đã kiểm tra trực tiếp ngày 2026-11-07):** `curl https://pxweb.nso.gov.vn/robots.txt` trả về đúng 2 dòng — `User-agent: *` và `Sitemap: …` — **không có dòng `Disallow` nào**, tức cổng không cấm tải tự động trang công khai. API v1 của PX-Web GSO chỉ mở 3 database và từ chối POST (thông báo 404 của **IIS** — *Internet Information Services*, web server của Microsoft) → `scripts/data/gso_pxweb_fetch.py` dùng đúng luồng bình thường của trang: GET trang chọn biến → POST form (**VIEWSTATE/EVENTVALIDATION** là hai trường ẩn của web form *ASP.NET* phải gửi lại để server xác thực trạng thái trang; script tự khai báo User-Agent "…research-download"). Không đăng nhập, không CAPTCHA, không rate-limit cần né — đây là cách dùng tiêu chuẩn của một trang công khai, không phải đi vòng lọc bot.
 - **File raw:** `data/raw/gso/` — 5 HTML pxweb (V03.12, V03.10, 3 file V02.01) + 10 PDF = 9 bản Niên giám (2012, 2014, 2016, 2018, 2019, 2020, 2021, 2022, 2025) + 1 bản tóm tắt 2016.
 - **Schema cột (output):**
   - `external_gso_grdp_63.csv` (441 dòng, đọc trong phiên này): `province_code, province_ascii, province_vi, year, grdp_per_capita_million_vnd, source, papi_province_code`. Đơn vị **Triệu đồng**; `source = gso_pxweb_V03.12`; 0 ô trống.
   - `external_gso_population_63_full.csv` (882 dòng): `papi_province_code, province_code, province_ascii, province_vi, year, gso_pop_total_thousand, gso_pop_urban_thousand, gso_urban_residence_pct_derived, source`. Đơn vị **Nghìn người** (dân số trung bình). `source` đếm trong phiên này: `gso_nien_giam_extract` 504 dòng (2012–2014, 2018–2022), `gso_pxweb_V02.01` 378 dòng (2011, 2015–2017, 2023–2024 — *6 năm × 63 tỉnh*); **cột đô thị trống đúng 378 dòng pxweb** (V02.01 không có phân tổ đô thị theo tỉnh).
 - **Độ phủ tỉnh×năm:** GRDP **2018–2024** (2024 = "Sơ bộ", tức số chưa chính thức) — **thiếu hẳn 2011–2017**; dân số **đầy đủ 2011–2024**.
-- **Đối chiếu GRDP — có mẫu số rõ (theo `data/raw/gso/PROVENANCE.md` dòng 57–62, chạy trong `scripts/build_gso_grdp_pop.py`):**
+- **Đối chiếu GRDP — có mẫu số rõ (theo `data/raw/gso/PROVENANCE.md` dòng 57–62, chạy trong `scripts/data/build_gso_grdp_pop.py`):**
   - pxweb V03.12 vs **Niên giám 2025** (bảng 86, tr.245–246; các cột năm 2020, 2022, 2023, Sơ bộ 2024): **248/248 ô trùng khớp** (dung sai 0,051 = sai số làm tròn). Mẫu số tối đa theo cấu trúc là 63 × 4 = 252; con số 248 là số ô thực sự so sánh, 4 ô chênh lệch không được giải thích trong PROVENANCE.md — ghi nhận trung thực.
   - pxweb V03.12 vs **Niên giám 2022** (bảng 95, tr.260–261; 5 năm 2018–2022 × 63 tỉnh = **315 ô so sánh**): 259 trùng, **56 lệch — toàn bộ ở cột "Sơ bộ 2022"** (56/63 ô của cột đó; số 2022 trên pxweb là bản hiệu đính mới hơn, cập nhật 15/08/2026).
 - **Độ lệch vintage dân số — đã định lượng VÀ tái lập trong phiên tài liệu:** *vintage* = phiên bản số liệu của cùng chỉ số tại thời điểm công bố khác nhau (bản Niên giám in tại thời điểm đó vs bản pxweb sửa lại sau Tổng điều tra Dân số 2019). Trên **504 tỉnh-năm giao** (8 năm 2012–2014, 2018–2022 — hai nguồn cùng có giá trị): chênh trung bình **8,49 nghìn người**, max **189,63** (Hà Nội 2014), **104 dòng >1%** — khớp 4/4 với `data/raw/gso/PROVENANCE.md` dòng 63–64. Lưu ý tránh nhầm hai con số 378: **378 dòng pxweb trong file output** (6 năm thiếu lấp mới: 2011, 2015–2017, 2023–2024) ≠ 504 tỉnh-năm giao dùng đối chiếu vintage. File giữ nguyên giá trị từng vintage và **cột `source` ghi rõ từng dòng**; không trộn bừa.
@@ -147,7 +147,7 @@ Giấy phép nêu rõ cho người học: **CC BY 4.0** = được dùng lại/v
   1. Nghèo chỉ cấp vùng × giai đoạn cũ (1998–2016) → **chỉ dùng diễn giải bối cảnh, tuyệt đối không đưa vào feature cấp tỉnh** (kết cấp vùng với panel tỉnh là lỗi "mismatch aggregation" — gán một giá trị vùng cho mọi tỉnh trong vùng làm cụm/hồi quy bị nhiễu cấu trúc vùng).
   2. Bệnh viện là **snapshot 1 năm (2020)** và đếm **số điểm**, không phải số giường/bệnh nhân; 10 tỉnh có `count = 0` (liệt kê §4 ghi chú 6) — phương pháp làm rõ: gap [8].
   3. QA ghi 2 lỗi nhỏ về **nhãn file bằng chứng** (không sai dữ liệu, các con số 439/81/10/3 đều đúng và đã tái tạo live): `_search_poverty_title.json` thực tế chứa truy vấn "tỷ lệ nghèo" (count=3); `_search_poverty_vn.json` chứa một truy vấn count=61 không được nhắc trong ghi chú.
-  4. 3 tên tỉnh lỗi chính tả trong nguồn (`Bà Rịa -Vũng Tàu`, `Cần Thơn`, `Quản Bình`) và 3 tên không dấu (`Kien Giang`, `Đăk Lăk`, `Đăk Nông`) được map tường minh qua bí danh trong `scripts/build_odmekong_external.py` — 63/63 tỉnh khớp crosswalk và khớp `papi_province_code` với panel, không bịa mã.
+  4. 3 tên tỉnh lỗi chính tả trong nguồn (`Bà Rịa -Vũng Tàu`, `Cần Thơn`, `Quản Bình`) và 3 tên không dấu (`Kien Giang`, `Đăk Lăk`, `Đăk Nông`) được map tường minh qua bí danh trong `scripts/data/build_odmekong_external.py` — 63/63 tỉnh khớp crosswalk và khớp `papi_province_code` với panel, không bịa mã.
 - **Provenance:** `data/raw/odmekong/PROVENANCE.md` — giấy phép từng dataset (kèm file package_show), bằng chứng 404 + rà catalog, manifest SHA-256 toàn bộ raw files, bảng URL gốc từng resource.
 
 ### 3.4 World Bank WDI — chỉ số phát triển thế giới, quốc gia VNM
@@ -155,7 +155,7 @@ Giấy phép nêu rõ cho người học: **CC BY 4.0** = được dùng lại/v
 - **Nguồn gốc + URL:** World Development Indicators (WDI), API v2, quốc gia `VNM`:
   `https://api.worldbank.org/V2/country/VNM/indicator/<MÃ>?downloadformat=csv` (4 chỉ số: `NY.GDP.PCAP.CD` GDP/người USD hiện hành; `SP.URB.TOTL.IN.ZS` % dân số đô thị; `SH.XPD.CHEX.GD.ZS` chi y tế hiện hành % GDP; `SH.MED.BEDS.ZS` giường bệnh trên 1.000 dân).
 - **Giấy phép:** **CC BY 4.0** — World Bank Terms of Use for Datasets, <https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets>.
-- **Cách tải:** dạng inline `format=csv&per_page=2000` bị API trả XML lỗi *"Invalid format"* (đã thử 2026-11-07) → dùng `downloadformat=csv`, API trả **ZIP**; CSV dữ liệu tách ra `data/raw/worldbank/<MÃ>.csv`, 4 ZIP giữ nguyên trạng thái; xác minh CSV tách ra **byte-identical** với ZIP bằng `sha256sum` 4/4 (theo tuyên bố phiên tải). **Kiểm tra chéo tự động** với JSON API (cùng nguồn, render khác) trong `scripts/build_external_worldbank.py`: **4/4 chỉ số khớp trên 52/52 giá trị** (15+15+14+8 giá trị-năm trong 2010–2024).
+- **Cách tải:** dạng inline `format=csv&per_page=2000` bị API trả XML lỗi *"Invalid format"* (đã thử 2026-11-07) → dùng `downloadformat=csv`, API trả **ZIP**; CSV dữ liệu tách ra `data/raw/worldbank/<MÃ>.csv`, 4 ZIP giữ nguyên trạng thái; xác minh CSV tách ra **byte-identical** với ZIP bằng `sha256sum` 4/4 (theo tuyên bố phiên tải). **Kiểm tra chéo tự động** với JSON API (cùng nguồn, render khác) trong `scripts/data/build_external_worldbank.py`: **4/4 chỉ số khớp trên 52/52 giá trị** (15+15+14+8 giá trị-năm trong 2010–2024).
 - **Schema cột:** long format (*mỗi dòng một giá trị*) — `indicator_code, indicator_name, year, value`; lọc 2010–2024, bỏ hàng trống: **52 dòng** (15 + 15 + 14 + 8 — đếm trong phiên này; dải năm từng chỉ số liệt kê ở §2).
 - **Độ phủ:** cấp **quốc gia** × 2010–2024. `NY.GDP.PCAP.CD` và `SP.URB.TOTL.IN.ZS` đủ 15/15 năm; `SH.XPD.CHEX.GD.ZS` 14/15 (**thiếu 2024** — WDI last-updated 2026-10-08 chỉ có tới 2023, giá trị 2024 = null cả trong JSON); `SH.MED.BEDS.ZS` 8/15 (**chỉ 2010–2017** — WDI ngừng cập nhật chuỗi này). Năm 2025 có trong file gốc nhưng ngoài cửa sổ đã chọn → lọc bỏ.
 - **Hạn chế:** không có chiều tỉnh (schema tỉnh bỏ qua theo yêu cầu — dùng làm bối cảnh vĩ mô, không nối theo tỉnh); các chuỗi bị cắt **là phía nguồn, không phải lỗi tải** → hiển thị trống trong bảng, **không nội suy**.
@@ -176,22 +176,22 @@ Các file này có sẵn từ Phase 2 (không phải sản phẩm mới của đ
 
 ### 3.6 Nghèo cấp tỉnh — bảng pxweb GSO V14.47 (bổ sung 2026-11-07, sau đợt tải ban đầu ở §1.2)
 
-- **Nguồn + cách tải:** ma trận **V14.47** "Tỷ lệ hộ nghèo phân theo địa phương" trong database "Y tế, văn hóa và MSDC" trên <https://pxweb.nso.gov.vn> — database này **KHÔNG mở qua API `/api/v1`** (404) mà chỉ hiện qua giao diện classic PX-Web (`?tablelist=true`); tải bằng chính `scripts/gso_pxweb_fetch.py` (GET trang chọn biến → chọn giá trị biến → POST WebForms; robots.txt không có `Disallow` — §3.2). Đơn vị %, cập nhật lần cuối 21/08/2026, trang bảng ghi "Bản quyền: Không".
-- **File:** raw `data/raw/gso/pxweb_V14.47_poverty_step2.html` (146.373 bytes, SHA-256 `3e652b6b1e5be65ebefa718b658dbde3b249fcc148eeb777bd3698d36d7183bd`); processed `data/processed/external_poverty_63.csv` sinh bởi `scripts/build_poverty_63.py`: parse HTML, bỏ dòng TỔNG SỐ + 6 vùng + dòng Hà Tây cũ (chỉ có 2006 — theo chú thích của nguồn, Hà Nội gộp Hà Tây từ 2008), nối 63/63 tỉnh qua `province_crosswalk_63.csv`, gán `papi_province_code` từ panel PAPI **882/882 (0 thiếu, panel chỉ đọc)**. Schema long format: `province_code, province_ascii, province_vi, year, poverty_rate_pct, papi_province_code`.
+- **Nguồn + cách tải:** ma trận **V14.47** "Tỷ lệ hộ nghèo phân theo địa phương" trong database "Y tế, văn hóa và MSDC" trên <https://pxweb.nso.gov.vn> — database này **KHÔNG mở qua API `/api/v1`** (404) mà chỉ hiện qua giao diện classic PX-Web (`?tablelist=true`); tải bằng chính `scripts/data/gso_pxweb_fetch.py` (GET trang chọn biến → chọn giá trị biến → POST WebForms; robots.txt không có `Disallow` — §3.2). Đơn vị %, cập nhật lần cuối 21/08/2026, trang bảng ghi "Bản quyền: Không".
+- **File:** raw `data/raw/gso/pxweb_V14.47_poverty_step2.html` (146.373 bytes, SHA-256 `3e652b6b1e5be65ebefa718b658dbde3b249fcc148eeb777bd3698d36d7183bd`); processed `data/processed/external_poverty_63.csv` sinh bởi `scripts/data/build_poverty_63.py`: parse HTML, bỏ dòng TỔNG SỐ + 6 vùng + dòng Hà Tây cũ (chỉ có 2006 — theo chú thích của nguồn, Hà Nội gộp Hà Tây từ 2008), nối 63/63 tỉnh qua `province_crosswalk_63.csv`, gán `papi_province_code` từ panel PAPI **882/882 (0 thiếu, panel chỉ đọc)**. Schema long format: `province_code, province_ascii, province_vi, year, poverty_rate_pct, papi_province_code`.
 - **Độ phủ:** 63 tỉnh × 14 năm (2006, 2008, 2010, 2012–2016, 2020–2025) = 882 dòng; **881/882 ô có số** — thiếu duy nhất TP.HCM 2016 (nguồn ghi ".."); **2017–2019 không có trên bảng nguồn** (danh sách năm của bảng chỉ có đúng 14 giá trị) → để trống, **KHÔNG nội suy**.
-- **Đối chiếu** (khâu verification trong `scripts/build_poverty_63.py`, dung sai 0,051 = sai số làm tròn): vs Niên giám 2025, bảng chương tr.934–935 (cột 2020, 2022, 2023, 2024, Sơ bộ 2025): **315/315 trùng**; vs Niên giám 2021 tr.881–882 (cột 2020, 2021): **124/124 trùng**.
+- **Đối chiếu** (khâu verification trong `scripts/data/build_poverty_63.py`, dung sai 0,051 = sai số làm tròn): vs Niên giám 2025, bảng chương tr.934–935 (cột 2020, 2022, 2023, 2024, Sơ bộ 2025): **315/315 trùng**; vs Niên giám 2021 tr.881–882 (cột 2020, 2021): **124/124 trùng**.
 - **Lưu ý chuẩn nghèo (đọc trước khi phát biểu trong báo cáo/thi):** cột 2010–2016 theo "chuẩn nghèo của Chính phủ giai đoạn 2011-2015 **tính theo thu nhập**" (cả nước 2016 = 5,8) — khác với số "chuẩn nghèo **đa chiều**" trong Niên giám 2019–2021; từ 2022, Niên giám 2025 ghi "theo chuẩn nghèo đa chiều của Chính phủ giai đoạn 2022-2025" và trùng khớp pxweb; cột "2025" của pxweb = "Sơ bộ 2025" của Niên giám 2025. Phụ lục Niên giám 2025 tr.1494–1495 liệt kê theo **34 tỉnh sau sáp nhập 2025** — khác địa giới 63 tỉnh nên không dùng đối chiếu (chi tiết: `data/raw/gso/PROVENANCE.md`).
 - **Trạng thái so với gap [7]:** (a) phần rà ODM đã đóng — `_search_poverty_vn.json` tải lại đủ **61/61 kết quả** (`rows=61`; SHA-256 `1d824ad8a00e140830299c1ba91ef740a760ac404a6e54f0a19bfe0337960f2d`) — không có dataset poverty cấp tỉnh nào mới trên ODM, kết luận §3.3 không đổi; (b) mục tiêu "có nghèo cấp tỉnh" **đạt được qua nguồn GSO** (bảng trên), không qua ODM/Wayback — Wayback vì vậy không còn cần thiết cho gap này. **File chưa nối vào `external_master`** — dùng làm feature/validation hay chỉ bối cảnh là quyết định của nhóm; trước mắt chỉ đọc như dữ liệu tham khảo cấp tỉnh. *(Cập nhật 2026-11-08: lỗ 2017–2019 đã điền từ NGTK 2020/2021, chuỗi thành 1071 dòng × 17 năm với cột `source` theo từng dòng — xem §3.7 và gap [11] §4.2.)*
 
 ### 3.7 Nghèo cấp tỉnh đã tích hợp — kiểm định bổ trợ + hình + dashboard (bổ sung 2026-11-08)
 
-Sau khi §3.6 chuẩn hóa `external_poverty_63.csv`, nghèo GSO đã được đưa vào **đầy đủ các asset kiểm chứng** của repo. Số dưới đây đọc từ `results/poverty_validation.md`/`.csv` — mọi số do `scripts/poverty_validation.py` tự tính từ CSV provenance (không hardcode); phiên tài liệu 2026-11-08 chạy lại script và md/csv/png **byte-giống** (sha256). **Cập nhật 2026-11-08 (gap [11] §4.2):** 2017–2019 được điền từ Niên giám Thống kê 2020/2021 (`scripts/build_poverty_gap.py`, chuỗi 1071 dòng × 17 năm, cột `source` theo từng dòng) → cửa sổ kiểm định mở rộng **2012–2016 & 2020–2024 → 2012–2024**:
+Sau khi §3.6 chuẩn hóa `external_poverty_63.csv`, nghèo GSO đã được đưa vào **đầy đủ các asset kiểm chứng** của repo. Số dưới đây đọc từ `results/poverty_validation.md`/`.csv` — mọi số do `scripts/analysis/poverty_validation.py` tự tính từ CSV provenance (không hardcode); phiên tài liệu 2026-11-08 chạy lại script và md/csv/png **byte-giống** (sha256). **Cập nhật 2026-11-08 (gap [11] §4.2):** 2017–2019 được điền từ Niên giám Thống kê 2020/2021 (`scripts/data/build_poverty_gap.py`, chuỗi 1071 dòng × 17 năm, cột `source` theo từng dòng) → cửa sổ kiểm định mở rộng **2012–2016 & 2020–2024 → 2012–2024**:
 
-- **Script kiểm định:** `scripts/poverty_validation.py` — tái dùng nguyên xi helper của `scripts/external_validation.py`, hình dùng `scripts/fig_style.py`; tái lập: `python -E scripts/poverty_validation.py`.
+- **Script kiểm định:** `scripts/analysis/poverty_validation.py` — tái dùng nguyên xi helper của `scripts/analysis/external_validation.py`, hình dùng `scripts/common/fig_style.py`; tái lập: `python -E scripts/analysis/poverty_validation.py`.
 - **Kết quả:** `results/poverty_validation.md` (+ `.csv`) — kiểm chứng ngoại lai **thứ hai** sau PCI, trên cửa sổ giao **2012–2024**: 819 ô cửa sổ, 818 ô có giá trị poverty; left-join nhãn cụm của model đóng băng được **805 ô vào kiểm định**; **13 ô** có poverty nhưng không có nhãn cụm bị loại có liệt kê tường minh (2018 có thêm 2 ô khi cửa sổ mở rộng); TP.HCM 2016 thiếu phía nguồn — **KHÔNG nội suy**.
 - **Hai kiểm định bắt buộc đọc CÙNG nhau:** gộp thô Kruskal–Wallis **H = 4.6670 (p = 0.198)** — KHÔNG đáng kể; đã trừ median trong năm **H = 20.6285 (p = 0.000126)** — đáng kể (median nghèo giảm 12.9% năm 2012 → 2.3% năm 2024, tỷ trọng cụm trôi theo năm). Mann–Whitney nhiễu vs cụm 2: p = 0.767 (thô) / p = 0.269 (đã trừ median — trước khi điền 2017–2019 p = 0.0836 biên; thêm 3 năm làm mất tín hiệu biên đó). Poverty là kiểm chứng **bổ trợ** — không thay thế kiểm định chính PCI (§4.2 mục [2]).
 - **Hình:** `results/figs/external_poverty_by_cluster.png` — boxplot gộp + median theo năm từng cụm (400 dpi, nguồn + mask ghi ngay trên hình).
-- **Dashboard:** tab "Kiểm chứng ngoại lai" có mục "Nghèo cấp tỉnh (GSO V14.47)" (`app.py:728`) — metrics cửa sổ, box plot, hai kiểm định tính lại live từ CSV bởi `scripts/dashboard_data.py` (`load_poverty_assets`, `prepare_poverty_cluster_view`); test pin protocol đối chiếu số đã công bố (`tests/test_dashboard_data.py`, `tests/test_app_ui.py`).
+- **Dashboard:** tab "Kiểm chứng ngoại lai" có mục "Nghèo cấp tỉnh (GSO V14.47)" (`app.py:728`) — metrics cửa sổ, box plot, hai kiểm định tính lại live từ CSV bởi `scripts/analysis/dashboard_data.py` (`load_poverty_assets`, `prepare_poverty_cluster_view`); test pin protocol đối chiếu số đã công bố (`tests/test_dashboard_data.py`, `tests/test_app_ui.py`).
 - Trạng thái **không đổi so với §3.6**: `external_poverty_63.csv` vẫn chưa nối vào `external_master` — quyết định của nhóm.
 
 ---
@@ -251,7 +251,7 @@ Ký hiệu: ✓ = lấp đủ 63/63 tỉnh · ◐ = một phần · ✗ = trốn
 > mục; số liệu chi tiết xem `results/external_master_summary.md` và
 > `results/external_validation.md`.
 
-1. **[1] ĐÃ ĐÓNG — master table phân tích:** `scripts/build_external_master.py`
+1. **[1] ĐÃ ĐÓNG — master table phân tích:** `scripts/data/build_external_master.py`
    nối `papi_panel_63_2011_2024.csv` + `external_pci_63_full.csv` +
    `external_gso_population_63_full.csv` + `external_gso_grdp_63.csv` +
    `external_gso_waste_63.csv` + `external_odm_health_63.csv` theo khóa
@@ -266,7 +266,7 @@ Ký hiệu: ✓ = lấp đủ 63/63 tỉnh · ◐ = một phần · ✗ = trốn
    `province_code`** (kiểm chứng trong script). Output:
    `data/processed/external_master_63_2011_2024.csv` +
    `results/external_master_summary.md`.
-2. **[2] ĐÃ ĐÓNG — giao thức external validation:** `scripts/external_validation.py`
+2. **[2] ĐÃ ĐÓNG — giao thức external validation:** `scripts/analysis/external_validation.py`
    (output `results/external_validation.md` + `.csv` + 4 hình
    `results/figs/external_*`). Validation CHÍNH trên lưới đầy 2011–2022
    (**756 ô** — bản nháp ma trận trước đây ghi 753 là lỗi cộng): PCI theo nhãn
@@ -280,14 +280,14 @@ Ký hiệu: ✓ = lấp đủ 63/63 tỉnh · ◐ = một phần · ✗ = trốn
    bảng đầu tiên ở Niên giám 2022, tr.260–261, chỉ từ 2018 — §3.2) → chốt:
    **GRDP chỉ dùng cửa sổ 2018–2024, dân số là normalizer chính xuyên panel,
    không nội suy 441 ô 2011–2017**. Đã thực thi trong
-   `scripts/external_validation.py` §4 (hình GRDP theo cụm, mask tường minh 11
+   `scripts/analysis/external_validation.py` §4 (hình GRDP theo cụm, mask tường minh 11
    ô thiếu nhãn trong cửa sổ; ghi chú 2024 = Sơ bộ).
 4. **[4] Cửa sổ khả dụng của chính panel PAPI:** chọn feature cho STING theo cửa sổ khả dụng — hai cấu hình: lõi 8 dimension xuyên 2011–2024 và **mở rộng 37 cột cho 2018–2024 nhưng với mask thiếu tường minh** (sd_5_2 chỉ tới 2020, sd_8_3 chỉ từ 2019 — các ô này để trống/không dùng trong khoảng tương ứng), thay vì giả định lưới đầy đủ.
 5. **[5] VÔ HIỆU — nhận định gốc của phiên QA sai phạm vi:** tuyên bố
    "PROVENANCE.md GSO thật ra ghi sai / file HTML chỉ chứa 2011–2018" và bộ số
    378/11,32/92 chỉ tái lập được khi **sai phạm vi năm** của file HTML. Kiểm
    chứng độc lập (tái lập trực tiếp trong phiên 2026-11-07 bằng hàm parse của
-   `scripts/build_gso_grdp_pop.py`): `pxweb_V02.01_pop_step2.html` chứa dữ liệu
+   `scripts/data/build_gso_grdp_pop.py`): `pxweb_V02.01_pop_step2.html` chứa dữ liệu
    thật 2019–2020 (Hà Nội 8.093,90 / 8.246,54 nghìn người), bộ 3 file phủ
    2011–2025; trên đúng phạm vi giao 504 tỉnh-năm: chênh trung bình **8,49**,
    max **189,63** (Hà Nội 2014), **104** dòng >1% — khớp **4/4** với
@@ -310,18 +310,18 @@ Ký hiệu: ✓ = lấp đủ 63/63 tỉnh · ◐ = một phần · ✗ = trốn
 8. **[8] ĐÃ ĐÓNG — ODM health 10 tỉnh count=0:** kết luận "0-thật (nguồn điểm
    không phủ)" — dump 2.169 điểm đã point-in-polygon với bộ alias tên tỉnh đã
    kiểm tra (script ODM map 6 tên lệch của geojson), 10 tỉnh giữ 0. Đã thực
-   thi: `scripts/external_validation.py` §3 — mật độ/1.000 dân theo cụm 2020
+   thi: `scripts/analysis/external_validation.py` §3 — mật độ/1.000 dân theo cụm 2020
    (ODM + dân số GSO) với **ghi chú bắt buộc "10 tỉnh count=0 là 0-thật"**
    ngay trên hình `results/figs/external_health_density_2020.png` và trong
    `results/external_validation.md`. Cân nhắc dump ODM các năm khác để có panel
    hạ tầng thay vì 1 snapshot 2020 — vẫn là tùy chọn tương lai.
 9. **[9] ĐÃ ĐÓNG — WDI (chỉ tài liệu):** không có việc tải thêm vì truncate là
-   phía nguồn. Đã thực thi: `scripts/external_validation.py` §5 — panel 2×2
+   phía nguồn. Đã thực thi: `scripts/analysis/external_validation.py` §5 — panel 2×2
    2010–2024 với ghi chú tường minh trên hình (giường bệnh dừng 2017, chi y tế
    thiếu 2024 — giữ ô trống, không nội suy) và bảng trạng thái chuỗi trong
    `results/external_validation.md` §5.
 10. **[10] Phụ thuộc tái lập:** bổ sung `shapely`, `xlrd`, `pypdf` (và `scipy` — dùng cho kiểm định, đã có sẵn trong user site-packages máy lập) vào `requirements.txt` (hoặc requirements-dev) ở phiên kế tiếp — hiện thiếu, tái lập trên máy khác sẽ hỏng ngay bước ODM, PCI 2011 và kiểm định thống kê (chi tiết §6.3). *Quyết định của nhóm — tài liệu không tự sửa `requirements.txt` vì ngoài phạm vi.*
-11. **[11] ĐÃ ĐÓNG (2026-11-08) — lỗ hổng 2017–2019 của chuỗi nghèo cấp tỉnh:** pxweb V14.47 không có cột 2017–2019 (§3.6 — 882 dòng × 14 năm, 2017–2019 để trống, không nội suy). Đã lấp bằng **Niên giám Thống kê 2020/2021** (bảng nghèo đa chiều cấp tỉnh, quy ước vintage-mới-nhất-chứa-năm — cùng họ nguồn GSO): `scripts/build_poverty_gap.py` → `external_poverty_gap_63.csv` (**189 dòng = 63 tỉnh × 3 năm, 0 ô thiếu**; đối chiếu chéo liên-vintage NGTK 2018/2019/2020/2021 = 0 ô lệch; sanity khớp pxweb V14.47 ở cột giao 2020/2021 **124/124** — nối 2017–2019 không tạo bước nhảy cấp độ), rồi `scripts/build_poverty_63.py` gộp thành chuỗi **1071 dòng × 17 năm liên tục** (2006/2008/2010 + 2012–2025) với cột `source` ghi nguồn **theo từng dòng** (`gso_pxweb_V14.47` 882 dòng / nhãn vintage NGTK 189 dòng) — xác minh ô cũ giữ nguyên giá trị. **MOLISA** (QĐ 862/1052/835, `external_molisa_poverty_63.csv`) giữ làm **kiểm chứng chéo ĐỘC LẬP, KHÔNG gộp**: trên 189 ô giao, nghèo-only MOLISA (rà soát hành chính) lệch hệ thống so với GSO NGTK (khảo sát) — 178/189 ô >0,1đ%, mean |Δ| = 2,48đ%, max 14,16đ% (Gia Lai 2017: 27,5 vs 13,34) — hai phép đo khác nhau, gộp sẽ phá tính thuần nhất của panel. **WB/UNDP** chỉ có 6 vùng hợp tỉnh (không province_code) — giữ nguyên raw làm tham chiếu. Hệ quả cho kiểm định cụm: cửa sổ poverty mở rộng **10 → 13 năm (2012–2024)**, panel 618 → **805 ô** — `results/poverty_validation.md` tái sinh (§3.7).
+11. **[11] ĐÃ ĐÓNG (2026-11-08) — lỗ hổng 2017–2019 của chuỗi nghèo cấp tỉnh:** pxweb V14.47 không có cột 2017–2019 (§3.6 — 882 dòng × 14 năm, 2017–2019 để trống, không nội suy). Đã lấp bằng **Niên giám Thống kê 2020/2021** (bảng nghèo đa chiều cấp tỉnh, quy ước vintage-mới-nhất-chứa-năm — cùng họ nguồn GSO): `scripts/data/build_poverty_gap.py` → `external_poverty_gap_63.csv` (**189 dòng = 63 tỉnh × 3 năm, 0 ô thiếu**; đối chiếu chéo liên-vintage NGTK 2018/2019/2020/2021 = 0 ô lệch; sanity khớp pxweb V14.47 ở cột giao 2020/2021 **124/124** — nối 2017–2019 không tạo bước nhảy cấp độ), rồi `scripts/data/build_poverty_63.py` gộp thành chuỗi **1071 dòng × 17 năm liên tục** (2006/2008/2010 + 2012–2025) với cột `source` ghi nguồn **theo từng dòng** (`gso_pxweb_V14.47` 882 dòng / nhãn vintage NGTK 189 dòng) — xác minh ô cũ giữ nguyên giá trị. **MOLISA** (QĐ 862/1052/835, `external_molisa_poverty_63.csv`) giữ làm **kiểm chứng chéo ĐỘC LẬP, KHÔNG gộp**: trên 189 ô giao, nghèo-only MOLISA (rà soát hành chính) lệch hệ thống so với GSO NGTK (khảo sát) — 178/189 ô >0,1đ%, mean |Δ| = 2,48đ%, max 14,16đ% (Gia Lai 2017: 27,5 vs 13,34) — hai phép đo khác nhau, gộp sẽ phá tính thuần nhất của panel. **WB/UNDP** chỉ có 6 vùng hợp tỉnh (không province_code) — giữ nguyên raw làm tham chiếu. Hệ quả cho kiểm định cụm: cửa sổ poverty mở rộng **10 → 13 năm (2012–2024)**, panel 618 → **805 ô** — `results/poverty_validation.md` tái sinh (§3.7).
 
 **Phân công đề xuất** (nhóm 2 sinh viên chủ nhiệm chốt, theo README): [1]+[2] một phiên duy nhất (master table + giao thức validation) trước khi chạy lại phân tích; [10] 5 phút sửa file khi chạm pipeline; [5]–[8] xếp sau [1]; [3], [7], [9] làm song song, không chặn báo cáo.
 
@@ -379,37 +379,37 @@ STING là **học không giám sát**: không có nhãn "đúng" để tính acc
 
 | Script | Input | Output |
 |---|---|---|
-| `scripts/build_external_panel.py` | extract SOURCE_EXTRACTED trong `data/raw/mendeley/Replication_package/data/` + `province_crosswalk_63.csv` | `external_pci_63.csv`, `external_gso_population_63.csv`, `external_gso_waste_63.csv`, `external_63_panel.csv`, `external_provenance.md` |
-| `scripts/build_pci_full.py` | `data/raw/pci/` (workbook 2011/2023/2024, trang xếp hạng HTML 3 năm) + `external_pci_63.csv` (base 2012–2022) | `external_pci_63_full.csv` |
-| `scripts/gso_pxweb_probe.py` | mạng: `pxweb.nso.gov.vn/api/v1` (thăm dò, chỉ in stdout) | không ghi file dữ liệu |
-| `scripts/gso_pxweb_fetch.py` | mạng: POST form WebForms pxweb (robots.txt không cấm — §3.2) | HTML thô vào `data/raw/gso/pxweb_*.html` (5 file) |
-| `scripts/build_gso_grdp_pop.py` | `data/raw/gso/` (5 HTML pxweb + Niên giám PDF để đối chiếu) + extract Mendeley (base dân số) | `external_gso_grdp_63.csv`, `external_gso_population_63_full.csv` |
-| `scripts/build_odmekong_external.py` | `data/raw/odmekong/` (CSV nghèo 6 vùng, dump bệnh viện EWKB) + `data/raw/boundaries/diaphantinh.geojson` (OD Mekong, 2026-11-03, CC-BY-SA 4.0 — `data/raw/boundaries/PROVENANCE.md`) | `external_odm_poverty_region_1998_2016.csv`, `external_odm_health_63.csv` |
-| `scripts/build_external_worldbank.py` | `data/raw/worldbank/<MÃ>.csv` (tách từ ZIP) + JSON API (kiểm tra chéo — cần mạng) | `external_worldbank_vnm.csv` (+ tạo lại `data/raw/worldbank/PROVENANCE.md`) |
+| `scripts/data/build_external_panel.py` | extract SOURCE_EXTRACTED trong `data/raw/mendeley/Replication_package/data/` + `province_crosswalk_63.csv` | `external_pci_63.csv`, `external_gso_population_63.csv`, `external_gso_waste_63.csv`, `external_63_panel.csv`, `external_provenance.md` |
+| `scripts/data/build_pci_full.py` | `data/raw/pci/` (workbook 2011/2023/2024, trang xếp hạng HTML 3 năm) + `external_pci_63.csv` (base 2012–2022) | `external_pci_63_full.csv` |
+| `scripts/data/gso_pxweb_probe.py` | mạng: `pxweb.nso.gov.vn/api/v1` (thăm dò, chỉ in stdout) | không ghi file dữ liệu |
+| `scripts/data/gso_pxweb_fetch.py` | mạng: POST form WebForms pxweb (robots.txt không cấm — §3.2) | HTML thô vào `data/raw/gso/pxweb_*.html` (5 file) |
+| `scripts/data/build_gso_grdp_pop.py` | `data/raw/gso/` (5 HTML pxweb + Niên giám PDF để đối chiếu) + extract Mendeley (base dân số) | `external_gso_grdp_63.csv`, `external_gso_population_63_full.csv` |
+| `scripts/data/build_odmekong_external.py` | `data/raw/odmekong/` (CSV nghèo 6 vùng, dump bệnh viện EWKB) + `data/raw/boundaries/diaphantinh.geojson` (OD Mekong, 2026-11-03, CC-BY-SA 4.0 — `data/raw/boundaries/PROVENANCE.md`) | `external_odm_poverty_region_1998_2016.csv`, `external_odm_health_63.csv` |
+| `scripts/data/build_external_worldbank.py` | `data/raw/worldbank/<MÃ>.csv` (tách từ ZIP) + JSON API (kiểm tra chéo — cần mạng) | `external_worldbank_vnm.csv` (+ tạo lại `data/raw/worldbank/PROVENANCE.md`) |
 
 ### 6.2 Thứ tự lệnh (chạy từ thư mục gốc repo)
 
 ```powershell
 # (1) Tải dữ liệu thô một lần (đã làm ngày 2026-11-07; file raw đã nằm trong data/raw/)
 #     PCI: curl workbook + trang xếp hạng từ pcivietnam.vn
-#     GSO: python -E scripts/gso_pxweb_probe.py tree ...   (thăm dò)
-#          python -E scripts/gso_pxweb_fetch.py <table_url> <out_html> [giữ_cột2.txt]
+#     GSO: python -E scripts/data/gso_pxweb_probe.py tree ...   (thăm dò)
+#          python -E scripts/data/gso_pxweb_fetch.py <table_url> <out_html> [giữ_cột2.txt]
 #     OD Mekong / World Bank: CKAN API + curl / API WDI downloadformat=csv
 
 # (2) Chuẩn hóa base từ gói Mendeley (đã chạy, sinh 4 file external_* + provenance)
-python -E scripts/build_external_panel.py
+python -E scripts/data/build_external_panel.py
 
 # (3) Bổ sung PCI 2011/2023/2024 -> external_pci_63_full.csv
-python -E scripts/build_pci_full.py
+python -E scripts/data/build_pci_full.py
 
 # (4) Chuẩn hóa GSO -> external_gso_grdp_63.csv + external_gso_population_63_full.csv
-python -E scripts/build_gso_grdp_pop.py
+python -E scripts/data/build_gso_grdp_pop.py
 
 # (5) Chuẩn hóa OD Mekong -> poverty 6 vùng + bệnh viện 63 tỉnh (point-in-polygon)
-python -E scripts/build_odmekong_external.py
+python -E scripts/data/build_odmekong_external.py
 
 # (6) Chuẩn hóa WDI -> external_worldbank_vnm.csv (bước này gọi JSON API để kiểm tra chéo -> cần mạng)
-python -E scripts/build_external_worldbank.py
+python -E scripts/data/build_external_worldbank.py
 ```
 
 Cờ `-E` bảo Python bỏ qua biến môi trường `PYTHONPATH`/`PYTHONHOME` — chạy đúng như các PROVENANCE.md đã ghi (`python -E scripts/<script>.py`). **Đừng** thay bằng `-I` cho các script cần `pandas`/`shapely`/`xlrd`: `-I` loại cả user site-packages, nơi các thư viện bổ sung này đang cài (đã kiểm tra: `python -I -c "import shapely"` lỗi `ModuleNotFoundError`, còn `python -E ...` thấy `shapely 2.1.2, xlrd 2.0.2, pypdf 6.18.0, pandas 2.3.3`). *(Các lệnh `python -I` chỉ dùng khi kiểm tra số liệu bằng stdlib như trong §1.4.)*

@@ -1,6 +1,6 @@
 """Gate tái lập mức artifact cho pipeline dự đoán STING.
 
-Refit đúng theo công thức của ``scripts/predict_demo.py`` (StandardScaler +
+Refit đúng theo công thức của ``scripts/analysis/predict_demo.py`` (StandardScaler +
 STING fit trên năm ≤ 2023 với tham số đóng băng trong
 ``models/predict_config.json``, rồi ``predict`` cho từng năm) phải cho lại
 CHÍNH XÁC toàn bộ nhãn ``pred_cluster`` trong ``results/predict_all_years.csv``
@@ -15,17 +15,17 @@ import pandas as pd
 import pytest
 from sklearn.preprocessing import StandardScaler
 
-from scripts.papi_pred_common import CONFIG_PATH, PANEL_PATH, ROOT
+from scripts.common.papi_pred_common import CONFIG_PATH, PANEL_PATH, ROOT
 from sting import STING
 
 PREDICT_CSV = ROOT / "results" / "predict_all_years.csv"
-TRAIN_MAX_YEAR = 2023  # khớp TRAIN_MAX_YEAR của scripts/predict_demo.py
+TRAIN_MAX_YEAR = 2023  # khớp TRAIN_MAX_YEAR của scripts/analysis/predict_demo.py
 
 _REQUIRED = (PANEL_PATH, CONFIG_PATH, PREDICT_CSV)
 pytestmark = pytest.mark.skipif(
     not all(p.exists() for p in _REQUIRED),
     reason="Thiếu artifact (panel / predict_config.json / predict_all_years.csv) "
-    "— chạy python scripts/predict_demo.py để dựng lại",
+    "— chạy python scripts/analysis/predict_demo.py để dựng lại",
 )
 
 

@@ -6,7 +6,7 @@ Bộ trình chiếu hiện tại nằm trong submissions/01-giua-ky. Phân bổ 
 
 Đây là bản ghi dry-run kỹ thuật cá nhân do AI thực hiện. Thời gian luyện thuyết trình thực tế của nhóm được ghi ở mục B khi nhóm tập.
 
-Nhật ký ban đầu ghi notebook mở rộng STING_PAPI_Demo_MoRong chạy hết khoảng 18 giây. Đây là thời gian thực thi notebook của đợt chạy thử đó. Lượt kiểm tra file nộp hiện tại chạy bằng python scripts/demo_smoke.py từ thư mục dự án.
+Nhật ký ban đầu ghi notebook mở rộng STING_PAPI_Demo_MoRong chạy hết khoảng 18 giây. Đây là thời gian thực thi notebook của đợt chạy thử đó. Lượt kiểm tra file nộp hiện tại chạy bằng python scripts/deliverables/demo_smoke.py từ thư mục dự án.
 
 ## B. Ghi khi nhóm tập
 
