@@ -37,7 +37,7 @@ Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đ
 | Khi cần | Mở thư mục |
 |---|---|
 | Gửi bài cho thầy | `submissions/` có file nộp đặt tên theo từng mốc và hai gói ZIP. |
-| Đọc giải thích để học | `study/` có ba notebook ôn tập và `sting_GiaiThich.py` (bản `src/sting.py` có chú thích đầy đủ, cùng logic). |
+| Đọc giải thích để học | `study/` có bốn notebook ôn tập (gồm bài tập K-Means và HC của Day 9) và `sting_GiaiThich.py` (bản `src/sting.py` có chú thích đầy đủ, cùng logic). |
 | Xem thuật toán và cách chạy | `src/` chứa STING tự cài đặt. `scripts/` xử lý dữ liệu, chạy phân tích và tạo file. |
 | Tìm dữ liệu | `data/raw/` chứa workbook và các nguồn tham chiếu. `data/processed/` chứa panel PAPI và dữ liệu đã xử lý. |
 | Xem kết quả đã lưu | `models/` chứa model và cấu hình. `results/` chứa bảng và hình kết quả. |
