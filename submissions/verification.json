@@ -2,7 +2,7 @@
   {
     "milestone": "midterm",
     "status": "PASS",
-    "sha256": "d18d9ca18deee0d43c2e4e0c71d780f6fcc4fce8c5718591ebce9b0ca55012b3",
+    "sha256": "7ba9a5ade78cf7dd7810fc3b41adf4cf15f01046a34c9704186acd25cd0c4092",
     "code_cells": 11,
     "isolation_guard": true,
     "python": "3.14.2",
@@ -11,10 +11,32 @@
   {
     "milestone": "final",
     "status": "PASS",
-    "sha256": "f8aa3d7cd84b6cb97681ef00c5d918818415eabca8a4eb2b43f4c098f22654b3",
-    "code_cells": 17,
+    "sha256": "770786ab7209fa751925c675a120e2f96ca0df37dfb44404764da34e18736c96",
+    "code_cells": 19,
     "isolation_guard": true,
     "python": "3.14.2",
-    "launcher_messages": true
+    "launcher_messages": true,
+    "guide_command_passed": true,
+    "path_with_vietnamese_and_spaces": true,
+    "notebook_code_cells_without_guard": 18,
+    "pypi_pins_checked": true,
+    "raw_rebuild": {
+      "workbooks": 14,
+      "panel_shape": [
+        882,
+        41
+      ],
+      "panel_and_metadata_byte_identical": true,
+      "mendeley_matched_values": 5118,
+      "mendeley_matched_keys": 756
+    },
+    "master_rebuild": {
+      "shape": [
+        882,
+        59
+      ],
+      "byte_identical": true,
+      "preprocessing_audit_matches": true
+    }
   }
 ]

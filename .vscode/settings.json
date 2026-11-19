@@ -1,0 +1,16 @@
+{
+    "files.exclude": {
+        ".agentkit": true,
+        ".agents": true,
+        ".claude": true,
+        ".codex": true,
+        ".devin": true,
+        ".zcode": true,
+        "plans": true,
+        ".coverage": true,
+        ".pytest_cache": true,
+        ".ruff_cache": true,
+        "**/__pycache__": true,
+        "**/.ipynb_checkpoints": true
+    }
+}

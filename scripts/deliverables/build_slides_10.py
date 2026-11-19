@@ -7,6 +7,7 @@ from __future__ import annotations
 import csv
 import re
 import sys
+from collections import Counter
 from io import BytesIO
 from pathlib import Path
 
@@ -25,6 +26,7 @@ from sklearn.datasets import make_blobs
 from sklearn.metrics import adjusted_rand_score
 
 from scripts.common.fig_style import PALETTE, style_context
+from scripts.common.papi_pred_common import load_config
 from sting import STING
 
 ROOT = _ROOT
@@ -59,6 +61,19 @@ def _metric_row(method_sub: str) -> dict[str, str]:
 M_STING = _metric_row("STING (frozen)")
 M_KM2 = _metric_row("k-means k=2")
 M_DB = _metric_row("DBSCAN eps=0.2")
+
+PAPI_ASSIGNMENTS = _read_results_csv("predict_all_years.csv")
+TRAIN_LABELS = Counter(int(row["pred_cluster"]) for row in PAPI_ASSIGNMENTS if row["split"] == "train")
+LABELS_2024 = Counter(int(row["pred_cluster"]) for row in PAPI_ASSIGNMENTS if row["year"] == "2024")
+TRAIN_SIZES = sorted((n for label, n in TRAIN_LABELS.items() if label >= 0), reverse=True)
+CLUSTERED_2024 = LABELS_2024.total() - LABELS_2024[-1]
+PAPI_GRID = load_config()["sting"]
+PAPI_GRID_SIZE = PAPI_GRID["factor"] ** PAPI_GRID["cluster_level"]
+
+PREDICT_SUMMARY = (ROOT / "results" / "predict_summary.md").read_text(encoding="utf-8")
+SENSITIVITY = {int(threshold): coverage for threshold, coverage in re.findall(
+    r"^\|\s*(\d+)\s*\|\s*(\d+%)\s*\|", PREDICT_SUMMARY, flags=re.MULTILINE,
+)}
 
 # Số đo tiền xử lý — đọc từ audit Day 4, không gõ tay.
 AUDIT = _read_results_csv("preprocessing_audit.csv")
@@ -378,7 +393,7 @@ text(
 text(
     s, 0.85, 4.7, 7.8, 1.9,
     [
-        ("Báo cáo giữa kỳ · Demo thuật toán và ứng dụng trên dữ liệu PAPI", 14, True, GOLD),
+        ("Báo cáo giữa kỳ · Minh họa thuật toán và ứng dụng trên dữ liệu PAPI", 14, True, GOLD),
         ("STING: Statistical Information Grid · PAPI: Chỉ số Hiệu quả Quản trị và Hành chính công cấp tỉnh", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
         ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 14, False, RGBColor(0xB9, 0xCD, 0xDE)),
         ("Nhóm 15 · Chủ đề 6 · Grid-based clustering", 13, False, RGBColor(0xB9, 0xCD, 0xDE)),
@@ -399,7 +414,7 @@ bullets(
     [
         ("Chủ đề.", "Grid-based clustering — phân cụm dựa trên lưới."),
         ("Thuật toán.", "Nhóm chọn biến thể STING dùng ngưỡng số điểm trong ô."),
-        ("Demo.", "Lưới 3 × 3 và dữ liệu giả lập có nhãn tham chiếu."),
+        ("Minh họa.", "Lưới 3 × 3 và dữ liệu giả lập có nhãn tham chiếu."),
         ("Ứng dụng.", "Dữ liệu PAPI. Mỗi quan sát là một tỉnh trong một năm."),
     ],
     size=15, gap_pt=32,
@@ -473,22 +488,28 @@ note(
 s = slide_new()
 header(s, "CƠ CHẾ", "Biến thể STING tạo cụm từ các ô dày", 4)
 steps = [
-    ("1. Đếm điểm", "Chọn một mức lưới và đọc số điểm trong từng ô."),
-    ("2. Chọn ô dày", "Đánh dấu ô có số điểm đạt ngưỡng đã chọn."),
-    ("3. Nối qua cạnh", "Các ô dày nối được qua cạnh thuộc cùng một cụm."),
+    ("1. Đếm điểm", "count", "Gán điểm vào các ô ở một mức lưới và đếm số điểm trong từng ô."),
+    ("2. Chọn ô dày", "count ≥ min_count", "Giữ các ô có số điểm đạt ngưỡng tối thiểu."),
+    ("3. Nối qua cạnh", "Liên thông", "Mỗi vùng các ô dày nối được qua cạnh tạo thành một cụm."),
 ]
-for i, (title, description) in enumerate(steps):
+for i, (title, rule, description) in enumerate(steps):
     x = 0.6 + i * 4.12
-    rect(s, x, 2.03, 3.86, 2.25, LIGHT)
-    text(s, x + 0.2, 2.28, 3.46, 0.55, [(title, 21, True, TEAL)])
-    text(s, x + 0.2, 3.03, 3.46, 0.95, [(description, 17, False, INK)])
-text(s, 0.6, 4.95, 12.1, 0.52, [
-    ("Điểm trong ô thưa nhận nhãn −1, tức nhiễu.", 19, True, NAVY),
+    rect(s, x, 1.67, 3.86, 3.42, LIGHT)
+    text(s, x + 0.2, 1.89, 3.46, 0.5, [(title, 20, True, TEAL)])
+    rect(s, x + 0.23, 2.69, 3.4, 0.7, WHITE)
+    text(s, x + 0.23, 2.8, 3.4, 0.46, [(rule, 19, True, NAVY)], align=PP_ALIGN.CENTER)
+    text(s, x + 0.2, 3.73, 3.46, 1.16, [(description, 17, False, INK)])
+text(s, 0.63, 5.44, 12.04, 0.55, [
+    ("Điểm trong ô thưa nhận nhãn −1 (nhiễu).", 19, True, NAVY),
+])
+text(s, 0.63, 6.14, 12.04, 0.55, [
+    ("STING gốc còn lưu loại phân phối và lọc ô từ trên xuống theo độ tin cậy.", 16, False, GREY),
 ])
 note(
     s,
     "Trong cài đặt của nhóm, một ô được xem là dày khi số điểm trong ô đạt min_count. "
-    "Tại mức lưới đã chọn, các ô dày liên thông qua cạnh được gom thành cụm. "
+    "Tại mức lưới đã chọn, chương trình duyệt từ một ô dày sang các ô dày chung cạnh "
+    "cho đến khi hết ô có thể đi tới. Các ô đã duyệt tạo thành một cụm. "
     "Điểm trong ô thưa nhận nhãn nhiễu −1. Đây là biến thể STING dùng ngưỡng số đếm. "
     "STING gốc còn mô hình hóa phân phối và dùng kiểm định thống kê để duyệt lưới từ trên xuống.",
 )
@@ -506,7 +527,7 @@ for row, values in enumerate(((4, 3, 0), (1, 0, 4), (0, 0, 3))):
             (str(count), 26, True, WHITE if count >= 3 else INK),
         ], align=PP_ALIGN.CENTER)
 rect(s, 5.6, 1.96, 7.08, 4.05, LIGHT)
-text(s, 5.88, 2.17, 6.48, 0.52, [("Ngưỡng ô dày là 3 điểm", 21, True, NAVY)])
+text(s, 5.88, 2.17, 6.48, 0.52, [("15 điểm · ngưỡng 3 điểm/ô", 21, True, NAVY)])
 for i, (label, fill, detail) in enumerate((
     ("Cụm A", TEAL, "Hai ô chung cạnh, tổng 7 điểm."),
     ("Cụm B", NAVY, "Hai ô chung cạnh, tổng 7 điểm."),
@@ -550,16 +571,16 @@ note(
 # 7 — Ứng dụng PAPI
 s = slide_new()
 header(s, "ỨNG DỤNG", "Cùng dữ liệu PAPI, hai cách đặt lưới", 7)
-pic(s, "sting_first_real.png", 0.55, 1.45, h=4.2)
+pic(s, "sting_first_real.png", 0.55, 1.44, w=8.08)
 bullets(
-    s, 7.95, 1.57, 4.75, 4.8,
+    s, 8.93, 1.63, 3.87, 4.7,
     [
         ("Dữ liệu 2023.", "61 tỉnh đủ hai chỉ tiêu được chọn."),
         ("Lưới 3 × 3.", "Ngưỡng 5, tìm 1 cụm và 10% nhiễu."),
         ("Lưới 9 × 9.", "Ngưỡng 2, tìm 3 cụm và 31% nhiễu."),
-        ("Gán dữ liệu mới.", "Dùng lưới học từ 2011–2023 cho năm 2024."),
+        ("Hai cấu hình.", "Cả cỡ lưới lẫn ngưỡng đều thay đổi."),
     ],
-    size=16, gap_pt=26,
+    size=16, gap_pt=20,
 )
 note(
     s,
@@ -592,14 +613,14 @@ for i, row in enumerate(rows):
         cell.fill.solid()
         cell.fill.fore_color.rgb = TEAL if i == 0 else WHITE if i % 2 else LIGHT
 text(s, 0.6, 4.98, 7.2, 0.6, [
-    ("Hai chỉ tiêu PAPI · gộp 2011–2023", 14, False, GREY),
+    (f"{TRAIN_LABELS.total()} quan sát đủ hai chỉ tiêu PAPI · 2011–2023", 14, False, GREY),
 ])
 rect(s, 8.2, 1.85, 4.53, 3.75, LIGHT)
 bullets(
     s, 8.43, 2.03, 4.0, 3.2,
     [
         ("K-means.", "Ấn định số cụm và gán mọi điểm."),
-        ("STING và DBSCAN.", "Có thể đánh dấu ngoại vi là nhiễu."),
+        ("STING và DBSCAN.", "Có cơ chế nhận diện điểm nhiễu."),
         ("Cách đọc.", "Xem silhouette cùng tỷ lệ nhiễu."),
     ],
     size=16, gap_pt=19,
@@ -618,30 +639,34 @@ text(s, 0.65, 6.15, 12.0, 0.4, [("Silhouette tính trên điểm thuộc cụm; 
 s = slide_new()
 header(s, "THAM SỐ", "Ngưỡng ô dày thay đổi kết quả ra sao?", 9)
 rect(s, 0.6, 1.65, 6.1, 4.6, LIGHT)
-text(s, 0.84, 1.86, 5.5, 0.55, [("THỬ TRÊN NOTEBOOK", 16, True, TEAL)])
-bullets(
-    s, 0.84, 2.55, 5.55, 3.5,
-    [
-        ("Giữ lưới cố định.", "Chỉ đổi ngưỡng số điểm tối thiểu mỗi ô."),
-        ("Thử 3, 5 và 8.", "So số cụm và tỷ lệ tỉnh năm 2024 vào vùng dày."),
-        ("Cách hiểu.", "Ngưỡng cao hơn làm ít ô đạt điều kiện dày hơn."),
-    ],
-    size=17, gap_pt=24,
-)
-text(s, 7.06, 1.86, 5.4, 0.55, [("GIỚI HẠN KẾT LUẬN", 16, True, TEAL)])
+text(s, 0.84, 1.86, 5.5, 0.55, [("ĐỔI NGƯỠNG, GIỮ CÙNG LƯỚI", 16, True, TEAL)])
+text(s, 0.84, 2.48, 5.5, 0.7, [
+    (f"Lưới {PAPI_GRID_SIZE} × {PAPI_GRID_SIZE} được xây dựng từ dữ liệu 2011–2023.", 17, False, INK),
+])
+for i, threshold in enumerate((3, 5, 8)):
+    x = 0.86 + i * 1.89
+    rect(s, x, 3.4, 1.79, 1.55, WHITE)
+    text(s, x, 3.55, 1.79, 0.38, [(f"Ngưỡng {threshold}", 14, True, INK)], align=PP_ALIGN.CENTER)
+    text(s, x, 4.04, 1.79, 0.67, [(SENSITIVITY[threshold], 27, True, TEAL)], align=PP_ALIGN.CENTER)
+text(s, 0.84, 5.23, 5.5, 0.68, [
+    (f"Tỷ lệ gán cụm trên {LABELS_2024.total()} tỉnh năm 2024 có đủ hai chỉ tiêu.", 15, False, GREY),
+])
+text(s, 7.06, 1.86, 5.4, 0.55, [("KẾT QUẢ Ở NGƯỠNG CHÍNH", 16, True, TEAL)])
 bullets(
     s, 7.06, 2.55, 5.45, 3.5,
     [
-        ("Đặc trưng.", "Kết quả mô tả hai chỉ tiêu PAPI được chọn."),
-        ("Dữ liệu thực.", "Một cụm lớn và hai cụm rất nhỏ."),
-        ("Năm 2024.", "Minh họa gán điểm mới vào lưới đã học."),
+        (f"Ngưỡng {PAPI_GRID['min_count']}.", f"{CLUSTERED_2024} tỉnh vào cụm lớn, "
+         f"{LABELS_2024[-1]} tỉnh nhận nhãn nhiễu."),
+        ("Cách đọc.", "Tỷ lệ cho biết có bao nhiêu tỉnh rơi vào các ô dày đã học."),
+        ("Phạm vi.", "Mô tả hai chỉ tiêu PAPI được chọn."),
     ],
     size=17, gap_pt=24,
 )
 note(
     s,
     "Khi giữ nguyên đặc trưng, biên và mức lưới, nhóm thử các ngưỡng 3, 5 và 8. "
-    "Tỷ lệ tỉnh năm 2024 được gán vào cụm lần lượt khoảng 82%, 79% và 70%. "
+    f"Tỷ lệ tỉnh năm 2024 được gán vào cụm lần lượt khoảng "
+    f"{SENSITIVITY[3]}, {SENSITIVITY[5]} và {SENSITIVITY[8]}. "
     "Kết quả cho thấy việc chọn ngưỡng ảnh hưởng đến độ phủ. Cấu hình chính được chọn "
     "từ dữ liệu các năm trước, sau đó mới dùng để gán cụm cho năm 2024.",
 )
@@ -650,15 +675,27 @@ note(
 s = slide_new()
 header(s, "KẾT LUẬN", "Kết quả thực nghiệm với STING", 10)
 bullets(
-    s, 0.55, 1.5, 12.0, 4.1,
+    s, 0.55, 1.5, 12.0, 2.4,
     [
         ("Cài đặt.", "STING chia lưới, lưu thống kê ô và gom các ô dày liên thông."),
-        ("PAPI 2011–2023.", "Trên hai chỉ tiêu đã chọn, có một cụm lớn gồm 629 điểm và hai cụm nhỏ gồm 16 và 5 điểm."),
+        ("PAPI 2011–2023.", "Trên hai chỉ tiêu đã chọn, có một cụm lớn và hai cụm nhỏ."),
         ("Đánh giá.", "Cần xem số cụm cùng kích thước cụm, tỷ lệ nhiễu và độ nhạy tham số."),
     ],
-    size=16, gap_pt=42,
+    size=16, gap_pt=22,
 )
-text(s, 0.6, 6.0, 12.1, 0.55, [("Cảm ơn thầy và các bạn đã lắng nghe", 20, True, NAVY)], align=PP_ALIGN.CENTER)
+for i, (value, label) in enumerate((
+    (str(TRAIN_SIZES[0]), "điểm trong cụm lớn"),
+    (" và ".join(map(str, TRAIN_SIZES[1:])), "điểm trong hai cụm nhỏ"),
+    (_pct(M_STING["noise_ratio"]), "điểm nhiễu"),
+)):
+    x = 0.6 + i * 4.12
+    rect(s, x, 3.95, 3.86, 1.65, LIGHT)
+    text(s, x, 4.1, 3.86, 0.8, [(value, 36, True, TEAL)], align=PP_ALIGN.CENTER)
+    text(s, x, 4.95, 3.86, 0.5, [(label, 16, False, INK)], align=PP_ALIGN.CENTER)
+text(s, 0.6, 5.82, 12.1, 0.46, [
+    ("Wang, Yang & Muntz (VLDB 1997) · Dữ liệu PAPI 2011–2024 (papi.org.vn)", 14, False, GREY),
+], align=PP_ALIGN.CENTER)
+text(s, 0.6, 6.38, 12.1, 0.49, [("Cảm ơn thầy và các bạn đã lắng nghe", 20, True, NAVY)], align=PP_ALIGN.CENTER)
 note(
     s,
     "Qua thực nghiệm, STING minh họa cách phân cụm bằng các ô dày liên thông. "

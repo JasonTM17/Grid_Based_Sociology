@@ -1,11 +1,11 @@
 """Build reports/final_report.docx — báo cáo cuối kỳ (tiếng Việt, 7 chương).
 
-Định dạng cuối áp dụng bằng report_style theo mẫu người dùng gửi
-(`reports/report_format_notes.md`): A4, lề trái/phải1.905cm, trên/dưới1.778cm,
-Times New Roman12pt, giãn dòng1.1, tiêu đề đen; bìa gọn với bảng thông tin nhóm,
-front matter đầy đủ (LỜI CẢM ƠN · TÓM TẮT · LỜI MỞ ĐẦU · MỤC LỤC(TOC field) · danh mục các loại).
+Định dạng theo mẫu Báo cáo cuối kì: bìa có logo và khung, trang riêng
+cho nhóm thực hiện, mục lục và các danh mục. Chương 1 bắt đầu từ trang 1.
+Thông số và nguồn mẫu được ghi trong reports/report_format_notes.md.
 
 Cách dùng: python scripts/deliverables/build_report.py
+Trước khi đóng gói, chạy scripts/deliverables/update_report_fields.py bằng Word.
 """
 
 import sys as _sys
@@ -41,6 +41,7 @@ def _read_results_csv(name):
 
 
 SUP_ROWS = _read_results_csv("supervised_metrics.csv")
+CLUSTER_METRICS = _read_results_csv("metrics.csv")
 ROBUSTNESS = _read_results_csv("robustness.csv")
 PREPROC_AUDIT = _read_results_csv("preprocessing_audit.csv")
 COURSE_SUP_ROWS = _read_results_csv("course_supervised_baselines.csv")
@@ -268,16 +269,9 @@ INK = RGBColor(0x1A, 0x1A, 0x1A)
 GREY = RGBColor(0x5A, 0x5A, 0x5A)
 
 doc = Document()
-
-# Page setup & styles
-def apply_page_setup(section):
-    section.page_width, section.page_height = Cm(21.0), Cm(29.7)
-    section.left_margin, section.right_margin = Cm(2.5), Cm(2.0)
-    section.top_margin, section.bottom_margin = Cm(2.0), Cm(2.0)
-
-
-for section in doc.sections:
-    apply_page_setup(section)
+doc.core_properties.title = "Phân cụm dựa trên lưới STING trên dữ liệu PAPI 2011–2024"
+doc.core_properties.subject = "Báo cáo cuối kỳ môn Học máy, Nhóm 15"
+doc.core_properties.author = "Nguyễn Tiến Sơn · Trần Thị Ngọc Quyên"
 
 
 def set_run(run, size=12, bold=False, color=INK, italic=False, name="Times New Roman"):
@@ -294,29 +288,6 @@ def set_run(run, size=12, bold=False, color=INK, italic=False, name="Times New R
         if rFonts is not None:
             rFonts.set(qn("w:hAnsi"), name)
             rFonts.set(qn("w:cs"), name)
-
-
-def style_font(name, size, bold=False, color=INK, italic=False):
-    st = doc.styles[name]
-    st.font.name = "Times New Roman"
-    st.font.size = Pt(size)
-    st.font.bold = bold
-    st.font.italic = italic
-    st.font.color.rgb = color
-    if st.paragraph_format is not None:
-        st.paragraph_format.line_spacing = 1.15
-        st.paragraph_format.space_after = Pt(6)
-
-
-style_font("Normal", 12)
-style_font("Title", 20, True, NAVY)
-style_font("Heading 1", 16, True, NAVY)
-style_font("Heading 2", 14, True, TEAL)
-style_font("Heading 3", 12, True, INK)
-try:
-    style_font("Caption", 10, False, GREY, italic=True)
-except KeyError:
-    pass
 
 
 def _append_field_to_run(run, instruction: str, cached: str | None = None):
@@ -349,29 +320,10 @@ def _paragraph_field(paragraph, instruction: str, placeholder: str, *, size=10.5
     _append_field_to_run(run, instruction, placeholder)
 
 
-def _clear_footer_block(footer):
-    for para in footer.paragraphs:
-        para.clear()
-
-
-def configure_cover_section(sec):
-    sec.different_first_page_header_footer = True
-    _clear_footer_block(sec.first_page_footer)
-    _clear_footer_block(sec.footer)
-
-
-def add_page_number_footer(sec):
-    p = sec.footer.paragraphs[0]
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("Trang ")
-    set_run(r, 10, False, GREY)
-    r2 = p.add_run()
-    _append_field_to_run(r2, "PAGE")
-
-
 def h1(text):
     para = doc.add_heading("", level=1)
-    para.paragraph_format.space_before = Pt(18)
+    if text.startswith("CHƯƠNG ") and not text.startswith("CHƯƠNG 1."):
+        para.paragraph_format.page_break_before = True
     r = para.add_run(text)
     set_run(r, 16, True, NAVY)
     return para
@@ -393,10 +345,15 @@ def h3(text):
 
 
 def body(text, italic=False):
-    para = doc.add_paragraph()
-    para.paragraph_format.space_after = Pt(6)
+    para = doc.add_paragraph(style="Body Text")
     r = para.add_run(text)
-    set_run(r, 12, False, INK, italic)
+    set_run(r, 13, False, INK, italic)
+    return para
+
+
+def front_title(text):
+    para = doc.add_paragraph(text, style="Title")
+    para.paragraph_format.page_break_before = True
     return para
 
 
@@ -412,18 +369,6 @@ def bullets(items):
 
 
 def table(headers, rows, widths=None, caption=None, header_fill="1B6E77"):
-    if caption:
-        cp = doc.add_paragraph()
-        cp.paragraph_format.space_before = Pt(10)
-        cp.paragraph_format.keep_with_next = True
-        r0 = cp.add_run("Bảng ")
-        set_run(r0, 10.5, True, GREY)
-        _paragraph_field(
-            cp, "SEQ Bảng \\* ARABIC", str(TABLE_NO[0]),
-            size=10.5, bold=True, color=GREY,
-        )
-        r = cp.add_run(f". {caption}")
-        set_run(r, 10.5, True, GREY)
     t = doc.add_table(rows=len(rows) + 1, cols=len(headers))
     t.style = doc.styles["Table Grid"]
     t.autofit = widths is None
@@ -451,7 +396,13 @@ def table(headers, rows, widths=None, caption=None, header_fill="1B6E77"):
             set_run(r, 10.5, False, INK)
             if i % 2 == 1:
                 _shade_cell(cell, "F6F4EF")
-    doc.add_paragraph().paragraph_format.space_after = Pt(4)
+    if caption:
+        for cell in t.rows[-1].cells:
+            cell.paragraphs[-1].paragraph_format.keep_with_next = True
+        cp = doc.add_paragraph(style="Caption")
+        cp.add_run("Bảng ")
+        _paragraph_field(cp, "SEQ Bảng \\* ARABIC", str(TABLE_NO[0]), size=12, bold=True, italic=True)
+        cp.add_run(f". {caption}")
     return t
 
 
@@ -477,20 +428,14 @@ def figure(fname, caption, width_cm=12.5):
     para = doc.add_paragraph()
     para.alignment = WD_ALIGN_PARAGRAPH.CENTER
     para.paragraph_format.space_after = Pt(2)
+    para.paragraph_format.keep_with_next = True
     para.add_run().add_picture(str(FIGS / fname), width=Cm(width_cm))
     FIG_NO[0] += 1
     n = FIG_NO[0]
-    cp = doc.add_paragraph()
-    cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    cp.paragraph_format.space_after = Pt(8)
-    r0 = cp.add_run("Hình ")
-    set_run(r0, 10.5, False, GREY, italic=True)
-    _paragraph_field(
-        cp, "SEQ Hình \\* ARABIC", str(n),
-        size=10.5, color=GREY, italic=True,
-    )
-    r = cp.add_run(f". {caption}")
-    set_run(r, 10.5, False, GREY, italic=True)
+    cp = doc.add_paragraph(style="Caption")
+    cp.add_run("Hình ")
+    _paragraph_field(cp, "SEQ Hình \\* ARABIC", str(n), size=12, bold=True, italic=True)
+    cp.add_run(f". {caption}")
     return n
 
 
@@ -516,7 +461,7 @@ def toc_field():
     fld1.set(qn("w:fldCharType"), "begin")
     it = OxmlElement("w:instrText")
     it.set(qn("xml:space"), "preserve")
-    it.text = 'TOC \\o "1-2" \\h \\z \\u'
+    it.text = 'TOC \\o "1-3" \\h \\z \\u'
     fld2 = OxmlElement("w:fldChar")
     fld2.set(qn("w:fldCharType"), "end")
     r._element.append(fld1)
@@ -524,50 +469,39 @@ def toc_field():
     r._element.append(fld2)
 
 
-configure_cover_section(doc.sections[0])
-
 # Dành section đầu cho bìa được chèn từ assets/report-cover.xml khi lưu.
-front_matter_sec = doc.add_section(WD_SECTION_START.NEW_PAGE)
-apply_page_setup(front_matter_sec)
-add_page_number_footer(front_matter_sec)
-
-# LỜI CẢM ƠN
-h1("LỜI CẢM ƠN")
-body(
-    "Nhóm xin chân thành cảm ơn ThS. Lê Minh Tân — giảng viên hướng dẫn — và Bộ môn Trí tuệ "
-    "nhân tạo, Khoa Công nghệ Thông tin, đã tạo điều kiện và góp ý trong quá trình thực hiện "
-    "đồ án môn Học máy."
-)
-body(
-    "Đồ án sử dụng dữ liệu công khai; nhóm xin ghi nhận các tổ chức cung cấp: CECODES, VFF-CRT, "
-    "RTA và UNDP (chỉ số PAPI); VCCI – USAID (PCI); Tổng cục Thống kê / NSO (GSO); Open "
-    "Development Mekong; và World Bank (WDI)."
-)
-body(
-    "Mọi sai sót còn lại trong báo cáo là trách nhiệm của nhóm."
-)
-doc.add_page_break()
+doc.add_section(WD_SECTION_START.NEW_PAGE)
+team = h1("NHÓM THỰC HIỆN")
+team.alignment = WD_ALIGN_PARAGRAPH.CENTER
+doc.add_paragraph("Học phần: Học máy (MALE431984) · Nhóm 15")
+doc.add_paragraph("Giảng viên hướng dẫn: ThS. Lê Minh Tân")
+table(["STT", "Họ và tên", "Mã số sinh viên"], [
+    ["1", "Nguyễn Tiến Sơn", "24110054"],
+    ["2", "Trần Thị Ngọc Quyên", "24110051"],
+], widths=[2.0, 8.3, 6.2])
+topic_line = doc.add_paragraph("Chủ đề 6: Phân cụm dựa trên lưới (Grid-based clustering).")
+topic_line.paragraph_format.space_before = Pt(8)
+doc.add_paragraph("Mã nguồn dự án: https://github.com/JasonTM17/Grid_Based_Sociology")
 
 # TÓM TẮT
-h1("TÓM TẮT")
+front_title("TÓM TẮT")
 body("Đồ án nghiên cứu phân cụm dựa trên lưới, chọn một biến thể STING rút gọn theo ngưỡng số điểm và áp dụng lên dữ liệu PAPI cấp tỉnh [1,2]. Từ 14 workbook giai đoạn 2011–2024, nhóm xây dựng bảng 882 quan sát tỉnh–năm và 41 cột, đáp ứng quy mô dữ liệu của học phần [8]. Các bước tiền xử lý gồm kiểm tra trùng khóa, giữ giá trị thiếu có cấu trúc, đối chiếu thang đo và chuẩn hóa bằng dữ liệu huấn luyện. Phân tích chính sử dụng hai chỉ tiêu: kiểm soát tham nhũng trong cung ứng dịch vụ công và y tế công lập.")
 body("Trên 240 điểm giả lập có hai nhóm tham chiếu, cài đặt cho ARI 0,950 và 2,5% nhiễu. Với hai chỉ tiêu PAPI giai đoạn 2011–2023, cấu hình chính tạo một cụm 629 điểm, hai cụm nhỏ 16 và 5 điểm, cùng 19,6% nhiễu. Lưới đã học gán 48/61 tỉnh đủ dữ liệu năm 2024 vào cụm và 13 tỉnh vào nhãn nhiễu. Kết quả thay đổi theo cấu hình lưới và tập đặc trưng; các thử nghiệm mở rộng chưa cho thấy sự phân tách mạnh trong phạm vi đã khảo sát. Báo cáo tập trung vào cơ chế STING, khả năng tái lập và giới hạn khi diễn giải cụm; kết quả trên hai chỉ tiêu không đại diện cho toàn bộ chất lượng quản trị của địa phương.")
-doc.add_page_break()
+body("Từ khóa: STING, phân cụm dựa trên lưới, PAPI, dữ liệu tỉnh–năm.", italic=True)
 
 # LỜI MỞ ĐẦU
-h1("LỜI MỞ ĐẦU")
+front_title("LỜI MỞ ĐẦU")
 body("Đề tài thuộc Topic 6 — Grid-based clustering. Theo bài giảng, cuối kỳ cần dữ liệu thật có hơn 500 dòng và 10 cột, báo cáo Word và notebook. Nhóm chọn tự cài đặt biến thể STING bằng NumPy để giải thích cơ chế lưới; đây là lựa chọn triển khai của nhóm. Scikit-learn hỗ trợ chuẩn hóa, chỉ số đánh giá và các mô hình đối chứng. PAPI được chọn vì dữ liệu công khai, có 14 năm và nhiều chỉ tiêu về quản trị, dịch vụ công.")
 body(f"Đồ án gồm: cài đặt STING từ đầu (src/sting.py); pipeline dữ liệu từ 14 workbook gốc; đối chiếu chéo với gói replication nghiên cứu công bố (Mendeley, CC BY 4.0 — lệch 0.0 trên {MENDELEY_OVERLAP_TXT} cặp giá trị có dữ liệu trên 8 chiều, tính từ reports/crosscheck_mendeley.md) [3]; phân cụm các năm; so sánh với k-means/DBSCAN; robustness đa chỉ tiêu; bản đồ 63 tỉnh; và gán cụm năm 2024 cùng các mô hình giám sát bổ trợ.")
 body("Mã nguồn lưu các bước dựng panel, kiểm tra dữ liệu, chọn cấu hình và phân tích kết quả. Notebook cuối kỳ tái lập ví dụ giả lập, nhãn STING và sai số dự báo từ panel đã lưu, đồng thời đọc các bảng và hình thực nghiệm. Notebook Day 4 thực hiện riêng pipeline tiền xử lý từ workbook gốc; lệnh tái lập được tổng hợp ở Phụ lục A.")
-doc.add_page_break()
+body("Nhóm xin chân thành cảm ơn ThS. Lê Minh Tân và Bộ môn Trí tuệ nhân tạo đã hướng dẫn và góp ý trong quá trình thực hiện đồ án. Nhóm trân trọng ghi nhận các tổ chức cung cấp dữ liệu công khai được dẫn trong báo cáo.")
 
 # MỤC LỤC
-h1("MỤC LỤC")
+front_title("MỤC LỤC")
 toc_field()
-doc.add_page_break()
 
 # DANH MỤC
-h1("DANH MỤC CHỮ VIẾT TẮT")
+front_title("DANH MỤC CHỮ VIẾT TẮT")
 table(["Viết tắt", "Nghĩa"], [
     ["STING", "STatistical INformation Grid — phân cụm dựa trên lưới thống kê phân cấp (Wang, Yang & Muntz, VLDB 1997) [1]"],
     ["PAPI", "Vietnam Provincial Governance and Public Administration Performance Index"],
@@ -580,15 +514,12 @@ table(["Viết tắt", "Nghĩa"], [
     ["Holdout", "Tập kiểm định duy nhất (năm 2024), đánh giá một lần cuối"],
 ], widths=[3.5, 13.0])
 
-h1("DANH MỤC HÌNH ẢNH")
+front_title("DANH MỤC HÌNH ẢNH")
 _catalog_field("Hình")
 
-h1("DANH MỤC BẢNG")
+front_title("DANH MỤC BẢNG")
 _catalog_field("Bảng")
-doc.add_page_break()
-body_sec = doc.add_section(WD_SECTION_START.NEW_PAGE)
-apply_page_setup(body_sec)
-_clear_footer_block(body_sec.footer)
+doc.add_section(WD_SECTION_START.NEW_PAGE)
 
 # CHƯƠNG 1
 h1("CHƯƠNG 1. TỔNG QUAN ĐỀ TÀI")
@@ -623,7 +554,7 @@ bullets([
     ("fit(X).", "Dựng L mức trên n điểm d chiều; với khóa ô nguyên và stable radix sort của NumPy đang dùng, chi phí theo dữ liệu khoảng O(L·n·d). Không coi số mức và số chiều luôn bằng hằng số khi phân tích tổng quát. Refit hủy nhãn cũ, cần cluster lại trước predict."),
     ("cluster(level).", "Chọn ô dày → gom thành phần liên thông trên đồ thị kề ô (BFS/DFS) → gán nhãn điểm; nhãn −1 cho điểm không nằm trong ô dày."),
     ("predict(X).", "Điểm MỚI: tìm ô chứa nó ở mức đã dùng → cụm của ô đó; nếu ô không dày hoặc điểm ngoài vùng huấn luyện → −1."),
-    ("query_rect(rect).", "Quét M ô có dữ liệu tại một mức, chọn các ô nằm trọn trong vùng và gộp thống kê; chi phí O(M·d), không có top-down pruning. Khi phân cụm, chế độ nối qua cạnh xét tối đa 2d ô kề mỗi ô; chế độ có cả góc có thể tới 3^d−1 hướng. Còn có bước sắp xếp các ô dày, nên không mô tả vô điều kiện cả pipeline bằng O(n)."),
+    ("query_rect(rect).", "Quét M ô có dữ liệu ở một mức và gộp các ô nằm trọn trong vùng. Phương sai gộp tính cả độ phân tán trong từng ô và chênh lệch giữa trung bình các ô, với trọng số là số điểm. Chi phí truy vấn là O(M·d). Khi phân cụm, mỗi ô có tối đa 2d láng giềng nếu nối qua mặt và 3^d−1 nếu tính cả góc. Chi phí chung còn gồm bước sắp xếp các ô dày."),
     ("save/load.", "Pickle model + JSON scaler/provenance — nạp lại dự báo không cần huấn luyện lại."),
 ])
 h2("2.4. Baselines & chỉ số đánh giá")
@@ -768,22 +699,23 @@ table(["Năm", "n", "k", "noise", "Kích thước cụm (giảm dần)"], PER_YE
       ))
 figure("sting_first_real.png", "Hai cấu hình lưới và ngưỡng số điểm trên PAPI năm 2023", 15.5)
 
-h2("5.3. Pooled 2011–2023: STING vs k-means vs DBSCAN")
-body("Phân tích chính dùng 808 quan sát đủ hai chỉ tiêu sd_4_2 và sd_6_1 giai đoạn 2011–2023, chuẩn hóa bằng thống kê của chính giai đoạn này. STING cho 3 cụm với kích thước 629, 16 và 5 điểm, cùng 19,6% nhiễu. Các chỉ số hình học được tính trên điểm thuộc cụm. Cụm lớn chứa 629/650 điểm được gán cụm, tương đương 96,8%; hai cụm nhỏ chỉ có điểm thuộc giai đoạn 2011–2018. Cách diễn giải chuyển nhãn theo thời gian được nêu ở mục 5.5.")
-table(["Scope", "Method", "k", "Noise", "Silh.", "DB", "Silh.→ARI"], [
-    ["pooled", "STING (frozen)", "3", "20%", "0.361", "0.472", "—"],
-    ["pooled", "k-means k=2", "2", "0%", "0.445", "0.876", "0.166"],
-    ["pooled", "k-means k=3", "3", "0%", "0.336", "1.050", "0.139"],
-    ["pooled", "k-means k=4", "4", "0%", "0.364", "0.879", "0.082"],
-    ["pooled", "k-means k=5", "5", "0%", "0.334", "0.945", "0.070"],
-    ["pooled", "DBSCAN eps=0.2", "5", "14%", "0.218", "0.505", "0.647"],
-    ["pooled", "DBSCAN eps=0.4", "1", "3%", "n/a", "n/a", "0.135"],
-    ["pooled", "DBSCAN eps=0.6", "1", "1%", "n/a", "n/a", "0.043"],
-    ["pooled", "DBSCAN eps=0.8", "1", "0%", "n/a", "n/a", "0.012"],
-    ["pooled", "DBSCAN eps=1.0", "1", "0%", "n/a", "n/a", "0.006"],
-], widths=[1.8, 3.4, 0.9, 1.5, 1.5, 1.5, 1.7],
-      caption=tbl_caption("STING vs baselines (noise tách khỏi metric hình học)"))
-body("K-means k=2 có silhouette 0,445 và gán mọi điểm vào cụm. STING và DBSCAN có thể loại các tập điểm khác nhau khỏi chỉ số hình học, nên không dùng riêng silhouette để xếp hạng tuyệt đối. ARI 0,647 giữa STING và DBSCAN ở eps=0,2 mô tả mức đồng thuận của hai cách phân hoạch, không phải độ chính xác so với nhãn khảo sát.")
+h2("5.3. Đối chứng STING, K-means và DBSCAN trên dữ liệu 2011–2023")
+body("Phân tích chính dùng 808 quan sát đủ hai chỉ tiêu sd_4_2 và sd_6_1 giai đoạn 2011–2023, chuẩn hóa bằng thống kê của chính giai đoạn này. STING cho 3 cụm với kích thước 629, 16 và 5 điểm, cùng 19,6% nhiễu. Cụm lớn chứa 629/650 điểm đã vào cụm, tương đương 96,8%. Hai cụm nhỏ chỉ có điểm thuộc giai đoạn 2011–2018. Mục 5.5 trình bày kết quả chuyển trạng thái theo thời gian.")
+comparison_rows = []
+for metric in CLUSTER_METRICS:
+    if metric["scope"] == "pooled 2011-2023":
+        method = metric["method"].replace("STING (frozen)", "STING").replace("k-means", "K-means")
+        comparison_rows.append([
+            method, metric["k"], _pct(metric["noise_ratio"]).replace(".", ","),
+            _f3(metric["silhouette"]).replace(".", ","),
+            _f3(metric["davies_bouldin"]).replace(".", ","),
+            _f3(metric["ari_vs_sting"]).replace(".", ",") if metric["ari_vs_sting"] else "—",
+        ])
+table(["Phương pháp", "Số cụm", "Nhiễu", "Silhouette", "Davies–Bouldin", "ARI với STING"],
+      comparison_rows, widths=[4.1, 1.7, 1.8, 2.4, 3.1, 3.0],
+      caption=tbl_caption("So sánh phân hoạch trên dữ liệu PAPI 2011–2023"))
+body("K-means với k = 2 có silhouette 0,445 trên 808 điểm. STING được chấm trên 650 điểm thuộc cụm và DBSCAN (eps = 0,2) trên 693 điểm. Để đối chiếu cùng mẫu số, notebook giữ nguyên các nhãn đã học và tính lại silhouette trên 631 điểm thuộc cụm của cả STING lẫn DBSCAN. Các giá trị lần lượt là 0,366 cho STING, 0,457 cho K-means và 0,258 cho DBSCAN. Tập giao chỉ đại diện cho phần dữ liệu được cả hai phương pháp gán cụm.")
+body("ARI STING–DBSCAN là 0,647 trên toàn bộ 808 quan sát, tính cả nhãn nhiễu, và 0,431 trên tập giao 631 quan sát. Hai số đo mức đồng thuận của phân hoạch trong từng phạm vi mẫu.")
 
 h2("5.4. Robustness đa chỉ tiêu — ablation OFAT ở chiều cao")
 body(f"PCA d1–d6 (trong-năm z, n={R_PCA['n']}): 2 thành phần đầu giữ {_pct(R_PCA['explained_var_total'])} phương sai; STING trên không gian PCA → k={R_PCA['k']}, nhiễu {_pct(R_PCA['noise_ratio'])}, ARI vs 2D = {R_PCA['ari_vs_2d']} — không nhận diện cấu trúc. Nhánh 8 chiều (2018–2024, n={N8}) đọc theo ablation OFAT — mỗi lần đổi đúng MỘT tham số so với cấu hình gốc (L=3 f=2 mc=10 lv=1): gốc → k={R_GOC['k']}, nhiễu {_pct(R_GOC['noise_ratio'])} (noise > 50% → không nhận diện); đổi f=3 → k={R_F3['k']}, nhiễu {_pct(R_F3['noise_ratio'])}; đổi lv=2 → k={R_LV2['k']}, nhiễu {_pct(R_LV2['noise_ratio'])}; đổi mc=2 → k={R_MC2['k']}, nhiễu {_pct(R_MC2['noise_ratio'])} — nhánh duy nhất đạt quy tắc chấp nhận cũ (k≥2 & noise ≤50%), CSV ghi verdict “có cấu trúc”, nhưng silhouette âm ({_f3(R_MC2['silhouette'])}) cho thấy hai cụm tách yếu, không phải cấu trúc mạnh. So sánh OFAT cho thấy sự nhạy với tham số trong các nhánh đã thử: lv=2 làm sập hoàn toàn (toàn nhiễu), f=3 khi giữ mc=10 mất gần hết điểm; riêng mc=2 chứng tỏ nhánh 8 chiều không trống rỗng theo ngưỡng k/noise — dù không tách mạnh.")
@@ -806,8 +738,9 @@ table(["Nhánh", "n", "k", "noise", "Silh.", "Kết luận"], _rob_rows,
           "(đổi một tham số mỗi lần so với gốc; nguồn: results/robustness.csv)"
       ))
 
-h2("5.5. Pipeline dự đoán 2024 (out-of-sample)")
-body("STING.predict (lưới toàn cục fit ≤2023) gán cụm 2024: 48/61 tỉnh đủ chỉ tiêu → cụm lớn; 13 → nhiễu. Không có “chuyển cụm thật” 2023→2024: 7 tỉnh chuyển sang nhiễu, 5 từ nhiễu ra (Bảng 8) — phát biểu này mang tính cấu trúc: cả 2023 lẫn 2024 không có điểm nào thuộc cụm 0/1 (hai cụm li ti chỉ có điểm 2011–2018), nên 0/59 là phát biểu rỗng, không chứng minh độ ổn định nhãn; 13/61 tỉnh nhận nhãn nhiễu vì không được gán vào vùng ô dày của lưới đã học. Lưu ý metadata: selection_metrics trong predict_config.json mô tả fit ≤ 2020 ([453,16,5]) trong khi model.pkl đóng gói là fit 2011–2023 ([629,16,5]). Hình 3 minh họa phủ cụm 2024 sau khi lưới học trên 2011–2023.")
+h2("5.5. Gán cụm ngoài mẫu năm 2024 và chuyển trạng thái")
+body("Nhóm áp dụng bộ chuẩn hóa và lưới học từ 2011–2023 cho hai điểm chỉ tiêu PAPI đã quan sát trong năm 2024. Trong 61 tỉnh đủ dữ liệu, 48 tỉnh vào cụm lớn và 13 tỉnh nhận nhãn nhiễu. Vĩnh Phúc và Tiền Giang thiếu ít nhất một chỉ tiêu. Hình 3 minh họa phần dữ liệu năm 2024 nằm trong các ô dày đã học.")
+body("Quảng Ninh và Bình Dương thiếu chỉ tiêu năm 2023. Sau khi ghép theo mã tỉnh, Bảng 8 còn 59 tỉnh đủ dữ liệu ở cả hai năm. Trên cùng lưới, 7 tỉnh từ cụm lớn sang nhiễu, 5 tỉnh từ nhiễu vào cụm lớn và 47 tỉnh giữ nguyên trạng thái. Hai cụm nhỏ chỉ gồm điểm giai đoạn 2011–2018. Phần selection_metrics trong predict_config.json lưu kết quả ở bước chọn cấu hình đến 2020, còn mô hình đóng gói được dựng lại từ toàn bộ giai đoạn 2011–2023.")
 body("Hồi quy dự báo 6.1 Y tế công lập năm sau (train 740 cặp 2011–2022, holdout 59 cặp 2023→2024). Ridge được chọn qua CV; MAE holdout là 0.0640, thấp hơn carry-forward (0.0683) khoảng 6.3%. R² holdout tương ứng là 0.381 và 0.198. Random forest có MAE holdout 0.0616 (thấp hơn carry-forward 9.8%, R² 0.423) nhưng không được chọn vì R² CV thấp hơn (0.197 so với 0.265 của Ridge). Hình 4 đối chiếu dự báo hồi quy với độ quan trọng đặc trưng. CV hồi quy là expanding origin 2017–2022 theo thứ tự thời gian (không origin tương lai nào nằm trong fold huấn luyện), và holdout không được dùng để chọn mô hình. value_cv là best_score_ của GridSearchCV sau khi chọn trên chính 6 fold đó (không nested CV — hơi lạc quan, bias nhỏ vì lưới thô: spread alpha Ridge ≈ 0.001). sd_6_1 (target) nằm trong 8 đặc trưng (scripts/common/papi_pred_common.py:19-23) nên lợi thế 6.3% so với carry-forward chủ yếu đến từ lag-1 của chính target: bỏ sd_6_1 khỏi features, CV R² 0.265 → −0.264; corr dự báo vs carry-forward = 0.99.")
 body("Phân loại dùng pseudo-label do STING sinh, trên một năm holdout 2023→2024. Logistic regression và random forest vượt baseline lớp đa số trên holdout này: accuracy 0.644 / 0.678 so với 0.186; macro-F1 0.541 / 0.600 so với 0.157. Một năm holdout không đủ để khẳng định năng lực dự báo tổng quát. Cấu hình STING/allowlist được chọn bằng cách chấm coverage trên 2021–2022 — trùng hai fold CV cuối của phân loại (mục 4.1; results/supervised_summary.md), nên điểm macro-F1 CV mang tính thăm dò, không dùng để khẳng định vượt trội. Prevalence nhãn 1 trôi 0% (2011) → 92% (2021): trong mọi fold CV 2017–2022, lớp đa số train là 0 còn validation luôn đa số 1 (44–92%), nên macro-F1 CV 0.434 thực chất đo drift độ phủ; baseline mù thời gian “always dự đoán 1” đạt 0.400, chỉ thấp hơn LR 0.034.")
 figure("predict_2024.png", "STING học 2011–2023 → dự đoán cụm 2024 (out-of-sample)", 13)
@@ -826,12 +759,12 @@ table(["Model", "CV R²/F1", "Holdout MAE/acc", "Holdout F1/R²"], [
           "CV expanding origin 2017–2022, holdout 2023→2024"
       ))
 body(f"Baselines hồi quy có CV thật trên cùng 6 fold expanding origin 2017–2022, không tranh selection: (CV: carry {_vn(CV_CARRY)} vs ridge {_vn(CV_RIDGE)}); trung bình train {_vn(CV_MEAN)} — Ridge vẫn được chọn theo CV. Một holdout không chứng minh tổng quát.")
-table(["2023 → 2024", "−1", "cụm 2", "Tổng"], [
-    ["nhiễu (in-sample 2023)", "4", "5", "9"],
-    ["cụm 2 (2023)", "7", "43", "50"],
+table(["Năm 2023 / năm 2024", "Nhiễu (−1)", "Cụm lớn (2)", "Tổng"], [
+    ["Nhiễu (−1)", "4", "5", "9"],
+    ["Cụm lớn (2)", "7", "43", "50"],
     ["Tổng", "11", "48", "59"],
 ], widths=[6.4, 2.4, 2.4, 2.4],
-      caption=tbl_caption("Chuyển cụm 2023 → 2024 (loại 4 dòng thiếu chỉ tiêu)"))
+      caption=tbl_caption("Chuyển trạng thái của 59 tỉnh đủ dữ liệu trong cả hai năm 2023 và 2024"))
 
 h2("5.6. So sánh các bộ phân loại học trong môn")
 body(
@@ -880,12 +813,12 @@ h2("6.1. Giới hạn khi diễn giải cụm chiếm ưu thế")
 body("Kết quả chính có một cụm chiếm ưu thế và hai cụm nhỏ trên hai chỉ tiêu. Điều này phụ thuộc tập đặc trưng, phạm vi năm, độ phân giải và ngưỡng số điểm. Kết quả một cụm của cấu hình theo năm chỉ mô tả hành vi của cấu hình đó; Hình 2 cho thấy một lựa chọn lưới khác tạo ba cụm trên dữ liệu 2023. Nhãn lưới không đủ để kết luận các tỉnh tương đồng trên toàn bộ 37 chỉ tiêu, hoặc để chia địa phương thành nhóm phát triển cao và thấp.")
 h2("6.2. Bài học từ gãy thang đo")
 body("Trong thử nghiệm ban đầu, nhóm đã xem xét cặp sd_5_4 và sd_6_2. Workbook cho thấy sd_5_4 đổi thang từ 0,25–2,5 sang 0,33–3,33 tại năm 2021. Bước nhảy trung bình quan sát là +0,576, trong khi nhân trung bình năm 2020 với hệ số 1,333 sẽ tăng khoảng +0,632. Hai giá trị cùng hướng nhưng không tách được ảnh hưởng của đổi thang và biến động khảo sát. Vì vậy, nhóm không dùng cặp này để kết luận về khác biệt quản trị. Khi gộp nhiều phiên bản dữ liệu cần kiểm tra cả tính tương thích của thang đo và khả năng cụm phản ánh giai đoạn thu thập.")
-h2("6.3. Metrics & lưới song song trục")
+h2("6.3. Cách đọc chỉ số và giới hạn của lưới song song trục")
 bullets([
-    ("k-means “thắng” silhouette nhưng ép k.", "k-means không có nhiễu — mọi điểm thuộc cụm; silhouette 0.445 là giá trị nội tại của phân vùng bắt buộc, không phải bằng chứng cấu trúc thật."),
-    ("STING vs DBSCAN(eps=0.2).", "ARI 0.647 — hai phương pháp mật độ đồng thuận; eps lớn hơn collapse về 1 cụm."),
-    ("STING k=3.", "cụm 629 + 16 + 5 + 20% nhiễu: cấu trúc “một lõi + vệ tinh nhỏ” — hợp lý về mặt dữ liệu, không phải lỗi."),
-    ("Silhouette không bản địa.", "metric khoảng cách Euclide không hiểu lưới song song; dùng để so sánh thô, tách noise; không dùng để chọn model."),
+    ("Chỉ số hình học.", "Đọc silhouette cùng số quan sát được chấm và tỷ lệ nhiễu. K-means gán mọi điểm vào một trong k cụm đã định trước."),
+    ("Đồng thuận phân hoạch.", "ARI STING–DBSCAN thay đổi khi loại các điểm nhiễu khỏi mẫu. Kết quả phụ thuộc thiết lập eps và mẫu dùng để đối chiếu."),
+    ("Cụm chiếm ưu thế.", "Một cụm giữ 96,8% số điểm đã vào cụm. Hai cụm còn lại nhỏ và chỉ xuất hiện ở phần đầu chuỗi thời gian."),
+    ("Lưới song song trục.", "Biên các ô thay đổi theo tập đặc trưng và độ phân giải. Silhouette dùng khoảng cách Euclid, còn STING gom theo liên thông của ô lưới."),
 ])
 h2("6.4. Ảnh hưởng của cấu hình khi mở rộng số chiều")
 body("Hai thành phần PCA giữ 63,2% phương sai và cấu hình STING đang xét cho một cụm. Trong nhánh 8 chiều, thay riêng mức lưới hoặc ngưỡng số điểm tạo các tỷ lệ nhiễu rất khác nhau; cấu hình min_count=2 đạt ngưỡng số cụm và tỷ lệ nhiễu đã đặt nhưng silhouette âm. Các kết quả cho thấy sự phụ thuộc vào cấu hình trong phạm vi thử nghiệm. Chúng không bác bỏ mọi khả năng có cấu trúc ở chiều cao, vì chỉ khảo sát một số cấu hình và PCA có thể bỏ thông tin ngoài hai thành phần đầu.")
@@ -1189,8 +1122,7 @@ _MDD = (ROOT / "reports" / "model_deep_dive.md").read_text(encoding="utf-8")
 _MDD_VER = _md_rx(r"\*\*Phiên bản (\d+)\*\*", _MDD).group(1)
 _MDD_DATE = _md_rx(r"\*\*Ngày:\*\* (\d{4}-\d{2}-\d{2})", _MDD).group(1)
 
-doc.add_page_break()
-h1("PHỤ LỤC B — PHÂN TÍCH CHUYÊN SÂU MODEL")
+h1("PHỤ LỤC B — PHÂN TÍCH CHUYÊN SÂU MODEL").paragraph_format.page_break_before = True
 body("Phụ lục tổng hợp các kiểm tra bổ sung về độ nhạy của quy trình chọn cấu hình, hồ sơ và độ ổn định của cụm, cùng chẩn đoán mô hình giám sát. Các phép thử giữ nguyên cấu hình chính đã công bố. Số liệu chi tiết và mã tái lập được lưu trong reports/model_deep_dive.md và các kết quả được dẫn ở từng mục dưới đây.")
 
 h2("B.1. Độ nhạy quy trình chọn cấu hình")
@@ -1307,11 +1239,11 @@ body("Số liệu đầy đủ: results/supervised_depth.md (kèm supervised_dep
 body("Các kiểm tra bổ sung cần được đọc riêng cho từng nhóm: tỷ lệ giữ nhãn toàn bộ chịu ảnh hưởng lớn từ cụm chiếm ưu thế, còn hai cụm nhỏ và các đặc trưng ngoài giá trị y tế năm trước kém ổn định hơn. Những nhận xét này mô tả phạm vi thử nghiệm hiện có và không xác nhận một phân hoạch xã hội tổng quát.")
 
 # TÀI LIỆU THAM KHẢO
-h1("TÀI LIỆU THAM KHẢO")
+h1("TÀI LIỆU THAM KHẢO").paragraph_format.page_break_before = True
 refs = [
     "Wang, S., Yang, J., Muntz, R. (1997). STING: A Statistical Information Grid Approach to Spatial Data Mining. Proc. 23rd International Conference on Very Large Data Bases (VLDB), Athens, Greece, 186–195.",
     "CECODES, VFF-CRT, RTA & UNDP. Chỉ số Hiệu quả Quản trị và Hành chính công cấp tỉnh ở Việt Nam (PAPI) 2011–2024. Hà Nội. Truy cập papi.org.vn/du-lieu-papi/.",
-    "Le, T. et al. Replication data and code for “Digital Governance...” study. Mendeley Data, DOI: 10.17632/wbk42j9wc8.1. Giấy phép CC BY 4.0.",
+    "Le, K. C. và cộng sự (2026). Replication data and code for: Digital Governance Capacity and Municipal Waste-Collection Performance in Vietnamese Provinces. Mendeley Data, phiên bản 1. DOI 10.17632/wbk42j9wc8.1. Giấy phép CC BY 4.0.",
     "Open Development Vietnam (OD Mekong). Ranh giới hành chính cấp tỉnh Việt Nam — GeoJSON. data.opendevelopmentmekong.net. Giấy phép CC-BY-SA 4.0.",
     "scikit-learn developers. scikit-learn: Machine Learning in Python. https://scikit-learn.org — KMeans, DBSCAN, silhouette_score, Davies–Bouldin, Calinski–Harabasz.",
     "Jain, A. K. (2010). Data clustering: 50 years beyond K-means. Pattern Recognition Letters, 31(8), 651–666.",

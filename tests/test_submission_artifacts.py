@@ -18,6 +18,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 from docx import Document
+from docx.oxml.ns import qn
 from pptx import Presentation
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,13 +61,29 @@ def test_report_embeds_current_canonical_figures():
         "external_grdp_by_cluster.png", "external_wdi_panel.png", "external_poverty_by_cluster.png",
     )
     report = Document(ROOT / "reports" / "final_report.docx")
-    assert len(report.inline_shapes) == len(figures)
-    for index, (shape, name) in enumerate(zip(report.inline_shapes, figures, strict=True), 1):
+    shapes = list(report.inline_shapes)
+    assert len(shapes) == len(figures) + 1
+    for shape, path in zip(shapes, (
+        ROOT / "assets/report-cover-logo.png", *(ROOT / "results" / "figs" / name for name in figures)
+    ), strict=True):
         relation = shape._inline.graphic.graphicData.pic.blipFill.blip.embed
         embedded = report.part.related_parts[relation].blob
-        assert hashlib.sha256(embedded).hexdigest() == _sha256_file(ROOT / "results" / "figs" / name), (
-            f"Hình {index} chưa cập nhật từ {name}; cần tạo lại báo cáo."
+        assert hashlib.sha256(embedded).hexdigest() == _sha256_file(path), (
+            f"Hình chưa cập nhật từ {path.name}; cần tạo lại báo cáo."
         )
+
+
+def test_report_uses_the_user_final_template_geometry():
+    report = Document(ROOT / "reports" / "final_report.docx")
+    cover, front, body = report.sections
+    assert (cover.left_margin.twips, cover.right_margin.twips) == (1417, 1134)
+    assert (cover.page_width.twips, cover.page_height.twips) == (11906, 16838)
+    border = cover._sectPr.find(qn("w:pgBorders"))
+    assert border.get(qn("w:display")) == "firstPage"
+    assert [edge.get(qn("w:val")) for edge in border] == ["double"] * 4
+    assert front._sectPr.find(qn("w:pgBorders")) is None
+    assert body._sectPr.find(qn("w:pgNumType")).get(qn("w:start")) == "1"
+    assert report.styles["Body Text"].paragraph_format.line_spacing == 1.5
 
 
 def check_pptx_submission(prs: Presentation) -> list[str]:
@@ -354,4 +371,4 @@ def test_optional_final_slides_match_grid_method_and_presentation_scope():
         "nghi thức phản biện", "bộ nộp cuối kỳ",
     ))
     notes = "\n".join(slide.notes_slide.notes_text_frame.text for slide in deck.slides)
-    assert all(name in notes for name in ["final_report.docx", "Nhom15_CuoiKy_STING_PAPI.ipynb", "final.pptx"])
+    assert all(name in notes for name in ["Nhom15_CuoiKy_STING_PAPI.docx", "Nhom15_CuoiKy_STING_PAPI.ipynb"])

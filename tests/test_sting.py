@@ -111,6 +111,35 @@ def test_query_rect_basic():
     assert res["std"].shape == (2,)
 
 
+def test_query_rect_preserves_variance_at_large_offsets():
+    points = np.array([[0, 0], [1, 3], [2, 6], [3, 9], [7, 21], [9, 27]], dtype=float)
+    points += [1e10, -1e10]
+    model = STING(n_levels=2, factor=2, min_count=1).fit(points)
+    whole_grid = np.column_stack((model.bounds_min_, model.bounds_max_))
+    lower_cell = model.cells_[1][(0, 0)]
+    lower_rect = np.column_stack((lower_cell.bounds_min, lower_cell.bounds_max))
+
+    for rect, expected in ((whole_grid, points), (lower_rect, points[:4])):
+        stats = model.query_rect(rect)
+        assert stats["count"] == len(expected)
+        np.testing.assert_allclose(stats["mean"] - points[0], expected.mean(axis=0) - points[0], atol=2e-6)
+        np.testing.assert_allclose(stats["std"], expected.std(axis=0))
+        np.testing.assert_array_equal(stats["min"], expected.min(axis=0))
+        np.testing.assert_array_equal(stats["max"], expected.max(axis=0))
+
+
+def test_constant_axis_remains_valid_when_unit_padding_rounds_away():
+    points = np.array([[1e16, 0.0], [1e16, 1.0]])
+    with np.errstate(divide="raise", invalid="raise"):
+        model = STING(n_levels=2, factor=2, min_count=1).fit(points)
+        labels = model.cluster()
+        predictions = model.predict(points)
+
+    np.testing.assert_array_equal(model.point_cell_index(1), [[0, 0], [0, 1]])
+    np.testing.assert_array_equal(predictions, labels)
+    assert model.predict([np.nextafter(points[0, 0], np.inf), 0.5])[0] == -1
+
+
 def test_predict_assigns_new_points_to_clusters():
     """predict() gán điểm mới vào cụm của ô chứa nó (dự đoán cho dữ liệu chưa thấy)."""
     X, _ = make_blobs(

@@ -14,13 +14,16 @@ _sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))  # repo root: cho
 
 import argparse
 import hashlib
+import io
 import json
 import os
 from pathlib import Path, PurePosixPath
+import re
 import stat
 import subprocess
 import sys
 import tempfile
+from xml.etree import ElementTree
 import zipfile
 
 from scripts.common.notebook_checks import notebook_issues
@@ -35,134 +38,270 @@ PACKAGES = {
         ("final", "Nhom15_CuoiKy_STING_PAPI"),
     )
 }
-SCRIPTS = (  # nhóm/tên module trong scripts/
-    "data/build_panel", "data/build_scale_metadata", "data/check_data", "data/crosscheck_mendeley",
+FINAL_SCRIPTS = (
+    "data/build_panel", "data/build_scale_metadata", "data/build_external_master",
+    "data/check_data", "data/crosscheck_mendeley", "data/preprocessing_audit",
     "analysis/first_real_cluster", "common/papi_pred_common", "common/fig_style",
-    "analysis/predict_sweep", "analysis/predict_demo", "supervised/predict_supervised",
-    "analysis/run_analysis", "data/preprocessing_audit",
-    "supervised/course_supervised_baselines", "supervised/classifier_label_baselines",
+    "analysis/predict_sweep", "analysis/predict_demo", "analysis/run_analysis",
     "analysis/external_validation", "analysis/poverty_validation", "analysis/cluster_profile",
-    "supervised/supervised_depth", "data/preprocessing_sensitivity", "analysis/protocol_sensitivity",
-    "common/notebook_checks", "figures/fig_grid_levels_and_elbow",
+    "analysis/protocol_sensitivity", "supervised/predict_supervised",
+    "supervised/course_supervised_baselines", "supervised/supervised_depth",
+    "figures/fig_grid_levels_and_elbow",
 )
-MIDTERM_FIGURES = (
-    "predict_2024", "00_synthetic_sting", "sting_first_real",
+FINAL_RESULTS = (
+    "analysis_summary.md", "cluster_labels.csv", "cluster_profile.csv", "cluster_profile.md",
+    "course_supervised_baselines.csv", "course_supervised_baselines.md", "course_supervised_sensitivity.csv",
+    "external_master_summary.md", "external_validation.csv", "external_validation.md",
+    "metrics.csv", "per_year.csv", "poverty_validation.csv", "poverty_validation.md",
+    "predict_all_years.csv", "predict_config_search.csv", "predict_summary.md",
+    "preprocessing_audit.csv", "preprocessing_audit.md", "protocol_sensitivity.csv",
+    "protocol_sensitivity.md", "robustness.csv", "supervised_depth.csv",
+    "supervised_depth.md", "supervised_metrics.csv", "supervised_summary.md",
 )
+FINAL_FIGURES = (
+    "course_confusion_matrix", "deep_cluster_profile", "evolution", "external_grdp_by_cluster",
+    "external_health_density_2020", "external_pci_by_cluster", "external_poverty_by_cluster",
+    "external_wdi_panel", "kmeans_elbow", "map_2020", "map_2024", "predict_2024",
+    "protocol_sensitivity_grid", "sting_grid_levels", "supervised_importance",
+    "supervised_learning_curve",
+)
+SUPPORT = "tai_lieu_kem"
+MIDTERM_NAME, MIDTERM_NOTEBOOK = PACKAGES["midterm"]
+FINAL_NAME, FINAL_NOTEBOOK = PACKAGES["final"]
+MIDTERM_VISIBLE = {
+    "slides/submission.pptx": f"{MIDTERM_NAME}.pptx",
+    f"notebooks/{MIDTERM_NOTEBOOK}": MIDTERM_NOTEBOOK,
+}
+FINAL_VISIBLE = {
+    "reports/final_report.docx": f"{FINAL_NAME}.docx",
+    f"notebooks/{FINAL_NOTEBOOK}": FINAL_NOTEBOOK,
+    "slides/final.pptx": f"{FINAL_NAME}.pptx",
+}
+VISIBLE = {"midterm": MIDTERM_VISIBLE, "final": FINAL_VISIBLE}
+PAPI_SOURCE_FILES = {
+    "data/raw/papi/PROVENANCE.md": "Nguồn và mã kiểm tra dữ liệu PAPI",
+    **{f"data/raw/papi/{name}": "Bảng tính PAPI gốc" for name in (*OLD_FILES.values(), *NEW_FILES.values())},
+}
+MIDTERM_FILES = {
+    "slides/submission.pptx": "Bản trình chiếu",
+    f"notebooks/{MIDTERM_NOTEBOOK}": "Notebook đã lưu kết quả",
+    "src/sting.py": "Mã nguồn thuật toán STING",
+    "scripts/common/papi_pred_common.py": "Đọc dữ liệu và cấu hình STING",
+    "scripts/common/fig_style.py": "Định dạng biểu đồ trong notebook",
+    "LICENSE": "Giấy phép mã nguồn",
+    "requirements.txt": "Thư viện để chạy notebook",
+    "models/predict_config.json": "Cấu hình STING đã chọn",
+    "data/processed/papi_panel_63_2011_2024.csv": "Bảng PAPI đã tiền xử lý",
+    **PAPI_SOURCE_FILES,
+    "results/preprocessing_audit.csv": "Kết quả kiểm tra tiền xử lý",
+    "results/metrics.csv": "Bảng đối chiếu các phương pháp phân cụm",
+    "results/predict_all_years.csv": "Nhãn cụm dùng để đối chiếu khi chạy lại",
+    "results/predict_summary.md": "Số liệu đối chiếu độ nhạy theo ngưỡng",
+    "results/figs/predict_2024.png": "Hình minh họa gán cụm năm 2024",
+}
+FINAL_FILES = {
+    "reports/final_report.docx": "Báo cáo cuối kỳ",
+    f"notebooks/{FINAL_NOTEBOOK}": "Notebook đã lưu kết quả",
+    "slides/final.pptx": "Slide vấn đáp",
+    "src/sting.py": "Mã nguồn thuật toán STING",
+    "LICENSE": "Giấy phép mã nguồn",
+    "CITATION.cff": "Thông tin trích dẫn dự án",
+    "requirements.txt": "Thư viện để tái lập",
+    **PAPI_SOURCE_FILES,
+    **{f"scripts/{name}.py": "Mã tái lập dữ liệu và thí nghiệm" for name in FINAL_SCRIPTS},
+    **{f"data/raw/mendeley/Replication_package/data/{name}": "Đối chiếu PAPI và tọa độ bản đồ"
+       for name in ("province_crosswalk_63.csv", "centroids_63_naturalearth.csv",
+                    "papi_panel_63_2011_2022.csv", "SHA256_PAPI_ORIGINALS.txt")},
+    "data/raw/boundaries/diaphantinh.geojson": "Ranh giới hành chính dùng trong bản đồ",
+    **{f"data/raw/{source}/PROVENANCE.md": "Nguồn và giấy phép dữ liệu"
+       for source in ("mendeley", "boundaries", "pci", "gso", "odmekong", "worldbank")},
+    "data/processed/external_provenance.md": "Nguồn và quy trình xử lý dữ liệu đối chiếu",
+    **{f"data/processed/{name}.csv": "Dữ liệu đã xử lý để chạy lại"
+       for name in ("papi_panel_63_2011_2024", "papi_panel_scale_metadata",
+                    "external_master_63_2011_2024", "external_poverty_63", "external_pci_63_full",
+                    "external_gso_population_63_full", "external_gso_grdp_63", "external_gso_waste_63",
+                    "external_odm_health_63", "external_worldbank_vnm")},
+    **{f"models/{name}": "Mô hình, cấu hình và hướng dẫn sử dụng"
+       for name in ("predict_config.json", "sting_predict_model.pkl", "sting_predict_scaler.json",
+                    "sup_ridge.joblib", "sup_rf.joblib", "sup_classifier.joblib", "README.md")},
+    **{f"results/{name}": "Bảng đối chiếu kết quả thực nghiệm" for name in FINAL_RESULTS},
+    **{f"results/figs/{name}.png": "Hình dùng trong notebook hoặc tài liệu đối chiếu" for name in FINAL_FIGURES},
+    "reports/panel_lock.md": "Phiên bản và mã kiểm tra bảng PAPI",
+    "reports/crosscheck_mendeley.md": "Kết quả đối chiếu PAPI với Mendeley",
+    "reports/model_deep_dive.md": "Minh chứng các phép phân tích bổ sung trong báo cáo",
+}
+PACKAGE_FILES = {"midterm": MIDTERM_FILES, "final": FINAL_FILES}
+RAW_REFERENCES = {
+    "data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf": "Báo cáo PAPI 2024 (bản tiếng Việt)",
+    "data/raw/mendeley/mendeley_replication.zip":
+        "Dữ liệu và mã đối chiếu của Le và cộng sự (2026), Mendeley Data, DOI 10.17632/wbk42j9wc8.1, CC BY 4.0",
+}
+MIDTERM_REQUIREMENTS = (
+    "numpy", "pandas", "scikit-learn", "matplotlib", "scipy", "joblib",
+    "jupyter", "nbformat", "nbconvert", "ipykernel",
+)
+FINAL_REQUIREMENTS = (*MIDTERM_REQUIREMENTS, "openpyxl", "tabulate")
 
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def package_files(root: Path, milestone: str) -> dict[str, str]:
-    """An explicit dependency/role map; no recursive copy of the repository."""
-    files = {}
+def archive_path(relative: str, milestone: str) -> str:
+    return VISIBLE[milestone].get(relative, f"{SUPPORT}/{relative}")
 
-    def add(relative: str, role: str) -> None:
+
+def package_files(root: Path, milestone: str) -> dict[str, str]:
+    """Check the source files from the fixed catalog for each submission."""
+    files = PACKAGE_FILES[milestone].copy()
+    if all((root / relative).is_file() for relative in RAW_REFERENCES):
+        files.update(RAW_REFERENCES)
+    for relative in files:
         if not (root / relative).is_file():
             raise FileNotFoundError(f"Thiếu dependency: {relative}")
-        files[relative] = role
-
-    for relative in ("LICENSE", "CITATION.cff", "requirements.txt", "pytest.ini", "src/sting.py"):
-        add(relative, "environment / algorithm / attribution")
-    for name in SCRIPTS:
-        add(f"scripts/{name}.py", "analysis and canonical generators")
-    for name in ("test_sting", "test_artifact_reproduction", "test_notebook_checks"):
-        add(f"tests/{name}.py", "algorithm / frozen-label / execution regressions")
-    for name in (*OLD_FILES.values(), *NEW_FILES.values(), "PROVENANCE.md"):
-        add(f"data/raw/papi/{name}", "primary source / byte manifest")
-    replication = "data/raw/mendeley/Replication_package/data"
-    for name in ("province_crosswalk_63.csv", "centroids_63_naturalearth.csv",
-                 "papi_panel_63_2011_2022.csv", "SHA256_PAPI_ORIGINALS.txt"):
-        add(f"{replication}/{name}", "identity / crosscheck / map coordinates")
-    for relative in ("data/raw/mendeley/PROVENANCE.md", "data/raw/boundaries/diaphantinh.geojson",
-                     "data/raw/boundaries/PROVENANCE.md", "data/processed/external_provenance.md"):
-        add(relative, "source attribution / map rebuild")
-    for source in ("pci", "gso", "odmekong", "worldbank"):
-        add(f"data/raw/{source}/PROVENANCE.md", "external source attribution; bulky originals kept in repository")
-    for name in ("papi_panel_63_2011_2024", "papi_panel_scale_metadata", "external_master_63_2011_2024", "external_poverty_63",
-                 "external_pci_63_full", "external_gso_population_63_full", "external_gso_grdp_63",
-                 "external_odm_health_63", "external_worldbank_vnm"):
-        add(f"data/processed/{name}.csv", "primary data or independent validation input")
-    for name in ("predict_config.json", "sting_predict_model.pkl", "sting_predict_scaler.json",
-                 "sup_ridge.joblib", "sup_rf.joblib", "sup_classifier.joblib", "README.md"):
-        add(f"models/{name}", "frozen fitted models / feature contract")
-    # Small scientific tables/notes support the published analyses, not web probes.
-    for path in sorted((root / "results").iterdir()):
-        if path.is_file() and path.suffix in (".csv", ".md", ".json"):
-            add(path.relative_to(root).as_posix(), "published analysis tables / limitations")
-    figures = sorted((root / "results/figs").glob("*.png")) if milestone == "final" else [
-        root / f"results/figs/{name}.png" for name in MIDTERM_FIGURES
-    ]
-    for path in figures:
-        add(path.relative_to(root).as_posix(), "notebook / report / slide figure")
-    add("reports/panel_lock.md", "data provenance and verification")
-    _, notebook = PACKAGES[milestone]
-    add(f"notebooks/{notebook}", "graded executed notebook")
-    if milestone == "midterm":
-        for name in ("notebooks/gen_submission_demo", "deliverables/build_slides_10"):
-            add(f"scripts/{name}.py", "midterm file generator")
-        add("slides/submission.pptx", "graded deck, ten slides")
-    else:
-        for name in ("notebooks/gen_final_analysis", "deliverables/build_report",
-                     "deliverables/report_style", "deliverables/build_slides"):
-            add(f"scripts/{name}.py", "final file generator")
-        add("assets/report-cover.xml", "report cover template")
-        add("reports/final_report.docx", "graded report, current seven-chapter format")
-        for name in ("crosscheck_mendeley", "model_deep_dive"):
-            add(f"reports/{name}.md", "report generator input")
-        add("slides/final.pptx", "optional final oral-defense slides")
     return files
 
 
-def instructions(milestone: str) -> str:
+def instructions(milestone: str, *, include_raw_references: bool = False) -> str:
     _, notebook = PACKAGES[milestone]
-    document = "slides/submission.pptx" if milestone == "midterm" else "reports/final_report.docx"
-    optional = "\n- Slide vấn đáp tùy chọn  slides/final.pptx" if milestone == "final" else ""
-    appendix = (
-        "\nCác lệnh tái tạo toàn bộ đồ án ở phụ lục báo cáo chạy từ kho mã đầy đủ.\n"
-        if milestone == "final" else ""
-    )
-    return f"""NHÓM 15 · HỌC MÁY · PHÂN CỤM STING TRÊN PAPI
+    raw_references = ""
+    if include_raw_references:
+        raw_references = "\nTài liệu nguồn kèm theo\n\n" + "".join(
+            f"- {SUPPORT}/{path} — {description}.\n"
+            for path, description in RAW_REFERENCES.items()
+        )
+    if milestone == "midterm":
+        return f"""BÁO CÁO GIỮA KỲ MÔN HỌC MÁY
+Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới (Grid-based clustering)
 Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)
 
-FILE NỘP
-- {document}
-- notebooks/{notebook}{optional}
+Kính gửi Thầy Lê Minh Tân,
 
-CHẠY LẠI NOTEBOOK
-Notebook đã lưu kết quả. Để chạy lại, giải nén toàn bộ ZIP, giữ cấu trúc
-thư mục và mở terminal ở thư mục chứa requirements.txt. Dùng Python 3.14.
+Nhóm 15 xin gửi bài báo cáo giữa kỳ về thuật toán phân cụm dựa trên lưới STING
+và ứng dụng trên dữ liệu PAPI giai đoạn 2011–2024. Bài nộp gồm hai tệp sau.
 
-python -m pip install -r requirements.txt
-python -m nbconvert --to notebook --execute --inplace notebooks/{notebook}
+- {MIDTERM_NAME}.pptx — Bản trình chiếu.
+- {notebook} — Notebook Jupyter có mã và kết quả thực nghiệm đã lưu.
 
-KIỂM TRA DỮ LIỆU VÀ THUẬT TOÁN
+Thư mục {SUPPORT}/ chứa mã nguồn STING, bảng PAPI đã tiền xử lý
+(882 quan sát tỉnh–năm, 41 cột), 14 bảng tính gốc và thông tin nguồn dữ liệu.
+{raw_references}
+Xem và chạy lại notebook
+
+Thầy có thể mở notebook để xem kết quả đã lưu. Để chạy lại, vui lòng giải nén
+toàn bộ gói và mở notebook cạnh thư mục {SUPPORT}/. Trong Jupyter,
+chọn Restart Kernel rồi Run All Cells để chạy các ô từ trên xuống.
+
+Nếu chạy bằng dòng lệnh, mở terminal tại thư mục vừa giải nén. Môi trường
+đã kiểm tra dùng Python 3.14.
+
+python -m pip install -r {SUPPORT}/requirements.txt
+python -m nbconvert --to notebook --execute {notebook} --output {MIDTERM_NAME}_chay_lai
+
+Trân trọng,
+Nhóm 15
+"""
+    return f"""BÁO CÁO CUỐI KỲ MÔN HỌC MÁY
+Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới (Grid-based clustering)
+Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)
+
+Kính gửi Thầy Lê Minh Tân,
+
+Nhóm 15 xin gửi bài báo cáo cuối kỳ về phương pháp STING và ứng dụng
+trên dữ liệu PAPI giai đoạn 2011–2024. Gói bài nộp gồm các tệp sau.
+
+- {FINAL_NAME}.docx — Báo cáo nghiên cứu.
+- {notebook} — Notebook Jupyter có mã và kết quả thực nghiệm đã lưu.
+- {FINAL_NAME}.pptx — Slide dùng khi vấn đáp.
+
+Trong báo cáo, Chương 3 trình bày dữ liệu và tiền xử lý. Chương 4 trình bày
+cấu hình STING và quy trình đánh giá. Chương 5 trình bày kết quả phân cụm,
+đối chứng và gán cụm năm 2024.
+
+Thư mục {SUPPORT}/ chứa mã nguồn STING, bảng PAPI đã tiền xử lý
+(882 quan sát tỉnh–năm, 41 cột), 14 bảng tính gốc, mô hình và kết quả
+đối chiếu. Hồ sơ nguồn dữ liệu nằm trong data/raw/ và mã SHA-256 của
+từng tệp nằm trong MANIFEST.json của thư mục này.
+{raw_references}
+Xem và chạy lại notebook
+
+Thầy có thể mở notebook để xem kết quả đã lưu. Để chạy lại, giải nén toàn
+bộ gói và mở notebook cạnh thư mục {SUPPORT}/. Trong Jupyter, chọn
+Restart Kernel rồi Run All Cells để chạy các ô theo thứ tự.
+
+Nếu dùng dòng lệnh, mở terminal tại thư mục vừa giải nén. Môi trường
+đã kiểm tra dùng Python 3.14.
+
+python -m pip install -r {SUPPORT}/requirements.txt
+python -m nbconvert --to notebook --execute {notebook} --output {FINAL_NAME}_chay_lai
+
+Dựng lại panel từ 14 bảng tính PAPI gốc
+
+Sau khi cài thư viện, chạy các lệnh sau từ thư mục vừa giải nén.
+
+cd {SUPPORT}
+python scripts/data/build_panel.py
+python scripts/data/build_scale_metadata.py
 python scripts/data/check_data.py
-python -m pytest tests/test_sting.py tests/test_artifact_reproduction.py tests/test_notebook_checks.py -q
 
-Panel PAPI 2011–2024 có 882 dòng, 41 cột và 14 workbook gốc đi kèm.
-Năm 2024 có 61/63 tỉnh đủ hai chỉ tiêu phân cụm. Có thể dựng lại panel
-từ workbook bằng python scripts/data/build_panel.py.
+Các lệnh trên tạo bảng PAPI 882 × 41 và bảng mô tả thang đo. Cũng tại
+thư mục {SUPPORT}/, thầy có thể dựng bảng ghép 882 × 59 và chạy kiểm tra
+tiền xử lý, đối chiếu dữ liệu bằng các lệnh sau.
 
-Thông tin nguồn và giấy phép nằm trong data/raw/*/PROVENANCE.md và
-data/processed/external_provenance.md. MANIFEST.json ghi danh mục và mã
-SHA-256 các tệp. Địa chỉ kho mã nằm trong CITATION.cff.
-{appendix}"""
+python scripts/data/build_external_master.py
+python scripts/data/preprocessing_audit.py
+python scripts/data/crosscheck_mendeley.py
+
+Phụ lục A trình bày thêm các lệnh tái lập từ kho mã đầy đủ của dự án.
+
+Trân trọng,
+Nhóm 15
+"""
+
+
+def verify_report_fields(data: bytes) -> None:
+    """Reject a draft DOCX whose Word table-of-contents fields are still empty."""
+    word = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+    with zipfile.ZipFile(io.BytesIO(data)) as docx:
+        document = ElementTree.fromstring(docx.read("word/document.xml"))
+    entries = {"TOC1": [], "TableofFigures": []}
+    for paragraph in document.findall(".//w:p", word):
+        style = paragraph.find("w:pPr/w:pStyle", word)
+        name = style.get(f"{{{word['w']}}}val") if style is not None else None
+        if name in entries:
+            content = "".join(t.text or "" for t in paragraph.findall(".//w:t", word))
+            entries[name].append(content)
+    chapters = {m.group(1) for line in entries["TOC1"] if (m := re.match(r"CHƯƠNG (\d+)\.", line))}
+    if chapters != set("1234567") or any(
+        sum(line.startswith(label + " ") for line in entries["TableofFigures"]) != 12
+        for label in ("Hình", "Bảng")
+    ):
+        raise ValueError("Mục lục hoặc danh mục Word chưa đầy đủ; chạy update_report_fields.py bằng Word.")
 
 
 def build_package(root: Path, output: Path, milestone: str, *, report_source: Path | None = None) -> Path:
     name, notebook = PACKAGES[milestone]
-    files = package_files(root, milestone)
+    sources = package_files(root, milestone)
     issues = notebook_issues(json.loads((root / "notebooks" / notebook).read_text(encoding="utf-8")))
     if issues:
         raise ValueError(f"{notebook}: " + "; ".join(issues))
-    payload = {p: (root / p).read_bytes() for p in files}
-    if milestone == "final" and report_source is not None:
-        # Preserve the graded filename when Word locks the report being viewed.
-        payload["reports/final_report.docx"] = report_source.read_bytes()
-    payload["HUONG_DAN.txt"] = instructions(milestone).encode("utf-8")
-    files["HUONG_DAN.txt"] = "submitted files and notebook run instructions"
+    files = {archive_path(p, milestone): role for p, role in sources.items()}
+    payload = {archive_path(p, milestone): (root / p).read_bytes() for p in sources}
+    requirements = archive_path("requirements.txt", milestone)
+    pins = {line.split("==", 1)[0]: line for line in payload[requirements].decode("utf-8").splitlines()
+            if "==" in line}
+    needed = MIDTERM_REQUIREMENTS if milestone == "midterm" else FINAL_REQUIREMENTS
+    payload[requirements] = ("\n".join(pins[p] for p in needed) + "\n").encode("utf-8")
+    if milestone == "final":
+        report = FINAL_VISIBLE["reports/final_report.docx"]
+        if report_source is not None:
+            # Preserve the graded filename when Word locks the report being viewed.
+            payload[report] = report_source.read_bytes()
+        verify_report_fields(payload[report])
+    payload["HUONG_DAN.txt"] = instructions(
+        milestone, include_raw_references=RAW_REFERENCES.keys() <= sources.keys()
+    ).encode("utf-8")
+    files["HUONG_DAN.txt"] = "Hướng dẫn mở và chạy lại bài nộp"
     manifest = {
         "schema_version": 1, "milestone": milestone, "root": name,
         "files": [{"path": p, "bytes": len(payload[p]), "sha256": sha256(payload[p]),
@@ -170,7 +309,9 @@ def build_package(root: Path, output: Path, milestone: str, *, report_source: Pa
     }
     if milestone == "final" and report_source is not None:
         manifest["report_source"] = report_source.name
-    payload["MANIFEST.json"] = (json.dumps(manifest, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+    payload[archive_path("MANIFEST.json", milestone)] = (
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n"
+    ).encode("utf-8")
     output.mkdir(parents=True, exist_ok=True)
     archive = output / f"{name}.zip"
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zipped:
@@ -191,6 +332,8 @@ def check_member(name: str) -> None:
 
 def verify_package(archive: Path, milestone: str) -> dict:
     name, notebook = PACKAGES[milestone]
+    notebook_path = archive_path(f"notebooks/{notebook}", milestone)
+    manifest_path = f"{name}/{archive_path('MANIFEST.json', milestone)}"
     with zipfile.ZipFile(archive) as zipped:
         names = zipped.namelist()
         if len(names) != len(set(p.casefold() for p in names)):
@@ -199,24 +342,25 @@ def verify_package(archive: Path, milestone: str) -> dict:
             check_member(info.filename)
             if stat.S_ISLNK(info.external_attr >> 16):
                 raise ValueError("Không chấp nhận symlink trong ZIP")
-        manifest = json.loads(zipped.read(f"{name}/MANIFEST.json"))
+        manifest = json.loads(zipped.read(manifest_path))
         if manifest.get("milestone") != milestone or manifest.get("root") != name:
             raise ValueError("Manifest không khớp mốc nộp")
         rows = manifest["files"]
-        expected = {f"{name}/{r['path']}" for r in rows} | {f"{name}/MANIFEST.json"}
+        expected = {f"{name}/{r['path']}" for r in rows} | {manifest_path}
         if len(expected) != len(rows) + 1 or set(names) != expected:
             raise ValueError("ZIP thiếu/thừa file so với manifest")
-        required = {"src/sting.py", f"notebooks/{notebook}", "requirements.txt",
-                    "data/processed/papi_panel_63_2011_2024.csv",
-                    "data/processed/external_master_63_2011_2024.csv", "models/predict_config.json"}
-        required.add("slides/submission.pptx" if milestone == "midterm" else "reports/final_report.docx")
-        if not {f"{name}/{p}" for p in required} <= expected:
-            raise ValueError("ZIP thiếu sản phẩm hoặc dependency bắt buộc")
+        delivery = {f"{name}/{archive_path(p, milestone)}" for p in PACKAGE_FILES[milestone]}
+        delivery.update((manifest_path, f"{name}/HUONG_DAN.txt"))
+        raw_references = {f"{name}/{archive_path(p, milestone)}" for p in RAW_REFERENCES}
+        if expected not in (delivery, delivery | raw_references):
+            raise ValueError("ZIP lệch danh mục tệp nộp")
+        if milestone == "final":
+            verify_report_fields(zipped.read(f"{name}/{FINAL_VISIBLE['reports/final_report.docx']}"))
         for row in rows:
             data = zipped.read(f"{name}/{row['path']}")
             if len(data) != row["bytes"] or sha256(data) != row["sha256"]:
                 raise ValueError(f"Checksum sai: {row['path']}")
-        issues = notebook_issues(json.loads(zipped.read(f"{name}/notebooks/{notebook}")))
+        issues = notebook_issues(json.loads(zipped.read(f"{name}/{notebook_path}")))
         if issues:
             raise ValueError("Notebook trong ZIP chưa hoàn tất: " + "; ".join(issues))
         return manifest
@@ -227,18 +371,16 @@ def replay_package(archive: Path, milestone: str, output: Path) -> dict:
     import nbformat
 
     verify_package(archive, milestone)  # validates every member before extraction
-    scratch = ROOT / "plans" / "submission-package-replay"
-    scratch.mkdir(parents=True, exist_ok=True)
-    temporary = tempfile.TemporaryDirectory(prefix="kiểm tra gói ", dir=scratch)
-    temporary_path = Path(temporary.name).resolve()
-    if not temporary_path.is_relative_to(scratch.resolve()):
-        raise ValueError("Scratch ngoài vùng cho phép")
-    try:
+    scratch = Path(tempfile.gettempdir()).resolve()
+    with tempfile.TemporaryDirectory(prefix="kiểm tra gói ", dir=scratch) as temporary:
+        temporary_path = Path(temporary).resolve()
+        if temporary_path.parent != scratch:
+            raise ValueError("Scratch ngoài vùng cho phép")
         name, notebook = PACKAGES[milestone]
         with zipfile.ZipFile(archive) as zipped:
             zipped.extractall(temporary_path)
         package = temporary_path / name
-        path = package / "notebooks" / notebook
+        path = package / archive_path(f"notebooks/{notebook}", milestone)
         nb = nbformat.read(path, as_version=4)
         guard = f'''import os, sys
 from pathlib import Path
@@ -275,8 +417,8 @@ print("Isolation guard enabled")
             str(replay_input), "--output", "isolated-replayed.ipynb",
             "--ExecutePreprocessor.timeout=300",
         ], cwd=package, env=env, capture_output=True, text=True, encoding="utf-8", timeout=600)
-        (output / f"replay-{milestone}.log").write_text(proc.stdout + proc.stderr, encoding="utf-8")
         if proc.returncode:
+            (output / f"replay-{milestone}.log").write_text(proc.stdout + proc.stderr, encoding="utf-8")
             raise RuntimeError(f"Replay {milestone} thất bại; xem replay-{milestone}.log")
         executed = nbformat.read(path.with_name("isolated-replayed.ipynb"), as_version=4)
         issues = notebook_issues(executed)
@@ -286,15 +428,12 @@ print("Isolation guard enabled")
                 "code_cells": sum(c.cell_type == "code" for c in executed.cells),
                 "isolation_guard": True, "python": sys.version.split()[0],
                 "launcher_messages": bool(proc.stderr.strip())}
-    finally:
-        # temporary_path was resolved and verified inside the task scratch root.
-        temporary.cleanup()
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=OUTPUT)
-    parser.add_argument("--report-source", type=Path, help="final DOCX copy to package under reports/final_report.docx")
+    parser.add_argument("--report-source", type=Path, help="final DOCX copy to package under the graded filename")
     parser.add_argument("--verify", action="store_true", help="verify existing ZIPs and replay both notebooks")
     args = parser.parse_args()
     args.output_dir = args.output_dir.resolve()

@@ -13,12 +13,23 @@
   Nhom15_Day4_TienXuLy_PAPI.ipynb  Bài thực hành tiền xử lý
   data, models, scripts và requirements.txt đi kèm để chạy lại.
 
-Hai ZIP Nhom15_GiuaKy_STING_PAPI.zip và Nhom15_CuoiKy_STING_PAPI.zip
-chứa mã và dữ liệu theo đúng cấu trúc để chạy notebook. Giải nén toàn bộ
-khi chuyển sang máy khác. Cài môi trường bằng requirements.txt, sau đó
-mở notebook trong thư mục notebooks của bản giải nén.
+Gói Nhom15_GiuaKy_STING_PAPI.zip đặt bản trình chiếu và notebook ngay
+ở cấp đầu của thư mục sau khi giải nén. Thư mục tai_lieu_kem chứa mã nguồn,
+dữ liệu và danh sách thư viện cần cài. Hướng dẫn chi tiết nằm trong
+HUONG_DAN.txt của gói giữa kỳ.
+
+Giải nén toàn bộ gói Nhom15_CuoiKy_STING_PAPI.zip để mở báo cáo Word,
+notebook và slide vấn đáp ở cấp đầu của thư mục. Xem HUONG_DAN.txt
+trong gói để chạy lại notebook, dựng bảng PAPI từ Excel gốc và ghép
+các nguồn đối chiếu bằng mã trong tai_lieu_kem/.
 Để chạy Day 4 riêng trên máy khác, sao chép cả thư mục 03-day-4, cài
 requirements.txt trong thư mục đó rồi mở notebook cùng cấp.
+
+Chạy trong VS Code
+
+Bấm tên kernel ở góc trên bên phải của notebook. Trong Python Environments,
+chọn Python 3.14 đã cài thư viện theo hướng dẫn của gói. Sau đó chọn
+Restart Kernel rồi Run All để chạy từ ô đầu.
 
 Các file rời đã lưu kết quả, có thể đọc hoặc chiếu ngay.
 Bản học có giải thích nằm riêng trong thư mục study của dự án.

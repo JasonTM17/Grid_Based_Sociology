@@ -1,306 +1,212 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<cover xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:p>
+<?xml version='1.0' encoding='utf-8'?>
+<w:cover xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" w14:paraId="42D6DBB7" w14:textId="77777777">
     <w:pPr>
-      <w:pStyle w:val="Title"/>
-      <w:spacing w:before="120" w:after="40"/>
+      <w:spacing w:after="60"/>
       <w:jc w:val="center"/>
       <w:rPr>
-        <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
-        <w:szCs w:val="40"/>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
       </w:rPr>
     </w:pPr>
     <w:r>
       <w:rPr>
-        <w:rFonts w:cs="Times New Roman" w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
         <w:b/>
-        <w:color w:val="000000"/>
-        <w:sz w:val="40"/>
-        <w:szCs w:val="40"/>
-        <w:lang w:val="vi-VN"/>
+        <w:sz w:val="28"/>
       </w:rPr>
-      <w:t>BÁO CÁO KẾT QUẢ DỰ ÁN</w:t>
+      <w:t>TRƯỜNG ĐẠI HỌC CÔNG NGHỆ KỸ THUẬT TP HCM</w:t>
     </w:r>
   </w:p>
-  <w:p>
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" w14:paraId="47B7D83E" w14:textId="77777777">
     <w:pPr>
-      <w:spacing w:after="160"/>
+      <w:spacing w:after="400"/>
       <w:jc w:val="center"/>
       <w:rPr>
-        <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
-        <w:sz w:val="26"/>
-        <w:szCs w:val="26"/>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
       </w:rPr>
     </w:pPr>
     <w:r>
       <w:rPr>
-        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+        <w:b/>
+        <w:sz w:val="28"/>
+      </w:rPr>
+      <w:t>KHOA CÔNG NGHỆ THÔNG TIN</w:t>
+    </w:r>
+  </w:p>
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" w14:paraId="72EF976A" w14:textId="77777777">
+    <w:pPr>
+      <w:spacing w:after="440"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+        <w:noProof/>
+      </w:rPr>
+      <w:drawing>
+        <wp:inline distT="0" distB="0" distL="0" distR="0" wp14:anchorId="1E6C251F" wp14:editId="35D8E769">
+          <wp:extent cx="1737360" cy="1954530"/>
+          <wp:effectExtent l="0" t="0" r="0" b="0"/>
+          <wp:docPr id="1930147789" name="Picture 1" descr="Logo Trường Đại học Sư phạm Kỹ thuật Thành phố Hồ Chí Minh" title="Logo HCM-UTE"/>
+          <wp:cNvGraphicFramePr>
+            <a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/>
+          </wp:cNvGraphicFramePr>
+          <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+            <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+              <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:nvPicPr>
+                  <pic:cNvPr id="0" name="image1.png"/>
+                  <pic:cNvPicPr/>
+                </pic:nvPicPr>
+                <pic:blipFill>
+                  <a:blip r:embed="rId8"/>
+                  <a:stretch>
+                    <a:fillRect/>
+                  </a:stretch>
+                </pic:blipFill>
+                <pic:spPr>
+                  <a:xfrm>
+                    <a:off x="0" y="0"/>
+                    <a:ext cx="1737360" cy="1954530"/>
+                  </a:xfrm>
+                  <a:prstGeom prst="rect">
+                    <a:avLst/>
+                  </a:prstGeom>
+                </pic:spPr>
+              </pic:pic>
+            </a:graphicData>
+          </a:graphic>
+        </wp:inline>
+      </w:drawing>
+    </w:r>
+  </w:p>
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" w14:paraId="6C90B5FD" w14:textId="77777777">
+    <w:pPr>
+      <w:spacing w:after="600"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+        <w:b/>
+        <w:sz w:val="28"/>
+      </w:rPr>
+      <w:t>MÔN HỌC: HỌC MÁY</w:t>
+    </w:r>
+  </w:p>
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" w14:paraId="06A2AE1D" w14:textId="77777777">
+    <w:pPr>
+      <w:spacing w:after="100"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+        <w:b/>
+        <w:sz w:val="34"/>
+      </w:rPr>
+      <w:t>BÁO CÁO BÀI TẬP LỚN CUỐI KỲ</w:t>
+    </w:r>
+  </w:p>
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" w14:paraId="29FE441C" w14:textId="77777777">
+    <w:pPr>
+      <w:spacing w:after="40"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+        <w:b/>
+        <w:sz w:val="30"/>
+      </w:rPr>
+      <w:t>PHÂN CỤM DỰA TRÊN LƯỚI STING</w:t>
+    </w:r>
+  </w:p>
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" w14:paraId="1A87BB25" w14:textId="77777777">
+    <w:pPr>
+      <w:spacing w:after="480"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+        <w:b/>
+        <w:sz w:val="30"/>
+      </w:rPr>
+      <w:t>PHÂN TÍCH DỮ LIỆU PAPI GIAI ĐOẠN 2011–2024</w:t>
+    </w:r>
+  </w:p>
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" w14:paraId="64232D2A" w14:textId="77777777">
+    <w:pPr>
+      <w:spacing w:after="200"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+        <w:b/>
+        <w:sz w:val="28"/>
+      </w:rPr>
+      <w:t>Giảng viên hướng dẫn: ThS. Lê Minh Tân</w:t>
+    </w:r>
+  </w:p>
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" w14:paraId="3488A356" w14:textId="77777777">
+    <w:pPr>
+      <w:spacing w:after="200"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+        <w:b/>
+        <w:sz w:val="28"/>
+      </w:rPr>
+      <w:t>Mã học phần: MALE431984 · Nhóm 15</w:t>
+    </w:r>
+  </w:p>
+  <w:p xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" w14:paraId="78EEF67A" w14:textId="77777777">
+    <w:pPr>
+      <w:framePr w:w="9500" w:h="400" w:wrap="none" w:vAnchor="page" w:hAnchor="page" w:xAlign="center" w:y="14900"/>
+      <w:spacing w:after="0" w:line="240" w:lineRule="auto"/>
+      <w:jc w:val="center"/>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+      </w:rPr>
+    </w:pPr>
+    <w:r>
+      <w:rPr>
+        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
         <w:i/>
-        <w:color w:val="000000"/>
-        <w:sz w:val="24"/>
-        <w:szCs w:val="24"/>
-        <w:lang w:val="vi-VN"/>
       </w:rPr>
-      <w:t>Học phần: HỌC MÁY (MALE431984) — Báo cáo cuối kỳ</w:t>
-      <w:br/>
-      <w:t>Đề tài: ỨNG DỤNG THUẬT TOÁN PHÂN CỤM DỰA TRÊN LƯỚI STING ĐỂ PHÂN TÍCH ĐẶC ĐIỂM VÀ SỰ BIẾN ĐỘNG CỦA CÁC CHỈ SỐ QUẢN TRỊ, HÀNH CHÍNH CÔNG TẠI 63 TỈNH, THÀNH PHỐ VIỆT NAM DỰA TRÊN DỮ LIỆU PAPI GIAI ĐOẠN 2011–2024</w:t>
-      <w:br/>
-      <w:t>Title: APPLICATION OF STING GRID-BASED CLUSTERING TO ANALYZE GOVERNANCE AND PUBLIC ADMINISTRATION PERFORMANCE PATTERNS AND TEMPORAL CHANGES ACROSS 63 VIETNAMESE PROVINCES USING PAPI DATA (2011–2024)</w:t>
+      <w:t>Thành phố Hồ Chí Minh, tháng 11 năm 2026.</w:t>
     </w:r>
   </w:p>
-  <w:tbl>
-    <w:tblPr>
-      <w:tblW w:w="9792" w:type="dxa"/>
-      <w:jc w:val="center"/>
-      <w:tblBorders>
-        <w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/>
-        <w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/>
-        <w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/>
-        <w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/>
-      </w:tblBorders>
-      <w:tblLayout w:type="fixed"/>
-      <w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/>
-    </w:tblPr>
-    <w:tblGrid>
-      <w:gridCol w:w="4896"/>
-      <w:gridCol w:w="4896"/>
-    </w:tblGrid>
-    <w:tr>
-      <w:trPr>
-        <w:cantSplit/>
-        <w:jc w:val="center"/>
-      </w:trPr>
-      <w:tc>
-        <w:tcPr>
-          <w:tcW w:w="4896" w:type="dxa"/>
-          <w:tcMar>
-            <w:top w:w="30" w:type="dxa"/>
-            <w:left w:w="60" w:type="dxa"/>
-            <w:bottom w:w="30" w:type="dxa"/>
-            <w:right w:w="60" w:type="dxa"/>
-          </w:tcMar>
-          <w:vAlign w:val="center"/>
-        </w:tcPr>
-        <w:p>
-          <w:pPr>
-            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
-            <w:rPr>
-              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
-              <w:sz w:val="26"/>
-              <w:szCs w:val="26"/>
-            </w:rPr>
-          </w:pPr>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-              <w:color w:val="000000"/>
-              <w:sz w:val="24"/>
-              <w:szCs w:val="24"/>
-              <w:lang w:val="vi-VN"/>
-            </w:rPr>
-            <w:t>Mã nhóm: 15</w:t>
-          </w:r>
-        </w:p>
-      </w:tc>
-      <w:tc>
-        <w:tcPr>
-          <w:tcW w:w="4896" w:type="dxa"/>
-          <w:tcMar>
-            <w:top w:w="30" w:type="dxa"/>
-            <w:left w:w="60" w:type="dxa"/>
-            <w:bottom w:w="30" w:type="dxa"/>
-            <w:right w:w="60" w:type="dxa"/>
-          </w:tcMar>
-          <w:vAlign w:val="center"/>
-        </w:tcPr>
-        <w:p>
-          <w:pPr>
-            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
-            <w:rPr>
-              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
-              <w:sz w:val="26"/>
-              <w:szCs w:val="26"/>
-              <w:lang w:val="vi-VN"/>
-            </w:rPr>
-          </w:pPr>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-              <w:color w:val="000000"/>
-              <w:sz w:val="24"/>
-              <w:szCs w:val="24"/>
-              <w:lang w:val="vi-VN"/>
-            </w:rPr>
-            <w:t>Số lượng thành viên: 2</w:t>
-          </w:r>
-        </w:p>
-      </w:tc>
-    </w:tr>
-    <w:tr>
-      <w:trPr>
-        <w:cantSplit/>
-        <w:jc w:val="center"/>
-      </w:trPr>
-      <w:tc>
-        <w:tcPr>
-          <w:tcW w:w="4896" w:type="dxa"/>
-          <w:tcMar>
-            <w:top w:w="30" w:type="dxa"/>
-            <w:left w:w="60" w:type="dxa"/>
-            <w:bottom w:w="30" w:type="dxa"/>
-            <w:right w:w="60" w:type="dxa"/>
-          </w:tcMar>
-          <w:vAlign w:val="center"/>
-        </w:tcPr>
-        <w:p>
-          <w:pPr>
-            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
-            <w:rPr>
-              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
-              <w:sz w:val="26"/>
-              <w:szCs w:val="26"/>
-              <w:lang w:val="vi-VN"/>
-            </w:rPr>
-          </w:pPr>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-              <w:color w:val="000000"/>
-              <w:sz w:val="24"/>
-              <w:szCs w:val="24"/>
-              <w:lang w:val="vi-VN"/>
-            </w:rPr>
-            <w:t>Giảng viên hướng dẫn: ThS. Lê Minh Tân</w:t>
-          </w:r>
-        </w:p>
-      </w:tc>
-      <w:tc>
-        <w:tcPr>
-          <w:tcW w:w="4896" w:type="dxa"/>
-          <w:tcMar>
-            <w:top w:w="30" w:type="dxa"/>
-            <w:left w:w="60" w:type="dxa"/>
-            <w:bottom w:w="30" w:type="dxa"/>
-            <w:right w:w="60" w:type="dxa"/>
-          </w:tcMar>
-          <w:vAlign w:val="center"/>
-        </w:tcPr>
-        <w:p>
-          <w:pPr>
-            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
-            <w:rPr>
-              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
-              <w:sz w:val="26"/>
-              <w:szCs w:val="26"/>
-            </w:rPr>
-          </w:pPr>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-              <w:color w:val="000000"/>
-              <w:sz w:val="24"/>
-              <w:szCs w:val="24"/>
-              <w:lang w:val="vi-VN"/>
-            </w:rPr>
-            <w:t>Chủ đề 6: Grid-based (clustering)</w:t>
-          </w:r>
-        </w:p>
-      </w:tc>
-    </w:tr>
-    <w:tr>
-      <w:trPr>
-        <w:cantSplit/>
-        <w:jc w:val="center"/>
-      </w:trPr>
-      <w:tc>
-        <w:tcPr>
-          <w:tcW w:w="4896" w:type="dxa"/>
-          <w:tcMar>
-            <w:top w:w="30" w:type="dxa"/>
-            <w:left w:w="60" w:type="dxa"/>
-            <w:bottom w:w="30" w:type="dxa"/>
-            <w:right w:w="60" w:type="dxa"/>
-          </w:tcMar>
-          <w:vAlign w:val="center"/>
-        </w:tcPr>
-        <w:p>
-          <w:pPr>
-            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
-            <w:rPr>
-              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
-              <w:sz w:val="26"/>
-              <w:szCs w:val="26"/>
-            </w:rPr>
-          </w:pPr>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-              <w:color w:val="000000"/>
-              <w:sz w:val="24"/>
-              <w:szCs w:val="24"/>
-              <w:lang w:val="vi-VN"/>
-            </w:rPr>
-            <w:t>Nguyễn Tiến Sơn</w:t>
-            <w:br/>
-            <w:t>MSSV: 24110054</w:t>
-          </w:r>
-        </w:p>
-      </w:tc>
-      <w:tc>
-        <w:tcPr>
-          <w:tcW w:w="4896" w:type="dxa"/>
-          <w:tcMar>
-            <w:top w:w="30" w:type="dxa"/>
-            <w:left w:w="60" w:type="dxa"/>
-            <w:bottom w:w="30" w:type="dxa"/>
-            <w:right w:w="60" w:type="dxa"/>
-          </w:tcMar>
-          <w:vAlign w:val="center"/>
-        </w:tcPr>
-        <w:p>
-          <w:pPr>
-            <w:spacing w:before="20" w:after="20" w:line="252" w:lineRule="auto"/>
-            <w:rPr>
-              <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
-              <w:sz w:val="26"/>
-              <w:szCs w:val="26"/>
-            </w:rPr>
-          </w:pPr>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-              <w:color w:val="000000"/>
-              <w:sz w:val="24"/>
-              <w:szCs w:val="24"/>
-              <w:lang w:val="vi-VN"/>
-            </w:rPr>
-            <w:t>Trần Thị Ngọc Quyên</w:t>
-            <w:br/>
-            <w:t>MSSV: 24110051</w:t>
-          </w:r>
-        </w:p>
-      </w:tc>
-    </w:tr>
-  </w:tbl>
-  <w:p>
-    <w:pPr>
-      <w:spacing w:before="160" w:after="40"/>
-      <w:jc w:val="center"/>
-      <w:rPr>
-        <w:rFonts w:ascii="Times  New Roman" w:hAnsi="Times  New Roman"/>
-      </w:rPr>
-    </w:pPr>
-    <w:r>
-      <w:rPr>
-        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-        <w:color w:val="000000"/>
-        <w:sz w:val="24"/>
-      </w:rPr>
-      <w:t>TRƯỜNG ĐẠI HỌC CÔNG NGHỆ KỸ THUẬT TP. HỒ CHÍ MINH</w:t>
-      <w:br/>
-      <w:t>KHOA CÔNG NGHỆ THÔNG TIN · BỘ MÔN TRÍ TUỆ NHÂN TẠO</w:t>
-      <w:br/>
-      <w:t>Thành phố Hồ Chí Minh, tháng 11 năm 2026</w:t>
-    </w:r>
-  </w:p>
-</cover>
+  <w:pgBorders w:display="firstPage" w:offsetFrom="page">
+    <w:top w:val="double" w:sz="6" w:space="24" w:color="000000"/>
+    <w:left w:val="double" w:sz="6" w:space="24" w:color="000000"/>
+    <w:bottom w:val="double" w:sz="6" w:space="24" w:color="000000"/>
+    <w:right w:val="double" w:sz="6" w:space="24" w:color="000000"/>
+  </w:pgBorders>
+</w:cover>

@@ -53,7 +53,7 @@ Lead đã đọc **chỉ dạng text** file mẫu `Report-proj.docx` (sau đó f
 - **Lời cảm ơn**, **Mục lục**
 - Nội dung gợi ý **3 chương:** Chương 1 Lý thuyết liên quan (mục/tiểu mục cấp 3) · Chương 2 Mô tả hệ thống · Chương 3 Kết luận
 
-**Báo cáo hiện tại** giữ **7 chương** theo kế hoạch nhóm, kèm phần mở đầu và tài liệu tham khảo. Bìa và căn chỉnh theo file báo cáo tiến độ do người dùng gửi (`reports/report_format_notes.md`). Yêu cầu thu gọn còn ba chương vẫn chờ xác nhận từ GV (ghi `open-questions.md`).
+**Báo cáo hiện tại** giữ **7 chương** theo kế hoạch nhóm, kèm phần mở đầu và tài liệu tham khảo. Bìa và thể thức theo tệp `Báo cáo cuối kì .docx` do người dùng chọn ngày 18/11 (`reports/report_format_notes.md`). Dàn ý ba chương ghi nhận từ mẫu GV là đề cương tham chiếu. Xem `open-questions.md`.
 
 _File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản sao slide/mẫu có thể để local tại `data/raw/course/` — cũng không commit._
 
@@ -62,7 +62,7 @@ _File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản 
 | Mốc | Yêu cầu đề | Sản phẩm dự kiến | Trạng thái |
 |---|---|---|---|
 | Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (PPTX) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (10 slide) + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch) | Sẵn sàng kỹ thuật (smoke + test) — rehearsal: con người |
-| Cuối kỳ | Thi vấn đáp trực tiếp, nộp DOCX + notebook, PPTX tùy chọn, dataset ≥500×10 | `reports/final_report.docx` và bản rời `submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx`, `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` và `slides/final.pptx` | Báo cáo đã kiểm tra từ bản xuất Word 35 trang. Còn lịch luyện vấn đáp của nhóm. |
+| Cuối kỳ | Thi vấn đáp trực tiếp, nộp DOCX + notebook, PPTX tùy chọn, dataset ≥500×10 | `reports/final_report.docx` và bản rời `submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx`, `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` và `slides/final.pptx` | Báo cáo 45 trang đã kiểm tra trong Word, notebook đã chạy từ ZIP. Còn lịch luyện vấn đáp của nhóm. |
 
 ## Quyết định cần chốt (hỏi GV — xem `open-questions.md`)
 

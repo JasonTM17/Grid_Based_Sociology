@@ -1,51 +1,31 @@
-# Định dạng báo cáo theo mẫu người dùng gửi ngày16/11/2026
+# Định dạng báo cáo cuối kỳ theo mẫu ngày 18/11/2026
 
-Nguồn: `File báo cáo tiến độ dự án nhóm.docx` của môn khác; chỉ dùng làm
-tham chiếu trình bày. Không lấy nội dung WEB, nhóm13, phân công, cam kết hay
-rubric tự chấm vào bài Học máy. Mẫu gốc giữ nguyên, SHA256:
-`39803646dfd0aa0050926bd5fe27d4c9478771039eecfa683120686e844aca5c`.
+Mẫu trình bày là `Báo cáo cuối kì .docx` do người dùng gửi, SHA-256
+`c10f9b2c8dfe456283374a2b99ce402ebe877a9bd38ba4448b478f295ed28313`.
+Bản Học máy dùng thông tin của Nhóm 15 và nội dung nghiên cứu STING trên PAPI.
 
-## Thông số đo trực tiếp từ DOCX
-
-| Thành phần | Mẫu và cách áp dụng |
+| Thành phần | Thể thức áp dụng |
 |---|---|
-| Khổ trang |A4 làm tròn11909×16834twips, khoảng21.006×29.693cm |
-| Lề |Trái/phải1080twips=1.905cm; trên/dưới1008twips=1.778cm |
-| Header/footer |Header1.27cm,footer0.8008cm; header trống, số trang PAGE giữa chân trang |
-| Thân bài |Times New Roman12pt, đen, giãn dòng1.1, sau đoạn6pt; căn trái, không thụt dòng đầu |
-| Tiêu đề đầu |20pt đậm, căn giữa; trước6pt/sau2pt |
-| Dòng học phần |12pt nghiêng, căn giữa, sau8pt |
-| Heading1 |14pt đậm, trước24pt |
-| Heading2/3 |12pt đậm, trước10pt |
-| Bảng thông tin |Hai cột, căn giữa bảng, viền đen0.5pt, không tô màu |
-| Đoạn trong ô |12pt; trước/sau1pt,giãn1.05; căn giữa theo chiều dọc |
-| Đệm ô |Trên/dưới30twips,trái/phải60twips |
+| Bìa | Khung đen hai nét, logo trường, tên trường và khoa, tên môn, đề tài, giảng viên, mã học phần và địa danh cuối trang |
+| Trang đầu | Nhóm thực hiện, tóm tắt, lời mở đầu, mục lục, danh mục chữ viết tắt, hình ảnh và bảng |
+| Khổ và lề | A4 11906 × 16838 twip, lề trái 2,5 cm, phải/trên/dưới 2 cm |
+| Thân bài | Times New Roman 13 pt, giãn dòng 1,5, căn đều hai lề, dòng đầu thụt 1,27 cm |
+| Tiêu đề | Trang đầu 20 pt, chương 16 pt, đề mục 14 pt, tiểu mục 12 pt |
+| Bảng và hình | Hàng tiêu đề bảng nền xám, chú thích đậm nghiêng 12 pt đặt dưới bảng hoặc hình |
+| Phân trang | Bảy chương chuyên môn. Số trang đặt giữa chân trang, bắt đầu từ 1 ở Chương 1 |
 
-Trang bìa dùng trực tiếp hai đoạn tiêu đề và bảng ba hàng, hai cột ở đầu
-trang 1 của tài liệu mẫu. Các khối Word giữ vị trí, lề ô và đường viền gốc.
-Các ô điền mã nhóm 15, đề tài STING/PAPI, học phần, giảng viên và hai thành viên.
-Dòng cuối trang giữ thông tin trường, khoa, bộ môn và tháng 11/2026.
+`assets/report-cover.xml` lưu các đoạn bìa và khung đã điền thông tin.
+`assets/report-cover-logo.png` là ảnh logo dùng trên bìa mẫu.
+Hai tệp đủ để dựng lại bìa trong dự án.
 
-## Áp dụng cho báo cáo Học máy
-
-Giữ ba section bìa/frontmatter/nội dung và bảy chương đã soạn. Đây là phạm vi
-nội dung của bài Học máy; số section của mẫu tiến độ không thay đề cương này.
-Giữ nguyên mọi đoạn kỹ thuật, số liệu, bảng, hình, field và tài liệu tham khảo.
-Đổi typography/màu/căn chỉnh đồng nhất. Bảng dài có header lặp và chiều rộng
-không vượt vùng chữ; không tái hiện bảng mẫu vốn rộng hơn vùng chữ.
-
-Hình/caption/TOC không có mẫu tương ứng: giữ cấu trúc và cỡ hình/caption đã có,
-đổi font/màu cho thống nhất. Bìa không đánh số; nội dung dùng PAGE giữa chân
-trang. Bỏ ngắt trang kép sau bìa. Các field có updateFields để Word cập nhật.
-
-`assets/report-cover.xml` giữ các khối Word đã sao chép và điền thông tin.
-`scripts/deliverables/build_report.py` dùng `scripts/deliverables/report_style.py` để ghép bìa trước khi lưu.
-Thay bìa của bản hiện có bằng lệnh sau:
+## Dựng và kiểm tra
 
 ```powershell
-python scripts/deliverables/report_style.py reports/final_report.docx --cover-only
-# Nếu bản chính đang được Word mở, dùng --output <bản-mới.docx>
+python scripts/deliverables/build_report.py
+python scripts/deliverables/update_report_fields.py
 ```
 
-Kiểm tra riêng việc bảo toàn nội dung và render. Không lấy kiểm XML làm bằng
-chứng bố cục trực quan; kết quả thực tế lưu tại kế hoạch261116-1540-report-template.
+Cập nhật trường bằng Microsoft Word trên Windows trước khi đóng gói.
+Bộ đóng gói kiểm tra mục lục bảy chương cùng 12 mục hình và 12 mục bảng
+đã được Word lưu. Bản phát hành được mở và xuất 45 trang trong Word,
+đối chiếu 77 đích liên kết với số trang hiển thị.

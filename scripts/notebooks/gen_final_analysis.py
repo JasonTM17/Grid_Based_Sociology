@@ -20,37 +20,44 @@ md(nbf.v4.new_markdown_cell("""# ỨNG DỤNG THUẬT TOÁN PHÂN CỤM DỰA TR
 
 *APPLICATION OF STING GRID-BASED CLUSTERING TO ANALYZE GOVERNANCE AND PUBLIC ADMINISTRATION PERFORMANCE PATTERNS AND TEMPORAL CHANGES ACROSS 63 VIETNAMESE PROVINCES USING PAPI DATA (2011–2024)*
 
-**Học máy · Báo cáo cuối kỳ · Nhóm 15 · Grid-based clustering**
+**Báo cáo cuối kỳ môn Học máy · Nhóm 15 · Chủ đề 6 — Grid-based clustering**
 
-Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)"""))
+Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)
+
+**Chạy lại notebook.** Giải nén toàn bộ gói và giữ thư mục
+`tai_lieu_kem` cạnh notebook. Chọn **Restart Kernel → Run All** để chạy
+các ô từ trên xuống. Các kết quả đã lưu có thể xem trực tiếp."""))
 
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
 
-ROOT = next((p for p in (Path.cwd(), *Path.cwd().parents)
+cwd = Path.cwd().resolve()
+ROOT = next((p for parent in (cwd, *cwd.parents)
+             for p in (parent / "tai_lieu_kem", parent)
              if (p / "src" / "sting.py").is_file()), None)
 if ROOT is None:
-    raise FileNotFoundError("Mở notebook trong gói đã giải nén có src/sting.py")
+    raise FileNotFoundError(
+        "Vui lòng giải nén toàn bộ gói và mở notebook cạnh thư mục tai_lieu_kem."
+    )
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
 import json
 import numpy as np
 import pandas as pd
-from IPython.display import Markdown, display
+from IPython.display import Image, Markdown, display
 
 def show_md(text):
-    try:
-        display(Markdown(text))
-    except Exception:
-        print(text)
+    display(Markdown(text))
 
 panel = pd.read_csv(ROOT / "data/processed/papi_panel_63_2011_2024.csv")
 assert panel.shape == (882, 41)
 assert not panel.duplicated(["province_code", "year"]).any()
-print("panel:", panel.shape, "| tỉnh:", panel.province_code.nunique(), "| năm:", panel.year.min(), "→", panel.year.max())"""))
+print(f"Bảng PAPI có {len(panel)} quan sát tỉnh–năm và {panel.shape[1]} cột.")
+print(f"Phạm vi gồm {panel.province_code.nunique()} tỉnh, thành phố giai đoạn "
+      f"{panel.year.min()}–{panel.year.max()}.")"""))
 
-md(nbf.v4.new_markdown_cell("""## 1. Dữ liệu & chất lượng
+md(nbf.v4.new_markdown_cell("""## 1. Dữ liệu và chất lượng
 
 - Dữ liệu PAPI 2011–2024 gồm 882 quan sát tỉnh–năm và 41 cột.
 - 0.0 quy về NaN (khớp quy ước gói replication Mendeley).
@@ -93,15 +100,17 @@ ari = adjusted_rand_score(truth, synthetic_labels)
 assert ari >= 0.9
 for cells_at_level in synthetic.cells_.values():
     assert sum(cell.count for cell in cells_at_level.values()) == len(truth)
-print(f"STING synthetic: ARI={ari:.3f}; k={synthetic.n_clusters_}; "
-      f"nhiễu={(synthetic_labels == -1).mean():.1%}; thống kê count bảo toàn")"""))
+print(f"Dữ liệu giả lập: ARI = {ari:.3f}, {synthetic.n_clusters_} cụm, "
+      f"{(synthetic_labels == -1).mean():.1%} điểm nhiễu.")
+print("Tổng số điểm được bảo toàn tại từng mức lưới.")"""))
 
 cd(nbf.v4.new_code_cell("""features, params = cfg["features"], cfg["sting"]
 train = panel[panel.year <= 2023].dropna(subset=features)
 scaler = StandardScaler().fit(train[features])
+train_scaled = scaler.transform(train[features])
 sting = STING(n_levels=params["n_levels"], factor=params["factor"],
-              min_count=params["min_count"]).fit(scaler.transform(train[features]))
-sting.cluster(level=params["cluster_level"], connectivity=params["connectivity"])
+              min_count=params["min_count"]).fit(train_scaled)
+train_labels = sting.cluster(level=params["cluster_level"], connectivity=params["connectivity"])
 eligible = panel.dropna(subset=features)
 scaled = scaler.transform(eligible[features])
 rebuilt = eligible[["province_code", "year"]].assign(pred_cluster=sting.predict(scaled))
@@ -115,8 +124,11 @@ scale_info = json.loads((ROOT / "models/sting_predict_scaler.json").read_text(en
 loaded_scaled = (eligible[features].to_numpy() - np.array(scale_info["mean"])) / np.array(scale_info["scale"])
 np.testing.assert_array_equal(loaded.predict(loaded_scaled), rebuilt.pred_cluster.to_numpy())
 test = rebuilt[rebuilt.year == 2024]
-print(f"Refit STING: {len(comparison)}/{len(saved)} nhãn khớp; model đã lưu khớp")
-print(f"2024: {len(test)}/63 tỉnh đủ chỉ tiêu; phân bố {test.pred_cluster.value_counts().sort_index().to_dict()}")"""))
+print(f"Tái lập STING: {len(comparison)}/{len(saved)} nhãn khớp với kết quả đã lưu.")
+print("Mô hình đã lưu và mô hình dựng lại cho cùng nhãn.")
+test_noise = int(test.pred_cluster.eq(-1).sum())
+print(f"Năm 2024: {len(test)}/63 tỉnh đủ hai chỉ tiêu. "
+      f"{len(test) - test_noise} tỉnh được gán cụm, {test_noise} tỉnh nhận nhãn nhiễu.")"""))
 
 md(nbf.v4.new_markdown_cell("""### 1.2 Lưới STING trên PAPI
 
@@ -125,8 +137,7 @@ Mức 0 là một ô chứa toàn bộ điểm. Mức 1 chia mỗi chiều thàn
 trong từng ô. Mức 2 chia thành 16 đoạn; các ô có ít nhất 5 điểm là ô dày, các ô dày
 kề mặt được gom thành cụm, điểm ở ô còn lại là nhiễu."""))
 
-cd(nbf.v4.new_code_cell("""from IPython.display import Image, display
-display(Image(filename=str(ROOT / "results/figs/sting_grid_levels.png")))"""))
+cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/sting_grid_levels.png")))"""))
 
 md(nbf.v4.new_markdown_cell("""## 2. So sánh STING, K-means và DBSCAN trên PAPI 2011–2023
 
@@ -147,8 +158,40 @@ cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/kmean
 md(nbf.v4.new_markdown_cell("""### Kết quả so sánh
 
 STING tạo một cụm 629 điểm, hai cụm nhỏ 16 và 5 điểm, với 19,6% nhiễu.
-ARI giữa STING và DBSCAN ở `eps=0.2` bằng 0,647. Tỷ lệ nhiễu làm thay đổi
-tập điểm được dùng để tính các chỉ số hình học."""))
+Để đọc kết quả trên cùng số quan sát, nhóm dùng giao các điểm mà cả STING
+và DBSCAN đều gán vào cụm. Giữ nhãn từ phân hoạch đã học trên 808 quan sát
+và tính lại silhouette trên tập giao. K-means gán nhãn cho cả 808 điểm nên
+cũng có nhãn trên toàn bộ tập giao."""))
+
+cd(nbf.v4.new_code_cell("""from sklearn.cluster import DBSCAN, KMeans
+from sklearn.metrics import silhouette_score
+
+kmeans_labels = KMeans(n_clusters=2, n_init=10, random_state=42).fit_predict(train_scaled)
+dbscan_labels = DBSCAN(eps=0.2, min_samples=5).fit_predict(train_scaled)
+shared = (train_labels >= 0) & (dbscan_labels >= 0)
+comparison_rows = []
+models = [
+    ("STING", "STING (frozen)", train_labels),
+    ("K-means (k=2)", "k-means k=2", kmeans_labels),
+    ("DBSCAN (eps=0,2)", "DBSCAN eps=0.2", dbscan_labels),
+]
+reference = metrics[metrics.scope == "pooled 2011-2023"].set_index("method")
+for label, key, labels in models:
+    assigned = labels >= 0
+    score = silhouette_score(train_scaled[assigned], labels[assigned])
+    score_shared = silhouette_score(train_scaled[shared], labels[shared])
+    assert abs(score - reference.loc[key, "silhouette"]) <= 0.0005
+    comparison_rows.append((label, int(assigned.sum()), f"{score:.3f}", f"{score_shared:.3f}"))
+shared_table = pd.DataFrame(comparison_rows, columns=[
+    "Phương pháp", "Điểm thuộc cụm", "Silhouette trên tập riêng", "Silhouette trên tập giao",
+])
+print(f"Tập giao có {shared.sum()}/{len(train_scaled)} quan sát.")
+show_md(shared_table.to_markdown(index=False))
+ari_all = adjusted_rand_score(train_labels, dbscan_labels)
+ari_shared = adjusted_rand_score(train_labels[shared], dbscan_labels[shared])
+assert abs(ari_all - reference.loc["DBSCAN eps=0.2", "ari_vs_sting"]) <= 0.0005
+print(f"ARI STING–DBSCAN trên toàn bộ mẫu (gồm nhãn nhiễu): {ari_all:.3f}.")
+print(f"ARI STING–DBSCAN trên tập giao các điểm thuộc cụm: {ari_shared:.3f}.")"""))
 
 md(nbf.v4.new_markdown_cell("## 3. STING theo từng năm"))
 
@@ -160,11 +203,25 @@ print(f"{single_cluster_years}/{len(per_year)} năm có một cụm với lướ
 
 md(nbf.v4.new_markdown_cell("""## 4. Gán cụm năm 2024 và xem dịch chuyển theo thời gian
 
-Dùng lưới học từ 2011–2023. Trên 61 tỉnh đủ hai chỉ tiêu năm 2024, có 48 tỉnh
-vào cụm lớn và 13 tỉnh nhận nhãn nhiễu. Hai tỉnh thiếu chỉ tiêu được để trống."""))
+Dùng lưới học từ 2011–2023 để gán nhãn trên điểm PAPI đã quan sát năm 2024.
+Trong 61 tỉnh đủ hai chỉ tiêu, có 48 tỉnh vào cụm lớn và 13 tỉnh nhận nhãn
+nhiễu. Hai tỉnh thiếu chỉ tiêu được để trống. Bảng chuyển trạng thái dưới
+đây chỉ dùng các tỉnh đủ dữ liệu ở cả hai năm."""))
 
-cd(nbf.v4.new_code_cell("""from IPython.display import Image, display
-for year in (2020, 2024):
+cd(nbf.v4.new_code_cell("""paired = (rebuilt[rebuilt.year.isin([2023, 2024])]
+          .pivot(index="province_code", columns="year", values="pred_cluster")
+          .dropna().astype(int))
+main_cluster = int(pd.Series(train_labels[train_labels >= 0]).mode().iat[0])
+label_names = {main_cluster: "Cụm lớn", -1: "Nhiễu"}
+transition = pd.crosstab(paired[2023], paired[2024], rownames=["Năm 2023"],
+                         colnames=["Năm 2024"])
+transition = transition.rename(index=label_names, columns=label_names)
+print(f"Đối chiếu trên {len(paired)} tỉnh đủ dữ liệu ở cả hai năm.")
+show_md(transition.to_markdown())
+print(f"{transition.loc['Cụm lớn', 'Nhiễu']} tỉnh từ cụm lớn sang nhiễu.")
+print(f"{transition.loc['Nhiễu', 'Cụm lớn']} tỉnh từ nhiễu vào cụm lớn.")"""))
+
+cd(nbf.v4.new_code_cell("""for year in (2020, 2024):
     display(Image(filename=str(ROOT / f"results/figs/map_{year}.png")))"""))
 
 cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/evolution.png")))"""))
@@ -212,22 +269,21 @@ cd(nbf.v4.new_code_cell("""sup = pd.read_csv(ROOT / "results/supervised_metrics.
 show_md(sup.to_markdown(index=False))"""))
 
 cd(nbf.v4.new_code_cell("""import joblib
-import sys
-sys.path.insert(0, str(ROOT))
+from sklearn.metrics import mean_absolute_error
 from scripts.common.papi_pred_common import REGRESSION_FEATURES
 from scripts.supervised.predict_supervised import build_regression_pairs, expanding_origin_folds
 
-print("8 regression features:", REGRESSION_FEATURES)
+print("Tám chỉ tiêu dùng cho hồi quy:", ", ".join(REGRESSION_FEATURES))
 regression_pairs = build_regression_pairs(panel)
 training_origins = regression_pairs.loc[
     regression_pairs.year_t < 2023, "year_t"
 ].to_numpy()
-print("Regression folds use training origins only (year_t < 2023).")
+print("Các lượt kiểm định theo thời gian dùng năm gốc trước 2023.")
 folds = expanding_origin_folds(training_origins, first_validation_origin=2017)
 for fold_number, (train_idx, val_idx) in enumerate(folds, start=1):
     print(
-        f"Fold {fold_number}: max train origin={training_origins[train_idx].max()}, "
-        f"validation origin={training_origins[val_idx][0]}"
+        f"Lượt {fold_number}: học đến năm gốc {training_origins[train_idx].max()}, "
+        f"kiểm định tại năm gốc {training_origins[val_idx][0]}."
     )
 
 regression_metrics = pd.read_csv(ROOT / "results/supervised_metrics.csv")
@@ -238,20 +294,16 @@ regression_models = regression_metrics[
     )
 ].dropna(subset=["value_cv"])
 chosen = regression_models.loc[regression_models.value_cv.idxmax()]
-print(f"CV-selected regression model: {chosen.model} (R²={chosen.value_cv:.3f})")
+print(f"Mô hình hồi quy được chọn qua kiểm định: {chosen.model} (R²={chosen.value_cv:.3f}).")
 
-print("Loading ../models/sup_ridge.joblib")
 ridge = joblib.load(ROOT / "models/sup_ridge.joblib")
-probe = np.array([[1.5, 2.6, 2.0, 2.1, 1.9, 1.7, 1.9, 1.8]])
-print("Fixed 8-feature probe:", probe.tolist()[0])
-print("Ridge prediction:", ridge.predict(probe).tolist())
-from sklearn.metrics import mean_absolute_error
 holdout = regression_pairs[regression_pairs.year_t == 2023]
 ridge_mae = mean_absolute_error(holdout.y, ridge.predict(holdout[REGRESSION_FEATURES].to_numpy()))
 carry_mae = mean_absolute_error(holdout.y, holdout["carry"])
 ridge_row = regression_metrics[(regression_metrics.task == "regression") & (regression_metrics.model == "ridge")].iloc[0]
 assert abs(ridge_mae - ridge_row.holdout_mae) < 1e-5
-print(f"Ridge holdout recalculated: n={len(holdout)}, MAE={ridge_mae:.4f}; carry-forward={carry_mae:.4f}")"""))
+print(f"Tính lại trên {len(holdout)} cặp 2023→2024: MAE của Ridge = {ridge_mae:.4f}, "
+      f"MAE khi giữ điểm năm trước = {carry_mae:.4f}.")"""))
 
 md(nbf.v4.new_markdown_cell("""## Phụ lục C. Đối chiếu PCI và nghèo GSO
 

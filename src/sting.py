@@ -224,27 +224,32 @@ class STING:
         lo, hi = rect[:, 0], rect[:, 1]
 
         total = 0
-        sum_ = np.zeros(self.n_dims_)
-        sumsq = np.zeros(self.n_dims_)
+        origin = np.zeros(self.n_dims_)
+        mean_offset = np.zeros(self.n_dims_)
+        m2 = np.zeros(self.n_dims_)
         mins = np.full(self.n_dims_, np.inf)
         maxs = np.full(self.n_dims_, -np.inf)
 
         for cell in self.cells_[level].values():
             if np.all(cell.bounds_min >= lo) and np.all(cell.bounds_max <= hi):
-                total += cell.count
-                sum_ += cell.mean * cell.count
-                sumsq += (cell.std ** 2 + cell.mean ** 2) * cell.count
+                if total == 0:
+                    origin = cell.mean
+                new_total = total + cell.count
+                weight = cell.count / new_total
+                # Gộp mômen trung tâm quanh mốc chung để tránh trừ hai bình phương lớn.
+                delta = (cell.mean - origin) - mean_offset
+                m2 += cell.count * cell.std ** 2 + total * weight * delta ** 2
+                mean_offset += weight * delta
+                total = new_total
                 mins = np.minimum(mins, cell.min_)
                 maxs = np.maximum(maxs, cell.max_)
 
         if total == 0:
             return {"count": 0, "mean": None, "std": None, "min": None, "max": None}
-        mean = sum_ / total
-        var = np.maximum(sumsq / total - mean ** 2, 0.0)
         return {
-            "count": int(total),
-            "mean": mean,
-            "std": np.sqrt(var),
+            "count": total,
+            "mean": origin + mean_offset,
+            "std": np.sqrt(m2 / total),
             "min": mins,
             "max": maxs,
         }
@@ -260,6 +265,7 @@ class STING:
     def _assign(self, X: np.ndarray, res: int) -> tuple[np.ndarray, np.ndarray]:
         """Chỉ số ô (theo chiều và phẳng) của từng điểm trên lưới ``res`` ô/chiều."""
         span = self.bounds_max_ - self.bounds_min_
+        span[span == 0.0] = 1.0  # Bước nới cận của chiều hằng có thể bị làm tròn về 0.
         idx = np.floor((X - self.bounds_min_) / span * res).astype(np.int64)
         np.clip(idx, 0, res - 1, out=idx)  # biên trên vào ô cuối
         flat = np.ravel_multi_index(

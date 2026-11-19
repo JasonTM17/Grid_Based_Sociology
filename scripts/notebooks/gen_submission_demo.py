@@ -29,9 +29,18 @@ md(nbf.v4.new_markdown_cell("""# ỨNG DỤNG THUẬT TOÁN PHÂN CỤM DỰA TR
 
 *APPLICATION OF STING GRID-BASED CLUSTERING TO ANALYZE GOVERNANCE AND PUBLIC ADMINISTRATION PERFORMANCE PATTERNS AND TEMPORAL CHANGES ACROSS 63 VIETNAMESE PROVINCES USING PAPI DATA (2011–2024)*
 
-**Học máy · Nhóm 15 · Chủ đề 6 — Grid-based clustering**
+**Báo cáo giữa kỳ môn Học máy · Nhóm 15 · Chủ đề 6 — Grid-based clustering**
 
-Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)"""))
+Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)
+
+Notebook trình bày cơ chế gom cụm của biến thể STING do nhóm cài đặt, kiểm
+chứng bằng dữ liệu giả lập và minh họa trên hai chỉ tiêu PAPI. Kết quả đã được
+lưu để theo dõi trực tiếp.
+
+**Chạy lại notebook.** Giải nén toàn bộ gói và mở notebook cạnh thư mục
+`tai_lieu_kem`. Chọn **Restart Kernel** (khởi động lại kernel), sau đó
+chọn **Run All** (chạy tất cả các ô từ đầu). Các ô phía sau sử dụng thư viện,
+dữ liệu và mô hình được nạp hoặc tạo ở các ô trước."""))
 
 cd(nbf.v4.new_code_cell("""import ast
 import os
@@ -42,7 +51,7 @@ from pathlib import Path
 _STING_MARKER = Path("src") / "sting.py"
 
 
-def _find_repo_root() -> Path:
+def _find_project_root() -> Path:
     seeds: list[Path] = [Path.cwd().resolve()]
     for env_key in ("STING_REPO_ROOT", "SUBMISSION_DEMO_NB_PATH", "JPY_STARTUP_PATH"):
         raw = os.environ.get(env_key)
@@ -71,19 +80,20 @@ def _find_repo_root() -> Path:
             if cur in seen:
                 break
             seen.add(cur)
-            if (cur / _STING_MARKER).is_file():
-                return cur
+            for candidate in (cur / "tai_lieu_kem", cur):
+                if (candidate / _STING_MARKER).is_file():
+                    return candidate
             parent = cur.parent
             if parent == cur:
                 break
             cur = parent
     raise FileNotFoundError(
-        "Không tìm thấy repo: không có src/sting.py khi đi lên từ cwd hoặc "
-        "vị trí notebook — đặt STING_REPO_ROOT hoặc chạy từ thư mục gốc repo."
+        "Không tìm thấy mã nguồn STING. Vui lòng giải nén toàn bộ gói "
+        "và giữ thư mục tai_lieu_kem cùng cấp với notebook."
     )
 
 
-ROOT = _find_repo_root()
+ROOT = _find_project_root()
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
@@ -106,7 +116,7 @@ from scripts.common.papi_pred_common import FEATURE_LABELS, load_config, load_pa
 from scripts.common.fig_style import CLUSTER_COLORS, apply_style
 
 apply_style()
-print("Đã nạp mã STING và các thư viện phân tích.")"""))
+print("Đã nạp mã nguồn STING và các thư viện cần thiết.")"""))
 
 md(nbf.v4.new_markdown_cell("""## 1. Lý thuyết STING
 
@@ -114,16 +124,20 @@ md(nbf.v4.new_markdown_cell("""## 1. Lý thuyết STING
 **STING** (Statistical Information Grid) thuộc nhóm phương pháp này và dùng lưới nhiều mức, từ thô đến mịn.
 Mỗi ô lưu số điểm và các thống kê tóm tắt.
 
-**Nhóm sử dụng biến thể STING rút gọn, tạo cụm tại một mức lưới**
+Nhóm sử dụng **biến thể STING rút gọn** để tạo cụm tại một mức lưới.
 
 1. Gán các điểm vào lưới và đếm số điểm trong từng ô.
 2. Đánh dấu ô có số điểm đạt ngưỡng là ô dày.
-3. Nối các ô dày chung cạnh thành cụm. Điểm trong ô thưa được xem là nhiễu."""))
+3. Gom mỗi vùng gồm các ô dày liên thông qua cạnh thành một cụm. Các điểm
+   trong ô thưa nhận nhãn nhiễu −1.
+
+STING gốc còn lưu loại phân phối trong các ô và duyệt lưới từ trên xuống
+dựa trên độ tin cậy."""))
 
 md(nbf.v4.new_markdown_cell("""## 2. Cài đặt từ đầu — lưới 3 × 3
 
 Ví dụ gồm 15 điểm trên một mặt phẳng. Mỗi ô có ít nhất 3 điểm được xem là ô dày.
-Các ô dày chỉ chạm góc được giữ thành những cụm riêng khi dùng quy tắc nối qua cạnh."""))
+Trong ví dụ này, hai vùng ô dày chỉ chạm góc nên được gán vào hai cụm riêng."""))
 
 cd(nbf.v4.new_code_cell("""counts = np.array([[4, 3, 0], [1, 0, 4], [0, 0, 3]])
 positions = [(col, 2 - row) for row in range(3) for col in range(3)]
@@ -143,7 +157,10 @@ noise_count = int((labels == -1).sum())
 assert group_sizes == [7, 7] and noise_count == 1
 print(f"{model.n_clusters_} cụm, mỗi cụm {group_sizes[0]} điểm. {noise_count} điểm nhiễu.")"""))
 
-md(nbf.v4.new_markdown_cell("## 3. Đánh giá trên dữ liệu giả lập"))
+md(nbf.v4.new_markdown_cell("""## 3. Đánh giá trên dữ liệu giả lập
+
+Nhóm sinh 240 điểm từ hai phân bố Gauss. Nhãn khi sinh dữ liệu là căn cứ
+để tính Adjusted Rand Index (ARI) và kiểm tra mức độ khớp của kết quả phân cụm."""))
 
 cd(nbf.v4.new_code_cell("""X_syn, y_true = make_blobs(n_samples=240, centers=[(-6, -6), (6, 6)],
                            cluster_std=0.6, random_state=42)
@@ -156,12 +173,14 @@ print(f"ARI = {ari:.3f} | Số cụm {m_syn.n_clusters_} | Tỷ lệ nhiễu {(l
 
 md(nbf.v4.new_markdown_cell("""## 4. Ứng dụng PAPI
 
-- PAPI gồm 882 dòng và 41 cột, theo dõi 63 tỉnh trong giai đoạn 2011–2024.
-- Mỗi dòng là một tỉnh trong một năm. Mỗi điểm biểu diễn quan sát đó bằng hai chỉ tiêu đã chọn.
-- Hai chỉ tiêu phân cụm là kiểm soát tham nhũng trong cung ứng dịch vụ công và y tế công lập.
-- Giá trị 0 được ghi nhận là thiếu theo quy ước của bộ dữ liệu.
-- Thống kê chuẩn hóa lấy từ dữ liệu 2011–2023. Cùng phép chuẩn hóa được áp dụng cho năm 2024.
-- Phân cụm dùng dữ liệu chuẩn hóa. Biểu đồ dự đoán năm 2024 hiển thị điểm thành phần PAPI gốc; đơn vị được ghi trên trục."""))
+Bảng PAPI có 882 quan sát tỉnh–năm và 41 cột, bao quát 63 tỉnh, thành phố
+trong giai đoạn 2011–2024. Phân tích chính dùng hai chỉ tiêu gồm **kiểm soát
+tham nhũng trong cung ứng dịch vụ công** và **y tế công lập**.
+
+Nhóm chuyển điểm 0 về giá trị thiếu theo quy ước nguồn, rồi chọn các quan
+sát có đủ hai chỉ tiêu để phân cụm. Bộ chuẩn hóa được ước lượng trên dữ liệu
+2011–2023 và áp dụng cho năm 2024. Biểu đồ gán cụm năm 2024 hiển thị điểm
+thành phần PAPI theo đơn vị gốc."""))
 
 cd(nbf.v4.new_code_cell("""cfg = load_config()
 feats = cfg["features"]
@@ -174,15 +193,27 @@ print("\\n".join(f"• {FEATURE_LABELS[feature]}" for feature in feats))"""))
 md(nbf.v4.new_markdown_cell("### 4.1 Tiền xử lý dữ liệu"))
 
 cd(nbf.v4.new_code_cell("""_prep = pd.read_csv(ROOT / "results" / "preprocessing_audit.csv")
-_tbl = _prep[["stage", "test", "result"]].rename(
-    columns={"stage": "Giai đoạn", "test": "Kiểm tra", "result": "Kết quả"}
+_outlier_result = _prep.loc[_prep["test"].str.startswith("Đánh dấu ngoại lai"), "result"].item()
+flagged_cells = int(_outlier_result.split()[0])
+duplicated_keys = int(panel.duplicated(["province_code", "year"]).sum())
+incomplete_rows = int(panel[feats].isna().any(axis=1).sum())
+_tbl = pd.DataFrame(
+    [
+        ("Làm sạch", "Khóa tỉnh–năm", f"{duplicated_keys} dòng trùng khóa", "Giữ các quan sát có khóa duy nhất."),
+        ("Làm sạch", "Độ đầy đủ của hai chỉ tiêu", f"{incomplete_rows} dòng thiếu", "Loại các dòng thiếu khỏi đầu vào phân cụm."),
+        ("Làm sạch", "Giá trị ngoại lai", f"{flagged_cells} ô được đánh dấu trong 37 chỉ tiêu", "Giữ giá trị gốc để phân tích."),
+        ("Tích hợp", "Độ phủ bảng PAPI", f"{panel.province_code.nunique()} tỉnh, {panel.year.nunique()} năm", "Thống nhất dữ liệu theo mã tỉnh và năm."),
+        ("Chuẩn hóa", "Giai đoạn ước lượng tham số", "2011–2023", "Dùng lại tham số đã học cho năm 2024."),
+    ],
+    columns=["Giai đoạn", "Kiểm tra", "Kết quả", "Quyết định"],
 )
-_tbl["Giai đoạn"] = _prep["stage"].str[0].map(
-    {"1": "Làm sạch", "2": "Tích hợp", "3": "Chuẩn hóa"}
-)
-_tbl["Kiểm tra"] = _tbl["Kiểm tra"].str.replace(", dedup chạy ĐẦU TIÊN", "", regex=False)
 with pd.option_context("display.max_colwidth", None):
     display(_tbl)"""))
+
+md(nbf.v4.new_markdown_cell("""### 4.2 Xây lưới và tái lập kết quả phân cụm
+
+Ô thứ nhất chuẩn hóa dữ liệu, xây lưới và tạo mô hình STING. Ô kế tiếp
+dùng mô hình đó để đối chiếu nhãn với bảng kết quả đã lưu."""))
 
 cd(nbf.v4.new_code_cell("""ptr = panel[panel.year <= 2023].dropna(subset=feats)
 scaler = StandardScaler().fit(ptr[feats])
@@ -218,6 +249,12 @@ n_diff = int((merged.pred_cluster_saved != merged.pred_cluster_refit).sum())
 assert len(merged) == len(saved) == 869
 assert n_diff == 0
 print(f"Khi chạy lại STING, {len(merged) - n_diff}/{len(saved)} nhãn khớp với kết quả đã lưu.")"""))
+
+md(nbf.v4.new_markdown_cell("""### 4.3 Đối chiếu với K-means và DBSCAN
+
+Ba phương pháp cùng dùng 808 quan sát đủ dữ liệu trong giai đoạn 2011–2023.
+Silhouette được tính trên các điểm thuộc cụm. Vì mỗi phương pháp có thể
+loại một tập điểm khác nhau, cần đọc chỉ số này cùng tỷ lệ nhiễu."""))
 
 cd(nbf.v4.new_code_cell("""metrics = pd.read_csv(ROOT / "results" / "metrics.csv")
 metrics_pooled = metrics[metrics.scope == "pooled 2011-2023"]
@@ -271,9 +308,16 @@ for ax in axes:
 plt.tight_layout()
 plt.show()
 
-display(Image(filename=str(ROOT / "results" / "figs" / "predict_2024.png")))"""))
+"""))
 
-cd(nbf.v4.new_code_cell("""test2024 = panel[panel.year == 2024].dropna(subset=feats)
+md(nbf.v4.new_markdown_cell("""### 4.4 Gán cụm năm 2024 và khảo sát độ nhạy
+
+Nhóm áp dụng lưới đã học trên giai đoạn 2011–2023 cho năm 2024. Thí nghiệm
+giữ nguyên lưới và thay ngưỡng số điểm tối thiểu trong ô."""))
+
+cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results" / "figs" / "predict_2024.png")))
+
+test2024 = panel[panel.year == 2024].dropna(subset=feats)
 Xte = scaler.transform(test2024[feats])
 base = m_frozen.predict(Xte)
 n_provinces = panel.loc[panel.year == 2024, "province_code"].nunique()
@@ -325,14 +369,22 @@ for mc, (ecov, eari) in exp_sens.items():
 
 md(nbf.v4.new_markdown_cell("""## 5. Kết luận và hạn chế
 
-- Trên dữ liệu giả lập, ARI 0.950 đo độ khớp với nhãn đã biết khi sinh dữ liệu.
-- PAPI 2011–2023 có một cụm lớn và hai cụm nhỏ. Số cụm và tỷ lệ nhiễu thay đổi
-  theo ngưỡng số điểm. Dữ liệu năm 2024 được gán vào lưới đã học.
-- Khi so sánh silhouette, đọc kèm tỷ lệ nhiễu vì mỗi phương pháp có thể được chấm
-  trên tập điểm khác nhau. Các cụm mô tả hai chỉ tiêu PAPI được chọn.
+Trên tập giả lập, STING đạt ARI 0,950 khi đối chiếu với nhãn tham chiếu.
+Trong giai đoạn 2011–2023, lưới STING tạo một cụm 629 điểm, hai cụm nhỏ
+gồm 16 và 5 điểm, với 19,6% quan sát nhận nhãn nhiễu.
 
-**Tài liệu tham khảo:** Wang, Yang & Muntz (VLDB'97); PAPI (CECODES/VFF-CRT/RTA/UNDP);
-Le et al., Mendeley Data (DOI 10.17632/wbk42j9wc8.1, CC BY 4.0)."""))
+Với lưới đã học, 48 trong số 61 tỉnh đủ dữ liệu năm 2024 được gán vào
+cụm lớn, còn 13 tỉnh nhận nhãn nhiễu. Tỷ lệ được gán cụm thay đổi theo
+ngưỡng số điểm. Kết quả phản ánh phân bố của hai chỉ tiêu được khảo sát.
+
+**Nguồn tham khảo**
+
+- Wang, Yang và Muntz (1997), bài báo về lưới thống kê STING tại VLDB.
+  [Bài báo gốc](https://www.vldb.org/conf/1997/P186.PDF)
+- Dữ liệu PAPI 2011–2024 do CECODES, VFF-CRT, RTA và UNDP công bố.
+  [Nguồn dữ liệu PAPI](https://papi.org.vn/du-lieu-papi/)
+- Le và cộng sự (2026), dữ liệu đối chiếu các chỉ số nội dung PAPI.
+  [Mendeley Data, DOI 10.17632/wbk42j9wc8.1](https://data.mendeley.com/datasets/wbk42j9wc8/1)"""))
 
 nb["cells"] = cells
 nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}

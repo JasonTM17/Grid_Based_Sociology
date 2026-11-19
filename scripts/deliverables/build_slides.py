@@ -3,6 +3,7 @@
 Cách dùng: python scripts/deliverables/build_slides.py
 """
 import csv
+from collections import Counter
 from pathlib import Path
 
 from pptx import Presentation
@@ -29,6 +30,13 @@ def _pct(v):
 
 
 ROBUSTNESS = _read_results_csv("robustness.csv")
+ASSIGNMENTS = _read_results_csv("predict_all_years.csv")
+MAIN_CLUSTER = Counter(r["pred_cluster"] for r in ASSIGNMENTS
+                       if r["split"] == "train" and r["pred_cluster"] != "-1").most_common(1)[0][0]
+LABELS_2023 = {r["province_code"]: r["pred_cluster"] for r in ASSIGNMENTS if r["year"] == "2023"}
+LABELS_2024 = {r["province_code"]: r["pred_cluster"] for r in ASSIGNMENTS if r["year"] == "2024"}
+TRANSITIONS = Counter((LABELS_2023[p], LABELS_2024[p]) for p in LABELS_2023.keys() & LABELS_2024.keys())
+assert all({left, right} <= {MAIN_CLUSTER, "-1"} for left, right in TRANSITIONS)
 
 
 def _rob(branch_sub):
@@ -165,6 +173,28 @@ def pic(slide, path, x, y, w=None, h=None):
     slide.shapes.add_picture(str(p), Inches(x), Inches(y), **kw)
 
 
+def result_table(slide, rows, x, y, widths, row_height, size):
+    table = slide.shapes.add_table(
+        len(rows), len(widths), Inches(x), Inches(y), Inches(sum(widths)), Inches(len(rows) * row_height)
+    ).table
+    for col, width in zip(table.columns, widths):
+        col.width = Inches(width)
+    for i, row in enumerate(rows):
+        table.rows[i].height = Inches(row_height)
+        for j, value in enumerate(row):
+            cell = table.cell(i, j)
+            cell.margin_left = cell.margin_right = Inches(0.09)
+            cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+            cell.text_frame.text = str(value)
+            paragraph = cell.text_frame.paragraphs[0]
+            paragraph.alignment = PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER
+            font = paragraph.runs[0].font
+            font.size, font.name, font.bold = Pt(size), "Calibri", i == 0
+            font.color.rgb = WHITE if i == 0 else INK
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = TEAL if i == 0 else WHITE if i % 2 else LIGHT
+
+
 # Slide 1 — Bìa
 s = slide_new()
 rect(s, 0, 0, SW, SH, NAVY)
@@ -175,14 +205,12 @@ for r in range(4):
         x0, y0 = SW - 4.6 + c * 0.78, 1.05 + r * 0.78
         fill = GOLD if (r, c) in ((1, 1), (2, 2)) else RGBColor(0x1E, 0x3D, 0x5E)
         rect(s, x0, y0, 0.66, 0.66, fill)
-text(s, 0.85, 1.15, 7.6, 0.4, [("HỌC MÁY · BÁO CÁO CUỐI KỲ", 13, True, GOLD)])
-text(s, 0.85, 1.55, 7.6, 3.0, [("ỨNG DỤNG THUẬT TOÁN PHÂN CỤM DỰA TRÊN LƯỚI STING ĐỂ PHÂN TÍCH ĐẶC ĐIỂM VÀ SỰ BIẾN ĐỘNG CỦA CÁC CHỈ SỐ QUẢN TRỊ, HÀNH CHÍNH CÔNG TẠI 63 TỈNH, THÀNH PHỐ VIỆT NAM DỰA TRÊN DỮ LIỆU PAPI GIAI ĐOẠN 2011–2024", 19, True, WHITE),
-                               ("APPLICATION OF STING GRID-BASED CLUSTERING TO ANALYZE GOVERNANCE AND PUBLIC ADMINISTRATION PERFORMANCE PATTERNS AND TEMPORAL CHANGES ACROSS 63 VIETNAMESE PROVINCES USING PAPI DATA (2011–2024)", 12, False, RGBColor(0xB9, 0xCD, 0xDE))])
-text(s, 0.85, 4.7, 7.8, 1.9, [
-    ("Báo cáo cuối kỳ · Grid-based clustering · 63 tỉnh · 2011–2024", 14, True, GOLD),
-    ("STING: Statistical Information Grid · PAPI: Chỉ số Hiệu quả Quản trị và Hành chính công cấp tỉnh", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
-    ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 14, False, RGBColor(0xB9, 0xCD, 0xDE)),
-    ("Nhóm 15 · Chủ đề 6 · Grid-based clustering", 13, False, RGBColor(0xB9, 0xCD, 0xDE)),
+text(s, 0.85, 1.15, 7.6, 0.4, [("HỌC MÁY · BÁO CÁO CUỐI KỲ", 15, True, GOLD)])
+text(s, 0.85, 1.75, 7.7, 1.48, [("Phân cụm dựa trên lưới STING", 38, True, WHITE)])
+text(s, 0.85, 3.42, 7.7, 0.6, [("Phân tích dữ liệu PAPI 2011–2024", 22, False, WHITE)])
+text(s, 0.85, 4.9, 7.8, 1.3, [
+    ("Nhóm 15 · Chủ đề 6 · Grid-based clustering", 15, True, GOLD),
+    ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 15, False, RGBColor(0xB9, 0xCD, 0xDE)),
 ])
 note(s, "Kính thưa thầy, nhóm 15 xin trình bày kết quả đồ án phân cụm dữ liệu PAPI bằng STING. "
      "Nhóm xây dựng lưới thống kê, kiểm tra trên dữ liệu giả lập, sau đó áp dụng lên hai chỉ tiêu "
@@ -243,7 +271,7 @@ bullets(s, 0.55, 1.5, 6.7, 5.3, [
     ("Bảng dữ liệu.", "882 dòng và 41 cột. Có 8 chiều nội dung và 29 chỉ tiêu thành phần."),
     ("Giá trị thiếu.", "Chuyển điểm 0 theo quy ước nguồn về NaN và chọn dòng đủ hai chỉ tiêu."),
     ("Chuẩn hóa.", "Ước lượng trung bình và độ lệch chuẩn từ dữ liệu huấn luyện."),
-    ("Đối chiếu.", "Các giá trị giai đoạn 2011–2022 khớp gói dữ liệu Le và cộng sự."),
+    ("Đối chiếu.", "5.118 cặp giá trị hợp lệ trên 8 chỉ số nội dung 2011–2022 khớp gói dữ liệu Le và cộng sự."),
 ], size=16, gap_pt=25)
 rect(s, 7.55, 1.35, 5.2, 2.45, RGBColor(0xFD, 0xF3, 0xDC))
 text(s, 7.85, 1.55, 4.7, 0.35, [("KIỂM TRA TÍNH SO SÁNH QUA CÁC NĂM", 13, True, RGBColor(0x8A, 0x5A, 0x00))])
@@ -297,7 +325,7 @@ rect(s, 0.6, 1.85, 3.1, 0.72, TEAL)
 text(s, 0.6, 1.91, 3.1, 0.4, [("DỮ LIỆU 2011–2023", 14, True, WHITE)], align=PP_ALIGN.CENTER)
 rect(s, 4.5, 1.7, 3.3, 1.1, LIGHT)
 text(s, 4.5, 1.82, 3.3, 0.9, [("LƯỚI STING ĐÃ HỌC", 14, True, NAVY),
-                             ("Biên lưới và các ô dày", 13, False, GREY)], align=PP_ALIGN.CENTER)
+                             ("16 × 16 · Từ 5 điểm mỗi ô", 13, False, GREY)], align=PP_ALIGN.CENTER)
 rect(s, 8.6, 1.85, 3.1, 0.72, GOLD)
 text(s, 8.6, 1.91, 3.1, 0.4, [("GÁN CỤM NĂM 2024", 14, True, NAVY)], align=PP_ALIGN.CENTER)
 for x0 in (3.7, 7.8):
@@ -307,7 +335,7 @@ for x0 in (3.7, 7.8):
     a.line.fill.background()
 bullets(s, 0.6, 3.9, 12.1, 3.0, [
     ("Chọn cấu hình.", "Dùng dữ liệu đến 2020 và đối chiếu trên các năm 2021–2022."),
-    ("Học lưới.", "Fit cấu hình đã chọn trên các quan sát đủ dữ liệu giai đoạn 2011–2023."),
+    ("Học lưới.", "Dựng lưới 16 × 16 trên 808 quan sát giai đoạn 2011–2023 và nối qua cạnh."),
     ("Năm 2024.", "Dùng lại bộ chuẩn hóa và lưới đã học để gán điểm mới vào cụm hoặc nhãn nhiễu."),
 ], size=17, gap_pt=24)
 note(s, "Cấu hình được chọn từ dữ liệu các năm trước, sau đó nhóm học lưới trên giai đoạn "
@@ -333,50 +361,21 @@ note(s, "Trong 61 tỉnh đủ dữ liệu năm 2024, có 48 tỉnh vào cụm l
 # Slide 9 — Baselines
 s = slide_new()
 header(s, "ĐỐI CHỨNG PHÂN CỤM", "STING, K-means và DBSCAN trên PAPI 2011–2023", 9)
-rows = [
-    ("Phương pháp", "Số cụm", "Nhiễu", "Silhouette", "ARI với STING"),
-    ("STING", "3", "19.6%", "0.361*", "—"),
-    ("k-means k=2", "2", "0%", "0.445", "0.166"),
-    ("k-means k=3", "3", "0%", "0.336", "0.139"),
-    ("DBSCAN eps=0.2", "5", "14.2%", "0.218*", "0.647"),
-    ("DBSCAN eps=0.4+", "1", "≤3%", "n/a", "≤0.135"),
-]
-tb = s.shapes.add_table(len(rows), 5, Inches(0.6), Inches(1.5), Inches(12.18), Inches(3.7)).table
-tb.columns[0].width = Inches(3.3)
-for c in range(1, 5):
-    tb.columns[c].width = Inches(2.22)
-tb.rows[0].height = Inches(0.6)
-for r_i in range(1, len(rows)):
-    tb.rows[r_i].height = Inches(0.62)
-for i, row in enumerate(rows):
-    for j, v in enumerate(row):
-        cell = tb.cell(i, j)
-        cell.margin_left = Inches(0.06)
-        cell.margin_top = Inches(0.02)
-        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
-        tf = cell.text_frame
-        tf.text = v
-        p = tf.paragraphs[0]
-        r = p.runs[0]
-        r.font.size = Pt(13)
-        r.font.name = "Calibri"
-        if i == 0:
-            r.font.bold = True
-            r.font.color.rgb = WHITE
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = TEAL
-        else:
-            r.font.color.rgb = INK
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = WHITE if i % 2 else LIGHT
-text(s, 0.6, 5.6, 12, 0.8, [
-    ("* Silhouette được tính trên các điểm thuộc cụm. Cần đọc cùng tỷ lệ nhiễu.", 14, False, GREY),
-    ("ARI với DBSCAN ở eps=0,2 bằng 0,647, cho biết mức đồng thuận giữa hai cách phân cụm.", 14, False, GREY),
+result_table(s, [
+    ("Phương pháp", "Số cụm", "Nhiễu", "Điểm thuộc cụm", "Silhouette riêng", "Silhouette trên tập giao"),
+    ("STING", 3, "19,6%", 650, "0,361", "0,366"),
+    ("K-means (k = 2)", 2, "0%", 808, "0,445", "0,457"),
+    ("DBSCAN (eps = 0,2)", 5, "14,2%", 693, "0,218", "0,258"),
+], 0.6, 1.67, [2.62, 1.24, 1.3, 2.06, 2.16, 2.8], 0.71, 15)
+text(s, 0.6, 4.88, 12, 0.92, [
+    ("Cùng một tập giao gồm 631/808 điểm được cả STING và DBSCAN gán vào cụm.", 16, True, NAVY),
+    ("ARI STING–DBSCAN là 0,647 trên toàn mẫu và 0,431 trên tập giao.", 15, False, GREY),
 ])
 note(s, "Bảng đối chiếu các cấu hình trên cùng hai chỉ tiêu PAPI của giai đoạn 2011–2023. "
-     "STING cho ba cụm với 19,6% nhiễu. Silhouette chỉ tính trên điểm thuộc cụm, nên "
-     "phạm vi điểm được chấm có thể khác giữa các phương pháp. ARI mô tả mức đồng thuận "
-     "giữa hai cách phân cụm và cần được đọc trong cấu hình cụ thể.")
+     "Silhouette riêng dùng mẫu thuộc cụm của từng phương pháp. Cột cuối giữ các nhãn "
+     "đã học và chấm ba phương pháp trên cùng 631 điểm, tức giao các điểm được cả STING "
+     "và DBSCAN gán cụm. ARI đo mức đồng thuận giữa phân hoạch STING và DBSCAN. "
+     "Trên toàn mẫu, giá trị này tính cả nhãn nhiễu. Notebook tính lại hai phép đối chiếu.")
 
 # Slide 10 — Bản đồ
 s = slide_new()
@@ -393,17 +392,28 @@ note(s, "Bản đồ nối nhãn STING với vị trí tỉnh thông qua mã t�
      "để gán nhãn. Các tỉnh nhiễu phân bố ở nhiều vùng. Đặc trưng phân cụm là hai chỉ tiêu PAPI, "
      "còn tọa độ địa lý dùng để trình bày kết quả trên bản đồ.")
 
-# Slide 11 — Hạn chế
+# Slide 11 — Dịch chuyển và giới hạn
 s = slide_new()
-header(s, "THẢO LUẬN", "Giới hạn của kết quả phân cụm", 11)
-bullets(s, 0.55, 1.7, 12.2, 5.2, [
-    ("Phạm vi đặc trưng.", "Kết quả chính mô tả hai chỉ tiêu PAPI được chọn."),
-    ("Kích thước cụm.", "Giai đoạn 2011–2023 có một cụm 629 điểm và hai cụm 16, 5 điểm."),
-    ("Tham số.", "Độ phân giải và ngưỡng mật độ làm thay đổi số cụm, tỷ lệ nhiễu."),
-    ("Mở rộng số chiều.", "Các nhánh PCA và 8 chiều cho kết quả nhạy với cấu hình."),
-    ("Đánh giá ngoài mẫu.", "Năm 2024 là mốc đánh giá hiện có. Cần thêm các năm để khảo sát độ ổn định."),
-], size=18, gap_pt=25)
-note(s, f"Kết quả cần được đọc trong phạm vi hai chỉ tiêu và các cấu hình đã thử. "
+header(s, "THẢO LUẬN", "Dịch chuyển trên cùng lưới STING từ 2023 sang 2024", 11)
+result_table(s, [
+    ("Năm 2023 / Năm 2024", "Cụm lớn", "Nhiễu"),
+    ("Cụm lớn", TRANSITIONS[MAIN_CLUSTER, MAIN_CLUSTER], TRANSITIONS[MAIN_CLUSTER, "-1"]),
+    ("Nhiễu", TRANSITIONS["-1", MAIN_CLUSTER], TRANSITIONS["-1", "-1"]),
+], 0.6, 1.85, [3.05, 1.48, 1.48], 0.82, 16)
+text(s, 0.6, 4.7, 6.0, 1.0, [
+    (f"{TRANSITIONS.total()} tỉnh có đủ dữ liệu ở cả hai năm.", 16, True, NAVY),
+    ("Bảng dùng cùng bộ chuẩn hóa và lưới đã học.", 15, False, GREY),
+])
+bullets(s, 6.95, 1.88, 5.75, 4.55, [
+    ("Chuyển trạng thái.", f"{TRANSITIONS[MAIN_CLUSTER, '-1']} tỉnh sang nhiễu, "
+     f"{TRANSITIONS['-1', MAIN_CLUSTER]} tỉnh vào cụm lớn."),
+    ("Hai cụm nhỏ.", "Chỉ có điểm giai đoạn 2011–2018."),
+    ("Phạm vi.", "Dịch chuyển phản ánh hai chỉ tiêu PAPI trên lưới cố định."),
+], size=17, gap_pt=25)
+note(s, f"Trong {TRANSITIONS.total()} tỉnh đủ dữ liệu cả hai năm, 47 tỉnh giữ trạng thái và 12 tỉnh đổi trạng thái. "
+     "Nhãn nhiễu biểu thị vị trí ngoài vùng ô dày; điểm gần biên có thể đổi trạng thái khi chỉ tiêu biến động nhỏ. "
+     "Hai năm cuối chỉ có quan sát thuộc cụm lớn hoặc nhiễu. "
+     f"Kết quả cần được đọc trong phạm vi hai chỉ tiêu và các cấu hình đã thử. "
      f"Hai thành phần PCA đầu giữ {_pct(R_PCA['explained_var_total'])} phương sai. "
      f"Ở nhánh 8 chiều, cấu hình gốc cho {R_GOC['k']} cụm và {_pct(R_GOC['noise_ratio'])} nhiễu. "
      f"Khi chỉ thay factor thành 3, kết quả còn {R_F3['k']} cụm và {_pct(R_F3['noise_ratio'])} nhiễu. "
@@ -428,8 +438,8 @@ for i, (a, b) in enumerate(steps):
 note(s, "Nhóm đã cài đặt biến thể STING và kiểm tra cách chia lưới, thống kê ô, gom cụm và gán "
      "điểm mới. Trên hai chỉ tiêu PAPI, kích thước cụm chênh lệch và độ nhạy tham số là những "
      "yếu tố cần chú ý khi đọc kết quả. Hướng tiếp theo là mở rộng mốc thời gian đánh giá "
-     "và đối chiếu thêm các bộ chỉ tiêu có thang đo tương thích. Tài liệu chi tiết kèm theo "
-     "gồm final_report.docx, Nhom15_CuoiKy_STING_PAPI.ipynb và bản trình chiếu final.pptx.")
+     "và đối chiếu thêm các bộ chỉ tiêu có thang đo tương thích. Hai tệp nộp chính là "
+     "Nhom15_CuoiKy_STING_PAPI.docx và Nhom15_CuoiKy_STING_PAPI.ipynb.")
 
 # Slide 13 — Phụ lục: mô hình giám sát
 s = slide_new()

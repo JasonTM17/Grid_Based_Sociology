@@ -10,6 +10,7 @@ import argparse
 from pathlib import Path
 
 from docx import Document
+from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement, parse_xml
@@ -17,9 +18,12 @@ from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor, Twips
 
 BLACK = RGBColor(0, 0, 0)
-PAGE_WIDTH, PAGE_HEIGHT = 11909, 16834
-TEXT_WIDTH = PAGE_WIDTH - 2 * 1080
-COVER_XML = Path(__file__).resolve().parents[2] / "assets/report-cover.xml"
+PAGE_WIDTH, PAGE_HEIGHT = 11906, 16838
+LEFT_MARGIN, RIGHT_MARGIN = 1417, 1134
+TEXT_WIDTH = PAGE_WIDTH - LEFT_MARGIN - RIGHT_MARGIN
+ASSETS = Path(__file__).resolve().parents[2] / "assets"
+COVER_XML = ASSETS / "report-cover.xml"
+COVER_LOGO = ASSETS / "report-cover-logo.png"
 
 
 def _font(run, size=None):
@@ -86,6 +90,11 @@ def _format_table(table):
                     margins.append(item)
                 item.set(qn("w:w"), str(value))
                 item.set(qn("w:type"), "dxa")
+            if row_index == 0:
+                shade = OxmlElement("w:shd")
+                shade.set(qn("w:val"), "clear")
+                shade.set(qn("w:fill"), "A6A6A6")
+                props.insert_element_before(shade, "w:tcMar", "w:vAlign")
             for paragraph in cell.paragraphs:
                 fmt = paragraph.paragraph_format
                 fmt.space_before = fmt.space_after = Pt(1)
@@ -97,72 +106,111 @@ def _format_table(table):
                     _font(run, 12)
 
 
+def _set_page(section, *, cover=False):
+    section.page_width, section.page_height = Twips(PAGE_WIDTH), Twips(PAGE_HEIGHT)
+    section.left_margin, section.right_margin = Twips(LEFT_MARGIN), Twips(RIGHT_MARGIN)
+    section.top_margin = section.bottom_margin = Twips(1134)
+    section.header_distance = Twips(720 if cover else 432)
+    section.footer_distance = Twips(576)
+
+
 def replace_cover(document):
     """Insert the actual reference blocks with their report-specific text."""
     cover = parse_xml(COVER_XML.read_bytes())
-    table = cover.find(qn("w:tbl"))
-    if table is None:
-        raise ValueError("Missing table in the report cover template.")
+    border = cover.find(qn("w:pgBorders"))
+    blip = cover.find(".//" + qn("a:blip"))
+    if border is None or blip is None:
+        raise ValueError("Missing page border or logo in the report cover template.")
     marker = next((p for p in document.paragraphs if p._p.pPr is not None
                    and p._p.pPr.find(qn("w:sectPr")) is not None), None)
     if marker is None:
         raise ValueError("Missing cover section boundary; refusing to replace report body.")
+    _set_page(document.sections[0], cover=True)
+    section_properties = marker._p.pPr.find(qn("w:sectPr"))
+    old_border = section_properties.find(qn("w:pgBorders"))
+    if old_border is not None:
+        section_properties.remove(old_border)
+    section_properties.insert_element_before(border, "w:lnNumType", "w:pgNumType", "w:cols")
+    relationship, _ = document.part.get_or_add_image(str(COVER_LOGO))
+    blip.set(qn("r:embed"), relationship)
+    drawing = cover.find(".//" + qn("wp:docPr"))
+    drawing.set("id", str(document.part.next_id))
     parent = document._element.body
     while parent[0] is not marker._p:
         parent.remove(parent[0])
-    for block in list(cover):
+    for block in list(cover.findall(qn("w:p"))):
         marker._p.addprevious(block)
-    return table
 
 
 def apply_reference_style(document):
     """Change layout only; retain all scientific text, tables and field content."""
     for section in document.sections:
-        section.page_width, section.page_height = Twips(PAGE_WIDTH), Twips(PAGE_HEIGHT)
-        section.left_margin = section.right_margin = Twips(1080)
-        section.top_margin = section.bottom_margin = Twips(1008)
-        section.header_distance, section.footer_distance = Twips(720), Twips(454)
-    for name, size, bold, before in (
-        ("Normal", 12, False, 0), ("Title", 20, True, 6),
-        ("Heading 1", 14, True, 24), ("Heading 2", 12, True, 10),
-        ("Heading 3", 12, True, 10),
-    ):
+        _set_page(section)
+    formats = {
+        "Normal": (13, False, 1.35, 0, 7),
+        "Body Text": (13, False, 1.5, 0, 6),
+        "Title": (20, True, 1.15, 0, 12),
+        "Heading 1": (16, True, 1.15, 18, 10),
+        "Heading 2": (14, True, 1.15, 13, 6),
+        "Heading 3": (12, True, 1.15, 10, 5),
+        "Caption": (12, True, 1.0, 2, 8),
+    }
+    for name, (size, bold, leading, before, after) in formats.items():
         style = document.styles[name]
         style.font.name, style.font.size = "Times New Roman", Pt(size)
         style.font.bold, style.font.color.rgb = bold, BLACK
+        style.font.italic = name == "Caption"
         fmt = style.paragraph_format
-        fmt.line_spacing, fmt.space_before, fmt.space_after = 1.1, Pt(before), Pt(6)
-        fmt.first_line_indent = Twips(0)
+        fmt.line_spacing, fmt.space_before, fmt.space_after = leading, Pt(before), Pt(after)
+        fmt.first_line_indent = Twips(720 if name == "Body Text" else 0)
+        if name == "Body Text":
+            fmt.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        if name in ("Title", "Caption"):
+            fmt.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if name == "Caption":
+            fmt.keep_with_next = False
         # The old Word Title style contains a theme-colored bottom rule.
         properties = style.element.get_or_add_pPr()
         for border in list(properties.findall(qn("w:pBdr"))):
             properties.remove(border)
+    for level, (indent, line_spacing, after) in enumerate(((0, 1.15, 2), (260, 1.15, 5), (480, 1.15, 5)), 1):
+        name = f"TOC {level}"
+        if name not in document.styles:
+            document.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH, builtin=True)
+        style = document.styles[name]
+        style.font.name, style.font.size = "Times New Roman", Pt(12)
+        style.paragraph_format.left_indent = Twips(indent)
+        style.paragraph_format.line_spacing = line_spacing
+        style.paragraph_format.space_after = Pt(after)
     for paragraph in document.paragraphs:
-        fmt = paragraph.paragraph_format
-        fmt.line_spacing = 1.1
-        heading = paragraph.style.name.startswith("Heading ")
-        if heading:
-            fmt.space_before = Pt(24 if paragraph.style.name == "Heading 1" else 10)
-        if paragraph.style.name == "Title" and paragraph._p.pPr is not None:
-            for border in list(paragraph._p.pPr.findall(qn("w:pBdr"))):
-                paragraph._p.pPr.remove(border)
+        name = paragraph.style.name
+        size = formats[name][0] if name in formats and name != "Normal" else None
+        if name == "Heading 1" and paragraph.alignment == WD_ALIGN_PARAGRAPH.CENTER:
+            size = 20
         for run in paragraph.runs:
-            _font(run, 14 if paragraph.style.name == "Heading 1" else 12 if heading else None)
-    cover_table = replace_cover(document)
+            if name == "Caption":
+                run.bold, run.italic = True, True
+            _font(run, size)
+    replace_cover(document)
     for table in document.tables:
-        if table._tbl is not cover_table:
-            _format_table(table)
-    # The previous document had empty footer parts. Create PAGE fields explicitly;
-    # unlink first so clearing the cover cannot clear later sections' page numbers.
-    for section in list(document.sections)[1:]:
+        _format_table(table)
+    # The reference starts visible numbering at Chapter 1.
+    sections = list(document.sections)
+    for section in sections[1:]:
         section.footer.is_linked_to_previous = False
         section.first_page_footer.is_linked_to_previous = False
-    for index, section in enumerate(document.sections):
+    for index, section in enumerate(sections):
         section.different_first_page_header_footer = index == 0
         for footer in (section.footer, section.first_page_footer):
             for paragraph in footer.paragraphs:
                 paragraph.clear()
-        if index:
+        if index == len(sections) - 1 and index > 0:
+            properties = section._sectPr
+            numbering = properties.find(qn("w:pgNumType"))
+            if numbering is None:
+                numbering = OxmlElement("w:pgNumType")
+                properties.insert_element_before(numbering, "w:cols")
+            numbering.set(qn("w:start"), "1")
             paragraph = section.footer.paragraphs[0]
             paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = paragraph.add_run()
