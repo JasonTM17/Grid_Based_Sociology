@@ -1,4 +1,4 @@
-"""Huấn luyện STING trên PAPI 2011–2023 và DỰ ĐOÁN cụm cho 63 tỉnh năm 2024.
+"""Dựng lưới STING từ PAPI 2011–2023 và gán điểm PAPI đã quan sát lên lưới.
 
 Cấu hình (cặp chỉ tiêu + tham số STING) được ĐÓNG BĂNG TRƯỚC khi đánh giá:
 `models/predict_config.json` do `scripts/analysis/predict_sweep.py` sinh theo quy trình
@@ -6,14 +6,15 @@ train-only (chọn trên ≤2020, kiểm trên tương lai giả 2021–2022; n�
 tham gia bước chọn — tránh selection-on-test).
 
 Quy trình:
-  fit 2011–2023 → save() → load() lại từ file → predict() 2024 (out-of-sample).
+  Dựng lưới từ 2011–2023 → lưu và nạp lại → gán các điểm đã quan sát năm 2024.
 
 Đầu ra:
   models/sting_predict_model.pkl   — model đã huấn luyện (pickle)
   models/sting_predict_scaler.json — tham số chuẩn hóa z-score + provenance
-  results/predict_all_years.csv    — cụm dự đoán cho 63 tỉnh × mọi năm
+  results/predict_all_years.csv    — nhãn gán từ điểm quan sát của mọi năm
+  results/papi_observed_grid_2024.csv — chỉ tiêu, nhãn và lý do gán của từng tỉnh
   results/predict_summary.md       — tóm tắt số liệu (cho báo cáo/slide)
-  results/figs/predict_2024.png    — scatter: train + dự đoán 2024
+  results/figs/predict_2024.png    — hình các điểm quan sát và nhãn lưới
 
 Chạy: python scripts/analysis/predict_demo.py
 """
@@ -32,8 +33,8 @@ from sklearn.preprocessing import StandardScaler
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from sting import STING  # noqa: E402
-from scripts.common.papi_pred_common import ROOT, load_config, load_panel  # noqa: E402
+from sting import STING
+from scripts.common.papi_pred_common import ROOT, describe_grid_assignment, load_config, load_panel
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -49,6 +50,7 @@ TEST_YEAR = 2024
 MODEL_PATH = MODELS / "sting_predict_model.pkl"
 SCALER_PATH = MODELS / "sting_predict_scaler.json"
 CSV_PATH = RESULTS / "predict_all_years.csv"
+ASSIGNMENT_PATH = RESULTS / "papi_observed_grid_2024.csv"
 SUMMARY_PATH = RESULTS / "predict_summary.md"
 FIG_PATH = FIGS / "predict_2024.png"
 
@@ -65,13 +67,10 @@ def main() -> int:
     train = df[df.year <= TRAIN_MAX_YEAR]
     test = df[df.year == TEST_YEAR]
     ptr = train[feats].dropna()
-    pte = test[["province_code", "province_vi"] + feats].dropna()
-
     scaler = StandardScaler().fit(ptr)
     Xtr = scaler.transform(ptr)
-    Xte = scaler.transform(pte[feats])
 
-    # 1) Huấn luyện + gom cụm
+    # 1) Dựng lưới và xác định cụm từ giai đoạn tham chiếu.
     model = STING(
         n_levels=sp["n_levels"], factor=sp["factor"], min_count=sp["min_count"]
     ).fit(Xtr)
@@ -99,12 +98,16 @@ def main() -> int:
         json.dumps(scaler_info, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    # 3) Nạp lại TỪ FILE và dự đoán — không cần huấn luyện lại
+    # 3) Nạp lưới đã lưu và gán các điểm quan sát năm 2024.
     loaded = STING.load(MODEL_PATH)
     assert np.array_equal(loaded.predict(Xtr), labels), "load() phải khôi phục đúng"
-    pred_te = loaded.predict(Xte)
+    assignments = describe_grid_assignment(test, feats, scaler, loaded)
+    pte = assignments.loc[assignments.cluster.notna()].copy()
+    pred_te = pte.cluster.to_numpy(dtype=int)
+    Xte = scaler.transform(pte[feats])
+    assignments.to_csv(ASSIGNMENT_PATH, index=False, encoding="utf-8-sig")
 
-    # 4) Dự đoán cụm cho mọi năm (2024 là năm out-of-sample duy nhất)
+    # 4) Gán điểm quan sát của từng năm lên cùng lưới.
     rows = []
     for y in sorted(df.year.unique()):
         sub = df[df.year == y].dropna(subset=feats)
@@ -186,21 +189,21 @@ def main() -> int:
     )
 
     lines = []
-    lines.append("# Dự đoán cụm PAPI bằng STING — train 2011–2023, dự đoán 2024\n")
+    lines.append("# Gán điểm PAPI đã quan sát lên lưới STING đến năm 2023\n")
     lines.append(f"- Cặp chỉ tiêu: **{labels_map[feats[0]]}** × **{labels_map[feats[1]]}**")
     lines.append(
         f"- Cấu hình (đóng băng trước đánh giá qua `predict_sweep.py`): "
         f"STING(L={sp['n_levels']}, factor={sp['factor']}, min_count={sp['min_count']}), "
-        f"level={sp['cluster_level']}; train n={len(ptr)}, test n={len(pte)}"
+        f"level={sp['cluster_level']}, tham chiếu {len(ptr)} quan sát, năm 2024 có {len(pte)} tỉnh đủ hai điểm"
     )
     lines.append(
-        f"- Kết quả train: {model.n_clusters_} cụm {sizes}, nhiễu {noise_tr:.0%} "
-        f"(nhiễu = ô không đủ dày, KHÔNG nằm trong bảng hồ sơ cụm bên dưới)"
+        f"- Giai đoạn tham chiếu: {model.n_clusters_} cụm {sizes}, ngoài vùng dày {noise_tr:.0%}."
     )
-    lines.append(f"- Dự đoán 2024 (đánh giá MỘT LẦN sau khi chốt cấu hình): phủ {cov:.0%}, phân bố {dist}\n")
-    lines.append("## Hồ sơ cụm (train, chỉ điểm thuộc cụm)\n")
+    lines.append(f"- Điểm đã quan sát năm 2024: {cov:.0%} thuộc ô dày, phân bố nhãn {dist}. "
+                 "Bảng lý do gán cho từng tỉnh nằm trong `papi_observed_grid_2024.csv`.\n")
+    lines.append("## Hồ sơ các cụm giai đoạn 2011–2023\n")
     lines.append(profile.to_markdown())
-    lines.append("\n## Thành phần dự đoán 2024 (chỉ điểm thuộc cụm)\n")
+    lines.append("\n## Các tỉnh có điểm quan sát năm 2024 thuộc vùng dày\n")
     lines.append(comp.to_markdown() if len(comp) else "(không có)")
     lines.append("\n## Chuyển cụm 2023 → 2024\n")
     lines.append(crosstab.to_markdown())
@@ -271,14 +274,14 @@ def main() -> int:
         f"({small_in_2324} điểm) — không phải bằng chứng về độ ổn định nhãn."
     )
     lines.append(
-        f"- {dist.get(-1, 0)}/{len(pte)} tỉnh {TEST_YEAR} vào nhiễu do ô lưới thưa (count < min_count), không phải "
-        "do scaler: STING bất biến với biến đổi affine từng chiều (z-score mỗi chiều), nguồn −1 là ô không đủ mật độ."
+        f"- {dist.get(-1, 0)}/{len(pte)} tỉnh {TEST_YEAR} nằm ngoài vùng dày của lưới tham chiếu. "
+        "Nhãn −1 gồm các điểm thuộc ô thưa và các điểm nằm ngoài biên lưới."
     )
     lines.append(
         "\n## Lưu ý phương pháp\n"
         "- Một lưới TOÀN CỤC cho mọi năm (nhãn so sánh được giữa các năm; các năm không độc lập — "
-        "phù hợp cho mục tiêu dự đoán). Phân tích per-year ở Phase 5 là phương pháp KHÁC, không trộn số liệu.\n"
-        "- Năm 2024 KHÔNG tham gia bước chọn cấu hình (xem `predict_sweep.py`); kết quả 2024 ở trên là out-of-sample.\n"
+        "dùng để theo dõi dịch chuyển theo thời gian).\n"
+        "- Nhóm chốt lưới từ giai đoạn 2011–2023 và dùng điểm đã quan sát để gán nhãn cho năm 2024.\n"
         "- Cặp chỉ tiêu nằm trong nhóm ĐÃ QUA AUDIT thang đo (xem `scripts/data/check_data.py`); các sub-dim có bước nhảy "
         "(sd_5_4 tại 2021, sd_2_1 tại 2018, …) đã bị loại khỏi pipeline dự đoán.\n"
         "- Nhãn 2023 cũng do model gán (in-sample); dịch chuyển sát ranh giới ô lưới có thể nhạy với ngưỡng cố định — "
@@ -313,23 +316,23 @@ def main() -> int:
         fig, ax = new_fig(target="docx")  # 6.5 x 4.3 in — khớp cột docx + slide
         noise_mask = labels == -1
         ax.scatter(xa[noise_mask], ya[noise_mask], s=14, c=PALETTE["gray"], alpha=0.5,
-                   label=f"train – {noise_name} ({int(noise_mask.sum())})")
+                   label=f"2011–2023 · {noise_name} ({int(noise_mask.sum())})")
         for c in range(model.n_clusters_):
             mm = labels == c
             if not mm.any():
                 continue
             ax.scatter(xa[mm], ya[mm], s=14, c=cluster_color(c), alpha=0.35,
-                       label=f"train – {CLUSTER_LABELS[c]} ({int(mm.sum())})")
+                       label=f"2011–2023 · {CLUSTER_LABELS.get(c, f'cụm {c}')} ({int(mm.sum())})")
         xt, yt = pte[feats[0]].to_numpy(), pte[feats[1]].to_numpy()
         te_noise = pred_te == -1
         ax.scatter(xt[te_noise], yt[te_noise], s=55, marker="x", c="#444444", linewidths=1.6,
-                   label=f"2024 – {noise_name} ({int(te_noise.sum())})")
+                   label=f"2024 · ngoài vùng dày ({int(te_noise.sum())})")
         for c in range(model.n_clusters_):
             mm = pred_te == c
             if not mm.any():
                 continue
             ax.scatter(xt[mm], yt[mm], s=55, marker="o", c=cluster_color(c), edgecolors="black",
-                       linewidths=0.7, label=f"2024 → {CLUSTER_LABELS[c]} ({int(mm.sum())})")
+                       linewidths=0.7, label=f"2024 → {CLUSTER_LABELS.get(c, f'cụm {c}')} ({int(mm.sum())})")
         # Nhãn trục theo cấu hình đóng băng. Điểm vẽ là GIÁ TRỊ GỐC của panel
         # (ptr/pte phía trên), KHÔNG phải z-score — STING chỉ chuẩn hóa bên trong
         # và bất biến với biến đổi affine từng chiều, nên tọa độ hiển thị giữ
@@ -338,10 +341,10 @@ def main() -> int:
         # số ("thang điểm 1–10" chỉ xác nhận cho d1..d8); ghi rõ "điểm thành phần
         # PAPI" để người đọc không nhầm với điểm chiều chính d1..d8 (0–10) cũng
         # như với điểm chuẩn hóa.
-        ax.set_xlabel(f"{labels_map[feats[0]]} (điểm thành phần PAPI)")
+        ax.set_xlabel(f"{labels_map[feats[0]]}\n(điểm thành phần PAPI)", fontsize=10)
         ax.set_ylabel(f"{labels_map[feats[1]]} (điểm thành phần PAPI)")
-        ax.set_title("STING học 2011–2023 → dự đoán cụm cho 2024 (out-of-sample)")
-        ax.legend(loc="best", frameon=True, framealpha=0.9)
+        ax.set_title("Điểm PAPI quan sát năm 2024\ntrên lưới STING đến năm 2023")
+        ax.legend(loc="upper left", fontsize=8.5, frameon=True, framealpha=0.9)
         ax.grid(alpha=0.25)
         # Nguồn/ngày tải theo data/raw/papi/PROVENANCE.md (không tự điền ngày render)
         add_source(fig, "PAPI — CECODES, VFF-CRT, RTA & UNDP", retrieved="2026-11-03")
@@ -352,7 +355,7 @@ def main() -> int:
 
     print(f"features={feats} | train n={len(ptr)} | test n={len(pte)}")
     print(f"train: k={model.n_clusters_} sizes={sizes} noise={noise_tr:.0%}")
-    print(f"du doan 2024: coverage={cov:.0%} dist={dist} | chuyen that {real_move}/{n_common}"
+    print(f"gan diem 2024: coverage={cov:.0%} dist={dist} | chuyen that {real_move}/{n_common}"
           f" | sang nhieu {to_noise} | tu nhieu {from_noise} | loai {n_excluded}")
     # Chẩn đoán cặp đôi giữa các biến thể min_count (chỉ stdout): ARI + đổi trạng thái
     # cụm↔nhiễu giữa từng cặp biến thể — kiểm chứng chéo độc lập với bảng so-cấu-hình-chốt.

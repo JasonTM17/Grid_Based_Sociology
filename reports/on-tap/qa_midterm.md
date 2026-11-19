@@ -24,9 +24,9 @@
 
 7. **Vì sao có hai cụm, mỗi cụm 7 điểm?** Ngưỡng ô dày là 3. Hai ô 4 và 3 điểm chung cạnh ở hàng trên tạo một cụm. Hai ô 4 và 3 điểm phía phải tạo cụm còn lại. Hai vùng chỉ chạm góc nên tách riêng theo quy tắc nối qua cạnh. (nguồn: scripts/deliverables/build_slides_10.py)
 
-8. **Điểm nhiễu là gì?** Ô có 1 điểm nằm dưới ngưỡng 3 nên điểm đó nhận nhãn −1. Trong PAPI, nhãn nhiễu mô tả vị trí ngoài các ô dày đã học trên hai chỉ tiêu đang xét. (nguồn: src/sting.py; scripts/notebooks/gen_submission_demo.py)
+8. **Điểm nhiễu là gì?** Ô có 1 điểm nằm dưới ngưỡng 3 nên điểm đó nhận nhãn −1. Trong PAPI cũng vậy. Điểm nằm trong ô có ít hơn 5 quan sát nhận nhãn −1 ở cấu hình chính. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
 
-9. **Đổi độ mịn lưới hoặc ngưỡng ô dày ảnh hưởng thế nào?** Lưới mịn hơn phân tán điểm vào nhiều ô. Ngưỡng lớn hơn đòi hỏi nhiều điểm hơn trong mỗi ô dày. Cả hai thay đổi có thể làm đổi số cụm và tỷ lệ nhiễu, nên cần xem bảng độ nhạy. (nguồn: results/predict_summary.md)
+9. **Đổi độ mịn lưới hoặc ngưỡng ô dày ảnh hưởng thế nào?** Lưới mịn hơn phân tán điểm vào nhiều ô. Trên cùng lưới 16 × 16, khi nâng ngưỡng từ 5 lên 8, số cụm giảm từ 3 xuống 1 và tỷ lệ nhiễu tăng từ 19,7% lên 31,2%. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
 
 10. **Bản nhóm khác STING gốc ở đâu?** Nhóm lưu số điểm và các thống kê theo ô, sau đó chọn một mức lưới và gom các ô dày chung cạnh. STING gốc còn mô hình hóa phân phối và duyệt lưới từ trên xuống theo tiêu chí thống kê. (nguồn: src/sting.py)
 
@@ -34,18 +34,28 @@
 
 ## Hiểu phần ứng dụng PAPI
 
-12. **Một điểm PAPI đại diện cho gì?** Một dòng ứng với một tỉnh trong một năm. Demo phân cụm dùng hai chỉ tiêu: kiểm soát tham nhũng trong cung ứng dịch vụ công và y tế công lập. Đầu vào thuật toán được chuẩn hóa; đơn vị hiển thị được ghi trên trục từng hình. Ví dụ, biểu đồ dự đoán năm 2024 hiển thị điểm thành phần PAPI gốc. Bảng dữ liệu có 882 dòng và 41 cột. (nguồn: models/predict_config.json; data/processed/papi_panel_63_2011_2024.csv; scripts/analysis/predict_demo.py)
+12. **Một điểm PAPI đại diện cho gì?** Một điểm ứng với một tỉnh trong một năm. Tọa độ là chỉ tiêu 4.2 và 6.1 sau chuẩn hóa. Mẫu phân cụm có 869 quan sát đủ cả hai chỉ tiêu, gồm 61 quan sát năm 2024. Nhóm dùng cả mẫu để mô tả cấu trúc vùng điểm trong giai đoạn 2011–2024. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
 
-13. **Vì sao cần chuẩn hóa?** Hai chỉ tiêu được đưa về thang z-score để đo khoảng cách và đặt lưới trên cùng quy mô. Thống kê chuẩn hóa được học từ 2011–2023 rồi áp dụng cho năm 2024. (nguồn: scripts/common/papi_pred_common.py; scripts/analysis/predict_demo.py)
+13. **Vì sao cần chuẩn hóa?** Hai chỉ tiêu được đưa về cùng đơn vị độ lệch chuẩn. Với chỉ tiêu 4.2 của Lạng Sơn năm 2024, lấy điểm gốc 2,072702 trừ trung bình 1,908406 rồi chia độ lệch chuẩn 0,182448 để được z ≈ 0,9005. Tính tương tự với chỉ tiêu 6.1 được z ≈ 0,3737. Hai tọa độ này đưa điểm vào ô (12, 10) của lưới, với 17 quan sát trong ô. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
 
-14. **Kết quả 48 tỉnh và 13 tỉnh được hiểu thế nào?** Năm 2024 có 61/63 tỉnh đủ hai chỉ tiêu. Trong số này, 48 tỉnh được gán vào cụm và 13 tỉnh nhận nhãn nhiễu. Tỷ lệ được gán cụm là 48/61, xấp xỉ 79%. (nguồn: results/predict_summary.md)
+14. **Ba cụm STING đến từ đâu?** Dùng lưới 16 × 16 và ngưỡng ít nhất 5 quan sát mỗi ô. Đếm được 56 ô dày. Nối qua cạnh cho ba vùng gồm 1, 3 và 52 ô dày. Số điểm tương ứng là 5, 16 và 677. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
 
-15. **Đánh giá bằng chỉ số nào?** Ví dụ giả lập dùng ARI so với nhãn đã biết. Với PAPI, nhóm xem số cụm, kích thước cụm, tỷ lệ nhiễu và silhouette. ARI giữa STING và phương pháp khác đo mức đồng thuận giữa hai cách phân hoạch. (nguồn: results/metrics.csv)
+15. **Vì sao K-means dùng hai cụm?** Nhóm thử k = 2, 3, 4 và 5. Silhouette lần lượt là 0,4472, 0,3354, 0,3649 và 0,3311. Chọn k = 2 vì điểm cao nhất trong nhóm giá trị đã thử. K-means gán đủ 869 điểm theo khoảng cách tới tâm cụm. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
 
-16. **STING, K-means và DBSCAN khác nhau thế nào?** STING dùng thống kê ô lưới. K-means dùng các tâm cụm và số cụm đã đặt trước. DBSCAN tìm vùng điểm dày theo lân cận quanh từng điểm. Bảng so sánh cần đọc kèm tỷ lệ nhiễu và tập điểm dùng để tính silhouette. (nguồn: results/metrics.csv; src/sting.py)
+16. **Vì sao có hai cỡ mẫu trong bảng?** Số cụm và số điểm nhiễu được đếm trên 869 điểm. Silhouette so trực tiếp trên 680 điểm cả ba cách gán cụm, dùng cùng tọa độ z-score và giữ nguyên nhãn từ mẫu đầy đủ. STING đạt 0,3802, K-means k = 2 đạt 0,4605, K-means k = 3 đạt 0,3499, DBSCAN đạt 0,2740. Đây là độ gọn và độ tách theo khoảng cách Euclid trên 680 điểm. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
 
-17. **Kết luận nào phù hợp với kết quả hiện có?** Trên hai chỉ tiêu đã chọn, cấu hình STING cho một cụm lớn và hai cụm nhỏ ở tập 2011–2023. Kết luận cần giới hạn trong hai chỉ tiêu, giai đoạn dữ liệu và cấu hình đã dùng. (nguồn: results/metrics.csv; models/predict_config.json)
+17. **Kết luận nào phù hợp với kết quả hiện có?** Trên hai chỉ tiêu đã chọn, cấu hình chính cho một vùng tập trung lớn, hai vùng nhỏ và 171 điểm nhiễu. Cụm lớn chứa 677 trong 698 điểm đã vào cụm. Nêu rõ kết quả mô tả hai chỉ tiêu và phụ thuộc tham số lưới. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
+
+18. **Nếu đặt K-means k = 3 thì có ra đúng ba cụm STING không?** Bảng chéo cho thấy 677 điểm trong cụm STING lớn nhất bị K-means chia thành 482 và 195 điểm khi k = 2. Khi k = 3, những điểm này vẫn bị chia thành ba phần 306, 303 và 68 điểm. Hai cách dùng tiêu chí khác nhau. STING nối các ô dày, K-means chia điểm theo tâm gần nhất. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
+
+19. **Bỏ z-score thì ba thuật toán đổi ra sao?** Dựng lại lưới theo min–max giữ 869/869 điểm trong cùng ô STING. K-means k = 2 đổi cụm ở 68 điểm sau ghép tên cụm. DBSCAN với min_samples = 5 đi từ 5 lên 6 cụm, từ 116 lên 120 điểm nhiễu và có 8 điểm đổi trạng thái nhiễu. Lượt chạy DBSCAN trên điểm gốc dùng vòng tròn cùng diện tích với elip tương ứng của ε = 0,2 trên thang z. Cả sáu ô hình dùng cùng tọa độ hiển thị. [Hình đối chiếu](../../results/figs/papi_zscore_comparison.png) · [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
+
+20. **Tham số significance_z có ý nghĩa gì?** Đây là quy tắc lọc tùy chọn so trung bình ô con với ô cha sau bước đếm điểm. Khi thử ngưỡng minh họa 2,0 với cùng lưới, có 46 ô đạt, 4 cụm và 270 điểm nhiễu. Kết quả chính dùng ngưỡng 5 điểm/ô. Z-score đầu vào vẫn dùng để chuẩn hóa tọa độ từng điểm. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
+
+**Hình phân bổ quan sát cuối dùng để làm gì?** Dùng chung lưới tới 2023 để đo độ phủ và phát hiện tỉnh đổi trạng thái, chẳng hạn Lạng Sơn từ ngoài vùng dày năm 2023 vào cụm lớn năm 2024. Nhãn suy từ hai điểm PAPI đã quan sát cũng là mốc đối chiếu cho phần dự báo. Ridge tạo hai điểm 2024 từ tám điểm 2023, sau đó đối chiếu sai số điểm và số tỉnh ngoài vùng dày trên mẫu đủ dữ liệu. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
+
+**Vì sao đã tiền xử lý mà vẫn giữ nhiễu?** Tiền xử lý kiểm tra tính hợp lệ của dữ liệu. Hai tỉnh thiếu chỉ tiêu năm 2024 được loại khỏi phép gán. Trong 61 tỉnh đủ điểm, 13 tỉnh vào ô có dưới 5 quan sát tham chiếu nên nhận nhãn −1. Giữ 13 tỉnh trong mẫu giúp đo đúng độ phủ 48/61 và xem xét các trường hợp ngoài vùng dày. Nếu chỉ giữ 48 tỉnh đã vào cụm, phép đếm sẽ cho 48/48 và che mất giới hạn độ phủ. Notebook tính bảng lý do gán từ lưới. Có thể tra ô và số quan sát tham chiếu của từng tỉnh trong CSV. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb) · [Bảng gán năm 2024](../../results/papi_observed_grid_2024.csv)
 
 ## Mở tài liệu đúng mốc
 
-18. **Mở file nào khi tập và khi chiếu?** Khi tập, mở bản có giải thích trong study và kịch bản cùng thư mục này. Khi chiếu, mở notebook và slide đã đặt tên theo nhóm trong submissions/01-giua-ky. Cách chạy lại nằm trong README và DEMO. (nguồn: README.md; DEMO.md)
+21. **Mở file nào khi tập và khi chiếu?** Dùng notebook và slide trong thư mục `submissions/01-giua-ky` để tập theo kết quả mới. Giải nén cả ZIP để chạy lại trên máy khác. [Hướng dẫn demo](../../DEMO.md)

@@ -1,0 +1,106 @@
+{
+  "origin_year": 2023,
+  "forecast_year": 2024,
+  "train_pairs": 738,
+  "forecast_count": 61,
+  "comparable_count": 59,
+  "actual_eligible": 61,
+  "actual_outside": 11,
+  "selected_method": {
+    "sd_4_2": "ridge",
+    "sd_6_1": "ridge"
+  },
+  "selected": {
+    "sd_4_2": "Ridge",
+    "sd_6_1": "Ridge"
+  },
+  "cv_mae": {
+    "sd_4_2": {
+      "blend": 0.0988307616075627,
+      "carry": 0.10769156279959148,
+      "forest": 0.10078989287040478,
+      "ridge": 0.09843215215278382
+    },
+    "sd_6_1": {
+      "blend": 0.06715491376770706,
+      "carry": 0.07114408391641865,
+      "forest": 0.06946606774841216,
+      "ridge": 0.06643483724629733
+    }
+  },
+  "scores": [
+    {
+      "target": "sd_4_2",
+      "method": "forecast",
+      "n": 59,
+      "mae": 0.07362903526243383,
+      "rmse": 0.09720651404168157,
+      "bias": -0.05809549096673748
+    },
+    {
+      "target": "sd_4_2",
+      "method": "carry",
+      "n": 59,
+      "mae": 0.07627283920676019,
+      "rmse": 0.09525046055079572,
+      "bias": -0.024542161973856225
+    },
+    {
+      "target": "sd_6_1",
+      "method": "forecast",
+      "n": 59,
+      "mae": 0.06411344193858291,
+      "rmse": 0.0769843179862577,
+      "bias": -0.030776258208783495
+    },
+    {
+      "target": "sd_6_1",
+      "method": "carry",
+      "n": 59,
+      "mae": 0.06830326581405383,
+      "rmse": 0.08754786099718419,
+      "bias": -0.033304517552004045
+    }
+  ],
+  "grid": [
+    {
+      "method": "forecast",
+      "n": 59,
+      "out_correct": 0,
+      "in_correct": 48,
+      "false_out": 0,
+      "missed_out": 11,
+      "exact_label_agreement": 0.8135593220338984,
+      "out_recall": 0.0,
+      "balanced_zone_accuracy": 0.5
+    },
+    {
+      "method": "carry",
+      "n": 59,
+      "out_correct": 4,
+      "in_correct": 43,
+      "false_out": 5,
+      "missed_out": 7,
+      "exact_label_agreement": 0.7966101694915254,
+      "out_recall": 0.36363636363636365,
+      "balanced_zone_accuracy": 0.6297348484848485
+    },
+    {
+      "method": "majority",
+      "n": 59,
+      "out_correct": 0,
+      "in_correct": 48,
+      "false_out": 0,
+      "missed_out": 11,
+      "exact_label_agreement": 0.8135593220338984,
+      "out_recall": 0.0,
+      "balanced_zone_accuracy": 0.5
+    }
+  ],
+  "scenario_count": 364,
+  "scenario_auc": 0.8162878787878788,
+  "scenario_share_range": [
+    0.038461538461538464,
+    0.7142857142857143
+  ]
+}

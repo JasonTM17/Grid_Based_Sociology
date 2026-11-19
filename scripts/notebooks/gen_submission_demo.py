@@ -1,9 +1,7 @@
 """Sinh + execute notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb — notebook nộp bài (STING × PAPI).
 
-Pattern theo scripts/notebooks/gen_midterm_demo.py và scripts/notebooks/gen_final_analysis.py nhưng
-tự execute (nbconvert inplace) và tự kiểm tra: mọi code cell có output, 0 output
-loại ``error``. Phần lớn số liệu được tính lại từ dữ liệu trong notebook; các ô gate
-đọc ``results/*.csv|md`` và ``assert`` khớp artifact đã lưu (không gõ tay số mới).
+Chạy bằng nbconvert và kiểm tra mọi ô code có kết quả. Notebook tính lại
+z-score, ô dày, số cụm, silhouette trên cùng nhóm điểm và độ nhạy từ bảng PAPI.
 
 Cách dùng: python scripts/notebooks/gen_submission_demo.py
 """
@@ -14,6 +12,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from base64 import b64decode
 
 import nbformat as nbf
 
@@ -42,10 +41,9 @@ lưu để theo dõi trực tiếp.
 chọn **Run All** (chạy tất cả các ô từ đầu). Các ô phía sau sử dụng thư viện,
 dữ liệu và mô hình được nạp hoặc tạo ở các ô trước."""))
 
-cd(nbf.v4.new_code_cell("""import ast
-import os
-import re
+cd(nbf.v4.new_code_cell("""import os
 import sys
+from collections import Counter
 from pathlib import Path
 
 _STING_MARKER = Path("src") / "sting.py"
@@ -104,16 +102,15 @@ from IPython.display import Image, display
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans, DBSCAN
-from sklearn.metrics import (
-    adjusted_rand_score,
-    silhouette_score,
-    davies_bouldin_score,
-    calinski_harabasz_score,
-)
+from sklearn.metrics import adjusted_rand_score, silhouette_score
 
 from sting import STING
-from scripts.common.papi_pred_common import FEATURE_LABELS, load_config, load_panel
-from scripts.common.fig_style import CLUSTER_COLORS, apply_style
+from scripts.common.papi_pred_common import FEATURE_LABELS, load_panel
+from scripts.common.fig_style import apply_style
+from scripts.common.midterm_clustering import (
+    FEATURES, GRID, THRESHOLDS, K_CANDIDATES, KMEANS_OPTIONS, DBSCAN_OPTIONS, CELL_Z_EXAMPLE,
+    fit_grid, clustered_silhouette, comparison_figure, raw_dbscan_radius, scaling_comparison_figure,
+)
 
 apply_style()
 print("Đã nạp mã nguồn STING và các thư viện cần thiết.")"""))
@@ -171,211 +168,374 @@ assert ari >= 0.9, f"ARI quá thấp: {ari:.3f}"
 print(f"ARI = {ari:.3f} | Số cụm {m_syn.n_clusters_} | Tỷ lệ nhiễu {(lab_syn == -1).mean():.1%}")
 """))
 
-md(nbf.v4.new_markdown_cell("""## 4. Ứng dụng PAPI
+md(nbf.v4.new_markdown_cell("""## 4. Phân cụm trên dữ liệu PAPI 2011–2024
 
-Bảng PAPI có 882 quan sát tỉnh–năm và 41 cột, bao quát 63 tỉnh, thành phố
-trong giai đoạn 2011–2024. Phân tích chính dùng hai chỉ tiêu gồm **kiểm soát
-tham nhũng trong cung ứng dịch vụ công** và **y tế công lập**.
+Mỗi điểm là một tỉnh trong một năm. Hai tọa độ là chỉ tiêu **4.2 Kiểm soát tham
+nhũng trong cung ứng dịch vụ công** và **6.1 Y tế công lập**. Mục tiêu là mô tả
+vùng điểm tập trung và các vùng nhỏ tách biệt trên mặt phẳng hai chỉ tiêu.
 
-Nhóm chuyển điểm 0 về giá trị thiếu theo quy ước nguồn, rồi chọn các quan
-sát có đủ hai chỉ tiêu để phân cụm. Bộ chuẩn hóa được ước lượng trên dữ liệu
-2011–2023 và áp dụng cho năm 2024. Biểu đồ gán cụm năm 2024 hiển thị điểm
-thành phần PAPI theo đơn vị gốc."""))
+Các tỉnh có đủ hai chỉ tiêu năm 2024 được đưa vào phân tích cùng dữ liệu các năm trước.
+Các cụm mô tả những quan sát đã có trong bảng PAPI."""))
 
-cd(nbf.v4.new_code_cell("""cfg = load_config()
-feats = cfg["features"]
+md(nbf.v4.new_markdown_cell("### 4.1 Chuẩn bị mẫu phân tích"))
+
+cd(nbf.v4.new_code_cell("""feats = list(FEATURES)
 panel = load_panel()
+keys = ["province_code", "year"]
 assert panel.shape == (882, 41)
-print(f"Bảng PAPI có {len(panel)} dòng và {len(panel.columns)} cột.")
-print("Hai chỉ tiêu phân cụm")
-print("\\n".join(f"• {FEATURE_LABELS[feature]}" for feature in feats))"""))
+assert not panel.duplicated(keys).any()
+assert not (panel[feats] == 0).any().any()
+complete = panel.dropna(subset=feats).copy()
+total_2024 = int(panel.year.eq(2024).sum())
+eligible_2024 = int(complete.year.eq(2024).sum())
 
-md(nbf.v4.new_markdown_cell("### 4.1 Tiền xử lý dữ liệu"))
+prep = pd.read_csv(ROOT / "results" / "preprocessing_audit.csv")
+outlier_result = prep.loc[prep["test"].str.startswith("Đánh dấu ngoại lai"), "result"].item()
+print(f"PAPI có {len(panel)} dòng, {panel.shape[1]} cột và {panel.province_code.nunique()} tỉnh.")
+print(f"Mẫu phân cụm gồm {len(complete)} quan sát đủ hai chỉ tiêu, loại {len(panel) - len(complete)} dòng thiếu.")
+print(f"Năm 2024 đóng góp {eligible_2024}/{total_2024} quan sát vào cùng mẫu phân cụm.")
+print(f"Kiểm tra ngoại lai khi tiền xử lý: {outlier_result}. Giữ điểm PAPI để phân cụm.")"""))
 
-cd(nbf.v4.new_code_cell("""_prep = pd.read_csv(ROOT / "results" / "preprocessing_audit.csv")
-_outlier_result = _prep.loc[_prep["test"].str.startswith("Đánh dấu ngoại lai"), "result"].item()
-flagged_cells = int(_outlier_result.split()[0])
-duplicated_keys = int(panel.duplicated(["province_code", "year"]).sum())
-incomplete_rows = int(panel[feats].isna().any(axis=1).sum())
-_tbl = pd.DataFrame(
-    [
-        ("Làm sạch", "Khóa tỉnh–năm", f"{duplicated_keys} dòng trùng khóa", "Giữ các quan sát có khóa duy nhất."),
-        ("Làm sạch", "Độ đầy đủ của hai chỉ tiêu", f"{incomplete_rows} dòng thiếu", "Loại các dòng thiếu khỏi đầu vào phân cụm."),
-        ("Làm sạch", "Giá trị ngoại lai", f"{flagged_cells} ô được đánh dấu trong 37 chỉ tiêu", "Giữ giá trị gốc để phân tích."),
-        ("Tích hợp", "Độ phủ bảng PAPI", f"{panel.province_code.nunique()} tỉnh, {panel.year.nunique()} năm", "Thống nhất dữ liệu theo mã tỉnh và năm."),
-        ("Chuẩn hóa", "Giai đoạn ước lượng tham số", "2011–2023", "Dùng lại tham số đã học cho năm 2024."),
-    ],
-    columns=["Giai đoạn", "Kiểm tra", "Kết quả", "Quyết định"],
-)
-with pd.option_context("display.max_colwidth", None):
-    display(_tbl)"""))
+md(nbf.v4.new_markdown_cell("""### 4.2 Tính z-score từ số liệu thật
 
-md(nbf.v4.new_markdown_cell("""### 4.2 Xây lưới và tái lập kết quả phân cụm
+Điểm 0 đã được chuyển sang giá trị thiếu theo quy ước nguồn. Với mỗi chỉ tiêu,
+nhóm tính trung bình **μ** và độ lệch chuẩn **σ** trên các quan sát đủ cả hai
+chỉ tiêu. Tọa độ được chuẩn hóa bằng **z = (x − μ) / σ**, với σ tính theo
+quy ước chia cho số quan sát n của StandardScaler. Trên hình, z = 0 là mức
+trung bình của chỉ tiêu đó và z = +1 là cao hơn trung bình một độ lệch chuẩn.
+Hai trục cùng dùng đơn vị độ lệch chuẩn.
 
-Ô thứ nhất chuẩn hóa dữ liệu, xây lưới và tạo mô hình STING. Ô kế tiếp
-dùng mô hình đó để đối chiếu nhãn với bảng kết quả đã lưu."""))
+Ô dưới lấy Lạng Sơn năm 2024 làm ví dụ. Sau chuẩn hóa, tọa độ 4.2 bằng 0,9005
+nghĩa là chỉ tiêu này cao hơn trung bình khoảng 0,90 độ lệch chuẩn. Tọa độ
+6.1 bằng 0,3737 nghĩa là y tế công lập cao hơn trung bình khoảng 0,37 độ
+lệch chuẩn. Hai tọa độ tạo thành đầu vào chung cho cả ba thuật toán."""))
 
-cd(nbf.v4.new_code_cell("""ptr = panel[panel.year <= 2023].dropna(subset=feats)
-scaler = StandardScaler().fit(ptr[feats])
-Xz = scaler.transform(ptr[feats])
-m_frozen = STING(n_levels=cfg["sting"]["n_levels"], factor=cfg["sting"]["factor"],
-                 min_count=cfg["sting"]["min_count"]).fit(Xz)
-lab = m_frozen.cluster(level=cfg["sting"]["cluster_level"],
-                       connectivity=cfg["sting"]["connectivity"])
-sizes = sorted([int((lab == c).sum()) for c in range(m_frozen.n_clusters_)], reverse=True)
-noise = float((lab == -1).mean())
-print(f"STING tìm được {m_frozen.n_clusters_} cụm trên {len(ptr)} quan sát giai đoạn 2011–2023.")
-print(f"Các cụm có lần lượt {', '.join(map(str, sizes))} điểm. Tỷ lệ nhiễu là {noise:.1%}.")
-_exp = pd.read_csv(ROOT / "results" / "metrics.csv")
-_sting = _exp[(_exp.scope == "pooled 2011-2023") & (_exp.method == "STING (frozen)")].iloc[0]
-_sizes_m = re.search(r"\\[(\\d+,\\s*\\d+,\\s*\\d+)\\]", str(_sting.note))
-exp_sizes = ast.literal_eval("[" + _sizes_m.group(1) + "]")
-assert m_frozen.n_clusters_ == int(_sting.k)
-assert sizes == exp_sizes
-assert abs(noise - float(_sting.noise_ratio)) < 1e-3"""))
+cd(nbf.v4.new_code_cell("""scores = complete[feats]
+Xraw = scores.to_numpy()
+scaler = StandardScaler().fit(scores)
+Xz = scaler.transform(scores)
 
-cd(nbf.v4.new_code_cell("""saved = pd.read_csv(ROOT / "results" / "predict_all_years.csv", encoding="utf-8-sig")
+example_mask = complete.province_vi.eq("Lạng Sơn") & complete.year.eq(2024)
+example = scores.loc[example_mask].iloc[0].to_numpy()
+means = scores.mean().to_numpy()
+stds = scores.std(ddof=0).to_numpy()
+z_example = (example - means) / stds
+np.testing.assert_allclose(z_example, scaler.transform(scores.loc[example_mask])[0])
+print("Lạng Sơn năm 2024")
+for feature, x, mu, sigma, z in zip(feats, example, means, stds, z_example, strict=True):
+    print(f"{feature}: ({x:.6f} − {mu:.6f}) / {sigma:.6f} = {z:.4f}")
 
+display(pd.DataFrame({
+    "Chỉ tiêu": [FEATURE_LABELS[f] for f in feats],
+    "Điểm gốc x": example,
+    "Trung bình μ": means,
+    "Độ lệch chuẩn σ": stds,
+    "z-score": z_example,
+}).round(4))"""))
 
-complete = panel.dropna(subset=feats)
-predicted = complete[["year", "province_code"]].assign(
-    pred_cluster=m_frozen.predict(scaler.transform(complete[feats]))
-)
-merged = saved.merge(
-    predicted, on=["year", "province_code"],
-    suffixes=("_saved", "_refit"), validate="one_to_one",
-)
-n_diff = int((merged.pred_cluster_saved != merged.pred_cluster_refit).sum())
-assert len(merged) == len(saved) == 869
-assert n_diff == 0
-print(f"Khi chạy lại STING, {len(merged) - n_diff}/{len(saved)} nhãn khớp với kết quả đã lưu.")"""))
+md(nbf.v4.new_markdown_cell("""### 4.3 STING tìm được ba cụm như thế nào?
 
-md(nbf.v4.new_markdown_cell("""### 4.3 Đối chiếu với K-means và DBSCAN
+Tại mức 2, mỗi trục có 4² = 16 khoảng, tạo lưới 16 × 16. Một ô có ít nhất
+**5 quan sát** là ô dày. Các ô dày nối được với nhau qua cạnh tạo thành một
+cụm. Dấu và độ lớn của z-score chỉ xác định tọa độ của điểm. Quy tắc nhiễu
+dựa vào **số điểm trong ô** mà điểm rơi vào.
 
-Ba phương pháp cùng dùng 808 quan sát đủ dữ liệu trong giai đoạn 2011–2023.
-Silhouette được tính trên các điểm thuộc cụm. Vì mỗi phương pháp có thể
-loại một tập điểm khác nhau, cần đọc chỉ số này cùng tỷ lệ nhiễu."""))
+Ô dưới in số ô dày và số quan sát trong từng cụm. Hàm thiết lập lưới gọi
+STING.fit để đếm điểm và STING.cluster để gom các ô dày kề cạnh."""))
 
-cd(nbf.v4.new_code_cell("""metrics = pd.read_csv(ROOT / "results" / "metrics.csv")
-metrics_pooled = metrics[metrics.scope == "pooled 2011-2023"]
-methods = ["STING (frozen)", "k-means k=2", "DBSCAN eps=0.2"]
-comparison = metrics_pooled.loc[metrics_pooled.method.isin(methods),
-                                ["method", "k", "noise_ratio", "silhouette"]].rename(
-    columns={"method": "Phương pháp", "k": "Số cụm",
-             "noise_ratio": "Tỷ lệ nhiễu", "silhouette": "Silhouette"}
-)
-comparison["Phương pháp"] = comparison["Phương pháp"].replace(
-    {"STING (frozen)": "STING", "k-means k=2": "K-means (2 cụm)"}
-)
-print(comparison.to_string(index=False, formatters={"Tỷ lệ nhiễu": "{:.1%}".format}))
-print()
+cd(nbf.v4.new_code_cell("""grid_model, lab = fit_grid(Xz)
+points_per_cluster = Counter(lab)
+cells_per_cluster = Counter(grid_model.label_of_.values())
+cell_stats = grid_model.cells_[grid_model.cluster_level_]
+grid_width = GRID["factor"] ** GRID["cluster_level"]
 
+print(f"Lưới {grid_width} × {grid_width} | Bốn hướng kề cạnh | Ngưỡng {grid_model.min_count_} điểm/ô")
+print(f"{len(grid_model.label_of_)} ô dày tạo thành {grid_model.n_clusters_} vùng liên thông.")
+for group in sorted(cells_per_cluster):
+    print(f"Cụm {group}: {cells_per_cluster[group]} ô dày, {points_per_cluster[group]} quan sát.")
+noise = points_per_cluster[-1]
+print(f"Nhiễu: {noise}/{len(lab)} quan sát ({noise / len(lab):.1%}).")
 
-def safe_metrics(X, lab):
-    mask = lab >= 0
-    k = len(set(lab[mask]))
-    if k < 2:
-        return None, None, None
-    return (silhouette_score(X[mask], lab[mask]),
-            davies_bouldin_score(X[mask], lab[mask]),
-            calinski_harabasz_score(X[mask], lab[mask]))
+step = (grid_model.bounds_max_ - grid_model.bounds_min_) / grid_width
+bin_indices = np.floor((z_example - grid_model.bounds_min_) / step).astype(int)
+example_cell = tuple(np.clip(bin_indices, 0, grid_width - 1).tolist())
+assert grid_model.label_of_.get(example_cell, -1) == lab[example_mask.to_numpy()][0]
+print(f"Lạng Sơn 2024 vào ô {example_cell} (đếm từ 0), ô có {cell_stats[example_cell].count} quan sát.")
+print(f"Nhãn cụm của điểm này: {grid_model.label_of_.get(example_cell, -1)}.")"""))
 
+md(nbf.v4.new_markdown_cell("""### 4.4 Vì sao K-means dùng k = 2?
 
-sil, db, ch = safe_metrics(Xz, lab)
-sting_row = metrics_pooled[metrics_pooled.method == "STING (frozen)"].iloc[0]
-assert abs(sil - sting_row.silhouette) < 1e-3
-assert abs(db - sting_row.davies_bouldin) < 1e-3
-assert abs(ch - sting_row.calinski_harabasz) < 1e-1
+K-means cần chỉ định số cụm k và gán mỗi điểm vào tâm cụm gần nhất. Nhóm
+thử k từ 2 đến 5 trên **cùng 869 điểm sau chuẩn hóa**. Silhouette đo độ
+gần của mỗi điểm với cụm của nó so với cụm gần nhất khác. Điểm càng gần 1,
+sự phân tách càng rõ theo khoảng cách Euclid. Nhóm dùng k có điểm cao nhất
+trong bốn giá trị đã thử để vẽ và đối chiếu.
 
-km2 = KMeans(n_clusters=2, n_init=10, random_state=42).fit(Xz)
-km2_row = metrics_pooled[metrics_pooled.method == "k-means k=2"].iloc[0]
-assert abs(adjusted_rand_score(lab, km2.labels_) - km2_row.ari_vs_sting) < 1e-3
-assert abs(silhouette_score(Xz, km2.labels_) - km2_row.silhouette) < 1e-3
+Trên hình STING, các hình chữ nhật đánh dấu ô dày. Cụm của STING được
+đếm từ các vùng ô dày, còn số cụm K-means được chọn qua bảng silhouette.
+Code cũng lấy lại tọa độ z-score của Lạng Sơn để tính khoảng cách Euclid
+đến các tâm. Qua đó có thể đối chiếu cách gán điểm này với cách STING chọn ô."""))
 
-db2 = DBSCAN(eps=0.2, min_samples=5).fit(Xz)
-db2_row = metrics_pooled[metrics_pooled.method == "DBSCAN eps=0.2"].iloc[0]
-assert abs(adjusted_rand_score(lab, db2.labels_) - db2_row.ari_vs_sting) < 1e-3
-print("Kết quả STING, K-means và DBSCAN khớp bảng đối chiếu.")"""))
+cd(nbf.v4.new_code_cell("""models = {}
+silhouette_by_k = {}
+for k in K_CANDIDATES:
+    fitted = KMeans(n_clusters=k, **KMEANS_OPTIONS).fit(Xz)
+    models[k] = fitted
+    silhouette_by_k[k] = silhouette_score(Xz, fitted.labels_)
+    print(f"k={k}  |  Silhouette = {silhouette_by_k[k]:.4f}")
 
-cd(nbf.v4.new_code_cell("""fig, axes = plt.subplots(1, 2, figsize=(11, 5))
-axes[0].scatter(Xz[:, 0], Xz[:, 1], s=12, c=[CLUSTER_COLORS[int(c)] for c in lab])
-axes[0].set_title(f"STING — {m_frozen.n_clusters_} cụm, {noise:.1%} nhiễu")
-axes[1].scatter(Xz[:, 0], Xz[:, 1], s=12, c=[CLUSTER_COLORS[int(c)] for c in km2.labels_])
-axes[1].set_title("K-means — 2 cụm")
-for ax in axes:
-    ax.set_xlabel(f"{FEATURE_LABELS[feats[0]]} (z-score)")
-    ax.set_ylabel(f"{FEATURE_LABELS[feats[1]]} (z-score)")
-plt.tight_layout()
-plt.show()
+best_k = max(silhouette_by_k, key=silhouette_by_k.get)
+km = models[best_k]
+print(f"K-means chọn k={best_k} trong các giá trị đã thử và gán đủ {len(km.labels_)} điểm.")
+distances = np.linalg.norm(km.cluster_centers_ - z_example, axis=1)
+assert distances.argmin() == km.labels_[example_mask.to_numpy()][0]
+print("Khoảng cách từ Lạng Sơn 2024 đến các tâm, theo thứ tự gần đến xa: "
+      + " và ".join(f"{distance:.4f}" for distance in sorted(distances)))"""))
 
-"""))
+cd(nbf.v4.new_code_cell("""fig = comparison_figure(Xz, grid_model, lab, km)
+plt.show()"""))
 
-md(nbf.v4.new_markdown_cell("""### 4.4 Gán cụm năm 2024 và khảo sát độ nhạy
+md(nbf.v4.new_markdown_cell("""### 4.5 Đối chiếu trên cùng nhóm quan sát
 
-Nhóm áp dụng lưới đã học trên giai đoạn 2011–2023 cho năm 2024. Thí nghiệm
-giữ nguyên lưới và thay ngưỡng số điểm tối thiểu trong ô."""))
+| Cách tạo cụm | Tiêu chí | Tham số chính trong bài |
+|---|---|---|
+| STING | Số điểm trong từng ô. Các ô dày kề cạnh tạo thành một cụm. | Lưới 16 × 16, tối thiểu 5 điểm/ô, kề theo 4 hướng. |
+| K-means | Gán mọi điểm cho tâm gần nhất, giảm tổng bình phương khoảng cách đến tâm. | Thử k = 2–5 trên cùng dữ liệu. Giữ thêm k = 3 để đối chiếu cùng số cụm với STING. |
+| DBSCAN | Xét mật độ lân cận quanh từng điểm. Nối các vùng qua điểm lõi. | ε = 0,2 theo khoảng cách Euclid trên tọa độ z-score, tối thiểu 5 điểm trong lân cận tính cả điểm đang xét. |
 
-cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results" / "figs" / "predict_2024.png")))
+Cả ba chạy trên 869 điểm sau chuẩn hóa. Khi so **silhouette**, lấy phần giao
+các điểm được cả ba phương pháp gán cụm. Dùng cùng tọa độ z-score, cùng
+khoảng cách Euclid và giữ nguyên nhãn đã gán trên mẫu 869. Bảng kèm số
+điểm nhiễu trên toàn mẫu và số cụm còn trong phần giao để đọc cùng điểm số.
 
-test2024 = panel[panel.year == 2024].dropna(subset=feats)
-Xte = scaler.transform(test2024[feats])
-base = m_frozen.predict(Xte)
-n_provinces = panel.loc[panel.year == 2024, "province_code"].nunique()
-n_noise = int((base == -1).sum())
-print(f"Năm 2024 có {len(base)}/{n_provinces} tỉnh đủ dữ liệu. "
-      f"{len(base) - n_noise} tỉnh được gán cụm, {n_noise} tỉnh nhận nhãn nhiễu.")
+Silhouette mô tả độ gọn và tách biệt theo khoảng cách, trên nhóm điểm được
+giữ lại. Dữ liệu PAPI ở đây chưa có nhãn cụm chuẩn. Tỷ lệ nhiễu và kích thước
+cụm giúp hiểu từng phương pháp đã giữ và chia dữ liệu như thế nào."""))
 
-min_counts = (3, 5, 8)
-sens = []
-for mc in min_counts:
-    mm = STING(n_levels=cfg["sting"]["n_levels"], factor=cfg["sting"]["factor"],
-               min_count=mc).fit(Xz)
-    mm.cluster(level=cfg["sting"]["cluster_level"], connectivity=cfg["sting"]["connectivity"])
-    p = mm.predict(Xte)
-    sens.append((mc, round(float((p != -1).mean()), 2), mm.n_clusters_,
-                 round(float(adjusted_rand_score(p, base)), 3)))
-print(f"{'Ngưỡng ô dày':>12} | {'Gán cụm 2024':>13} | {'Số cụm 2011–2023':>17} | "
-      f"ARI so với ngưỡng {cfg['sting']['min_count']}")
-for mc, cov, k, ari in sens:
-    print(f"{mc:>12} | {cov:>13.0%} | {k:>17} | {ari:.3f}")
-cov_map = {mc: round(cov, 2) for mc, cov, _, _ in sens}
-ari_map = {mc: round(ari, 3) for mc, _, _, ari in sens}
+cd(nbf.v4.new_code_cell("""db = DBSCAN(**DBSCAN_OPTIONS).fit(Xz)
+assignments = {
+    "STING": lab,
+    f"K-means k={best_k}": km.labels_,
+    "DBSCAN": db.labels_,
+}
+common = np.logical_and.reduce([labels >= 0 for labels in assignments.values()])
+# Đối chứng cùng số cụm với STING trên đúng phần giao đã chọn.
+assignments["K-means k=3"] = models[3].labels_
+print(f"Silhouette trên cùng {common.sum()}/{len(lab)} điểm, giữ nhãn đã gán trên mẫu đầy đủ.")
+rows = []
+for name, labels in assignments.items():
+    assigned = labels >= 0
+    n_noise = int((~assigned).sum())
+    sil_full = clustered_silhouette(Xz, labels)
+    sil_common = silhouette_score(Xz[common], labels[common])
+    print(f"{name} | silhouette cùng tập = {sil_common:.4f}")
+    rows.append((name, len(set(labels[assigned])), n_noise, int(assigned.sum()), sil_full,
+                 len(set(labels[common])), sil_common))
 
-def _sensitivity_expectations(md_path):
-    exp = {}
-    in_tbl = False
-    for line in md_path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line.startswith("|"):
-            if in_tbl:
-                break
-            continue
-        cols = [c.strip() for c in line.split("|")[1:-1]]
-        if not in_tbl:
-            in_tbl = bool(cols) and cols[0] == "min_count"
-        elif len(cols) >= 4 and cols[0].isdigit():
-            mc = int(cols[0])
-            exp[mc] = (float(cols[1].rstrip("%")) / 100, float(cols[3]))
-    if exp.keys() != set(min_counts):
-        expected = ", ".join(map(str, min_counts))
-        raise ValueError(f"Bảng độ nhạy cần đủ các ngưỡng {expected}. Nhận được {sorted(exp)}.")
-    return exp
+comparison = pd.DataFrame(rows, columns=[
+    "Phương pháp", "Cụm toàn mẫu", "Điểm nhiễu", "Điểm vào cụm",
+    "Silhouette riêng", "Cụm phần giao", "Silhouette chung",
+])
+display(comparison.round(4))"""))
 
-exp_sens = _sensitivity_expectations(ROOT / "results" / "predict_summary.md")
-for mc, (ecov, eari) in exp_sens.items():
-    assert abs(cov_map[mc] - round(ecov, 2)) < 1e-9
-    assert ari_map[mc] == round(eari, 3)
-"""))
+md(nbf.v4.new_markdown_cell("""**Đối chiếu các cụm trên cùng từng điểm.** Bảng chéo dùng cả 869 quan sát.
+Mỗi ô cho biết số điểm vừa thuộc một hàng STING vừa thuộc một cột K-means.
+Số hiệu cụm chỉ định danh trong từng phương pháp. Đọc hàng của cụm STING
+lớn nhất để thấy K-means chia vùng dày này ra sao, kể cả khi đặt k = 3."""))
+
+cd(nbf.v4.new_code_cell("""biggest = max(cells_per_cluster, key=points_per_cluster.get)
+for k in (2, 3):
+    table = pd.crosstab(lab, models[k].labels_, rownames=["STING (−1 là nhiễu)"],
+                        colnames=[f"K-means k={k}"], margins=True, margins_name="Tổng")
+    sizes = sorted(table.loc[biggest].drop("Tổng").tolist(), reverse=True)
+    print(f"Cụm STING lớn nhất: {points_per_cluster[biggest]} điểm. "
+          f"K-means k={k} chia các điểm này thành {' + '.join(map(str, sizes))}.")
+    display(table)"""))
+
+md(nbf.v4.new_markdown_cell("""### 4.6 Cùng thuật toán, trước và sau z-score
+
+**STING.** Bản cài đặt dựng lại biên lưới theo min và max của từng trục.
+Vị trí tương đối trên một trục là **(x − min) / (max − min)**. Khi đổi sang
+z-score, x và cả hai biên đều trừ cùng μ và chia cùng σ. Vị trí tương đối
+giữ nguyên với trục có σ > 0. Với cùng độ phân giải, ngưỡng và quy tắc
+kề cạnh, các ô giữ cùng điểm và ghép thành cùng các cụm. Phép thử bên dưới
+đếm số chỉ số ô và nhãn khớp trên dữ liệu thật.
+
+**K-means.** Sau chuẩn hóa, độ chênh của từng chỉ tiêu khi tính khoảng cách
+Euclid được chia cho σ riêng của chỉ tiêu đó. Hai chỉ tiêu có σ khác nhau
+nên trọng số khoảng cách thay đổi. Giữ k = 2 và cùng cách khởi tạo để
+kiểm tra ảnh hưởng của phép đổi thang. Ghép hai tên cụm theo cách khớp
+nhiều điểm nhất trước khi đếm số điểm đổi nhóm.
+
+**DBSCAN.** So sánh với cùng 5 điểm tối thiểu. Vòng lân cận bán kính ε trên
+thang z tương ứng một elip có hai bán trục εσ₄.₂ và εσ₆.₁ trên thang gốc.
+Trong lượt dùng điểm gốc, chọn vòng tròn cùng diện tích với elip đó, tức
+ε gốc = ε × √(σ₄.₂ × σ₆.₁). Đây là cách đặt bán kính để minh họa tác động
+đổi thang. Diện tích bằng nhau và hình dạng lân cận khác nhau, nên số
+điểm lân cận vẫn có thể thay đổi."""))
+
+cd(nbf.v4.new_code_cell("""raw_grid, raw_labels = fit_grid(Xraw)
+level = grid_model.cluster_level_
+idx_raw = raw_grid.point_cell_index(level)
+idx_z = grid_model.point_cell_index(level)
+same_bins = int((idx_raw == idx_z).all(axis=1).sum())
+same_labels = int((raw_labels == lab).sum())
+print(f"STING: {same_bins}/{len(lab)} điểm cùng chỉ số ô, {same_labels}/{len(lab)} nhãn trùng.")
+
+km2_raw = KMeans(n_clusters=2, **KMEANS_OPTIONS).fit_predict(Xraw)
+km2_z = models[2].labels_
+# Nhãn 0/1 có thể đảo tên. So cả hai cách ghép rồi dùng cách có nhiều điểm khớp nhất.
+same_ids = int((km2_raw == km2_z).sum())
+km2_display = km2_z if same_ids >= len(km2_z) - same_ids else 1 - km2_z
+km_changed = km2_raw != km2_display
+n_changed = int(km_changed.sum())
+print(f"K-means k=2: {n_changed}/{len(km2_z)} điểm đổi nhóm sau ghép tên cụm.")
+print(f"ARI giữa hai lần chạy K-means: {adjusted_rand_score(km2_raw, km2_z):.4f}.")
+# Đánh giá cả hai bộ nhãn trên cùng tọa độ để giữ cùng thước đo khoảng cách.
+print(f"Silhouette cùng thang z: {silhouette_score(Xz, km2_raw):.4f} "
+      f"(chạy điểm gốc) và {silhouette_score(Xz, km2_z):.4f} (chạy điểm chuẩn hóa).")
+
+eps_raw = raw_dbscan_radius(scaler.scale_)
+db_raw = DBSCAN(eps=eps_raw, min_samples=DBSCAN_OPTIONS["min_samples"]).fit_predict(Xraw)
+db_changed = (db_raw == -1) != (db.labels_ == -1)
+count_db_raw = len(set(db_raw[db_raw >= 0]))
+count_db_z = len(set(db.labels_[db.labels_ >= 0]))
+print(f"DBSCAN: ε gốc = {eps_raw:.4f}, {count_db_raw} cụm, {(db_raw == -1).sum()} điểm nhiễu.")
+print(f"DBSCAN sau chuẩn hóa: {count_db_z} cụm, {(db.labels_ == -1).sum()} điểm nhiễu, "
+      f"{db_changed.sum()}/{len(db_raw)} điểm đổi trạng thái nhiễu.")"""))
+
+md(nbf.v4.new_markdown_cell("""**Cách đọc hình.** Hàng trên lấy nhãn từ lượt chạy trên điểm gốc. Hàng dưới
+lấy nhãn từ lượt chạy sau z-score. Cả sáu ô dùng cùng tọa độ hiển thị để
+dễ dò cùng một quan sát. Vòng đen ở hàng dưới đánh dấu điểm đổi cụm của
+K-means sau ghép tên cụm và điểm DBSCAN đổi trạng thái nhiễu. Màu cụm
+DBSCAN chỉ phân biệt các cụm trong từng ô hình."""))
+
+cd(nbf.v4.new_code_cell("""fig = scaling_comparison_figure(Xz, grid_model, (
+    ("STING", raw_labels, lab, raw_labels != lab),
+    ("K-means k = 2", km2_raw, km2_display, km_changed),
+    ("DBSCAN", db_raw, db.labels_, db_changed),
+))
+plt.show()""", metadata={"tags": ["papi-zscore-comparison"]}))
+
+md(nbf.v4.new_markdown_cell("""### 4.7 Kiểm tra hai cách thay tiêu chí ô dày
+
+**Đổi số điểm tối thiểu.** Giữ dữ liệu, trạng thái chuẩn hóa, mức lưới, biên và
+quy tắc kề cạnh. Thử 3, 5 và 8 để quan sát số cụm và tỷ lệ điểm nhiễu thay đổi."""))
+
+cd(nbf.v4.new_code_cell("""for threshold in THRESHOLDS:
+    trial, trial_labels = fit_grid(Xz, min_count=threshold)
+    noise_count = int((trial_labels == -1).sum())
+    print(f"Ngưỡng {threshold}  |  {trial.n_clusters_} cụm  |  "
+          f"{noise_count}/{len(trial_labels)} nhiễu ({noise_count / len(trial_labels):.1%})")"""))
+
+md(nbf.v4.new_markdown_cell("""**Thử thêm ngưỡng so ô con với ô cha.** Tham số tùy chọn
+**significance_z** của bản cài đặt áp dụng sau khi ô đạt tối thiểu 5 điểm.
+Ô đạt thêm điều kiện nếu có ít nhất một chỉ tiêu thỏa
+
+**|trung bình ô con − trung bình ô cha| > t × độ lệch chuẩn ô cha / √(số điểm ô con).**
+
+Phép thử dùng **t = 2,0** làm giá trị minh họa. Đây là quy tắc lọc mô tả.
+Ô cha chứa cả điểm của ô con, nên ngưỡng minh họa chỉ dùng để khảo sát
+thay đổi của lưới. Kết quả chính ở trên dùng quy tắc đếm điểm, với
+significance_z ở giá trị mặc định None. Z-score ở mục 4.2 vẫn là phép đổi
+tọa độ của từng quan sát."""))
+
+cd(nbf.v4.new_code_cell("""filtered, filtered_labels = fit_grid(Xz, significance_z=CELL_Z_EXAMPLE)
+print(f"Thêm significance_z={CELL_Z_EXAMPLE:.1f}: {len(filtered.label_of_)} ô đạt, "
+      f"{filtered.n_clusters_} cụm, {int((filtered_labels == -1).sum())}/{len(lab)} điểm nhiễu.")
+
+child = cell_stats[example_cell]
+parent_key = tuple(i // GRID["factor"] for i in example_cell)
+parent = grid_model.cells_[level - 1][parent_key]
+gap = np.abs(child.mean - parent.mean)
+cutoff = CELL_Z_EXAMPLE * parent.std / np.sqrt(child.count)
+satisfied = gap > cutoff
+assert bool(satisfied.any()) == (example_cell in filtered.label_of_)
+print(f"Ô chứa Lạng Sơn 2024: ô con {example_cell}, ô cha {parent_key}.")
+display(pd.DataFrame({"Chỉ tiêu": feats, "Chênh lệch tuyệt đối": gap,
+                      "Mức so sánh": cutoff, "Đạt": satisfied}).round(4))"""))
+
+md(nbf.v4.new_markdown_cell("""### 4.8 Minh họa bổ sung — dự báo điểm rồi đối chiếu trên lưới
+
+Thử nghiệm này có mốc thời gian riêng. Sáu lượt kiểm định dùng các điểm
+đích 2018–2023 để chọn mô hình cho từng chỉ tiêu. Từ tám điểm đầu vào
+năm 2023, mô hình tạo hai điểm dự báo năm 2024 cho từng tỉnh đủ dữ liệu.
+Sau bước đó mới ghép điểm PAPI quan sát năm 2024 để đo sai số. Lưới
+STING dựng từ dữ liệu đến 2023 giúp đối chiếu vùng của hai loại điểm.
+Đây là đánh giá hồi cứu tại một năm đã có số liệu."""))
+
+cd(nbf.v4.new_code_cell("""from scripts.common.papi_forecast import MODEL_NAMES, forecast_from_history, score_forecast
+
+origin = 2023
+history = panel.loc[panel.year <= origin].copy()
+forecast_run = forecast_from_history(history, GRID, origin)
+print(f"{forecast_run.train_pairs} cặp lịch sử, {len(forecast_run.predictions)} tỉnh có dự báo 2024.")
+for target, method in forecast_run.selection.items():
+    print(f"{target}: {MODEL_NAMES[method]} theo MAE trung bình các lượt kiểm định.")"""))
+
+cd(nbf.v4.new_code_cell("""observations = panel.loc[panel.year == origin + 1].copy()
+scored, error_table, zones = score_forecast(forecast_run, observations)
+display(error_table[["target", "method", "n", "mae", "rmse"]].rename(columns={
+    "target": "Chỉ tiêu", "method": "Cách dự báo", "n": "Số tỉnh", "mae": "MAE", "rmse": "RMSE",
+}).replace({"forecast": "Mô hình chọn", "carry": "Giữ điểm năm 2023"}).round(4))
+zone = zones.set_index("method").loc["forecast"]
+print(f"Dự báo điểm nhận ra {int(zone.out_correct)}/{int(zone.out_correct + zone.missed_out)} tỉnh "
+      "thực tế ở ngoài vùng dày. Đọc kết quả này cùng sai số điểm PAPI.")"""))
+
+md(nbf.v4.new_markdown_cell("""**Hình phân bổ quan sát năm 2024 dùng để làm gì?** Dùng lưới đến 2023 làm
+mốc chung để đo độ phủ của vùng dày, tìm các quan sát nằm ngoài vùng đó và
+theo dõi một tỉnh qua hai năm. Trong 61 tỉnh đủ hai điểm quan sát 2024,
+48 tỉnh vào cụm lớn và 13 tỉnh ở ngoài vùng dày.
+
+**Vì sao xử lý dữ liệu rồi vẫn có điểm nhiễu?** Hai tỉnh thiếu chỉ tiêu
+được loại khỏi phép gán. Cả 13 tỉnh mang nhãn −1 đều đủ hai điểm và
+nằm trong ô có dưới 5 quan sát tham chiếu. Bảng bên dưới ghi rõ lý do và
+số quan sát có sẵn trong ô của từng tỉnh. Giữ các điểm ô thưa giúp tính
+độ phủ trên đủ 61 tỉnh và tìm các trường hợp cần đối chiếu với số liệu gốc.
+
+Khi đánh giá dự báo, nhãn từ hai điểm thực tế là kết quả tham chiếu trên
+cùng lưới. Phép đánh giá còn cần đủ tám đầu vào năm 2023, nên có 59 tỉnh
+đối chiếu được. Ví dụ dưới hình dùng lại tỉnh Lạng Sơn để minh họa."""))
+
+cd(nbf.v4.new_code_cell("""from scripts.common.papi_pred_common import GRID_ASSIGNMENT_LABELS, describe_grid_assignment
+
+display(Image(filename=str(ROOT / "results/figs/predict_2024.png")))
+observed_grid = describe_grid_assignment(observations, feats, forecast_run.scaler, forecast_run.grid)
+status_counts = observed_grid.grid_status.value_counts().rename(index=GRID_ASSIGNMENT_LABELS)
+display(status_counts.rename("Số tỉnh").rename_axis("Kết quả gán").to_frame())
+review = observed_grid.loc[observed_grid.grid_status.ne("in_cluster")].copy()
+review["grid_status"] = review.grid_status.map(GRID_ASSIGNMENT_LABELS)
+display(review[["province_vi", "grid_cell", "reference_count", "grid_status"]].rename(columns={
+    "province_vi": "Tỉnh/thành phố", "grid_cell": "Ô lưới", "reference_count": "Số điểm tham chiếu",
+    "grid_status": "Lý do",
+}).reset_index(drop=True))
+
+example_years = panel.loc[panel.province_vi.eq("Lạng Sơn") & panel.year.isin([2023, 2024])].sort_values("year")
+example = describe_grid_assignment(example_years, feats, forecast_run.scaler, forecast_run.grid)
+for row in example.itertuples(index=False):
+    region = "ngoài vùng dày" if row.cluster == -1 else f"cụm {row.cluster}"
+    print(f"Lạng Sơn {row.year}: {region} trên cùng lưới đến năm 2023. "
+          f"Ô {row.grid_cell} có {row.reference_count} điểm tham chiếu.")"""))
 
 md(nbf.v4.new_markdown_cell("""## 5. Kết luận và hạn chế
 
-Trên tập giả lập, STING đạt ARI 0,950 khi đối chiếu với nhãn tham chiếu.
-Trong giai đoạn 2011–2023, lưới STING tạo một cụm 629 điểm, hai cụm nhỏ
-gồm 16 và 5 điểm, với 19,6% quan sát nhận nhãn nhiễu.
+Trên dữ liệu giả lập, STING đạt ARI 0,950 khi đối chiếu với nhãn tham chiếu.
+Trên 869 quan sát PAPI 2011–2024, ở ngưỡng 5, ba cụm STING có 677, 16 và
+5 điểm. Cụm lớn chiếm khoảng 97% trong số 698 điểm được gán cụm. Còn
+171 điểm (19,7% toàn mẫu) nằm trong các ô thưa. Kết quả nổi bật là một
+vùng tập trung lớn và hai vùng nhỏ. Ở ngưỡng 8, kết quả còn một cụm.
 
-Với lưới đã học, 48 trong số 61 tỉnh đủ dữ liệu năm 2024 được gán vào
-cụm lớn, còn 13 tỉnh nhận nhãn nhiễu. Tỷ lệ được gán cụm thay đổi theo
-ngưỡng số điểm. Kết quả phản ánh phân bố của hai chỉ tiêu được khảo sát.
+K-means k = 2 chia 677 điểm ở vùng STING lớn nhất thành hai phần gồm
+482 và 195 điểm. Ở cấu hình đang dùng, z-score giữ nguyên chỉ số ô STING
+vì hai lưới đều dựng lại theo biên từng trục. Kết quả K-means có thể đổi
+do phép chuẩn hóa thay đổi khoảng cách. So sánh silhouette dựa trên nhóm
+điểm được cả ba phương pháp gán cụm, nên kết quả mô tả phần dữ liệu này.
+Mỗi cụm gồm các quan sát tỉnh–năm. Diễn giải giới hạn trong hai chỉ tiêu,
+giai đoạn và cấu hình đã xét.
+
+Minh họa dự báo bổ sung cho thấy sai số điểm và khả năng nhận ra điểm
+ngoài vùng dày trả lời hai câu hỏi riêng. Notebook cuối kỳ trình bày
+phép đối chiếu dự báo chi tiết theo tỉnh và các kịch bản dao động.
 
 **Nguồn tham khảo**
 
@@ -383,6 +543,10 @@ ngưỡng số điểm. Kết quả phản ánh phân bố của hai chỉ tiêu
   [Bài báo gốc](https://www.vldb.org/conf/1997/P186.PDF)
 - Dữ liệu PAPI 2011–2024 do CECODES, VFF-CRT, RTA và UNDP công bố.
   [Nguồn dữ liệu PAPI](https://papi.org.vn/du-lieu-papi/)
+- Công cụ chuẩn hóa và thước đo so sánh từ scikit-learn 1.8.
+  [StandardScaler](https://scikit-learn.org/1.8/modules/generated/sklearn.preprocessing.StandardScaler.html) ·
+  [Silhouette](https://scikit-learn.org/1.8/modules/generated/sklearn.metrics.silhouette_score.html) ·
+  [ARI](https://scikit-learn.org/1.8/modules/generated/sklearn.metrics.adjusted_rand_score.html)
 - Le và cộng sự (2026), dữ liệu đối chiếu các chỉ số nội dung PAPI.
   [Mendeley Data, DOI 10.17632/wbk42j9wc8.1](https://data.mendeley.com/datasets/wbk42j9wc8/1)"""))
 
@@ -422,6 +586,10 @@ def main() -> int:
     if n_err or n_noout:
         print(f"FAIL: {n_err} lỗi, {n_noout} ô code thiếu output (trong {n_code} ô)")
         return 1
+
+    visual = next(cell for cell in code_cells if "papi-zscore-comparison" in cell["metadata"].get("tags", []))
+    png = next(out["data"]["image/png"] for out in visual["outputs"] if "image/png" in out.get("data", {}))
+    (ROOT / "results/figs/papi_zscore_comparison.png").write_bytes(b64decode("".join(png)))
 
     print(f"notebook OK: {n_code} code cells, 0 error outputs, mọi ô có output")
     print("OK")

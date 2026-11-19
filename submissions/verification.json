@@ -2,41 +2,43 @@
   {
     "milestone": "midterm",
     "status": "PASS",
-    "sha256": "7ba9a5ade78cf7dd7810fc3b41adf4cf15f01046a34c9704186acd25cd0c4092",
-    "code_cells": 11,
+    "sha256": "93086fc5e126b9da9009a009fbfc0dc2e4903f5f34d07e657b742ce26134717b",
+    "code_cells": 18,
     "isolation_guard": true,
     "python": "3.14.2",
-    "launcher_messages": true
+    "launcher_messages": true,
+    "system": "Windows",
+    "ubuntu": {
+      "milestone": "midterm",
+      "status": "PASS",
+      "sha256": "93086fc5e126b9da9009a009fbfc0dc2e4903f5f34d07e657b742ce26134717b",
+      "code_cells": 18,
+      "isolation_guard": true,
+      "python": "3.12.3",
+      "launcher_messages": true,
+      "system": "Linux",
+      "distribution": "Ubuntu 24.04.4 LTS"
+    }
   },
   {
     "milestone": "final",
     "status": "PASS",
-    "sha256": "770786ab7209fa751925c675a120e2f96ca0df37dfb44404764da34e18736c96",
-    "code_cells": 19,
+    "sha256": "103d34e8a624703e3eea47b0e81a7e4ed1fc0f722923aa92f9ed973e7e6ec9df",
+    "code_cells": 22,
     "isolation_guard": true,
     "python": "3.14.2",
     "launcher_messages": true,
-    "guide_command_passed": true,
-    "path_with_vietnamese_and_spaces": true,
-    "notebook_code_cells_without_guard": 18,
-    "pypi_pins_checked": true,
-    "raw_rebuild": {
-      "workbooks": 14,
-      "panel_shape": [
-        882,
-        41
-      ],
-      "panel_and_metadata_byte_identical": true,
-      "mendeley_matched_values": 5118,
-      "mendeley_matched_keys": 756
-    },
-    "master_rebuild": {
-      "shape": [
-        882,
-        59
-      ],
-      "byte_identical": true,
-      "preprocessing_audit_matches": true
+    "system": "Windows",
+    "ubuntu": {
+      "milestone": "final",
+      "status": "PASS",
+      "sha256": "103d34e8a624703e3eea47b0e81a7e4ed1fc0f722923aa92f9ed973e7e6ec9df",
+      "code_cells": 22,
+      "isolation_guard": true,
+      "python": "3.12.3",
+      "launcher_messages": true,
+      "system": "Linux",
+      "distribution": "Ubuntu 24.04.4 LTS"
     }
   }
 ]

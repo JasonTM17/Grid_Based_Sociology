@@ -201,9 +201,9 @@ print()
 single_cluster_years = per_year["k"].eq(1).sum()
 print(f"{single_cluster_years}/{len(per_year)} năm có một cụm với lưới 3 × 3 và min_count=3.")"""))
 
-md(nbf.v4.new_markdown_cell("""## 4. Gán cụm năm 2024 và xem dịch chuyển theo thời gian
+md(nbf.v4.new_markdown_cell("""## 4. Đối chiếu PAPI năm 2024 trên lưới đến năm 2023
 
-Dùng lưới học từ 2011–2023 để gán nhãn trên điểm PAPI đã quan sát năm 2024.
+Dựng lưới từ 2011–2023 để gán nhãn cho điểm PAPI đã quan sát năm 2024.
 Trong 61 tỉnh đủ hai chỉ tiêu, có 48 tỉnh vào cụm lớn và 13 tỉnh nhận nhãn
 nhiễu. Hai tỉnh thiếu chỉ tiêu được để trống. Bảng chuyển trạng thái dưới
 đây chỉ dùng các tỉnh đủ dữ liệu ở cả hai năm."""))
@@ -226,9 +226,115 @@ cd(nbf.v4.new_code_cell("""for year in (2020, 2024):
 
 cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/evolution.png")))"""))
 
-md(nbf.v4.new_markdown_cell("### Phân bố các tỉnh năm 2024 trên lưới đã học"))
+md(nbf.v4.new_markdown_cell("""**Mục đích của hình phân bổ quan sát 2024.** Đặt hai điểm PAPI đã quan
+sát lên lưới đến 2023 để xem độ phủ của vùng dày và nhận diện những trường
+hợp nằm ở ngoài vùng. Cùng lưới còn giúp theo dõi tỉnh đổi trạng thái giữa
+hai năm. Phần dự báo dùng nhãn suy ra từ điểm quan sát làm mốc đối chiếu
+với nhãn suy ra từ điểm do mô hình sinh.
 
-cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/predict_2024.png")))"""))
+Hai tỉnh thiếu chỉ tiêu được loại khỏi phép gán. Cả 13 tỉnh mang nhãn −1
+đều đủ điểm và nằm trong ô có dưới 5 quan sát tham chiếu. Nhóm giữ các điểm
+này trong mẫu để báo đúng độ phủ 48/61 tỉnh và theo dõi các trường hợp ngoài
+vùng dày."""))
+
+cd(nbf.v4.new_code_cell("""from scripts.common.papi_pred_common import GRID_ASSIGNMENT_LABELS, describe_grid_assignment
+
+display(Image(filename=str(ROOT / "results/figs/predict_2024.png")))
+observed_grid = describe_grid_assignment(panel.loc[panel.year.eq(2024)], features, scaler, sting)
+status_counts = observed_grid.grid_status.value_counts().rename(index=GRID_ASSIGNMENT_LABELS)
+display(status_counts.rename("Số tỉnh").rename_axis("Kết quả gán").to_frame())
+print("Bảng 63 tỉnh kèm ô, số điểm tham chiếu và lý do gán nằm trong results/papi_observed_grid_2024.csv.")
+lang_son_code = panel.loc[panel.province_vi.eq("Lạng Sơn"), "province_code"].iat[0]
+lang_son = paired.loc[lang_son_code]
+for year, label in lang_son.items():
+    region = "ngoài vùng dày" if label == -1 else f"cụm {label}"
+    print(f"Lạng Sơn {year}: {region} trên cùng lưới đến năm 2023.")"""))
+
+md(nbf.v4.new_markdown_cell("""### 4.1 Dự báo hai chỉ tiêu năm 2024 từ dữ liệu đến năm 2023
+
+Từ tám chỉ tiêu ở năm t, nhóm dự báo **4.2 Kiểm soát tham nhũng trong cung
+ứng dịch vụ công** và **6.1 Y tế công lập** ở năm t+1. Ghép cặp theo mã tỉnh
+và hai năm liên tiếp. Bốn ứng viên gồm giữ điểm năm trước, Ridge, Random
+Forest và trung bình 50/50 của hai mô hình. Chọn riêng cho từng chỉ tiêu
+bằng MAE trung bình của sáu lượt kiểm định theo thời gian. Mỗi lượt chỉ
+dùng cặp huấn luyện có năm đích đến mốc xuất phát của lượt đó.
+
+Với mốc cuối 2023, ô dưới tạo hai điểm dự báo cho 2024 từ lịch sử. Scaler
+và lưới STING cũng được dựng từ lịch sử. Điểm PAPI 2024 sẽ được dùng ở ô
+đối chiếu kế tiếp. Đây là đánh giá hồi cứu trên một năm đã có số liệu."""))
+
+cd(nbf.v4.new_code_cell("""from scripts.common.papi_forecast import (
+    FEATURES, MODEL_NAMES, ORIGIN_YEAR, TARGETS, forecast_from_history, scenario_auc, score_forecast,
+)
+
+history = panel.loc[panel.year <= ORIGIN_YEAR].copy()
+assert tuple(cfg["features"]) == TARGETS
+run = forecast_from_history(history, cfg["sting"])
+folds = run.validation[["origin_year", "target_year", "last_train_target_year",
+                        "n_train", "n_validation"]].drop_duplicates()
+assert folds.last_train_target_year.le(folds.origin_year).all()
+assert folds.target_year.le(ORIGIN_YEAR).all()
+print(f"Huấn luyện cuối: {run.train_pairs} cặp. Dự báo: {len(run.predictions)} tỉnh đủ tám đầu vào.")
+print("Tám đầu vào:", ", ".join(FEATURES))
+display(folds.rename(columns={
+    "origin_year": "Mốc xuất phát", "target_year": "Năm đích kiểm định",
+    "last_train_target_year": "Năm đích huấn luyện cuối", "n_train": "Cặp huấn luyện",
+    "n_validation": "Cặp kiểm định",
+}))
+avg = run.validation.pivot_table(index="target", columns="method", values="mae")
+display(avg.rename(columns=MODEL_NAMES).round(4))
+for target, method in run.selection.items():
+    print(f"{target}: {MODEL_NAMES[method]} theo MAE trung bình qua sáu lượt kiểm định.")"""))
+
+md(nbf.v4.new_markdown_cell("""### 4.2 Đo sai số dự báo trên các tỉnh đối chiếu được
+
+Ghép điểm PAPI 2024 theo mã tỉnh. Cùng một nhóm tỉnh có đủ hai điểm thực
+tế được dùng để tính MAE, RMSE và độ lệch trung bình cho cả mô hình lẫn
+mốc giữ nguyên. MAE là trung bình độ lệch tuyệt đối. RMSE nhạy hơn với
+sai số lớn. Độ lệch âm cho biết dự báo thấp hơn quan sát về trung bình."""))
+
+cd(nbf.v4.new_code_cell("""observed = panel.loc[panel.year == ORIGIN_YEAR + 1].copy()
+scored, errors, zones = score_forecast(run, observed)
+archive_table = pd.read_csv(ROOT / "results/papi_forecast_provinces_2024.csv")
+pd.testing.assert_frame_equal(scored.astype({"actual_cluster": "float64"}), archive_table,
+                              check_dtype=False, check_exact=False, atol=1e-9, rtol=1e-9)
+n_matched = int(scored.actual_cluster.notna().sum())
+print(f"Có {len(scored)} dự báo, đối chiếu được {n_matched} tỉnh đủ hai điểm quan sát.")
+display(errors.rename(columns={
+    "target": "Chỉ tiêu", "method": "Cách dự báo", "n": "Số tỉnh", "mae": "MAE", "rmse": "RMSE",
+    "bias": "Độ lệch trung bình",
+}).replace({"forecast": "Mô hình đã chọn", "carry": "Giữ điểm 2023"}).round(4))
+display(Image(filename=str(ROOT / "results/figs/papi_forecast_values.png")))"""))
+
+md(nbf.v4.new_markdown_cell("""### 4.3 Đọc vùng STING khi phần lớn điểm nằm trong cụm lớn
+
+Chiếu các điểm dự báo, điểm giữ nguyên và điểm quan sát vào **cùng lưới
+đến 2023**. Thêm đối chứng luôn chọn cụm phổ biến nhất trong lịch sử.
+Tỷ lệ trùng nhãn dùng nhãn suy ra từ lưới, còn tỷ lệ phát hiện ngoài vùng
+dày tính riêng trên số tỉnh có điểm quan sát ngoài vùng dày.
+
+Nhóm giữ nguyên từng cặp sai số ngoài lượt kiểm định của hai chỉ tiêu,
+cộng chúng vào hai điểm dự báo rồi chiếu từng kịch bản lên lưới. Tỷ lệ
+kịch bản ngoài vùng dày là thước đo độ nhạy theo sai số lịch sử. AUC đánh
+giá việc xếp hạng các tỉnh khi đối chiếu năm 2024. Đây là kiểm tra thăm dò
+trên một năm, với sai số gộp từ các tỉnh và năm trước."""))
+
+cd(nbf.v4.new_code_cell("""zone_table = zones[["method", "n", "out_correct", "missed_out", "false_out",
+                    "exact_label_agreement", "out_recall", "balanced_zone_accuracy"]]
+display(zone_table.rename(columns={
+    "method": "Cách gán vùng", "n": "Số tỉnh", "out_correct": "Nhận ra ngoài vùng",
+    "missed_out": "Bỏ sót", "false_out": "Gán ngoài nhầm", "exact_label_agreement": "Trùng nhãn lưới",
+    "out_recall": "Tỷ lệ nhận ra ngoài vùng", "balanced_zone_accuracy": "Độ đúng cân bằng hai vùng",
+}).replace({"forecast": "Điểm dự báo", "carry": "Giữ điểm 2023", "majority": "Luôn chọn cụm lớn"}).round(4))
+false_negatives = int(zones.loc[zones.method.eq("forecast"), "missed_out"].item())
+print(f"Dự báo điểm bỏ sót {false_negatives} tỉnh ngoài vùng dày.")
+print(f"{run.scenario_count} cặp sai số lịch sử mỗi tỉnh. AUC xếp hạng ngoài vùng = {scenario_auc(scored):.4f}.")
+display(Image(filename=str(ROOT / "results/figs/papi_forecast_grid.png")))
+probe = scored.loc[scored.province_vi.eq("Lạng Sơn")].iloc[0]
+for target in TARGETS:
+    print(f"Lạng Sơn, {target}: điểm 2023 = {probe[f'carry_{target}']:.4f}, "
+          f"dự báo = {probe[f'forecast_{target}']:.4f}, quan sát 2024 = {probe[f'actual_{target}']:.4f}.")
+print("Kết quả từng tỉnh nằm trong results/papi_forecast_provinces_2024.csv.")"""))
 
 md(nbf.v4.new_markdown_cell("""## 5. Kết luận
 
@@ -238,6 +344,10 @@ md(nbf.v4.new_markdown_cell("""## 5. Kết luận
   tiêu được chọn, trong phạm vi lưới và thời gian đã kiểm tra.
 - Khi đọc silhouette, xem cùng tỉ lệ nhiễu. Các phương pháp có thể được đánh giá
   trên các tập điểm khác nhau.
+- Dự báo điểm giảm MAE cho cả hai chỉ tiêu so với giữ nguyên năm 2023, trong
+  khi RMSE của 4.2 tăng nhẹ. Khi chiếu dự báo điểm lên lưới, kết quả nghiêng
+  về cụm lớn và bỏ sót các quan sát ngoài vùng dày. Sai số điểm và độ đúng
+  theo vùng cần được đọc riêng.
 
 **Nguồn:** Wang, Yang & Muntz (VLDB 1997), PAPI (CECODES/VFF-CRT/RTA/UNDP),
 Le et al. (Mendeley DOI 10.17632/wbk42j9wc8.1) và Open Development Vietnam."""))
@@ -259,11 +369,11 @@ md(nbf.v4.new_markdown_cell(f"""## Phụ lục A. Kiểm tra bổ sung trên nhi
 cd(nbf.v4.new_code_cell("""rob = pd.read_csv(ROOT / "results/robustness.csv")
 show_md(rob.to_markdown(index=False))"""))
 
-md(nbf.v4.new_markdown_cell("""## Phụ lục B. Mô hình giám sát bổ trợ
+md(nbf.v4.new_markdown_cell("""## Phụ lục B. Thí nghiệm học phần trên 6.1 và nhãn lưới
 
-Ridge và Random Forest dự báo chỉ tiêu y tế năm sau. Chọn bằng CV theo
-thời gian và đánh giá trên 2023→2024. Bài phân loại dùng nhãn do STING sinh.
-Kết quả phân loại đo mức khớp với nhãn lưới trong một holdout."""))
+Thí nghiệm đơn chỉ tiêu này chọn mô hình theo R² và mẫu đủ 6.1. Mục 4 dùng
+mẫu chung của cả hai chỉ tiêu và chọn theo MAE. Bài phân loại phụ đo mức
+khớp với nhãn do STING sinh ở mốc 2023→2024."""))
 
 cd(nbf.v4.new_code_cell("""sup = pd.read_csv(ROOT / "results/supervised_metrics.csv")
 show_md(sup.to_markdown(index=False))"""))

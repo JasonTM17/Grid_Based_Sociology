@@ -7,29 +7,27 @@ No training/configuration selection or network access is performed by this CLI.
 
 from __future__ import annotations
 
-import sys as _sys
-from pathlib import Path as _Path
-
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))  # repo root: cho phép `from scripts.<nhóm>.<module> import ...`
-
 import argparse
 import hashlib
 import io
 import json
 import os
-from pathlib import Path, PurePosixPath
 import re
+import shutil
 import stat
 import subprocess
 import sys
 import tempfile
-from xml.etree import ElementTree
 import zipfile
-
-from scripts.common.notebook_checks import notebook_issues
-from scripts.data.build_panel import NEW_FILES, OLD_FILES
+from pathlib import Path, PurePosixPath
+from xml.etree import ElementTree
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))  # cho phép `from scripts.<nhóm>.<module> import ...`
+
+from scripts.common.notebook_checks import notebook_issues  # noqa: E402
+from scripts.data.build_panel import NEW_FILES, OLD_FILES  # noqa: E402
+
 OUTPUT = ROOT / "submissions"
 PACKAGES = {
     milestone: (name, f"{name}.ipynb")
@@ -41,18 +39,20 @@ PACKAGES = {
 FINAL_SCRIPTS = (
     "data/build_panel", "data/build_scale_metadata", "data/build_external_master",
     "data/check_data", "data/crosscheck_mendeley", "data/preprocessing_audit",
-    "analysis/first_real_cluster", "common/papi_pred_common", "common/fig_style",
+    "analysis/first_real_cluster", "common/papi_pred_common", "common/fig_style", "common/papi_forecast",
     "analysis/predict_sweep", "analysis/predict_demo", "analysis/run_analysis",
     "analysis/external_validation", "analysis/poverty_validation", "analysis/cluster_profile",
     "analysis/protocol_sensitivity", "supervised/predict_supervised",
     "supervised/course_supervised_baselines", "supervised/supervised_depth",
-    "figures/fig_grid_levels_and_elbow",
+    "figures/fig_grid_levels_and_elbow", "figures/forecast_papi_grid",
 )
 FINAL_RESULTS = (
     "analysis_summary.md", "cluster_labels.csv", "cluster_profile.csv", "cluster_profile.md",
     "course_supervised_baselines.csv", "course_supervised_baselines.md", "course_supervised_sensitivity.csv",
     "external_master_summary.md", "external_validation.csv", "external_validation.md",
-    "metrics.csv", "per_year.csv", "poverty_validation.csv", "poverty_validation.md",
+    "metrics.csv", "papi_forecast_2024.json", "papi_forecast_cv.csv", "papi_forecast_provinces_2024.csv",
+    "papi_observed_grid_2024.csv",
+    "per_year.csv", "poverty_validation.csv", "poverty_validation.md",
     "predict_all_years.csv", "predict_config_search.csv", "predict_summary.md",
     "preprocessing_audit.csv", "preprocessing_audit.md", "protocol_sensitivity.csv",
     "protocol_sensitivity.md", "robustness.csv", "supervised_depth.csv",
@@ -61,7 +61,8 @@ FINAL_RESULTS = (
 FINAL_FIGURES = (
     "course_confusion_matrix", "deep_cluster_profile", "evolution", "external_grdp_by_cluster",
     "external_health_density_2020", "external_pci_by_cluster", "external_poverty_by_cluster",
-    "external_wdi_panel", "kmeans_elbow", "map_2020", "map_2024", "predict_2024",
+    "external_wdi_panel", "kmeans_elbow", "map_2020", "map_2024", "papi_forecast_grid", "papi_forecast_values",
+    "predict_2024",
     "protocol_sensitivity_grid", "sting_grid_levels", "supervised_importance",
     "supervised_learning_curve",
 )
@@ -86,18 +87,17 @@ MIDTERM_FILES = {
     "slides/submission.pptx": "Bản trình chiếu",
     f"notebooks/{MIDTERM_NOTEBOOK}": "Notebook đã lưu kết quả",
     "src/sting.py": "Mã nguồn thuật toán STING",
-    "scripts/common/papi_pred_common.py": "Đọc dữ liệu và cấu hình STING",
+    "scripts/common/papi_pred_common.py": "Đọc bảng PAPI và kiểm tra lý do gán cụm",
     "scripts/common/fig_style.py": "Định dạng biểu đồ trong notebook",
+    "scripts/common/midterm_clustering.py": "Tham số, mã phân cụm và biểu đồ dùng trong notebook",
+    "scripts/common/papi_forecast.py": "Minh họa dự báo hai điểm từ dữ liệu đến năm 2023",
     "LICENSE": "Giấy phép mã nguồn",
     "requirements.txt": "Thư viện để chạy notebook",
-    "models/predict_config.json": "Cấu hình STING đã chọn",
     "data/processed/papi_panel_63_2011_2024.csv": "Bảng PAPI đã tiền xử lý",
     **PAPI_SOURCE_FILES,
     "results/preprocessing_audit.csv": "Kết quả kiểm tra tiền xử lý",
-    "results/metrics.csv": "Bảng đối chiếu các phương pháp phân cụm",
-    "results/predict_all_years.csv": "Nhãn cụm dùng để đối chiếu khi chạy lại",
-    "results/predict_summary.md": "Số liệu đối chiếu độ nhạy theo ngưỡng",
-    "results/figs/predict_2024.png": "Hình minh họa gán cụm năm 2024",
+    "results/papi_observed_grid_2024.csv": "Lý do gán cụm trên lưới tham chiếu của 63 tỉnh, thành phố",
+    "results/figs/predict_2024.png": "Điểm PAPI đã quan sát năm 2024 trên lưới đến 2023",
 }
 FINAL_FILES = {
     "reports/final_report.docx": "Báo cáo cuối kỳ",
@@ -178,10 +178,12 @@ Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)
 Kính gửi Thầy Lê Minh Tân,
 
 Nhóm 15 xin gửi bài báo cáo giữa kỳ về thuật toán phân cụm dựa trên lưới STING
-và ứng dụng trên dữ liệu PAPI giai đoạn 2011–2024. Bài nộp gồm hai tệp sau.
+và phân tích mô tả 869 quan sát đủ hai chỉ tiêu PAPI giai đoạn 2011–2024.
+Bài nộp gồm hai tệp sau.
 
 - {MIDTERM_NAME}.pptx — Bản trình chiếu.
-- {notebook} — Notebook Jupyter có mã và kết quả thực nghiệm đã lưu.
+- {notebook} — Notebook Jupyter có mã phân cụm, đối chiếu z-score và phần
+  minh họa dự báo điểm PAPI để đối chiếu trên lưới STING.
 
 Thư mục {SUPPORT}/ chứa mã nguồn STING, bảng PAPI đã tiền xử lý
 (882 quan sát tỉnh–năm, 41 cột), 14 bảng tính gốc và thông tin nguồn dữ liệu.
@@ -216,7 +218,8 @@ trên dữ liệu PAPI giai đoạn 2011–2024. Gói bài nộp gồm các tệ
 
 Trong báo cáo, Chương 3 trình bày dữ liệu và tiền xử lý. Chương 4 trình bày
 cấu hình STING và quy trình đánh giá. Chương 5 trình bày kết quả phân cụm,
-đối chứng và gán cụm năm 2024.
+dự báo hai chỉ tiêu từ dữ liệu đến 2023 và đối chiếu trên cùng lưới với
+điểm quan sát năm 2024.
 
 Thư mục {SUPPORT}/ chứa mã nguồn STING, bảng PAPI đã tiền xử lý
 (882 quan sát tỉnh–năm, 41 cột), 14 bảng tính gốc, mô hình và kết quả
@@ -251,6 +254,7 @@ tiền xử lý, đối chiếu dữ liệu bằng các lệnh sau.
 python scripts/data/build_external_master.py
 python scripts/data/preprocessing_audit.py
 python scripts/data/crosscheck_mendeley.py
+python scripts/figures/forecast_papi_grid.py
 
 Phụ lục A trình bày thêm các lệnh tái lập từ kho mã đầy đủ của dự án.
 
@@ -430,6 +434,20 @@ print("Isolation guard enabled")
                 "launcher_messages": bool(proc.stderr.strip())}
 
 
+def sync_loose_deliverables(root: Path, output: Path, *, report_source: Path | None = None) -> None:
+    """Keep loose milestone folders (01-giua-ky, 02-cuoi-ky) identical to canonical deliverables."""
+    dirs = {"midterm": output / "01-giua-ky", "final": output / "02-cuoi-ky"}
+    for milestone, target_dir in dirs.items():
+        target_dir.mkdir(parents=True, exist_ok=True)
+        for src_rel, dest_name in VISIBLE[milestone].items():
+            src = (
+                report_source
+                if (milestone == "final" and src_rel == "reports/final_report.docx" and report_source is not None)
+                else (root / src_rel)
+            )
+            shutil.copy2(src, target_dir / dest_name)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=OUTPUT)
@@ -455,6 +473,8 @@ def main() -> int:
             lines.append(f"{sha256(path.read_bytes())}  {path.name}\n")
             print(f"{path.name}: {len(manifest['files'])} files, {path.stat().st_size / 1e6:.2f} MB")
         (args.output_dir / "SHA256SUMS.txt").write_text("".join(lines), encoding="utf-8")
+        if args.output_dir == OUTPUT.resolve():
+            sync_loose_deliverables(ROOT, args.output_dir, report_source=args.report_source)
     return 0
 
 

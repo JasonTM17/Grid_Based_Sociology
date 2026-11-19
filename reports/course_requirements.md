@@ -15,8 +15,10 @@ _Cập nhật: 2026-11-12 · Chủ sở hữu: nhóm · Hạn chốt logistics: 
 | Q&A | 2 |
 
 _Liên hệ deliverable giữa kỳ:_ slide và notebook đã chạy trình bày định nghĩa,
-demo lưới, tiền xử lý, kết quả STING trên PAPI và hai đối chứng phân cụm. Tham
-chiếu bảng `results/preprocessing_audit.md` và `results/metrics.csv`.
+demo lưới, tiền xử lý, kết quả STING trên PAPI và hai đối chứng phân cụm.
+Notebook giữa kỳ tính lại z-score, số ô dày, silhouette và độ nhạy trên 869
+quan sát đủ hai chỉ tiêu PAPI 2011–2024. Kiểm tra tiền xử lý tham chiếu bảng
+`results/preprocessing_audit.md`.
 
 ### Cuối kỳ (rubric Day 1, trang 10 — đã xác minh bằng mắt trên PDF gốc)
 

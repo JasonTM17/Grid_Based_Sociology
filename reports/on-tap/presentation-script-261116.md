@@ -2,7 +2,7 @@
 
 Giữa kỳ trình bày định nghĩa và demo cơ bản. Nhóm minh họa cơ chế bằng lưới 3 × 3, kiểm chứng trên dữ liệu giả lập và giới thiệu ứng dụng PAPI đã chuẩn bị.
 
-Mở slide trong submissions/01-giua-ky và notebook cùng thư mục. Hướng dẫn thao tác ở [DEMO](../../DEMO.md). Bản có giải thích để tập nằm trong [study](../../study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb).
+Mở slide trong `submissions/01-giua-ky` và notebook cùng thư mục. Dùng mục 4 của notebook để tập giải thích phép tính và minh họa mã khi chiếu. [Hướng dẫn demo](../../DEMO.md)
 
 ## Lời mở đầu có thể dùng
 
@@ -18,16 +18,16 @@ Mở slide trong submissions/01-giua-ky và notebook cùng thư mục. Hướng 
 | 4 | 3:30–5:00 | Đi qua đếm điểm, chọn ô dày và nối các ô chung cạnh. Gọi đúng là biến thể rút gọn của STING. |
 | 5 | 5:00–7:00 | Mở mục 2 của notebook. Ngưỡng 3 cho hai cụm 7 điểm và một điểm nhiễu. Giải thích hai vùng chỉ chạm góc. |
 | 6 | 7:00–8:30 | Bộ giả lập có 240 điểm và hai nhóm tham chiếu. Giải thích ARI 0,950 đo mức khớp với nhãn khi sinh dữ liệu. |
-| 7 | 8:30–10:30 | Giới thiệu ngắn PAPI. Hai chỉ tiêu là hai trục dữ liệu, lưới thô và mịn cho kết quả khác nhau. |
-| 8 | 10:30–12:00 | Đọc bảng STING, K-means và DBSCAN. Xem số cụm, tỷ lệ nhiễu cùng silhouette. |
-| 9 | 12:00–14:00 | Đổi riêng ngưỡng ô dày 3, 5 và 8. Giải thích vì sao số cụm và tỷ lệ gán cụm thay đổi. |
+| 7 | 8:30–10:30 | Nêu 869 quan sát đã có, gồm 61 quan sát năm 2024. Dùng ví dụ Lạng Sơn ở mục 4.2 để giải thích hai trục z-score. Chỉ vùng ô dày trên hình. |
+| 8 | 10:30–12:00 | Chỉ 56 ô dày tạo 3 vùng. K-means chọn k = 2 trong các giá trị 2–5. Đọc số cụm và nhiễu trên 869 điểm, silhouette trên 680 điểm giao. Chỉ bảng chéo để giải thích cùng k = 3 vẫn ra cách chia khác. |
+| 9 | 12:00–14:00 | Đọc ba nhánh sơ đồ. Chỉ các ô STING giữ nguyên và các vòng đen trên hình ở mục 4.6. Nêu 68 điểm đổi cụm K-means và 8 điểm đổi trạng thái nhiễu DBSCAN. Khi hỏi về bán kính, giải thích vòng gốc có cùng diện tích với elip lân cận sau đổi thang. |
 | 10 | 14:00–15:00 | Chốt cơ chế, kết quả minh họa và giới hạn khi áp dụng lên hai chỉ tiêu PAPI. |
 
 Ghi người trình bày và thời gian đo được vào [nhật ký luyện tập](rehearsal_log.md).
 
 ## Hỏi đáp trong 5 phút
 
-Ưu tiên tự trả lời câu 1–10 trong [câu hỏi giữa kỳ](qa_midterm.md). Các câu 12–17 giải thích phần PAPI khi thầy hỏi thêm. Mỗi người cần nói được quan hệ Grid-based → STING → dữ liệu minh họa.
+Ưu tiên tự trả lời câu 1–10 trong câu hỏi giữa kỳ. Các câu 12–20 giải thích phần PAPI khi thầy hỏi thêm. Mỗi người cần nói được quan hệ Grid-based → STING → dữ liệu minh họa. [Câu hỏi giữa kỳ](qa_midterm.md)
 
 ## Chuẩn bị cuối kỳ
 

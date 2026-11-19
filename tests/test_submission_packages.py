@@ -29,6 +29,8 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
         prefix = f"{SUPPORT}/"
         support_files = {p.removeprefix(prefix) for p in files}
         assert sum(p.endswith(".xlsx") and p.startswith(f"{prefix}data/raw/papi/") for p in files) == 14
+        audit = "results/papi_observed_grid_2024.csv"
+        assert audit in support_files
         if kind == "final":
             assert {
                 "scripts/supervised/predict_supervised.py", "scripts/common/papi_pred_common.py", "scripts/common/fig_style.py",
@@ -37,6 +39,8 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
                 "data/processed/papi_panel_scale_metadata.csv",
                 "data/processed/external_master_63_2011_2024.csv",
                 "data/processed/external_gso_waste_63.csv", "scripts/data/build_external_master.py",
+                "scripts/common/papi_forecast.py", "results/papi_forecast_provinces_2024.csv",
+                "results/figs/papi_forecast_grid.png", "results/figs/papi_forecast_values.png",
             } <= support_files
             assert {p for p in files if "/" not in p} == {f"{name}.docx", f"{name}.pptx", notebook, "HUONG_DAN.txt"}
             assert not any(p.startswith(("tests/", "scripts/deliverables/", "assets/", "results/candidates_"))
@@ -48,9 +52,13 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
             assert {p for p in files if "/" not in p} == {f"{name}.pptx", notebook, "HUONG_DAN.txt"}
             assert {f"{prefix}{p}" for p in (
                 "src/sting.py", "scripts/common/papi_pred_common.py", "scripts/common/fig_style.py",
-                "models/predict_config.json", "results/predict_all_years.csv",
+                "scripts/common/midterm_clustering.py", "results/preprocessing_audit.csv",
+                "scripts/common/papi_forecast.py",
+                "results/figs/predict_2024.png",
                 "data/processed/papi_panel_63_2011_2024.csv", "requirements.txt",
             )} <= files
+            assert not {"models/predict_config.json", "results/predict_all_years.csv",
+                        "results/metrics.csv", "results/predict_summary.md"} & support_files
             assert not any(p.endswith((".pkl", ".joblib")) or p.startswith(
                 (f"{prefix}tests/", f"{prefix}reports/", f"{prefix}scripts/supervised/")
             ) for p in files)
@@ -72,6 +80,7 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
             assert f"--execute {notebook}" in guide
             assert "Kính gửi Thầy Lê Minh Tân" in guide
             assert archive.read(f"{name}/{notebook}") == (ROOT / "notebooks" / notebook).read_bytes()
+            assert archive.read(f"{name}/{prefix}{audit}") == (ROOT / audit).read_bytes()
             for relative in bundled_references:
                 assert f"{prefix}{relative}" in guide
                 assert archive.read(f"{name}/{prefix}{relative}") == (ROOT / relative).read_bytes()
@@ -133,7 +142,7 @@ def test_extra_file_is_rejected_even_when_listed_in_manifest(packages, tmp_path)
 def test_corrupted_data_is_rejected(packages, tmp_path):
     broken = tmp_path / "corrupt.zip"
     _rewrite(packages["midterm"], broken,
-             lambda name, data: data + b"\nchanged" if name.endswith("/models/predict_config.json") else data)
+             lambda name, data: data + b"\nchanged" if name.endswith("/src/sting.py") else data)
     with pytest.raises(ValueError, match="Checksum"):
         verify_package(broken, "midterm")
 
@@ -187,3 +196,18 @@ def test_preprocessing_rebuilds_master_and_audit_from_extracted_package(packages
     assert (package / "results/preprocessing_audit.csv").read_text(encoding="utf-8-sig") == (
         ROOT / "results/preprocessing_audit.csv"
     ).read_text(encoding="utf-8-sig")
+
+
+def test_loose_submission_folders_match_canonical_deliverables():
+    """Loose copies in submissions/01-giua-ky and 02-cuoi-ky must match canonical files."""
+    expected_pairs = [
+        ("slides/submission.pptx", "submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx"),
+        ("notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb", "submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.ipynb"),
+        ("reports/final_report.docx", "submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx"),
+        ("notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb", "submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.ipynb"),
+        ("slides/final.pptx", "submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx"),
+    ]
+    for src_rel, dst_rel in expected_pairs:
+        src, dst = ROOT / src_rel, ROOT / dst_rel
+        assert dst.is_file(), f"Thiếu bản rời {dst_rel}"
+        assert src.read_bytes() == dst.read_bytes(), f"{dst_rel} lệch với {src_rel}"

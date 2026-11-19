@@ -22,11 +22,18 @@ from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Inches, Pt
+from matplotlib import pyplot as plt
+from sklearn.cluster import DBSCAN, KMeans
 from sklearn.datasets import make_blobs
-from sklearn.metrics import adjusted_rand_score
+from sklearn.metrics import adjusted_rand_score, silhouette_score
+from sklearn.preprocessing import StandardScaler
 
 from scripts.common.fig_style import PALETTE, style_context
-from scripts.common.papi_pred_common import load_config
+from scripts.common.midterm_clustering import (
+    FEATURES, GRID, THRESHOLDS, K_CANDIDATES, KMEANS_OPTIONS, DBSCAN_OPTIONS,
+    fit_grid, comparison_figure, raw_dbscan_radius,
+)
+from scripts.common.papi_pred_common import load_panel
 from sting import STING
 
 ROOT = _ROOT
@@ -34,46 +41,47 @@ FIGS = ROOT / "results" / "figs"
 OUT = ROOT / "slides" / "submission.pptx"
 TOTAL = 10
 
-# Số liệu đọc từ artifact (không hardcode số đo phân cụm)
-
-
 def _read_results_csv(name: str) -> list[dict[str, str]]:
     with open(ROOT / "results" / name, encoding="utf-8-sig", newline="") as f:
         return list(csv.DictReader(f))
 
 
-def _pct(v: str | float) -> str:
-    s = f"{float(v) * 100:.1f}".rstrip("0").rstrip(".")
-    return s + "%"
+# Tính trên cùng mẫu 2011–2024 và với cùng tham số như notebook giữa kỳ.
+PAPI_COMPLETE = load_panel().dropna(subset=FEATURES)
+PAPI_COUNT = len(PAPI_COMPLETE)
+PAPI_RAW = PAPI_COMPLETE[list(FEATURES)].to_numpy()
+PAPI_SCALER = StandardScaler().fit(PAPI_RAW)
+PAPI_Z = PAPI_SCALER.transform(PAPI_RAW)
+PAPI_GRID, PAPI_LABELS = fit_grid(PAPI_Z)
+PAPI_GRID_SIZE = GRID["factor"] ** GRID["cluster_level"]
+PAPI_SIZES = sorted((n for label, n in Counter(PAPI_LABELS).items() if label >= 0), reverse=True)
+PAPI_NOISE = int((PAPI_LABELS == -1).sum())
+DENSE_COMPONENTS = sorted(Counter(PAPI_GRID.label_of_.values()).values())
 
+KM_MODELS = {k: KMeans(n_clusters=k, **KMEANS_OPTIONS).fit(PAPI_Z) for k in K_CANDIDATES}
+KM_SCORES = {k: silhouette_score(PAPI_Z, model.labels_) for k, model in KM_MODELS.items()}
+BEST_K = max(KM_SCORES, key=KM_SCORES.get)
+KM_MODEL = KM_MODELS[BEST_K]
+DB_LABELS = DBSCAN(**DBSCAN_OPTIONS).fit_predict(PAPI_Z)
+DB_EPS_RAW = raw_dbscan_radius(PAPI_SCALER.scale_)
+DB_RAW = DBSCAN(eps=DB_EPS_RAW, min_samples=DBSCAN_OPTIONS['min_samples']).fit_predict(PAPI_RAW)
+DB_NOISE_CHANGED = int(((DB_RAW == -1) != (DB_LABELS == -1)).sum())
+COMMON = (PAPI_LABELS >= 0) & (KM_MODEL.labels_ >= 0) & (DB_LABELS >= 0)
+N_COMMON = int(COMMON.sum())
+LARGEST = Counter(PAPI_LABELS[PAPI_LABELS >= 0]).most_common(1)[0][0]
 
-def _f3(v: str | float) -> str:
-    return f"{float(v):.3f}"
+RAW_GRID, RAW_LABELS = fit_grid(PAPI_RAW)
+GRID_LEVEL = PAPI_GRID.cluster_level_
+SAME_BIN = int((RAW_GRID.point_cell_index(GRID_LEVEL) == PAPI_GRID.point_cell_index(GRID_LEVEL)).all(axis=1).sum())
+SAME_LABEL = int((RAW_LABELS == PAPI_LABELS).sum())
+KM2_RAW = KMeans(n_clusters=2, **KMEANS_OPTIONS).fit_predict(PAPI_RAW)
+KMEANS2_SAME_ID = int((KM2_RAW == KM_MODELS[2].labels_).sum())
+KMEANS2_CHANGED = min(KMEANS2_SAME_ID, PAPI_COUNT - KMEANS2_SAME_ID)
 
-
-def _metric_row(method_sub: str) -> dict[str, str]:
-    for r in _read_results_csv("metrics.csv"):
-        if method_sub in r["method"]:
-            return r
-    raise KeyError(method_sub)
-
-
-M_STING = _metric_row("STING (frozen)")
-M_KM2 = _metric_row("k-means k=2")
-M_DB = _metric_row("DBSCAN eps=0.2")
-
-PAPI_ASSIGNMENTS = _read_results_csv("predict_all_years.csv")
-TRAIN_LABELS = Counter(int(row["pred_cluster"]) for row in PAPI_ASSIGNMENTS if row["split"] == "train")
-LABELS_2024 = Counter(int(row["pred_cluster"]) for row in PAPI_ASSIGNMENTS if row["year"] == "2024")
-TRAIN_SIZES = sorted((n for label, n in TRAIN_LABELS.items() if label >= 0), reverse=True)
-CLUSTERED_2024 = LABELS_2024.total() - LABELS_2024[-1]
-PAPI_GRID = load_config()["sting"]
-PAPI_GRID_SIZE = PAPI_GRID["factor"] ** PAPI_GRID["cluster_level"]
-
-PREDICT_SUMMARY = (ROOT / "results" / "predict_summary.md").read_text(encoding="utf-8")
-SENSITIVITY = {int(threshold): coverage for threshold, coverage in re.findall(
-    r"^\|\s*(\d+)\s*\|\s*(\d+%)\s*\|", PREDICT_SUMMARY, flags=re.MULTILINE,
-)}
+SENSITIVITY = {}
+for threshold in THRESHOLDS:
+    trial, _ = fit_grid(PAPI_Z, min_count=threshold)
+    SENSITIVITY[threshold] = trial.n_clusters_
 
 # Số đo tiền xử lý — đọc từ audit Day 4, không gõ tay.
 AUDIT = _read_results_csv("preprocessing_audit.csv")
@@ -421,13 +429,17 @@ bullets(
 )
 rect(s, 7.4, 1.4, 5.35, 4.22, LIGHT)
 text(s, 7.65, 1.52, 4.9, 0.32, [("DỮ LIỆU PAPI ĐÃ CHUẨN BỊ", 12, True, TEAL)])
-for i, (lbl, val) in enumerate([("Quan sát tỉnh–năm", "882"), ("Số cột", "41"), ("Giai đoạn", "2011–2024")]):
+for i, (lbl, val) in enumerate([
+    ("Bảng gốc · số dòng × số cột", f"{N_ROWS} × 41"),
+    ("Đủ chỉ tiêu 4.2 và 6.1", f"{PAPI_COUNT} quan sát"),
+    ("Giai đoạn", "2011–2024"),
+]):
     y = 2.0 + i * 1.02
     rect(s, 7.65, y, 4.85, 0.86, WHITE)
     text(s, 7.8, y + 0.08, 3.2, 0.7, [(lbl, 12.5, False, GREY), (val, 21, True, NAVY)])
 text(
     s, 7.65, 5.02, 4.85, 0.55,
-    [("Hai chỉ tiêu dùng cho phân cụm được chuẩn hóa bằng thống kê của tập huấn luyện.", 12.5, False, GREY)],
+    [(f"z = (x − μ) / σ. Tính theo từng chỉ tiêu trên {PAPI_COUNT} quan sát đủ dữ liệu.", 12.5, False, GREY)],
 )
 
 # Dải tiền xử lý Day 4 — thứ tự dạy học + số đo audit, đọc từ preprocessing_audit.csv.
@@ -439,7 +451,7 @@ text_line(
     s, 0.72, 6.11, 11.9, 0.33,
     [
         ("Làm sạch", True, NAVY),
-        (" (trùng khóa, thiếu dữ liệu, ngoại lai)", False, INK),
+        (" (rà khóa trùng, điểm thiếu, ngoại lai)", False, INK),
         ("  →  ", False, GREY),
         ("Tích hợp", True, NAVY),
         (" (mã tỉnh, năm)", False, INK),
@@ -459,7 +471,11 @@ note(
     "Nhóm kiểm tra trùng khóa tỉnh–năm, dữ liệu thiếu, tính nhất quán và ngoại lai, "
     "sau đó ghép dữ liệu theo mã tỉnh và chuẩn hóa. Các ô thiếu được giữ để ghi nhận "
     "độ phủ. Bước phân cụm chỉ dùng những dòng có đủ hai chỉ tiêu được chọn. "
-    "Thống kê chuẩn hóa được ước lượng từ tập huấn luyện.",
+    "Điểm hợp lệ trong ô thưa được giữ để đo độ phủ của lưới. Bảng gán năm 2024 "
+    "trong notebook ghi cả lý do và số quan sát tham chiếu của từng ô thưa. "
+    f"Tính trung bình và độ lệch chuẩn của từng chỉ tiêu trên {PAPI_COUNT} quan sát đủ dữ liệu. "
+    "Điểm z bằng 0 là trung bình, điểm z bằng +1 cao hơn trung bình một độ lệch chuẩn. "
+    "Notebook cho phép kiểm lại phép tính từ điểm PAPI gốc của Lạng Sơn năm 2024.",
 )
 
 # 3 — Các mức lưới
@@ -556,7 +572,7 @@ bullets(
     s, 7.85, 1.73, 4.9, 4.6,
     [
         ("Dữ liệu.", "240 điểm, biết trước hai cụm khi sinh dữ liệu."),
-        ("Kết quả.", f"STING tìm {SYN_K} cụm, nhiễu {_pct(SYN_NOISE)}."),
+        ("Kết quả.", f"STING tìm {SYN_K} cụm, nhiễu {SYN_NOISE:.1%}."),
         ("Độ khớp.", f"ARI {SYN_ARI_S} khi so với nhãn giả lập."),
     ],
     size=17, gap_pt=33,
@@ -570,123 +586,175 @@ note(
 
 # 7 — Ứng dụng PAPI
 s = slide_new()
-header(s, "ỨNG DỤNG", "Cùng dữ liệu PAPI, hai cách đặt lưới", 7)
-pic(s, "sting_first_real.png", 0.55, 1.44, w=8.08)
-bullets(
-    s, 8.93, 1.63, 3.87, 4.7,
-    [
-        ("Dữ liệu 2023.", "61 tỉnh đủ hai chỉ tiêu được chọn."),
-        ("Lưới 3 × 3.", "Ngưỡng 5, tìm 1 cụm và 10% nhiễu."),
-        ("Lưới 9 × 9.", "Ngưỡng 2, tìm 3 cụm và 31% nhiễu."),
-        ("Hai cấu hình.", "Cả cỡ lưới lẫn ngưỡng đều thay đổi."),
-    ],
-    size=16, gap_pt=20,
-)
+header(s, "ỨNG DỤNG", "Cùng dữ liệu PAPI, hai cách tạo cụm", 7)
+text(s, 0.65, 1.26, 12.0, 0.34, [
+    (f"{PAPI_COUNT} quan sát tỉnh–năm · 2011–2024 · Hai trục hiển thị theo z-score", 14, True, TEAL),
+], align=PP_ALIGN.CENTER)
+figure = comparison_figure(PAPI_Z, PAPI_GRID, PAPI_LABELS, KM_MODEL)
+image = BytesIO()
+figure.savefig(image, format="png", dpi=200)
+plt.close(figure)
+image.seek(0)
+pic_bytes(s, image, 0.7, 1.64, w=11.9)
+text(s, 0.65, 6.55, 12.0, 0.33, [
+    ("STING nối các ô dày. Đường đứt ở hình K-means đi qua vị trí cách đều hai tâm.", 13, False, GREY),
+], align=PP_ALIGN.CENTER)
 note(
     s,
-    "Năm 2023 có 61 tỉnh đủ hai chỉ tiêu. Cấu hình lưới 3×3 với ngưỡng 5 cho một cụm và khoảng 10% nhiễu. "
-    "Cấu hình 9×9 với ngưỡng 2 cho ba cụm và khoảng 31% nhiễu. Hai cấu hình thay đổi cả "
-    "độ phân giải và ngưỡng mật độ. Phần sau khảo sát riêng ngưỡng mật độ.",
+    f"Phân cụm mô tả dùng {PAPI_COUNT} quan sát đủ hai chỉ tiêu, gồm "
+    f"{PAPI_COMPLETE.year.eq(2024).sum()} quan sát năm 2024. Bên trái, viền màu đánh dấu "
+    f"các ô có ít nhất {GRID['min_count']} điểm. Bên phải, dấu X chỉ tâm cụm, mỗi điểm được gán "
+    "cho tâm gần nhất. Đường đứt là ranh giới giữa hai nhóm do K-means tạo. "
+    "Màu và tên cụm dùng riêng trong từng hình. Trục ngang là chỉ tiêu 4.2, trục dọc là chỉ tiêu 6.1. "
+    "Giá trị z thể hiện khoảng cách tới trung bình của chỉ tiêu theo đơn vị độ lệch chuẩn.",
 )
 
-# 8 — Đối chứng phân cụm
+# 8 — Đối chiếu trên cùng nhóm điểm
 s = slide_new()
-header(s, "ĐÁNH GIÁ", "Kết quả STING và hai đối chứng", 8)
-rows = [("Phương pháp", "Số cụm", "Nhiễu", "Silhouette")]
-for label, result in [("STING", M_STING), ("K-means (k=2)", M_KM2), ("DBSCAN (ε=0.2)", M_DB)]:
-    rows.append((label, result["k"], _pct(result["noise_ratio"]), _f3(result["silhouette"])))
+header(s, "ĐÁNH GIÁ", f"Vì sao STING có {PAPI_GRID.n_clusters_} cụm, K-means dùng k = {BEST_K}?", 8)
+text(s, 0.6, 1.37, 12.16, 0.34, [
+    (f"Số cụm và nhiễu trên {PAPI_COUNT} quan sát · Silhouette trên cùng {N_COMMON} điểm", 14, True, TEAL),
+])
+rows = [("Phương pháp", "Số cụm", "Điểm nhiễu", "Silhouette")]
+for name, labels in (
+    ("STING", PAPI_LABELS),
+    (f"K-means (k={BEST_K})", KM_MODEL.labels_),
+    ("K-means (k=3)", KM_MODELS[3].labels_),
+    (f"DBSCAN (ε={DBSCAN_OPTIONS['eps']})", DB_LABELS),
+):
+    counts = Counter(labels)
+    n_noise = counts.pop(-1, 0)
+    rows.append((name, str(len(counts)), f"{n_noise} ({n_noise / PAPI_COUNT:.1%})",
+                 f"{silhouette_score(PAPI_Z[COMMON], labels[COMMON]):.4f}"))
 tb = s.shapes.add_table(
-    len(rows), 4, Inches(0.6), Inches(1.85), Inches(7.2), Inches(2.8)
+    len(rows), 4, Inches(0.6), Inches(1.9), Inches(7.27), Inches(3.3)
 ).table
-for j, width in enumerate([2.65, 1.2, 1.25, 2.1]):
+for j, width in enumerate([2.36, 1.05, 1.94, 1.92]):
     tb.columns[j].width = Inches(width)
 for i, row in enumerate(rows):
     for j, value in enumerate(row):
         cell = tb.cell(i, j)
         cell.vertical_anchor = MSO_ANCHOR.MIDDLE
         cell.text_frame.text = value
-        run = cell.text_frame.paragraphs[0].runs[0]
+        p = cell.text_frame.paragraphs[0]
+        if j > 0:
+            p.alignment = PP_ALIGN.CENTER
+        run = p.runs[0]
         run.font.name = "Calibri"
-        run.font.size = Pt(17)
+        run.font.size = Pt(15 if i == 0 else 16)
         run.font.bold = i == 0
         run.font.color.rgb = WHITE if i == 0 else INK
         cell.fill.solid()
         cell.fill.fore_color.rgb = TEAL if i == 0 else WHITE if i % 2 else LIGHT
-text(s, 0.6, 4.98, 7.2, 0.6, [
-    (f"{TRAIN_LABELS.total()} quan sát đủ hai chỉ tiêu PAPI · 2011–2023", 14, False, GREY),
+text(s, 0.6, 5.43, 7.25, 1.07, [
+    (f"{N_COMMON} điểm được cả ba cách gán cụm. Silhouette đo độ gọn và độ tách trên nhóm điểm này.",
+     15, False, GREY),
 ])
-rect(s, 8.2, 1.85, 4.53, 3.75, LIGHT)
+largest_split = sorted(Counter(KM_MODEL.labels_[PAPI_LABELS == LARGEST]).values(), reverse=True)
+split_text = " và ".join(map(str, largest_split))
+rect(s, 8.19, 1.9, 4.56, 4.76, LIGHT)
 bullets(
-    s, 8.43, 2.03, 4.0, 3.2,
+    s, 8.42, 2.13, 4.09, 4.13,
     [
-        ("K-means.", "Ấn định số cụm và gán mọi điểm."),
-        ("STING và DBSCAN.", "Có cơ chế nhận diện điểm nhiễu."),
-        ("Cách đọc.", "Xem silhouette cùng tỷ lệ nhiễu."),
+        ("STING.", f"{sum(DENSE_COMPONENTS)} ô dày tạo {len(DENSE_COMPONENTS)} vùng kề cạnh, "
+         f"gồm {', '.join(map(str, DENSE_COMPONENTS))} ô."),
+        ("K-means.", f"Thử k = 2–5. k = {BEST_K} có silhouette cao nhất trên mẫu đầy đủ."),
+        ("Đối chiếu.", f"K-means k = {BEST_K} chia vùng STING lớn nhất ({PAPI_SIZES[0]} điểm) "
+         f"thành {split_text} điểm."),
     ],
-    size=16, gap_pt=19,
+    size=16, gap_pt=13,
 )
 note(
     s,
-    "Ba phương pháp cùng dùng hai chỉ tiêu và giai đoạn 2011–2023. STING cho ba cụm "
-    "với 19,6% nhiễu, K-means cho hai cụm và DBSCAN cho năm cụm ở các cấu hình đã nêu. "
-    "Silhouette được tính trên điểm đã vào cụm, vì vậy mỗi phương pháp có thể được đánh giá "
-    "trên tập điểm khác nhau. Khi so sánh cần đọc cùng tỷ lệ nhiễu.",
+    f"STING dùng lưới {PAPI_GRID_SIZE} × {PAPI_GRID_SIZE} và ngưỡng {GRID['min_count']} điểm mỗi ô. "
+    f"Quy tắc kề cạnh tạo {len(DENSE_COMPONENTS)} cụm. K-means cần đặt k trước khi chạy. "
+    f"Trên {PAPI_COUNT} điểm, các kết quả K-means khi dò k là "
+    + ", ".join(f"k={k} đạt {score:.4f}" for k, score in KM_SCORES.items())
+    + f". Bảng trên slide giữ các nhãn đã có và tính silhouette Euclid trên cùng {N_COMMON} điểm "
+      "được cả STING, K-means và DBSCAN gán cụm. Cột số cụm và nhiễu lấy trên mẫu đầy đủ. "
+      "K-means k=3 là đối chứng cùng số cụm với STING. Bảng chéo trong notebook cho thấy cách chia khác "
+      "kể cả khi cùng có ba cụm. DBSCAN dùng ε=0,2 trên tọa độ z-score, với tối thiểu 5 điểm "
+      "trong lân cận tính cả điểm đang xét. Silhouette mô tả hình học trên phần giao. "
+      "Tỷ lệ nhiễu và kích thước cụm cho thấy phần còn lại của dữ liệu.",
 )
 
-text(s, 0.65, 6.15, 12.0, 0.4, [("Silhouette tính trên điểm thuộc cụm; tập điểm của các phương pháp có thể khác nhau.", 12, False, GREY)])
-
-# 9 — Tham số và giới hạn
+# 9 — Sơ đồ tác động của z-score
 s = slide_new()
-header(s, "THAM SỐ", "Ngưỡng ô dày thay đổi kết quả ra sao?", 9)
-rect(s, 0.6, 1.65, 6.1, 4.6, LIGHT)
-text(s, 0.84, 1.86, 5.5, 0.55, [("ĐỔI NGƯỠNG, GIỮ CÙNG LƯỚI", 16, True, TEAL)])
-text(s, 0.84, 2.48, 5.5, 0.7, [
-    (f"Lưới {PAPI_GRID_SIZE} × {PAPI_GRID_SIZE} được xây dựng từ dữ liệu 2011–2023.", 17, False, INK),
-])
-for i, threshold in enumerate((3, 5, 8)):
-    x = 0.86 + i * 1.89
-    rect(s, x, 3.4, 1.79, 1.55, WHITE)
-    text(s, x, 3.55, 1.79, 0.38, [(f"Ngưỡng {threshold}", 14, True, INK)], align=PP_ALIGN.CENTER)
-    text(s, x, 4.04, 1.79, 0.67, [(SENSITIVITY[threshold], 27, True, TEAL)], align=PP_ALIGN.CENTER)
-text(s, 0.84, 5.23, 5.5, 0.68, [
-    (f"Tỷ lệ gán cụm trên {LABELS_2024.total()} tỉnh năm 2024 có đủ hai chỉ tiêu.", 15, False, GREY),
-])
-text(s, 7.06, 1.86, 5.4, 0.55, [("KẾT QUẢ Ở NGƯỠNG CHÍNH", 16, True, TEAL)])
-bullets(
-    s, 7.06, 2.55, 5.45, 3.5,
-    [
-        (f"Ngưỡng {PAPI_GRID['min_count']}.", f"{CLUSTERED_2024} tỉnh vào cụm lớn, "
-         f"{LABELS_2024[-1]} tỉnh nhận nhãn nhiễu."),
-        ("Cách đọc.", "Tỷ lệ cho biết có bao nhiêu tỉnh rơi vào các ô dày đã học."),
-        ("Phạm vi.", "Mô tả hai chỉ tiêu PAPI được chọn."),
-    ],
-    size=17, gap_pt=24,
+header(s, "CHUẨN HÓA", "Z-score thay đổi điều gì?", 9)
+rect(s, 2.74, 1.37, 7.86, 0.68, TEAL)
+text(s, 2.74, 1.51, 7.86, 0.37, [
+    (f"{PAPI_COUNT} quan sát · Chạy trên điểm gốc và điểm chuẩn hóa", 16, True, WHITE),
+], align=PP_ALIGN.CENTER)
+rect(s, 6.657, 2.05, 0.018, 0.25, TEAL)
+rect(s, 2.55, 2.28, 8.25, 0.018, TEAL)
+
+cards = (
+    ("STING", "Ô dày chung cạnh, biên lưới theo min–max.",
+     f"{SAME_BIN}/{PAPI_COUNT} điểm cùng ô", f"{SAME_LABEL} nhãn trùng · {PAPI_NOISE} điểm nhiễu"),
+    ("K-means k = 2", "Khoảng cách Euclid đến tâm cụm.",
+     f"{KMEANS2_CHANGED} điểm đổi cụm", f"Silhouette cùng thang z  {silhouette_score(PAPI_Z, KM2_RAW):.4f} → {KM_SCORES[2]:.4f}"),
+    ("DBSCAN", "Lân cận ε, ít nhất 5 điểm.",
+     f"{DB_NOISE_CHANGED} điểm đổi trạng thái nhiễu",
+     f"{len(set(DB_RAW[DB_RAW >= 0]))} → {len(set(DB_LABELS[DB_LABELS >= 0]))} cụm  ·  "
+     f"{int((DB_RAW == -1).sum())} → {int((DB_LABELS == -1).sum())} nhiễu"),
 )
+for index, (name, rule, result, detail) in enumerate(cards):
+    x = 0.63 + index * 4.12
+    arrow = s.shapes.add_shape(MSO_SHAPE.DOWN_ARROW, Inches(x + 1.80), Inches(2.29),
+                               Inches(0.24), Inches(0.39))
+    arrow.fill.solid()
+    arrow.fill.fore_color.rgb = TEAL
+    arrow.line.fill.background()
+    rect(s, x, 2.68, 3.86, 2.73, LIGHT)
+    text(s, x + 0.16, 2.82, 3.54, 0.38, [(name, 18, True, TEAL)])
+    text(s, x + 0.16, 3.34, 3.54, 0.64, [(rule, 14.5, False, INK)])
+    text(s, x + 0.16, 4.08, 3.54, 0.52, [(result, 16, True, NAVY)])
+    text(s, x + 0.16, 4.76, 3.54, 0.53, [(detail, 13, False, GREY)])
+
+code_box = rect(s, 0.63, 5.67, 12.10, 0.55, NAVY)
+code_frame = code_box.text_frame
+code_frame.word_wrap = False
+code_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+code_frame.margin_left = Inches(0.20)
+paragraph = code_frame.paragraphs[0]
+paragraph.alignment = PP_ALIGN.LEFT
+run = paragraph.add_run()
+run.text = "print((idx_raw == idx_z).all(axis=1).sum())"
+run.font.name = "Consolas"
+run.font.size = Pt(14)
+run.font.color.rgb = WHITE
+text(s, 0.63, 6.42, 12.10, 0.44, [
+    (f"DBSCAN dùng ε gốc ≈ {DB_EPS_RAW:.4f} và ε z = {DBSCAN_OPTIONS['eps']}. Xem 6 hình đối chiếu ở mục 4.6.",
+     14, False, GREY),
+])
+threshold_line = ", ".join(f"{value} điểm/ô cho {SENSITIVITY[value]} cụm" for value in THRESHOLDS)
 note(
     s,
-    "Khi giữ nguyên đặc trưng, biên và mức lưới, nhóm thử các ngưỡng 3, 5 và 8. "
-    f"Tỷ lệ tỉnh năm 2024 được gán vào cụm lần lượt khoảng "
-    f"{SENSITIVITY[3]}, {SENSITIVITY[5]} và {SENSITIVITY[8]}. "
-    "Kết quả cho thấy việc chọn ngưỡng ảnh hưởng đến độ phủ. Cấu hình chính được chọn "
-    "từ dữ liệu các năm trước, sau đó mới dùng để gán cụm cho năm 2024.",
+    "Trên mỗi trục của STING, điểm và hai biên cùng đổi thang nên (x − min) / (max − min) giữ nguyên "
+    "với trục có độ lệch chuẩn dương. K-means dùng khoảng cách đến tâm, ghép tên cụm 0/1 trước "
+    "khi đếm điểm đổi nhóm. DBSCAN chạy với min_samples = 5. Vòng ε gốc có cùng diện tích với elip "
+    "tương ứng của ε z nhưng khác hình dạng. Mục 4.6 hiển thị nhãn của cả hai lượt trên cùng tọa độ z. "
+    f"Khảo sát thêm chỉ thay ngưỡng STING: {threshold_line}. Xem chi tiết ở mục 4.7.",
 )
 
 # 10 — Kết luận
 s = slide_new()
-header(s, "KẾT LUẬN", "Kết quả thực nghiệm với STING", 10)
+header(s, "KẾT LUẬN", "Kết quả phân cụm mô tả với STING", 10)
+assigned = PAPI_COUNT - PAPI_NOISE
 bullets(
     s, 0.55, 1.5, 12.0, 2.4,
     [
         ("Cài đặt.", "STING chia lưới, lưu thống kê ô và gom các ô dày liên thông."),
-        ("PAPI 2011–2023.", "Trên hai chỉ tiêu đã chọn, có một cụm lớn và hai cụm nhỏ."),
-        ("Đánh giá.", "Cần xem số cụm cùng kích thước cụm, tỷ lệ nhiễu và độ nhạy tham số."),
+        ("PAPI 2011–2024.", f"Cụm lớn chứa {PAPI_SIZES[0] / assigned:.0%} số điểm được gán cụm."),
+        ("Phạm vi.", "Kết quả mô tả hai chỉ tiêu. Số cụm và tỷ lệ nhiễu phụ thuộc ngưỡng ô dày."),
+        ("Mở rộng.", "Mục 4.8 dự báo hai điểm PAPI 2024 rồi đối chiếu trên lưới dựng đến 2023."),
     ],
-    size=16, gap_pt=22,
+    size=16, gap_pt=16,
 )
 for i, (value, label) in enumerate((
-    (str(TRAIN_SIZES[0]), "điểm trong cụm lớn"),
-    (" và ".join(map(str, TRAIN_SIZES[1:])), "điểm trong hai cụm nhỏ"),
-    (_pct(M_STING["noise_ratio"]), "điểm nhiễu"),
+    (str(PAPI_SIZES[0]), "điểm trong cụm lớn"),
+    (" và ".join(map(str, PAPI_SIZES[1:])), "điểm trong hai cụm nhỏ"),
+    (f"{PAPI_NOISE / PAPI_COUNT:.1%}", "quan sát trong ô thưa"),
 )):
     x = 0.6 + i * 4.12
     rect(s, x, 3.95, 3.86, 1.65, LIGHT)
@@ -698,10 +766,11 @@ text(s, 0.6, 5.82, 12.1, 0.46, [
 text(s, 0.6, 6.38, 12.1, 0.49, [("Cảm ơn thầy và các bạn đã lắng nghe", 20, True, NAVY)], align=PP_ALIGN.CENTER)
 note(
     s,
-    "Qua thực nghiệm, STING minh họa cách phân cụm bằng các ô dày liên thông. "
-    "Trên hai chỉ tiêu PAPI giai đoạn 2011–2023, các cụm có kích thước chênh lệch lớn. "
-    "Vì vậy, số cụm cần được đọc cùng tỷ lệ nhiễu và độ nhạy tham số. "
-    "Nhóm xin kết thúc phần trình bày và cảm ơn thầy và các bạn đã lắng nghe. "
+    f"Trên {PAPI_COUNT} quan sát và hai chỉ tiêu đã chọn, vùng chính chiếm "
+    f"{PAPI_SIZES[0]}/{assigned} số điểm được gán cụm, còn {PAPI_NOISE} điểm nằm trong ô thưa. "
+    "Ba cụm có kích thước chênh lệch lớn. Trên cùng nhóm điểm đã vào cụm, silhouette đo độ gọn "
+    "và tách biệt theo Euclid. Đây là các nhóm quan sát tỉnh–năm, "
+    "với kết quả phụ thuộc cách chọn chỉ tiêu, kích thước ô và ngưỡng mật độ. "
     "Nguồn phương pháp là Wang, Yang và Muntz, VLDB 1997. Nguồn dữ liệu là PAPI "
     "và gói đối chiếu Le cùng cộng sự, DOI 10.17632/wbk42j9wc8.1.",
 )

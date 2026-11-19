@@ -8,14 +8,13 @@ Chạy: python -m pytest tests/test_submission_artifacts.py -q
 
 from __future__ import annotations
 
-import ast
 import copy
+from base64 import b64decode
 import hashlib
 import json
 import re
 from pathlib import Path
 
-import pandas as pd
 import pytest
 from docx import Document
 from docx.oxml.ns import qn
@@ -25,7 +24,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 SUBMISSION_PPTX = ROOT / "slides" / "submission.pptx"
 SUBMISSION_NB = ROOT / "notebooks" / "Nhom15_GiuaKy_STING_PAPI.ipynb"
-PAPI_LABELS = ROOT / "results" / "predict_all_years.csv"
 PROVENANCE = ROOT / "data" / "raw" / "papi" / "PROVENANCE.md"
 PAPI_PDF = ROOT / "data" / "raw" / "papi" / "PAPI_2024_REPORT_VIE_final.pdf"
 EXPECTED_ARI_STR = "0.950"
@@ -55,8 +53,8 @@ def _sha256_file(path: Path) -> str:
 
 def test_report_embeds_current_canonical_figures():
     figures = (
-        "00_synthetic_sting.png", "sting_first_real.png", "predict_2024.png",
-        "supervised_regression.png", "course_confusion_matrix.png", "evolution.png",
+        "00_synthetic_sting.png", "sting_first_real.png", "papi_forecast_values.png",
+        "papi_forecast_grid.png", "course_confusion_matrix.png", "evolution.png",
         "map_2024.png", "external_pci_by_cluster.png", "external_health_density_2020.png",
         "external_grdp_by_cluster.png", "external_wdi_panel.png", "external_poverty_by_cluster.png",
     )
@@ -235,6 +233,20 @@ def test_submission_pptx_exists_and_notes():
     assert "nhóm báo cáo trung thực" not in titles_and_text.lower()
     assert "PHÂN CỤM DỰA TRÊN LƯỚI STING" in titles_and_text
     assert "APPLICATION OF STING GRID-BASED CLUSTERING" in titles_and_text
+    assert "Vì sao STING có 3 cụm, K-means dùng k = 2?" in titles_and_text
+    assert "56 ô dày" in titles_and_text
+    assert "Z-score thay đổi điều gì?" in titles_and_text
+    assert "Silhouette trên cùng 680 điểm" in titles_and_text
+    assert "print((idx_raw == idx_z).all(axis=1).sum())" in titles_and_text
+    assert "869/869 điểm cùng ô" in titles_and_text and "68 điểm đổi cụm" in titles_and_text
+    assert "8 điểm đổi trạng thái nhiễu" in titles_and_text
+    assert "482 và 195 điểm" in titles_and_text
+    assert "Mục 4.8 dự báo hai điểm PAPI 2024" in titles_and_text
+    assert "869 quan sát tỉnh–năm" in titles_and_text
+    assert "677" in titles_and_text and "19.7%" in titles_and_text
+    assert "huấn luyện" not in titles_and_text
+    table = next(shape.table for shape in presentation.slides[7].shapes if shape.has_table)
+    assert [table.cell(i, 3).text for i in range(1, 5)] == ["0.3802", "0.4605", "0.3499", "0.2740"]
 
 
 def test_submission_notebook_cells(submission_notebook: dict):
@@ -254,16 +266,15 @@ def test_submission_notebook_course_rubric_sections(submission_notebook: dict):
         c for c in submission_notebook.get("cells", []) if c.get("cell_type") == "code"
     ]
     missing: list[str] = []
-    if "Tiền xử lý dữ liệu" not in md_text:
-        missing.append("thiếu mục Tiền xử lý dữ liệu")
-    for section in ("Lý thuyết STING", "Cài đặt từ đầu", "Ứng dụng PAPI"):
+    for section in ("Lý thuyết STING", "Cài đặt từ đầu", "Phân cụm trên dữ liệu PAPI",
+                    "Chuẩn bị mẫu phân tích", "Tính z-score từ số liệu thật"):
         if section not in md_text:
             missing.append(f"thiếu mục {section}")
     if not any("preprocessing_audit.csv" in _cell_source_text(c) for c in code_cells):
         missing.append("không có ô đọc preprocessing_audit.csv")
-    if not any("KMeans(" in _cell_source_text(c) and "DBSCAN(" in _cell_source_text(c)
-               for c in code_cells):
-        missing.append("thiếu ô so sánh K-means và DBSCAN")
+    for calculation in ("KMeans(", "DBSCAN(", "scores.std(ddof=0)", "Counter(grid_model.label_of_.values())"):
+        if not any(calculation in _cell_source_text(c) for c in code_cells):
+            missing.append(f"thiếu phép tính {calculation}")
     assert not missing, "\n".join(missing)
     assert all(phrase not in md_text for phrase in (
         "Thứ tự giảng dạy", "Test → Decide", "Cách chạy", "Cùng ví dụ với slide",
@@ -272,31 +283,60 @@ def test_submission_notebook_course_rubric_sections(submission_notebook: dict):
 
 def test_submission_notebook_key_numbers(submission_notebook: dict):
     output = notebook_executed_text(submission_notebook)
-    labels = pd.read_csv(PAPI_LABELS)
-    holdout = labels.loc[labels.year == 2024, "pred_cluster"]
-    noise = int(holdout.eq(-1).sum())
     assert "2 cụm, mỗi cụm 7 điểm. 1 điểm nhiễu." in output
     assert f"ARI = {EXPECTED_ARI_STR}" in output
-    assert f"{len(labels)}/{len(labels)} nhãn khớp với kết quả đã lưu" in output
-    assert f"{len(holdout) - noise} tỉnh được gán cụm, {noise} tỉnh nhận nhãn nhiễu." in output
+    for expected in (
+        "869 quan sát đủ hai chỉ tiêu", "61/63 quan sát vào cùng mẫu",
+        "56 ô dày tạo thành 3 vùng liên thông.",
+        "1 ô dày, 5 quan sát.", "3 ô dày, 16 quan sát.", "52 ô dày, 677 quan sát.",
+        "Nhiễu: 171/869 quan sát (19.7%)",
+        "= 0.9005", "= 0.3737", "ô (12, 10) (đếm từ 0), ô có 17 quan sát",
+        "K-means chọn k=2 trong các giá trị đã thử và gán đủ 869 điểm.",
+    ):
+        assert expected in output
 
 
-def test_submission_checks_all_three_sensitivity_rows(submission_notebook: dict, tmp_path):
-    source = next(_cell_source_text(c) for c in submission_notebook["cells"]
-                  if "def _sensitivity_expectations(" in _cell_source_text(c))
-    parser = next(node for node in ast.parse(source).body
-                  if isinstance(node, ast.FunctionDef) and node.name == "_sensitivity_expectations")
-    scope = {"min_counts": (3, 5, 8)}
-    exec(compile(ast.Module(body=[parser], type_ignores=[]), "<notebook>", "exec"), scope)
-    parse = scope[parser.name]
-    path = tmp_path / "sensitivity.md"
-    path.write_text("| min_count  | coverage 2024 | số cụm | ARI |\n"
-                    "|---|---|---|---|\n| 3 | 82% | 3 | 0.852 |\n"
-                    "| 5 | 79% | 3 | 1.000 |\n| 8 | 70% | 1 | 0.678 |\n", encoding="utf-8")
-    assert parse(path) == {3: (0.82, 0.852), 5: (0.79, 1.0), 8: (0.70, 0.678)}
-    path.write_text(path.read_text(encoding="utf-8").split("| 8 |")[0], encoding="utf-8")
-    with pytest.raises(ValueError, match="3, 5, 8"):
-        parse(path)
+def test_submission_runs_all_kmeans_and_sensitivity_trials(submission_notebook: dict):
+    output = notebook_executed_text(submission_notebook)
+    for k, score in ((2, "0.4472"), (3, "0.3354"), (4, "0.3649"), (5, "0.3311")):
+        assert f"k={k}  |  Silhouette = {score}" in output
+    for threshold, k, n_noise, pct in ((3, 3, 85, "9.8"), (5, 3, 171, "19.7"), (8, 1, 271, "31.2")):
+        assert f"Ngưỡng {threshold}  |  {k} cụm  |  {n_noise}/869 nhiễu ({pct}%)" in output
+
+
+def test_midterm_compares_shared_points_and_check_scaling_effect(submission_notebook: dict):
+    output = notebook_executed_text(submission_notebook)
+    assert "Silhouette trên cùng 680/869 điểm" in output
+    for method, score in (("STING", "0.3802"), ("K-means k=2", "0.4605"),
+                          ("K-means k=3", "0.3499"), ("DBSCAN", "0.2740")):
+        assert f"{method} | silhouette cùng tập = {score}" in output
+    assert "K-means k=2 chia các điểm này thành 482 + 195" in output
+    assert "K-means k=3 chia các điểm này thành 306 + 303 + 68" in output
+    assert "STING: 869/869 điểm cùng chỉ số ô, 869/869 nhãn trùng" in output
+    assert "K-means k=2: 68/869 điểm đổi nhóm sau ghép tên cụm" in output
+    assert "ARI giữa hai lần chạy K-means: 0.7103" in output
+    assert "DBSCAN: ε gốc = 0.0316, 5 cụm, 116 điểm nhiễu" in output
+    assert "DBSCAN sau chuẩn hóa: 6 cụm, 120 điểm nhiễu, 8/869 điểm đổi trạng thái nhiễu" in output
+    assert "Thêm significance_z=2.0: 46 ô đạt, 4 cụm, 270/869 điểm nhiễu" in output
+    assert "738 cặp lịch sử, 61 tỉnh có dự báo 2024" in output
+    assert "Dự báo điểm nhận ra 0/11 tỉnh" in output
+    assert "Lạng Sơn 2023: ngoài vùng dày trên cùng lưới" in output
+    assert "Lạng Sơn 2024: cụm 2 trên cùng lưới" in output
+    assert "Ô (13, 9) có 2 điểm tham chiếu." in output
+    assert "Ô (12, 10) có 12 điểm tham chiếu." in output
+
+
+def test_midterm_contains_the_comparison_and_observed_figures(submission_notebook):
+    cells = submission_notebook["cells"]
+    figures = (
+        (next(cell for cell in cells if "papi-zscore-comparison" in cell.get("metadata", {}).get("tags", [])),
+         "papi_zscore_comparison.png"),
+        (next(cell for cell in cells if 'results/figs/predict_2024.png' in _cell_source_text(cell)),
+         "predict_2024.png"),
+    )
+    for cell, filename in figures:
+        png = next(output["data"]["image/png"] for output in cell["outputs"] if "image/png" in output.get("data", {}))
+        assert b64decode("".join(png)) == (ROOT / "results/figs" / filename).read_bytes()
 
 
 def test_papi_pdf_provenance_chain():
@@ -361,6 +401,9 @@ def test_optional_final_slides_match_grid_method_and_presentation_scope():
     assert "23/37 cột đổi thang" not in text
     assert "28 unit test" not in text
     assert "Kết quả chính và hướng phát triển" in text
+    assert "Dự báo hai điểm PAPI rồi đối chiếu theo vùng" in text
+    assert "0/11 tỉnh ngoài vùng dày được nhận ra" in text
+    assert "0,0736" in text and "0,0641" in text
     assert "Cảm ơn thầy và các bạn đã lắng nghe" in text
     closing_text = "\n".join(
         shape.text for shape in deck.slides[-1].shapes if shape.has_text_frame

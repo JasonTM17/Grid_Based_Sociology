@@ -21,11 +21,11 @@ Toàn bộ file nộp nằm trong [`submissions/`](submissions/). Các notebook 
 
 Khi chuyển sang máy khác, giải nén cả ZIP của mốc tương ứng. Slide cuối kỳ dùng khi vấn đáp là tài liệu tùy chọn. [Hướng dẫn](submissions/HUONG-DAN.txt) · [Slide vấn đáp](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
 
-Slide cuối kỳ có phần chính về STING ở trang 1–12, phụ lục Ridge và PCI ở trang 13–14, nguồn ở trang 15 và lời cảm ơn ở trang 16.
+Slide cuối kỳ trình bày STING và dự báo ở trang 1–13. Trang 7–9 giải thích cách dự báo hai chỉ tiêu, sai số và kết quả đối chiếu trên lưới. Trang 14 đối chiếu PCI, trang 15 ghi nguồn và trang 16 kết thúc.
 
 ## Ôn tập
 
-Ba notebook có giải thích nằm ngay trong `study/`. [Giữa kỳ](study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) · [Cuối kỳ](study/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) · [Day 4](study/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb)
+Bốn notebook có giải thích nằm ngay trong `study/`. [Giữa kỳ](study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) · [Cuối kỳ](study/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) · [Day 4](study/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb) · [Day 9: K-Means & HC](study/Nhom15_Day9_KMeans_HC_GiaiThich.ipynb)
 
 Tài liệu hỏi đáp, kịch bản nói và nhật ký luyện tập nằm trong `reports/on-tap/`.
 Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đó mở
@@ -110,6 +110,7 @@ python scripts/deliverables/build_slides_10.py
 python scripts/notebooks/gen_submission_demo.py
 
 # Cuối kỳ
+python scripts/figures/forecast_papi_grid.py
 python scripts/notebooks/gen_final_analysis.py
 python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb
 python scripts/deliverables/build_report.py
@@ -125,13 +126,19 @@ ZIP lấy các bản gốc trong `notebooks/`, `slides/` và `reports/`. Khi đ�
 bản gốc, đồng bộ cả bản rời trong `submissions/01-giua-ky/` hoặc
 `submissions/02-cuoi-ky/` theo bảng file nộp ở đầu trang.
 
-## Dự đoán (train quá khứ → dự đoán năm mới)
+## Dự báo hai chỉ tiêu và đối chiếu trên lưới STING
+
+Chạy `python scripts/figures/forecast_papi_grid.py` để tạo dự báo 2024 từ tám điểm PAPI năm 2023. Quy trình chọn mô hình cho hai chỉ tiêu bằng sáu lượt kiểm định có đích 2018–2023, rồi đánh giá trên cùng các tỉnh đối chiếu được năm 2024. Dùng chung lưới STING dựng từ dữ liệu đến 2023 cho điểm dự báo và điểm thực tế.
+
+Ridge đạt MAE 0,0736 và 0,0641 trên 59 tỉnh, so với 0,0763 và 0,0683 khi giữ điểm 2023. RMSE ở chỉ tiêu 4.2 tăng nhẹ. Dự báo điểm đưa cả 59 tỉnh vào cụm lớn và bỏ sót 11 tỉnh có quan sát ngoài vùng dày. Tỷ lệ kịch bản ngoài vùng dày từ 364 cặp sai số kiểm định là phân tích độ nhạy, với AUC xếp hạng thăm dò 0,816 trên năm 2024. [Kết quả từng tỉnh](results/papi_forecast_provinces_2024.csv) · [Số liệu tổng hợp](results/papi_forecast_2024.json)
+
+### Phân tích gán vùng quan sát và đối chứng học phần
 
 Toàn bộ chạy **local, không cần dịch vụ ngoài**. Ba bước:
 
 ```powershell
 python scripts/analysis/predict_sweep.py        # 1) chốt cấu hình (train-only, KHÔNG nhìn 2024)
-python scripts/analysis/predict_demo.py         # 2) STING: học 2011–2023 → dự đoán cụm 2024
+python scripts/analysis/predict_demo.py         # 2) đặt điểm đã quan sát lên lưới STING
 python scripts/supervised/predict_supervised.py   # 3) model ML có giám sát (scikit-learn)
 ```
 
@@ -148,13 +155,13 @@ python scripts/supervised/predict_supervised.py   # 3) model ML có giám sát (
    PAPI 2021 (loại sd_5_1/5_3/5_4 vì bước nhảy 2021 nằm ngoài giai đoạn train).
 2. **`predict_demo.py`** — STING `fit → save → load → predict`: lưu model local
    (`models/sting_predict_model.pkl`) rồi nạp lại để gán cụm ngoài mẫu năm 2024.
-   Chỉ hàng đủ hai feature được dự đoán (hiện 61/63 tỉnh; tỉnh thiếu bị loại,
+   Chỉ hàng đủ hai điểm PAPI được gán nhãn (61/63 tỉnh năm 2024; tỉnh thiếu bị loại,
    không nội suy). `-1` nghĩa là điểm nằm ngoài ô dày đã học, không phải cụm thường.
    Kết quả: `results/predict_all_years.csv`,
    `results/predict_summary.md` (gồm độ nhạy theo `min_count` và chuyển cụm tách riêng
    "chuyển thật" vs "chuyển sang/từ nhiễu"), `results/figs/predict_2024.png`.
 3. **`predict_supervised.py`** — model có giám sát, lưu local bằng joblib:
-   - **Hồi quy (chính):** dự báo *6.1 Y tế công lập* năm t+1 từ 8 sub-dimension năm t.
+   - **Đối chứng đơn chỉ tiêu:** dự báo *6.1 Y tế công lập* năm t+1 từ 8 sub-dimension năm t.
      Chọn model bằng metric `r2 (expanding origin 2017–2022)` train-only (warm-up 2011–2016):
      hiện Ridge được chọn với R²=0.265; MAE holdout 2023→2024 là 0.0640 so với
      carry-forward 0.0683 (giảm 6.3%). Random Forest có R² CV thấp hơn (0.197) và
@@ -185,7 +192,7 @@ quy: holdout luôn là 2023→2024; phần hồi quy chỉ lọc theo tỉnh và
 2023. Kết quả 2024 của STING là assignment vào lưới train trước đó, không phải accuracy có
 nhãn chuẩn. Metric hồi quy có một năm holdout; classifier đo khớp pseudo-label STING.
 
-Nạp model để dự đoán điểm mới:
+Nạp mô hình để gán điểm lên lưới hoặc dự báo giá trị năm sau:
 
 ```python
 import json, sys
@@ -199,7 +206,7 @@ mean, scale = np.array(info["mean"]), np.array(info["scale"])
 
 x = np.array([[1.9, 1.9]])           # [sd_4_2, sd_6_1] của tỉnh mới
 z = (x - mean) / scale
-print(model.predict(z))               # -> cụm dự đoán (hoặc -1: nhiễu/ngoài vùng học)
+print(model.predict(z))               # -> nhãn ô lưới hoặc -1 nếu ở ngoài vùng dày
 
 import joblib
 ridge = joblib.load("models/sup_ridge.joblib")

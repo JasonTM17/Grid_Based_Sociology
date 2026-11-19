@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,6 +22,15 @@ REGRESSION_FEATURES = [
     "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3",
 ]
 REGRESSION_TARGET = "sd_6_1"
+
+GRID_ASSIGNMENT_LABELS = {
+    "in_cluster": "Thuộc cụm",
+    "sparse_cell": "Ô thưa",
+    "outside_grid": "Ngoài biên lưới",
+    "filtered_cell": "Ô bị lọc theo tiêu chí bổ sung",
+    "missing_score": "Thiếu chỉ tiêu",
+    "nonfinite_score": "Điểm không hữu hạn",
+}
 
 # Nhãn tiếng Việt của các chỉ tiêu ỨNG VIÊN đạt audit thang đo (xem check_data.py).
 FEATURE_LABELS = {
@@ -55,6 +65,44 @@ def year_frame(df: pd.DataFrame, year: int, feats: list[str]) -> pd.DataFrame:
     sub = df[df["year"] == year]
     sub = sub.dropna(subset=feats)
     return sub[["province_code", "province_vi", "year"] + feats].reset_index(drop=True)
+
+
+def describe_grid_assignment(frame: pd.DataFrame, features, scaler, grid) -> pd.DataFrame:
+    """Ghi nhãn và lý do gán cho từng quan sát trên lưới đã dựng."""
+    features = list(features)
+    rows = frame[["province_code", "province_vi", "year", *features]].reset_index(drop=True)
+    raw = rows[features].to_numpy(dtype=float, na_value=np.nan)
+    missing = np.isnan(raw).any(axis=1)
+    complete = np.isfinite(raw).all(axis=1)
+    rows["grid_status"] = np.where(missing, "missing_score", "nonfinite_score")
+    rows["cluster"] = pd.Series(pd.NA, index=rows.index, dtype="Int64")
+    rows["grid_cell"] = pd.Series(pd.NA, index=rows.index, dtype="string")
+    rows["reference_count"] = pd.Series(pd.NA, index=rows.index, dtype="Int64")
+    if not complete.any():
+        return rows
+
+    points = scaler.transform(rows.loc[complete, features])
+    labels = grid.predict(points)
+    rows.loc[complete, "cluster"] = labels
+    rows.loc[complete, "grid_status"] = "outside_grid"
+    within = ((points >= grid.bounds_min_) & (points <= grid.bounds_max_)).all(axis=1)
+    if not within.any():
+        return rows
+
+    level = grid.cluster_level_
+    indices, _ = grid._assign(points[within], grid.factor**level)
+    keys = [tuple(map(int, index)) for index in indices]
+    cells = grid.cells_[level]
+    counts = np.array([cells[key].count if key in cells else 0 for key in keys])
+    inside_rows = rows.index[complete][within]
+    rows.loc[inside_rows, "grid_cell"] = [str(key) for key in keys]
+    rows.loc[inside_rows, "reference_count"] = counts
+    rows.loc[inside_rows, "grid_status"] = np.select(
+        [labels[within] >= 0, counts < grid.min_count_],
+        ["in_cluster", "sparse_cell"],
+        default="filtered_cell",
+    )
+    return rows
 
 
 def select_model_by_cv(metrics: pd.DataFrame) -> str:

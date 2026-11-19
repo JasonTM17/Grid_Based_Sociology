@@ -3,6 +3,7 @@
 Cách dùng: python scripts/deliverables/build_slides.py
 """
 import csv
+import json
 from collections import Counter
 from pathlib import Path
 
@@ -52,18 +53,16 @@ R_F3 = _rob("OFAT f=3")
 R_MC2 = _rob("OFAT mc=2")
 R_LV2 = _rob("OFAT lv=2")
 
-SUP_ROWS = _read_results_csv("supervised_metrics.csv")
+FORECAST = json.loads((ROOT / "results" / "papi_forecast_2024.json").read_text(encoding="utf-8"))
+SCORES = {(row["target"], row["method"]): row for row in FORECAST["scores"]}
+ZONES = {row["method"]: row for row in FORECAST["grid"]}
+N_COMPARED = FORECAST["comparable_count"]
+N_OUTSIDE = FORECAST["actual_outside"]
 
 
-def _reg_cv(model_sub):
-    for r in SUP_ROWS:
-        if r["task"] == "regression" and model_sub in r["model"]:
-            return r["value_cv"].strip()
-    raise KeyError(model_sub)
+def _dec(value, digits=4):
+    return f"{value:.{digits}f}".replace(".", ",")
 
-
-CV_CARRY = _reg_cv("carry-forward")
-CV_RIDGE = _reg_cv("ridge")
 
 NAVY = RGBColor(0x0F, 0x2B, 0x46)
 TEAL = RGBColor(0x1B, 0x6E, 0x77)
@@ -318,49 +317,81 @@ note(s, "Hai hình dùng cùng dữ liệu 2023. Lưới 3×3 với ngưỡng 5 
      "trong khi lưới 9×9 với ngưỡng 2 cho ba cụm. Cả độ phân giải và ngưỡng đều thay đổi "
      "giữa hai phép thử, nên cần khảo sát riêng từng tham số để đọc ảnh hưởng của chúng.")
 
-# Slide 7 — Pipeline dự đoán
+# Slide 7 — Quy trình dự báo và lưới STING
 s = slide_new()
-header(s, "GÁN CỤM NGOÀI MẪU", "Dùng lưới 2011–2023 cho dữ liệu năm 2024", 7)
-rect(s, 0.6, 1.85, 3.1, 0.72, TEAL)
-text(s, 0.6, 1.91, 3.1, 0.4, [("DỮ LIỆU 2011–2023", 14, True, WHITE)], align=PP_ALIGN.CENTER)
-rect(s, 4.5, 1.7, 3.3, 1.1, LIGHT)
-text(s, 4.5, 1.82, 3.3, 0.9, [("LƯỚI STING ĐÃ HỌC", 14, True, NAVY),
-                             ("16 × 16 · Từ 5 điểm mỗi ô", 13, False, GREY)], align=PP_ALIGN.CENTER)
-rect(s, 8.6, 1.85, 3.1, 0.72, GOLD)
-text(s, 8.6, 1.91, 3.1, 0.4, [("GÁN CỤM NĂM 2024", 14, True, NAVY)], align=PP_ALIGN.CENTER)
-for x0 in (3.7, 7.8):
-    a = s.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, Inches(x0), Inches(2.01), Inches(0.8), Inches(0.4))
-    a.fill.solid()
-    a.fill.fore_color.rgb = TEAL
-    a.line.fill.background()
-bullets(s, 0.6, 3.9, 12.1, 3.0, [
-    ("Chọn cấu hình.", "Dùng dữ liệu đến 2020 và đối chiếu trên các năm 2021–2022."),
-    ("Học lưới.", "Dựng lưới 16 × 16 trên 808 quan sát giai đoạn 2011–2023 và nối qua cạnh."),
-    ("Năm 2024.", "Dùng lại bộ chuẩn hóa và lưới đã học để gán điểm mới vào cụm hoặc nhãn nhiễu."),
-], size=17, gap_pt=24)
-note(s, "Cấu hình được chọn từ dữ liệu các năm trước, sau đó nhóm học lưới trên giai đoạn "
-     "2011–2023. Năm 2024 dùng bộ chuẩn hóa và biên lưới này. Điểm mới nằm trong ô dày được "
-     "gán nhãn cụm tương ứng. Các điểm còn lại nhận nhãn −1. Kết quả thể hiện việc gán "
-     "dữ liệu mới vào các vùng đã học.")
+header(s, "HỌC CÓ GIÁM SÁT VÀ STING", "Dự báo hai điểm PAPI rồi đối chiếu theo vùng", 7)
+stages = [
+    ("1. DỮ LIỆU ĐẾN 2023", "Tám chỉ tiêu năm t để tạo cặp với điểm năm t+1."),
+    ("2. DỰ BÁO NĂM 2024", "Từ điểm năm 2023, dự báo chỉ tiêu 4.2 và 6.1 cho từng tỉnh."),
+    ("3. ĐỐI CHIẾU TRÊN LƯỚI", "Đặt điểm dự báo và điểm PAPI thực tế vào cùng lưới STING."),
+]
+for index, (label, detail) in enumerate(stages):
+    x = 0.58 + index * 4.18
+    rect(s, x, 1.65, 3.88, 2.35, LIGHT)
+    text(s, x + 0.17, 1.89, 3.5, 0.56, [(label, 16, True, TEAL)])
+    text(s, x + 0.17, 2.58, 3.53, 1.18, [(detail, 17, False, INK)])
+bullets(s, 0.61, 4.35, 12.09, 2.25, [
+    ("Chọn theo thời gian.", "Sáu lượt kiểm định cho các năm đích 2018–2023. So với giữ điểm năm trước."),
+    ("Lưới cố định.", "STING dùng hai chỉ tiêu đến 2023, mức lưới 16 × 16 và tối thiểu 5 điểm/ô."),
+    ("Đánh giá hồi cứu.", "Dùng điểm PAPI 2024 để đối chiếu sau khi đã có dự báo."),
+], size=16, gap_pt=14)
+note(s, "Bốn ứng viên là giữ điểm năm trước, Ridge, Random Forest, và trung bình của hai mô hình. "
+     "Chọn riêng từng chỉ tiêu theo trung bình MAE của sáu lượt kiểm định theo thời gian. "
+     "Ở mỗi lượt, năm đích huấn luyện cuối cùng không vượt mốc xuất phát. Hai điểm dự báo năm 2024 "
+     "được sinh từ tám điểm năm 2023. Điểm thực tế 2024 dùng để đánh giá sai số và đối chiếu nhãn trên lưới.")
 
-# Slide 8 — Kết quả dự đoán
+# Slide 8 — Kết quả dự báo liên tục
 s = slide_new()
-header(s, "KẾT QUẢ NĂM 2024", "48 tỉnh được gán cụm, 13 tỉnh nhận nhãn nhiễu", 8)
-pic(s, "predict_2024.png", 0.55, 1.3, h=4.9)
-bullets(s, 8.15, 1.75, 4.6, 5.0, [
-    ("Đủ dữ liệu.", "61/63 tỉnh có hai chỉ tiêu được chọn."),
-    ("Gán cụm.", "48 tỉnh vào cụm lớn, tương đương khoảng 79% trong 61 tỉnh."),
-    ("Nhiễu.", "13 tỉnh nằm ngoài các ô dày của lưới đã học."),
-    ("Độ nhạy.", "Ngưỡng 3, 5, 8 cho tỷ lệ gán cụm khoảng 82%, 79%, 70%."),
-], size=17, gap_pt=25)
-note(s, "Trong 61 tỉnh đủ dữ liệu năm 2024, có 48 tỉnh vào cụm lớn và 13 tỉnh nhận nhãn nhiễu. "
-     "Hai tỉnh thiếu chỉ tiêu được để trống. Trên 59 tỉnh có đủ dữ liệu ở cả hai năm 2023 và "
-     "2024, có 7 tỉnh từ cụm sang nhiễu và 5 tỉnh từ nhiễu vào cụm. Cả hai năm đều chỉ có "
-     "điểm thuộc cụm lớn hoặc nhiễu, vì vậy cần thận trọng khi diễn giải mức ổn định của nhãn.")
+header(s, "DỰ BÁO ĐIỂM", "Sai số dự báo hai chỉ tiêu PAPI năm 2024", 8)
+text(s, 0.66, 1.28, 12.0, 0.43, [
+    (f"{FORECAST['train_pairs']} cặp lịch sử · {FORECAST['forecast_count']} tỉnh có dự báo · "
+     f"{N_COMPARED} tỉnh đối chiếu được", 15, True, TEAL),
+], align=PP_ALIGN.CENTER)
+pic(s, "papi_forecast_values.png", 0.54, 1.8, w=8.36)
+rect(s, 9.07, 1.94, 3.65, 4.45, LIGHT)
+bullets(s, 9.25, 2.09, 3.24, 4.04, [
+    ("Chỉ tiêu 4.2.", f"MAE {_dec(SCORES['sd_4_2', 'forecast']['mae'])} · "
+                     f"giữ điểm 2023 {_dec(SCORES['sd_4_2', 'carry']['mae'])}."),
+    ("Chỉ tiêu 6.1.", f"MAE {_dec(SCORES['sd_6_1', 'forecast']['mae'])} · "
+                     f"giữ điểm 2023 {_dec(SCORES['sd_6_1', 'carry']['mae'])}."),
+    ("Sai số lớn.", "RMSE của chỉ tiêu 4.2 tăng nhẹ."),
+], size=15.5, gap_pt=18)
+text(s, 0.62, 6.15, 8.4, 0.65, [
+    ("Đường chéo biểu thị dự báo bằng điểm thực tế. Hai phương pháp dùng cùng các tỉnh.", 14, False, GREY),
+])
+note(s, f"Ridge được chọn cho hai chỉ tiêu ở lần kiểm định trước 2024. Trên cùng {N_COMPARED} tỉnh, "
+     f"RMSE 4.2 là {_dec(SCORES['sd_4_2', 'forecast']['rmse'])} so với {_dec(SCORES['sd_4_2', 'carry']['rmse'])}. "
+     f"RMSE 6.1 là {_dec(SCORES['sd_6_1', 'forecast']['rmse'])} so với {_dec(SCORES['sd_6_1', 'carry']['rmse'])}. "
+     "RMSE nhạy với sai số lớn hơn MAE. Kết quả mô tả một năm hồi cứu.")
 
-# Slide 9 — Baselines
+# Slide 9 — Đối chiếu trên lưới và độ nhạy
 s = slide_new()
-header(s, "ĐỐI CHỨNG PHÂN CỤM", "STING, K-means và DBSCAN trên PAPI 2011–2023", 9)
+header(s, "ĐỐI CHIẾU TRÊN LƯỚI", "Dự báo điểm bỏ sót các tỉnh ngoài vùng dày", 9)
+text(s, 0.67, 1.28, 12.03, 0.42, [
+    (f"Cùng lưới đến 2023 · Cùng {N_COMPARED} tỉnh có đủ hai điểm thực tế", 15, True, TEAL),
+], align=PP_ALIGN.CENTER)
+pic(s, "papi_forecast_grid.png", 0.54, 1.87, w=8.46)
+rect(s, 9.15, 1.86, 3.61, 4.93, LIGHT)
+bullets(s, 9.34, 2.06, 3.18, 4.51, [
+    ("Dự báo điểm.", f"{ZONES['forecast']['out_correct']}/{N_OUTSIDE} tỉnh ngoài vùng dày được nhận ra."),
+    ("Giữ điểm 2023.", f"Nhận ra {ZONES['carry']['out_correct']}/{N_OUTSIDE} tỉnh ngoài vùng, "
+                       f"với {ZONES['carry']['false_out']} trường hợp gán ngoài nhầm."),
+    ("Kịch bản sai số.", f"AUC xếp hạng {_dec(FORECAST['scenario_auc'], 3)} trên năm 2024."),
+], size=15, gap_pt=15)
+text(s, 0.62, 6.1, 8.48, 0.64, [
+    ("Ô tô nhạt là vùng dày của lưới lịch sử. Dấu × là điểm ngoài vùng dày.", 14, False, GREY),
+])
+note(s, f"Mọi dự báo điểm rơi vào cụm lớn. Trùng nhãn lưới {_pct(ZONES['forecast']['exact_label_agreement'])}, "
+     "bằng đối chứng luôn chọn cụm lớn. Trên 59 tỉnh, điểm dự báo bỏ sót 11 tỉnh có PAPI thực tế "
+     f"ngoài vùng dày. Độ đúng cân bằng hai vùng là {_pct(ZONES['forecast']['balanced_zone_accuracy'])}, "
+     f"so với {_pct(ZONES['carry']['balanced_zone_accuracy'])} khi giữ điểm 2023. "
+     f"Cho từng tỉnh, {FORECAST['scenario_count']} cặp sai số ngoài lượt kiểm định năm 2018–2023 "
+     "được cộng vào dự báo và đưa qua lưới. Tỷ lệ kịch bản ngoài vùng dùng để xếp hạng trong phân tích "
+     "thăm dò trên năm 2024. Tỷ lệ kịch bản là thước đo độ nhạy theo sai số quá khứ.")
+
+# Slide 10 — Baselines
+s = slide_new()
+header(s, "ĐỐI CHỨNG PHÂN CỤM", "STING, K-means và DBSCAN trên PAPI 2011–2023", 10)
 result_table(s, [
     ("Phương pháp", "Số cụm", "Nhiễu", "Điểm thuộc cụm", "Silhouette riêng", "Silhouette trên tập giao"),
     ("STING", 3, "19,6%", 650, "0,361", "0,366"),
@@ -377,9 +408,9 @@ note(s, "Bảng đối chiếu các cấu hình trên cùng hai chỉ tiêu PAPI
      "và DBSCAN gán cụm. ARI đo mức đồng thuận giữa phân hoạch STING và DBSCAN. "
      "Trên toàn mẫu, giá trị này tính cả nhãn nhiễu. Notebook tính lại hai phép đối chiếu.")
 
-# Slide 10 — Bản đồ
+# Slide 11 — Bản đồ
 s = slide_new()
-header(s, "BẢN ĐỒ NĂM 2024", "Phân bố các tỉnh theo nhãn STING", 10)
+header(s, "BẢN ĐỒ NĂM 2024", "Phân bố các tỉnh theo nhãn STING", 11)
 pic(s, "map_2024.png", 0.55, 1.3, h=5.75)
 bullets(s, 5.6, 1.8, 7.15, 4.9, [
     ("Cụm lớn.", "48 tỉnh được biểu diễn bằng màu xanh."),
@@ -392,9 +423,9 @@ note(s, "Bản đồ nối nhãn STING với vị trí tỉnh thông qua mã t�
      "để gán nhãn. Các tỉnh nhiễu phân bố ở nhiều vùng. Đặc trưng phân cụm là hai chỉ tiêu PAPI, "
      "còn tọa độ địa lý dùng để trình bày kết quả trên bản đồ.")
 
-# Slide 11 — Dịch chuyển và giới hạn
+# Slide 12 — Dịch chuyển và giới hạn
 s = slide_new()
-header(s, "THẢO LUẬN", "Dịch chuyển trên cùng lưới STING từ 2023 sang 2024", 11)
+header(s, "THẢO LUẬN", "Dịch chuyển trên cùng lưới STING từ 2023 sang 2024", 12)
 result_table(s, [
     ("Năm 2023 / Năm 2024", "Cụm lớn", "Nhiễu"),
     ("Cụm lớn", TRANSITIONS[MAIN_CLUSTER, MAIN_CLUSTER], TRANSITIONS[MAIN_CLUSTER, "-1"]),
@@ -421,12 +452,12 @@ note(s, f"Trong {TRANSITIONS.total()} tỉnh đủ dữ liệu cả hai năm, 47
      f"với {_pct(R_MC2['noise_ratio'])} nhiễu, nhưng silhouette âm. "
      "Các phép thử bổ sung cho thấy cần thận trọng khi diễn giải cụm ở số chiều cao hơn.")
 
-# Slide 12 — Kế hoạch cuối kỳ
+# Slide 13 — Kế hoạch cuối kỳ
 s = slide_new()
-header(s, "KẾT LUẬN", "Kết quả chính và hướng phát triển", 12)
+header(s, "KẾT LUẬN", "Kết quả chính và hướng phát triển", 13)
 steps = [
     ("PHƯƠNG PHÁP", "Cài đặt STING dựa trên lưới phân cấp, thống kê ô và liên thông giữa các ô dày."),
-    ("THỰC NGHIỆM", "Đối chiếu trên dữ liệu giả lập, áp dụng lên PAPI và khảo sát ảnh hưởng của tham số."),
+    ("THỰC NGHIỆM", "Dự báo hai điểm và đo sai số. Khi chiếu lên lưới, dự báo điểm nghiêng về cụm lớn."),
     ("HƯỚNG PHÁT TRIỂN", "Đánh giá trên thêm các năm dữ liệu và các bộ chỉ tiêu có thang đo tương thích."),
 ]
 for i, (a, b) in enumerate(steps):
@@ -441,26 +472,9 @@ note(s, "Nhóm đã cài đặt biến thể STING và kiểm tra cách chia lư
      "và đối chiếu thêm các bộ chỉ tiêu có thang đo tương thích. Hai tệp nộp chính là "
      "Nhom15_CuoiKy_STING_PAPI.docx và Nhom15_CuoiKy_STING_PAPI.ipynb.")
 
-# Slide 13 — Phụ lục: mô hình giám sát
-s = slide_new()
-header(s, "PHỤ LỤC A · PHÂN TÍCH BỔ TRỢ", "Dự báo chỉ tiêu y tế công lập bằng Ridge", 13)
-pic(s, "supervised_regression.png", 0.55, 1.7, h=3.85)
-bullets(s, 8.2, 1.75, 4.6, 5.0, [
-    ("Đầu vào.", "8 chỉ tiêu năm hiện tại để dự báo chỉ tiêu y tế năm sau."),
-    ("Chọn mô hình.", f"Kiểm định theo thời gian 2017–2022 chọn Ridge, với R² bằng {CV_RIDGE}."),
-    ("Kết quả 2024.", "MAE bằng 0,0640, so với 0,0683 của cách giữ giá trị năm trước."),
-    ("Phạm vi.", "Đánh giá trên 59 cặp tỉnh–năm của giai đoạn 2023→2024."),
-], size=16, gap_pt=26)
-note(s, f"Đây là phân tích bổ trợ về học có giám sát. Nhóm dự báo chỉ tiêu y tế năm sau "
-     f"từ tám chỉ tiêu năm hiện tại. Kiểm định theo thời gian dùng sáu lần chia có năm huấn luyện "
-     f"đứng trước năm kiểm định. Ridge có R² kiểm định {CV_RIDGE}, so với {CV_CARRY} của cách "
-     "giữ giá trị năm trước. MAE trên 59 cặp của 2023→2024 giảm khoảng 6,3%. Random Forest "
-     "có MAE trên năm này thấp hơn, nhưng điểm kiểm định theo thời gian thấp hơn Ridge. "
-     "Kết quả hiện giới hạn ở một năm đánh giá.")
-
 # Slide 14 — Kiểm chứng bên ngoài
 s = slide_new()
-header(s, "PHỤ LỤC B · PHÂN TÍCH BỔ TRỢ", "Đối chiếu các nhóm STING với dữ liệu PCI", 14)
+header(s, "PHÂN TÍCH BỔ TRỢ", "Đối chiếu các nhóm STING với dữ liệu PCI", 14)
 pic(s, "external_pci_by_cluster.png", 0.55, 1.45, h=4.75)
 bullets(s, 8.0, 1.5, 4.8, 4.8, [
     ("Nguồn đối chiếu.", "PCI khảo sát doanh nghiệp, do VCCI–USAID công bố."),
@@ -484,9 +498,10 @@ bullets(s, 0.55, 1.35, 12.1, 5.4, [
     ("PAPI 2011–2024.", "CECODES/VFF-CRT/RTA/UNDP — papi.org.vn."),
     ("Dữ liệu đối chiếu.", "Le và cộng sự, Mendeley Data, DOI 10.17632/wbk42j9wc8.1."),
     ("STING gốc.", "Wang, Yang & Muntz (1997), “STING: A Statistical Information Grid Approach to Spatial Data Mining”, VLDB."),
+    ("Dự báo theo thời gian.", "Hyndman & Athanasopoulos (2021), Forecasting: Principles and Practice."),
     ("GeoJSON ranh giới.", "Open Development Vietnam (OD Mekong) — CC-BY-SA 4.0."),
     ("Nguồn bổ trợ.", "PCI VCCI–USAID, GSO PX-Web, Open Development Vietnam và World Bank WDI."),
-], size=17, gap_pt=29)
+], size=17, gap_pt=20)
 note(s, "Phương pháp dựa trên bài STING của Wang, Yang và Muntz tại VLDB 1997. Dữ liệu chính "
      "là PAPI 2011–2024. Gói Le và cộng sự dùng để đối chiếu dữ liệu. Bản đồ và các phân tích "
      "bổ trợ có nguồn riêng được ghi trong báo cáo và hồ sơ nguồn dữ liệu kèm dự án.")

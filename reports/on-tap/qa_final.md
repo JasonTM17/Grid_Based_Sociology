@@ -2,6 +2,13 @@
 
 _Mỗi thành viên tự luyện trả lời các câu trọng tâm trong khoảng một phút mỗi câu. Bắt đầu với cơ chế lưới, quy trình tránh rò rỉ và cách đọc mẫu số._
 
+## Dự báo hai chỉ tiêu và đối chiếu trên lưới
+
+- **Giá trị nào thật sự được dự báo?** Hai điểm 4.2 và 6.1 của năm 2024. Đầu vào là tám điểm đã có năm 2023. Tại sáu lượt kiểm định, đích thuộc 2018–2023. Ridge có MAE trung bình thấp nhất ở cả hai chỉ tiêu. Điểm quan sát 2024 chỉ được ghép sau để chấm sai số. [Notebook cuối kỳ](../../notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb)
+- **Vì sao có 61 dự báo và 59 tỉnh để tính sai số?** Có 61 tỉnh đủ tám đầu vào năm 2023. Sau khi ghép theo mã tỉnh, 59 tỉnh trong số đó đủ cả hai điểm thực tế 2024. MAE của Ridge trên 59 tỉnh là 0,0736 và 0,0641. Mốc giữ điểm cũ là 0,0763 và 0,0683. RMSE của 4.2 tăng từ 0,0953 lên 0,0972. [Kết quả chi tiết](../../results/papi_forecast_2024.json)
+- **Vì sao đưa dự báo lên lưới vẫn vào cụm lớn?** Ridge tạo dự báo điểm ở vùng trung tâm của dữ liệu. Trên 59 tỉnh đối chiếu, 11 điểm thực tế nằm ngoài vùng dày nhưng dự báo điểm gán cả 59 vào cụm lớn. Tỷ lệ trùng nhãn 81,4% bằng mốc luôn chọn cụm lớn và đi cùng tỷ lệ phát hiện ngoài vùng 0/11. [Notebook cuối kỳ](../../notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb)
+- **Tỷ lệ kịch bản và AUC được đọc thế nào?** Với mỗi tỉnh, cộng 364 cặp sai số ngoài lượt kiểm định vào hai điểm dự báo rồi đếm tỷ lệ kịch bản rơi ngoài vùng dày. AUC 0,816 cho biết khả năng xếp hạng các tỉnh thực tế ngoài vùng trong lượt đối chiếu 2024. Đây là phân tích độ nhạy từ sai số lịch sử. Hiệu chỉnh xác suất cần những mốc kiểm tra độc lập. [Mã dự báo](../../scripts/common/papi_forecast.py)
+
 ## Trọng tâm khoa học
 
 1. **Bạn chứng minh được STING chạy đúng như thế nào?** — Bộ test STING trong `tests/test_sting.py` pass; thống kê ô khớp numpy (tol 1e-9); blobs ARI=0.950; predict/save/load roundtrip; out-of-support → −1; biên/ô rỗng. Chạy `python -m pytest tests -q` — toàn bộ test xanh.
