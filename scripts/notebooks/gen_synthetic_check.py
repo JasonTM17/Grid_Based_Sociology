@@ -1,14 +1,14 @@
-"""Sinh notebook thu-nghiem/STING_KiemChung_GiaLap.ipynb (chạy một lần khi tạo dự án).
+"""Sinh notebook exploratory/Nhom15_STING_KiemChung_GiaLap.ipynb (chạy một lần khi tạo dự án).
 
-Cách dùng: python scripts/notebooks/gen_notebook_00.py
-Ghi ra: notebooks/thu-nghiem/STING_KiemChung_GiaLap.ipynb
+Cách dùng: python scripts/notebooks/gen_synthetic_check.py
+Ghi ra: notebooks/exploratory/Nhom15_STING_KiemChung_GiaLap.ipynb
 """
 from pathlib import Path
 
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "notebooks" / "thu-nghiem" / "STING_KiemChung_GiaLap.ipynb"
+OUT = ROOT / "notebooks" / "exploratory" / "Nhom15_STING_KiemChung_GiaLap.ipynb"
 
 nb = nbf.v4.new_notebook()
 cells = []

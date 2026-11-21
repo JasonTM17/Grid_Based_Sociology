@@ -36,7 +36,7 @@ nằm trong [README](README.md#tái-tạo-file-nộp-và-zip).
 
 ## 2. Kịch bản 15 phút
 
-Xem [kịch bản theo 10 slide](reports/on-tap/presentation-script-261116.md). Slide 5
+Xem [kịch bản theo 10 slide](reports/on-tap/presentation_script.md). Slide 5
 dùng bảng đếm 3 × 3. Slide 7–9 giải thích z-score, nguồn gốc số cụm và cách
 chạy kiểm tra ngưỡng trên 869 quan sát PAPI 2011–2024.
 

@@ -9,7 +9,7 @@ Bám sát toàn bộ 48 slide Day 9 (Clustering):
 - STING 4 bước + Bẫy lưới/ngưỡng/kề 8 hướng + So sánh K-Means vs HC vs STING trên dữ liệu có nhiễu
 Đây là tài liệu học, không thuộc gói nộp.
 
-Chạy: python scripts/notebooks/gen_study_kmeans_hc.py
+Chạy: python scripts/notebooks/gen_study_day9_kmeans_hc.py
 """
 from __future__ import annotations
 

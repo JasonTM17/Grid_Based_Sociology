@@ -18,10 +18,10 @@
 - `qa_midterm.md` — 24 câu hỏi đáp trọng tâm cho buổi giữa kỳ (kèm bằng chứng nhiễu `−1` và bản đồ 2D).
 - `qa_final.md` — 43 câu hỏi đáp cuối kỳ (STING, kiểm định ngoại lai, dự báo PAPI 2024, Phụ lục Day 6).
 - `qa_course_concepts.md` — 58 câu hỏi đáp bám sát slide Day 1–9 (NB, KNN, SVM, DT/RF, Regressions, Clustering) + 6 câu chuyên sâu nhiễu STING.
-- `presentation-script-261116.md` — Kịch bản trình bày 10 slide (15 phút nói + 5 phút Q&A).
+- `presentation_script.md` — Kịch bản trình bày 10 slide (15 phút nói + 5 phút Q&A).
 - `rehearsal_log.md`, `midterm_feedback.md`, `mock_defense_log.md` — Nhật ký luyện tập và ghi nhận góp ý.
 
-## Lưu trữ lịch sử (`reports/luu-tru/`)
+## Lưu trữ lịch sử (`reports/archive/`)
 
-- `open-questions.md` — Bảng theo dõi các câu hỏi logistics/kỹ thuật đã xử lý.
-- `submission-readiness-261116.md` — Hồ sơ kiểm tra đóng gói ngày 16/11/2026.
+- `open_questions.md` — Bảng theo dõi các câu hỏi logistics/kỹ thuật đã xử lý.
+- `submission_readiness.md` — Hồ sơ kiểm tra đóng gói ngày 16/11/2026.

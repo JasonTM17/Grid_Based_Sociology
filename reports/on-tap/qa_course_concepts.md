@@ -247,12 +247,12 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
 
 46. **Bẫy khởi tạo xấu (TRAP!) của K-Means khác gì các bẫy cấu hình của STING?** — Day 9 tr.19–24 minh họa K-Means chọn tâm ban đầu tệ sẽ kẹt ở cực tiểu địa phương (`WCSS = 146.40` vs `38.01` trong notebook ôn tập, chẻ 1 cụm và gộp nhầm 2 cụm). STING không phụ thuộc ngẫu nhiên nhưng có 3 bẫy riêng trên đồ thị 2D: (i) xóa điểm `|z| > 3` làm co biên `[min, max]` khiến lưới dịch và nhiễu tăng (`19.7% → 20.1%` / `19.6% → 24.6%`); (ii) đặt lưới quá mịn với `min_count` cao biến đa số điểm thành `−1`; (iii) đổi sang kề 8 hướng (`connectivity=2`) chỉ gộp cụm qua góc thành `1` cụm mà không giảm 1 điểm nhiễu nào.
    - **Hỏi bẫy:** "STING không bị ngẫu nhiên nên không bao giờ ra kết quả dở?" — Sai; chọn sai `min_count`, độ mịn hoặc biên lưới vẫn tạo cấu trúc méo hoặc 100% nhiễu.
-   - **Repo:** `scripts/notebooks/gen_study_kmeans_hc.py:136-149,343-360`; `scripts/common/midterm_clustering.py:308-370`.
+   - **Repo:** `scripts/notebooks/gen_study_day9_kmeans_hc.py:136-149,343-360`; `scripts/common/midterm_clustering.py:308-370`.
    - **Bài giảng:** Day 9, tr.19–24 (TRAP).
 
 47. **Bốn khoảng cách Linkage của Hierarchical Clustering và mẹo cắt Dendrogram hoạt động thế nào?** — Agglomerative bắt đầu mỗi điểm một cụm rồi ghép dần từ dưới lên theo `#1 Closest points (Single)`, `#2 Furthest points (Complete)`, `#3 Centroid distance`, hoặc `#4 Average distance` (cùng `Ward` trong thực nghiệm); Dendrogram ghi độ cao ghép dần và mẹo Day 9 tr.47 là cắt ngang tại khoảng trống chiều cao lớn nhất. Bản STING của nhóm không xây Dendrogram HC mà nối ô dày ở đúng một mức lưới chọn trước.
    - **Hỏi bẫy:** "Single linkage luôn tốt nhất?" — Không; Single dễ bị hiện tượng dây xích nối bắc cầu qua vài điểm lẻ, còn Complete/Ward tạo cụm gọn hơn.
-   - **Repo:** `scripts/notebooks/gen_study_kmeans_hc.py:210-305`; `src/sting.py:1-13`.
+   - **Repo:** `scripts/notebooks/gen_study_day9_kmeans_hc.py:210-305`; `src/sting.py:1-13`.
    - **Bài giảng:** Day 9, tr.32–47 (bốn linkage tr.35, cắt dendrogram tr.47).
 
 ## Day 6 — Regressions (Linear, Polynomial, Logistic)

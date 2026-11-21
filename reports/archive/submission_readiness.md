@@ -150,7 +150,7 @@ dùng p-value để kết luận nhân quả hay cấu trúc xã hội chắc ch
    bảy chương; không tự xác nhận thầy đã chấp nhận.
 3. Cả hai thành viên luyện trình bày15phút + Q&A5phút; ưu tiên lưới, mật độ,
    khác STING gốc, noise, chọn feature, giới hạn đánh giá. Xem Q&A39–45 và
-   `reports/on-tap/presentation-script-261116.md` (lịch nói dự kiến, chưa đo rehearsal).
+   `reports/on-tap/presentation_script.md` (lịch nói dự kiến, chưa đo rehearsal).
 4. Nếu GV yêu cầu đầy đủ STING gốc hoặc có yêu cầu miệng khác với tài liệu,
    chốt yêu cầu đó trước khi nộp; không lấy test xanh làm thay cho rubric.
 

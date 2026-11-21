@@ -1,6 +1,6 @@
 # Nhật ký luyện trình bày giữa kỳ
 
-Bộ trình chiếu hiện tại nằm trong submissions/01-giua-ky. Phân bổ 15 phút ở [kịch bản giữa kỳ](presentation-script-261116.md). Bảng dưới dùng để ghi thời gian đo trực tiếp khi nhóm tập.
+Bộ trình chiếu hiện tại nằm trong submissions/01-giua-ky. Phân bổ 15 phút ở [kịch bản giữa kỳ](presentation_script.md). Bảng dưới dùng để ghi thời gian đo trực tiếp khi nhóm tập.
 
 ## A. Lượt chạy thử kỹ thuật đã ghi nhận
 

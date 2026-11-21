@@ -1,14 +1,14 @@
-"""Sinh notebooks/thu-nghiem/STING_KhaoSat_ThamSo.ipynb — sweep độ nhạy tham số STING (Phase 4).
+"""Sinh notebooks/exploratory/Nhom15_STING_KhaoSat_ThamSo.ipynb — sweep độ nhạy tham số STING (Phase 4).
 
 Cách dùng: python scripts/notebooks/gen_params_sweep.py
-Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/thu-nghiem/STING_KhaoSat_ThamSo.ipynb
+Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/exploratory/Nhom15_STING_KhaoSat_ThamSo.ipynb
 """
 from pathlib import Path
 
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "notebooks" / "thu-nghiem" / "STING_KhaoSat_ThamSo.ipynb"
+OUT = ROOT / "notebooks" / "exploratory" / "Nhom15_STING_KhaoSat_ThamSo.ipynb"
 
 nb = nbf.v4.new_notebook()
 cells = []

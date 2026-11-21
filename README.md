@@ -29,7 +29,7 @@ Năm notebook có giải thích nằm ngay trong [`study/`](study/README.md): [G
 
 Tài liệu hỏi đáp, kịch bản nói và nhật ký luyện tập nằm trong `reports/on-tap/`.
 Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đó mở
-[Kịch bản 10 slide](reports/on-tap/presentation-script-261116.md).
+[Kịch bản 10 slide](reports/on-tap/presentation_script.md).
 [Hướng dẫn demo](DEMO.md) chỉ cách mở các file khi trình bày.
 
 ## Cấu trúc dự án
@@ -47,11 +47,11 @@ Grid_Based_Sociology/
 │   ├── deliverables/          #   Sinh báo cáo Word, slide PPTX, gói ZIP & kiểm chứng
 │   └── common/                #   Hàm dùng chung (fig_style, midterm_clustering, ...)
 ├── notebooks/                 # Notebook chính (chi tiết trong notebooks/README.md)
-│   └── thu-nghiem/            #   Notebook kiểm chứng giả lập & khảo sát tham số Phase 1–4
+│   └── exploratory/           #   Notebook kiểm chứng giả lập & khảo sát tham số Phase 1–4
 ├── slides/                    # Slide PowerPoint (submission.pptx 10 trang, final.pptx 16 trang)
 ├── reports/                   # Báo cáo final_report.docx & hồ sơ kỹ thuật (reports/README.md)
 │   ├── on-tap/                #   Bộ Q&A giữa kỳ/cuối kỳ/bài giảng & kịch bản thuyết trình
-│   └── luu-tru/               #   Tài liệu theo dõi lịch sử đã chốt
+│   └── archive/               #   Tài liệu theo dõi lịch sử đã chốt
 ├── submissions/               # Sản phẩm đóng gói sẵn theo từng mốc nộp
 │   ├── 01-giua-ky/            #   Slide & notebook giữa kỳ
 │   ├── 02-cuoi-ky/            #   DOCX, notebook & slide cuối kỳ

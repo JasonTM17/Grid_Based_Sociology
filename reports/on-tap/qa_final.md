@@ -51,7 +51,7 @@ _Mỗi thành viên tự luyện trả lời các câu trọng tâm trong khoả
 
 21. **Nạp lại mô hình đã lưu bằng cách nào?** — `joblib.load('models/sup_ridge.joblib')`, rồi truyền vector 8 chỉ số. Không cần train lại. (nguồn: results/supervised_summary.md:30)
 
-22. **Trong repo có mấy bộ slide và dùng khi nào?** Giữa kỳ dùng slides/submission.pptx, có 10 slide. Cuối kỳ dùng báo cáo Word và notebook, có thể dùng thêm slides/final.pptx gồm 16 slide để vấn đáp. Lịch trình bày hiện tại nằm trong reports/on-tap/presentation-script-261116.md, thời gian thực tế ghi ở reports/on-tap/rehearsal_log.md. (nguồn: scripts/deliverables/build_slides_10.py; scripts/deliverables/build_slides.py; reports/course_requirements.md)
+22. **Trong repo có mấy bộ slide và dùng khi nào?** Giữa kỳ dùng slides/submission.pptx, có 10 slide. Cuối kỳ dùng báo cáo Word và notebook, có thể dùng thêm slides/final.pptx gồm 16 slide để vấn đáp. Lịch trình bày hiện tại nằm trong reports/on-tap/presentation_script.md, thời gian thực tế ghi ở reports/on-tap/rehearsal_log.md. (nguồn: scripts/deliverables/build_slides_10.py; scripts/deliverables/build_slides.py; reports/course_requirements.md)
 
 23. **Ba cụm của STING phân bố thế nào?** Trên tập huấn luyện 2011–2023 (`808` quan sát đủ hai chỉ tiêu sau `dropna`), cụm lớn chứa 629/650 điểm đã vào cụm, tương đương 96,8%, hai cụm nhỏ có 16 và 5 điểm (đều trong 2011–2018), và 158 điểm (19,6%) nhận nhãn nhiễu `−1`. Về đối chiếu tiền xử lý: chỉ 7/808 quan sát có `|z| > 3` (đều thuộc thang `[0,25; 2,5]`), trong khi 151/158 điểm `−1` đều có `|z| ≤ 3` trên cả hai trục; nếu xóa 7 điểm `|z| > 3` rồi dựng lại lưới trên 801 điểm thì khung `[min, max]` co lại làm ranh giới dịch chuyển và vẫn còn 197/801 điểm nhiễu (24,6%). Phần `selection_metrics` trong `predict_config.json` ghi kết quả chọn cấu hình đến 2020 với quy mô 453, 16 và 5. Với 61 tỉnh đủ dữ liệu năm 2024, 0/61 tỉnh có `|z| > 3` và cả 13/13 tỉnh ô thưa đều nằm trong miền huấn luyện với `|z| ≤ 3` (`|z|` lớn nhất là `2,1299` tại Tây Ninh) nhưng rơi vào các ô có ít hơn 5 điểm tham chiếu. Xem `models/predict_config.json`, `results/predict_all_years.csv` và `results/papi_observed_grid_2024.csv`.
 
@@ -97,7 +97,7 @@ _Mỗi thành viên tự luyện trả lời các câu trọng tâm trong khoả
 
 39. **Tái tạo notebook nộp bài thế nào?** — `python scripts/notebooks/gen_submission_demo.py` (sinh + `nbconvert --execute --inplace`, kiểm mọi code cell có output, 0 lỗi); hoặc chỉ execute `python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` sau khi đã sinh file. (nguồn: scripts/notebooks/gen_submission_demo.py)
 
-40. **Mười slide submission.pptx lần lượt nói gì?** Kịch bản hiện tại theo đúng slide nằm trong reports/on-tap/presentation-script-261116.md. Mở cùng notebook để tập ví dụ 3 × 3, sau đó đến dữ liệu giả lập và ứng dụng PAPI. (nguồn: scripts/deliverables/build_slides_10.py; reports/on-tap/presentation-script-261116.md)
+40. **Mười slide submission.pptx lần lượt nói gì?** Kịch bản hiện tại theo đúng slide nằm trong reports/on-tap/presentation_script.md. Mở cùng notebook để tập ví dụ 3 × 3, sau đó đến dữ liệu giả lập và ứng dụng PAPI. (nguồn: scripts/deliverables/build_slides_10.py; reports/on-tap/presentation_script.md)
 
 41. **Slide 10 trình bày gì?** Trang cuối chốt cơ chế lưới, kết quả minh họa và giới hạn khi ứng dụng lên hai chỉ tiêu PAPI. Khi hỏi đáp, giải thích thêm ô dày, ô nhiễu và độ nhạy ngưỡng. (nguồn: scripts/deliverables/build_slides_10.py)
 

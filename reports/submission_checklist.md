@@ -61,8 +61,8 @@ và chặn đọc kho mã gốc và Downloads. Gói nộp chứa 14 bảng tính
 báo cáo PAPI 2024, ZIP dữ liệu đối chiếu Mendeley, metadata thang đo và hồ sơ nguồn.
 
 Cấu trúc này là đề xuất; tên file/nơi nộp/deadline chính thức cần theo GV/LMS.
-Hồ sơ kiểm tra ngày 16/11 nằm ở `reports/luu-tru/submission-readiness-261116.md`. Các file nộp hiện tại được liệt kê trong README và submissions/HUONG-DAN.txt.
-Kịch bản giữa kỳ 15 phút + Q&A 5 phút: `reports/on-tap/presentation-script-261116.md`.
+Hồ sơ kiểm tra ngày 16/11 nằm ở `reports/archive/submission_readiness.md`. Các file nộp hiện tại được liệt kê trong README và submissions/HUONG-DAN.txt.
+Kịch bản giữa kỳ 15 phút + Q&A 5 phút: `reports/on-tap/presentation_script.md`.
 
 ## Git tag
 

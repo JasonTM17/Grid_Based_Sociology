@@ -67,7 +67,7 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
         assert not any(p.startswith((".git", ".codex", ".agentkit", "plans/", "study/", "reports/on-tap/", "data/raw/course/")) for p in support_files)
         assert not {
             "reports/course_requirements.md", "reports/report_format_notes.md",
-            "reports/on-tap/qa_course_concepts.md", "reports/on-tap/presentation-script-261116.md",
+            "reports/on-tap/qa_course_concepts.md", "reports/on-tap/presentation_script.md",
         } & support_files
         assert not any("__pycache__" in p or "probe" in p for p in files)
         bundled_references = {p for p in support_files if p.endswith((".pdf", ".zip", ".rar"))}
