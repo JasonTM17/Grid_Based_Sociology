@@ -1,14 +1,14 @@
-"""Sinh notebooks/STING_KhaoSat_ThamSo.ipynb — sweep độ nhạy tham số STING (Phase 4).
+"""Sinh notebooks/thu-nghiem/STING_KhaoSat_ThamSo.ipynb — sweep độ nhạy tham số STING (Phase 4).
 
 Cách dùng: python scripts/notebooks/gen_params_sweep.py
-Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/STING_KhaoSat_ThamSo.ipynb
+Sau đó:      python -m nbconvert --to notebook --execute --inplace notebooks/thu-nghiem/STING_KhaoSat_ThamSo.ipynb
 """
 from pathlib import Path
 
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "notebooks" / "STING_KhaoSat_ThamSo.ipynb"
+OUT = ROOT / "notebooks" / "thu-nghiem" / "STING_KhaoSat_ThamSo.ipynb"
 
 nb = nbf.v4.new_notebook()
 cells = []
@@ -26,14 +26,16 @@ không "cherry-pick" theo hình đẹp. Chi tiết: `results/predict_config_sear
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
 
-# Cho phép import `sting` / `fig_style` dù kernel chạy từ notebooks/ hay từ gốc repo
+
 ROOT = None
-for cand in (Path.cwd(), Path.cwd().parent):
-    if (cand / "src" / "sting.py").exists():
+for cand in (Path.cwd(), *Path.cwd().parents):
+    if (cand / "src" / "sting.py").is_file():
         ROOT = cand
         sys.path.insert(0, str(cand / "src"))
         sys.path.insert(0, str(cand))
         break
+if ROOT is None:
+    raise FileNotFoundError("Không tìm thấy thư mục gốc repo chứa src/sting.py")
 
 import numpy as np
 import pandas as pd
@@ -45,10 +47,10 @@ from sklearn.preprocessing import StandardScaler
 from sting import STING
 from scripts.common.fig_style import apply_style, new_fig, add_source, save_png
 
-# rcParams trình bày chuẩn repo (font/palette/DPI) — chỉ tác động lớp vẽ hình
+
 apply_style()
 
-# Hình lưu results/figs/ theo gốc repo, không phụ thuộc cwd của kernel
+
 OUT_FIG = (ROOT or Path.cwd()) / "results" / "figs" / "params_sweep.png"
 
 print("import OK")"""))
@@ -76,26 +78,24 @@ best = df[df.ari >= 0.9].sort_values(["ari", "noise"], ascending=[False, True]).
 print("Cấu hình tốt nhất (ARI ≥ 0.9):")
 print(best.to_string(index=False))
 
-# Kích thước chuẩn cột docx (6.5 x 4.3 in); chuỗi mc lấy màu theo COLOR_CYCLE rcParams
+
 fig, axes = new_fig(target="docx", ncols=2)
-for ax, grp in zip(axes, [(2, 3), (3, 3)]):
-    nl, factor = grp
-    sub = df[(df.n_levels == nl) & (df.factor == factor)]
-    for mc in sorted(sub.min_count.unique()):
-        s = sub[sub.min_count == mc]
-        ax.plot(s.min_count, s.ari, "o-", label=f"mc={mc}")
-    ax.set_title(f"L={nl}, factor={factor}:\\nARI theo min_count")
+for ax, nl in zip(axes, (2, 3)):
+    for factor in (3, 4):
+        sub = df[(df.n_levels == nl) & (df.factor == factor)].sort_values("min_count")
+        ax.plot(sub.min_count, sub.ari, "o-", label=f"factor={factor}")
+    ax.set_title(f"L={nl}: ARI theo min_count")
     ax.set_xlabel("min_count"); ax.set_ylabel("ARI"); ax.set_ylim(0, 1.02); ax.grid(alpha=0.3)
-    # Tick tại đúng các giá trị min_count đã quét — lấy từ dữ liệu, không hardcode
-    ax.set_xticks(sorted(sub.min_count.unique()))
+
+    ax.set_xticks(sorted(df.min_count.unique()))
     ax.legend()
 
-# Dòng nguồn: dữ liệu giả lập sinh tại chỗ (seed 42), không có PROVENANCE.md
-# nên KHÔNG truyền `retrieved` — helper cấm tự điền ngày lấy dữ liệu.
+
+
 add_source(fig, "Dữ liệu giả lập 3 cụm Gauss (make_blobs, seed 42)",
            extra="STING tự viết — src/sting.py")
 fig.tight_layout(rect=(0, 0.05, 1, 1))
-save_png(fig, OUT_FIG)  # chuẩn repo: DPI >= 200 (trước đây lưu theo figure.dpi=110)
+save_png(fig, OUT_FIG)
 plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("""## 2. Sweep trên dữ liệu PAPI thật (3 năm đại diện)
@@ -103,9 +103,9 @@ md(nbf.v4.new_markdown_cell("""## 2. Sweep trên dữ liệu PAPI thật (3 năm
 Dùng cặp chỉ tiêu đã đóng băng (`sd_4_2 × sd_6_1`); chuẩn hóa z trong từng năm để các năm so sánh được tương đối."""))
 
 cd(nbf.v4.new_code_cell("""import json
-cfg = json.loads(Path("../models/predict_config.json").read_text(encoding="utf-8"))
+cfg = json.loads((ROOT / "models" / "predict_config.json").read_text(encoding="utf-8"))
 FEATS = cfg["features"]
-panel = pd.read_csv("../data/processed/papi_panel_63_2011_2024.csv")
+panel = pd.read_csv(ROOT / "data" / "processed" / "papi_panel_63_2011_2024.csv")
 print(f"Cặp chỉ tiêu: {FEATS}")
 print(f"{'year':>4} {'f':>2} {'mc':>3} {'k':>2} {'sizes':>16} {'noise':>6}")
 for year in (2018, 2021, 2024):
@@ -122,7 +122,7 @@ md(nbf.v4.new_markdown_cell("""## 3. Kết luận
 - Dữ liệu giả lập: tách đúng khi `min_count` vừa phải; quá nhỏ → chia vụn, quá lớn → toàn nhiễu.
 - Dữ liệu thật: đại đa số cấu hình cho **1 cụm lớn** (dữ liệu rất đồng nhất) — đúng với phát hiện chính của nghiên cứu.
 - Quy tắc mặc định: dùng **cấu hình đóng băng** trong `models/predict_config.json` (chọn train-only, không nhìn test).
-- Sens duy nhất cần quan tâm khi trình bày: độ nhạy theo `min_count` (đã ghi trong `results/predict_summary.md`)."""))
+- Độ nhạy quan trọng nhất cần lưu ý khi trình bày: độ nhạy theo `min_count` (đã ghi trong `results/predict_summary.md`)."""))
 
 nb["cells"] = cells
 nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}

@@ -1,14 +1,14 @@
-"""Sinh notebook STING_KiemChung_GiaLap.ipynb (chạy một lần khi tạo dự án).
+"""Sinh notebook thu-nghiem/STING_KiemChung_GiaLap.ipynb (chạy một lần khi tạo dự án).
 
 Cách dùng: python scripts/notebooks/gen_notebook_00.py
-Ghi ra: notebooks/STING_KiemChung_GiaLap.ipynb
+Ghi ra: notebooks/thu-nghiem/STING_KiemChung_GiaLap.ipynb
 """
 from pathlib import Path
 
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "notebooks" / "STING_KiemChung_GiaLap.ipynb"
+OUT = ROOT / "notebooks" / "thu-nghiem" / "STING_KiemChung_GiaLap.ipynb"
 
 nb = nbf.v4.new_notebook()
 cells = []
@@ -25,9 +25,9 @@ lưới phân cấp → thống kê từng ô → ô "dày" → gom cụm liền
 cells.append(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
 
-# Cho phép import `sting` / `fig_style` dù kernel chạy từ notebooks/ hay từ gốc repo
+
 ROOT = None
-for cand in (Path.cwd(), Path.cwd().parent):
+for cand in (Path.cwd(), *Path.cwd().parents):
     if (cand / "src" / "sting.py").exists():
         ROOT = cand
         sys.path.insert(0, str(cand / "src"))
@@ -45,10 +45,10 @@ from sting import STING
 from scripts.common.fig_style import (PALETTE, CLUSTER_COLORS, CLUSTER_LABELS,
                        apply_style, new_fig, add_source, save_png)
 
-# rcParams trình bày chuẩn repo (font/palette/DPI) — chỉ tác động lớp vẽ hình
+
 apply_style()
 
-# Hình lưu results/figs/ theo gốc repo, không phụ thuộc cwd của kernel
+
 OUT_FIG = (ROOT or Path.cwd()) / "results" / "figs" / "00_synthetic_sting.png"
 
 print("import OK")"""))
@@ -61,11 +61,11 @@ cells.append(nbf.v4.new_code_cell("""X, y_true = make_blobs(
     n_samples=240, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=42
 )
 
-# Palette chuẩn repo: cụm 0 = xanh dương, cụm 1 = cam (Okabe-Ito, CVD-safe)
+
 fig, ax = new_fig(target=None, figsize=(5, 5))
 ax.scatter(X[:, 0], X[:, 1], c=[CLUSTER_COLORS[int(v)] for v in y_true], s=12)
 ax.set_title("Dữ liệu giả lập: 2 cụm")
-# make_blobs không có đơn vị vật lý — ghi rõ "đơn vị tùy ý" trên nhãn trục
+
 ax.set_xlabel("x1 (đơn vị tùy ý)"); ax.set_ylabel("x2 (đơn vị tùy ý)")
 fig.tight_layout()
 plt.show()
@@ -114,7 +114,7 @@ ari = adjusted_rand_score(y_true, labels)
 noise = (labels == -1).mean()
 print(f"ARI = {ari:.3f} | tỷ lệ nhiễu = {noise:.1%} | số cụm = {model.n_clusters_}")
 
-# Palette chuẩn repo: -1 = xám (nhiễu), 0 = xanh dương, 1 = cam
+
 fig, axes = new_fig(target="docx", ncols=2)
 axes[0].scatter(X[:, 0], X[:, 1], c=[CLUSTER_COLORS[int(v)] for v in y_true], s=12)
 axes[0].set_title("Nhãn thật")
@@ -122,7 +122,7 @@ axes[1].scatter(X[:, 0], X[:, 1], c=[CLUSTER_COLORS[int(v)] for v in labels], s=
 axes[1].set_title(f"STING (ARI={ari:.3f})")
 
 def legend_clusters(ax, values):
-    # Chú giải palette/nhãn chuẩn repo — chỉ gồm nhãn thật sự có trong dữ liệu
+
     handles = [
         Line2D([0], [0], marker="o", linestyle="", markersize=5,
                color=CLUSTER_COLORS.get(int(v), "#333333"),
@@ -133,16 +133,16 @@ def legend_clusters(ax, values):
 
 legend_clusters(axes[0], y_true)
 legend_clusters(axes[1], labels)
-# make_blobs không có đơn vị vật lý — ghi rõ "đơn vị tùy ý" trên cả 4 nhãn trục
+
 for ax in axes:
     ax.set_xlabel("x1 (đơn vị tùy ý)"); ax.set_ylabel("x2 (đơn vị tùy ý)")
 
-# Dòng nguồn: dữ liệu giả lập sinh tại chỗ (seed 42), không có PROVENANCE.md
-# nên KHÔNG truyền `retrieved` — helper cấm tự điền ngày lấy dữ liệu.
+
+
 add_source(fig, "Dữ liệu giả lập 2 cụm Gauss (make_blobs, seed 42)",
            extra="STING tự viết — src/sting.py")
 fig.tight_layout(rect=(0, 0.05, 1, 1))
-save_png(fig, OUT_FIG, dpi=300)  # chuẩn in sắc nét: >= 300 DPI (trước đây 120, rồi 200)
+save_png(fig, OUT_FIG, dpi=300)
 plt.show()"""))
 
 cells.append(nbf.v4.new_markdown_cell("""## 5. Xem trước độ nhạy tham số
