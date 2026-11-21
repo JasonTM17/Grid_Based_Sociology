@@ -17,7 +17,7 @@ Toàn bộ file nộp nằm trong [`submissions/`](submissions/). Các notebook 
 |---|---|---|
 | Giữa kỳ | [Slide PPTX](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx) và [notebook](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.ipynb) | [ZIP giữa kỳ](submissions/Nhom15_GiuaKy_STING_PAPI.zip) |
 | Cuối kỳ | [Báo cáo DOCX](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx) và [notebook](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.ipynb) | [ZIP cuối kỳ](submissions/Nhom15_CuoiKy_STING_PAPI.zip) |
-| Bài nhóm Day 4 | [Notebook tiền xử lý](submissions/03-day-4/Nhom15_Day4_TienXuLy_PAPI.ipynb) | [Thư mục Day 4](submissions/03-day-4/) |
+| Bộ tiền xử lý PAPI | [Notebook tiền xử lý](submissions/03-tien-xu-ly-papi/Nhom15_TienXuLy_PAPI.ipynb) | [Mã và dữ liệu tiền xử lý](submissions/03-tien-xu-ly-papi/) |
 
 Khi chuyển sang máy khác, giải nén cả ZIP của mốc tương ứng. Slide cuối kỳ dùng khi vấn đáp là tài liệu tùy chọn. [Hướng dẫn](submissions/HUONG-DAN.txt) · [Slide vấn đáp](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
 
@@ -25,7 +25,7 @@ Slide cuối kỳ trình bày STING và dự báo ở trang 1–13. Trang 7–9 
 
 ## Ôn tập
 
-Năm notebook có giải thích nằm ngay trong [`study/`](study/README.md): [Giữa kỳ](study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) · [Cuối kỳ](study/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) · [Day 4: Tiền xử lý](study/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb) · [Day 6: Regressions](study/Nhom15_Day6_Regressions_GiaiThich.ipynb) · [Day 9: K-Means & HC](study/Nhom15_Day9_KMeans_HC_GiaiThich.ipynb).
+Năm notebook có giải thích nằm ngay trong [`study/`](study/README.md): [Giữa kỳ](study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) · [Cuối kỳ](study/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) · [Tiền xử lý PAPI](study/Nhom15_TienXuLy_PAPI_GiaiThich.ipynb) · [Hồi quy](study/Nhom15_HoiQuy_GiaiThich.ipynb) · [K-means và phân cụm phân cấp](study/Nhom15_KMeans_PhanCumPhanCap_GiaiThich.ipynb).
 
 Tài liệu hỏi đáp, kịch bản nói và nhật ký luyện tập nằm trong `reports/on-tap/`.
 Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đó mở
@@ -49,13 +49,12 @@ Grid_Based_Sociology/
 ├── notebooks/                 # Notebook chính (chi tiết trong notebooks/README.md)
 │   └── exploratory/           #   Notebook kiểm chứng giả lập & khảo sát tham số Phase 1–4
 ├── slides/                    # Slide PowerPoint (submission.pptx 10 trang, final.pptx 16 trang)
-├── reports/                   # Báo cáo final_report.docx & hồ sơ kỹ thuật (reports/README.md)
-│   ├── on-tap/                #   Bộ Q&A giữa kỳ/cuối kỳ/bài giảng & kịch bản thuyết trình
-│   └── archive/               #   Tài liệu theo dõi lịch sử đã chốt
+├── reports/                   # Báo cáo cuối kỳ và hồ sơ kỹ thuật (reports/README.md)
+│   └── on-tap/                #   Hỏi đáp và kịch bản thuyết trình
 ├── submissions/               # Sản phẩm đóng gói sẵn theo từng mốc nộp
 │   ├── 01-giua-ky/            #   Slide & notebook giữa kỳ
 │   ├── 02-cuoi-ky/            #   DOCX, notebook & slide cuối kỳ
-│   └── 03-day-4/              #   Gói tự chạy bài thực hành tiền xử lý Day 4
+│   └── 03-tien-xu-ly-papi/              #   Bộ tiền xử lý từ bảng tính PAPI gốc
 ├── study/                     # 5 notebook giải thích bám sát bài giảng + sting_GiaiThich.py
 ├── data/
 │   ├── raw/                   #   Dữ liệu gốc & PROVENANCE.md từng nguồn (course/ lưu local)
@@ -68,15 +67,15 @@ Grid_Based_Sociology/
 
 | Khi cần | Mở thư mục |
 |---|---|
-| Gửi bài cho thầy | `submissions/` có file nộp đặt tên theo từng mốc (`01-giua-ky/`, `02-cuoi-ky/`, `03-day-4/`) và hai gói ZIP tự chứa. |
-| Đọc giải thích để học | [`study/`](study/README.md) có năm notebook ôn tập (giữa kỳ, cuối kỳ, Day 4, Day 6 Regressions, Day 9 K-Means & HC) và `sting_GiaiThich.py`. |
+| Gửi bài cho thầy | `submissions/` có file nộp đặt tên theo từng mốc (`01-giua-ky/`, `02-cuoi-ky/`, `03-tien-xu-ly-papi/`) và hai gói ZIP tự chứa. |
+| Đọc giải thích để học | [`study/`](study/README.md) có năm notebook ôn tập (giữa kỳ, cuối kỳ, tiền xử lý PAPI, hồi quy, K-means và phân cụm phân cấp) và `sting_GiaiThich.py`. |
 | Xem thuật toán và cách chạy | `src/` chứa STING tự cài đặt. [`scripts/`](scripts/README.md) chia theo chức năng; chạy từ thư mục gốc, ví dụ `python scripts/data/check_data.py`. |
 | Tìm dữ liệu | [`data/`](data/README.md): `data/raw/` chứa workbook và nguồn tham chiếu; `data/processed/` chứa panel PAPI và dữ liệu đã xử lý. |
 | Xem kết quả đã lưu | `models/` chứa model và cấu hình. [`results/`](results/README.md) chứa bảng CSV/MD/JSON và hình `figs/`. |
 | Tái tạo bài nộp | [`notebooks/`](notebooks/README.md), `slides/` và [`reports/`](reports/README.md) chứa notebook, slide, báo cáo nguồn và tài liệu ôn tập. |
 | Kiểm tra hoặc chỉnh tài liệu | `tests/` có bộ kiểm thử. `assets/` chứa ảnh bìa repo và mẫu bìa báo cáo. |
 
-`plans/templates/` lưu mẫu lập kế hoạch. Các thư mục bắt đầu bằng dấu chấm chứa cấu hình Git, CI, dashboard hoặc công cụ phát triển. Tư liệu bài giảng của giảng viên lưu cục bộ trong `data/raw/course/` (không commit, không đưa vào ZIP).
+Tư liệu bài giảng của giảng viên được lưu cục bộ trong `data/raw/course/` để nhóm ôn tập.
 
 ## Nguồn dữ liệu & giấy phép
 
@@ -113,19 +112,19 @@ Ghi chú: `jupyter` CLI chưa vào PATH — dùng `python -m jupyter` / `python 
 
 ## Đối chiếu nội dung môn học
 
-Bảng dưới ánh xạ chủ đề đã dạy (Day 1–9, môn Học máy — STING vẫn là đề tài clustering Topic 6) sang script/kết quả/notebook trong repo. Số liệu classifier là **mức khớp với pseudo-label STING**, holdout **một lần** 2023→2024 — không có kết luận “vượt trội” so với ground truth xã hội.
+Bảng liên kết các nội dung học máy với mã nguồn, kết quả và notebook của đồ án. Số liệu classifier là **mức khớp với pseudo-label STING**, holdout **một lần** 2023→2024 — không có kết luận “vượt trội” so với ground truth xã hội.
 
-| Chủ đề (Day) | Trong repo |
+| Nội dung học máy | Trong repo |
 |---|---|
-| Ý tưởng ML, học có/không giám sát, clustering grid-based (Day 1) | `src/sting.py`; demo synthetic + test: `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`, `tests/test_sting.py`; PAPI thật: `scripts/analysis/predict_demo.py`, `results/predict_summary.md` |
-| Regression vs classification (Day 1) | Hồi quy: `scripts/supervised/predict_supervised.py` → `results/supervised_metrics.csv`; phân loại pseudo-label: cùng script + `results/supervised_summary.md` |
-| Naive Bayes, KNN, đánh giá accuracy / F1 (Day 2) | `scripts/supervised/course_supervised_baselines.py` → `results/course_supervised_baselines.{csv,md}`; sàn chance/drift: `scripts/supervised/classifier_label_baselines.py` → `results/classifier_label_baselines.{csv,md}`; pipeline chọn LR: `scripts/supervised/predict_supervised.py` |
-| Confusion matrix, precision/recall (Day 2) | Ma trận 6 model học phần: `results/figs/course_confusion_matrix.png`; LR đã chọn (một model): `results/figs/supervised_confusion.png` |
-| SVM tuyến tính + kernel RBF (Day 3) | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
-| Decision Tree, Random Forest (Day 3) | Cùng `scripts/supervised/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/supervised/predict_supervised.py` (chọn model theo CV, không theo holdout) |
-| Tiền xử lý Day 4 (Cleaning → Integration → Transformation) | `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/data/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
-| Linear, Polynomial & Logistic Regression (Day 6) | `study/Nhom15_Day6_Regressions_GiaiThich.ipynb` (OLS residual $\varepsilon_i$, đa thức $m \le n$, Sigmoid & Binary Cross-Entropy) + Phụ lục B của `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` |
-| K-Means, TRAP, Linkage & Dendrogram vs STING (Day 9) | `study/Nhom15_Day9_KMeans_HC_GiaiThich.ipynb` + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (sơ đồ 4 bước STING 2D, phản biện nhiễu `−1` & Elbow/Silhouette) |
+| Ý tưởng ML, học có/không giám sát, clustering grid-based | `src/sting.py`; demo synthetic + test: `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`, `tests/test_sting.py`; PAPI thật: `scripts/analysis/predict_demo.py`, `results/predict_summary.md` |
+| Regression vs classification | Hồi quy: `scripts/supervised/predict_supervised.py` → `results/supervised_metrics.csv`; phân loại pseudo-label: cùng script + `results/supervised_summary.md` |
+| Naive Bayes, KNN, đánh giá accuracy / F1 | `scripts/supervised/course_supervised_baselines.py` → `results/course_supervised_baselines.{csv,md}`; sàn chance/drift: `scripts/supervised/classifier_label_baselines.py` → `results/classifier_label_baselines.{csv,md}`; pipeline chọn LR: `scripts/supervised/predict_supervised.py` |
+| Confusion matrix, precision/recall | Ma trận 6 model học phần: `results/figs/course_confusion_matrix.png`; LR đã chọn (một model): `results/figs/supervised_confusion.png` |
+| SVM tuyến tính + kernel RBF | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
+| Decision Tree, Random Forest | Cùng `scripts/supervised/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/supervised/predict_supervised.py` (chọn model theo CV, không theo holdout) |
+| Tiền xử lý PAPI (làm sạch, tích hợp và chuẩn hóa) | `notebooks/Nhom15_TienXuLy_PAPI.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/data/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
+| Linear, Polynomial & Logistic Regression | `study/Nhom15_HoiQuy_GiaiThich.ipynb` (OLS residual $\varepsilon_i$, đa thức $m \le n$, Sigmoid & Binary Cross-Entropy) + Phụ lục B của `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` |
+| K-Means, TRAP, Linkage & Dendrogram vs STING | `study/Nhom15_KMeans_PhanCumPhanCap_GiaiThich.ipynb` + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (sơ đồ 4 bước STING 2D, phản biện nhiễu `−1` & Elbow/Silhouette) |
 | Q&A thi / vấn đáp theo slide | `reports/on-tap/qa_course_concepts.md` (midterm/cuối kỳ bổ sung: `reports/on-tap/qa_midterm.md`, `reports/on-tap/qa_final.md`) |
 
 Tái tạo audit và bảng classifier (nếu artifact cũ):

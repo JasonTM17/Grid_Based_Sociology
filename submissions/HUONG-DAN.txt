@@ -9,8 +9,8 @@
   Nhom15_CuoiKy_STING_PAPI.ipynb   Notebook cuối kỳ đã chạy
   Nhom15_CuoiKy_STING_PAPI.pptx    Slide vấn đáp cuối kỳ
 
-03-day-4
-  Nhom15_Day4_TienXuLy_PAPI.ipynb  Bài thực hành tiền xử lý
+03-tien-xu-ly-papi
+  Nhom15_TienXuLy_PAPI.ipynb  Bài thực hành tiền xử lý
   data, models, scripts và requirements.txt đi kèm để chạy lại.
 
 Gói Nhom15_GiuaKy_STING_PAPI.zip đặt bản trình chiếu và notebook ngay
@@ -22,7 +22,7 @@ Giải nén toàn bộ gói Nhom15_CuoiKy_STING_PAPI.zip để mở báo cáo Wo
 notebook và slide vấn đáp ở cấp đầu của thư mục. Xem HUONG_DAN.txt
 trong gói để chạy lại notebook, dựng bảng PAPI từ Excel gốc và ghép
 các nguồn đối chiếu bằng mã trong tai_lieu_kem/.
-Để chạy Day 4 riêng trên máy khác, sao chép cả thư mục 03-day-4, cài
+Để chạy quy trình tiền xử lý PAPI trên máy khác, sao chép cả thư mục 03-tien-xu-ly-papi, cài
 requirements.txt trong thư mục đó rồi mở notebook cùng cấp.
 
 Chạy trong VS Code

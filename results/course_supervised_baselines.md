@@ -25,7 +25,7 @@
 
 ## Hình
 - **Hình:** `results/figs/course_confusion_matrix.png` — ma trận nhầm lẫn holdout cho từng classifier học phần.
-- Đọc ma trận nhầm lẫn (bài Day 2–3): **hàng** = nhãn STING thực tế, **cột** = nhãn dự báo; ô trên đường chéo là dự đoán đúng.
+- Cách đọc ma trận nhầm lẫn: **hàng** = nhãn STING thực tế, **cột** = nhãn dự báo; ô trên đường chéo là dự đoán đúng.
 - Cân bằng lớp holdout 2023→2024: lớp 0 = 11 tỉnh, lớp 1 = 48 tỉnh (baseline majority luôn dự báo lớp chiếm đa số).
 
 ## Cách đọc

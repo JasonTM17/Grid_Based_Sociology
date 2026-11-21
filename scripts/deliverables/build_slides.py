@@ -281,13 +281,15 @@ pic_bytes(s, step_bio, 0.96, 3.16, w=11.41)
 text(s, 0.55, 5.82, 12.23, 1.18, [
     ("Số cụm được xác định từ các vùng ô dày liên thông tại mức lưới đã chọn.", 14.5, True, NAVY),
     ("Độ phân giải lưới và ngưỡng min_count ảnh hưởng đến số cụm và tỷ lệ nhiễu.", 13.5, False, GREY),
-    ("Cài đặt dùng ngưỡng số đếm. STING gốc còn dùng phân phối và kiểm định thống kê.", 12.5, False, GREY),
+    ("Cài đặt dùng ngưỡng số đếm để chọn ô dày. STING gốc còn dùng phân phối và kiểm định thống kê.", 12.5, False, GREY),
+    ("Notebook minh họa thêm truy vấn từ trên xuống theo phân phối chuẩn từng chiều.", 12.5, False, GREY),
 ], space_after=2)
 note(s, "Cài đặt gồm ba bước. Đầu tiên chia không gian thành lưới phân cấp, tiếp theo tính thống kê "
      "cho từng ô, cuối cùng gom các ô đạt min_count và liên thông qua cạnh. Sơ đồ 4 bước trên đồ thị 2D "
      "minh họa từ 15 điểm thô đến chia lưới 3×3, chọn ô dày (≥ 3), gắn −1 cho ô thưa (1 điểm) "
      "và nối kề 4 hướng (chạm góc không nối). Nhóm chọn một mức lưới để phân cụm. "
-     "STING gốc của Wang, Yang và Muntz còn mô hình hóa loại phân phối và dùng kiểm định thống kê để duyệt từ trên xuống.")
+     "Phép query_top_down duyệt từ mức thô và gộp thống kê của các ô nằm trọn vùng ở mức đích. "
+     "Phép truy vấn dùng xác suất ước lượng theo phân phối chuẩn từng chiều để tỉa nhánh.")
 
 
 s = slide_new()

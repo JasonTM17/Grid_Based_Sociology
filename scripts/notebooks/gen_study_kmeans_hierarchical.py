@@ -1,6 +1,6 @@
-"""Sinh study/Nhom15_Day9_KMeans_HC_GiaiThich.ipynb — bài tập Day 9 (đầy đủ sơ đồ trên đồ thị 2D).
+"""Sinh study/Nhom15_KMeans_PhanCumPhanCap_GiaiThich.ipynb — minh họa K-means, phân cụm phân cấp và STING.
 
-Bám sát toàn bộ 48 slide Day 9 (Clustering):
+Nội dung minh họa theo bài giảng về phân cụm:
 - K-Means từng bước trên đồ thị 2D (init → assign → update → converge)
 - Bẫy khởi tạo ngẫu nhiên (TRAP!) làm K-Means chẻ/gộp sai cụm & tăng WCSS
 - Trực quan WCSS (k=1 vs k=3) + đường cong Elbow & Silhouette
@@ -9,7 +9,7 @@ Bám sát toàn bộ 48 slide Day 9 (Clustering):
 - STING 4 bước + Bẫy lưới/ngưỡng/kề 8 hướng + So sánh K-Means vs HC vs STING trên dữ liệu có nhiễu
 Đây là tài liệu học, không thuộc gói nộp.
 
-Chạy: python scripts/notebooks/gen_study_day9_kmeans_hc.py
+Chạy: python scripts/notebooks/gen_study_kmeans_hierarchical.py
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from pathlib import Path
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "study" / "Nhom15_Day9_KMeans_HC_GiaiThich.ipynb"
+OUT = ROOT / "study" / "Nhom15_KMeans_PhanCumPhanCap_GiaiThich.ipynb"
 
 cells = []
 
@@ -33,9 +33,9 @@ def code(text: str) -> None:
     cells.append(nbf.v4.new_code_cell(text))
 
 
-md("""# Day 9 — K-Means, Hierarchical Clustering và STING (đầy đủ sơ đồ trên đồ thị 2D)
+md("""# K-means, phân cụm phân cấp và STING
 
-Tài liệu ôn tập thực hành theo trọn bộ **48 slide bài giảng Day 9: Clustering** (ThS. Lê Minh Tân — HCMUTE),
+Tài liệu ôn tập dựa trên bài giảng **Phân cụm** của ThS. Lê Minh Tân,
 đối chiếu từng bước trực quan giữa **K-Means**, **Hierarchical Clustering (HC)** và **STING** (đề tài nhóm 15).""")
 
 code(r"""import copy

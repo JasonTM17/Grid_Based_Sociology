@@ -504,7 +504,7 @@ def _write_markdown(
         "## Hình",
         "- **Hình:** `results/figs/course_confusion_matrix.png` — ma trận nhầm lẫn "
         "holdout cho từng classifier học phần.",
-        "- Đọc ma trận nhầm lẫn (bài Day 2–3): **hàng** = nhãn STING thực tế, "
+        "- Cách đọc ma trận nhầm lẫn: **hàng** = nhãn STING thực tế, "
         "**cột** = nhãn dự báo; ô trên đường chéo là dự đoán đúng.",
         f"- Cân bằng lớp holdout {HOLDOUT_YEAR}→{HOLDOUT_YEAR + 1}: "
         f"lớp 0 = {int((yte == 0).sum())} tỉnh, "

@@ -599,7 +599,7 @@ Nhóm cài đặt và kiểm chứng hai cải tiến trực tiếp trên 869 qu
 cd(nbf.v4.new_code_cell(r"""from matplotlib.patches import Rectangle
 from scripts.common.fig_style import CLUSTER_COLORS, PALETTE, style_context
 
-# 1. Kiểm chứng truy vấn top-down vs query_rect trên góc phần tư hiệu suất cao
+
 q_rect_box = [(0.0, 2.5), (0.0, 2.5)]
 res_full = grid_model.query_rect(q_rect_box, level=2)
 res_td = grid_model.query_top_down(q_rect_box, confidence=0.95, level=2)
@@ -612,7 +612,7 @@ print(
     f"tỉa bỏ {res_td['pruned_cells']} nhánh/ô biên."
 )
 
-# 2. Lưới đều vs Lưới thích nghi theo phân vị (Quantile Grid, mc=3)
+
 Xq = pd.DataFrame(Xz).rank(pct=True).to_numpy()
 mq = STING(n_levels=3, factor=4, min_count=3).fit(Xq)
 lq = mq.cluster(level=2, connectivity=1)

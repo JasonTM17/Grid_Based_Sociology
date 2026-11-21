@@ -20,11 +20,11 @@ python -m pip install -r requirements.txt
 chcp 65001
 
 # đối chiếu môn học — mở sẵn trước Q&A (không cần mạng)
-results\preprocessing_audit.md              # audit Day 4 (bảng Test → Decide)
+results\preprocessing_audit.md              # bảng kiểm tra tiền xử lý PAPI
 results\course_supervised_baselines.md      # bảng NB/KNN/SVM/cây/RF (pseudo-label STING)
 results\classifier_label_baselines.md       # sàn hoán vị nhãn + drift năm (exploratory)
 results\figs\course_confusion_matrix.png    # 6 panel confusion (học phần)
-reports\on-tap\qa_course_concepts.md               # cheat sheet Q&A Day 1–9 + chuyên sâu nhiễu STING
+reports\on-tap\qa_course_concepts.md               # hỏi đáp về học máy và nhãn nhiễu STING
 ```
 
 Mở [slide giữa kỳ](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx) và
@@ -62,7 +62,7 @@ Khi cần minh họa kết quả đối chiếu PCI, mở dashboard bằng
 | Nguồn | PAPI 2011–2024 (papi.org.vn) · Mendeley CC BY 4.0 (DOI 10.17632/wbk42j9wc8.1, crosscheck lệch 0.0) |
 | STING trên dữ liệu giả lập | ARI = **0.950**, tỷ lệ nhiễu 2.5%. Bộ kiểm thử thuật toán ở `tests/test_sting.py`. |
 | Phân cụm PAPI giữa kỳ | 869 quan sát đủ hai chỉ tiêu, gồm 61 quan sát năm 2024. STING cho ba cụm 677, 16 và 5 điểm, với 171 điểm nhiễu. K-means chọn k = 2 với silhouette 0,4472 trong k = 2–5. |
-| Tiền xử lý (Day 4) | `results/preprocessing_audit.md` — 0 trùng khóa / 882 dòng; không nội suy; outlier giữ + đánh dấu |
+| Tiền xử lý PAPI | `results/preprocessing_audit.md` — 0 trùng khóa / 882 dòng; không nội suy; outlier giữ + đánh dấu |
 | Classifier học phần | `results/course_supervised_baselines.csv` — CV macro-F1; holdout 2023→2024 **một lần**; so **khớp pseudo-label STING**, không ground truth xã hội (NB CV cao nhất ≠ “tốt nhất” tổng quát — xem `qa_course_concepts.md` câu 7) |
 | Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột bị cờ heuristic audit (`check_data.py`; chưa chứng minh đổi thang) |
 | Gán quan sát 2024 bằng lưới cố định | Mục 4.8 giữa kỳ dùng lưới dựng từ 2011–2023. Trong 61 tỉnh có đủ hai chỉ tiêu năm 2024, 48 nằm ở 21 ô dày thuộc một cụm và 13 nằm trong ô thưa. |

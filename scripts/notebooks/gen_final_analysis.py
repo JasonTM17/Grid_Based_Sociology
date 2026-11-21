@@ -243,7 +243,7 @@ _lo_t, _hi_t = sting.bounds_min_, sting.bounds_max_
 _px_t, _py_t = (_hi_t[0] - _lo_t[0]) * 0.06, (_hi_t[1] - _lo_t[1]) * 0.06
 with style_context():
     fig, axes = plt.subplots(1, 3, figsize=(13.0, 4.35), dpi=150, sharex=True, sharey=True, layout="constrained")
-    # Panel 1: |z| <= 3 vs nhiễu STING (-1)
+
     _draw_sting_grid(axes[0], sting)
     axes[0].add_patch(Rectangle((-3.0, -3.0), 6.0, 6.0, facecolor="none", edgecolor="#D55E00",
                                 linestyle="--", linewidth=1.35, label="Khung |z| ≤ 3 ('sạch' 1D)", zorder=4))
@@ -259,7 +259,7 @@ with style_context():
     axes[0].set_ylabel("6.1 Y tế công lập (z-score)")
     axes[0].legend(loc="upper left", fontsize=7.6, framealpha=0.92)
 
-    # Panel 2: BẪY xóa |z|>3
+
     _draw_sting_grid(axes[1], trimmed_sting, grid_color="#E2CFC9", dense_fill="#F3EEEA")
     axes[1].add_patch(Rectangle(_lo_t, *(_hi_t - _lo_t), facecolor="none", edgecolor="#64748B",
                                 linestyle=":", linewidth=1.2, label="Biên [min, max] cũ", zorder=3))
@@ -277,7 +277,7 @@ with style_context():
     axes[1].set_xlabel("4.2 Kiểm soát tham nhũng dịch vụ công (z-score)")
     axes[1].legend(loc="upper left", fontsize=7.6, framealpha=0.92)
 
-    # Panel 3: BẪY connectivity=2
+
     _draw_sting_grid(axes[2], conn8_sting, dense_fill="#E4EFF7")
     _c8a = conn8_labels >= 0
     axes[2].scatter(train_scaled[_c8a, 0], train_scaled[_c8a, 1], s=10, color=PALETTE["blue"], alpha=0.72, linewidths=0,
@@ -372,7 +372,7 @@ from scipy.spatial.distance import cdist
 from scripts.common.fig_style import CLUSTER_COLORS
 
 with style_context():
-    # Hình A: So sánh phân bố 2D của STING, K-means và DBSCAN trên 808 điểm 2011-2023
+
     fig_cmp, axes_cmp = plt.subplots(1, 3, figsize=(13.2, 4.35), dpi=150, sharex=True, sharey=True, layout="constrained")
     n_db_clusters = len(set(dbscan_labels[dbscan_labels >= 0]))
     cmp_specs = (
@@ -400,7 +400,7 @@ with style_context():
     fig_cmp.suptitle("Đối chiếu trực quan STING, K-means và DBSCAN trên 808 quan sát PAPI (2011–2023)", fontsize=12.2)
     plt.show()
 
-    # Hình B: Bốn khoảng cách Linkage & ghép vòng lồng nhau + Dendrogram (Day 9 slides 35-47)
+
     a_pts = np.array([[0.7, 1.2], [1.1, 2.0], [1.5, 1.0], [1.8, 1.7], [0.9, 2.5]])
     b_pts = np.array([[4.1, 2.3], [4.5, 3.2], [5.1, 2.6], [4.8, 1.6], [5.4, 2.1]])
     d_ab = cdist(a_pts, b_pts)
@@ -427,7 +427,7 @@ with style_context():
     ax_lnk.scatter(b_pts[:, 0], b_pts[:, 1], s=48, color=PALETTE["green"], label="Cụm B", zorder=5)
     ax_lnk.set_xlim(0.2, 5.9)
     ax_lnk.set_ylim(0.5, 4.1)
-    ax_lnk.set_title("1. Bốn khoảng cách Linkage (Day 9 tr.35)", fontsize=10.2)
+    ax_lnk.set_title("1. Bốn cách tính khoảng cách liên kết", fontsize=10.2)
     ax_lnk.set_xlabel("x1")
     ax_lnk.set_ylabel("x2")
     ax_lnk.grid(alpha=0.16)
@@ -465,7 +465,7 @@ with style_context():
     ax_dn.set_title("3. Dendrogram & mẹo chọn k (tr.44–47)", fontsize=10.2)
     ax_dn.set_ylabel("Khoảng cách ghép")
     ax_dn.legend(loc="upper left", fontsize=7.8, framealpha=0.92)
-    fig_hc.suptitle("Day 9 Hierarchical Clustering: Bốn Linkage & Cắt Dendrogram trên 2D", fontsize=12.5)
+    fig_hc.suptitle("Cách liên kết, ghép cụm và cắt cây phân cụm phân cấp", fontsize=12.5)
     plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("## 3. STING theo từng năm"))
@@ -742,12 +742,12 @@ preds_te = clf_model.predict(Xc_te)
 bce_loss = log_loss(yc_te, probs_te)
 clf_acc = accuracy_score(yc_te, preds_te)
 clf_mf1 = f1_score(yc_te, preds_te, average="macro", labels=[0, 1], zero_division=0)
-print(f"Day 6 Logistic holdout 2023→2024 ({len(yc_te)} tỉnh): "
+print(f"Hồi quy logistic trên tập 2024 ({len(yc_te)} tỉnh): "
       f"Binary Cross-Entropy = {bce_loss:.4f} | Acc = {clf_acc:.3f} | Macro-F1 = {clf_mf1:.3f}.")
 
 with style_context():
     fig, (ax_reg, ax_poly, ax_log) = plt.subplots(1, 3, figsize=(13.4, 4.4), dpi=150, layout="constrained")
-    # Trái: Ridge + đoạn phần dư dọc ε_i
+
     lo_r = float(min(y_true_reg.min(), y_pred_ridge.min())) - 0.03
     hi_r = float(max(y_true_reg.max(), y_pred_ridge.max())) + 0.03
     ax_reg.plot([lo_r, hi_r], [lo_r, hi_r], "--", color="#5A6B7C", lw=1.2, label="Đường chéo y = ŷ", zorder=1)
@@ -760,11 +760,11 @@ with style_context():
     ax_reg.set_ylim(lo_r, hi_r)
     ax_reg.set_xlabel("Điểm dự báo Ridge ŷ (2023 → 2024)")
     ax_reg.set_ylabel("Điểm 6.1 thực tế y (2024)")
-    ax_reg.set_title(f"1. Day 6 Hồi quy Ridge & phần dư ε_i\nMAE = {ridge_mae:.4f} · Holdout R² = {ridge_r2:.3f}", fontsize=10.0)
+    ax_reg.set_title(f"1. Hồi quy Ridge và phần dư ε_i\nMAE = {ridge_mae:.4f} · Holdout R² = {ridge_r2:.3f}", fontsize=10.0)
     ax_reg.grid(alpha=0.18)
     ax_reg.legend(loc="upper left", fontsize=7.8, framealpha=0.92)
 
-    # Giữa: Polynomial Regression bậc m <= n (Day 6 tr.13-14 & 19)
+
     x_d6 = np.array([1.5, 2.0, 3.5, 5.0, 6.5, 7.0])
     y_d6 = np.array([-3.0, -3.5, 0.5, -1.0, 2.5, 1.5])
     x_gd = np.linspace(1.2, 7.3, 250)
@@ -779,13 +779,13 @@ with style_context():
         ax_poly.plot(x_gd, xg @ bp, ls=ls_d, color=col_d, lw=1.8 if deg_d == 5 else 1.5, label=lbl_d, zorder=3 if deg_d == 5 else 2)
     ax_poly.scatter(x_d6, y_d6, s=44, color="#1E3D5E", edgecolors="white", linewidths=0.7, zorder=4)
     ax_poly.set_ylim(-5.2, 5.2)
-    ax_poly.set_xlabel("x (ví dụ 6 điểm Day 6 tr.19)")
+    ax_poly.set_xlabel("x (ví dụ sáu điểm)")
     ax_poly.set_ylabel("y")
-    ax_poly.set_title("2. Day 6 Đa thức m = 1, 2, 5 & Bẫy Overfit\nm = 5 (MSE train = 0, dao động mạnh)", fontsize=10.0)
+    ax_poly.set_title("2. Hồi quy đa thức m = 1, 2, 5 và hiện tượng quá khớp\nm = 5 (MSE train = 0, dao động mạnh)", fontsize=10.0)
     ax_poly.grid(alpha=0.18)
     ax_poly.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
 
-    # Phải: Logistic Regression Sigmoid & Binary Cross-Entropy
+
     z_grid = np.linspace(float(logits_te.min()) - 0.6, float(logits_te.max()) + 0.6, 200)
     sig_grid = 1.0 / (1.0 + np.exp(-z_grid))
     ax_log.plot(z_grid, sig_grid, "-", color=PALETTE["blue"], lw=2.0, label="Sigmoid f(z) = 1 / (1 + e⁻ᶻ)", zorder=2)
@@ -803,7 +803,7 @@ with style_context():
     ax_log.set_ylim(-0.14, 1.15)
     ax_log.set_xlabel("Logit tuyến tính z = β₀ + wᵀx")
     ax_log.set_ylabel("Xác suất P(vùng dày | x)")
-    ax_log.set_title(f"3. Day 6 Logistic Sigmoid (nhãn STING)\nBinary Cross-Entropy = {bce_loss:.4f} · Acc = {clf_acc:.3f}", fontsize=10.0)
+    ax_log.set_title(f"3. Hàm sigmoid trong hồi quy logistic (nhãn STING)\nBinary Cross-Entropy = {bce_loss:.4f} · Acc = {clf_acc:.3f}", fontsize=10.0)
     ax_log.grid(alpha=0.18)
     ax_log.legend(loc="center left", fontsize=7.6, framealpha=0.92)
     plt.show()"""))

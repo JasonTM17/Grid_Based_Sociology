@@ -531,7 +531,7 @@ text(s, 0.63, 6.02, 12.04, 0.40, [
     ("Điểm trong ô thưa nhận nhãn −1 (nhiễu).", 16.5, True, NAVY),
 ])
 text(s, 0.63, 6.46, 12.04, 0.42, [
-    ("STING gốc còn lưu loại phân phối và lọc ô từ trên xuống theo độ tin cậy.", 14.5, False, GREY),
+    ("Notebook minh họa thêm truy vấn thống kê từ trên xuống.", 14.5, False, GREY),
 ])
 note(
     s,
@@ -540,8 +540,8 @@ note(
     "cho đến khi hết ô có thể đi tới. Các ô đã duyệt tạo thành một cụm. "
     "Hình bốn bước bên dưới minh họa đầy đủ quy trình từ 15 điểm thô đến chia lưới 3×3, "
     "chọn ô dày (≥ 3), gắn nhãn −1 cho ô thưa (1 điểm) và nối kề 4 hướng (chạm góc không nối). "
-    "Điểm trong ô thưa nhận nhãn nhiễu −1. Đây là biến thể STING dùng ngưỡng số đếm. "
-    "STING gốc còn mô hình hóa phân phối và dùng kiểm định thống kê để duyệt lưới từ trên xuống.",
+    "Điểm trong ô thưa nhận nhãn nhiễu −1. Phần phân cụm PAPI chọn một mức lưới. "
+    "Notebook minh họa thêm query_top_down, phép gộp thống kê theo vùng với xác suất ước lượng từ phân phối chuẩn từng chiều.",
 )
 
 

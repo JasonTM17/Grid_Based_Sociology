@@ -28,7 +28,7 @@
 
 9. **Đổi độ mịn lưới hoặc ngưỡng ô dày ảnh hưởng thế nào?** Giữ ngưỡng 5, lưới 1 × 1, 4 × 4 và 16 × 16 lần lượt tạo 1, 1 và 3 cụm, với 0, 6 và 171 điểm nhiễu. Trên riêng lưới 16 × 16, nâng ngưỡng từ 5 lên 8 cho 1 cụm và 31,2% nhiễu. Giải thích tác động của từng tham số bằng lượt thử chỉ đổi tham số đó. [Notebook giữa kỳ](../../notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb)
 
-10. **Bản nhóm khác STING gốc ở đâu?** Nhóm lưu số điểm và các thống kê theo ô, sau đó chọn một mức lưới và gom các ô dày chung cạnh. STING gốc còn mô hình hóa phân phối và duyệt lưới từ trên xuống theo tiêu chí thống kê. (nguồn: src/sting.py)
+10. **Nhóm dùng lưới STING để phân cụm và truy vấn ra sao?** Khi phân cụm, nhóm chọn một mức lưới và nối các ô dày chung cạnh. Khi cần thống kê theo vùng, notebook minh họa `query_top_down`, duyệt từ mức thô và tỉa nhánh theo xác suất ước lượng từ phân phối chuẩn từng chiều. Bài báo gốc lưu loại phân phối của từng thuộc tính trong ô. [Mã STING](../../src/sting.py)
 
 11. **Độ phức tạp cần giải thích thế nào?** Với L mức lưới, n điểm và d đặc trưng, bước xây thống kê phụ thuộc L, n và d. Ở chế độ nối qua cạnh, mỗi ô xét tối đa 2d ô kề. Có thể nói chi phí tăng theo số điểm khi các tham số còn lại được giữ cố định. (nguồn: src/sting.py)
 

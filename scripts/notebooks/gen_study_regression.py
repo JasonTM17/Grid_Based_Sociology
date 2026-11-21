@@ -1,11 +1,11 @@
-"""Sinh study/Nhom15_Day6_Regressions_GiaiThich.ipynb — ôn tập Day 6 (Regressions) + liên hệ PAPI × STING.
+"""Sinh study/Nhom15_HoiQuy_GiaiThich.ipynb — minh họa hồi quy và liên hệ với PAPI và STING.
 
-Đối chiếu toàn bộ sơ đồ bài giảng Day 6 (Linear/OLS + phần dư ε_i, Polynomial
+Đối chiếu các sơ đồ trong bài giảng về hồi quy (Linear/OLS + phần dư ε_i, Polynomial
 Regression m <= n và bẫy overfit, Logistic Regression Sigmoid & Binary Cross-Entropy)
 với hai bài toán giám sát trong Phụ lục B của đồ án (Ridge 6.1 & Logistic nhãn STING).
 Đây là tài liệu ôn tập, không thuộc gói nộp.
 
-Chạy: python scripts/notebooks/gen_study_day6_regressions.py
+Chạy: python scripts/notebooks/gen_study_regression.py
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from pathlib import Path
 import nbformat as nbf
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "study" / "Nhom15_Day6_Regressions_GiaiThich.ipynb"
+OUT = ROOT / "study" / "Nhom15_HoiQuy_GiaiThich.ipynb"
 
 cells = []
 
@@ -29,9 +29,9 @@ def code(text: str) -> None:
     cells.append(nbf.v4.new_code_cell(text))
 
 
-md("""# Day 6 — Regressions (Linear, Polynomial, Logistic) và liên hệ đồ án STING × PAPI
+md("""# Hồi quy tuyến tính, đa thức và logistic
 
-Tài liệu ôn tập bám sát 19 slide bài giảng **Day 6: Regressions** (ThS. Lê Minh Tân — HCMUTE)
+Tài liệu ôn tập dựa trên bài giảng **Hồi quy** của ThS. Lê Minh Tân
 và nối trực tiếp sang Phụ lục B của đồ án:
 
 1. **Linear Regression & OLS (slides 3–12, ví dụ trang 19):** đường khớp tốt nhất, các đoạn phần dư dọc $\\varepsilon_i = y_i - \\hat{y}_i$, và nghiệm đóng $\\hat{\\beta} = (X^T X)^{-1} X^T y$.
@@ -63,7 +63,7 @@ from scripts.supervised.predict_supervised import build_classification_pairs, bu
 plt.rcParams.update({"figure.dpi": 115, "axes.spines.top": False, "axes.spines.right": False})
 print("Đã nạp thư viện và kết nối repo.")""")
 
-md("""## 1. Linear Regression (OLS) và các đoạn phần dư $\\varepsilon_i$ (Day 6, slides 3–12 & 19)
+md("""## 1. Linear Regression (OLS) và các đoạn phần dư $\\varepsilon_i$ (bài giảng, trang 3–12 và 19)
 
 Dùng đúng bảng 6 điểm ở slide 19: `(1.5, -0.96), (2.0, -2.71), (3.5, -3.13), (5.0, 2.26), (6.5, 3.45), (7.0, 2.06)`.
 Ta tự tính nghiệm bình phương tối thiểu $\\hat{\\beta} = (X^T X)^{-1} X^T y$ rồi đối chiếu với `LinearRegression`,
@@ -112,7 +112,7 @@ with style_context():
     ax_r.legend(loc="upper center", fontsize=8.5, framealpha=0.92)
     plt.show()""")
 
-md("""## 2. Polynomial Regression: từ Underfit đến Bẫy Overfit (Day 6, slides 13–14)
+md("""## 2. Polynomial Regression: từ Underfit đến Bẫy Overfit (bài giảng, trang 13–14)
 
 Dựng ma trận thiết kế bậc $m$: $X' = [1, x, x^2, \\dots, x^m]$ và giải $\\hat{\\beta} = (X'^T X')^{-1} X'^T y$.
 Với $n = 6$ điểm, đa thức bậc $m = 5$ có đúng 6 tham số nên đi qua khít cả 6 điểm (MSE trên train bằng `0`),
@@ -148,10 +148,10 @@ with style_context():
         ax.set_xlabel("x")
     for ax in axes[:, 0]:
         ax.set_ylabel("y")
-    fig.suptitle("Day 6 Polynomial Regression: đánh đổi giữa độ khớp train và dao động", fontsize=12.5)
+    fig.suptitle("Độ khớp trên mẫu và độ dao động của hồi quy đa thức", fontsize=12.5)
     plt.show()""")
 
-md("""## 3. Logistic Regression: Sigmoid & Binary Cross-Entropy (Day 6, slides 15–18)
+md("""## 3. Logistic Regression: Sigmoid & Binary Cross-Entropy (bài giảng, trang 15–18)
 
 Logistic Regression đưa tổ hợp tuyến tính $z = \\beta_0 + \\beta_1 x$ qua hàm Sigmoid
 $f(x) = \\frac{1}{1 + e^{-z}} \\in (0, 1)$ để ước lượng xác suất $P(y = 1 \\mid x)$ và tối thiểu hóa
@@ -256,7 +256,7 @@ with style_context():
     ax_l.legend(loc="center left", fontsize=8.3, framealpha=0.92)
     plt.show()""")
 
-md("""## Ghi chú ôn thi Day 6
+md("""## Câu hỏi ôn tập về hồi quy
 
 - **Tại sao OLS không đủ cho PAPI mà dùng Ridge?** OLS tối thiểu $\\|y - X\\beta\\|_2^2$; Ridge thêm phạt $L_2$ giúp hệ số ổn định khi 8 chỉ tiêu PAPI tương quan với nhau.
 - **Tại sao Ridge giảm MAE nhưng chiếu lên lưới STING vẫn bỏ sót 11/11 tỉnh nhiễu?** Hồi quy ước lượng kỳ vọng có điều kiện $\\mathbb{E}[y \\mid x]$ nên các giá trị dự báo co về vùng trung tâm — đúng vùng các ô dày STING (cụm lớn 2). Muốn xếp hạng rủi ro rơi vào vùng thưa phải cộng phân bố sai số lịch sử hoặc dùng mô hình phân loại trực tiếp với trọng số lớp cân bằng.""")

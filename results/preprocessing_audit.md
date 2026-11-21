@@ -1,4 +1,4 @@
-# Audit tiền xử lý theo thứ tự Day 4
+# Kiểm tra quy trình tiền xử lý PAPI
 
 Sinh bởi `scripts/data/preprocessing_audit.py` — CHỈ ĐỌC dữ liệu, không ghi lại panel hay master.
 
@@ -12,7 +12,7 @@ Mỗi bảng dưới đây là một giai đoạn: **Test | Result | Decision | 
 
 ## 1. Cleaning
 
-Thứ tự trong Day 4: trùng khóa → thiếu → nhất quán → ngoại lai CUỐI CÙNG.
+Bước làm sạch kiểm tra lần lượt trùng khóa, giá trị thiếu, tính nhất quán và ngoại lai.
 
 | Test | Result | Decision | Evidence file:line |
 |---|---|---|---|

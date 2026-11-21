@@ -490,7 +490,7 @@ body("Từ khóa: STING, phân cụm dựa trên lưới, PAPI, dữ liệu tỉ
 front_title("LỜI MỞ ĐẦU")
 body("Đề tài thuộc Topic 6 — Grid-based clustering. Theo bài giảng, cuối kỳ cần dữ liệu thật có hơn 500 dòng và 10 cột, báo cáo Word và notebook. Nhóm chọn tự cài đặt biến thể STING bằng NumPy để giải thích cơ chế lưới; đây là lựa chọn triển khai của nhóm. Scikit-learn hỗ trợ chuẩn hóa, chỉ số đánh giá và các mô hình đối chứng. PAPI được chọn vì dữ liệu công khai, có 14 năm và nhiều chỉ tiêu về quản trị, dịch vụ công.")
 body(f"Đồ án gồm: cài đặt STING từ đầu (src/sting.py); pipeline dữ liệu từ 14 workbook gốc; đối chiếu chéo với gói replication nghiên cứu công bố (Mendeley, CC BY 4.0 — lệch 0.0 trên {MENDELEY_OVERLAP_TXT} cặp giá trị có dữ liệu trên 8 chiều, tính từ reports/crosscheck_mendeley.md) [3]; phân cụm các năm; so sánh với k-means/DBSCAN; robustness đa chỉ tiêu; bản đồ 63 tỉnh; và dự báo hai điểm PAPI rồi dùng lưới STING để đối chiếu vùng năm 2024.")
-body("Mã nguồn lưu các bước dựng panel, kiểm tra dữ liệu, chọn cấu hình và phân tích kết quả. Notebook cuối kỳ tái lập ví dụ giả lập, nhãn STING và sai số dự báo từ panel đã lưu, đồng thời đọc các bảng và hình thực nghiệm. Notebook Day 4 thực hiện riêng pipeline tiền xử lý từ workbook gốc; lệnh tái lập được tổng hợp ở Phụ lục A.")
+body("Mã nguồn lưu các bước dựng panel, kiểm tra dữ liệu, chọn cấu hình và phân tích kết quả. Notebook cuối kỳ tái lập ví dụ giả lập, nhãn STING và sai số dự báo từ panel đã lưu, đồng thời đọc các bảng và hình thực nghiệm. Notebook tiền xử lý PAPI dựng lại bảng từ các tệp Excel gốc; lệnh tái lập được tổng hợp ở Phụ lục A.")
 body("Nhóm xin chân thành cảm ơn ThS. Lê Minh Tân và Bộ môn Trí tuệ nhân tạo đã hướng dẫn và góp ý trong quá trình thực hiện đồ án. Nhóm trân trọng ghi nhận các tổ chức cung cấp dữ liệu công khai được dẫn trong báo cáo.")
 
 
@@ -544,15 +544,16 @@ h1("CHƯƠNG 2. CƠ SỞ LÝ THUYẾT")
 h2("2.1. Grid-based clustering")
 body("Grid-based clustering chia không gian đặc trưng thành các ô lưới và dùng thông tin tóm tắt của ô để tìm vùng điểm dày. Lưới được đặt trên các chỉ tiêu phân tích, không phải lưới chia bản đồ địa lý. Khi số chiều và cấu hình được giữ cố định, chi phí thống kê có thể tăng gần tuyến tính theo số điểm. Phương pháp nhạy với độ phân giải, ngưỡng số điểm và hướng trục; khi số chiều tăng, dữ liệu dễ phân tán vào nhiều ô thưa.")
 h2("2.2. STING (STatistical INformation Grid)")
-body("STING gốc của Wang, Yang & Muntz (VLDB 1997) lưu count, mean, std, min, max và loại phân phối theo thuộc tính. Truy vấn bắt đầu từ lớp cao, đánh giá độ liên quan bằng confidence rồi chỉ duyệt các ô con liên quan (top-down pruning); thống kê lớp trên có thể gộp từ lớp dưới. Đây là cơ chế của bài gốc, khác với biến thể rút gọn dùng trong đồ án [1].")
-body("Bản nhóm tự cài bỏ loại phân phối và pruning top-down: fit tính thống kê trực tiếp từ điểm ở từng mức; cluster chọn một mức cố định, coi count ≥ min_count là ô dày rồi gom các ô kề bằng DFS; ô thưa nhận −1. Tùy chọn significance_z chỉ là heuristic so với ô cha, không phải toàn bộ phép đánh giá confidence của bài gốc; pipeline chính tắt tùy chọn này. Dự án là một ứng dụng grid-based dựa trên STING, không tuyên bố tái hiện đầy đủ mọi chức năng của STING gốc.")
+body("STING gốc của Wang, Yang và Muntz (VLDB 1997) lưu số điểm, trung bình, độ lệch chuẩn, cực trị và loại phân phối của từng thuộc tính. Truy vấn đánh giá độ liên quan ở lớp thô rồi duyệt tiếp các ô con liên quan. Thống kê của ô cha có thể được gộp từ thống kê các ô con [1].")
+body("Trong đồ án, fit tính thống kê từ các điểm ở từng mức. Pipeline PAPI chọn một mức, lấy ô có số điểm đạt min_count rồi gom các ô dày kề nhau thành cụm. Điểm trong ô thưa nhận nhãn −1. Tùy chọn significance_z so trung bình ô con với ô cha và được tắt trong cấu hình chính. Notebook minh họa riêng truy vấn phân cấp query_top_down. Phép truy vấn ước lượng xác suất theo phân phối chuẩn của từng chiều và giả định các chiều độc lập.")
 h2("2.3. Cài đặt trong đồ án (src/sting.py)")
 bullets([
     ("fit(X).", "Dựng L mức trên n điểm d chiều; với khóa ô nguyên và stable radix sort của NumPy đang dùng, chi phí theo dữ liệu khoảng O(L·n·d). Không coi số mức và số chiều luôn bằng hằng số khi phân tích tổng quát. Refit hủy nhãn cũ, cần cluster lại trước predict."),
     ("cluster(level).", "Chọn ô dày → gom thành phần liên thông trên đồ thị kề ô (BFS/DFS) → gán nhãn điểm; nhãn −1 cho điểm không nằm trong ô dày."),
     ("predict(X).", "Điểm MỚI: tìm ô chứa nó ở mức đã dùng → cụm của ô đó; nếu ô không dày hoặc điểm ngoài vùng huấn luyện → −1."),
     ("query_rect(rect).", "Quét M ô có dữ liệu ở một mức và gộp các ô nằm trọn trong vùng. Phương sai gộp tính cả độ phân tán trong từng ô và chênh lệch giữa trung bình các ô, với trọng số là số điểm. Chi phí truy vấn là O(M·d). Khi phân cụm, mỗi ô có tối đa 2d láng giềng nếu nối qua mặt và 3^d−1 nếu tính cả góc. Chi phí chung còn gồm bước sắp xếp các ô dày."),
-    ("save/load.", "Lưu lưới và bộ chuẩn hóa để gán các điểm mới theo cùng biên và cùng quy tắc."),
+    ("query_top_down(rect).", "Duyệt từ gốc đến mức đích. Với ô cha giao một phần vùng truy vấn, chương trình có thể dừng nhánh nếu xác suất ước lượng có ít nhất một điểm trong vùng thấp hơn 1 − confidence. Kết quả gộp thống kê của các ô nằm trọn trong vùng tại mức đích."),
+    ("save/load.", "Lưu và nạp lại lưới đã xác định cụm. Khi gán điểm quan sát mới, quy trình dùng cùng bộ chuẩn hóa đã lưu riêng."),
 ])
 h2("2.4. Baselines & chỉ số đánh giá")
 bullets([
@@ -563,7 +564,7 @@ bullets([
     ("ARI.", "Adjusted Rand Index so với STING và giữa các năm."),
 ])
 h2("2.5. Chỉ số PAPI & thang đo")
-body("Liên hệ Day 9: WCSS là tổng khoảng cách bình phương từ điểm tới centroid của cụm. K-Means tối ưu WCSS với k cố định; tăng k thường làm WCSS giảm nên cần đọc elbow cùng chỉ số khác. STING sinh k từ lưới và có noise: không so WCSS hay silhouette giữa các tập điểm khác nhau như một bảng xếp hạng tuyệt đối; luôn báo cả cỡ cụm và tỷ lệ noise. Dendrogram của Hierarchical Clustering ghi thứ tự ghép cụm theo khoảng cách, còn hierarchy của STING là chia không gian hình học; hai loại cây không đồng nghĩa.")
+body("WCSS là tổng khoảng cách bình phương từ điểm tới centroid của cụm. K-Means tối ưu WCSS với k cố định; tăng k thường làm WCSS giảm nên cần đọc elbow cùng chỉ số khác. STING sinh k từ lưới và có noise: không so WCSS hay silhouette giữa các tập điểm khác nhau như một bảng xếp hạng tuyệt đối; luôn báo cả cỡ cụm và tỷ lệ noise. Dendrogram của Hierarchical Clustering ghi thứ tự ghép cụm theo khoảng cách, còn hierarchy của STING là chia không gian hình học; hai loại cây không đồng nghĩa.")
 body("Mỗi yếu tố PAPI chuẩn hóa về 1–10 điểm theo năm; chỉ tiêu thành phần có thang riêng và có thể đổi thang giữa các phiên bản (vd 5.4 đổi 0.25–2.5 → 0.33–3.33 tại 2021 khi cấu trúc chỉ tiêu thay đổi). Vì vậy sử dụng xuyên năm buộc phải kiểm tra thang từng chỉ tiêu — làm bằng audit bước nhảy trung bình năm trong scripts/data/check_data.py (ngưỡng 0.25 điểm).")
 
 
@@ -598,19 +599,19 @@ table(["Tiêu chí yêu cầu", "Kết quả"], [
 h2("3.4. Audit thang đo xuyên năm (điểm mới)")
 body("Nhóm đánh dấu 23/37 chỉ tiêu có chênh lệch trung bình giữa hai năm liền kề vượt 0,25 điểm. Đối chiếu workbook cho thấy sd_5_1, sd_5_3 và sd_5_4 đổi từ thang 0,25–2,5 sang 0,33–3,33 vào năm 2021. Với sd_2_1, mức tăng 1,355 điểm vào năm 2018 là dấu hiệu cần kiểm tra thêm. Các workbook đối chiếu quanh năm 2021 ghi cùng khoảng điểm cho sd_3_2 (0,33–3,33) và sd_6_4 (0,25–2,5). Cùng khoảng điểm vẫn cần đối chiếu nội dung chỉ tiêu và cách khảo sát khi so sánh qua các năm.")
 body("Nhóm dùng tám chỉ tiêu đã đối chiếu khoảng điểm để tạo các cặp ứng viên STING và làm đầu vào cho mô hình hồi quy bổ trợ. Phân tích STING chính chọn hai chỉ tiêu sd_4_2 và sd_6_1. Bảng metadata ở data/processed/papi_panel_scale_metadata.csv ghi các khoảng điểm và nguồn đối chiếu.")
-h2("3.5. Kiểm tra tiền xử lý theo thứ tự Day 4")
-body("Theo Day 4, pipeline gồm Cleaning (kiểm tra trùng khóa, giá trị thiếu, tính nhất quán và ngoại lai) → Integration (nối khóa và kiểm tra số dòng) → Transformation (chuẩn hóa). Bảng kiểm tra đọc từ results/preprocessing_audit.csv, sinh bởi scripts/data/preprocessing_audit.py. Giá trị thiếu được giữ là NaN; chỉ các dòng đủ đặc trưng mới được đưa vào từng phép phân tích. Các ô có |z|>3 được đánh dấu để khảo sát và vẫn giữ trong panel. Cờ ngoại lai z-score và nhãn nhiễu STING là hai quy tắc khác nhau: điểm chỉ nhận nhãn −1 khi không thuộc ô dày hoặc nằm ngoài vùng lưới đã học.")
+h2("3.5. Kiểm tra quy trình tiền xử lý")
+body("Quy trình gồm làm sạch dữ liệu, tích hợp theo khóa và chuẩn hóa chỉ tiêu. Bước làm sạch kiểm tra trùng khóa, giá trị thiếu, tính nhất quán và ngoại lai. Bước tích hợp kiểm tra khóa nối và số dòng sau khi ghép. Bảng kiểm tra đọc từ results/preprocessing_audit.csv, sinh bởi scripts/data/preprocessing_audit.py. Giá trị thiếu được giữ là NaN; chỉ các dòng đủ đặc trưng mới được đưa vào từng phép phân tích. Các ô có |z|>3 được đánh dấu để khảo sát và vẫn giữ trong panel. Cờ ngoại lai z-score và nhãn nhiễu STING là hai quy tắc khác nhau: điểm chỉ nhận nhãn −1 khi không thuộc ô dày hoặc nằm ngoài vùng lưới đã học.")
 table(
     ["Test", "Kết quả", "Quyết định"],
     PREPROCESSING_AUDIT_TABLE,
     widths=[4.8, 4.8, 6.4],
     caption=tbl_caption(
-        "Kiểm tra tiền xử lý theo thứ tự Day 4 — nguồn: results/preprocessing_audit.csv"
+        "Kiểm tra quy trình tiền xử lý — nguồn: results/preprocessing_audit.csv"
     ),
 )
 h2("3.6. Quyết định tiền xử lý và giới hạn")
 body(
-    "Tóm tắt các quyết định Test → Quyết định (Day 4) và giới hạn thiết kế liên quan baseline "
+    "Tóm tắt các quyết định xử lý dựa trên kết quả kiểm tra và giới hạn thiết kế liên quan baseline "
     "học phần — số đo trong cột giữa trích từ results/preprocessing_audit.md và "
     "results/course_supervised_baselines.md; chi tiết đầy đủ ở Bảng trên, không lặp từng test."
 )

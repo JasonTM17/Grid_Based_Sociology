@@ -81,11 +81,11 @@ _Mỗi thành viên tự luyện trả lời các câu trọng tâm trong khoả
 
 ## Lý thuyết thuật toán & demo nộp bài (`submission.pptx` / `Nhom15_GiuaKy_STING_PAPI.ipynb`)
 
-32. **Vì sao dùng lưới phân cấp?** Mức `l` chia mỗi chiều thành `factor**l` đoạn để quan sát dữ liệu ở nhiều độ phân giải. STING gốc duyệt từ mức thô đến các ô con có liên quan theo độ tin cậy. Cài đặt của nhóm tính thống kê trực tiếp từ điểm ở từng mức. Mỗi lần gom cụm hoặc truy vấn dùng một mức đã chọn. Xem `src/sting.py` và Chương 2 của báo cáo.
+32. **Vì sao dùng lưới phân cấp?** Mức `l` chia mỗi chiều thành `factor**l` đoạn để quan sát dữ liệu ở nhiều độ phân giải. Cài đặt của nhóm tính thống kê từ điểm ở từng mức. `cluster` gom các ô dày tại mức đã chọn. `query_top_down` đi từ gốc xuống mức đích, tỉa nhánh rời vùng hoặc có xác suất ước lượng thấp. Kết quả truy vấn là thống kê gộp. [Mã STING](../../src/sting.py) · [Chương 2 của báo cáo](../final_report.docx)
 
 33. **Một ô `Cell` lưu những gì?** — Chỉ số ô, cận biên theo chiều, `count`, và thống kê **độc lập từng chiều**: mean, std, min, max — **bài gốc còn lưu distribution type; cài đặt của nhóm bỏ qua (đơn giản hóa)** — đủ để so sánh mật độ/độ lệch cục bộ mà không cần giữ toàn bộ điểm trong ô. (nguồn: src/sting.py:10; src/sting.py:37-49)
 
-34. **Gom cụm từ ô dày liền kề diễn ra thế nào?** — Chỉ tại **một** mức `level` đã chọn: ô có `count ≥ min_count` là “dày”; DFS trên tập ô dày với `connectivity` (mặc định 4 hướng) gộp ô kề thành một cụm; điểm trong ô không dày hoặc không thuộc thành phần liên thông nhận **−1** (khác STING gốc top-down). (nguồn: src/sting.py:12; src/sting.py:117; src/sting.py:149)
+34. **Gom cụm từ ô dày liền kề diễn ra thế nào?** Ở mức `level` đã chọn, ô có `count ≥ min_count` là ô dày. DFS tìm các vùng ô dày liên thông. Trong lưới hai chiều mặc định, hai ô kề nhau khi chung cạnh. Điểm trong ô thưa mang nhãn **−1**. [Mã STING](../../src/sting.py)
 
 35. **Độ phức tạp của bản STING nhóm viết phụ thuộc vào gì?** Gán chỉ số cho n điểm d chiều tại một mức tốn O(n·d). Sau đó còn sắp xếp các điểm theo chỉ số ô và tính thống kê từng ô. Khi tìm liên thông, mỗi ô dày có tối đa 2d láng giềng trong chế độ kề mặt. Chi phí tổng phụ thuộc số mức, cách sắp xếp, số chiều và số ô dày. K-means cần k cho trước. DBSCAN dùng bán kính ε và ngưỡng số điểm trong lân cận. Xem `src/sting.py` và Chương 2 của báo cáo.
 
@@ -113,8 +113,8 @@ _Mỗi thành viên tự luyện trả lời các câu trọng tâm trong khoả
 
 Chưa-test: render trên máy/phiên bản Office khác (chỉ chạy trên máy này); deck và script bố cục chưa commit — diff đang là trạng thái làm việc.
 
-## Bổ sung phản biện nhiễu & sơ đồ bài giảng (Day 6 · Day 9)
+## Nhãn nhiễu và minh họa hồi quy
 
 42. **13 tỉnh nhãn −1 năm 2024 nằm ở đâu trên lưới, có tỉnh nào bị tràn biên (`outside_grid`) hay điểm kém tất cả không?** — `0/61` tỉnh `outside_grid` và `0/61` có `|z| > 3` (`max |z| = 2.1299` tại Tây Ninh). Cả `13/13` tỉnh là `sparse_cell` (`0–3` điểm tham chiếu trên lưới `2011–2023`), trải cả rìa **điểm cao** (Tây Ninh, Quảng Ninh `ref=0`, Bà Rịa - Vũng Tàu, Sóc Trăng, Bình Thuận, Hà Tĩnh) lẫn rìa thấp hơn ở `6.1` (Hà Nội, Cần Thơ). Kết quả này và sơ đồ 3 panel bẫy nhiễu trên `808` điểm `2011–2023` được in trực tiếp ở Mục 1.1 & Mục 4 của notebook cuối kỳ. (nguồn: results/papi_observed_grid_2024.csv:1-64; scripts/notebooks/gen_final_analysis.py:222-292)
 
-43. **Phụ lục B liên hệ thế nào với bài giảng Day 6 (Regressions)?** — Notebook cuối kỳ (Phụ lục B) và notebook ôn tập `study/Nhom15_Day6_Regressions_GiaiThich.ipynb` minh họa đủ ba trục của Day 6: (i) **Linear/Ridge** với các đoạn phần dư dọc $\varepsilon_i = y_i - \hat{y}_i$ trên `59` tỉnh holdout 2024 (`MAE = 0.0640, R² = 0.381`), (ii) lý do không chọn đa thức bậc cao để tránh bẫy overfit $m \le n$, và (iii) **Logistic Regression** với đường cong Sigmoid $f(z) = \frac{1}{1 + e^{-z}}$ và hàm mất mát **Binary Cross-Entropy (`log_loss = 0.7059`, Acc `0.644`, Macro-F1 `0.541`)** trên `11` tỉnh nhiễu (`0`) và `48` tỉnh vùng dày (`1`). (nguồn: scripts/notebooks/gen_final_analysis.py:727-809; scripts/notebooks/gen_study_day6_regressions.py:162-255; results/supervised_metrics.csv:4-7)
+43. **Phụ lục B minh họa những phương pháp hồi quy nào?** — Notebook cuối kỳ (Phụ lục B) và notebook ôn tập `study/Nhom15_HoiQuy_GiaiThich.ipynb` minh họa ba phương pháp: (i) **Linear/Ridge** với các đoạn phần dư dọc $\varepsilon_i = y_i - \hat{y}_i$ trên `59` tỉnh holdout 2024 (`MAE = 0.0640, R² = 0.381`), (ii) lý do không chọn đa thức bậc cao để tránh bẫy overfit $m \le n$, và (iii) **Logistic Regression** với đường cong Sigmoid $f(z) = \frac{1}{1 + e^{-z}}$ và hàm mất mát **Binary Cross-Entropy (`log_loss = 0.7059`, Acc `0.644`, Macro-F1 `0.541`)** trên `11` tỉnh nhiễu (`0`) và `48` tỉnh vùng dày (`1`). (nguồn: scripts/notebooks/gen_final_analysis.py:727-809; scripts/notebooks/gen_study_regression.py:162-255; results/supervised_metrics.csv:4-7)

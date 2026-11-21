@@ -14,7 +14,7 @@ Toàn bộ dữ liệu được tách rõ thành hai tầng bất biến (`raw/`
 | `molisa/` | Phụ lục chuẩn nghèo đa chiều 2017–2019 (MOLISA) | `data/raw/molisa/PROVENANCE.md` |
 | `odmekong/` | Dữ liệu nghèo theo vùng & mật độ cơ sở y tế 2020 (OD Mekong) | `data/raw/odmekong/PROVENANCE.md` |
 | `worldbank/`, `undp/` | Chỉ số vĩ mô WDI & kết quả rà soát nghèo cấp tỉnh | `PROVENANCE.md` trong từng thư mục |
-| `course/` | Slide bài giảng của giảng viên (Day 1, 2, 3, 4, 6, 9 — **chỉ lưu local**, `.gitignore`, không đưa vào ZIP) | `data/raw/course/SHA256SUMS.txt` |
+| `course/` | Tài liệu bài giảng tham khảo về học máy, tiền xử lý, hồi quy và phân cụm, lưu cục bộ | `data/raw/course/SHA256SUMS.txt` |
 
 ## `data/processed/` — Dữ liệu đã chuẩn hóa & ghép bảng
 

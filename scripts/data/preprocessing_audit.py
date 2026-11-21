@@ -1,10 +1,10 @@
-"""Audit tiền xử lý theo đúng thứ tự Day 4: Cleaning → Integration → Transformation.
+"""Kiểm tra quy trình làm sạch, tích hợp và chuẩn hóa dữ liệu.
 
 Mỗi phép kiểm tra in ra một dòng Test → Decide: kết quả ĐO trên file thật và
 quyết định mà pipeline đang áp dụng, kèm bằng chứng `file:dòng`. Script chỉ
 ĐỌC panel/master/models — không sửa dữ liệu.
 
-Thứ tự bắt buộc (Day 4): trùng khóa trước, rồi thiếu, rồi nhất quán, ngoại lai
+Thứ tự kiểm tra trong bước làm sạch: trùng khóa trước, rồi thiếu, rồi nhất quán, ngoại lai
 CUỐI CÙNG; sau đó Integration (khóa nối, cardinality, rò rỉ dữ liệu) và
 Transformation (chuẩn hóa).
 
@@ -689,7 +689,7 @@ def main() -> int:
     }
     stage_intro = {
         "1. Cleaning": (
-            "Thứ tự trong Day 4: trùng khóa → thiếu → nhất quán → ngoại lai CUỐI CÙNG."
+            "Bước làm sạch kiểm tra lần lượt trùng khóa, giá trị thiếu, tính nhất quán và ngoại lai."
         ),
         "2. Integration": (
             "Khóa nối, cardinality, số dòng, xung đột tên/giá trị, rò rỉ dữ liệu."
@@ -698,7 +698,7 @@ def main() -> int:
     }
 
     lines = [
-        "# Audit tiền xử lý theo thứ tự Day 4",
+        "# Kiểm tra quy trình tiền xử lý PAPI",
         "",
         "Sinh bởi `scripts/data/preprocessing_audit.py` — CHỈ ĐỌC dữ liệu, không ghi lại "
         "panel hay master.",

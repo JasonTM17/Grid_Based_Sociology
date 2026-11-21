@@ -2,19 +2,43 @@
   {
     "milestone": "midterm",
     "status": "PASS",
-    "sha256": "24478195001d3e6552e9e9023433df3b00014a2014b740d051de98a757ef77d7",
+    "sha256": "9b1616ae229795054ada031fc741456a9f97a7fd3ae17f4734acd49b8e873081",
     "code_cells": 24,
     "isolation_guard": true,
     "python": "3.14.2",
-    "launcher_messages": true
+    "launcher_messages": true,
+    "system": "Windows",
+    "ubuntu": {
+      "milestone": "midterm",
+      "status": "PASS",
+      "sha256": "9b1616ae229795054ada031fc741456a9f97a7fd3ae17f4734acd49b8e873081",
+      "code_cells": 24,
+      "isolation_guard": true,
+      "python": "3.12.3",
+      "launcher_messages": true,
+      "system": "Linux",
+      "distribution": "Ubuntu 24.04.4 LTS"
+    }
   },
   {
     "milestone": "final",
     "status": "PASS",
-    "sha256": "1a8d54f93b323dbaad341eb07cad97d920aa2f84ba1605bcf6073a8fc2420b4e",
+    "sha256": "ccdf786e960becd45c1d481a1557321f62e412a17080d4c5fc4c8d9dbd587d2f",
     "code_cells": 27,
     "isolation_guard": true,
     "python": "3.14.2",
-    "launcher_messages": true
+    "launcher_messages": true,
+    "system": "Windows",
+    "ubuntu": {
+      "milestone": "final",
+      "status": "PASS",
+      "sha256": "ccdf786e960becd45c1d481a1557321f62e412a17080d4c5fc4c8d9dbd587d2f",
+      "code_cells": 27,
+      "isolation_guard": true,
+      "python": "3.12.3",
+      "launcher_messages": true,
+      "system": "Linux",
+      "distribution": "Ubuntu 24.04.4 LTS"
+    }
   }
 ]

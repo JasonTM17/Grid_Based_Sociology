@@ -348,7 +348,7 @@ def noise_and_trap_figure(
             1, 3, figsize=(13.0, 4.35), dpi=150, sharex=True, sharey=True, layout="constrained"
         )
 
-        # Panel 1: Khung |z| <= 3 vs nhieu STING (-1)
+
         ax = axes[0]
         _draw_grid(ax, grid_model)
         ax.add_patch(Rectangle(
@@ -372,7 +372,7 @@ def noise_and_trap_figure(
         ax.set_ylabel("6.1 Y tế công lập (z-score)")
         ax.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
 
-        # Panel 2: BẪY Xóa |z| > 3 rồi dựng lại lưới
+
         ax = axes[1]
         _draw_grid(ax, trimmed_model, grid_color="#E2CFC9", dense_fill="#F3EEEA")
         ax.add_patch(Rectangle(
@@ -401,7 +401,7 @@ def noise_and_trap_figure(
         ax.set_xlabel("4.2 Kiểm soát tham nhũng dịch vụ công (z-score)")
         ax.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
 
-        # Panel 3: BẪY Kề 8 hướng (connectivity=2)
+
         ax = axes[2]
         _draw_grid(ax, conn8_model, dense_fill="#E4EFF7")
         c8_ass = conn8_labels >= 0
@@ -541,7 +541,7 @@ def hierarchy_levels_figure(points: np.ndarray):
 
 
 def kmeans_mechanism_and_trap_figure():
-    """Minh họa 3 đồ thị Day 9 cho K-Means: dịch chuyển tâm, BẪY khởi tạo xấu và WCSS."""
+    """Minh họa K-means qua bước cập nhật tâm, ảnh hưởng của khởi tạo và WCSS."""
     from scipy.spatial.distance import cdist
     from sklearn.datasets import make_blobs
 
@@ -572,7 +572,7 @@ def kmeans_mechanism_and_trap_figure():
         fig, axes = plt.subplots(
             1, 3, figsize=(13.2, 4.35), dpi=150, sharex=True, sharey=True, layout="constrained"
         )
-        # Panel 1: Cơ chế dịch chuyển tâm K-Means
+
         for g in range(3):
             mk = labs == g
             axes[0].scatter(Xs[mk, 0], Xs[mk, 1], s=14, color=pal3[g], alpha=0.72, linewidths=0)
@@ -583,11 +583,11 @@ def kmeans_mechanism_and_trap_figure():
                         edgecolors="#111111", linewidths=1.1, label="Tâm ban đầu μ⁽⁰⁾", zorder=6)
         axes[0].scatter(cur[:, 0], cur[:, 1], marker="X", s=140, color="#111111",
                         edgecolors="white", linewidths=0.9, label="Tâm hội tụ μ*", zorder=7)
-        axes[0].set_title(f"1. K-Means dịch chuyển tâm (Day 9 tr.11–16)\nHội tụ 3 nhóm chuẩn · WCSS = {wcss_ok:.2f}", fontsize=10.2)
+        axes[0].set_title(f"1. K-means cập nhật tâm cụm\nHội tụ 3 nhóm chuẩn · WCSS = {wcss_ok:.2f}", fontsize=10.2)
         axes[0].set_ylabel("x2 (z-score)")
         axes[0].legend(loc="upper left", fontsize=7.8, framealpha=0.92)
 
-        # Panel 2: Bẫy khởi tạo xấu (TRAP!)
+
         for g in range(3):
             mk = km_trap.labels_ == g
             axes[1].scatter(Xs[mk, 0], Xs[mk, 1], s=14, color=pal3[g], alpha=0.72, linewidths=0)
@@ -599,7 +599,7 @@ def kmeans_mechanism_and_trap_figure():
         axes[1].set_xlabel("x1 (z-score)")
         axes[1].legend(loc="upper left", fontsize=7.8, framealpha=0.92)
 
-        # Panel 3: Các đoạn WCSS từ điểm tới tâm cụm
+
         for pt, lbl in zip(Xs, labs, strict=True):
             c = cur[int(lbl)]
             axes[2].plot([pt[0], c[0]], [pt[1], c[1]], "-", color=pal3[int(lbl)], alpha=0.25, lw=0.8, zorder=1)
@@ -613,12 +613,12 @@ def kmeans_mechanism_and_trap_figure():
 
         for ax in axes:
             ax.grid(alpha=0.16)
-        fig.suptitle("Day 9 Clustering: Cơ chế K-Means, Bẫy khởi tạo (TRAP!) & Độ gọn WCSS", fontsize=12.5)
+        fig.suptitle("Cập nhật tâm cụm, khởi tạo và WCSS trong K-means", fontsize=12.5)
         return fig
 
 
 def hc_linkage_and_dendrogram_figure():
-    """Minh họa 4 kiểu Linkage, ghép cụm vòng lồng nhau & Dendrogram cắt ngang (Day 9 tr.35–47)."""
+    """Minh họa bốn cách tính khoảng cách liên kết và cách cắt cây phân cụm phân cấp."""
     from scipy.cluster.hierarchy import dendrogram, linkage
     from scipy.spatial.distance import cdist
 
@@ -641,7 +641,7 @@ def hc_linkage_and_dendrogram_figure():
 
     with style_context():
         fig, (ax_lnk, ax_2d, ax_dn) = plt.subplots(1, 3, figsize=(13.4, 4.4), dpi=150, layout="constrained")
-        # Panel 1: 4 khoảng cách Linkage trên cùng mặt phẳng 2D
+
         for pa in a_pts:
             for pb in b_pts:
                 ax_lnk.plot([pa[0], pb[0]], [pa[1], pb[1]], "-", color="#94A3B8", alpha=0.22, lw=0.75, zorder=1)
@@ -657,13 +657,13 @@ def hc_linkage_and_dendrogram_figure():
         ax_lnk.scatter(b_pts[:, 0], b_pts[:, 1], s=48, color=PALETTE["green"], label="Cụm B", zorder=5)
         ax_lnk.set_xlim(0.2, 5.9)
         ax_lnk.set_ylim(0.5, 4.1)
-        ax_lnk.set_title("1. Bốn khoảng cách Linkage (Day 9 tr.35)", fontsize=10.2)
+        ax_lnk.set_title("1. Bốn cách tính khoảng cách liên kết", fontsize=10.2)
         ax_lnk.set_xlabel("x1")
         ax_lnk.set_ylabel("x2")
         ax_lnk.grid(alpha=0.16)
         ax_lnk.legend(loc="upper left", fontsize=7.3, framealpha=0.92, ncols=2)
 
-        # Panel 2: Vòng bao ghép dần 6 điểm từ dưới lên
+
         ax_2d.scatter(pts6[:, 0], pts6[:, 1], s=65, color="#1E3D5E", zorder=5)
         for idx_p, (px, py) in enumerate(pts6):
             ax_2d.text(px + 0.12, py + 0.08, f"P{idx_p}", fontsize=9, fontweight="bold", color="#0F2B46")
@@ -688,7 +688,7 @@ def hc_linkage_and_dendrogram_figure():
         ax_2d.grid(alpha=0.16)
         ax_2d.legend(loc="lower right", fontsize=7.5, framealpha=0.94)
 
-        # Panel 3: Dendrogram tương ứng & cắt ngang
+
         heights6 = z6[:, 2]
         cut_i = int(np.argmax(np.diff(heights6)))
         thr6 = float((heights6[cut_i] + heights6[cut_i + 1]) / 2)
@@ -700,5 +700,5 @@ def hc_linkage_and_dendrogram_figure():
         ax_dn.set_ylabel("Khoảng cách ghép")
         ax_dn.legend(loc="upper left", fontsize=7.8, framealpha=0.92)
 
-        fig.suptitle("Day 9 Hierarchical Clustering: Bốn Linkage & Cắt Dendrogram trên 2D", fontsize=12.5)
+        fig.suptitle("Cách liên kết, ghép cụm và cắt cây phân cụm phân cấp", fontsize=12.5)
         return fig
