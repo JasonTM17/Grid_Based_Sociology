@@ -16,7 +16,7 @@ hành chính công cấp tỉnh PAPI giai đoạn 2011–2024 (882 quan sát t�
 1. CẤU TRÚC THƯ MỤC GÓI NỘP
 --------------------------------------------------------------------------------
 Nhom15_GiuaKy_STING_PAPI/
-├── Nhom15_GiuaKy_STING_PAPI.pptx       Slide báo cáo giữa kỳ (10 trang)
+├── Nhom15_GiuaKy_STING_PAPI.pptx       Slide giữa kỳ (10 trang đầu kể cả bìa và 1 trang cảm ơn)
 ├── Nhom15_GiuaKy_STING_PAPI.ipynb      Notebook phân cụm STING & đối chiếu PAPI
 ├── Nhom15_TienXuLy_PAPI.ipynb  Notebook tiền xử lý PAPI 6 bước
 ├── HUONG_DAN.txt             Hướng dẫn cấu trúc và cách chạy

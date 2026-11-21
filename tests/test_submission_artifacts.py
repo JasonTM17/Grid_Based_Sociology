@@ -31,6 +31,8 @@ SUBMISSION_NB = ROOT / "notebooks" / "Nhom15_GiuaKy_STING_PAPI.ipynb"
 PROVENANCE = ROOT / "data" / "raw" / "papi" / "PROVENANCE.md"
 PAPI_PDF = ROOT / "data" / "raw" / "papi" / "PAPI_2024_REPORT_VIE_final.pdf"
 EXPECTED_ARI_STR = "0.950"
+MIDTERM_SLIDE_COUNT = 11
+THANK_YOU = "Cảm ơn thầy và các bạn đã lắng nghe"
 
 _IGNORE_PATTERNS = (
     re.compile(r"""filterwarnings\s*\(\s*['"]ignore['"]""", re.IGNORECASE),
@@ -89,13 +91,17 @@ def test_report_uses_the_user_final_template_geometry():
 
 
 def check_pptx_submission(prs: Presentation) -> list[str]:
-    """Trả về danh sách lỗi (rỗng = hợp lệ): 1–10 slide, mọi slide có ghi chú."""
+    """Kiểm tra 10 slide đầu, slide cảm ơn và ghi chú thuyết trình."""
     violations: list[str] = []
     count = len(prs.slides)
-    if count < 1:
-        violations.append("submission.pptx không có slide nào")
-    if count > 10:
-        violations.append(f"submission.pptx có {count} slide (> 10)")
+    if count != MIDTERM_SLIDE_COUNT:
+        violations.append(f"submission.pptx có {count} slide, cần đúng {MIDTERM_SLIDE_COUNT}")
+    else:
+        closing_text = [
+            shape.text.strip() for shape in prs.slides[-1].shapes if shape.has_text_frame and shape.text.strip()
+        ]
+        if closing_text != [THANK_YOU]:
+            violations.append("slide cuối chỉ dành cho lời cảm ơn")
     for index, slide in enumerate(prs.slides, start=1):
         notes = ""
         if slide.has_notes_slide:
@@ -237,6 +243,9 @@ def test_submission_pptx_exists_and_notes():
     assert "nhóm báo cáo trung thực" not in titles_and_text.lower()
     assert "PHÂN CỤM DỰA TRÊN LƯỚI STING" in titles_and_text
     assert "APPLICATION OF STING GRID-BASED CLUSTERING" in titles_and_text
+    assert all(call in titles_and_text for call in (
+        "run_preprocessing_pipeline(...)", "fit(X)", "cluster(level, connectivity=1)", "predict(X_moi)",
+    ))
     assert "Vì sao STING có 3 cụm, K-means dùng k = 2?" in titles_and_text
     assert "56 ô dày" in titles_and_text
     assert "Z-score thay đổi điều gì?" in titles_and_text
@@ -246,12 +255,38 @@ def test_submission_pptx_exists_and_notes():
     assert "8 điểm đổi trạng thái nhiễu" in titles_and_text
     assert "482 và 195 điểm" in titles_and_text
     assert "48/61 tỉnh nằm ở 21 ô dày thuộc 1 cụm trên lưới 2011–2023." in titles_and_text
+    assert "7 tỉnh sang ô thưa, 5 tỉnh từ ô thưa vào cụm." in titles_and_text
     assert "dự báo" not in titles_and_text.lower()
     assert "869 quan sát tỉnh–năm" in titles_and_text
     assert "677" in titles_and_text and "19.7%" in titles_and_text
     assert "huấn luyện" not in titles_and_text
     table = next(shape.table for shape in presentation.slides[7].shapes if shape.has_table)
     assert [table.cell(i, 3).text for i in range(1, 5)] == ["0.3802", "0.4605", "0.3499", "0.2740"]
+    trace = next(shape.table for shape in presentation.slides[9].shapes if shape.has_table)
+    assert [trace.cell(i, 2).text for i in (1, 2)] == ["(13, 9)", "(12, 10)"]
+    assert [trace.cell(i, 3).text for i in (1, 2)] == ["2", "12"]
+
+
+def test_midterm_notebook_root_skips_incomplete_loose_folder(submission_notebook, tmp_path, monkeypatch):
+    root = tmp_path / "Đồ án PAPI"
+    loose = root / "submissions/01-giua-ky"
+    for relative in (
+        "src/sting.py", "src/preprocessing.py", "scripts/common/midterm_clustering.py",
+        "data/processed/papi_panel_63_2011_2024.csv", "submissions/01-giua-ky/src/sting.py",
+    ):
+        marker = root / relative
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.touch()
+
+    monkeypatch.chdir(loose)
+    for env_key in ("STING_REPO_ROOT", "SUBMISSION_DEMO_NB_PATH", "JPY_STARTUP_PATH"):
+        monkeypatch.delenv(env_key, raising=False)
+    setup = next(cell for cell in submission_notebook["cells"] if cell["cell_type"] == "code")
+    finder = _cell_source_text(setup).split("ROOT = _find_project_root()", 1)[0]
+    namespace = {}
+    exec(finder, namespace)
+
+    assert namespace["_find_project_root"]() == root
 
 
 def test_submission_notebook_cells(submission_notebook: dict):
@@ -342,6 +377,9 @@ def test_midterm_compares_shared_points_and_check_scaling_effect(submission_note
     assert "Lạng Sơn 2024: cụm 2 trên cùng lưới" in output
     assert "Ô (13, 9) có 2 điểm tham chiếu." in output
     assert "Ô (12, 10) có 12 điểm tham chiếu." in output
+    assert "7 tỉnh sang ô thưa, 5 tỉnh từ ô thưa vào cụm." in output
+    assert "Truy vấn từ trên xuống tổng hợp 322 điểm trong các ô nằm trọn vùng" in output
+    assert "Đếm trực tiếp từng điểm trong vùng: 348 điểm." in output
 
 
 def test_midterm_contains_the_comparison_and_observed_figures(submission_notebook):
@@ -382,7 +420,7 @@ def test_midterm_slide_uses_current_panel_for_2024_coverage(tmp_path):
         [sys.executable, str(slide_builder)], cwd=tmp_path, capture_output=True, timeout=120,
     )
     assert completed.returncode == 0, completed.stderr.decode(errors="replace")
-    slide = Presentation(str(tmp_path / "slides/submission.pptx")).slides[-1]
+    slide = Presentation(str(tmp_path / "slides/submission.pptx")).slides[9]
     text = "\n".join(shape.text for shape in slide.shapes if shape.has_text_frame)
     assert "49/61 tỉnh nằm ở 21 ô dày thuộc 1 cụm" in text
 
@@ -392,14 +430,21 @@ def test_papi_pdf_provenance_chain():
     assert not violations, "\n".join(violations)
 
 
-def test_gate_detects_eleventh_slide_in_memory():
-    """Đột biến RAM: thêm slide thứ 11 phải làm gate đỏ (không ghi file)."""
+def test_gate_detects_twelfth_slide_in_memory():
+    """Đột biến RAM: thêm slide thứ 12 phải làm gate đỏ (không ghi file)."""
     presentation = Presentation(str(SUBMISSION_PPTX))
     layout_index = 6 if len(presentation.slide_layouts) > 6 else 0
     presentation.slides.add_slide(presentation.slide_layouts[layout_index])
-    assert len(presentation.slides) == 11
+    assert len(presentation.slides) == 12
     violations = check_pptx_submission(presentation)
-    assert any("> 10" in message for message in violations)
+    assert any("cần đúng 11" in message for message in violations)
+
+
+def test_gate_rejects_content_on_thank_you_slide():
+    presentation = Presentation(str(SUBMISSION_PPTX))
+    text_box = next(shape for shape in presentation.slides[-1].shapes if shape.has_text_frame and shape.text)
+    text_box.text += "\nChi tiết kết quả"
+    assert "slide cuối chỉ dành cho lời cảm ơn" in check_pptx_submission(presentation)
 
 
 def test_gate_detects_error_output_in_memory(submission_notebook: dict):

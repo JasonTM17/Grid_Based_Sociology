@@ -113,7 +113,7 @@ apply_style()
 cfg = json.loads((root / "models" / "predict_config.json").read_text(encoding="utf-8"))
 features = list(cfg["features"])
 raw, diagnostics = load_raw_papi(root / "data" / "raw" / "papi")
-print(f"Đã nạp src/preprocessing.py từ: {root.name}")
+print("Đã nạp src/preprocessing.py và cấu hình tiền xử lý PAPI.")
 print(f"Đã đọc {len(OLD_FILES) + len(NEW_FILES)} workbook: {len(raw)} dòng × {raw.shape[1]} cột thô.")
 display(diagnostics.set_index("year").T)"""))
 
@@ -260,7 +260,12 @@ display(panel[["province_code", "year", "province_vi", *features]].head())"""))
         md(nbf.v4.new_markdown_cell("""## 4. Giai đoạn 3 — Chọn đặc trưng, Chuẩn hóa & Thử nghiệm tiền xử lý
 
 ### 4.1 Sàng lọc đặc trưng và chuẩn hóa z-score (`StandardScaler` fit chỉ trên 2011–2023)
-Từ `37` cột điểm số PAPI, loại `8` chỉ số tổng hợp `d1–d8` (thang `1–10`, trong đó `d7, d8` chỉ có từ `2018`) và loại các tiểu chiều có cờ nhảy thang `|Δmean| > 0.25` (`23/37` cột theo `scale_audit`) hoặc thiếu cấu trúc, còn lại **8 chỉ tiêu sạch** trong `ALLOWLIST_FEATURES`. Bước này kiểm tra phương sai (`> 0.01`, không hằng số) và tương quan Pearson từng cặp trên `2011–2023` trước khi chọn cặp `(sd_4_2, sd_6_1)` cho STING; cuối cùng chỉ fit `StandardScaler` trên tập `2011–2023` rồi áp dụng cho `2024`."""))
+Nhóm dùng danh sách 8 tiểu chỉ tiêu đã rà soát thang đo trong `ALLOWLIST_FEATURES`.
+`scale_audit` đánh cờ 23/37 cột có bước nhảy trung bình năm đáng kiểm tra.
+Phương sai và tương quan Pearson trên 2011–2023 dùng để mô tả các biến trong
+danh sách. Cặp `(sd_4_2, sd_6_1)` lấy từ cấu hình được chọn bằng khảo sát
+đến năm 2020 và đối chiếu độ phủ năm 2021–2022. `StandardScaler` fit trên mẫu
+2011–2023 rồi dùng lại bộ tham số đó cho năm 2024."""))
     else:
         md(nbf.v4.new_markdown_cell("""## 4. Giai đoạn 3 — Chọn đặc trưng, Chuẩn hóa & Thử nghiệm tiền xử lý
 
@@ -288,9 +293,9 @@ np.testing.assert_allclose(train_scaled.std(ddof=0), 1.0, atol=1e-12)
 scaler_json_path = root / "models" / "sting_predict_scaler.json"
 if scaler_json_path.is_file():
     saved_sc = json.loads(scaler_json_path.read_text(encoding="utf-8"))
-    np.testing.assert_allclose(scaler.mean_, saved_sc["mean"], atol=1e-12)
-    np.testing.assert_allclose(scaler.scale_, saved_sc["scale"], atol=1e-12)
-    print("Xác nhận tham số StandardScaler khớp tuyệt đối với models/sting_predict_scaler.json.")
+    np.testing.assert_allclose(scaler.mean_, saved_sc["mean"], rtol=0, atol=1e-12)
+    np.testing.assert_allclose(scaler.scale_, saved_sc["scale"], rtol=0, atol=1e-12)
+    print("Tham số StandardScaler khớp models/sting_predict_scaler.json với dung sai tuyệt đối 1e-12.")
 
 extreme = train_scaled.abs().gt(3.0).any(axis=1)
 assert int(extreme.sum()) == int(ctx["train_outlier_mask"].sum())
@@ -346,7 +351,10 @@ display(
 
 Kiểm chứng định lượng bằng **chính lưới STING (`n_levels=3, factor=4, min_count=5, level=2`)** qua `run_sting_preprocessing_experiments` để giải thích vì sao chọn `dropna` + giữ `|z| > 3` + `StandardScaler`:
 1. **Thử nghiệm Cleaning (giữ vs xóa `|z| > 3`, và `dropna` vs điền `SimpleImputer(median)`)**: xóa 7 điểm `|z| > 3` làm co biên `[min, max]` của lưới 16×16 và khiến tỷ lệ nhiễu STING **tăng `19.6% → 24.6%`**; còn điền median đẩy nhân tạo 11 dòng thiếu về trung vị `sd_4_2` (làm điểm nhiễu tăng `158 → 160`).
-2. **Thử nghiệm Transformation & Rời rạc hóa (`Raw` vs `StandardScaler` vs `MinMaxScaler` vs `QuantileTransformer`)**: lưới STING mức 2 chia đều không gian thành `16×16` ô — đây chính là bước **rời rạc hóa theo độ rộng bằng nhau (Equal-Width Discretization)** gắn vào thuật toán. Vì vậy các phép biến đổi affine (`StandardScaler`, `MinMaxScaler`) bảo toàn **808/808** chỉ số ô STING, còn biến đổi phi tuyến (`QuantileTransformer`) làm thay đổi mật độ ô và tăng số cụm giả tạo (`3 → 24`)."""))
+2. **Thử nghiệm biến đổi và rời rạc hóa.** Lưới STING mức 2 chia đều mỗi
+   trục thành 16 đoạn. `StandardScaler` và `MinMaxScaler` giữ nguyên **808/808**
+   chỉ số ô khi dựng lại lưới theo biên mới. Với `QuantileTransformer`, mật độ
+   ô thay đổi và số cụm tăng từ 3 lên 24 trong phép thử này."""))
     else:
         md(nbf.v4.new_markdown_cell("""### 4.2 Giải thích định lượng các thí nghiệm Cleaning & Transformation
 - Lưới STING mức 2 (`16 × 16` ô đều) bản chất là **rời rạc hóa theo độ rộng bằng nhau (Equal-Width Discretization)**.
@@ -402,7 +410,8 @@ with style_context():
     if not study:
         md(nbf.v4.new_markdown_cell("""## 5. Đóng gói Pipeline (`PREPROCESSING_PIPELINE`) & Kết luận
 
-Chạy trực tiếp hàm `run_preprocessing_pipeline(root)` từ `src/preprocessing.py` (chuỗi 6 hàm thuần trong `PREPROCESSING_PIPELINE`) để tái lập nhất quán từ 14 workbook Excel gốc và đối chiếu khớp tuyệt đối với kết quả từng bước ở trên."""))
+Chạy `run_preprocessing_pipeline(root)` để tái lập từ 14 bảng tính gốc.
+Đối chiếu số điểm được gắn cờ, hai ma trận đã chuẩn hóa và giá trị trong panel."""))
     else:
         md(nbf.v4.new_markdown_cell("""## 5. Đóng gói Pipeline (`List of functions`) & Đối chiếu tái lập
 
@@ -416,11 +425,11 @@ state = run_preprocessing_pipeline(root, features=features, cutoff_year=DEFAULT_
 
 assert int(state["panel_outlier_mask"].sum().sum()) == int(ctx["panel_outlier_mask"].sum().sum())
 assert int(state["train_outlier_mask"].sum()) == int(extreme.sum())
-np.testing.assert_allclose(state["X_train"], train_scaled.to_numpy(), atol=1e-12)
-np.testing.assert_allclose(state["X_holdout"], holdout_scaled.to_numpy(), atol=1e-12)
+np.testing.assert_allclose(state["X_train"], train_scaled.to_numpy(), rtol=0, atol=1e-12)
+np.testing.assert_allclose(state["X_holdout"], holdout_scaled.to_numpy(), rtol=0, atol=1e-12)
 pd.testing.assert_frame_equal(state["panel"], reference_sorted, check_dtype=False, check_exact=False, rtol=1e-12, atol=1e-12)
 
-print("Thực thi pipeline hoàn tất — đầu ra khớp 100% với phân tích từng bước và CSV đã khóa:")
+print("Pipeline tái lập kết quả từng bước và các giá trị trong CSV trong dung sai 1e-12.")
 display(pd.DataFrame(state["log"], columns=["Bước trong pipeline", "Kết quả thực thi"]))"""))
 
     if not study:
@@ -429,9 +438,14 @@ display(pd.DataFrame(state["log"], columns=["Bước trong pipeline", "Kết qu�
 1. **Đọc & hợp nhất định dạng nguồn**: đọc 14 workbook PAPI (`2011–2019` hàng là tỉnh và `2020–2024` ma trận chuyển vị), thu `882` dòng thô.
 2. **Khử trùng lặp đầu tiên**: kiểm tra trùng toàn dòng (`0`) và trùng khóa `(province_code, year)` (`0`) sau khi quy đổi mã tỉnh qua `province_crosswalk_63.csv`.
 3. **Làm sạch giá trị thiếu theo ngữ cảnh**: chuyển `109` ô điểm `0.0` (quy ước tỉnh không xếp hạng) về `NaN`; phân tách `4.284` ô thiếu cấu trúc ngoài giai đoạn khảo sát và `365` ô thiếu trong giai đoạn (`13` dòng thiếu `sd_4_2`/`sd_6_1`); **không nội suy**, chỉ `dropna` khi dựng ma trận đặc trưng.
-4. **Kiểm tra nhất quán & audit thang đo**: `0` sai khác mã tỉnh, `0` ô vượt miền giá trị metadata (`32.634` ô); dùng `scale_audit` sàng lọc 23/37 cột biến động > 0,25 để chỉ giữ 8 chỉ tiêu thang ổn định (`[0,25; 2,5]`) và cặp `(sd_4_2, sd_6_1)`.
+4. **Kiểm tra nhất quán và thang đo.** Có 0 sai khác mã tỉnh và 0 điểm vượt
+   miền theo metadata. Cờ 23/37 cột từ `scale_audit` hỗ trợ đối chiếu workbook.
+   Phân cụm dùng cặp tiểu chỉ tiêu đã chốt trong cấu hình.
 5. **Đánh dấu ngoại lai cuối cùng**: gắn cờ `7/808` dòng huấn luyện có `|z| > 3` nhưng **giữ nguyên** vì đều là điểm khảo sát hợp lệ và thực nghiệm chứng minh xóa cực trị làm co biên lưới và tăng tỷ lệ nhiễu STING từ `19,6%` lên `24,6%`.
-6. **Tích hợp & chuẩn hóa không rò rỉ**: nối tên tỉnh chuẩn `many_to_one`, khớp byte-level với bảng `882 × 41` (`39` cột số ≥ `500 × 10`), fit `StandardScaler` (`ddof=0`) **chỉ trên 2011–2023 (`808` dòng)** rồi transform cho **2024 (`61` dòng)** qua `src/preprocessing.py` (`PREPROCESSING_PIPELINE`)."""))
+6. **Tích hợp và chuẩn hóa.** Nối tên tỉnh chuẩn theo quan hệ `many_to_one`.
+   Bảng 882 × 41 khớp về giá trị với bảng đối chiếu khi dùng `rtol=atol=1e-12`
+   cho giá trị số. Fit `StandardScaler` trên 808 dòng giai đoạn 2011–2023,
+   sau đó transform 61 dòng năm 2024."""))
     else:
         md(nbf.v4.new_markdown_cell("""## Kết luận (Tóm tắt quyết định tiền xử lý)
 
@@ -453,11 +467,11 @@ def _execute_and_check(path: Path) -> int:
         "STING_REPO_ROOT": str(ROOT),
     }
     proc = subprocess.run(
-        [sys.executable, "-m", "nbconvert", "--to", "notebook", "--execute", "--inplace", str(path)],
+        [sys.executable, "-X", "utf8", "-m", "nbconvert", "--to", "notebook", "--execute", "--inplace", str(path)],
         cwd=str(ROOT),
         env=env,
         capture_output=True,
-        text=True,
+        encoding="utf-8",
         timeout=600,
     )
     if proc.returncode != 0:
@@ -465,7 +479,9 @@ def _execute_and_check(path: Path) -> int:
         print("STDERR:\n" + proc.stderr[-4000:])
         return 1
 
-    check = json.loads(path.read_text(encoding="utf-8"))
+    executed = path.read_text(encoding="utf-8")
+    path.write_text(executed, encoding="utf-8", newline="\n")
+    check = json.loads(executed)
     code_cells = [c for c in check["cells"] if c["cell_type"] == "code"]
     n_code = len(code_cells)
     n_err = sum(

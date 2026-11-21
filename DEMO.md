@@ -8,7 +8,7 @@ _Mục tiêu: bạn mở repo ra và demo được ngay — không cần mạng,
 python scripts/deliverables/demo_smoke.py
 ```
 
-Phải in ra: **KET LUAN: SAN SANG DEMO (N/N muc dat)** với N = số mục kiểm tra (gom cả `submission.pptx` ≤10 slide và `Nhom15_GiuaKy_STING_PAPI.ipynb` 0 lỗi). Nếu có FAIL → sửa xong chạy lại.
+Lệnh in **KET LUAN: SAN SANG DEMO (N/N muc dat)** khi mọi mục đạt, gồm 11 slide giữa kỳ và notebook có kết quả chạy đầy đủ. Sửa các mục FAIL rồi kiểm tra lại.
 
 ## 1. Lắp ráp máy demo
 
@@ -33,12 +33,30 @@ Mở [slide giữa kỳ](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx) v
 [notebook giữa kỳ](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.ipynb).
 Notebook đã lưu bảng, số liệu và biểu đồ để trình chiếu.
 
-Môi trường đã kiểm chứng là Python 3.14.2 trên Windows 11. Cách tạo lại file
-nằm trong [README](README.md#tái-tạo-file-nộp-và-zip).
+### Chạy bộ giữa kỳ trên Windows, Linux và macOS
+
+Giải nén toàn bộ ZIP giữa kỳ. Mở terminal trong thư mục có hai notebook,
+`requirements.txt`, `src/` và `data/`. Tạo môi trường bằng
+`python -m venv .venv` với Python 3.14. Dùng trình thông dịch trong môi trường
+này để cài thư viện và chạy notebook.
+
+```sh
+python -m pip install -r requirements.txt
+python -m nbconvert --to notebook --execute Nhom15_TienXuLy_PAPI.ipynb --output TienXuLy_chay_lai
+python -m nbconvert --to notebook --execute Nhom15_GiuaKy_STING_PAPI.ipynb --output GiuaKy_chay_lai
+```
+
+Sau khi kích hoạt môi trường, chạy các lệnh trên với `python`. Có thể dùng
+đường dẫn trực tiếp `./.venv/Scripts/python.exe` trong PowerShell hoặc
+`./.venv/bin/python` trên Linux và macOS. Trong Jupyter hoặc VS Code, chọn
+kernel của môi trường vừa cài rồi dùng **Restart Kernel → Run All**.
+Từ thư mục repo, có thể kiểm tra riêng ZIP bằng
+`python scripts/deliverables/build_submission_packages.py --verify --milestone midterm`.
+[Các lượt kiểm tra CI](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml)
 
 ## 2. Kịch bản 15 phút
 
-Xem [kịch bản theo 10 slide](reports/on-tap/presentation_script.md). Slide 5
+Xem [kịch bản theo 11 slide](reports/on-tap/presentation_script.md). Slide 5
 dùng bảng đếm 3 × 3. Slide 7–9 giải thích z-score, nguồn gốc số cụm và cách
 chạy kiểm tra ngưỡng trên 869 quan sát PAPI 2011–2024.
 

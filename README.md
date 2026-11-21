@@ -29,7 +29,7 @@ Năm notebook có giải thích nằm ngay trong [`study/`](study/README.md): [G
 
 Tài liệu hỏi đáp, kịch bản nói và nhật ký luyện tập nằm trong `reports/on-tap/`.
 Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đó mở
-[Kịch bản 10 slide](reports/on-tap/presentation_script.md).
+[Kịch bản giữa kỳ 11 slide](reports/on-tap/presentation_script.md).
 [Hướng dẫn demo](DEMO.md) chỉ cách mở các file khi trình bày.
 
 ## Cấu trúc dự án
@@ -48,7 +48,7 @@ Grid_Based_Sociology/
 │   └── common/                #   Hàm dùng chung (fig_style, midterm_clustering, ...)
 ├── notebooks/                 # Notebook chính (chi tiết trong notebooks/README.md)
 │   └── exploratory/           #   Notebook kiểm chứng giả lập & khảo sát tham số Phase 1–4
-├── slides/                    # Slide PowerPoint (submission.pptx 10 trang, final.pptx 16 trang)
+├── slides/                    # Slide PowerPoint (submission.pptx 11 trang, final.pptx 16 trang)
 ├── reports/                   # Báo cáo cuối kỳ và hồ sơ kỹ thuật (reports/README.md)
 │   └── on-tap/                #   Hỏi đáp và kịch bản thuyết trình
 ├── submissions/               # Sản phẩm đóng gói sẵn theo từng mốc nộp
@@ -160,7 +160,8 @@ bản gốc, đồng bộ cả bản rời trong `submissions/01-giua-ky/` hoặ
 `submissions/02-cuoi-ky/` theo bảng file nộp ở đầu trang.
 
 Slide 10 và mục 4.8 của notebook giữa kỳ cùng tính kết quả gán năm 2024
-từ panel PAPI. Khi cập nhật panel, chạy `python scripts/analysis/predict_demo.py`
+từ panel PAPI và trình bày ví dụ Lạng Sơn. Slide 11 dành để cảm ơn.
+Khi cập nhật panel, chạy `python scripts/analysis/predict_demo.py`
 để dựng lại hình phân bổ và bảng chi tiết trước khi tạo notebook. Trình đóng
 gói kiểm tra riêng PDF báo cáo PAPI và ZIP Mendeley. Tệp nào có sẵn sẽ được
 đưa vào gói và liệt kê trong hướng dẫn.

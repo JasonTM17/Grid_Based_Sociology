@@ -33,7 +33,7 @@ Các **hạng mục** (tên category) đọc được từ text trích PDF bài 
 
 Trang 10 của tài liệu `data/raw/course/bai-giang-nhap-mon-hoc-may.pdf` ghi điểm tiền xử lý **1.5**, học model **1**, đánh giá & thảo luận **2**, quy ước code + cảnh báo **1**, báo cáo **2.5** (nhóm, tổng 8); thi vấn đáp **2** (cá nhân). Chia theo Group/Individual nên phần Q&A mỗi thành viên phải tự trả lời được.
 
-Bộ giữa kỳ gồm 10 slide là lựa chọn trình bày của nhóm để phù hợp thời lượng; PDF được cung cấp không ghi giới hạn số slide.
+Bộ giữa kỳ gồm 10 slide đầu kể cả bìa và một slide cảm ơn riêng theo hướng dẫn về số trang được nhóm xác nhận.
 
 ### Bài thực hành tiền xử lý dữ liệu
 
@@ -63,13 +63,13 @@ _File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản 
 
 | Mốc | Yêu cầu đề | Sản phẩm dự kiến | Trạng thái |
 |---|---|---|---|
-| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (PPTX) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (10 slide) + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch) | Sẵn sàng kỹ thuật (smoke + test) — rehearsal: con người |
+| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (PPTX) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (11 slide) + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch) | Sẵn sàng kỹ thuật (smoke + test) — rehearsal: con người |
 | Cuối kỳ | Thi vấn đáp trực tiếp, nộp DOCX + notebook, PPTX tùy chọn, dataset ≥500×10 | Báo cáo Word, notebook Jupyter và slide vấn đáp trong [gói cuối kỳ](../submissions/Nhom15_CuoiKy_STING_PAPI.zip) | Có bản rời và gói tự chứa. [Kết quả chạy lại](../submissions/verification.json) |
 
 ## Thông tin đã chốt và mục cần xác nhận
 
 - [x] **Định dạng `.docx`** đã áp dụng theo file mẫu người dùng chọn (`reports/report_format_notes.md`). Đã khảo sát dàn ý ba chương trong tài liệu mẫu GV.
-- [x] **Template slide:** nhóm tự thiết kế và chọn 10 slide (`slides/submission.pptx`); phụ lục cuối kỳ: `slides/final.pptx` (16 slide).
+- [x] **Số slide.** 11 slide giữa kỳ (`slides/submission.pptx`), tính cả bìa và trang cảm ơn. Slide vấn đáp cuối kỳ nằm ở `slides/final.pptx`.
 - [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051).
 - [x] **Tệp giữa kỳ** — slide PowerPoint và notebook Jupyter theo yêu cầu giảng viên.
 - [x] **Trọng số cuối kỳ** — bài giảng nhập môn học máy, trang 10 ghi 8 điểm nhóm và 2 điểm vấn đáp cá nhân.

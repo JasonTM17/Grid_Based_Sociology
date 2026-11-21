@@ -32,9 +32,11 @@ md(nbf.v4.new_markdown_cell("""# ỨNG DỤNG THUẬT TOÁN PHÂN CỤM DỰA TR
 
 Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051) · GVHD: ThS. Lê Minh Tân
 
-Notebook trình bày cơ chế gom cụm của biến thể STING do nhóm cài đặt (`src/sting.py`),
-kiểm chứng bằng dữ liệu giả lập, thực thi trực tiếp quy trình tiền xử lý 6 bước từ
-14 bảng tính Excel PAPI gốc (`src/preprocessing.py`) và phân tích trên hai chỉ tiêu PAPI.
+Notebook minh họa cách `STING.fit` xây lưới và `STING.cluster` nối các ô dày
+bằng ví dụ 15 điểm. Phần thực nghiệm kiểm chứng cài đặt trên dữ liệu giả lập,
+sau đó tìm vùng tập trung của hai chỉ tiêu PAPI. Cuối cùng, notebook dùng
+`STING.predict` để theo dõi điểm PAPI đã đo của từng tỉnh trên cùng một lưới.
+Tiền xử lý chạy từ 14 bảng tính gốc qua `src/preprocessing.py`.
 
 **Chạy lại notebook.** Giải nén toàn bộ gói và mở notebook trực tiếp tại thư mục
 gốc của gói (cùng cấp với `src/`, `data/`, `scripts/`, `models/`, `results/`).
@@ -47,7 +49,12 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-_STING_MARKER = Path("src") / "sting.py"
+_PROJECT_MARKERS = (
+    Path("src/sting.py"),
+    Path("src/preprocessing.py"),
+    Path("scripts/common/midterm_clustering.py"),
+    Path("data/processed/papi_panel_63_2011_2024.csv"),
+)
 
 
 def _find_project_root() -> Path:
@@ -80,15 +87,15 @@ def _find_project_root() -> Path:
                 break
             seen.add(cur)
             for candidate in (cur / "tai_lieu_kem", cur):
-                if (candidate / _STING_MARKER).is_file():
+                if all((candidate / marker).is_file() for marker in _PROJECT_MARKERS):
                     return candidate
             parent = cur.parent
             if parent == cur:
                 break
             cur = parent
     raise FileNotFoundError(
-        "Không tìm thấy mã nguồn STING. Vui lòng giải nén toàn bộ gói "
-        "và giữ thư mục tai_lieu_kem cùng cấp với notebook."
+        "Không tìm thấy thư mục chứa mã và dữ liệu PAPI. "
+        "Hãy giải nén toàn bộ ZIP và mở notebook ở thư mục gốc của gói."
     )
 
 
@@ -136,10 +143,13 @@ Mỗi ô lưu số điểm và các thống kê tóm tắt.
 
 Nhóm sử dụng **biến thể STING rút gọn** để tạo cụm tại một mức lưới.
 
-1. Gán các điểm vào lưới và đếm số điểm trong từng ô.
-2. Đánh dấu ô có số điểm đạt ngưỡng là ô dày.
-3. Gom mỗi vùng gồm các ô dày liên thông qua cạnh thành một cụm. Các điểm
-   trong ô thưa nhận nhãn nhiễu −1.
+1. `fit(X)` chia mỗi trục thành `factor ** level` đoạn ở từng mức, rồi lưu
+   số điểm, trung bình, độ lệch chuẩn và cực trị cho các ô có dữ liệu.
+2. `cluster(level, connectivity=1)` giữ các ô đủ `min_count` điểm và dùng
+   duyệt sâu để gán cùng nhãn cho các ô dày nối được qua cạnh.
+3. `predict(X_moi)` kiểm tra biên rồi tra nhãn ô trên lưới đã dựng. Điểm ở
+   ô thưa hoặc ngoài biên nhận nhãn −1. Tỉnh thiếu chỉ tiêu được giữ nhãn trống
+   ở bước lập bảng gán PAPI.
 
 STING gốc còn lưu loại phân phối trong các ô và duyệt lưới từ trên xuống
 dựa trên độ tin cậy."""))
@@ -401,7 +411,9 @@ md(nbf.v4.new_markdown_cell("""### 4.3 STING tìm được ba cụm như thế n
 
 Bảng bên dưới dùng tọa độ z-score của Lạng Sơn năm 2024 ở mục 4.2. Đọc
 từng hàng để thấy phép tính chỉ số theo từng trục, rồi kiểm tra số quan
-sát trong ô và các ô dày kề cạnh để hiểu nhãn cụm.
+sát trong ô và các ô dày kề cạnh để hiểu nhãn cụm. **Mục này dựng lưới từ
+869 quan sát, gồm năm 2024**, nên ô (12, 10) có 17 điểm. Mục 4.8 dựng
+lưới từ 808 quan sát đến 2023, nơi ô (12, 10) có 12 điểm tham chiếu.
 
 **Vì sao dùng ngưỡng 5?** Cặp chỉ tiêu, độ mịn và ngưỡng được chọn cùng
 nhau trong khảo sát cấu hình trên dữ liệu đến 2020, đối chiếu độ phủ
@@ -559,7 +571,9 @@ lưới, tỉa nhánh rời vùng hoặc có xác suất ước lượng thấp.
 gộp thống kê của các ô nằm trọn vùng tại mức 16 × 16.
 
 Code đối chiếu số điểm và trung bình với `query_rect`, cách quét trực
-tiếp các ô ở mức 16 × 16 trên cùng lưới."""))
+tiếp các ô ở mức 16 × 16 trên cùng lưới. Lượt đếm theo từng điểm bên dưới
+tính cả những điểm trong vùng nằm ở các ô cắt biên. Truy vấn vùng dùng để
+gộp thống kê, còn kết quả phân cụm đến từ `cluster` ở mục 4.3."""))
 
 cd(nbf.v4.new_code_cell("""q_rect_box = [(0.0, 2.5), (0.0, 2.5)]
 query_level = grid_model.cluster_level_
@@ -568,10 +582,15 @@ res_td = grid_model.query_top_down(q_rect_box, confidence=0.95, level=query_leve
 assert res_td["count"] == res_full["count"]
 np.testing.assert_allclose(res_td["mean"], res_full["mean"])
 total_occ = sum(len(grid_model.cells_[lvl]) for lvl in range(grid_model.n_levels))
+q_min, q_max = np.asarray(q_rect_box).T
+in_rect = ((Xz >= q_min) & (Xz <= q_max)).all(axis=1)
+exact_count = int(in_rect.sum())
+assert res_full["count"] <= exact_count
 print(
-    f"Truy vấn từ trên xuống tổng hợp {res_td['count']} điểm "
+    f"Truy vấn từ trên xuống tổng hợp {res_td['count']} điểm trong các ô nằm trọn vùng "
     f"(z-score trung bình = {res_td['mean'].round(3)})."
 )
+print(f"Đếm trực tiếp từng điểm trong vùng: {exact_count} điểm.")
 print(
     f"Duyệt {res_td['visited_cells']}/{total_occ} ô có dữ liệu trên ba mức "
     f"và tỉa {res_td['pruned_cells']} nhánh hoặc ô biên."
@@ -835,7 +854,9 @@ chứ nhãn −1 không đồng nghĩa tỉnh quản trị yếu kém. Giữ cá
 tính độ phủ trên đủ 61 tỉnh và tìm các trường hợp cần đối chiếu với số liệu gốc.
 
 Để theo dõi thay đổi, ghép theo mã tỉnh và giữ những tỉnh đủ hai chỉ tiêu
-ở cả hai năm. Cả hai lần gán đều dùng chung biên lưới, ngưỡng và cách nối ô."""))
+ở cả hai năm. Cả hai lần gán đều dùng chung scaler, biên lưới, ngưỡng và
+cách nối ô. Bảng Lạng Sơn bên dưới đọc lần lượt điểm gốc, tọa độ chuẩn
+hóa, chỉ số ô, số điểm tham chiếu và nhãn ở mỗi năm."""))
 
 cd(nbf.v4.new_code_cell("""from scripts.common.papi_pred_common import GRID_ASSIGNMENT_LABELS
 
@@ -876,12 +897,22 @@ print(f"Ghép được {len(paired)} tỉnh đủ chỉ tiêu ở cả hai năm.
 unmatched = eligible_2024.loc[~eligible_2024.province_code.isin(paired.province_code), "province_vi"]
 print(f"Đủ điểm 2024 nhưng thiếu điểm ghép năm 2023: {', '.join(unmatched)}.")
 display(transition)
+to_sparse = paired.cluster_2023.ge(0) & paired.cluster_2024.eq(-1)
+to_cluster = paired.cluster_2023.eq(-1) & paired.cluster_2024.ge(0)
+print(f"{to_sparse.sum()} tỉnh sang ô thưa, {to_cluster.sum()} tỉnh từ ô thưa vào cụm.")
 same_cluster = paired.loc[paired.cluster_2023.ge(0) & paired.cluster_2023.eq(paired.cluster_2024)]
 changed_cells = same_cluster.grid_cell_2023.ne(same_cluster.grid_cell_2024).sum()
 print(f"{changed_cells}/{len(same_cluster)} tỉnh giữ nguyên cụm nhưng đổi ô.")
 
-example = assignments.loc[assignments.province_vi.eq("Lạng Sơn")].sort_values("year")
-for row in example.itertuples(index=False):
+lang_son = assignments.loc[assignments.province_vi.eq("Lạng Sơn")].sort_values("year").copy()
+z_cols = [f"z_{feature}" for feature in feats]
+lang_son[z_cols] = ref_scaler.transform(lang_son[feats])
+display(lang_son[["year", *feats, *z_cols, "grid_cell", "reference_count", "cluster"]].rename(columns={
+    "year": "Năm", "sd_4_2": "Điểm 4.2", "sd_6_1": "Điểm 6.1",
+    "z_sd_4_2": "z-score 4.2", "z_sd_6_1": "z-score 6.1",
+    "grid_cell": "Ô lưới", "reference_count": "Số điểm tham chiếu", "cluster": "Nhãn",
+}).round(4).reset_index(drop=True))
+for row in lang_son.itertuples(index=False):
     region = "ngoài vùng dày" if row.cluster == -1 else f"cụm {row.cluster}"
     print(f"Lạng Sơn {row.year}: {region} trên cùng lưới đến năm 2023. "
           f"Ô {row.grid_cell} có {row.reference_count} điểm tham chiếu.")"""))
@@ -902,9 +933,11 @@ do phép chuẩn hóa thay đổi khoảng cách. So sánh silhouette dựa trê
 Mỗi cụm gồm các quan sát tỉnh–năm. Diễn giải giới hạn trong hai chỉ tiêu,
 giai đoạn và cấu hình đã xét.
 
-Lưới cố định giúp theo dõi một tỉnh qua hai năm ở cả cấp ô và cấp cụm.
-Đổi ô cho thấy hai điểm PAPI đã dịch chuyển qua một đường biên lưới.
-Việc diễn giải mức độ thay đổi cần đọc cùng hai giá trị điểm gốc.
+Trên lưới cố định 2011–2023, 48/61 tỉnh đủ điểm năm 2024 được gán vào
+cụm lớn. Trong 59 tỉnh đủ dữ liệu hai năm, 7 tỉnh sang ô thưa và 5 tỉnh
+từ ô thưa vào cụm. Lạng Sơn đi từ ô có 2 điểm tham chiếu sang ô có 12
+điểm, vượt ngưỡng 5. Việc diễn giải dịch chuyển cần đọc cùng điểm gốc
+của 4.2 và 6.1, trong phạm vi hai chỉ tiêu đã chọn.
 
 **Nguồn tham khảo**
 
@@ -934,11 +967,11 @@ def main() -> int:
         "SUBMISSION_DEMO_NB_PATH": str(OUT),
     }
     proc = subprocess.run(
-        [sys.executable, "-m", "nbconvert", "--to", "notebook", "--execute", "--inplace", str(OUT)],
+        [sys.executable, "-X", "utf8", "-m", "nbconvert", "--to", "notebook", "--execute", "--inplace", str(OUT)],
         cwd=str(ROOT),
         env=env,
         capture_output=True,
-        text=True,
+        encoding="utf-8",
         timeout=600,
     )
     if proc.returncode != 0:
@@ -946,7 +979,9 @@ def main() -> int:
         print("STDERR:\n" + proc.stderr[-4000:])
         return 1
 
-    check = json.loads(OUT.read_text(encoding="utf-8"))
+    executed = OUT.read_text(encoding="utf-8")
+    OUT.write_text(executed, encoding="utf-8", newline="\n")
+    check = json.loads(executed)
     code_cells = [c for c in check["cells"] if c["cell_type"] == "code"]
     n_code = len(code_cells)
     n_err = sum(1 for c in code_cells for o in c.get("outputs", [])

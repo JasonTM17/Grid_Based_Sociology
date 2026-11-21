@@ -231,7 +231,7 @@ hành chính công cấp tỉnh PAPI giai đoạn 2011–2024 (882 quan sát t�
 1. CẤU TRÚC THƯ MỤC GÓI NỘP
 --------------------------------------------------------------------------------
 {MIDTERM_NAME}/
-├── {MIDTERM_NAME}.pptx       Slide báo cáo giữa kỳ (10 trang)
+├── {MIDTERM_NAME}.pptx       Slide giữa kỳ (10 trang đầu kể cả bìa và 1 trang cảm ơn)
 ├── {notebook}      Notebook phân cụm STING & đối chiếu PAPI
 ├── {PREPROCESSING_NOTEBOOK}  Notebook tiền xử lý PAPI 6 bước
 ├── HUONG_DAN.txt             Hướng dẫn cấu trúc và cách chạy
@@ -672,17 +672,23 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, default=OUTPUT)
     parser.add_argument("--report-source", type=Path, help="final DOCX copy to package under the graded filename")
     parser.add_argument("--verify", action="store_true", help="verify ZIPs and replay both notebooks in each")
+    parser.add_argument("--milestone", choices=PACKAGES, help="with --verify, check one ZIP without replacing the receipt")
     args = parser.parse_args()
+    if args.milestone and not args.verify:
+        parser.error("--milestone requires --verify")
     args.output_dir = args.output_dir.resolve()
     if args.verify:
         receipts = []
-        for milestone, (name, _) in PACKAGES.items():
+        milestones = (args.milestone,) if args.milestone else PACKAGES
+        for milestone in milestones:
+            name, _ = PACKAGES[milestone]
             receipt = replay_package(args.output_dir / f"{name}.zip", milestone, args.output_dir)
             receipts.append(receipt)
             print(f"{milestone}: PASS ({receipt['preprocessing_code_cells']} preprocessing, "
-                  f"{receipt['code_cells']} analysis code cells)")
-        (args.output_dir / "verification.json").write_text(
-            json.dumps(receipts, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                  f"{receipt['code_cells']} analysis code cells, Python {receipt['python']}, {receipt['system']})")
+        if not args.milestone:
+            (args.output_dir / "verification.json").write_text(
+                json.dumps(receipts, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     else:
 
         (args.output_dir / "verification.json").unlink(missing_ok=True)

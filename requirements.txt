@@ -1,7 +1,7 @@
 # Pin theo môi trường đã kiểm chứng — 2026-11-03, Python 3.14.2, Windows 11
 # Cài đặt: python -m pip install -r requirements.txt
 pandas==2.3.3
-numpy==2.4.0
+numpy==2.4.1
 scikit-learn==1.8.0
 matplotlib==3.10.8
 plotly==6.5.0

@@ -2,7 +2,7 @@
 
 Giữa kỳ trình bày định nghĩa và demo cơ bản. Nhóm minh họa cơ chế bằng lưới 3 × 3, kiểm chứng trên dữ liệu giả lập và giới thiệu ứng dụng PAPI đã chuẩn bị.
 
-Mở slide trong `submissions/01-giua-ky` và notebook cùng thư mục. Dùng mục 4 của notebook để tập giải thích phép tính và minh họa mã khi chiếu. [Hướng dẫn demo](../../DEMO.md)
+Mở slide trong `submissions/01-giua-ky`. Để chạy notebook ở máy trình chiếu, giải nén toàn bộ ZIP giữa kỳ và mở notebook ở thư mục gốc của gói. Dùng mục 4 để minh họa phép tính và mã. [Hướng dẫn demo](../../DEMO.md)
 
 ## Lời mở đầu có thể dùng
 
@@ -21,7 +21,8 @@ Mở slide trong `submissions/01-giua-ky` và notebook cùng thư mục. Dùng m
 | 7 | 8:30–10:30 | Nêu 869 quan sát đã có, gồm 61 quan sát năm 2024. Dùng ví dụ Lạng Sơn ở mục 4.2 để giải thích hai trục z-score. Chỉ vùng ô dày trên hình. |
 | 8 | 10:30–12:00 | Chỉ 56 ô dày tạo 3 vùng. K-means chọn k = 2 trong các giá trị 2–5. Đọc số cụm và nhiễu trên 869 điểm, silhouette trên 680 điểm giao. Chỉ bảng chéo để giải thích cùng k = 3 vẫn ra cách chia khác. |
 | 9 | 12:00–14:00 | Đọc ba nhánh sơ đồ. Chỉ các ô STING giữ nguyên và các vòng đen trên hình ở mục 4.6. Nêu 68 điểm đổi cụm K-means và 8 điểm đổi trạng thái nhiễu DBSCAN. Khi hỏi về bán kính, giải thích vòng gốc có cùng diện tích với elip lân cận sau đổi thang. |
-| 10 | 14:00–15:00 | Chốt kết quả mô tả. Mục 4.8 đặt điểm đã ghi nhận năm 2024 lên lưới 2011–2023. Nêu 48 tỉnh ở 21 ô của cùng một cụm, 13 tỉnh ở ô thưa (`< 5` điểm tham chiếu, không phải dữ liệu lỗi) và ví dụ đổi ô qua hai năm. |
+| 10 | 14:00–14:50 | Mục 4.8 đặt điểm đã ghi nhận năm 2024 lên lưới 2011–2023. Nêu 48 tỉnh ở 21 ô thuộc cùng cụm, 13 tỉnh ở ô thưa và 2 tỉnh thiếu điểm. Đọc từ điểm gốc đến nhãn của Lạng Sơn trong bảng. |
+| 11 | 14:50–15:00 | Cảm ơn thầy và các bạn, chuyển sang hỏi đáp. |
 
 Ghi người trình bày và thời gian đo được vào [nhật ký luyện tập](rehearsal_log.md).
 

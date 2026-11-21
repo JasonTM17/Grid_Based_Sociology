@@ -1,4 +1,4 @@
-"""Build slides/submission.pptx — đúng 10 trang 16:9, tiếng Việt, ghi chú người nói.
+"""Build slides/submission.pptx — 10 trang đầu và một trang cảm ơn.
 
 Cách dùng: python scripts/deliverables/build_slides_10.py
 """
@@ -39,7 +39,7 @@ from sting import STING
 ROOT = _ROOT
 FIGS = ROOT / "results" / "figs"
 OUT = ROOT / "slides" / "submission.pptx"
-TOTAL = 10
+TOTAL = 11
 
 def _read_results_csv(name: str) -> list[dict[str, str]]:
     with open(ROOT / "results" / name, encoding="utf-8-sig", newline="") as f:
@@ -123,13 +123,6 @@ def _sp(n: int) -> str:
     return f"{n:,}".replace(",", " ")
 
 
-PP_FACTS = (
-    f"Đo trên PAPI: {N_DUP}/{N_ROWS} dòng trùng khóa · "
-    f"{_sp(N_MISS)}/{_sp(N_CELLS)} ô thiếu ({100 * N_MISS / N_CELLS:.1f}%) giữ NaN, không nội suy · "
-    f"{N_OUT} ô |z|>{Z_OUT} chỉ đánh dấu, không xóa"
-)
-
-
 _X_SYN, _Y_SYN = make_blobs(
     n_samples=240, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=42
 )
@@ -203,31 +196,14 @@ def text(slide, x, y, w, h, runs, align=PP_ALIGN.LEFT, space_after=4):
     return tb
 
 
-def text_line(slide, x, y, w, h, spans, size=12.0, align=PP_ALIGN.LEFT):
-    """Một dòng nhiều run khác định dạng (dải quy trình, nhấn tên bước)."""
-    tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
-    tf = tb.text_frame
-    tf.word_wrap = True
-    p = tf.paragraphs[0]
-    p.alignment = align
-    for t, bold, color in spans:
-        r = p.add_run()
-        r.text = t
-        r.font.size = Pt(size)
-        r.font.bold = bold
-        r.font.color.rgb = color
-        r.font.name = "Calibri"
-    return tb
-
-
-def header(slide, kicker, title, page_no):
+def header(slide, kicker, title, page_no, source="Topic 6 · STING × PAPI 2011–2024 · Nhóm 15"):
     rect(slide, 0, 0, SW, 0.16, TEAL)
     text(slide, 0.55, 0.32, 10.5, 0.3, [(kicker, 12, True, TEAL)])
     text(slide, 0.55, 0.58, 12.2, 0.75, [(title, 26, True, NAVY)])
     rect(slide, 0.55, SH - 0.42, SW - 1.1, 0.012, RGBColor(0xD8, 0xD5, 0xCC))
     text(
         slide, 0.55, SH - 0.36, 9.5, 0.3,
-        [("Topic 6 · STING × PAPI 2011–2024 · Nhóm 15", 10, False, GREY)],
+        [(source, 10, False, GREY)],
     )
     text(
         slide, SW - 1.6, SH - 0.36, 1.1, 0.3,
@@ -384,6 +360,27 @@ def pic_bytes(slide, bio: BytesIO, x, y, w=None, h=None):
     slide.shapes.add_picture(bio, Inches(x), Inches(y), **kw)
 
 
+def result_table(slide, rows, x, y, widths, row_height, font_size=16):
+    table = slide.shapes.add_table(
+        len(rows), len(widths), Inches(x), Inches(y), Inches(sum(widths)), Inches(len(rows) * row_height)
+    ).table
+    for column, width in zip(table.columns, widths, strict=True):
+        column.width = Inches(width)
+    for i, row in enumerate(rows):
+        table.rows[i].height = Inches(row_height)
+        for j, value in enumerate(row):
+            cell = table.cell(i, j)
+            cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+            cell.text_frame.text = str(value)
+            paragraph = cell.text_frame.paragraphs[0]
+            if j > 0:
+                paragraph.alignment = PP_ALIGN.CENTER
+            font = paragraph.runs[0].font
+            font.name, font.size, font.bold = "Calibri", Pt(font_size), i == 0
+            font.color.rgb = WHITE if i == 0 else INK
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = TEAL if i == 0 else WHITE if i % 2 else LIGHT
+
 
 s = slide_new()
 rect(s, 0, 0, SW, SH, NAVY)
@@ -393,21 +390,21 @@ for r in range(4):
         x0, y0 = SW - 4.6 + c * 0.78, 1.05 + r * 0.78
         fill = GOLD if (r, c) in ((1, 1), (2, 2)) else RGBColor(0x1E, 0x3D, 0x5E)
         rect(s, x0, y0, 0.66, 0.66, fill)
-text(s, 0.85, 1.15, 7.6, 0.4, [("HỌC MÁY · BÁO CÁO GIỮA KỲ", 13, True, GOLD)])
+text(s, 0.85, 1.15, 7.6, 0.4, [("HỌC MÁY · BÁO CÁO GIỮA KỲ", 15, True, GOLD)])
 text(
-    s, 0.85, 1.55, 7.6, 3.0,
+    s, 0.85, 1.80, 7.6, 2.95,
     [
-        ("ỨNG DỤNG THUẬT TOÁN PHÂN CỤM DỰA TRÊN LƯỚI STING ĐỂ PHÂN TÍCH ĐẶC ĐIỂM VÀ SỰ BIẾN ĐỘNG CỦA CÁC CHỈ SỐ QUẢN TRỊ, HÀNH CHÍNH CÔNG TẠI 63 TỈNH, THÀNH PHỐ VIỆT NAM DỰA TRÊN DỮ LIỆU PAPI GIAI ĐOẠN 2011–2024", 19, True, WHITE),
-        ("APPLICATION OF STING GRID-BASED CLUSTERING TO ANALYZE GOVERNANCE AND PUBLIC ADMINISTRATION PERFORMANCE PATTERNS AND TEMPORAL CHANGES ACROSS 63 VIETNAMESE PROVINCES USING PAPI DATA (2011–2024)", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
+        ("PHÂN CỤM DỰA TRÊN LƯỚI STING", 34, True, WHITE),
+        ("Đặc điểm và biến động PAPI tại 63 tỉnh, thành phố giai đoạn 2011–2024", 22, False, WHITE),
+        ("APPLICATION OF STING GRID-BASED CLUSTERING TO PAPI DATA", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
     ],
+    space_after=10,
 )
 text(
     s, 0.85, 4.7, 7.8, 1.9,
     [
-        ("Báo cáo giữa kỳ · Minh họa thuật toán và ứng dụng trên dữ liệu PAPI", 14, True, GOLD),
-        ("STING: Statistical Information Grid · PAPI: Chỉ số Hiệu quả Quản trị và Hành chính công cấp tỉnh", 12, False, RGBColor(0xB9, 0xCD, 0xDE)),
-        ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 14, False, RGBColor(0xB9, 0xCD, 0xDE)),
-        ("Nhóm 15 · Chủ đề 6 · Grid-based clustering", 13, False, RGBColor(0xB9, 0xCD, 0xDE)),
+        ("Nhóm 15 · Chủ đề 6 · Grid-based clustering", 16, True, GOLD),
+        ("Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)", 15, False, RGBColor(0xB9, 0xCD, 0xDE)),
     ],
 )
 note(
@@ -419,80 +416,51 @@ note(
 
 
 s = slide_new()
-header(s, "CHỦ ĐỀ VÀ DỮ LIỆU", "Grid-based clustering, STING và dữ liệu PAPI", 2)
-bullets(
-    s, 0.55, 1.45, 6.5, 4.15,
-    [
-        ("Chủ đề.", "Grid-based clustering — phân cụm dựa trên lưới."),
-        ("Thuật toán.", "Nhóm chọn biến thể STING dùng ngưỡng số điểm trong ô."),
-        ("Minh họa.", "Lưới 3 × 3 và dữ liệu giả lập có nhãn tham chiếu."),
-        ("Ứng dụng.", "Dữ liệu PAPI. Mỗi quan sát là một tỉnh trong một năm."),
-    ],
-    size=15, gap_pt=32,
-)
-rect(s, 7.4, 1.4, 5.35, 4.22, LIGHT)
-text(s, 7.65, 1.52, 4.9, 0.32, [("DỮ LIỆU PAPI ĐÃ CHUẨN BỊ", 12, True, TEAL)])
-for i, (lbl, val) in enumerate([
-    ("Bảng gốc · số dòng × số cột", f"{N_ROWS} × 41"),
-    ("Đủ chỉ tiêu 4.2 và 6.1", f"{PAPI_COUNT} quan sát"),
-    ("Giai đoạn", "2011–2024"),
-]):
-    y = 2.0 + i * 1.02
-    rect(s, 7.65, y, 4.85, 0.86, WHITE)
-    text(s, 7.8, y + 0.08, 3.2, 0.7, [(lbl, 12.5, False, GREY), (val, 21, True, NAVY)])
-text(
-    s, 7.65, 5.02, 4.85, 0.55,
-    [(f"z = (x − μ) / σ. Tính theo từng chỉ tiêu trên {PAPI_COUNT} quan sát đủ dữ liệu.", 12.5, False, GREY)],
-)
-
-
-rect(s, 0.55, 5.7, 12.23, 1.2, LIGHT)
-text(s, 0.72, 5.73, 11.8, 0.38, [
-    ("TIỀN XỬ LÝ DỮ LIỆU", 12, True, TEAL),
+header(s, "CHỦ ĐỀ VÀ DỮ LIỆU", "Phân cụm trên hai chỉ tiêu PAPI", 2,
+       "src/preprocessing.py · Notebook giữa kỳ §4.1")
+rect(s, 0.6, 1.52, 5.22, 4.56, LIGHT)
+text(s, 0.86, 1.75, 4.71, 1.38, [
+    (f"{N_ROWS} × 41", 34, True, NAVY),
+    ("63 tỉnh, thành phố · 2011–2024", 17, False, GREY),
 ])
-text_line(
-    s, 0.72, 6.11, 11.9, 0.33,
-    [
-        ("Làm sạch", True, NAVY),
-        (" (rà khóa trùng, điểm thiếu, ngoại lai)", False, INK),
-        ("  →  ", False, GREY),
-        ("Tích hợp", True, NAVY),
-        (" (mã tỉnh, năm)", False, INK),
-        ("  →  ", False, GREY),
-        ("Biến đổi", True, NAVY),
-        (" (chuẩn hóa)", False, INK),
-    ],
-    size=13,
-)
-text(s, 0.72, 6.49, 11.9, 0.34, [(PP_FACTS, 11, False, GREY)])
+text(s, 0.86, 3.43, 4.71, 2.35, [
+    ("HAI TRỤC CỦA LƯỚI", 14, True, TEAL),
+    ("4.2  Kiểm soát tham nhũng trong cung ứng dịch vụ công", 17.5, False, INK),
+    ("6.1  Y tế công lập", 17.5, False, INK),
+], space_after=9)
+text(s, 6.2, 1.53, 6.53, 0.48, [("run_preprocessing_pipeline(...)", 18, True, TEAL)])
+bullets(s, 6.2, 2.1, 6.53, 4.06, [
+    ("Làm sạch.", f"{N_DUP}/{N_ROWS} khóa tỉnh–năm trùng. Kiểm tra thiếu, thang đo và cực trị."),
+    ("Tích hợp.", "Chuẩn hóa mã tỉnh, ghép 14 bảng tính năm."),
+    ("Chọn mẫu.", f"dropna theo cặp 4.2 và 6.1. Còn {PAPI_COUNT} quan sát tỉnh–năm cho phân cụm mô tả."),
+    ("Chuẩn hóa.", "StandardScaler tính z = (x − μ) / σ riêng cho từng chỉ tiêu."),
+], size=16.5, gap_pt=14)
+text(s, 0.6, 6.23, 12.1, 0.59, [
+    (f"{_sp(N_MISS)}/{_sp(N_CELLS)} ô thiếu được giữ trong panel. Giữ nguyên {N_OUT} ô được gắn cờ |z| > {Z_OUT}.",
+     15, False, GREY),
+])
 note(
     s,
-    "Grid-based clustering là chủ đề chung. STING là thuật toán nhóm chọn, còn PAPI là dữ liệu ứng dụng. "
-    "Giữa kỳ tập trung vào định nghĩa và demo cơ bản. Phần PAPI cho thấy hướng ứng dụng đã chuẩn bị. "
-    "Bảng dữ liệu có 882 quan sát và 41 cột. Một điểm ứng với một tỉnh trong một năm, "
-    "được biểu diễn bằng hai chỉ tiêu PAPI đã chuẩn hóa. Nguồn PAPI do CECODES, VFF-CRT, RTA và UNDP công bố. "
-    "Nhóm kiểm tra trùng khóa tỉnh–năm, dữ liệu thiếu, tính nhất quán và ngoại lai, "
-    "sau đó ghép dữ liệu theo mã tỉnh và chuẩn hóa. Các ô thiếu được giữ để ghi nhận "
-    "độ phủ. Bước phân cụm chỉ dùng những dòng có đủ hai chỉ tiêu được chọn. "
-    "Điểm hợp lệ trong ô thưa được giữ để đo độ phủ của lưới. Bảng gán năm 2024 "
-    "trong notebook ghi cả lý do và số quan sát tham chiếu của từng ô thưa. "
-    f"Tính trung bình và độ lệch chuẩn của từng chỉ tiêu trên {PAPI_COUNT} quan sát đủ dữ liệu. "
-    "Điểm z bằng 0 là trung bình, điểm z bằng +1 cao hơn trung bình một độ lệch chuẩn. "
-    "Notebook cho phép kiểm lại phép tính từ điểm PAPI gốc của Lạng Sơn năm 2024. "
-    "Nếu thầy hỏi sao lọc rồi mà vẫn nhiễu: tiền xử lý chỉ loại 13/882 dòng thiếu chỉ tiêu, "
-    "còn 869 điểm đều hợp lệ trong thang 0,25–2,5; chỉ 9/869 điểm có |z| > 3, trong khi "
-    "162/171 điểm nhãn −1 của STING nằm gọn trong khung |z| ≤ 3 nhưng ở ô thưa dưới 5 điểm.",
+    "STING là phương pháp nhóm chọn để tìm các vùng có nhiều điểm gần nhau trên hai chỉ tiêu PAPI. "
+    "Mỗi quan sát là một tỉnh trong một năm. Mục tiêu ứng dụng là mô tả đặc điểm vùng dày và "
+    "theo dõi sự dịch chuyển của tỉnh khi dùng chung lưới. "
+    "Notebook chạy sáu bước tiền xử lý từ dữ liệu gốc và đối chiếu panel 882 × 41. "
+    "Số ô thiếu và số ô được gắn cờ trên slide tính trên 37 cột điểm, trước khi lấy hai chỉ tiêu. "
+    f"Phân cụm mô tả dùng {PAPI_COUNT} dòng, gồm điểm đã đo năm 2024. "
+    "Phép gán riêng ở slide 10 dùng scaler và lưới dựng trên các năm đến 2023. "
+    "Dữ liệu PAPI do CECODES, VFF-CRT, RTA và UNDP công bố. https://papi.org.vn/du-lieu-papi/",
 )
 
 
 s = slide_new()
-header(s, "LƯỚI THỐNG KÊ", "Lưới từ thô đến mịn", 3)
+header(s, "LƯỚI THỐNG KÊ", "Lưới từ thô đến mịn", 3,
+       "src/sting.py · Notebook giữa kỳ §4.3.2")
 pic_bytes(s, _sting_hierarchy_figure_png(_syn_model, _X_SYN), 0.55, 1.32, w=SW - 1.1)
 _, example_cell = _callout_cell(_syn_model, level=2)
 bullets(
     s, 0.75, 5.02, 11.8, 1.76,
     [
-        ("Cùng một tập điểm.", "Mức sau chia mỗi ô thành những ô nhỏ hơn."),
+        ("Độ mịn.", "Mức l có r = factorˡ đoạn mỗi trục. Với factor = 4, các mức có 1, 4 và 16 đoạn."),
         ("Thống kê theo ô.", f"Ô viền cam chứa {example_cell.count} điểm. Mỗi ô còn lưu trung bình, "
          "độ lệch chuẩn, giá trị nhỏ nhất và lớn nhất."),
     ],
@@ -508,11 +476,15 @@ note(
 
 
 s = slide_new()
-header(s, "CƠ CHẾ", "Biến thể STING tạo cụm từ các ô dày", 4)
+header(s, "CƠ CHẾ", "Biến thể STING tạo cụm từ các ô dày", 4,
+       "src/sting.py · Notebook giữa kỳ §1–2")
 steps = [
-    ("1. Đếm điểm", "count", "Gán điểm vào các ô ở một mức lưới và đếm số điểm trong từng ô."),
-    ("2. Chọn ô dày", "count ≥ min_count", "Giữ các ô có số điểm đạt ngưỡng tối thiểu."),
-    ("3. Nối qua cạnh", "Liên thông", "Mỗi vùng các ô dày nối được qua cạnh tạo thành một cụm."),
+    ("fit(X)", "_assign và _accumulate",
+     "Tính chỉ số ô và lưu số điểm, trung bình, độ lệch chuẩn, cực trị."),
+    ("cluster(level, connectivity=1)", "count ≥ min_count",
+     "Duyệt sâu qua các ô dày kề cạnh để gán nhãn cho mỗi vùng liên thông."),
+    ("predict(X_moi)", "Tra nhãn ô",
+     "Giữ nguyên lưới và tra nhãn. Điểm ngoài vùng dày nhận −1."),
 ]
 for i, (title, rule, description) in enumerate(steps):
     x = 0.6 + i * 4.12
@@ -528,10 +500,10 @@ plt.close(step_fig)
 step_bio.seek(0)
 pic_bytes(s, step_bio, 0.96, 3.16, w=11.41)
 text(s, 0.63, 6.02, 12.04, 0.40, [
-    ("Điểm trong ô thưa nhận nhãn −1 (nhiễu).", 16.5, True, NAVY),
+    ("Chỉ số ô mỗi trục = clip(floor((z − zmin) / Δ), 0, r − 1), với Δ = (zmax − zmin) / r.", 15, True, NAVY),
 ])
 text(s, 0.63, 6.46, 12.04, 0.42, [
-    ("Notebook minh họa thêm truy vấn thống kê từ trên xuống.", 14.5, False, GREY),
+    ("STING gốc dùng phân phối và khoảng tin cậy khi truy vấn từ trên xuống. Xem mục 4.3.3.", 14.5, False, GREY),
 ])
 note(
     s,
@@ -541,7 +513,10 @@ note(
     "Hình bốn bước bên dưới minh họa đầy đủ quy trình từ 15 điểm thô đến chia lưới 3×3, "
     "chọn ô dày (≥ 3), gắn nhãn −1 cho ô thưa (1 điểm) và nối kề 4 hướng (chạm góc không nối). "
     "Điểm trong ô thưa nhận nhãn nhiễu −1. Phần phân cụm PAPI chọn một mức lưới. "
-    "Notebook minh họa thêm query_top_down, phép gộp thống kê theo vùng với xác suất ước lượng từ phân phối chuẩn từng chiều.",
+    "Ở ví dụ 3×3, notebook gọi fit trên 15 điểm và cluster(level=1, connectivity=1). "
+    "Ô biên trên dùng chỉ số r−1. Mục 4.3.3 cho thấy query_top_down thống kê 322 điểm "
+    "trong các ô nằm trọn vùng, còn lọc trực tiếp từng điểm cho 348. "
+    "Xem Wang, Yang và Muntz (VLDB 1997) tại https://www.vldb.org/conf/1997/P186.PDF",
 )
 
 
@@ -568,6 +543,7 @@ for i, (label, fill, detail) in enumerate((
     text(s, 6.35, y, 5.95, 0.58, [
         (f"{label}. {detail}", 17, False, INK),
     ])
+text(s, 5.88, 5.42, 6.48, 0.38, [("model.cluster(level=1, connectivity=1)", 14.5, True, TEAL)])
 text(s, 0.85, 6.3, 11.8, 0.42, [
     ("Hai vùng màu chỉ chạm góc nên tách thành 2 cụm.", 17, True, NAVY),
 ])
@@ -589,7 +565,7 @@ bullets(
         ("Kết quả.", f"STING tìm {SYN_K} cụm, nhiễu {SYN_NOISE:.1%}."),
         ("Độ khớp.", f"ARI {SYN_ARI_S} khi so với nhãn giả lập."),
     ],
-    size=17, gap_pt=33,
+    size=17, gap_pt=24,
 )
 note(
     s,
@@ -640,26 +616,7 @@ for name, labels in (
     n_noise = counts.pop(-1, 0)
     rows.append((name, str(len(counts)), f"{n_noise} ({n_noise / PAPI_COUNT:.1%})",
                  f"{silhouette_score(PAPI_Z[COMMON], labels[COMMON]):.4f}"))
-tb = s.shapes.add_table(
-    len(rows), 4, Inches(0.6), Inches(1.9), Inches(7.27), Inches(3.3)
-).table
-for j, width in enumerate([2.36, 1.05, 1.94, 1.92]):
-    tb.columns[j].width = Inches(width)
-for i, row in enumerate(rows):
-    for j, value in enumerate(row):
-        cell = tb.cell(i, j)
-        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
-        cell.text_frame.text = value
-        p = cell.text_frame.paragraphs[0]
-        if j > 0:
-            p.alignment = PP_ALIGN.CENTER
-        run = p.runs[0]
-        run.font.name = "Calibri"
-        run.font.size = Pt(15 if i == 0 else 16)
-        run.font.bold = i == 0
-        run.font.color.rgb = WHITE if i == 0 else INK
-        cell.fill.solid()
-        cell.fill.fore_color.rgb = TEAL if i == 0 else WHITE if i % 2 else LIGHT
+result_table(s, rows, 0.6, 1.9, [2.36, 1.05, 1.94, 1.92], 0.66, font_size=15)
 text(s, 0.6, 5.43, 7.25, 1.07, [
     (f"{N_COMMON} điểm được cả ba cách gán cụm. Silhouette đo độ gọn và độ tách trên nhóm điểm này.",
      15, False, GREY),
@@ -756,60 +713,69 @@ note(
 
 
 s = slide_new()
-header(s, "KẾT LUẬN", "Kết quả phân cụm mô tả với STING", 10)
+header(s, "QUAN SÁT VÀ KẾT LUẬN", "Điểm PAPI năm 2024 trên lưới cố định", 10,
+       "Notebook giữa kỳ §4.8 và §5 · PAPI 2011–2024")
 assigned = PAPI_COUNT - PAPI_NOISE
-assignments, _ = reference_grid_assignments(PAPI_PANEL, reference_year=2023)
+assignments, n_reference = reference_grid_assignments(PAPI_PANEL, reference_year=2023)
 observed_2024 = assignments.loc[assignments.year.eq(2024)]
 clustered_2024 = observed_2024.loc[observed_2024.cluster.ge(0)]
 outside_2024 = int(observed_2024.cluster.eq(-1).sum())
 eligible_2024 = observed_2024.cluster.count()
 occupied_cells = clustered_2024.grid_cell.nunique()
 represented_clusters = clustered_2024.cluster.nunique()
-bullets(
-    s, 0.55, 1.5, 12.0, 2.4,
-    [
-        ("Cài đặt.", "STING chia lưới, lưu thống kê ô và gom các ô dày liên thông."),
-        ("PAPI 2011–2024.", f"Cụm lớn chứa {PAPI_SIZES[0] / assigned:.0%} số điểm được gán cụm."),
-        ("Phạm vi.", "Kết quả mô tả hai chỉ tiêu. Số cụm và tỷ lệ nhiễu phụ thuộc ngưỡng ô dày."),
-        ("Quan sát 2024.", f"{len(clustered_2024)}/{eligible_2024} tỉnh nằm ở {occupied_cells} ô dày "
-         f"thuộc {represented_clusters} cụm trên lưới 2011–2023."),
-    ],
-    size=16, gap_pt=16,
-)
-for i, (value, label) in enumerate((
-    (str(PAPI_SIZES[0]), "điểm trong cụm lớn"),
-    (" và ".join(map(str, PAPI_SIZES[1:])), "điểm trong hai cụm nhỏ"),
-    (f"{PAPI_NOISE / PAPI_COUNT:.1%}", "quan sát trong ô thưa"),
-)):
-    x = 0.6 + i * 4.12
-    rect(s, x, 3.95, 3.86, 1.65, LIGHT)
-    text(s, x, 4.1, 3.86, 0.8, [(value, 36, True, TEAL)], align=PP_ALIGN.CENTER)
-    text(s, x, 4.95, 3.86, 0.5, [(label, 16, False, INK)], align=PP_ALIGN.CENTER)
-text(s, 0.6, 5.82, 12.1, 0.46, [
-    ("Wang, Yang & Muntz (VLDB 1997) · Dữ liệu PAPI 2011–2024 (papi.org.vn)", 14, False, GREY),
-], align=PP_ALIGN.CENTER)
-text(s, 0.6, 6.38, 12.1, 0.49, [("Cảm ơn thầy và các bạn đã lắng nghe", 20, True, NAVY)], align=PP_ALIGN.CENTER)
+eligible = assignments.dropna(subset=["cluster"])
+paired = eligible.pivot(index="province_code", columns="year", values="cluster").dropna()
+to_sparse = int((paired[2023].ge(0) & paired[2024].eq(-1)).sum())
+to_cluster = int((paired[2023].eq(-1) & paired[2024].ge(0)).sum())
+text(s, 0.6, 1.42, 12.0, 1.19, [
+    (f"{len(clustered_2024)}/{eligible_2024} tỉnh nằm ở {occupied_cells} ô dày thuộc "
+     f"{represented_clusters} cụm trên lưới 2011–2023.", 18, True, NAVY),
+    (f"{n_reference} dòng dựng lưới. Năm 2024 có {outside_2024} tỉnh ở ô thưa và "
+     f"{len(observed_2024) - eligible_2024} tỉnh thiếu chỉ tiêu.", 16, False, INK),
+], space_after=7)
+text(s, 0.6, 2.74, 12.0, 0.44, [
+    ("Lạng Sơn chuyển từ ô thưa vào cụm lớn", 17, True, TEAL),
+])
+lang_son = assignments.loc[assignments.province_vi.eq("Lạng Sơn")].sort_values("year")
+province_rows = [("Năm", "Điểm 4.2 / 6.1", "Ô lưới", "Số điểm tham chiếu", "Nhãn")]
+for row in lang_son.itertuples(index=False):
+    pair = f"{row.sd_4_2:.3f} / {row.sd_6_1:.3f}".replace(".", ",")
+    label = "−1 (ô thưa)" if row.cluster == -1 else f"{row.cluster} (cụm lớn)"
+    province_rows.append((row.year, pair, row.grid_cell, row.reference_count, label))
+result_table(s, province_rows, 0.6, 3.2, [1.13, 2.73, 1.65, 3.4, 3.1], 0.61)
+text(s, 0.6, 5.28, 12.12, 1.02, [
+    (f"Ghép cùng {len(paired)} tỉnh. {to_sparse} tỉnh sang ô thưa, {to_cluster} tỉnh từ ô thưa vào cụm.", 16, True, NAVY),
+    (f"Lưới mô tả {PAPI_COUNT} dòng có cụm lớn {PAPI_SIZES[0]}/{assigned} điểm đã vào cụm "
+     f"và {PAPI_NOISE / PAPI_COUNT:.1%} điểm ở ô thưa.", 15, False, GREY),
+], space_after=7)
+text(s, 0.60, 6.48, 12.1, 0.36, [
+    ("Wang, Yang & Muntz (VLDB 1997) · CECODES, VFF-CRT, RTA và UNDP (papi.org.vn)", 13, False, GREY),
+])
 note(
     s,
-    f"Trên {PAPI_COUNT} quan sát và hai chỉ tiêu đã chọn, vùng chính chiếm "
-    f"{PAPI_SIZES[0]}/{assigned} số điểm được gán cụm, còn {PAPI_NOISE} điểm nằm trong ô thưa. "
-    "Ba cụm có kích thước chênh lệch lớn. Trên cùng nhóm điểm đã vào cụm, silhouette đo độ gọn "
-    "và tách biệt theo Euclid. Đây là các nhóm quan sát tỉnh–năm, "
-    "với kết quả phụ thuộc cách chọn chỉ tiêu, kích thước ô và ngưỡng mật độ. "
-    "Mục 4.8 lấy hai chỉ tiêu đã quan sát năm 2024 và giữ nguyên lưới dựng từ 2011–2023. "
-    f"Có {outside_2024} tỉnh đủ dữ liệu nằm ngoài vùng dày — cả 13 tỉnh đều có |z| ≤ 3 "
-    "(tối đa 2,13 tại Tây Ninh) và nằm trong ô có dưới 5 điểm tham chiếu, gồm cả tỉnh điểm cao "
-    "như Hà Tĩnh, Bình Thuận, Quảng Ninh, Tây Ninh. Nếu xóa 9 điểm |z| > 3 của mẫu 869 rồi dựng lại "
-    "lưới thì biên min–max co lại và vẫn sinh 173/860 điểm nhiễu (20,1%). Bảng theo mã tỉnh cho biết "
-    "trường hợp đổi ô hoặc đổi trạng thái qua hai năm. Quảng Ninh và Bình Dương thiếu điểm 2023, "
-    "nên số tỉnh ghép hai năm là 59. Số đếm ô của Lạng Sơn là số quan sát tham chiếu tích lũy. "
-    "Nguồn phương pháp là Wang, Yang và Muntz, VLDB 1997. Nguồn dữ liệu là PAPI "
-    "và gói đối chiếu Le cùng cộng sự, DOI 10.17632/wbk42j9wc8.1.",
+    "Bảng dùng dữ liệu đã quan sát, với scaler và lưới chung từ 2011–2023. "
+    "Mục 4.8 tính mã ô, số quan sát tham chiếu và nhãn cho từng tỉnh. "
+    "48 tỉnh vào cụm lớn, 13 tỉnh đủ điểm ở ô thưa, Vĩnh Phúc và Tiền Giang thiếu chỉ tiêu. "
+    "Ghép theo province_code. Quảng Ninh và Bình Dương thiếu điểm 2023 nên chỉ có 59 tỉnh ở mẫu ghép. "
+    "Ô (12, 10) của Lạng Sơn có 12 điểm tham chiếu ở lưới này. Mục 4.3 đếm 17 điểm trong cùng "
+    "chỉ số ô trên lưới mô tả gồm cả dữ liệu 2024. Điểm 4.2 của Lạng Sơn giảm và 6.1 tăng. "
+    "Số đếm theo cụm phụ thuộc vào hai trục PAPI đã chọn và cấu hình lưới. "
+    "Nguồn phương pháp https://www.vldb.org/conf/1997/P186.PDF và nguồn dữ liệu https://papi.org.vn/du-lieu-papi/",
 )
 
+
+s = slide_new()
+rect(s, 0, 0, SW, SH, NAVY)
+rect(s, 0, SH - 0.18, SW, 0.18, GOLD)
+text(s, 0.55, 3.1, 12.23, 1.2, [
+    ("Cảm ơn thầy và các bạn đã lắng nghe", 40, True, GOLD),
+], align=PP_ALIGN.CENTER)
+note(s, "Nhóm em cảm ơn thầy và các bạn đã lắng nghe. Nhóm sẵn sàng trả lời câu hỏi.")
+
+
 OUT.parent.mkdir(parents=True, exist_ok=True)
-prs.save(str(OUT))
-n_slides = len(prs.slides._sldIdLst)
+n_slides = len(prs.slides)
 assert n_slides == TOTAL, f"expected {TOTAL} slides, got {n_slides}"
+prs.save(str(OUT))
 print("saved:", OUT)
 print("slides:", n_slides)

@@ -136,7 +136,7 @@ try:
 
     p_sub = Presentation(ROOT / "slides" / "submission.pptx")
     n_sub = len(p_sub.slides._sldIdLst)
-    check("submission.pptx mo duoc <=10 trang", 1 <= n_sub <= 10, f"{n_sub} trang")
+    check("submission.pptx mo duoc 11 trang", n_sub == 11, f"{n_sub} trang")
 except Exception as e:
     check("submission.pptx mo duoc", False, str(e))
 

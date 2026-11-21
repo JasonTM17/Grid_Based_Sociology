@@ -8,7 +8,7 @@ _Cập nhật ngày 21/11/2026 · Nhóm 15._
 - [x] **Notebook cuối kỳ** — `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` chạy từ gói giải nén theo `HUONG_DAN.txt` và tái lập 869/869 nhãn STING. [Kết quả chạy lại](../submissions/verification.json)
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/data/check_data.py` → PASS.
 - [x] **Notebook nộp bài (giữa kỳ)** — `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch, 0 lỗi; sinh bằng `python scripts/notebooks/gen_submission_demo.py`).
-- [x] **Slides nộp bài (giữa kỳ)** — `slides/submission.pptx` (10 slide, tiếng Việt, notes kèm từng slide; build bằng `python scripts/deliverables/build_slides_10.py`). Deck phụ lục mở rộng cho cuối kỳ: `slides/final.pptx` (16 slide).
+- [x] **Slides nộp bài (giữa kỳ)** — `slides/submission.pptx` gồm 10 trang đầu kể cả bìa và một trang cảm ơn. Chạy `python scripts/deliverables/build_slides_10.py` để tạo lại slide và ghi chú. Slide cuối kỳ nằm ở `slides/final.pptx`.
 
 ## Đối chiếu môn học (2026-11-12)
 
@@ -50,7 +50,7 @@ python scripts/deliverables/build_submission_packages.py --verify
 
 Đầu ra tại `submissions/`:
 
-- `Nhom15_GiuaKy_STING_PAPI.zip` đặt slide 10 trang, notebook giữa kỳ, notebook tiền xử lý, `HUONG_DAN.txt`, `requirements.txt` cùng các thư mục chuẩn `src/`, `data/`, `scripts/`, `models/`, `results/` ở cấp đầu.
+- `Nhom15_GiuaKy_STING_PAPI.zip` đặt slide 11 trang, notebook giữa kỳ, notebook tiền xử lý, `HUONG_DAN.txt`, `requirements.txt` cùng các thư mục chuẩn `src/`, `data/`, `scripts/`, `models/`, `results/` ở cấp đầu.
 - `Nhom15_CuoiKy_STING_PAPI.zip` đặt báo cáo, notebook cuối kỳ, notebook tiền xử lý, slide vấn đáp, `HUONG_DAN.txt`, `requirements.txt` cùng các thư mục chuẩn `src/`, `data/`, `scripts/`, `models/`, `results/`, `reports/` ở cấp đầu.
 - Bộ dựng và bộ xác minh dùng chung danh mục tệp. Xem số lượng và vai trò của từng tệp trong `results/MANIFEST.json`.
 - `SHA256SUMS.txt`: hash hai ZIP; mỗi ZIP có `MANIFEST.json` ghi hash/vai trò từng file.

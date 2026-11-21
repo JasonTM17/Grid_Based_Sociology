@@ -18,7 +18,7 @@
 - `qa_midterm.md` — 24 câu hỏi đáp trọng tâm cho buổi giữa kỳ (kèm bằng chứng nhiễu `−1` và bản đồ 2D).
 - `qa_final.md` — 44 câu hỏi đáp cuối kỳ (STING, tiền xử lý 6 bước & độ nhạy, kiểm định ngoại lai, dự báo PAPI 2024, phụ lục minh họa hồi quy).
 - `qa_course_concepts.md` — 58 câu hỏi đáp về các phương pháp học máy và 6 câu chuyên sâu về nhãn nhiễu STING.
-- `presentation_script.md` — Kịch bản trình bày 10 slide (15 phút nói + 5 phút Q&A).
+- `presentation_script.md` — Kịch bản trình bày 11 slide (15 phút nói + 5 phút Q&A).
 - `rehearsal_log.md`, `midterm_feedback.md`, `mock_defense_log.md` — Nhật ký luyện tập và ghi nhận góp ý.
 
 Danh sách tệp gửi giảng viên và hướng dẫn chạy lại nằm trong [thư mục nộp bài](../submissions/).
