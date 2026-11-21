@@ -40,13 +40,13 @@ def load_crosswalk() -> pd.DataFrame:
 def attach_keys(df: pd.DataFrame, cw: pd.DataFrame, code_col: str) -> pd.DataFrame:
     df = df.copy()
     df[code_col] = df[code_col].astype(str).str.strip()
-    # Bỏ cột tên tỉnh có sẵn trong file gốc — dùng bản chuẩn từ crosswalk (tránh _x/_y).
+
     for col in ("province_ascii", "province_vi"):
         if col in df.columns:
             df = df.drop(columns=[col])
     merged = df.merge(cw, left_on=code_col, right_on="province_code", how="left", validate="many_to_one")
     if code_col != "province_code":
-        # Khóa gốc giữ tên riêng (vd "id"): bỏ cột trùng từ crosswalk, caller sẽ rename sau.
+
         merged = merged.drop(columns=["province_code"])
     missing = sorted(merged.loc[merged["province_ascii"].isna(), code_col].unique())
     if missing:
@@ -88,9 +88,9 @@ def coverage(label: str, df: pd.DataFrame, value_col: str) -> str:
 
 
 def main() -> int:
-    # Console Windows mặc định cp1252 không mã hóa được chữ Việt trong khối print
-    # tổng kết → UnicodeEncodeError khi script đã chạy xong. Ép stdout/stderr sang
-    # UTF-8 để phần báo cáo không làm sập script ngay trước khi exit 0.
+
+
+
     for stream in (sys.stdout, sys.stderr):
         if stream is not None and hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")
@@ -101,11 +101,11 @@ def main() -> int:
     pop = gso_population(cw)
     waste = gso_waste(cw)
 
-    # Panel nối ngoài: outer join theo tỉnh-năm để thấy rõ khoảng trống phủ dữ liệu.
+
     panel = pci.merge(pop, on=KEEP, how="outer").merge(waste, on=KEEP, how="outer")
     panel = panel.sort_values(["province_code", "year"]).reset_index(drop=True)
 
-    # Gán thêm province_code theo PAPI panel (khóa chính của đồ án) qua province_ascii.
+
     papi = pd.read_csv(OUT / "papi_panel_63_2011_2024.csv")
     papi_map = papi[["province_code", "province_ascii"]].drop_duplicates()
     panel = panel.merge(

@@ -35,9 +35,9 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import numpy as np  # noqa: E402
-import pandas as pd  # noqa: E402
-from sklearn.preprocessing import StandardScaler  # noqa: E402
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
@@ -53,9 +53,9 @@ try:
 except Exception:
     pass
 
-# Giao thức gốc — sao chép NGUYÊN VĂN từ scripts/analysis/predict_sweep.py:48-59.
-# Tính trung thực của bản sao được kiểm chứng bằng đối chiếu 224/224 dòng với
-# results/predict_config_search.csv (mục 3 của results/protocol_sensitivity.md).
+
+
+
 STABLE_SUBDIMS = ["sd_1_3", "sd_1_4", "sd_4_1", "sd_4_2",
                   "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3"]
 CONFIGS = [
@@ -69,11 +69,11 @@ NOISE_MAX = 0.25
 LARGEST_MAX = 0.85
 COV_MIN = 0.75
 
-# Tham số B5 (theo đề bài lane; mcs chính = 0.05, dò nhạy 3 giá trị).
+
 SEED = 11
 MCS_MAIN = 0.05
 MCS_GRID = (0.02, 0.05, 0.10)
-FROZEN_NAME = "sd_4_2+sd_6_1"  # định danh theo đề bài — đối chiếu CSV công bố
+FROZEN_NAME = "sd_4_2+sd_6_1"
 
 OUT_CSV = ROOT / "results" / "protocol_sensitivity.csv"
 OUT_MD = ROOT / "results" / "protocol_sensitivity.md"

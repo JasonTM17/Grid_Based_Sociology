@@ -49,7 +49,7 @@ from sklearn.preprocessing import StandardScaler
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from sting import STING  # noqa: E402
+from sting import STING
 from scripts.common.papi_pred_common import (
     FEATURE_LABELS,
     PANEL_PATH,
@@ -59,7 +59,7 @@ from scripts.common.papi_pred_common import (
     load_config,
     load_panel,
     select_model_by_cv,
-)  # noqa: E402
+)
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -69,31 +69,30 @@ except Exception:
 MODELS = ROOT / "models"
 RESULTS = ROOT / "results"
 FIGS = RESULTS / "figs"
-HOLDOUT_YEAR = 2023          # cặp (2023 → 2024) là holdout duy nhất
+HOLDOUT_YEAR = 2023
 SEED = 42
-CLASSIFICATION_CV_FIRST_YEAR = 2017  # warm-up cố định: origins 2011–2016
+CLASSIFICATION_CV_FIRST_YEAR = 2017
 CLASSIFICATION_CV_YEARS = tuple(range(CLASSIFICATION_CV_FIRST_YEAR, HOLDOUT_YEAR))
 CLASSIFICATION_SCORER = make_scorer(
     f1_score, average="macro", labels=[0, 1], zero_division=0
 )
 
-SUBS = REGRESSION_FEATURES
 TARGET = REGRESSION_TARGET
 FEATURES = REGRESSION_FEATURES
 
-# Dòng nguồn cho hình — theo data/raw/papi/PROVENANCE.md (ngày tải của dữ liệu
-# gốc, KHÔNG phải ngày render hình); panel dùng để train là file phái sinh.
+
+
 FIG_SOURCE = "PAPI — CECODES, VFF-CRT, RTA & UNDP"
-FIG_RETRIEVED = "2026-11-03"  # data/raw/papi/PROVENANCE.md
+FIG_RETRIEVED = "2026-11-03"
 FIG_EXTRA = f"panel phái sinh: {PANEL_PATH.name}"
-# DPI khi lưu PNG: chuẩn in là ~300 DPI hiệu dụng ở chiều rộng chữ A4 (~16 cm).
-# Sau tight bbox hình còn ~5.9–9 inch, nên dùng 330 DPI để mọi hình của script
-# này đạt >= 300 DPI hiệu dụng ở 16 cm khi in (chuẩn in báo cáo).
+
+
+
 FIG_DPI = 330
-# Tên hiển thị hai lớp pseudo-label của bài toán (2): nhãn sinh trong
-# `build_classification_pairs` là `y = int(labels[pc] != -1)` — STING gán điểm
-# vào cụm (vùng dày) => 1, còn lại nhãn nhiễu (ngoại vi) => 0. Chỉ là tên
-# hiển thị cho ngữ nghĩa đã có trong code, không đổi dữ liệu.
+
+
+
+
 CLASS_NAMES = {0: "ngoại vi", 1: "vùng dày"}
 
 
@@ -101,7 +100,7 @@ def build_regression_pairs(df: pd.DataFrame) -> pd.DataFrame:
     """Cặp (đặc trưng năm t, giá trị đích năm t+1, carry-forward)."""
     if df.duplicated(["province_code", "year"]).any():
         raise ValueError("Panel có province_code/year trùng; không thể ghép cặp an toàn.")
-    base = df[["province_code", "year"] + FEATURES].copy()  # TARGET nằm trong FEATURES
+    base = df[["province_code", "year"] + FEATURES].copy()
     rows = []
     for t in range(2011, 2024):
         cur = base[base.year == t].dropna(subset=FEATURES)
@@ -151,7 +150,7 @@ def expanding_origin_folds(
 def fit_sting_labeler(
     df: pd.DataFrame, cutoff_year: int, feats, sting_params: dict
 ):
-    """Fit scaler/STING usando đúng dữ liệu có tại cutoff, bao gồm năm origin."""
+    """Fit scaler/STING dùng đúng dữ liệu có tại cutoff, bao gồm năm origin."""
     if df.duplicated(["province_code", "year"]).any():
         raise ValueError("Panel có province_code/year trùng; không thể tạo nhãn an toàn.")
     history = df[df.year <= cutoff_year].dropna(subset=feats)
@@ -261,7 +260,7 @@ def main() -> int:
 
     met_rows: list[dict] = []
 
-    # (1) HỒI QUY: dự báo "6.1 Y tế công lập" năm t+1
+
     P = build_regression_pairs(df)
     tr = P[P.year_t < HOLDOUT_YEAR]
     te = P[P.year_t == HOLDOUT_YEAR]
@@ -287,12 +286,12 @@ def main() -> int:
     print(f"[Hồi quy] CV R² Ridge={grid_ridge.best_score_:.3f} {grid_ridge.best_params_}")
     print(f"[Hồi quy] CV R² RF   ={grid_rf.best_score_:.3f} {grid_rf.best_params_}")
 
-    # Baseline hồi quy chấm CV THẬT trên CÙNG fold expanding origin 2017–2022
-    # (reg_cv) thay vì để trống: quy ước điểm trùng GridSearchCV scoring="r2" —
-    # R² trên từng fold validation, lấy mean làm value_cv. Trong mỗi fold,
-    # "train" là phần lịch sử của fold nên trung bình train là mean của
-    # ytr[train_idx] (song song với expanding_majority_f1 của phân loại).
-    # Baseline vẫn không tranh selection (vẫn bị loại khỏi select_model_by_cv).
+
+
+
+
+
+
     _carry_all = tr["carry"].to_numpy()
     _carry_fold_r2 = []
     _mean_fold_r2 = []
@@ -328,7 +327,7 @@ def main() -> int:
     joblib.dump(grid_ridge.best_estimator_, MODELS / "sup_ridge.joblib")
     joblib.dump(grid_rf.best_estimator_, MODELS / "sup_rf.joblib")
 
-    # (2) PHÂN LOẠI pseudo-label STING, với forward CV
+
     C = build_classification_pairs(df, cfg["features"], cfg["sting"])
     ctr = C[C.year_t < HOLDOUT_YEAR]
     cte = C[C.year_t == HOLDOUT_YEAR]
@@ -369,7 +368,7 @@ def main() -> int:
     met.to_csv(RESULTS / "supervised_metrics.csv", index=False, encoding="utf-8-sig")
     print("\n" + met.to_string(index=False))
 
-    # Hình (a): dự báo vs thực tế + độ quan trọng đặc trưng
+
     import matplotlib
 
     matplotlib.use("Agg")
@@ -382,29 +381,30 @@ def main() -> int:
         style_context,
     )
 
-    # Hình (a) — bố cục 2 panel ngang, đặt trên slide 16:9 (build_slides.py)
-    # nên dùng preset "slide" (9 x 5.0625 in) cho đủ chỗ cho tiêu đề panel.
+
+
     with style_context():
         fig, axes = new_fig(target="slide", ncols=2)
         ax = axes[0]
         ax.scatter(yte, pred_ridge, s=34, c=PALETTE["blue"], label="Ridge", alpha=0.85)
-        # Random forest: cam đặc (không alpha) để RGB của marker khớp ĐÚNG màu
-        # thanh độ quan trọng ở panel phải — một đối tượng một màu trong hình.
+
+
         ax.scatter(
             yte, pred_rf, s=34, c=PALETTE["orange"],
             label="Random forest", marker="^",
         )
-        lo, hi = float(min(yte.min(), pred_ridge.min())) - 0.05, float(max(yte.max(), pred_rf.max())) + 0.05
+        lo = float(min(yte.min(), pred_ridge.min(), pred_rf.min())) - 0.05
+        hi = float(max(yte.max(), pred_ridge.max(), pred_rf.max())) + 0.05
         ax.plot([lo, hi], [lo, hi], "k--", lw=1, label="y = x")
-        # Đơn vị trục: sd_* là điểm chỉ số PAPI nhưng thang đo CHƯA đối chiếu
-        # workbook (data/processed/papi_panel_scale_metadata.csv), nên chỉ ghi
-        # họ đơn vị "điểm PAPI", không gắn thang điểm cụ thể.
-        # Nhãn xuống 2 dòng: nhãn 1 dòng (~4.3 in) rộng hơn panel trái mà
-        # tight_layout ép hẹp (panel phải chiếm chỗ cho tên đặc trưng dài), nên
-        # nhãn tràn qua mép trái canvas và bbox_inches="tight" cắt mất ký tự đầu
-        # (matplotlib chỉ tính tâm nhãn trục, không tính bề ngang, khi gộp
-        # tight bbox — Axes.get_tightbbox gọi _get_tightbbox_for_layout_only).
-        # Wrap 30 ký tự như tên đặc trưng panel phải, giữ nguyên nội dung + đơn vị.
+
+
+
+
+
+
+
+
+
         ax.set_xlabel(
             textwrap.fill(
                 f"{FEATURE_LABELS[TARGET]} ({TARGET}) thực tế năm {HOLDOUT_YEAR + 1}"
@@ -420,17 +420,17 @@ def main() -> int:
         ax = axes[1]
         imp = grid_rf.best_estimator_.feature_importances_
         order = np.argsort(imp)
-        # Màu cam = màu Random forest ở panel trái: cùng một đối tượng dùng
-        # một màu trong cùng hình (palette Okabe–Ito, scripts/common/fig_style.py).
+
+
         ax.barh(np.arange(len(imp)), imp[order], color=PALETTE["orange"])
-        # Tên hiển thị tiếng Việt của từng mã chỉ tiêu (papi_pred_common.py).
+
         imp_names = [FEATURE_LABELS[c] for c in np.array(FEATURES)[order]]
         ax.set_yticks(
             np.arange(len(imp)), [textwrap.fill(name, 30) for name in imp_names]
         )
         ax.set_title("Độ quan trọng đặc trưng (Random forest)")
-        # Đơn vị trục x: feature_importances_ của sklearn (MDI — Mean Decrease
-        # in Impurity), chuẩn hoá để tổng trên tất cả đặc trưng bằng 1.
+
+
         ax.set_xlabel("Tầm quan trọng (MDI chuẩn hoá, tổng = 1)")
         ax.grid(alpha=0.25, axis="x")
         add_source(fig, FIG_SOURCE, retrieved=FIG_RETRIEVED, extra=FIG_EXTRA)
@@ -438,7 +438,7 @@ def main() -> int:
         save_png(fig, FIGS / "supervised_regression.png", dpi=FIG_DPI)
         plt.close(fig)
 
-    # Hình (b): confusion của bài toán phân loại (model chọn bằng CV)
+
     _clf_rows = met[met.task == "classification"]
     _clf = _clf_rows.set_index("model")
     _clf_models = _clf_rows[_clf_rows.model != "majority (lớp đa số)"]
@@ -453,7 +453,7 @@ def main() -> int:
     joblib.dump(_selected_clf_grid.best_estimator_, MODELS / "sup_classifier.joblib")
     classes = sorted(set(yc_tr.tolist()) | set(yc_te.tolist()))
     with style_context():
-        fig, ax = new_fig()  # preset "docx": 6.5 x 4.3 in — đủ chỗ cho tiêu đề 2 dòng
+        fig, ax = new_fig()
         cm = confusion_matrix(
             yc_te, _selected_clf_grid.best_estimator_.predict(Xc_te), labels=classes
         )
@@ -465,8 +465,8 @@ def main() -> int:
         )
         ax.set_xlabel("dự báo")
         ax.set_ylabel("thực tế")
-        # Nối tick số với tên lớp (xem CLASS_NAMES): 0 = ngoại vi (nhãn nhiễu
-        # STING), 1 = vùng dày (được STING gán vào cụm).
+
+
         class_tick = [f"{c} – {CLASS_NAMES.get(c, str(c))}" for c in classes]
         ax.set_xticks(range(len(classes)), class_tick)
         ax.set_yticks(range(len(classes)), class_tick)
@@ -474,18 +474,18 @@ def main() -> int:
             for j in range(len(classes)):
                 ax.text(j, i, str(cm[i, j]), ha="center", va="center",
                         color="black" if cm[i, j] < cm.max() / 2 else "white")
-        # Đơn vị của giá trị trong ô: số tỉnh (thể hiện bằng colorbar có nhãn).
+
         fig.colorbar(im, ax=ax, label="Số tỉnh", fraction=0.046, pad=0.04)
         add_source(fig, FIG_SOURCE, retrieved=FIG_RETRIEVED, extra=FIG_EXTRA)
         fig.tight_layout(rect=(0, 0.05, 1, 1))
         save_png(fig, FIGS / "supervised_confusion.png", dpi=FIG_DPI)
         plt.close(fig)
 
-    # Tóm tắt
+
     lines = []
     lines.append("# Model local có giám sát (scikit-learn, huấn luyện hoàn toàn local)\n")
     lines.append("## 1) Hồi quy — dự báo 6.1 Y tế công lập năm t+1 (bài toán chính)\n")
-    lines.append(f"- Đặc trưng: 8 chỉ số năm t (sub-dim sạch thang đo: {', '.join(SUBS[1:4])}, …)")
+    lines.append(f"- Đặc trưng: 8 chỉ số năm t (sub-dim sạch thang đo: {', '.join(FEATURES[:4])}, …)")
     lines.append(
         "- Hồi quy: chọn model bằng CV expanding origin 2017–2022 thuần train; holdout 2023→2024 đánh giá "
         "một lần. Phân loại: đặc trưng (2 cột) và tham số STING của nhãn do predict_sweep.py chọn bằng cách "
@@ -515,7 +515,7 @@ def main() -> int:
     _acc_delta = (_selected_clf["holdout_acc"] - _majority_clf["holdout_acc"]) * 100
     _f1_delta = (_selected_clf["holdout_macro_f1"] - _majority_clf["holdout_macro_f1"]) * 100
 
-    # Số liệu cho phần disclosure: tính từ chính dữ liệu/fold/grid của script này
+
     _prev = C.groupby("year_t")["y"].mean()
     _val_prev = _prev.loc[list(CLASSIFICATION_CV_YEARS)]
     _train_majority: list[int] = []

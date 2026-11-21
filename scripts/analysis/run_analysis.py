@@ -32,9 +32,9 @@ from sklearn.preprocessing import StandardScaler
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from sting import STING  # noqa: E402
-from scripts.common.papi_pred_common import ROOT, load_config, load_panel  # noqa: E402
-from scripts.common.fig_style import (  # noqa: E402
+from sting import STING
+from scripts.common.papi_pred_common import ROOT, load_config, load_panel
+from scripts.common.fig_style import (
     AX_KINH_DO,
     AX_VI_DO,
     CLUSTER_COLORS,
@@ -46,12 +46,12 @@ from scripts.common.fig_style import (  # noqa: E402
     save_png,
 )
 
-# Dòng nguồn: tên nguồn + ngày tải lấy từ PROVENANCE.md của từng dữ liệu
-# (KHÔNG phải ngày render hình).
+
+
 PAPI_SOURCE = "PAPI — CECODES, VFF-CRT, RTA & UNDP"
-PAPI_RETRIEVED = "2026-11-03"  # data/raw/papi/PROVENANCE.md
+PAPI_RETRIEVED = "2026-11-03"
 CENTROID_SOURCE = "Le et al. — Mendeley Data, DOI 10.17632/wbk42j9wc8.1 (CC BY 4.0)"
-CENTROID_RETRIEVED = "2026-11-03"  # data/raw/mendeley/PROVENANCE.md
+CENTROID_RETRIEVED = "2026-11-03"
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -94,16 +94,16 @@ def label_noise_points(ax, fig, sub, nmap, fontsize: float = 5.5) -> None:
     đã đặt (tính trong hệ toạ độ point nên bất biến theo DPI), ưu tiên ứng
     viên sớm hơn khi bằng điểm. Không đổi dữ liệu hay thứ tự điểm.
     """
-    k = fig.dpi / 72.0  # px hiển thị trên 1 point
+    k = fig.dpi / 72.0
     xy = sub[["longitude", "latitude"]].to_numpy()
-    centers = ax.transData.transform(xy) / k  # -> point
-    r_mark = float(np.sqrt(110 / np.pi)) + 0.6  # bán kính marker (point)
+    centers = ax.transData.transform(xy) / k
+    r_mark = float(np.sqrt(110 / np.pi)) + 0.6
     bb = ax.get_window_extent()
     ax_bb = (bb.x0 / k, bb.y0 / k, bb.x1 / k, bb.y1 / k)
-    # Ứng viên (dx, dy, ha, va) theo point: phải, trái, trên, dưới, 4 chéo —
-    # 2 vòng (gần + 1.9x xa) để chữ lớn vẫn có lối thoát ở vùng dày đặc.
-    # Khoảng neo gốc đặt cho fontsize 5.5 — co giãn theo cỡ chữ để mép chữ
-    # luôn cách marker một khoảng tương đương (lớp trình bày thuần).
+
+
+
+
     s_f = fontsize / 5.5
     ring1 = (
         (8, -2, "left", "center"), (-8, -2, "right", "center"),
@@ -113,9 +113,9 @@ def label_noise_points(ax, fig, sub, nmap, fontsize: float = 5.5) -> None:
     )
     ring2 = tuple((dx * 1.9, dy * 1.9, ha, va) for dx, dy, ha, va in ring1)
     cands = tuple((dx * s_f, dy * s_f, ha, va) for dx, dy, ha, va in ring1 + ring2)
-    placed = []  # hộp (x0, x1, y0, y1) các nhãn đã đặt, theo point
-    # Legend cũng là vật cản: seed bbox của nó vào `placed` để nhãn không đè
-    # lên chú giải ở góc trái-dưới (draw đã chạy trước khi gọi hàm này).
+    placed = []
+
+
     leg = ax.get_legend()
     if leg is not None:
         lb = leg.get_window_extent(fig.canvas.get_renderer())
@@ -157,8 +157,8 @@ def label_noise_points(ax, fig, sub, nmap, fontsize: float = 5.5) -> None:
         text = nmap.get(int(code[i]), "")
         if not text:
             continue
-        w = 0.62 * fontsize * len(text)  # ước lượng bề rộng chữ (point)
-        h = 1.7 * fontsize  # đủ chứa dấu tiếng Việt chồng (ế, ị, ữ)
+        w = 0.62 * fontsize * len(text)
+        h = 1.7 * fontsize
         best, best_score = None, -np.inf
         for rank, cand in enumerate(cands):
             r = rect(centers[i, 0], centers[i, 1], cand, w, h)
@@ -167,7 +167,7 @@ def label_noise_points(ax, fig, sub, nmap, fontsize: float = 5.5) -> None:
             others = (gap_point(r, *centers[j]) - r_mark
                       for j in range(len(centers)) if j != i)
             gap_l = min((gap_rect(r, p) for p in placed), default=99.0)
-            # chấm điểm theo khoảng cách hẹp nhất (marker hoặc nhãn đã đặt)
+
             score = min(min(others), gap_l) - (50.0 if out else 0.0) \
                 - 0.01 * rank
             if score > best_score:
@@ -185,13 +185,13 @@ def main() -> int:
     years = sorted(df.year.unique())
     print(f"features đóng băng: {feats} | năm {years[0]}–{years[-1]}")
 
-    # 1) Per-year STING (fit riêng từng năm; lưới thô vì mẫu nhỏ)
+
     labels_rows = []
     per_year_rows = []
     for y in years:
         sub = df[df.year == y].dropna(subset=feats)
         X = StandardScaler().fit_transform(sub[feats])
-        m = STING(n_levels=2, factor=3, min_count=3).fit(X)  # lưới 3×3, mc=3
+        m = STING(n_levels=2, factor=3, min_count=3).fit(X)
         lab = m.cluster(level=1, connectivity=1)
         k = m.n_clusters_
         noise = float((lab == -1).mean())
@@ -207,7 +207,7 @@ def main() -> int:
     pd.DataFrame(per_year_rows).to_csv(RES / "per_year.csv", index=False, encoding="utf-8-sig")
     print("1) per-year STING: xong ->", RES / "cluster_labels.csv")
 
-    # 2) Pooled metrics: frozen STING vs k-means vs DBSCAN
+
     ptr = df[df.year <= 2023].dropna(subset=feats)
     X = StandardScaler().fit(ptr[feats]).transform(ptr[feats])
     m = STING(n_levels=cfg["sting"]["n_levels"], factor=cfg["sting"]["factor"],
@@ -220,7 +220,7 @@ def main() -> int:
     sil, db, ch = safe_metrics(X, lab_sting)
     rows.append(metric_row("pooled 2011-2023", "STING (frozen)", m.n_clusters_,
                            (lab_sting == -1).mean(), sil, db, ch, None,
-                           "k=3: [629,16,5]; noise tách khỏi metric hình học"))
+                           f"k={m.n_clusters_}: {sizes}; noise tách khỏi metric hình học"))
 
     for k in (2, 3, 4, 5):
         km = KMeans(n_clusters=k, n_init=10, random_state=SEED).fit(X)
@@ -243,10 +243,10 @@ def main() -> int:
     pd.DataFrame(rows).to_csv(RES / "metrics.csv", index=False, encoding="utf-8-sig")
     print("   xong ->", RES / "metrics.csv")
 
-    # 3) Robustness: PCA(d1–d6) toàn panel + 8 chiều 2018–2024
+
     robust = []
     X6 = df[[f"d{i}" for i in range(1, 7)]].copy()
-    # z trong từng năm (khử bước nhảy do đổi thang đo/phương pháp theo năm)
+
     X6z = X6.groupby(df["year"]).transform(lambda s: (s - s.mean()) / s.std(ddof=0))
     ok = X6z.notna().all(axis=1)
     pca = PCA(n_components=2, random_state=SEED).fit(X6z[ok])
@@ -257,7 +257,7 @@ def main() -> int:
     lab6 = m6.cluster(level=2, connectivity=1)
     sil6, db6, ch6 = safe_metrics(Zp, lab6)
 
-    # ARI giữa 2D frozen và PCA-6D trên giao các dòng (province_code, year) có mặt cả hai
+
     d2d = ptr.reset_index()[["province_code", "year"]].copy()
     d2d["frozen"] = lab_sting
     d6 = df.loc[ok.index[ok.to_numpy()]][["province_code", "year"]].copy().reset_index(drop=True)
@@ -281,7 +281,7 @@ def main() -> int:
         Gốc (8a) = n_levels=3, factor=2, min_count=10, cluster(level=1).
         Metric hình học tính ngay tại đây — k>=2 thì có số, k<2 thì None.
         """
-        params = {"n_levels": 3, "factor": 2, "min_count": 10}  # nhánh gốc 8a
+        params = {"n_levels": 3, "factor": 2, "min_count": 10}
         params.update(fit_over)
         mm = STING(**params).fit(Z8v)
         ll = mm.cluster(level=level, connectivity=1)
@@ -313,7 +313,7 @@ def main() -> int:
     pd.DataFrame(robust).to_csv(RES / "robustness.csv", index=False, encoding="utf-8-sig")
     print("   xong ->", RES / "robustness.csv")
 
-    # 4) Evolution heatmap (nhãn từ lưới TOÀN CỤC — so sánh được các năm)
+
     import matplotlib
 
     matplotlib.use("Agg")
@@ -344,9 +344,9 @@ def main() -> int:
     cbar.set_ticklabels([CLUSTER_LABELS[c] for c in (-1, 0, 1, 2)])
     cbar.set_label("Cụm STING")
     add_source(fig, PAPI_SOURCE, retrieved=PAPI_RETRIEVED)
-    # Ô trắng trong lưới là (tỉnh, năm) không có dự đoán — thiếu dữ liệu đầu
-    # vào năm đó (không nằm trong predict_all_years.csv); chú giải rõ để
-    # người đọc không phải đoán.
+
+
+
     fig.text(0.01, 0.032, "Ô trắng = không có dự đoán (thiếu dữ liệu năm đó)",
              fontsize=8, color="#555555")
     fig.tight_layout(rect=(0, 0.05, 1, 1))
@@ -354,19 +354,19 @@ def main() -> int:
     plt.close(fig)
     print("4) evolution ->", FIGS / "evolution.png")
 
-    # 5) Bản đồ centroid tô màu theo cụm (2020, 2024)
+
     cent = pd.read_csv(ROOT / "data" / "raw" / "mendeley" / "Replication_package" / "data"
                        / "centroids_63_naturalearth.csv")
     cent["province_code"] = cent["province_code"].astype(int)
-    colors = CLUSTER_COLORS  # {-1: xám nhiễu, 0: xanh dương, 1: cam, 2: xanh lá}
+    colors = CLUSTER_COLORS
     for yr in (2020, 2024):
         labels = dict(zip(pred[pred.year == yr].province_code, pred[pred.year == yr].pred_cluster))
         sub = cent[cent.province_code.isin(labels)].copy()
         sub["cluster"] = sub.province_code.map(labels)
-        # Cỡ chữ trình bày cần bản đồ đủ lớn trên slide (slide 11 đặt h≈5.75in):
-        # canvas 8.0×9.2in + font lớn (title 20 / legend 13 / nhãn 12pt) cho
-        # cỡ hiệu dụng ~7.5-12.5pt khi thu về slide; 12 là cỡ nhãn lớn nhất
-        # không gây chồng nhãn trong vùng delta dày đặc (đo bằng probe bbox).
+
+
+
+
         fig, ax = new_fig(target=None, figsize=(8.0, 9.2))
         for c in sorted(sub.cluster.unique()):
             m = sub.cluster == c
@@ -377,23 +377,23 @@ def main() -> int:
         nmap = dict(zip(prow.province_code, prow.province_vi))
         ax.set_title(f"Cụm STING — {yr}", fontsize=20)
         ax.legend(loc="lower left", fontsize=13)
-        # Đơn vị độ bắt buộc với trục toạ độ địa lý.
+
         ax.set_xlabel(f"{AX_KINH_DO} (°)")
         ax.set_ylabel(f"{AX_VI_DO} (°)")
         ax.grid(alpha=0.25)
         fig.tight_layout(rect=(0, 0.05, 1, 1))
         add_source(fig, f"{PAPI_SOURCE}; toạ độ centroid: {CENTROID_SOURCE}",
                    retrieved=PAPI_RETRIEVED, fontsize=9)
-        # Nhãn tỉnh nhiễu: chọn vị trí ít chồng chéo nhất sau khi bố cục chốt
-        # (thử 8 hướng quanh marker, chấm điểm theo khoảng cách tới marker/
-        # nhãn khác) — chỉ lớp trình bày, không đổi dữ liệu.
+
+
+
         fig.canvas.draw()
         label_noise_points(ax, fig, sub, nmap, fontsize=12)
         save_png(fig, FIGS / f"map_{yr}.png", dpi=300)
         plt.close(fig)
         print(f"5) map {yr} ->", FIGS / f"map_{yr}.png")
 
-    # 6) Tóm tắt
+
     lines = []
     lines.append("# Phân tích cuối kỳ — tóm tắt số liệu\n")
     lines.append("## 1) STING theo từng năm (lưới thô 3×3, mc=3; trong-năm z)\n")
@@ -408,7 +408,7 @@ def main() -> int:
         "- Dữ liệu PAPI cấp tỉnh/năm **rất đồng nhất**: STING per-year đa số cho 1 vùng dày; "
         "cấu trúc tách biệt chỉ xuất hiện ở hai cụm ngoại vi nhỏ (ví dụ cụm 16 và 5 điểm, tổng 21, trong pooled).\n"
         "- Metric hình học tính trên điểm thuộc cụm (loại −1); khi k<2 metric = n/a.\n"
-        "- ARIt vs k-means thấp (≈0.07–0.17): hai phương pháp phân vùng khác nhau trên dữ liệu gần như một khối.\n"
+        "- ARI vs k-means thấp (≈0.07–0.17): hai phương pháp phân vùng khác nhau trên dữ liệu gần như một khối.\n"
         "- STING ≈ DBSCAN(eps=0.2) đồng thuận hơn (ARI≈0.65) — cùng họ mật độ-lưới.\n"
         f"- 8 chiều chỉ 2018–2024, OFAT đổi một tham số mỗi lần so với gốc mc=10/lv=1: "
         f"{'; '.join(ofat_parts)}."

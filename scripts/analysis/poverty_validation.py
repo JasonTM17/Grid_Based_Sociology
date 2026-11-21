@@ -56,11 +56,6 @@ vẽ bằng rng seed cố định nên cũng ổn định; chỉ DPI/layout có 
 
 from __future__ import annotations
 
-import sys as _sys
-from pathlib import Path as _Path
-
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))  # repo root: cho phép `from scripts.<nhóm>.<module> import ...`
-
 import sys
 from pathlib import Path
 
@@ -68,14 +63,28 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from scripts.analysis.external_validation import (FIG_DPI_PRINT, RETRIEVED_DATE,
-                                 anova_kruskal, fmt_p, group_table,
-                                 place_n_labels, source_note,
-                                 source_rect_bottom, stats_rows, test_rows)
-from scripts.common.fig_style import (CLUSTER_COLORS, CLUSTER_LABELS, apply_style, new_fig,
-                       save_png)
-
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
+from scripts.analysis.external_validation import (  # noqa: E402
+    FIG_DPI_PRINT,
+    RETRIEVED_DATE,
+    anova_kruskal,
+    fmt_p,
+    group_table,
+    place_n_labels,
+    source_note,
+    source_rect_bottom,
+    stats_rows,
+    test_rows,
+)
+from scripts.common.fig_style import (  # noqa: E402
+    CLUSTER_COLORS,
+    CLUSTER_LABELS,
+    apply_style,
+    new_fig,
+    save_png,
+)
 PROC = ROOT / "data" / "processed"
 RES = ROOT / "results"
 FIGS = RES / "figs"
@@ -87,9 +96,9 @@ OUT_CSV = RES / "poverty_validation.csv"
 OUT_MD = RES / "poverty_validation.md"
 OUT_PNG = FIGS / "external_poverty_by_cluster.png"
 
-# Cửa sổ thiết kế trong giao thức — assert khớp cửa sổ tự tính từ dữ liệu.
-# 2017–2019 đã có trong chuỗi nghèo (điền từ NGTK 2020/2021 —
-# scripts/data/build_poverty_gap.py) nên cửa sổ giao với nhãn cụm liền 2012–2024.
+
+
+
 DESIGN_WINDOW = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
                  2020, 2021, 2022, 2023, 2024]
 
@@ -144,7 +153,7 @@ def kw_by_year_rows(d: pd.DataFrame) -> list[dict]:
         degenerate = k < 3 or min_n < 2
         try:
             h, p = stats.kruskal(*gy)
-        except ValueError:  # nhóm suy biến hoàn toàn — không tính được
+        except ValueError:
             h, p = float("nan"), float("nan")
         note = f"k = {k} nhóm, min n = {min_n}; H = {h:.4f}; {fmt_p(p)}"
         if degenerate:
@@ -161,7 +170,7 @@ def mw_noise_vs_c2(d: pd.DataFrame, value_col: str) -> dict:
     """Mann–Whitney nhiễu (−1) vs cụm 2 — cặp tương phản đáng tin duy nhất."""
     a = d.loc[d.pred_cluster == -1, value_col].to_numpy()
     b = d.loc[d.pred_cluster == 2, value_col].to_numpy()
-    u, p = stats.mannwhitneyu(a, b)  # two-sided (mặc định scipy)
+    u, p = stats.mannwhitneyu(a, b)
     return {"u": float(u), "p": float(p), "n": int(len(a) + len(b))}
 
 
@@ -180,14 +189,14 @@ def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
     """Hình 2 hàng: boxplot gộp (template plot_pci) + median theo năm (GRDP)."""
     import matplotlib
 
-    matplotlib.use("Agg")  # trước khi import pyplot
+    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     fig, axes = new_fig(nrows=2, ncols=1,
                         gridspec_kw={"height_ratios": [1.15, 1.0]})
     ax1, ax2 = axes
 
-    # hàng 1: boxplot gộp (external_validation.py:256-294)
+
     labels = sorted(int(x) for x in d.pred_cluster.unique())
     arrays = [d.loc[d.pred_cluster == lab, "poverty_rate_pct"].to_numpy()
               for lab in labels]
@@ -216,7 +225,7 @@ def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
              va="bottom", fontsize=9, color="#444444")
     ax1.grid(axis="y", alpha=0.25)
 
-    # hàng 2: median theo năm (template GRDP :455-490)
+
     med_year = d.groupby("year").poverty_rate_pct.median()
     series: list[tuple[int, list[tuple[float, float, int]]]] = []
     for lab in labels:
@@ -225,11 +234,11 @@ def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
                   n=("poverty_rate_pct", "size"))
              .sort_index())
         ax2.plot(s.index, s.med, marker="o", color=CLUSTER_COLORS[lab],
-                 label=CLUSTER_LABELS[lab])  # "(median)" đã có ở nhãn trục y
+                 label=CLUSTER_LABELS[lab])
         series.append((lab, [(float(y), float(r.med), int(r.n))
                              for y, r in s.iterrows()]))
-    # Chừa đầu trên trục y cho legend (pattern WDI: margins/ylim là lớp trình
-    # bày, không đổi dữ liệu) — ymax = median lớn nhất của các series.
+
+
     ymax = max(m for _, rows in series for _, m, _ in rows)
     ax2.set_ylim(-0.10 * ymax, 1.45 * ymax)
     ax2.set_xticks(window)
@@ -239,9 +248,9 @@ def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
                   f"({med_year.iloc[0]:.1f}% {int(med_year.index[0])} → "
                   f"{med_year.iloc[-1]:.1f}% {int(med_year.index[-1])})",
                   fontsize=10, pad=10)
-    # Legend 1 hàng 4 cột neo phải-trên: dải đầu trên đã chừa không có điểm
-    # nào cao (max ngoài c0-2012 thuộc nửa trái) → không đè đường số;
-    # place_n_labels đọc bbox legend và né nó.
+
+
+
     ax2.legend(loc="upper right", ncol=4, fontsize=8.5, columnspacing=1.0,
                handlelength=1.6, borderaxespad=0.4)
     ax2.grid(alpha=0.25)
@@ -256,10 +265,10 @@ def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
                "nhãn cụm nên không vẽ/kiểm định"),
     )
     fig.tight_layout(rect=(0, source_rect_bottom(n_src), 1, 1))
-    # Nhãn n= đặt SAU tight_layout về phía trống nhất (external_validation.py:
-    # 488-490) — chỉ lớp trình bày.
+
+
     place_n_labels(ax2, series)
-    save_png(fig, out_path, dpi=FIG_DPI_PRINT)  # 400 dpi — hình 2 hàng dày chữ
+    save_png(fig, out_path, dpi=FIG_DPI_PRINT)
     plt.close(fig)
 
 
@@ -268,15 +277,15 @@ def main() -> int:
         if hasattr(s, "reconfigure"):
             s.reconfigure(encoding="utf-8", errors="replace")
 
-    apply_style()  # rcParams chuẩn repo — gọi đầu script
+    apply_style()
     FIGS.mkdir(parents=True, exist_ok=True)
 
-    # 1) Đọc dữ liệu + join đúng protocol (year, province_code)
+
     pov = pd.read_csv(POVERTY_CSV)
     lab = pd.read_csv(LABELS_CSV)
     assert not lab.duplicated(["year", "province_code"]).any(), "nhãn trùng khóa"
     assert not pov.duplicated(["year", "province_code"]).any(), "poverty trùng khóa"
-    # papi_province_code khớp province_code → khóa join thống nhất hai bên
+
     assert (pov.province_code == pov.papi_province_code).all(), \
         "papi_province_code lệch province_code"
 
@@ -305,9 +314,9 @@ def main() -> int:
     assert set(d.pred_cluster) <= set(CLUSTER_COLORS), "nhãn ngoài palette"
     n_panel = len(d)
 
-    # Trừ median TRONG TỪNG NĂM trên chính panel phân tích (n ô) — hằng số
-    # trong năm nên KHÔNG đổi so sánh giữa cụm trong năm; chỉ tái trọng số
-    # giữa các năm khi gộp (đúng ý nghĩa của test đã-điều-chỉnh-năm).
+
+
+
     d["pov_dm"] = d.poverty_rate_pct - \
         d.groupby("year").poverty_rate_pct.transform("median")
 
@@ -318,7 +327,7 @@ def main() -> int:
     print(f"Left-join nhãn: {n_panel} ô vào kiểm định; {n_no_label} ô không có "
           f"nhãn (loại khỏi kiểm định, liệt kê tường minh)")
 
-    # 2) Kiểm định: gộp thô + đã-trừ-median-năm (báo cáo CÙNG nhau)
+
     t_raw = anova_kruskal(d, "poverty_rate_pct")
     t_dm = anova_kruskal(d, "pov_dm")
     mw_raw = mw_noise_vs_c2(d, "poverty_rate_pct")
@@ -340,7 +349,7 @@ def main() -> int:
           f"({fmt_p(mw_raw['p'])}); đã trừ median năm U={mw_dm['u']:.0f} "
           f"({fmt_p(mw_dm['p'])})")
 
-    # 3) CSV — cùng schema external_validation.csv
+
     year_rows = [dict(r) for r in tab_year.to_dict("records")]
     mw_rows = [
         {"section": "test_mw_noise_vs_c2",
@@ -366,7 +375,7 @@ def main() -> int:
     pd.DataFrame(rows)[cols].to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
     print(f"Đã ghi {OUT_CSV} ({len(rows)} dòng)")
 
-    # 4) MD — báo cáo + caveats đầy đủ (mọi số f-string từ biến đã tính)
+
     med_year = d.groupby("year").poverty_rate_pct.median()
     cnt = d.pred_cluster.value_counts().sort_index()
     noise_by_year = d[d.pred_cluster == -1].groupby("year").size()

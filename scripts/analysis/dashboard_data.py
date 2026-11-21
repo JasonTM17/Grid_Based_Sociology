@@ -353,17 +353,17 @@ def select_classification_model(metrics: pd.DataFrame) -> str:
     return select_model_by_cv(candidates)
 
 
-# Kiểm chứng ngoại lai — PCI (VCCI–USAID) · y tế 2020 · GRDP 2018–2024.
-# Nguồn: data/processed/external_pci_63_full.csv + results/external_validation.csv
-# (sinh bởi scripts/analysis/external_validation.py, provenance trong
-# data/processed/external_provenance.md). Mọi số tính lại từ CSV — không
-# hardcode, không nội suy ô thiếu.
+
+
+
+
+
 
 _EXTERNAL_PCI_CSV = Path("data/processed/external_pci_63_full.csv")
 _EXTERNAL_VALIDATION_CSV = Path("results/external_validation.csv")
 _EXTERNAL_REBUILD_COMMAND = "python scripts/analysis/external_validation.py"
 
-# Cửa sổ của kiểm định CHÍNH (§1) và kiểm tra PHỤ Top-30 (§2) trong artifact.
+
 PCI_MAIN_WINDOW = (2011, 2022)
 PCI_TOP30_WINDOW = (2023, 2024)
 
@@ -628,9 +628,9 @@ def ensure_external_pci_consistency(
             )
     for key in ("p_anova", "p_kw"):
         if published[f"{key}_is_bound"]:
-            # Artifact ghi chặn trên dạng 'p < X' (quy ước format_p_value cho p
-            # cực nhỏ) — không có điểm số để so isclose; nhất quán khi p tính
-            # lại cũng nằm dưới đúng chặn trên đó.
+
+
+
             if recomputed[key] >= published[key]:
                 problems.append(
                     f"{key}: tính lại {recomputed[key]:.3g} không thỏa "
@@ -647,7 +647,7 @@ def ensure_external_pci_consistency(
         try:
             code = _published_group_code(row.group)
         except DashboardDataError:
-            continue  # dòng kiểm định (ANOVA/Kruskal/eta), không phải nhóm cụm
+            continue
         if code not in group_stats.index:
             problems.append(f"nhóm '{row.group}' không có trong dữ liệu tính lại.")
             continue
@@ -712,29 +712,29 @@ def external_section_frame(validation: pd.DataFrame, section: str) -> pd.DataFra
     return rows.sort_values(["pred_cluster", "year"]).reset_index(drop=True)
 
 
-# Kiểm chứng bổ trợ — nghèo cấp tỉnh GSO (pxweb V14.47) theo nhãn cụm.
-# Nguồn: data/processed/external_poverty_63.csv (sinh bởi
-# scripts/data/build_poverty_63.py) + results/predict_all_years.csv (model chốt,
-# gate bởi tests/test_artifact_reproduction.py). Protocol join GIỐNG
-# poverty_validation.py / external_validation.py: khóa (year, province_code)
-# duy nhất hai phía, left-join `validate="one_to_one"`, KHÔNG nội suy ô thiếu;
-# ô thiếu được đếm và liệt kê tường minh. Hai kiểm định chính báo cáo CÙNG
-# nhau — gộp thô và đã-trừ-median-năm (pov_dm) — vì chuẩn nghèo đổi theo giai
-# đoạn: chỉ so GIỮA CỤM trong cùng một năm là hợp lệ. Mọi số tự tính lại từ
-# CSV — không hardcode.
+
+
+
+
+
+
+
+
+
+
 
 _POVERTY_CSV = Path("data/processed/external_poverty_63.csv")
 _POVERTY_REBUILD_COMMAND = "python scripts/data/build_poverty_63.py"
 
-# Cửa sổ giao thiết kế (= DESIGN_WINDOW của scripts/analysis/poverty_validation.py:88):
-# chuỗi nghèo phủ 2006/2008/2010 + 2012–2025 liên tục (2017–2019 điền từ NGTK
-# 2020/2021 — scripts/data/build_poverty_gap.py), nhãn cụm phủ 2011–2024, nên giao
-# tự tính từ dữ liệu phải khớp đúng danh sách này — lệch là artifact đã đổi
-# phía nguồn hoặc phía nhãn.
+
+
+
+
+
 POVERTY_OVERLAP_YEARS = (2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
                          2020, 2021, 2022, 2023, 2024)
 
-# Đủ để nối nhãn và liệt kê ô thiếu; load_poverty_assets yêu cầu schema đầy đủ.
+
 _REQUIRED_POVERTY_VIEW_COLUMNS = {"province_code", "province_vi", "year", "poverty_rate_pct"}
 _REQUIRED_POVERTY_CSV_COLUMNS = {
     "province_code", "province_ascii", "province_vi", "year",
@@ -757,8 +757,8 @@ def load_poverty_assets(root: Path = ROOT) -> dict:
             f"{_POVERTY_CSV.as_posix()} thiếu cột: {', '.join(sorted(missing))}."
         )
     _require_unique_keys(poverty, ["province_code", "year"], "Poverty GSO")
-    # papi_province_code khớp province_code → khóa nối nhãn thống nhất hai bên
-    # (assert tương tự poverty_validation.py:277).
+
+
     misaligned = poverty.province_code.ne(poverty.papi_province_code)
     if misaligned.any():
         raise DashboardDataError(
@@ -808,7 +808,7 @@ def prepare_poverty_cluster_view(
     missing_source = window.loc[window.poverty_rate_pct.isna(), keys + ["province_vi"]]
     valid = window.loc[window.poverty_rate_pct.notna()].copy()
 
-    # Cột tên của assignments không mang sang (chỉ hiển thị phía poverty).
+
     labels = assignments.loc[:, keys + ["pred_cluster"]]
     merged = valid.merge(labels, on=keys, how="left", validate="one_to_one")
     no_label = merged.loc[merged.pred_cluster.isna(), keys + ["province_vi"]]
@@ -908,5 +908,5 @@ def poverty_noise_vs_c2(view: pd.DataFrame, value_col: str = "poverty_rate_pct")
     cluster2 = view.loc[view.pred_cluster.eq(2), value_col].to_numpy()
     if not len(noise) or not len(cluster2):
         raise DashboardDataError("Thiếu nhóm nhiễu hoặc cụm 2 cho Mann–Whitney poverty.")
-    u_stat, p_value = stats.mannwhitneyu(noise, cluster2)  # hai phía (mặc định scipy)
+    u_stat, p_value = stats.mannwhitneyu(noise, cluster2)
     return {"u": float(u_stat), "p": float(p_value), "n": int(len(noise) + len(cluster2))}

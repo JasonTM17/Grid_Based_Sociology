@@ -59,11 +59,9 @@ def draw_grid_levels(X: np.ndarray, feats: list[str], params: dict) -> Path:
             cells = model.cells_[level]
             for key, cell in cells.items():
                 dense = cell.count >= min_count
-                face = "#cfe3f2" if dense else "none"
-                if level == last and dense:
-                    face = "none"
-                ax.add_patch(Rectangle(cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
-                                       facecolor=face, edgecolor="none", alpha=0.8))
+                if dense and level != last:
+                    ax.add_patch(Rectangle(cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
+                                           facecolor="#cfe3f2", edgecolor="none", alpha=0.8))
                 if res <= 4:
                     centre = (cell.bounds_min + cell.bounds_max) / 2
                     ax.text(centre[0], centre[1], str(cell.count), ha="center",
@@ -114,12 +112,12 @@ def draw_elbow(X: np.ndarray) -> Path:
     with style_context():
         fig, (a, b) = plt.subplots(1, 2, figsize=(11, 4.2))
         a.plot(ks, wcss, "o-", color=PALETTE["blue"])
-        a.axvline(2, color=PALETTE["gray"], ls="--", lw=1)
+        a.axvline(best, color=PALETTE["gray"], ls="--", lw=1)
         a.set_title("WCSS (tổng bình phương trong cụm)")
         a.set_xlabel("Số cụm k")
         a.set_ylabel("WCSS")
         b.plot(ks[1:], sil, "o-", color=PALETTE["orange"])
-        b.axvline(2, color=PALETTE["gray"], ls="--", lw=1)
+        b.axvline(best, color=PALETTE["gray"], ls="--", lw=1)
         b.set_title(f"Silhouette — cao nhất tại k = {best}")
         b.set_xlabel("Số cụm k")
         b.set_ylabel("Silhouette")

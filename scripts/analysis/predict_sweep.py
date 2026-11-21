@@ -35,24 +35,24 @@ from sklearn.preprocessing import StandardScaler
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from sting import STING  # noqa: E402
-from scripts.data.check_data import scale_audit  # noqa: E402
-from scripts.common.papi_pred_common import FEATURE_LABELS, ROOT, load_panel  # noqa: E402
+from sting import STING
+from scripts.data.check_data import scale_audit
+from scripts.common.papi_pred_common import FEATURE_LABELS, ROOT, load_panel
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
     pass
 
-# Ứng viên đã sàng lọc trước, không bao gồm dimension-level scores
+
 STABLE_SUBDIMS = ["sd_1_3", "sd_1_4", "sd_4_1", "sd_4_2", "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3"]
 CONFIGS = [
     (3, 3, 4, 2), (3, 3, 5, 2), (3, 3, 8, 2), (3, 3, 12, 2),
     (3, 4, 5, 2), (3, 4, 8, 2), (2, 3, 12, 1), (2, 4, 8, 1),
 ]
-SELECT_MAX_YEAR = 2020          # fit trên ≤ 2020
-VALIDATE_YEARS = (2021, 2022)   # tương lai giả để chấm điểm
-# Bộ lọc chất lượng (đặt trước, không tinh chỉnh theo kết quả 2024)
+SELECT_MAX_YEAR = 2020
+VALIDATE_YEARS = (2021, 2022)
+
 K_RANGE = (2, 6)
 NOISE_MAX = 0.25
 LARGEST_MAX = 0.85
@@ -87,11 +87,7 @@ def evaluate(ptr: pd.DataFrame, pva: pd.DataFrame, feats, nl, f, mc, lv):
     largest = sizes[0] / len(lab) if sizes else 1.0
     pred = m.predict(sc.transform(pva[feats]))
     cov = float((pred != -1).mean())
-    return k_of(m), sizes, noise, largest, pred, cov, sc
-
-
-def k_of(m: STING) -> int:
-    return int(m.n_clusters_)
+    return int(m.n_clusters_), sizes, noise, largest, pred, cov, sc
 
 
 def stable_under_mc_pm1(ptr_f, pva_f, feats, sc, pred, nl, f, mc, lv) -> bool:
@@ -161,7 +157,7 @@ def main() -> int:
     best = ok.iloc[0]
     feats = best["features"].split("+")
     cfg = {
-        "frozen_at": datetime.now().date().isoformat(),  # sinh lúc chạy, không hardcode
+        "frozen_at": datetime.now().date().isoformat(),
         "selection_protocol": (
             "Candidates: pairwise allowlist of screened sub-dimensions; mean-jump heuristic checked on train years ≤2020; "
             "dimension-level d1–d6 excluded pending cross-year comparability evidence. "

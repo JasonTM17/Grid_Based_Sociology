@@ -21,8 +21,8 @@ import matplotlib
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from sting import STING  # noqa: E402
-from scripts.common.fig_style import (  # noqa: E402
+from sting import STING
+from scripts.common.fig_style import (
     CLUSTER_COLORS,
     CLUSTER_LABELS,
     PALETTE,
@@ -31,7 +31,7 @@ from scripts.common.fig_style import (  # noqa: E402
     new_fig,
     save_png,
 )
-from scripts.common.papi_pred_common import ROOT, load_config, load_panel  # noqa: E402
+from scripts.common.papi_pred_common import ROOT, load_config, load_panel
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -39,19 +39,19 @@ except Exception:
     pass
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
 YEAR = 2023
 OUT = ROOT / "results" / "figs" / "sting_first_real.png"
-# Màu cụm theo palette Okabe–Ito (fig_style): 0–2 theo CLUSTER_COLORS chuẩn của
-# repo (xám=nhiễu, xanh dương/cam/xanh lá=cụm 0/1/2); cụm 3–4 nếu STING tách
-# thêm dùng 2 màu chuỗi phụ của cùng palette, giữ nguyên hành vi quay vòng %5.
+
+
+
 COLORS = {
     **CLUSTER_COLORS,
     3: PALETTE["sky"],
     4: PALETTE["purple"],
 }
-# Nguồn dữ liệu — theo data/raw/papi/PROVENANCE.md (ngày tải 2026-11-03).
+
 PAPI_SOURCE = "PAPI — CECODES, VFF-CRT, RTA & UNDP"
 PAPI_RETRIEVED = "2026-11-03"
 
@@ -97,8 +97,8 @@ def main() -> int:
     X = sub[feats].to_numpy()
     x, y = X[:, 0], X[:, 1]
 
-    # Hình 1×2 nằm ngang, dùng ở cả slides (đặt theo chiều cao) và docx (cỡ
-    # theo chiều rộng) — dùng preset 16:9 của chuẩn trình bày.
+
+
     apply_style()
     fig, axes = new_fig("slide", ncols=2)
 
@@ -118,11 +118,11 @@ def main() -> int:
                 f"{m_fine.n_clusters_} cụm, cỡ cụm {s2}, "
                 f"nhiễu {(lab_fine == -1).mean():.0%}")
 
-    # Đơn vị trục: cặp sd_* CHƯA đối chiếu workbook (data/processed/
-    # papi_panel_scale_metadata.csv) nên KHÔNG được gắn thang số —
-    # "thang điểm 1–10" (fig_style.UNIT_LABELS["papi"]) chỉ xác nhận cho
-    # d1..d8. Ghi rõ "điểm thành phần PAPI" như predict_demo.py để người
-    # đọc không nhầm với thang chiều chính 1–10 hay điểm chuẩn hóa.
+
+
+
+
+
     sd_unit = "(điểm thành phần PAPI)"
     for ax in axes:
         ax.set_xlabel(f"{wrap_label(labels_map[feats[0]])}\n{sd_unit}")

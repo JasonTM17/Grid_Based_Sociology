@@ -50,7 +50,7 @@ URL gốc:
   cập nhật theo chỉ số giá tiêu dùng như sau: Năm 2010 là 400 nghìn đồng đối
   với khu vực nông thôn và 500 nghìn đồng đối với khu vực thành thị; … năm
   2016 là 630 nghìn đồng và 780 nghìn đồng." — tức các cột 2010–2016 của bảng
-  pxweb theo **chuẩn nghèo thu nhập của Chính phủ**, KHÁCH với bảng "chuẩn
+  pxweb theo **chuẩn nghèo thu nhập của Chính phủ**, KHÁC với bảng "chuẩn
   nghèo đa chiều" trong Niên giám 2019–2021: cùng năm 2016, pxweb cả nước
   5,8% so với Niên giám 9,2%. Còn Niên giám 2025 ghi chú "(*) Từ năm 2022,
   theo chuẩn nghèo đa chiều của Chính phủ giai đoạn 2022-2025" và giá trị
@@ -164,7 +164,7 @@ Chú thích (*) của bảng (trích Niên giám 2019, tr.863 — Biểu 364): *
 nghèo được tính theo chuẩn nghèo tiếp cận đa chiều. / The household poverty
 rate is calculated according to multi-dimensional poverty approach."** — tức
 cùng chuẩn với phần 2020–2025 của pxweb V14.47 (đã đối chiếu trùng khớp ở
-phiên trước), KHÁCH với cột 2006–2016 của V14.47 (chuẩn thu nhập).
+phiên trước), KHÁC với cột 2006–2016 của V14.47 (chuẩn thu nhập).
 
 TP. Hồ Chí Minh để trống cột 2020/2021 trong Niên giám 2021 (ô trống thật,
 không phải lỗi trích) — nhất quán với ghi chú cũ "TP.HCM 2020/2021 để trống

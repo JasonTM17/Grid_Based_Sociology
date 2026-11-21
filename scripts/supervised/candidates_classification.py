@@ -59,14 +59,14 @@ from sklearn.preprocessing import StandardScaler
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.common.papi_pred_common import (  # noqa: E402
+from scripts.common.papi_pred_common import (
     CONFIG_PATH,
     PANEL_PATH,
     ROOT,
     load_config,
     load_panel,
 )
-from scripts.supervised.predict_supervised import (  # noqa: E402
+from scripts.supervised.predict_supervised import (
     CLASSIFICATION_CV_YEARS,
     CLASSIFICATION_SCORER,
     FEATURES,
@@ -87,14 +87,14 @@ OUT_MD = RESULTS / "candidates_classification.md"
 OUT_CSV = RESULTS / "candidates_classification.csv"
 PUBLISHED_METRICS = RESULTS / "supervised_metrics.csv"
 
-LANE_SEED = 11  # seed lane theo quy ước đợt phân tích — mọi bước tất định, không tác động kết quả
-# Mốc "always dự đoán 1" đã công bố — results/supervised_summary.md:31
-# ("baseline mù thời gian "always dự đoán 1" đạt macro-F1 0.400").
+LANE_SEED = 11
+
+
 PUBLISHED_ALWAYS1 = 0.400
-MIN_FOLD_BEAT = 4  # ngưỡng (ii) pre-registered: beat per-fold LR-best trên >= 4/6 fold
+MIN_FOLD_BEAT = 4
 
 
-# helpers
+
 def fmt(value: object, nd: int = 4) -> str:
     """Số thập phân cố định; NaN/None → chuỗi rỗng (ổn định byte khi chạy lại)."""
     if value is None or (isinstance(value, float) and np.isnan(value)):
@@ -187,22 +187,22 @@ def verdict_text(cond_i: bool, cond_ii: bool) -> str:
     return "KHÔNG VƯỢT — " + "; ".join(reasons)
 
 
-# main
+
 def main() -> int:
-    cfg = load_config()          # CHỈ ĐỌC cấu hình đóng băng — không ghi lại
+    cfg = load_config()
     df = load_panel()
 
-    # Ghép cặp + fold ĐÚNG pipeline (predict_supervised.py:335-341)
+
     C = build_classification_pairs(df, cfg["features"], cfg["sting"])
-    ctr = C[C.year_t < HOLDOUT_YEAR]          # CHỈ train-side; holdout không tạo biến
-    Xc_tr = ctr[FEATURES].to_numpy()          # 8 cột REGRESSION_FEATURES — đúng :338
+    ctr = C[C.year_t < HOLDOUT_YEAR]
+    Xc_tr = ctr[FEATURES].to_numpy()
     yc_tr = ctr["y"].to_numpy()
     clf_cv = expanding_year_splits(ctr["year_t"].to_numpy(), yc_tr)
     print(f"[Cặp] phân loại train {len(ctr)} cặp (year_t ≤ {HOLDOUT_YEAR - 1}) · "
           f"{len(FEATURES)} đặc trưng · fold origin {min(CLASSIFICATION_CV_YEARS)}–"
           f"{max(CLASSIFICATION_CV_YEARS)} · holdout {HOLDOUT_YEAR}→{HOLDOUT_YEAR + 1} KHÔNG đụng")
 
-    # Cấu trúc fold (đa số train / prevalence validation)
+
     fold_info = []
     for tr_idx, va_idx in clf_cv:
         origin = int(ctr["year_t"].iloc[va_idx[0]])
@@ -214,16 +214,16 @@ def main() -> int:
             "val_prev": float(np.mean(yc_tr[va_idx])),
         })
 
-    # Baseline tái lập IN-MEMORY trên cùng fold (không hardcode CSV)
-    majority_cv = expanding_majority_f1(yc_tr, clf_cv)   # :236-251 nguyên văn
+
+    majority_cv = expanding_majority_f1(yc_tr, clf_cv)
     majority_folds = []
-    for tr_idx, va_idx in clf_cv:                        # per-fold cùng công thức :241-248
+    for tr_idx, va_idx in clf_cv:
         maj = int(pd.Series(yc_tr[tr_idx]).mode().iloc[0])
         majority_folds.append(f1_score(
             yc_tr[va_idx], np.full(va_idx.size, maj, dtype=int),
             average="macro", labels=[0, 1], zero_division=0,
         ))
-    always_one_folds = [                                  # :530-542 nguyên văn
+    always_one_folds = [
         f1_score(
             yc_tr[va_idx], np.ones(va_idx.size, dtype=int),
             average="macro", labels=[0, 1], zero_division=0,
@@ -232,14 +232,14 @@ def main() -> int:
     ]
     always_one_cv = float(np.mean(always_one_folds))
 
-    lr_pub = fit_grid(lr_pipeline(), {"clf__C": [0.1, 0.3, 1.0]}, clf_cv)   # :342-346
+    lr_pub = fit_grid(lr_pipeline(), {"clf__C": [0.1, 0.3, 1.0]}, clf_cv)
     lr_pub.fit(Xc_tr, yc_tr)
     rf_pub = fit_grid(
         rf_pipeline(), {"max_depth": [3, 6, None], "min_samples_leaf": [1, 2]}, clf_cv
     )
-    rf_pub.fit(Xc_tr, yc_tr)                                                # :344, :347-348
+    rf_pub.fit(Xc_tr, yc_tr)
 
-    # GATE đối chiếu mốc công bố trước khi so ứng viên (đề bài mục 6)
+
     if not PUBLISHED_METRICS.exists():
         print(f"[DỪNG] Không tìm thấy {PUBLISHED_METRICS} — không đối chiếu được baseline.")
         return 1
@@ -272,7 +272,7 @@ def main() -> int:
               "không ghi kết quả ứng viên.")
         return 1
 
-    # Ứng viên (3)
+
     cand_specs = [
         ("C1", lr_pipeline("balanced"), {"clf__C": [0.1, 0.3, 1.0]}),
         ("C2", lr_pipeline(None), {"clf__C": [0.03, 0.1, 0.3, 1.0, 3.0, 10.0]}),
@@ -286,7 +286,7 @@ def main() -> int:
         grids[name] = g
         print(f"[{name}] value_cv={g.best_score_:.4f} best={g.best_params_}")
 
-    # Kiểm tra nội bộ: C2 là superset — điểm tại C dùng chung phải trùng LR công bố
+
     lr_pub_map = {float(k[0]): m for k, m in combo_means(lr_pub, ["clf__C"])}
     c2_map = {float(k[0]): m for k, m in combo_means(grids["C2"], ["clf__C"])}
     shared_cs = (0.1, 0.3, 1.0)
@@ -298,7 +298,7 @@ def main() -> int:
     print("[Kiểm tra] C2 superset: điểm tại C∈{0.1, 0.3, 1.0} trùng LR công bố (≤1e-12) → "
           "optimum đã công bố vẫn đạt được trong lưới C2")
 
-    # Verdict theo ngưỡng pre-registered
+
     ref_lr_mean = float(lr_pub.best_score_)
     ref_lr_folds = per_fold_scores(lr_pub)
     ref_rf_folds = per_fold_scores(rf_pub)
@@ -308,7 +308,7 @@ def main() -> int:
         g = grids[name]
         mean = float(g.best_score_)
         folds = per_fold_scores(g)
-        beats = [bool(f > r) for f, r in zip(folds, ref_lr_folds)]  # chặt: hoà không tính
+        beats = [bool(f > r) for f, r in zip(folds, ref_lr_folds)]
         n_beat = int(sum(beats))
         cond_i = bool(mean > ref_lr_mean)
         cond_ii = bool(n_beat >= MIN_FOLD_BEAT)
@@ -320,7 +320,7 @@ def main() -> int:
         print(f"[{name}] Δ vs LR {mean - ref_lr_mean:+.4f} · Δ vs majority "
               f"{mean - ref_majority:+.4f} · beat LR-best {n_beat}/6 → {verdicts[name]['text']}")
 
-    # CSV (long)
+
     csv_rows: list[tuple[str, str, str, str]] = []
 
     def csv_add(section: str, key: str, metrics: dict[str, object]) -> None:
@@ -381,7 +381,7 @@ def main() -> int:
     )
     print(f"[Ghi] {OUT_CSV} ({len(csv_rows)} dòng)")
 
-    # MARKDOWN
+
     spec_text = {
         "C1": "LogisticRegression(class_weight='balanced') — lưới C {0.1, 0.3, 1.0} y hệt lưới công bố",
         "C2": "LogisticRegression — lưới C {0.03, 0.1, 0.3, 1.0, 3.0, 10.0} (superset của lưới công bố)",

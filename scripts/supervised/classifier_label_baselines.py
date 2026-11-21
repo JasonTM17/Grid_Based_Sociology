@@ -22,7 +22,7 @@ from sklearn.metrics import f1_score
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.supervised.course_supervised_baselines import (  # noqa: E402
+from scripts.supervised.course_supervised_baselines import (
     MODEL_GAUSSIAN_NB,
     MODEL_KNN,
     MODEL_LOGISTIC,
@@ -30,8 +30,8 @@ from scripts.supervised.course_supervised_baselines import (  # noqa: E402
     _fit_grids,
     _grid_best_fold_scores,
 )
-from scripts.common.papi_pred_common import REGRESSION_FEATURES, ROOT, load_config, load_panel  # noqa: E402
-from scripts.supervised.predict_supervised import (  # noqa: E402
+from scripts.common.papi_pred_common import REGRESSION_FEATURES, ROOT, load_config, load_panel
+from scripts.supervised.predict_supervised import (
     CLASSIFICATION_CV_YEARS,
     HOLDOUT_YEAR,
     SEED,
@@ -56,7 +56,7 @@ PUBLISHED_CV = {
     MODEL_LOGISTIC: 0.434,
 }
 
-# Hoán vị nhãn train: mặc định 200; giảm xuống 100 nếu script vượt 5 phút khi chạy thật.
+
 N_PERMUTATIONS = 200
 PERMUTATION_FIT = "fixed_best_params"
 SHUFFLE_BASE_SEED = SEED

@@ -16,6 +16,7 @@ venv/
 .claude/
 .codex/
 .cursor/
+.devin/
 .zcode/
 plans/
 AGENTS.md

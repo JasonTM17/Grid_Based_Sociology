@@ -47,25 +47,25 @@ from sklearn.preprocessing import StandardScaler
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.common.fig_style import (CLUSTER_COLORS, CLUSTER_LABELS, PALETTE,  # noqa: E402
+from scripts.common.fig_style import (CLUSTER_COLORS, CLUSTER_LABELS, PALETTE,
                        add_source, new_fig, save_png, style_context)
-from scripts.common.papi_pred_common import ROOT, load_config, load_panel  # noqa: E402
-from sting import STING  # noqa: E402
+from scripts.common.papi_pred_common import ROOT, load_config, load_panel
+from sting import STING
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
     pass
 
-# hằng số
-SEED = 11                 # seed cố định cho TOÀN BỘ phần ngẫu nhiên (đặc tả lane)
-N_BOOT = 200              # số lần resample bootstrap theo tỉnh
-TRAIN_MAX_YEAR = 2023     # khớp scripts/analysis/predict_demo.py (fit 2011–2023)
 
-# Cửa sổ phân tích là ĐẶC TẢ của lane (không phải kết quả tính được):
-PCI_YEARS = (2011, 2022)    # "lưới đầy 2011–2022" (2023–2024 chỉ Top-30)
-GRDP_YEARS = (2018, 2024)   # nguồn GSO V03.12 chỉ phủ 2018–2024 (2024 sơ bộ)
-HEALTH_YEAR = 2020          # snapshot ODM Health Facilities 2020
+SEED = 11
+N_BOOT = 200
+TRAIN_MAX_YEAR = 2023
+
+
+PCI_YEARS = (2011, 2022)
+GRDP_YEARS = (2018, 2024)
+HEALTH_YEAR = 2020
 
 PROC = ROOT / "data" / "processed"
 RES = ROOT / "results"
@@ -80,7 +80,7 @@ MD_PATH = RES / "cluster_profile.md"
 CSV_PATH = RES / "cluster_profile.csv"
 FIG_PATH = FIGS / "deep_cluster_profile.png"
 
-# Số chữ số thập phân khi làm tròn hiển thị, theo đơn vị từng chỉ số.
+
 DECIMALS = {"pci": 3, "poverty": 2, "health": 6, "grdp": 2, "urban": 2}
 
 
@@ -97,7 +97,7 @@ def rnd(v, nd: int):
     return None if np.isnan(v) else round(v, nd)
 
 
-# dữ liệu
+
 def load_labels() -> pd.DataFrame:
     """Nhãn cụm tỉnh-năm từ artifact của model đóng băng (đọc, không ghi)."""
     lab = pd.read_csv(LABELS_CSV)
@@ -154,7 +154,7 @@ def join_labels(d: pd.DataFrame, lab: pd.DataFrame, value_cols: list[str]):
     return j, n_missing
 
 
-# hồ sơ chỉ số ngoài
+
 def load_pci(lab):
     pci = pd.read_csv(PCI_CSV)
     d = pci[pci.year.between(*PCI_YEARS) & pci.pci_weighted_score.notna()]
@@ -184,7 +184,7 @@ def load_health(lab):
                   ["province_code", "gso_pop_total_thousand"]]
     h = odm.merge(p20, on="province_code", how="left", validate="one_to_one")
     assert h.gso_pop_total_thousand.notna().all(), "dân số 2020 thiếu tỉnh"
-    # pop tính bằng NGHÌN người → count / pop_nghìn = cơ sở trên 1.000 dân
+
     h["fac_per_1000"] = h["hospital_count_odm2020"] / h["gso_pop_total_thousand"]
     j, n_miss = join_labels(h, lab, ["fac_per_1000"])
     meta = dict(key="health", name="Mật độ cơ sở y tế/1.000 dân (OD Mekong)",
@@ -249,14 +249,14 @@ def kruskal_test(d: pd.DataFrame, col: str) -> dict:
         return out
     try:
         h, p = stats.kruskal(*groups)
-    except ValueError as exc:  # mọi giá trị giống hệt nhau — hiếm, ghi rõ
+    except ValueError as exc:
         out["note"] = f"scipy từ chối kiểm định: {exc}"
         return out
     out["h"], out["p"] = float(h), float(p)
     return out
 
 
-# ổn định bootstrap (seed)
+
 def match_by_jaccard(lab_b: np.ndarray, orig: np.ndarray,
                      orig_ids: list[int]):
     """Ghép từng cụm mẫu về cụm gốc bằng Jaccard tối đa (1-1 tối ưu).
@@ -276,7 +276,7 @@ def match_by_jaccard(lab_b: np.ndarray, orig: np.ndarray,
     jac_map = {c: 0.0 for c in orig_ids}
     mapping: dict[int, int] = {}
     if jac.size:
-        row, col = linear_sum_assignment(-jac)  # cực đại tổng Jaccard
+        row, col = linear_sum_assignment(-jac)
         mapping = {int(boot_ids[j]): int(orig_ids[i]) for i, j in zip(row, col)}
         for i, j in zip(row, col):
             jac_map[int(orig_ids[i])] = float(jac[i, j])
@@ -358,7 +358,7 @@ def bootstrap_stability(fit: pd.DataFrame, feats: list[str], sp: dict,
             try:
                 sils[b] = float(silhouette_score(Xz[nn], lab_b[nn]))
             except ValueError:
-                pass  # degenerate (ví dụ trùng điểm hoàn toàn) — bỏ lần này
+                pass
 
     match_freq = {
         c: int(sum(1 for jv in jac_by_orig[c] if jv > 0.0)) for c in orig_ids
@@ -379,7 +379,7 @@ def bootstrap_stability(fit: pd.DataFrame, feats: list[str], sp: dict,
     }
 
 
-# hình ảnh
+
 SOURCE_LINE = "PCI VCCI–USAID · GSO V14.47 · OD Mekong — provenance trong repo"
 SHORT_NAMES = {
     "pci": "PCI 2011–22",
@@ -404,12 +404,12 @@ def make_fig(inds: list[dict], boot: dict, sil0: float, out_path: Path) -> None:
     import matplotlib.pyplot as plt
 
     with style_context():
-        # 2×2 cần khổ lớn hơn preset docx để tiêu đề/ nhãn tiếng Việt không
-        # chồng nhau — target=None cho phép figsize riêng (fig_style.py:169
-        # dành kích thước tự do cho hình ngoài 2 preset).
+
+
+
         fig, axes = new_fig(target=None, nrows=2, ncols=2, figsize=(9.6, 7.0))
 
-        # (a) Phân bố tỉ lệ giữ nhãn qua 200 lần bootstrap
+
         ax = axes[0, 0]
         rd = boot["rate_dist"]
         ax.hist(boot["rates"], bins=20, color=PALETTE["blue"], alpha=0.75)
@@ -425,7 +425,7 @@ def make_fig(inds: list[dict], boot: dict, sil0: float, out_path: Path) -> None:
         ax.legend(fontsize=8)
         ax.grid(axis="y", alpha=0.25)
 
-        # (b) Phân bố silhouette (không nhiễu) + tham chiếu model gốc
+
         ax = axes[0, 1]
         sd = boot["sil_dist"]
         valid = boot["sils"][~np.isnan(boot["sils"])]
@@ -444,7 +444,7 @@ def make_fig(inds: list[dict], boot: dict, sil0: float, out_path: Path) -> None:
         ax.legend(fontsize=8)
         ax.grid(axis="y", alpha=0.25)
 
-        # (c) Tỉ lệ giữ nhãn theo NHÃN GỐC (mean + CI95 theo lần có mặt)
+
         ax = axes[1, 0]
         labs = sorted(boot["rate_by_label"])
         means, los, his, cols = [], [], [], []
@@ -469,7 +469,7 @@ def make_fig(inds: list[dict], boot: dict, sil0: float, out_path: Path) -> None:
         ax.set_title("Giữ nhãn theo nhóm gốc (thanh lỗi = CI95)", fontsize=11)
         ax.grid(axis="y", alpha=0.25)
 
-        # (d) Kruskal–Wallis từng chỉ số ngoài
+
         ax = axes[1, 1]
         names = [SHORT_NAMES[i["meta"]["key"]] for i in inds]
         hs = [i["kw"]["h"] if i["kw"]["h"] is not None else 0.0 for i in inds]
@@ -497,7 +497,7 @@ def make_fig(inds: list[dict], boot: dict, sil0: float, out_path: Path) -> None:
         plt.close(fig)
 
 
-# outputs
+
 CSV_COLS = ["section", "indicator", "group", "n", "mean", "median", "std",
             "min", "max", "note"]
 
@@ -615,7 +615,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
         "nghĩa gate `tests/test_artifact_reproduction.py`.\n"
     )
 
-    # 1) nhãn tỉnh-năm
+
     lines.append("## 1) Nhãn cụm theo tỉnh-năm\n")
     ov = []
     for c, sub in lab.groupby("pred_cluster"):
@@ -638,7 +638,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
         "trục này trước khi đọc các bảng dưới.\n"
     )
 
-    # 2) hồ sơ × chỉ số ngoài
+
     lines.append("## 2) Hồ sơ nhóm × chỉ số ngoài (Kruskal–Wallis + trung vị)\n")
     lines.append(
         "*Lưu ý chung*: nhóm cụm 0 / cụm 1 có n rất nhỏ (cụm li ti) — thống kê "
@@ -654,7 +654,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
             f"({ind['n_miss']} ô tỉnh-năm panel thiếu sd_4_2/sd_6_1 nên không "
             f"có nhãn); {kw['n']} ô vào thống kê.\n"
         )
-        # sd = None với nhóm n=1 → hiển thị "–" thay vì nan trong md
+
         lines.append(ind["groups"].fillna("–").to_markdown(index=False))
         lines.append("")
         if kw["h"] is not None:
@@ -672,7 +672,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
                     f"không phải lỗi nối tên): {', '.join(zeros)}.\n"
                 )
 
-    # 3) ổn định bootstrap
+
     rd, sd = boot["rate_dist"], boot["sil_dist"]
     lines.append(
         f"## 3) Ổn định bootstrap — {N_BOOT} lần, seed {SEED}, resample theo tỉnh\n"
@@ -748,7 +748,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
         "vững chỉ nên dựa trên tương phản nhiễu vs cụm 2.\n"
     )
 
-    # 4) tái lập
+
     lines.append("## 4) Tái lập\n")
     lines.append("```powershell\npython -E scripts/analysis/cluster_profile.py\n```\n")
     lines.append(
@@ -767,7 +767,7 @@ def build_md(lab, cfg, fit, n_fit, inds, boot, sil0) -> str:
     return "\n".join(lines) + "\n"
 
 
-# main
+
 def main() -> int:
     cfg = load_config()
     feats = list(cfg["features"])

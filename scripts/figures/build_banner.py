@@ -18,10 +18,10 @@ import sys
 
 import matplotlib
 
-matplotlib.use("Agg")  # đặt backend trước khi import pyplot
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
-from matplotlib.patches import Rectangle  # noqa: E402
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Rectangle
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -39,7 +39,7 @@ MIST = "#B9CDDE"
 DIM = "#7C93A6"
 DOT = "#F2E9D8"
 
-apply_style()  # DejaVu Sans (phủ đủ dấu tiếng Việt) + rcParams chuẩn repo
+apply_style()
 
 fig = plt.figure(figsize=(6.4, 3.2), dpi=400)
 ax = fig.add_axes([0, 0, 1, 1])
@@ -48,17 +48,17 @@ ax.set_ylim(0, 640)
 ax.axis("off")
 ax.add_patch(Rectangle((0, 0), 1280, 640, color=NAVY, zorder=0))
 
-# Lưới STING phía bên phải
+
 rng = np.random.default_rng(11)
 cell, gap = 60, 11
 cols, rows = 8, 7
 x0 = 708
 y0 = 78
 
-# mật độ giả định: phần lớn thấp, vài ô teal, một cụm gold cháy sáng
+
 density = rng.gamma(1.6, 2.2, size=(rows, cols))
-hot = {(2, 4), (2, 5), (3, 4), (4, 5), (1, 5)}      # cụm chính (teal)
-very_hot = {(3, 5), (2, 5)}                          # vàng cháy nhất
+hot = {(2, 4), (2, 5), (3, 4), (4, 5), (1, 5)}
+very_hot = {(3, 5), (2, 5)}
 
 for r in range(rows):
     for c in range(cols):
@@ -75,7 +75,7 @@ for r in range(rows):
             fill, alpha = CELL_DARK, 0.9
         ax.add_patch(Rectangle((x, y), cell, cell, facecolor=fill,
                                edgecolor="#27455F", linewidth=0.4, alpha=alpha, zorder=1))
-        # điểm dữ liệu giả lập trong ô
+
         n_pts = int(np.clip(d, 0, 14))
         if n_pts:
             px = x + 8 + rng.random(n_pts) * (cell - 16)
@@ -83,13 +83,13 @@ for r in range(rows):
             ax.scatter(px, py, s=3.5, c=DOT if (r, c) not in very_hot else "#3A2A00",
                        alpha=0.9, zorder=2, linewidths=0)
 
-# điểm nhiễu mờ ngoài lưới (ngoại vi)
+
 n_noise = 26
 ax.scatter(rng.uniform(x0 - 60, x0 + 6.6, n_noise), rng.uniform(60, 610, n_noise),
            s=2.5, c=MIST, alpha=0.35, zorder=1, linewidths=0)
 
-# Chữ bên trái
-# Cỡ chữ = 1/2 bản gốc (12.8×6.4 @100dpi) vì figure nhỏ đi một nửa @200dpi.
+
+
 ax.text(96, 470, "STING × PAPI", fontsize=46, fontweight="bold",
         color=CREAM, va="center", zorder=3)
 ax.add_patch(Rectangle((96, 408), 150, 7, color=GOLD, zorder=3))

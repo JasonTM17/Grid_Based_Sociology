@@ -12,7 +12,6 @@ Chạy: ``python -W error scripts/data/preprocessing_sensitivity.py``
 """
 from __future__ import annotations
 
-import hashlib
 import sys
 from pathlib import Path
 from typing import Any
@@ -42,7 +41,6 @@ from scripts.supervised.course_supervised_baselines import (  # noqa: E402
 )
 from scripts.common.papi_pred_common import (  # noqa: E402
     REGRESSION_TARGET,
-    ROOT as REPO_ROOT,
     load_config,
     load_panel,
 )
@@ -62,7 +60,7 @@ try:
 except Exception:
     pass
 
-RESULTS = REPO_ROOT / "results"
+RESULTS = ROOT / "results"
 CSV_PATH = RESULTS / "preprocessing_sensitivity.csv"
 MD_PATH = RESULTS / "preprocessing_sensitivity.md"
 
@@ -98,7 +96,7 @@ class TrainFoldWinsorizer(BaseEstimator, TransformerMixin):
     def __init__(self, z: float = WINSOR_Z) -> None:
         self.z = float(z)
 
-    def fit(self, X, y=None):  # noqa: ANN001, D102
+    def fit(self, X, y=None):
         X = np.asarray(X, dtype=float)
         self.mean_ = np.nanmean(X, axis=0)
         self.std_ = np.nanstd(X, axis=0, ddof=0)
@@ -107,7 +105,7 @@ class TrainFoldWinsorizer(BaseEstimator, TransformerMixin):
         self.upper_ = self.mean_ + self.z * self.std_
         return self
 
-    def transform(self, X):  # noqa: ANN001, D102
+    def transform(self, X):
         X = np.asarray(X, dtype=float)
         return np.clip(X, self.lower_, self.upper_)
 
@@ -376,10 +374,6 @@ def write_markdown(frame: pd.DataFrame) -> None:
         "chỉ báo cáo minh họa.",
     ]
     MD_PATH.write_text("\n".join(lines), encoding="utf-8", newline="\n")
-
-
-def csv_digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def main() -> int:

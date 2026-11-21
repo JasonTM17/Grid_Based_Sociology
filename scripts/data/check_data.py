@@ -17,12 +17,12 @@ import pandas as pd
 MIN_ROWS = 500
 MIN_COLS = 10
 
-# 8 sub-dimension allowlist của pipeline dự đoán — đồng bộ với
-# REGRESSION_FEATURES trong scripts/common/papi_pred_common.py (sửa cả hai nếu đổi).
-PRED_FEATURES_8 = [
-    "sd_1_3", "sd_1_4", "sd_4_1", "sd_4_2",
-    "sd_4_3", "sd_4_4", "sd_6_1", "sd_6_3",
-]
+
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from scripts.common.papi_pred_common import REGRESSION_FEATURES  # noqa: E402
+
+PRED_FEATURES_8 = REGRESSION_FEATURES
 
 
 def load(path: Path) -> pd.DataFrame:

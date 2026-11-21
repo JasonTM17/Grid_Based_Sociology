@@ -23,7 +23,7 @@ from pathlib import Path, PurePosixPath
 from xml.etree import ElementTree
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))  # cho phép `from scripts.<nhóm>.<module> import ...`
+sys.path.insert(0, str(ROOT))
 
 from scripts.common.notebook_checks import notebook_issues  # noqa: E402
 from scripts.data.build_panel import NEW_FILES, OLD_FILES  # noqa: E402
@@ -90,7 +90,6 @@ MIDTERM_FILES = {
     "scripts/common/papi_pred_common.py": "Đọc bảng PAPI và kiểm tra lý do gán cụm",
     "scripts/common/fig_style.py": "Định dạng biểu đồ trong notebook",
     "scripts/common/midterm_clustering.py": "Tham số, mã phân cụm và biểu đồ dùng trong notebook",
-    "scripts/common/papi_forecast.py": "Minh họa dự báo hai điểm từ dữ liệu đến năm 2023",
     "LICENSE": "Giấy phép mã nguồn",
     "requirements.txt": "Thư viện để chạy notebook",
     "data/processed/papi_panel_63_2011_2024.csv": "Bảng PAPI đã tiền xử lý",
@@ -154,21 +153,23 @@ def archive_path(relative: str, milestone: str) -> str:
 def package_files(root: Path, milestone: str) -> dict[str, str]:
     """Check the source files from the fixed catalog for each submission."""
     files = PACKAGE_FILES[milestone].copy()
-    if all((root / relative).is_file() for relative in RAW_REFERENCES):
-        files.update(RAW_REFERENCES)
+    files.update({
+        relative: description for relative, description in RAW_REFERENCES.items()
+        if (root / relative).is_file()
+    })
     for relative in files:
         if not (root / relative).is_file():
             raise FileNotFoundError(f"Thiếu dependency: {relative}")
     return files
 
 
-def instructions(milestone: str, *, include_raw_references: bool = False) -> str:
+def instructions(milestone: str, *, source_references: tuple[str, ...] = ()) -> str:
     _, notebook = PACKAGES[milestone]
     raw_references = ""
-    if include_raw_references:
+    if source_references:
         raw_references = "\nTài liệu nguồn kèm theo\n\n" + "".join(
-            f"- {SUPPORT}/{path} — {description}.\n"
-            for path, description in RAW_REFERENCES.items()
+            f"- {SUPPORT}/{relative} — {RAW_REFERENCES[relative]}.\n"
+            for relative in source_references
         )
     if milestone == "midterm":
         return f"""BÁO CÁO GIỮA KỲ MÔN HỌC MÁY
@@ -183,7 +184,7 @@ Bài nộp gồm hai tệp sau.
 
 - {MIDTERM_NAME}.pptx — Bản trình chiếu.
 - {notebook} — Notebook Jupyter có mã phân cụm, đối chiếu z-score và phần
-  minh họa dự báo điểm PAPI để đối chiếu trên lưới STING.
+  gán điểm PAPI đã quan sát năm 2024 lên lưới STING dựng từ 2011–2023.
 
 Thư mục {SUPPORT}/ chứa mã nguồn STING, bảng PAPI đã tiền xử lý
 (882 quan sát tỉnh–năm, 41 cột), 14 bảng tính gốc và thông tin nguồn dữ liệu.
@@ -299,11 +300,11 @@ def build_package(root: Path, output: Path, milestone: str, *, report_source: Pa
     if milestone == "final":
         report = FINAL_VISIBLE["reports/final_report.docx"]
         if report_source is not None:
-            # Preserve the graded filename when Word locks the report being viewed.
+
             payload[report] = report_source.read_bytes()
         verify_report_fields(payload[report])
     payload["HUONG_DAN.txt"] = instructions(
-        milestone, include_raw_references=RAW_REFERENCES.keys() <= sources.keys()
+        milestone, source_references=tuple(relative for relative in RAW_REFERENCES if relative in sources),
     ).encode("utf-8")
     files["HUONG_DAN.txt"] = "Hướng dẫn mở và chạy lại bài nộp"
     manifest = {
@@ -320,7 +321,7 @@ def build_package(root: Path, output: Path, milestone: str, *, report_source: Pa
     archive = output / f"{name}.zip"
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zipped:
         for path, data in sorted(payload.items()):
-            info = zipfile.ZipInfo(f"{name}/{path}")  # fixed timestamp, reproducible bytes
+            info = zipfile.ZipInfo(f"{name}/{path}")
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             zipped.writestr(info, data)
@@ -356,7 +357,7 @@ def verify_package(archive: Path, milestone: str) -> dict:
         delivery = {f"{name}/{archive_path(p, milestone)}" for p in PACKAGE_FILES[milestone]}
         delivery.update((manifest_path, f"{name}/HUONG_DAN.txt"))
         raw_references = {f"{name}/{archive_path(p, milestone)}" for p in RAW_REFERENCES}
-        if expected not in (delivery, delivery | raw_references):
+        if not delivery <= expected <= (delivery | raw_references):
             raise ValueError("ZIP lệch danh mục tệp nộp")
         if milestone == "final":
             verify_report_fields(zipped.read(f"{name}/{FINAL_VISIBLE['reports/final_report.docx']}"))
@@ -374,7 +375,7 @@ def replay_package(archive: Path, milestone: str, output: Path) -> dict:
     """Run extracted code, blocking reads of the source repo and Downloads."""
     import nbformat
 
-    verify_package(archive, milestone)  # validates every member before extraction
+    verify_package(archive, milestone)
     scratch = Path(tempfile.gettempdir()).resolve()
     with tempfile.TemporaryDirectory(prefix="kiểm tra gói ", dir=scratch) as temporary:
         temporary_path = Path(temporary).resolve()
@@ -464,7 +465,7 @@ def main() -> int:
         (args.output_dir / "verification.json").write_text(
             json.dumps(receipts, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     else:
-        # A successful older replay is no longer evidence for newly built ZIPs.
+
         (args.output_dir / "verification.json").unlink(missing_ok=True)
         lines = []
         for milestone in PACKAGES:

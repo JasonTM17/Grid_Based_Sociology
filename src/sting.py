@@ -25,7 +25,7 @@ import numpy as np
 
 __all__ = ["Cell", "STING"]
 
-_MAX_GRID_CELLS = 2**62  # flat index phải vừa int64
+_MAX_GRID_CELLS = 2**62
 
 
 @dataclass
@@ -82,7 +82,7 @@ class STING:
         lo = X.min(axis=0)
         hi = X.max(axis=0)
         width = hi - lo
-        width[width == 0.0] = 1.0  # chiều hằng số
+        width[width == 0.0] = 1.0
         self.bounds_min_, self.bounds_max_ = lo, np.maximum(hi, lo + width)
 
         self.min_count_ = (
@@ -142,7 +142,7 @@ class STING:
                 stacklevel=2,
             )
 
-        # Thành phần liên thông trên các ô dày (DFS lặp, thứ tự ổn định).
+
         label_of: dict[tuple[int, ...], int] = {}
         comp = 0
         for start in sorted(dense_set):
@@ -218,9 +218,19 @@ class STING:
         level: int | None = None,
     ) -> dict[str, int | np.ndarray | None]:
         """Thống kê gộp của các ô nằm trọn trong ``rect`` = [(lo0, hi0), ...]."""
+        if not hasattr(self, "cells_"):
+            raise RuntimeError("Hãy gọi fit(X) trước khi query_rect()")
         if level is None:
             level = self.n_levels - 1
+        if not (0 <= level < self.n_levels):
+            raise ValueError(
+                f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
+            )
         rect = np.asarray(rect, dtype=float)
+        if rect.ndim != 2 or rect.shape != (self.n_dims_, 2):
+            raise ValueError(
+                f"rect cần shape ({self.n_dims_}, 2), nhận {rect.shape}"
+            )
         lo, hi = rect[:, 0], rect[:, 1]
 
         total = 0
@@ -236,7 +246,7 @@ class STING:
                     origin = cell.mean
                 new_total = total + cell.count
                 weight = cell.count / new_total
-                # Gộp mômen trung tâm quanh mốc chung để tránh trừ hai bình phương lớn.
+
                 delta = (cell.mean - origin) - mean_offset
                 m2 += cell.count * cell.std ** 2 + total * weight * delta ** 2
                 mean_offset += weight * delta
@@ -256,18 +266,30 @@ class STING:
 
     def point_cell_index(self, level: int) -> np.ndarray:
         """Chỉ số ô của mỗi điểm tại ``level``, shape (n, d)."""
+        if not hasattr(self, "_point_idx_"):
+            raise RuntimeError("Hãy gọi fit(X) trước khi point_cell_index()")
+        if not (0 <= level < self.n_levels):
+            raise ValueError(
+                f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
+            )
         return self._point_idx_[level].copy()
 
     def cell_stats(self, level: int) -> list[Cell]:
         """Các ô có dữ liệu tại ``level``, sắp theo chỉ số."""
+        if not hasattr(self, "cells_"):
+            raise RuntimeError("Hãy gọi fit(X) trước khi cell_stats()")
+        if not (0 <= level < self.n_levels):
+            raise ValueError(
+                f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
+            )
         return [self.cells_[level][k] for k in sorted(self.cells_[level])]
 
     def _assign(self, X: np.ndarray, res: int) -> tuple[np.ndarray, np.ndarray]:
         """Chỉ số ô (theo chiều và phẳng) của từng điểm trên lưới ``res`` ô/chiều."""
         span = self.bounds_max_ - self.bounds_min_
-        span[span == 0.0] = 1.0  # Bước nới cận của chiều hằng có thể bị làm tròn về 0.
+        span[span == 0.0] = 1.0
         idx = np.floor((X - self.bounds_min_) / span * res).astype(np.int64)
-        np.clip(idx, 0, res - 1, out=idx)  # biên trên vào ô cuối
+        np.clip(idx, 0, res - 1, out=idx)
         flat = np.ravel_multi_index(
             tuple(idx[:, k] for k in range(self.n_dims_)), (res,) * self.n_dims_
         )

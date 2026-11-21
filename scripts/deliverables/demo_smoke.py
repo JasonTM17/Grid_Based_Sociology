@@ -5,22 +5,19 @@ In bang kiem tra tung muc + ket luan tong. Exit 0 neu tat ca deu dat.
 """
 from __future__ import annotations
 
-import sys as _sys
-from pathlib import Path as _Path
-
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))  # repo root: cho phép `from scripts.<nhóm>.<module> import ...`
-
 import sys
 from pathlib import Path
 
-from scripts.common.notebook_checks import notebook_issues
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
+from scripts.common.notebook_checks import notebook_issues  # noqa: E402
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
     pass
 
-ROOT = Path(__file__).resolve().parents[2]
 RESULTS: list[tuple[str, bool, str]] = []
 
 
@@ -34,7 +31,7 @@ def file_nonempty(rel: str, min_bytes: int = 200) -> None:
     check(rel, ok, f"{p.stat().st_size if p.is_file() else 0:,} bytes" if p.is_file() else "MISSING")
 
 
-# 1) Dataset va model
+
 check(
     "panel 882x41, >=500x10",
     (ROOT / "data" / "processed" / "papi_panel_63_2011_2024.csv").is_file(),
@@ -47,7 +44,7 @@ try:
     check("63 tinh x 14 nam", df.province_code.nunique() == 63 and df.year.nunique() == 14)
     n_num = df.select_dtypes("number").shape[1]
     check(">= 10 cot so", n_num >= 10, f"{n_num} cot so")
-except Exception as e:  # noqa: BLE001
+except Exception as e:
     check("panel readable", False, str(e))
 
 for f in [
@@ -60,7 +57,7 @@ for f in [
 ]:
     file_nonempty(f)
 
-# 2) Artifacts ket qua
+
 for f in [
     "results/figs/predict_2024.png",
     "results/figs/00_synthetic_sting.png",
@@ -79,7 +76,7 @@ for f in [
 ]:
     file_nonempty(f, min_bytes=100)
 
-# 3) Deliverables nop bai
+
 for f in [
     "notebooks/STING_PAPI_Demo_MoRong.ipynb",
     "notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb",
@@ -92,25 +89,25 @@ for f in [
 ]:
     file_nonempty(f, min_bytes=500)
 
-# 4) Docs mo duoc
+
 try:
-    import docx  # noqa: E402
+    import docx
 
     d = docx.Document(ROOT / "reports" / "final_report.docx")
     check("final_report.docx mo duoc", len(d.paragraphs) > 100, f"{len(d.paragraphs)} doan, {len(d.tables)} bang")
-except Exception as e:  # noqa: BLE001
+except Exception as e:
     check("final_report.docx mo duoc", False, str(e))
 
 try:
-    from pptx import Presentation  # noqa: E402
+    from pptx import Presentation
 
     p = Presentation(ROOT / "slides" / "final.pptx")
     n = len(p.slides._sldIdLst)
     check("final.pptx mo duoc 16 trang", n == 16, f"{n} trang")
-except Exception as e:  # noqa: BLE001
+except Exception as e:
     check("final.pptx mo duoc", False, str(e))
 
-# 5) Notebook execute san
+
 import nbformat  # noqa: E402
 
 for nb in [
@@ -126,19 +123,19 @@ for nb in [
             f"{nb} da execute, 0 loi", not issues,
             f"{n_cells} cells; " + ("; ".join(issues) if issues else "Run All, 0 error/stderr"),
         )
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         check(f"{nb} doc duoc", False, str(e))
 
 try:
-    from pptx import Presentation  # noqa: E402
+    from pptx import Presentation
 
     p_sub = Presentation(ROOT / "slides" / "submission.pptx")
     n_sub = len(p_sub.slides._sldIdLst)
     check("submission.pptx mo duoc <=10 trang", 1 <= n_sub <= 10, f"{n_sub} trang")
-except Exception as e:  # noqa: BLE001
+except Exception as e:
     check("submission.pptx mo duoc", False, str(e))
 
-# Bao cao
+
 print("=" * 64)
 print("KIỂM TRA SẴN SÀNG DEMO — STING × PAPI")
 print("=" * 64)

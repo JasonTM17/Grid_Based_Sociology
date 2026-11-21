@@ -70,7 +70,7 @@ def main() -> int:
     scaler = StandardScaler().fit(ptr)
     Xtr = scaler.transform(ptr)
 
-    # 1) Dựng lưới và xác định cụm từ giai đoạn tham chiếu.
+
     model = STING(
         n_levels=sp["n_levels"], factor=sp["factor"], min_count=sp["min_count"]
     ).fit(Xtr)
@@ -80,7 +80,7 @@ def main() -> int:
     )
     noise_tr = float((labels == -1).mean())
 
-    # 2) Lưu model local + tham số chuẩn hóa
+
     model.save(MODEL_PATH)
     scaler_info = {
         "features": feats,
@@ -98,7 +98,7 @@ def main() -> int:
         json.dumps(scaler_info, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    # 3) Nạp lưới đã lưu và gán các điểm quan sát năm 2024.
+
     loaded = STING.load(MODEL_PATH)
     assert np.array_equal(loaded.predict(Xtr), labels), "load() phải khôi phục đúng"
     assignments = describe_grid_assignment(test, feats, scaler, loaded)
@@ -107,7 +107,7 @@ def main() -> int:
     Xte = scaler.transform(pte[feats])
     assignments.to_csv(ASSIGNMENT_PATH, index=False, encoding="utf-8-sig")
 
-    # 4) Gán điểm quan sát của từng năm lên cùng lưới.
+
     rows = []
     for y in sorted(df.year.unique()):
         sub = df[df.year == y].dropna(subset=feats)
@@ -130,13 +130,13 @@ def main() -> int:
     out = pd.DataFrame(rows)
     out.to_csv(CSV_PATH, index=False, encoding="utf-8-sig")
 
-    # 5) Tóm tắt trung thực
+
     cov = float((pred_te != -1).mean())
     dist = dict(sorted(Counter(pred_te.tolist()).items()))
     te2 = pte.copy()
     te2["pred_cluster"] = pred_te
 
-    # hồ sơ cụm train — KHÔNG trộn dòng nhiễu (-1) vào bảng cụm
+
     prof = ptr.copy()
     prof["cluster"] = labels
     profile = (
@@ -155,7 +155,7 @@ def main() -> int:
         )
     )
 
-    # chuyển cụm 2023 → 2024, TÁCH RÕ chuyển thật vs chuyển sang/từ nhiễu
+
     a = out[out.year == TRAIN_MAX_YEAR][["province_code", "pred_cluster"]]
     b = out[out.year == TEST_YEAR][["province_code", "pred_cluster"]]
     m = a.merge(b, on="province_code", suffixes=("_prev", "_test"))
@@ -168,11 +168,11 @@ def main() -> int:
     n_excluded = int(test[feats].isna().any(axis=1).sum()
                      + train[train.year == TRAIN_MAX_YEAR][feats].isna().any(axis=1).sum())
 
-    # độ nhạy coverage + ổn định nhãn theo min_count (coverage là ngưỡng-phụ thuộc —
-    # nói rõ). Ổn định nhãn so với dự đoán 2024 của cấu hình chốt (pred_te) trên cùng
-    # len(pte) tỉnh đủ dữ liệu 2024: (i) ARI — bất biến với hoán vị nhãn, bắt buộc vì
-    # nhãn cụm do thuật toán gán theo thứ tự ô dày và đổi min_count là đổi lưới;
-    # (ii) số tỉnh đổi TRẠNG THÁI cụm↔nhiễu (p == -1 khác dấu với cấu hình chốt).
+
+
+
+
+
     sens = []
     te_by_mc: dict[int, np.ndarray] = {}
     for mc2 in sorted({max(1, sp["min_count"] - 2), sp["min_count"], sp["min_count"] + 3}):
@@ -231,7 +231,7 @@ def main() -> int:
         "không đọc nhầm thành gãy model."
     )
 
-    # Hạn chế diễn giải: số liệu tính từ chính artifacts của script này
+
     import ast
 
     nn_total = int((labels >= 0).sum())
@@ -290,9 +290,9 @@ def main() -> int:
     lines.append("")
     SUMMARY_PATH.write_text("\n".join(lines), encoding="utf-8")
 
-    # 6) Hình scatter — trình bày theo chuẩn scripts/common/fig_style.py (palette
-    #    Okabe–Ito, font/tiêu đề chuẩn, dòng nguồn PAPI, DPI in ấn 300).
-    #    Chỉ đổi lớp trình bày; toàn bộ số liệu lấy từ kết quả tính phía trên.
+
+
+
     import matplotlib
 
     matplotlib.use("Agg")
@@ -308,12 +308,12 @@ def main() -> int:
         extras = [PALETTE["purple"], PALETTE["sky"]]
         return extras[(c - 3) % len(extras)]
 
-    # Nhãn nhiễu cho legend: bỏ đuôi "(–1)" vì số điểm đã nằm trong ngoặc kế bên
+
     noise_name = CLUSTER_LABELS[-1].replace(" (–1)", "")
 
     with style_context():
         xa, ya = ptr[feats[0]].to_numpy(), ptr[feats[1]].to_numpy()
-        fig, ax = new_fig(target="docx")  # 6.5 x 4.3 in — khớp cột docx + slide
+        fig, ax = new_fig(target="docx")
         noise_mask = labels == -1
         ax.scatter(xa[noise_mask], ya[noise_mask], s=14, c=PALETTE["gray"], alpha=0.5,
                    label=f"2011–2023 · {noise_name} ({int(noise_mask.sum())})")
@@ -333,23 +333,23 @@ def main() -> int:
                 continue
             ax.scatter(xt[mm], yt[mm], s=55, marker="o", c=cluster_color(c), edgecolors="black",
                        linewidths=0.7, label=f"2024 → {CLUSTER_LABELS.get(c, f'cụm {c}')} ({int(mm.sum())})")
-        # Nhãn trục theo cấu hình đóng băng. Điểm vẽ là GIÁ TRỊ GỐC của panel
-        # (ptr/pte phía trên), KHÔNG phải z-score — STING chỉ chuẩn hóa bên trong
-        # và bất biến với biến đổi affine từng chiều, nên tọa độ hiển thị giữ
-        # nguyên điểm gốc. Cặp sd_* CHƯA đối chiếu workbook
-        # (data/processed/papi_panel_scale_metadata.csv) nên KHÔNG được gắn thang
-        # số ("thang điểm 1–10" chỉ xác nhận cho d1..d8); ghi rõ "điểm thành phần
-        # PAPI" để người đọc không nhầm với điểm chiều chính d1..d8 (0–10) cũng
-        # như với điểm chuẩn hóa.
+
+
+
+
+
+
+
+
         ax.set_xlabel(f"{labels_map[feats[0]]}\n(điểm thành phần PAPI)", fontsize=10)
         ax.set_ylabel(f"{labels_map[feats[1]]} (điểm thành phần PAPI)")
         ax.set_title("Điểm PAPI quan sát năm 2024\ntrên lưới STING đến năm 2023")
         ax.legend(loc="upper left", fontsize=8.5, frameon=True, framealpha=0.9)
         ax.grid(alpha=0.25)
-        # Nguồn/ngày tải theo data/raw/papi/PROVENANCE.md (không tự điền ngày render)
+
         add_source(fig, "PAPI — CECODES, VFF-CRT, RTA & UNDP", retrieved="2026-11-03")
-        fig.tight_layout(rect=(0, 0.05, 1, 1))  # chừa lề dưới cho dòng nguồn
-        # 300 DPI: 6.5 in × 300 ≈ 1950 px → ≥ 300 DPI hiệu dụng ở cột báo cáo ~16 cm
+        fig.tight_layout(rect=(0, 0.05, 1, 1))
+
         save_png(fig, FIG_PATH, dpi=300)
         plt.close(fig)
 
@@ -357,8 +357,8 @@ def main() -> int:
     print(f"train: k={model.n_clusters_} sizes={sizes} noise={noise_tr:.0%}")
     print(f"gan diem 2024: coverage={cov:.0%} dist={dist} | chuyen that {real_move}/{n_common}"
           f" | sang nhieu {to_noise} | tu nhieu {from_noise} | loai {n_excluded}")
-    # Chẩn đoán cặp đôi giữa các biến thể min_count (chỉ stdout): ARI + đổi trạng thái
-    # cụm↔nhiễu giữa từng cặp biến thể — kiểm chứng chéo độc lập với bảng so-cấu-hình-chốt.
+
+
     _mc_list = sorted(te_by_mc)
     _pair_diag = "; ".join(
         f"mc{a}-mc{b}: ARI={adjusted_rand_score(te_by_mc[a], te_by_mc[b]):.3f}, "

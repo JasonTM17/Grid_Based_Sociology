@@ -36,8 +36,8 @@ OUT = ROOT / "data" / "processed" / "papi_panel_scale_metadata.csv"
 sys.path.insert(0, str(ROOT))
 from scripts.data.check_data import scale_audit  # noqa: E402
 
-# Các cột đã đối chiếu workbook (kiểm toán 2026-11-07): thang trước/sau 2021,
-# năm đổi thang, năm ngừng thu thập, nguồn chứng minh.
+
+
 WORKBOOK: dict[str, tuple[str, str, str, str, str]] = {
     "sd_5_1": ("0.25-2.5 điểm", "0.33-3.33 điểm/points", "2021", "", "workbook sheet 2020 vs 2021+"),
     "sd_5_3": ("0.25-2.5 điểm", "0.33-3.33 điểm/points", "2021", "", "workbook sheet 2020 vs 2021+"),

@@ -61,7 +61,7 @@ REGIONS_ASCII = {
     "dong bang song cuu long",
 }
 
-# (file, các trang pdf, số cột bảng, {vị trí cột: năm}, nhãn source)
+
 YEARBOOKS: list[tuple[str, tuple[int, ...], int, dict[int, int], str]] = [
     ("nien_giam_2018.pdf", (854, 855, 856), 6, {3: 2016, 4: 2017, 5: 2018},
      "GSO NGTK 2018 tr.854-856 (đa chiều; 2018=Sơ bộ)"),
@@ -73,7 +73,7 @@ YEARBOOKS: list[tuple[str, tuple[int, ...], int, dict[int, int], str]] = [
      "GSO NGTK 2021 tr.881-882 (đa chiều; 2021=Sơ bộ)"),
 ]
 
-# Năm kết quả -> (chỉ số trong YEARBOOKS, vị trí cột): vintage mới nhất chứa năm
+
 PRIMARY = {2017: (2, 1), 2018: (3, 1), 2019: (3, 2)}
 
 NUM_RE = re.compile(r"(\d{1,3}(?:\.\d{3})*),(\d+)")
@@ -137,7 +137,7 @@ def parse_yearbook(pdf: str, pages: tuple[int, ...], ncols: int,
                 continue
             cells = parse_cells(lines, i, ncols)
             if len(cells) < ncols:
-                continue  # tiêu đề trùng chữ (vd 'Hà Nội' trong mục lục) — không phải hàng số liệu
+                continue
             for pos, year in sorted(POSITIONS[pdf].items()):
                 if pos < len(cells) and pd.notna(cells[pos]):
                     if k == "ca nuoc":
@@ -172,7 +172,7 @@ def main() -> int:
     papi_by_ascii = papi_map.set_index("province_ascii")["province_code"]
     assert papi_by_ascii.index.is_unique
 
-    # trích 4 bảng Niên giám
+
     extracted: dict[str, dict[tuple[str, int], float]] = {}
     nationals: dict[str, dict[int, float]] = {}
     for pdf, pages, ncols, colmap, label in YEARBOOKS:
@@ -181,9 +181,9 @@ def main() -> int:
         got_prov = {y: sum(1 for k, yy in vals if yy == y) for y in want_years}
         print(f"{label}: tỉnh/năm = {got_prov}; cả nước = {national}")
         assert len(seen) == 63, f"{pdf}: chỉ nhận diện {len(seen)}/63 tỉnh"
-        # TP.HCM để trống 2020/2021 trong NGTK 2021 (đã ghi trong PROVENANCE.md
-        # cũ: "TP.HCM 2020/2021 để trống trong Niên giám") — 62/63 là duy nhất
-        # 2 cột đó; mọi cột khác phải đủ 63.
+
+
+
         for y in want_years:
             n = got_prov[y]
             if pdf == "nien_giam_2021.pdf" and y in (2020, 2021):
@@ -193,7 +193,7 @@ def main() -> int:
         extracted[pdf] = vals
         nationals[pdf] = national
 
-    # đối chiếu chéo giữa các vintage
+
     all_years = sorted({y for _p, _pg, _n, cm, _l in YEARBOOKS for y in cm.values()})
     print("\nĐối chiếu chéo các vintage (dung sai 0,051):")
     vintage_conflict = False
@@ -217,7 +217,7 @@ def main() -> int:
             vintage_conflict = True
         print(f"  năm {y}: {len(holders)} nguồn {[(Path(p).stem, q) for p, q in holders]} — {n_diff} ô lệch")
 
-    # sanity: cột 2020/2021 NGTK 2021 phải trùng external_poverty_63.csv
+
     existing = pd.read_csv(OUT / "external_poverty_63.csv")
     g2020 = existing.set_index(["province_ascii", "year"])["poverty_rate_pct"]
     n_ok = n_diff = n_skip = 0
@@ -239,7 +239,7 @@ def main() -> int:
           f"lệch {n_diff}, bỏ qua {n_skip} (TP.HCM trống trong Niên giám)")
     assert n_diff == 0, "NGTK 2021 cột 2020/2021 lệch pxweb — kiểm tra parser"
 
-    # dựng bảng chỉ 2017–2019
+
     rows = []
     for year, (yi, pos) in PRIMARY.items():
         pdf = YEARBOOKS[yi][0]

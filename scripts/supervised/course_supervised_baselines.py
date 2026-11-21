@@ -34,14 +34,14 @@ from sklearn.tree import DecisionTreeClassifier
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.common.papi_pred_common import (  # noqa: E402
+from scripts.common.papi_pred_common import (
     REGRESSION_FEATURES,
     ROOT,
     load_config,
     load_panel,
     select_model_by_cv,
 )
-from scripts.supervised.predict_supervised import (  # noqa: E402
+from scripts.supervised.predict_supervised import (
     CLASSIFICATION_CV_YEARS,
     FIG_DPI,
     FIG_EXTRA,
@@ -68,7 +68,7 @@ CLASSIFICATION_SCORER = make_scorer(
     f1_score, average="macro", labels=[0, 1], zero_division=0
 )
 
-# Tên hiển thị — khớp convention ``predict_supervised.py``.
+
 MODEL_GAUSSIAN_NB = "gaussian naive bayes"
 MODEL_KNN = "knn"
 MODEL_SVM_LINEAR = "svm (linear)"
@@ -91,7 +91,7 @@ SENSITIVITY_LABEL = " (cân bằng lớp, tham khảo)"
 GROUP_PRIMARY = "primary"
 GROUP_SENSITIVITY = "sensitivity"
 
-# Ba classifier học phần — cùng lưới công bố, thêm class_weight="balanced".
+
 BALANCED_SENSITIVITY_BASE_MODELS = (
     MODEL_SVM_RBF,
     MODEL_DECISION_TREE,
@@ -102,7 +102,7 @@ BALANCED_SENSITIVITY_BASE_MODELS = (
 def _sensitivity_display_name(base_model: str) -> str:
     return f"{base_model}{SENSITIVITY_LABEL}"
 
-# Tiêu đề panel trên hình — đọc được khi chiếu slide (tránh rút gọn kiểu svm-L).
+
 PANEL_TITLES: dict[str, str] = {
     MODEL_GAUSSIAN_NB: "Naive Bayes Gauss",
     MODEL_KNN: "KNN",
@@ -114,7 +114,7 @@ PANEL_TITLES: dict[str, str] = {
 
 CLASS_LEGEND = "0 = ngoại vi (nhiễu STING), 1 = vùng dày"
 
-# Tránh fit STING lặp lại trong cùng một tiến trình (kiểm thử / determinism).
+
 _PAIRS_CACHE: pd.DataFrame | None = None
 
 
@@ -370,7 +370,7 @@ def build_metrics_table(
     majority_cv = expanding_majority_f1(ytr, clf_cv)
     maj = int(pd.Series(ytr).mode().iloc[0])
 
-    # Dữ liệu thật: 50 cây (trùng kết quả CSV đã lưu). Synthetic test: ít cây hơn, cùng grid.
+
     rf_n_estimators = 25 if synthetic_pairs else 50
 
     grids = _fit_grids(

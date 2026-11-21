@@ -43,7 +43,7 @@ def extract_fields(page: str) -> list[tuple[str, str]]:
         ty = re.search(r'type="([^"]*)"', tag)
         typ = (ty.group(1).lower() if ty else "text")
         if typ in ("submit", "image", "button"):
-            continue  # nút bấm: chỉ thêm khi chủ động kích
+            continue
         val = re.search(r'value="([^"]*)"', tag)
         if typ == "checkbox" or typ == "radio":
             chk = re.search(r'checked="([^"]*)"', tag) or re.search(r"\bchecked\b", tag)
@@ -57,7 +57,7 @@ def extract_fields(page: str) -> list[tuple[str, str]]:
             fields.append((name, "vi"))
             continue
         if "OutputFormatDropDownList" in name:
-            continue  # để mặc định server-side
+            continue
         sel = [_unesc(re.search(r'value="([^"]*)"', a).group(1)) if re.search(r'value="([^"]*)"', a) else _unesc(t.strip())
                for a, t in opts if "selected" in a]
         for v in sel:
@@ -98,7 +98,7 @@ def main() -> int:
     fields = extract_fields(page1)
     print(f"[1] GET OK — {len(fields)} trường form gốc")
 
-    # Đánh dấu chọn: mọi option của 2 listbox giá trị (mặc định chưa chọn gì)
+
     boxes = re.findall(
         r'(?s)<select[^>]*name="([^"]*ValuesListBox[^"]*)"[^>]*>(.*?)</select>', page1)
     select_data: list[tuple[str, str]] = []
@@ -120,7 +120,7 @@ def main() -> int:
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(page2)
     print("Đã ghi:", out_path)
-    # Gợi ý nhanh trang kế tiếp
+
     for pat in ("<table", "OutputFormat", "lưu", "Lưu", "Save"):
         print(f"    chứa {pat!r}: {pat in page2}")
     return 0

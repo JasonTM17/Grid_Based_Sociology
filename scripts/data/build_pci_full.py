@@ -67,14 +67,14 @@ def norm(name: str) -> str:
     return re.sub(r"[^a-z]", "", s)
 
 
-# Bí danh tên hiển thị khác chuẩn (theo extract_indicators.py của gói replication + biến thể
-# EN thực tế trong workbook 2024 và trang xếp hạng: BRVT, HCMC, TT-Hue).
+
+
 ALIASES = {
     "tphochiminh": "79", "hochiminh": "79", "tphcm": "79", "hcmc": "79",
     "thuathienhue": "46", "hue": "46", "tthue": "46",
     "bariavungtau": "77", "brvt": "77",
     "daklak": "66", "daknong": "67", "hoabinh": "17", "thanhhoa": "38", "khanhhoa": "56",
-    "baccan": "06",  # 'Bắc Cạn' — chính tả cũ trong workbook 2011
+    "baccan": "06",
     "tphanoi": "01", "hanoi": "01", "tpdanang": "48", "tphaiphong": "31", "tpcantho": "92",
 }
 
@@ -115,7 +115,7 @@ def as_score(x, where: str) -> float:
     return v
 
 
-# 2011 (xls)
+
 def parse_2011() -> tuple[list[tuple[str, float]], str]:
     """Summary 2011 xếp dòng theo rank sub-index đầu tiên; mỗi chỉ số là cặp (tên tỉnh, điểm).
 
@@ -126,7 +126,7 @@ def parse_2011() -> tuple[list[tuple[str, float]], str]:
     if ws.cell_value(0, 20) != "PCI 2011":
         raise SystemExit(f"LỖI: cột 21 của {F_XLS_2011}!Summary không phải 'PCI 2011'")
     recs = []
-    for i in range(1, 64):  # Excel dòng 2-64 = 63 tỉnh
+    for i in range(1, 64):
         name = str(ws.cell_value(i, 19)).strip()
         recs.append((name, as_score(ws.cell_value(i, 20), f"{F_XLS_2011} dòng {i + 1}")))
     if len(recs) != 63:
@@ -136,7 +136,7 @@ def parse_2011() -> tuple[list[tuple[str, float]], str]:
     return recs, note
 
 
-# trang xếp hạng (2023 + kiểm chứng)
+
 def parse_ranking_html(path: Path, year: str) -> list[tuple[str, float | None, str]]:
     raw = path.read_text(encoding="utf-8", errors="replace")
     sel = re.findall(rf'<option value="{year}"\s+selected', raw)
@@ -161,7 +161,7 @@ def parse_ranking_html(path: Path, year: str) -> list[tuple[str, float | None, s
     return recs
 
 
-# 2024 (xlsx)
+
 def parse_2024() -> tuple[list[tuple[str, float | None]], str]:
     wb = openpyxl.load_workbook(RAW / F_XLSX_2024, read_only=True, data_only=True)
     ws = wb["Summary"]
@@ -173,8 +173,8 @@ def parse_2024() -> tuple[list[tuple[str, float | None]], str]:
     i_w = hdr.index("The Weighted PCI Score")
     if rows[1][0] is None or str(rows[1][0]).strip() != "An Giang":
         raise SystemExit(f"LỖI: {F_XLSX_2024} dòng 2 không phải 'An Giang' — cấu trúc khác dự kiến")
-    recs = [(str(rows[i][0]).strip(), rows[i][i_w]) for i in range(1, 64)]  # Excel dòng 2-64
-    # Dòng 66 là 'Yen Bai' trùng lặp với điểm 0 — artifact phía cuối bảng, bỏ qua nhưng ghi nhận.
+    recs = [(str(rows[i][0]).strip(), rows[i][i_w]) for i in range(1, 64)]
+
     artifact = rows[65]
     note = ""
     if artifact[0] is not None and str(artifact[0]).strip() == "Yen Bai":
@@ -285,17 +285,17 @@ def main() -> int:
 
     name2code = load_name2code()
 
-    # 2011
+
     rec_2011, note_2011 = parse_2011()
     names_2011 = {n for n, _ in rec_2011}
     rank_2011 = parse_ranking_html(RAW / "pci_ranking_page_2011.html", "2011")
     names_rank_2011 = {n for n, _, _ in rank_2011}
     check_code_set(name2code, F_XLS_2011, names_2011, "ranking 2011", names_rank_2011)
-    # Kiểm chứng chéo điểm 2011: workbook (nguồn chính) vs trang xếp hạng.
-    # Đã biết trang xếp hạng hiện tại HOÁN TÊN cặp Bắc Giang/Bắc Cạn (workbook: Bắc Giang
-    # 60,79 hạng 23, Bắc Cạn 52,71 hạng 60; Báo cáo PCI 2014 chính thức trang 37-38 xác
-    # nhận workbook: 'BẮC KẠN ... 2011 52,71 60', 'BẮC GIANG ... 2011 60,79 23'). Nếu bộ
-    # mã lệch khác cặp này thì dừng để rà thủ công.
+
+
+
+
+
     rank_map_2011 = {code_of(n, name2code): s for n, s, _ in rank_2011}
     diffs_2011, mismatch_2011 = [], []
     for n, s in rec_2011:
@@ -319,9 +319,9 @@ def main() -> int:
           f"Bắc Giang/Bắc Cạn trên trang xếp hạng — lấy theo workbook (khớp Báo cáo PCI 2014)")
     print(f"2011 workbook: {note_2011}")
 
-    # 2023 (điểm tổng từ trang xếp hạng — workbook không có cột điểm tổng)
+
     rank_2023 = parse_ranking_html(RAW / "pci_ranking_page_2023.html", "2023")
-    # Xác nhận workbook 2023 (EN và VN) cùng tập 63 tỉnh, và đúng là không có cột điểm tổng
+
     for f in (F_XLSX_2023_EN, F_XLSX_2023_VN):
         wb = openpyxl.load_workbook(RAW / f, read_only=True, data_only=True)
         ws = wb[wb.sheetnames[0]]
@@ -330,9 +330,9 @@ def main() -> int:
         hdr = [str(v) if v is not None else "" for v in rows[0]]
         if any("weighted" in h.lower() or "chỉ số pci" in h.lower() for h in hdr):
             raise SystemExit(f"LỖI: {f} lại có cột điểm tổng — cần rà lại cách parse 2023")
-        # Excel dòng 2-64 = 63 tỉnh; đuôi bảng (dòng 65+) chứa dòng trống, 1 dòng tỉnh
-        # trùng lặp (EN: 'Lang Son', VN: 'Yên Bái') và Min/Median/Max (VN: 'Thấp nhất',
-        # 'Trung vị', 'Cao nhất') — bỏ hẳn, không dùng.
+
+
+
         wb_names = {str(rows[i][0]).strip() for i in range(1, 64) if rows[i][0]}
         check_code_set(name2code, f, wb_names, "ranking 2023", {n for n, _, _ in rank_2023})
     scored_2023 = [(n, s) for n, s, _ in rank_2023 if s is not None]
@@ -341,7 +341,7 @@ def main() -> int:
           f"{len(na_2023)} tỉnh không công bố (từ PCI 2022 báo cáo chỉ công bố Top 30 — "
           f"trang {RAW.name} VN-Bao-cao-dai-PCI-2023_VN.pdf tr.24, 43): {sorted(na_2023)}")
 
-    # 2024
+
     rec_2024, artifact_note = parse_2024()
     names_2024 = {n for n, _ in rec_2024}
     rank_2024 = parse_ranking_html(RAW / "pci_ranking_page_2024.html", "2024")
@@ -363,22 +363,22 @@ def main() -> int:
     if artifact_note:
         print(f"2024 workbook: {artifact_note}")
 
-    # Base (2012-2022 từ extract Mendeley)
+
     base = pd.read_csv(BASE, dtype={"province_code": str, "papi_province_code": str})
     base["source"] = "mendeley_extract"
 
-    # Khóa hiển thị (code, ascii, vi) lấy ngay từ base để tránh lệch chữ với các file hiện có
+
     keys = base[["province_code", "province_ascii", "province_vi"]].drop_duplicates()
     if len(keys) != 63:
         raise SystemExit(f"LỖI: base có {len(keys)} bộ khóa tỉnh thay vì 63")
-    # crosswalk code '01' -> code dạng base '1' để nối
+
     disp_of_xw = {str(int(c)): (c, a, v) for c, a, v in
                   zip(keys["province_code"], keys["province_ascii"], keys["province_vi"])}
 
     def new_year_rows(year: int, scored: list[tuple[str, float | None]], source: str) -> pd.DataFrame:
         by_code: dict[str, float | None] = {}
         for n, s in scored:
-            c = str(int(code_of(n, name2code)))  # '01' -> '1' khớp quy ước của base
+            c = str(int(code_of(n, name2code)))
             if c in by_code:
                 raise SystemExit(f"LỖI: năm {year} trùng mã tỉnh {c} sau chuẩn hóa tên")
             by_code[c] = s
@@ -402,7 +402,7 @@ def main() -> int:
     full = pd.concat([base[["province_code", "province_ascii", "province_vi", "year",
                             "pci_weighted_score", "source"]], extra], ignore_index=True)
 
-    # gán papi_province_code qua province_ascii (khóa chính của panel PAPI)
+
     papi = pd.read_csv(PAPI, dtype={"province_code": str})
     papi_map = papi[["province_code", "province_ascii"]].drop_duplicates()
     if papi_map["province_ascii"].duplicated().any():
@@ -422,7 +422,7 @@ def main() -> int:
                  "year", "pci_weighted_score", "source"]].reset_index(drop=True)
     full.to_csv(OUT / "external_pci_63_full.csv", index=False)
 
-    # báo cáo phủ
+
     print(f"\nĐã ghi {OUT / 'external_pci_63_full.csv'}: {len(full)} dòng, "
           f"{full['province_code'].nunique()} tỉnh, năm {full['year'].min()}-{full['year'].max()}")
     per_year = full.groupby("year")["pci_weighted_score"].agg(["count", "size"])

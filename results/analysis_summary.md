@@ -47,6 +47,6 @@
 ## Ghi chú trung thực
 - Dữ liệu PAPI cấp tỉnh/năm **rất đồng nhất**: STING per-year đa số cho 1 vùng dày; cấu trúc tách biệt chỉ xuất hiện ở hai cụm ngoại vi nhỏ (ví dụ cụm 16 và 5 điểm, tổng 21, trong pooled).
 - Metric hình học tính trên điểm thuộc cụm (loại −1); khi k<2 metric = n/a.
-- ARIt vs k-means thấp (≈0.07–0.17): hai phương pháp phân vùng khác nhau trên dữ liệu gần như một khối.
+- ARI vs k-means thấp (≈0.07–0.17): hai phương pháp phân vùng khác nhau trên dữ liệu gần như một khối.
 - STING ≈ DBSCAN(eps=0.2) đồng thuận hơn (ARI≈0.65) — cùng họ mật độ-lưới.
 - 8 chiều chỉ 2018–2024, OFAT đổi một tham số mỗi lần so với gốc mc=10/lv=1: f=3: k=1, noise=0.919 → không nhận diện; mc=2: k=2, noise=0.109 → có cấu trúc; lv=2: k=0, noise=1.0 → không nhận diện.

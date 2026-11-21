@@ -56,7 +56,7 @@ OUT = ROOT / "data" / "processed"
 CROSSWALK = ROOT / "data" / "raw" / "mendeley" / "Replication_package" / "data" / "province_crosswalk_63.csv"
 PAPI = OUT / "papi_panel_63_2011_2024.csv"
 
-# Năm số liệu -> (file chính, file đối chứng). 2019 chỉ có một bản gõ đầy đủ.
+
 SOURCES: dict[int, list[tuple[str, str]]] = {
     2017: [
         ("QD862_2017_luatvietnam.html", "luatvietnam"),
@@ -77,7 +77,7 @@ DECISIONS: dict[int, tuple[str, str]] = {
     2019: ("835/QĐ-LĐTBXH", "2020-07-15"),
 }
 
-# Tổng cả nước công bố trong từng quyết định (số hộ nghèo, tỷ lệ %) — kiểm tra chốt.
+
 NATIONAL_EXPECTED: dict[int, tuple[float, float]] = {
     2017: (1642489.0, 6.70),
     2018: (1304001.0, 5.23),
@@ -93,7 +93,7 @@ REGION_ASCII = {
     "dong nam bo",
     "dong bang song cuu long",
 }
-REGION_KEYS: set[str] = set()  # điền sau khi desp() được định nghĩa (xem module body cuối)
+REGION_KEYS: set[str] = set()
 
 
 def norm_ascii(name: str) -> str:
@@ -169,7 +169,7 @@ def find_annex1_block(blocks: list[tuple[str, list[list[str]]]], year: int) -> l
     pending = False
     for text_before, rows in blocks:
         seg = desp(norm_ascii(re.sub(r"[.,;:]", "", re.sub(r"<[^>]+>", " ", text_before))))
-        pending_at = 0  # vị trí nhãn trong ĐOẠN NÀY (đoạn mới thì tìm từ đầu)
+        pending_at = 0
         for m in re.finditer(r"phulucso(\d+)([ab])?", seg):
             if m.group(1) == "1" and not m.group(2):
                 pending = True
@@ -189,7 +189,7 @@ def parse_annex1(path: Path, year: int, keys_desp: dict[str, tuple[str, str, str
     if grid is None:
         raise SystemExit(f"LỖI: {path.name}: không tìm thấy bảng Phụ lục Số 1 năm {year}")
 
-    # kiểm tra tiêu đề bảng (ASCII bỏ dấu — bản gõ có thể lệch dấu thanh)
+
     header = desp(norm_ascii(" ".join(grid[0])))
     if "tinh/thanhpho" not in header:
         raise SystemExit(f"LỖI: {path.name}: dòng tiêu đề không có 'TỈNH/THÀNH PHỐ': {grid[0]}")
@@ -325,7 +325,7 @@ def main() -> int:
 
     rows = []
     for year, srcs in parsed.items():
-        src = srcs[0]  # bản chính (các bản đã chứng minh trùng khớp)
+        src = srcs[0]
         dec_no, dec_date = DECISIONS[year]
         for stt, p in sorted(src["provinces"].items()):
             rows.append({
@@ -345,13 +345,13 @@ def main() -> int:
 
     df = pd.DataFrame(rows).sort_values(["province_code", "year"]).reset_index(drop=True)
 
-    # papi_province_code qua province_ascii (giống build_poverty_63.py)
+
     df["papi_province_code"] = df["province_ascii"].map(papi_by_ascii)
     if df["papi_province_code"].isna().any():
         bad = sorted(df.loc[df["papi_province_code"].isna(), "province_ascii"].unique())
         raise SystemExit(f"LỖI: province_ascii không có trong panel PAPI: {bad}")
 
-    # 6 cột đầu lặp lại đúng thứ tự schema chuẩn của external_poverty_63.csv
+
     df = df[
         [
             "province_code", "province_ascii", "province_vi", "year", "poverty_rate_pct",

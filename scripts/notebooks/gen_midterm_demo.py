@@ -41,10 +41,10 @@ md(nbf.v4.new_markdown_cell("""# Demo giữa kỳ — Ứng dụng thuật toán
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
 
-for cand in (Path.cwd(), Path.cwd().parent):
-    if (cand / "src" / "sting.py").exists():
-        sys.path.insert(0, str(cand / "src"))
-        break
+ROOT = next((cand for cand in (Path.cwd(), *Path.cwd().parents) if (cand / "src" / "sting.py").is_file()), None)
+if ROOT is None:
+    raise FileNotFoundError("Không tìm thấy thư mục gốc repo chứa src/sting.py")
+sys.path.insert(0, str(ROOT / "src"))
 
 import numpy as np
 import pandas as pd
@@ -65,7 +65,7 @@ md(nbf.v4.new_markdown_cell("""## 1. Vì sao grid-based? STING là gì?
 - **STING** (Wang, Yang & Muntz — VLDB 1997): chia không gian thành lưới **phân cấp** theo factor;
   mỗi ô lưu `count/mean/std/min/max` theo từng chiều; gom các ô "dày" (count ≥ `min_count`)
   liền kề thành cụm; điểm thuộc ô không dày = **nhiễu (-1)**.
-- Chi phí xây lưới: **O(n)** theo số điểm (mỗi mức quét 1 lượt); truy vấn vùng chữ nhật dùng thống kê ô."""))
+- Chi phí xây lưới: quét theo từng mức lưới (**O(L·n log n)** trong cài đặt NumPy `argsort` hiện tại, không ghép cặp n² điểm); truy vấn vùng chữ nhật dùng thống kê ô."""))
 
 md(nbf.v4.new_markdown_cell("""## 2. Demo nhanh trên dữ liệu giả lập
 
@@ -94,17 +94,17 @@ cells = model.cells_[level]
 rows = sorted(cells.items(), key=lambda kv: -kv[1].count)[:5]
 for (idx, cell) in rows:
     print(f"  ô {idx}: count={cell.count}, mean=({cell.mean[0]:+.2f}, {cell.mean[1]:+.2f})")
-print(f"Tổng: {len(cells)} ô có dữ liệu; STING quét mỗi mức 1 lượt => O(n)")"""))
+print(f"Tổng: {len(cells)} ô có dữ liệu; gom nhóm điểm qua argsort tại mức {level} (không tính ma trận khoảng cách n×n)")"""))
 
 md(nbf.v4.new_markdown_cell("""## 3. Dữ liệu thật: PAPI 2011–2024
 
 - 14 workbook gốc (papi.org.vn) → panel sạch `province × year × d1..d8 + 29 sub-dim`.
-- **Cảnh báo quan trọng phát hiện khi làm sạch:** 23/37 cột chỉ tiêu có **gãy thang đo**
-  giữa các năm (vd `sd_5_4` đổi 0.25–2.5 → 0.33–3.33 tại 2021) — `check_data.py` tự audit;
-  phân tích xuyên năm chỉ dùng chỉ tiêu qua audit (hoặc ghi rõ cách xử lý).
+- **Cảnh báo quan trọng phát hiện khi làm sạch:** 23/37 cột chỉ tiêu có **cờ biến động trung bình năm > 0,25**
+  (heuristic trong `check_data.py`, cần đối chiếu workbook; ví dụ `sd_5_4` đổi 0.25–2.5 → 0.33–3.33 tại 2021) —
+  phân tích xuyên năm chỉ dùng chỉ tiêu đã sàng lọc và qua audit.
 - 0.0 = "tỉnh không có đủ dữ liệu" → quy về NaN (khớp quy ước gói replication Mendeley)."""))
 
-cd(nbf.v4.new_code_cell("""panel = pd.read_csv("../data/processed/papi_panel_63_2011_2024.csv")
+cd(nbf.v4.new_code_cell("""panel = pd.read_csv(ROOT / "data/processed/papi_panel_63_2011_2024.csv")
 print("Panel:", panel.shape)
 print("Tỉnh:", panel.province_code.nunique(), "| Năm:", panel.year.min(), "→", panel.year.max())
 print()
@@ -115,7 +115,7 @@ print()
 num_cols = panel.select_dtypes("number").shape[1]
 print(f"Cột số: {num_cols} (yêu cầu ≥ 10) — đáp ứng")"""))
 
-cd(nbf.v4.new_code_cell("""# Audit thang đo (xem scripts/data/check_data.py để biết quy tắc đầy đủ)
+cd(nbf.v4.new_code_cell("""
 means = panel.groupby("year").mean(numeric_only=True)
 flags = []
 for c in [c for c in panel.columns if c.startswith(("d", "sd_"))]:
@@ -124,7 +124,7 @@ for c in [c for c in panel.columns if c.startswith(("d", "sd_"))]:
         j = m.diff().abs().max()
         if j > 0.25:
             flags.append((c, round(j, 2)))
-print("Cột bị đánh dấu gãy thang đo:", len(flags))
+print("Cột có cờ biến động trung bình năm > 0.25 (heuristic):", len(flags))
 print("Ví dụ:", flags[:8])
 print()
 print("Chỉ tiêu được dùng trong pipeline dự đoán (qua audit): sd_4_2, sd_6_1, sd_1_3, sd_1_4, sd_4_1, sd_4_3, sd_4_4, sd_6_3")"""))
@@ -136,13 +136,13 @@ Cặp chỉ tiêu chốt (qua quy trình train-only — chọn trên ≤2020, ki
 `4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công × 6.1 Y tế công lập`"""))
 
 cd(nbf.v4.new_code_cell("""import json
-cfg = json.loads(Path("../models/predict_config.json").read_text(encoding="utf-8"))
+cfg = json.loads((ROOT / "models/predict_config.json").read_text(encoding="utf-8"))
 print("Config đã đóng băng (predict_sweep.py):")
 print("  features:", cfg["features"])
 print("  STING:", cfg["sting"])
 print("  chọn trên:", cfg["selection_protocol"])"""))
 
-cd(nbf.v4.new_code_cell("""summary = pd.read_csv("../results/predict_all_years.csv")
+cd(nbf.v4.new_code_cell("""summary = pd.read_csv(ROOT / "results/predict_all_years.csv")
 print(summary.groupby("split").size().to_dict())
 for y in (2023, 2024):
     sub = summary[summary.year == y]
@@ -154,11 +154,10 @@ md(nbf.v4.new_markdown_cell("""![Dự đoán cụm 2024](../results/figs/predict
 năm 2024: 48/61 tỉnh có đủ chỉ tiêu vào cụm lớn, 13 tỉnh rơi vào ô thưa (nhiễu). Độ nhạy theo
 `min_count` được ghi trong `results/predict_summary.md`."""))
 
-cd(nbf.v4.new_code_cell("""figs = ["../results/figs/predict_2024.png", "../results/figs/sting_first_real.png",
-        "../results/figs/supervised_regression.png"]
-for f in figs:
-    p = Path(f)
-    print(("OK " if p.exists() else "THIẾU ") + f, f"({p.stat().st_size / 1024:.0f} KB)" if p.exists() else "")"""))
+cd(nbf.v4.new_code_cell("""figs = [ROOT / "results/figs/predict_2024.png", ROOT / "results/figs/sting_first_real.png",
+        ROOT / "results/figs/supervised_regression.png"]
+for p in figs:
+    print(("OK " if p.exists() else "THIẾU ") + str(p.relative_to(ROOT)), f"({p.stat().st_size / 1024:.0f} KB)" if p.exists() else "")"""))
 
 md(nbf.v4.new_markdown_cell("""## 5. Pipeline dự đoán (2 mô hình local)
 
@@ -168,24 +167,24 @@ md(nbf.v4.new_markdown_cell("""## 5. Pipeline dự đoán (2 mô hình local)
 
 Cả hai lưu **local** (`models/`), nạp lại để dự báo mà không cần huấn luyện lại."""))
 
-cd(nbf.v4.new_code_cell("""sup = pd.read_csv("../results/supervised_metrics.csv")
+cd(nbf.v4.new_code_cell("""sup = pd.read_csv(ROOT / "results/supervised_metrics.csv")
 print(sup.to_string(index=False))"""))
 
-md(nbf.v4.new_markdown_cell("""## 6. Hạn chế trung thực & kế hoạch cuối kỳ
+md(nbf.v4.new_markdown_cell("""## 6. Hạn chế trung thực & phần mở rộng cuối kỳ
 
 **Hạn chế:**
 - Dữ liệu PAPI **khá đồng nhất** — cấu trúc cụm yếu ở cấp tỉnh/năm; số liệu được báo cáo kèm nhiễu.
-- **Gãy thang đo** ở nhiều sub-dim (23/37 cột) — chỉ dùng chỉ tiêu qua audit; phân tích xuyên năm bị giới hạn.
+- **Biến động thang đo** (23/37 cột có cờ heuristic > 0,25) — chỉ dùng chỉ tiêu đã sàng lọc và qua audit; phân tích xuyên năm bị giới hạn.
 - `d7/d8` chỉ có từ 2018 → robustness 8 chiều chỉ làm cho 2018–2024; giai đoạn 2011–2017 dùng d1–d6.
 - Metric hình học (silhouette/DB/CH) **không bản địa** với lưới song song trục — chỉ so sánh thô, tách noise.
-- Kết quả âm tính (phân loại ngoại vi không vượt baseline) được **giữ lại trung thực**.
+- Kết quả phân loại pseudo-label chỉ đo mức khớp nhãn do STING sinh, không phải ground truth xã hội; một holdout 2023→2024 không chứng minh tổng quát hóa.
 
-**Cuối kỳ sẽ làm thêm:** so sánh STING vs k-means/DBSCAN (bảng metrics), robustness PCA, bản đồ 63 tỉnh,
-tiến hóa cụm 2011–2024, báo cáo .docx + bảo vệ."""))
+**Phần mở rộng cuối kỳ (đã hoàn thiện):** so sánh STING vs k-means/DBSCAN, robustness PCA/8D, bản đồ 63 tỉnh,
+tiến hóa cụm 2011–2024 và kiểm chứng ngoại lai (PCI/GSO) trong `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` và `reports/final_report.docx`."""))
 
 md(nbf.v4.new_markdown_cell("""## 7. Câu hỏi phản biện trước (5 câu)
 
-1. *Vì sao grid-based?* — Không giả định hình dạng cụm; O(n); phù hợp khi cụm kéo dài theo trục.
+1. *Vì sao grid-based?* — Không giả định hình dạng cụm; không ghép cặp n² điểm; phù hợp khi cụm kéo dài theo trục.
 2. *STING khác DBSCAN/k-means thế nào?* — Lưới phân cấp + thống kê ô; DBSCAN theo mật độ kề điểm; k-means theo centroid.
 3. *Chọn `min_count` sao?* — Sweep tham số; cấu hình chốt bằng quy trình train-only (không nhìn test).
 4. *Noise −1 là gì?* — Điểm thuộc ô không dày — STING không ép mọi điểm vào cụm; ta tách noise khỏi metrics.

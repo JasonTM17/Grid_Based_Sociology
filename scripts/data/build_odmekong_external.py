@@ -26,7 +26,7 @@ import sys
 import unicodedata
 from pathlib import Path
 
-import pandas as pd  # user site-packages
+import pandas as pd
 from shapely.geometry import Point, shape
 from shapely.prepared import prep
 
@@ -55,20 +55,20 @@ def fold_ascii(s: str) -> str:
     return d.replace("đ", "d").replace("Đ", "D").strip().lower()
 
 
-# Spelling variants observed in mekong_countries_hospitals_dump.csv ("Province"
-# values do not exist there; these come from matching boundary ten_tinh values).
-# Explicit, documented aliases only — no fuzzy guessing.
+
+
+
 TEN_TINH_ALIAS = {
-    "Bà Rịa -Vũng Tàu": "Bà Rịa - Vũng Tàu",  # source spacing typo
-    "Cần Thơn": "Cần Thơ",                     # source typo (ơn vs ơ)
-    "Quản Bình": "Quảng Bình",                 # source typo (ản vs ảng)
+    "Bà Rịa -Vũng Tàu": "Bà Rịa - Vũng Tàu",
+    "Cần Thơn": "Cần Thơ",
+    "Quản Bình": "Quảng Bình",
 }
 
 
-# poverty
+
 def build_poverty() -> None:
     src = RAW / "poverty" / "poverty_rate_1998_2016.csv"
-    # file uses TAB separators despite the .csv extension
+
     df = pd.read_csv(src, encoding="utf-8", sep="\t")
     year_cols = [c for c in df.columns if str(c).strip().isdigit()]
     years = sorted(int(c) for c in year_cols)
@@ -87,14 +87,14 @@ def build_poverty() -> None:
           f"{long['year'].min()}-{long['year'].max()}) -> {out.name}")
 
 
-# health
+
 def parse_ewkb_point(hexs: str):
     b = bytes.fromhex(hexs)
     if b[0] != 1:
         raise ValueError("only little-endian EWKB expected")
     flags = struct.unpack("<I", b[1:5])[0]
     off = 5
-    if flags & 0x20000000:  # SRID present
+    if flags & 0x20000000:
         struct.unpack("<I", b[off:off + 4])
         off += 4
     gtype = flags & 0xFF
@@ -150,7 +150,7 @@ def build_health() -> None:
         for u in unmatched:
             fold_hits = cw.loc[cw["fold"] == fold_ascii(u), "province_vi"].tolist()
             print(f"[health] WARNING ten_tinh '{u}' not NFC-matched; fold matches: {fold_hits}")
-        # fall back to fold match where possible
+
         remap = {}
         for u in unmatched:
             hits = cw.loc[cw["fold"] == fold_ascii(u), "province_vi"].tolist()
@@ -186,7 +186,7 @@ def build_health() -> None:
         )
         if r["province_ascii"] not in papi_ascii:
             papi_unmatched.append(r["province_ascii"])
-        # papi_province_code assigned below after reindex
+
 
     out_df = pd.DataFrame(rows)
     out_df["papi_province_code"] = out_df["province_ascii"].map(
@@ -204,7 +204,7 @@ def build_health() -> None:
     print("[health] top 5:", top.to_dict("records"))
 
 
-# provenance
+
 def print_manifest() -> None:
     files = [
         RAW / "poverty" / "poverty_rate_1998_2016.csv",

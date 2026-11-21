@@ -51,7 +51,7 @@ SOURCES = {
     "odm": OUT / "external_odm_health_63.csv",
     "waste": OUT / "external_gso_waste_63.csv",
 }
-# Cột giá trị giữ lại của từng nguồn (sau khóa nối)
+
 VALUE_COLS = {
     "pci": ["pci_weighted_score"],
     "pop": ["gso_pop_total_thousand", "gso_pop_urban_thousand",
@@ -62,8 +62,8 @@ VALUE_COLS = {
 }
 KEYS = ["province_code", "year"]
 
-# Hai chỉ tiêu đặc trưng dùng khi clustering (models/predict_config.json);
-# panel có 13 ô tỉnh-năm thiếu đúng hai cột này nên không có nhãn cụm.
+
+
 CLUSTER_FEATURES = ["sd_4_2", "sd_6_1"]
 
 
@@ -112,8 +112,8 @@ def attach_waste_papi_code(waste: pd.DataFrame, panel: pd.DataFrame) -> pd.DataF
     if not (w["papi_province_code"] == w["province_code"]).all():
         raise SystemExit("LỖI: papi_province_code (qua tên) khác province_code trong waste")
     print(f"  waste: gán papi_province_code qua province_ascii — khớp {n}/{n}")
-    # Tên tỉnh + mã đối chiếu chỉ dùng để kiểm tra — bỏ trước khi nối để không
-    # trùng cột master (master đã có papi_province_code gán từ province_code).
+
+
     return w.drop(columns=["province_ascii", "papi_province_code"])
 
 
@@ -156,15 +156,15 @@ def main() -> int:
 
     waste = load_source("waste", extra_cols=("province_ascii",))
     waste = attach_waste_papi_code(waste, panel)
-    # Mọi file external đã kiểm chứng papi_province_code == province_code từng
-    # dòng (_check_keys_consistent / attach_waste_papi_code) → gán cho cả 882 dòng.
+
+
     master["papi_province_code"] = master["province_code"]
     master = master.merge(waste, on=KEYS, how="left", validate="one_to_one")
     if len(master) != n0:
         raise SystemExit(f"LỖI: merge waste làm đổi số dòng: {n0} -> {len(master)}")
     print(f"  + waste: nối xong, mask present = {int(master['kg_pc'].notna().sum())}/{n0}")
 
-    # mask thiếu tường minh cho từng nguồn
+
     master["pci_present"] = master["pci_weighted_score"].notna()
     master["pop_present"] = master["gso_pop_total_thousand"].notna()
     master["grdp_present"] = master["grdp_per_capita_million_vnd"].notna()
@@ -172,11 +172,11 @@ def main() -> int:
     master["waste_present"] = master["kg_pc"].notna()
     master["papi_sd46_present"] = master[CLUSTER_FEATURES].notna().all(axis=1)
 
-    # Sắp cột: khóa -> panel -> external -> mask -> source flags
+
     mask_cols = ["pci_present", "pop_present", "grdp_present", "odm_present",
                  "waste_present", "papi_sd46_present"]
     src_cols = ["pci_source", "pop_source", "grdp_source"]
-    # province_ascii/province_vi đã có ở head — loại khỏi panel_cols tránh cột trùng tên.
+
     panel_cols = [c for c in panel.columns if c not in KEYS + ["province_ascii", "province_vi"]]
     ext_cols = [c for k in VALUE_COLS for c in VALUE_COLS[k]]
     head = ["province_code", "papi_province_code", "province_ascii", "province_vi", "year"]
@@ -186,7 +186,7 @@ def main() -> int:
     master.to_csv(out_csv, index=False, encoding="utf-8-sig")
     print(f"Đã ghi {out_csv}: {len(master)} dòng × {len(master.columns)} cột")
 
-    # tóm tắt md cho results/
+
     cov = coverage_by_year(master, mask_cols)
     lines = []
     lines.append("# Master table ngoại lai 63 tỉnh × 2011–2024 — tóm tắt\n")

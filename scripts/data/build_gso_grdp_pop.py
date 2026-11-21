@@ -111,7 +111,7 @@ def main() -> int:
     papi_by_ascii = papi_map.set_index("province_ascii")["province_code"]
     assert papi_by_ascii.index.is_unique
 
-    # GRDP
+
     tables = html_tables(RAW / "pxweb_V03.12_grdp_pc_step2.html")
     grid = next(t for t in tables if any("2018" in c for r in t for c in r) and len(t) > 60)
     header = next(r for r in grid if any(re.fullmatch(r"20\d\d", c.strip()) for c in r))
@@ -142,7 +142,7 @@ def main() -> int:
         info = key2cw.loc[k]
         for yc, v in zip(year_cols, vals):
             if yc.startswith("Ước tính"):
-                continue  # ngoài phạm vi 2011-2024
+                continue
             year = int(re.search(r"20\d\d", yc).group(0))
             src = "gso_pxweb_V03.12"
             if yc.startswith("Sơ bộ"):
@@ -157,13 +157,13 @@ def main() -> int:
             })
     grdp = pd.DataFrame(grdp).sort_values(["province_code", "year"]).reset_index(drop=True)
 
-    # Gán papi_province_code qua province_ascii
+
     grdp["papi_province_code"] = grdp["province_ascii"].map(papi_by_ascii)
     if grdp["papi_province_code"].isna().any():
         bad = sorted(grdp.loc[grdp["papi_province_code"].isna(), "province_ascii"].unique())
         raise SystemExit(f"LỖI: province_ascii không có trong panel PAPI: {bad}")
 
-    # đối chiếu Niên giám
+
     def yb_table(pdf: str, pages: tuple[int, ...], years: dict[int, int]) -> dict[tuple[str, int], float]:
         import pymupdf
 
@@ -202,7 +202,7 @@ def main() -> int:
             if key not in g.index or pd.isna(g[key]):
                 n_miss += 1
                 continue
-            if abs(g[key] - v) <= 0.051:  # YB in 1 chữ số thập phân, pxweb 2 chữ số
+            if abs(g[key] - v) <= 0.051:
                 n_ok += 1
             else:
                 n_diff += 1
@@ -211,7 +211,7 @@ def main() -> int:
                     print(f"  LỆCH {name}: {key} pxweb={g[key]} vs {v}")
         print(f"Đối chiếu {name}: trùng {n_ok}, lệch {n_diff}, thiếu {n_miss} / {len(yb)} | lệch theo năm: {diff_by_year}")
 
-    # dân số
+
     pop_rows = []
     for fname in (
         "pxweb_V02.01_pop_step2.html",
@@ -222,7 +222,7 @@ def main() -> int:
         grid = next(t for t in tables if any(re.fullmatch(r"20\d\d", c.strip()) for r in t for c in r) and len(t) > 60)
         header = next(r for r in grid if sum(1 for c in r if re.search(r"20\d\d", c)) >= 2)
         years = [c.strip() for c in header if re.search(r"20\d\d", c) and len(c.strip()) <= 16]
-        # mỗi năm 3 ô dữ liệu: Diện tích, Dân số trung bình, Mật độ — dân số là ô 3*i+1
+
         pop_cols = {yr: 3 * i + 1 for i, yr in enumerate(years)}
         print(f"{fname}: năm {years[0]}..{years[-1]} ({len(years)} năm, 3 chỉ tiêu/năm)")
 
@@ -233,7 +233,7 @@ def main() -> int:
                 continue
             cells = [num(c) for c in r[1:]]
             if sum(pd.notna(c) for c in cells) < 4:
-                continue  # dòng tiêu đề/caption không có số liệu
+                continue
             if k in REGIONS_ASCII:
                 continue
             if k not in key2cw.index:
@@ -253,11 +253,11 @@ def main() -> int:
                 })
     pop = pd.DataFrame(pop_rows)
     assert pop["province_code"].nunique() == 63
-    # mỗi tỉnh-năm phải có duy nhất 1 dòng
+
     dup = pop[pop.duplicated(["province_code", "year"], keep=False)]
     assert dup.empty, f"Trùng tỉnh-năm trong dữ liệu pxweb: {dup.head()}"
 
-    # gộp file dân số đầy đủ
+
     base = pd.read_csv(OUT / "external_gso_population_63.csv")
     base["province_code"] = base["province_code"].astype(str)
     base["source"] = "gso_nien_giam_extract (Mendeley replication package)"
@@ -277,14 +277,14 @@ def main() -> int:
             "gso_urban_residence_pct_derived", "source"]
     full = full[cols]
 
-    # so sánh vintage: năm trùng nhau giữa base và pxweb
+
     chk = base.merge(pop, on=["province_code", "year"], suffixes=("_base", "_px"))
     chk["diff"] = (chk["gso_pop_total_thousand_base"] - chk["gso_pop_total_thousand_px"]).abs()
     print(f"So sánh vintage (base Niên giám vs pxweb V02.01) trên {len(chk)} tỉnh-năm trùng:")
     print("  chênh lệch trung bình:", round(chk["diff"].mean(), 2), "nghìn người; max:",
           round(chk["diff"].max(), 2), "| dòng lệch >1%:", int((chk["diff"] / chk["gso_pop_total_thousand_base"] > 0.01).sum()))
 
-    # ghi file
+
     OUT.mkdir(parents=True, exist_ok=True)
     grdp.to_csv(OUT / "external_gso_grdp_63.csv", index=False)
     full.to_csv(OUT / "external_gso_population_63_full.csv", index=False)

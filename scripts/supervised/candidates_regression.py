@@ -70,22 +70,22 @@ RESULTS = ROOT / "results"
 MD_PATH = RESULTS / "candidates_regression.md"
 CSV_PATH = RESULTS / "candidates_regression.csv"
 
-SEED = 11  # seed môi trường (phòng hờ); mọi estimator dưới đây đều deterministic
-N_TRAIN_PAIRS = 740   # year_t 2011–2022 (đối chiếu design)
-N_HOLDOUT_PAIRS = 59  # year_t 2023 (chỉ kiểm tra kích thước, KHÔNG chấm)
-FIRST_VALIDATION_ORIGIN = 2017  # predict_supervised.py:123-147 + CLASSIFICATION_CV_FIRST_YEAR
+SEED = 11
+N_TRAIN_PAIRS = 740
+N_HOLDOUT_PAIRS = 59
+FIRST_VALIDATION_ORIGIN = 2017
 
-# Số CÔNG BỐ trong results/supervised_metrics.csv — chỉ dùng làm MỐC so sánh
-# (selection luôn theo value_cv, scripts/common/papi_pred_common.py:60-66).
+
+
 PUBLISHED_RIDGE = 0.265
 PUBLISHED_RF = 0.197
 PUBLISHED_CARRY = 0.145
 PUBLISHED_CSV = ROOT / "results" / "supervised_metrics.csv"
 
-METRIC_CV = "r2 (expanding origin 2017–2022)"  # chuỗi y hệt reg_metrics:309-316
+METRIC_CV = "r2 (expanding origin 2017–2022)"
 
-# Biến ngoài: (tên cột, tệp, tên ứng viên) — join theo (province_code, year_t),
-# KHÔNG BAO GIỜ join năm t+1 (chống tin tức tương lai).
+
+
 EXTERNAL_COLUMNS = [
     (
         "poverty_rate_pct",
@@ -103,10 +103,10 @@ EXTERNAL_COLUMNS = [
         "R4 Ridge+urban",
     ),
 ]
-MISSING_EXCLUDE_FRAC = 0.30  # quy tắc pre-registered: thiếu >30% trên 740 cặp train → LOẠI
+MISSING_EXCLUDE_FRAC = 0.30
 
-FOLD_YEARS = tuple(range(FIRST_VALIDATION_ORIGIN, HOLDOUT_YEAR))  # 2017..2022 = 6 fold
-FOLDS_BEAT_MIN = 4  # điều kiện (ii) của ngưỡng thắng
+FOLD_YEARS = tuple(range(FIRST_VALIDATION_ORIGIN, HOLDOUT_YEAR))
+FOLDS_BEAT_MIN = 4
 
 
 def fold_best_scores(grid: GridSearchCV, n_folds: int) -> list[float]:
@@ -174,7 +174,7 @@ def candidate_specs(ext_col: str | None) -> list[dict]:
                         ("m", Ridge(random_state=42)),
                     ]
                 ),
-                "grid": {"m__alpha": [0.1, 1.0, 10.0]},  # GIỐNG HỆT lưới ridge công bố
+                "grid": {"m__alpha": [0.1, 1.0, 10.0]},
                 "ext_col": ext_col,
                 "note": "Pipeline [SimpleImputer(median, add_indicator), StandardScaler, "
                 "Ridge] — delta tiền xử lý có imputer so với pipeline công bố",
@@ -240,7 +240,7 @@ def pair_join_keys(df: pd.DataFrame) -> pd.DataFrame:
     tgt = df[["province_code", "year", REGRESSION_TARGET]].rename(
         columns={"year": "year_t", REGRESSION_TARGET: "y_next"}
     )
-    tgt["year_t"] = tgt["year_t"] - 1  # target năm t+1 gán về origin t
+    tgt["year_t"] = tgt["year_t"] - 1
     tgt = tgt.dropna(subset=["y_next"])
     cur = df[["province_code", "year"] + REGRESSION_FEATURES].rename(
         columns={"year": "year_t"}
@@ -280,8 +280,8 @@ def fmt_params(params: dict) -> str:
 
 def verdict_label(value_cv: float, folds_beat: int) -> str:
     """Verdict pre-registered: beat = (i)+(ii); noise = đúng một; worse = không cái nào."""
-    above = value_cv > PUBLISHED_RIDGE          # (i) vượt mốc ridge 0.265
-    consistent = folds_beat >= FOLDS_BEAT_MIN   # (ii) beat per-fold ridge ≥4/6
+    above = value_cv > PUBLISHED_RIDGE
+    consistent = folds_beat >= FOLDS_BEAT_MIN
     if above and consistent:
         return "beat"
     if above or consistent:
@@ -293,7 +293,7 @@ def main() -> int:
     np.random.seed(SEED)
     RESULTS.mkdir(exist_ok=True)
 
-    # Giao thức: import đúng từ predict_supervised.py
+
     df = load_panel()
     pairs = build_regression_pairs(df)
     tr = pairs[pairs.year_t < HOLDOUT_YEAR].reset_index(drop=True)
@@ -304,10 +304,10 @@ def main() -> int:
             f"holdout {len(te)} (cần {N_HOLDOUT_PAIRS}) — DỪNG."
         )
         return 1
-    # te (holdout 2023→2024) CHỈ được kiểm tra kích thước phía trên — không chấm.
 
-    # Join-key (province_code, year_t) phải khớp position-wise với frame cặp
-    # của build_regression_pairs trước khi biến ngoài được join — lệch thì DỪNG.
+
+
+
     keys = pair_join_keys(df)
     if not verify_key_alignment(keys, tr):
         print(
@@ -337,7 +337,7 @@ def main() -> int:
         f"warm-up 2011–{val_years[0] - 1}"
     )
 
-    # Baseline tái lập IN-MEMORY trên cùng fold
+
     grid_ridge, grid_rf = reproduce_baselines(X, y, reg_cv)
     ridge_raw = float(grid_ridge.best_score_)
     rf_raw = float(grid_rf.best_score_)
@@ -348,7 +348,7 @@ def main() -> int:
     carry_folds = [float(r2_score(y[va], carry_all[va])) for _, va in reg_cv]
     carry_raw = float(np.mean(carry_folds))
 
-    # GATE quy tắc pre-registered số 6: đối chiếu với số công bố trước khi so.
+
     gate = [
         ("ridge", ridge_raw, PUBLISHED_RIDGE),
         ("random forest", rf_raw, PUBLISHED_RF),
@@ -369,7 +369,7 @@ def main() -> int:
         )
         return 1
 
-    # Biến ngoài: áp quy tắc loại pre-registered
+
     miss = external_missingness(keys)
     kept_ext: list[dict] = []
     excluded_ext: list[dict] = []
@@ -391,7 +391,7 @@ def main() -> int:
 
     ext_col = kept_ext[0]["column"] if kept_ext else None
 
-    # Chạy ứng viên trên cùng fold
+
     rows: list[dict] = []
 
     def add_row(
@@ -510,7 +510,7 @@ def main() -> int:
             f"{MISSING_EXCLUDE_FRAC:.0%} — nguồn {m['source']}",
         )
 
-    # Ghi output (chỉ 2 tệp phân tích MỚI)
+
     csv_header = list(rows[0].keys())
     with open(CSV_PATH, "w", encoding="utf-8", newline="\n") as fh:
         writer = csv.writer(fh, lineterminator="\n")

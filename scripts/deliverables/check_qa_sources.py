@@ -42,25 +42,21 @@ def _check_file_line(path_part: str, loc: str) -> tuple[bool, str]:
         return False, f"không tồn tại: {path_part}"
     n = line_count(path)
     loc = loc.strip()
-    if "-" in loc and loc.replace("-", "").isdigit() is False:
-        # dạng start-end số
-        if loc.count("-") == 1 and all(p.isdigit() for p in loc.split("-", 1)):
-            start_s, end_s = loc.split("-", 1)
-            start, end = int(start_s), int(end_s)
-            if end > n:
-                return False, f"{path_part} chỉ có {n} dòng, cần tới {end}"
-            if start < 1:
-                return False, f"dòng bắt đầu {start} < 1"
-            return True, f"OK dòng {start}-{end} / {n}"
     if "-" in loc:
         parts = loc.split("-", 1)
         if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
             start, end = int(parts[0]), int(parts[1])
+            if start < 1:
+                return False, f"dòng bắt đầu {start} < 1"
+            if start > end:
+                return False, f"dòng bắt đầu {start} > kết thúc {end}"
             if end > n:
                 return False, f"{path_part} chỉ có {n} dòng, cần tới {end}"
             return True, f"OK dòng {start}-{end} / {n}"
     if loc.isdigit():
         line_no = int(loc)
+        if line_no < 1:
+            return False, f"dòng {line_no} < 1"
         if line_no > n:
             return False, f"{path_part} chỉ có {n} dòng, cần {line_no}"
         return True, f"OK dòng {line_no} / {n}"
@@ -80,7 +76,7 @@ def check_ref(ref: str) -> tuple[bool, str]:
 
     if ":" in ref:
         path_part, loc = ref.rsplit(":", 1)
-        # cùng file, nhiều vị trí: app.py:91-104, 376-378, 604
+
         if "," in loc:
             bits = [b.strip() for b in loc.split(",")]
             msgs = []

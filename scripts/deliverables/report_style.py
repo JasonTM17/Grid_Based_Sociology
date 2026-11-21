@@ -45,7 +45,7 @@ def _format_table(table):
     widths = [column.width.twips for column in table.columns]
     for index, cell in enumerate(table.rows[0].cells):
         if cell.text == "value_cv":
-            widths[index] = max(widths[index], 1021)  # keep the short CV key on one line
+            widths[index] = max(widths[index], 1021)
     if sum(widths) > TEXT_WIDTH:
         widths = [int(width * TEXT_WIDTH / sum(widths)) for width in widths]
     for column, width in zip(table.columns, widths):
@@ -169,7 +169,7 @@ def apply_reference_style(document):
             fmt.alignment = WD_ALIGN_PARAGRAPH.CENTER
         if name == "Caption":
             fmt.keep_with_next = False
-        # The old Word Title style contains a theme-colored bottom rule.
+
         properties = style.element.get_or_add_pPr()
         for border in list(properties.findall(qn("w:pBdr"))):
             properties.remove(border)
@@ -194,7 +194,7 @@ def apply_reference_style(document):
     replace_cover(document)
     for table in document.tables:
         _format_table(table)
-    # The reference starts visible numbering at Chapter 1.
+
     sections = list(document.sections)
     for section in sections[1:]:
         section.footer.is_linked_to_previous = False

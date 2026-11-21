@@ -36,8 +36,8 @@ JSON_URL = "https://api.worldbank.org/V2/country/VNM/indicator/{ind}?format=json
 LICENSE_URL = "https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets"
 DOWNLOAD_DATE = "2026-11-07"
 
-# Thứ tự yêu cầu trong đề bài: SH.XPD.CHEX.GD.ZS, NY.GDP.PCAP.CD,
-# SP.URB.TOTL.IN.ZS, SH.MED.BEDS.ZS.
+
+
 INDICATORS = [
     "SH.XPD.CHEX.GD.ZS",
     "NY.GDP.PCAP.CD",
@@ -93,7 +93,7 @@ def cross_check_json(indicator_code: str, values: dict[int, str]) -> str:
         with urllib.request.urlopen(url, timeout=60) as resp:
             payload = json.loads(resp.read().decode("utf-8"))
         records = payload[1]
-    except Exception as exc:  # noqa: BLE001 — ghi nhận trung thực, không dừng build
+    except Exception as exc:
         return f"KHONG_KIEM_TRA_DUOC ({type(exc).__name__}: {exc})"
     api = {
         int(r["date"]): r["value"]
@@ -188,7 +188,7 @@ def main() -> int:
         path = RAW / f"{ind}.csv"
         if not path.is_file():
             raise SystemExit(f"LOI: thieu file {path}")
-        # Lấy "Last Updated Date" từ 2 dòng đầu file gốc
+
         with open(path, newline="", encoding="utf-8-sig") as f:
             for r in csv.reader(f):
                 if len(r) >= 2 and r[0].strip() == "Last Updated Date":

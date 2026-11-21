@@ -57,8 +57,8 @@ PKG = ROOT / "data" / "raw" / "mendeley" / "Replication_package" / "data"
 
 SRC_HTML = "pxweb_V14.47_poverty_step2.html"
 
-# 6 vùng + cả nước theo bảng pxweb ("TỔNG SỐ"); "hà tây" là dòng cũ (gộp vào
-# Hà Nội từ 2008)
+
+
 REGIONS_ASCII = {
     "tong so",
     "ca nuoc",
@@ -134,7 +134,7 @@ def main() -> int:
     papi_by_ascii = papi_map.set_index("province_ascii")["province_code"]
     assert papi_by_ascii.index.is_unique
 
-    # bảng pxweb V14.47
+
     tables = html_tables(RAW / SRC_HTML)
     grid = next(t for t in tables if any(re.fullmatch(r"20\d\d", c.strip()) for r in t for c in r) and len(t) > 60)
     header = next(r for r in grid if sum(1 for c in r if re.fullmatch(r"20\d\d", c.strip())) >= 2)
@@ -181,14 +181,14 @@ def main() -> int:
             })
     pov = pd.DataFrame(long_rows).sort_values(["province_code", "year"]).reset_index(drop=True)
 
-    # Gán papi_province_code qua province_ascii
+
     pov["papi_province_code"] = pov["province_ascii"].map(papi_by_ascii)
     if pov["papi_province_code"].isna().any():
         bad = sorted(pov.loc[pov["papi_province_code"].isna(), "province_ascii"].unique())
         raise SystemExit(f"LỖI: province_ascii không có trong panel PAPI: {bad}")
 
-    # điền 2017–2019 từ gap CSV (không đụng ô cũ)
-    # Cột source phân biệt nguồn THEO TỪNG DÒNG; concat sau phần pxweb.
+
+
     pov["source"] = "gso_pxweb_V14.47"
     gap_path = OUT / "external_poverty_gap_63.csv"
     gap = pd.read_csv(gap_path, encoding="utf-8-sig")
@@ -204,7 +204,7 @@ def main() -> int:
         "gap CSV có ô thiếu — KHÔNG nội suy, kiểm tra build_poverty_gap.py"
     assert (gap["papi_province_code"] == gap["province_code"]).all(), \
         "gap CSV: papi_province_code lệch province_code"
-    gap["province_code"] = gap["province_code"].astype(str)  # cùng dtype phần pxweb
+    gap["province_code"] = gap["province_code"].astype(str)
     overlap = set(zip(pov["province_code"], pov["year"])) & \
         set(zip(gap["province_code"], gap["year"]))
     assert not overlap, f"khóa (province_code, year) trùng pxweb∩gap: {sorted(overlap)}"
@@ -222,7 +222,7 @@ def main() -> int:
     print("Cột source theo dòng:", pov["source"].value_counts().to_dict())
     print("Giá trị TỔNG SỐ (cả nước) theo bảng, cho đối chiếu nhanh:", national)
 
-    # đối chiếu Niên giám 2025 (verification)
+
     def yb_table(pdf: str, pages: tuple[int, ...], years_map: dict[int, int]) -> dict[tuple[str, int], float]:
         import pymupdf
 
@@ -233,7 +233,7 @@ def main() -> int:
             lines = [line.strip() for line in text.split("\n")]
             for i, line in enumerate(lines):
                 k = norm_ascii(split_label(line))
-                if k == "hue":  # NH 2025 tách dòng mất 'Thừa Thiên-'
+                if k == "hue":
                     k = "thua thien hue"
                 if k in key2cw.index:
                     nums = []
@@ -242,7 +242,7 @@ def main() -> int:
                         t2 = lines[j].strip()
                         k2 = norm_ascii(split_label(t2))
                         if k2 and (k2 in key2cw.index or k2 in REGIONS_ASCII):
-                            break  # gặp nhãn hàng kế tiếp — dừng, không nhảy số qua hàng
+                            break
                         m = re.fullmatch(r"(\d{1,3}(?:\.\d{3})*),(\d+)", t2)
                         if m:
                             nums.append(float((m.group(1).replace(".", "")) + "." + m.group(2)))

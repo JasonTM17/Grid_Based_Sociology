@@ -60,8 +60,8 @@ from sklearn.neighbors import NearestNeighbors
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.common.papi_pred_common import ROOT, load_config  # noqa: E402
-from sting import STING  # noqa: E402
+from scripts.common.papi_pred_common import ROOT, load_config
+from sting import STING
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -74,18 +74,18 @@ PRED_CSV = RESULTS / "predict_all_years.csv"
 OUT_CSV = RESULTS / "candidates_clustering.csv"
 OUT_MD = RESULTS / "candidates_clustering.md"
 
-WINDOW_MAX_YEAR = 2022  # loại 2023 (origin holdout) và 2024 (ngoài fit)
+WINDOW_MAX_YEAR = 2022
 FEATS = ["sd_4_2", "sd_6_1"]
 MIN_SAMPLES_GRID = (5, 10)
 KDIST_PCTS = (50, 60, 70, 80, 90)
-NOISE_FLAG_MAX = 0.25  # cờ mô tả theo bộ lọc cũ — KHÔNG phải bộ lọc ứng viên
-# Kiểm chứng fail-closed artifact đóng băng: số đếm trong phiên thiết kế trên
-# predict_all_years.csv (747 dòng; khớp join PCI 747 — cluster_profile.md:34).
+NOISE_FLAG_MAX = 0.25
+
+
 EXPECTED_N = 747
 EXPECTED_DIST = {-1: 149, 0: 5, 1: 16, 2: 577}
-EXPECTED_EXCLUDED = 122  # 61 dòng 2023 + 61 dòng 2024 bị loại khỏi cửa sổ
-# Sanity phiên thiết kế (in-memory): KMeans(3, seed 11, n_init=10) trên
-# z-trong-năm cho đa thức sizes {234, 307, 206}, ARI đầy đủ 0.0557.
+EXPECTED_EXCLUDED = 122
+
+
 EXPECTED_KMEANS_SIZES = sorted([234, 307, 206])
 EXPECTED_KMEANS_ARI = 0.0557
 
@@ -288,7 +288,7 @@ def main() -> int:
     short_years = {int(y): int(n) for y, n in per_year.items() if n != 63}
     print(f"n theo năm: {dict(per_year)} | năm không đủ 63: {short_years}")
 
-    # Mốc + deconfound
+
     rows = [
         metric_row(
             "STING đóng băng — nhãn gốc CSV (mốc)", "sting_frozen",
@@ -304,7 +304,7 @@ def main() -> int:
         ),
     ]
 
-    # K1: DBSCAN grid suy từ k-distance
+
     labels_by_method: dict[str, np.ndarray] = {}
     eps_summary: list[tuple[int, float, float, float]] = []
     for ms in MIN_SAMPLES_GRID:
@@ -327,7 +327,7 @@ def main() -> int:
             labels_by_method[method] = labels
     print("DBSCAN grid: 10 combo xong")
 
-    # K2/K3: k-means + Ward
+
     km = KMeans(n_clusters=3, random_state=SEED, n_init=10).fit_predict(X)
     km_method = f"KMeans k=3 (seed {SEED}, n_init=10)"
     rows.append(
@@ -347,7 +347,7 @@ def main() -> int:
     out.to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
     print(f"đã ghi {OUT_CSV}")
 
-    # Ngưỡng thắng (chốt trước)
+
     bench = next(r for r in rows if r["family"] == "sting_frozen")
     cand = [r for r in rows if r["family"] in ("dbscan", "kmeans", "ward")]
 
@@ -361,7 +361,7 @@ def main() -> int:
 
     winners = [r for r in cand if beats(r)]
 
-    # DBSCAN narrative
+
     db_rows = [r for r in rows if r["family"] == "dbscan"]
     best_db = sorted(
         db_rows,
@@ -370,7 +370,7 @@ def main() -> int:
         ),
     )[0]
 
-    # Đọc theo thành phần (trung thực, sinh từ chính bảng)
+
     sil_beat = [
         r for r in cand
         if r["silhouette"] is not None and r["silhouette"] > bench["silhouette"]
@@ -395,7 +395,7 @@ def main() -> int:
             + "."
         )
 
-    # Sanity vs phiên thiết kế
+
     km_row = next(r for r in rows if r["family"] == "kmeans")
     km_sizes = [int(v) for v in km_row["sizes_top5"].strip("[]").split(",")]
     km_sizes_sorted = sorted(km_sizes)
@@ -404,10 +404,10 @@ def main() -> int:
         abs(km_row["ari_full_vs_frozen"] - EXPECTED_KMEANS_ARI) < 5e-5
     )
 
-    # Deconfound số đọc
+
     refit_row = next(r for r in rows if r["family"] == "sting_refit")
 
-    # Bảng md
+
     cols = [
         ("method", "phương pháp"), ("min_samples", "min_samples"),
         ("eps", "eps"), ("kdist_pct", "phân vị k-dist (%)"),

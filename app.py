@@ -144,6 +144,21 @@ def cluster_label(value: int | str) -> str:
     return "Nhiễu (-1)" if cluster == -1 else f"Cụm {cluster}"
 
 
+def cluster_palette(cluster_codes) -> dict[str, str]:
+    """Consistent Okabe-Ito cluster colors with Safe fallback for cluster >= 3."""
+    fallback = px.colors.qualitative.Safe
+    palette: dict[str, str] = {}
+    extra_index = 0
+    for code in sorted({int(c) for c in cluster_codes}):
+        label = cluster_label(code)
+        if code in CLUSTER_COLORS:
+            palette[label] = CLUSTER_COLORS[code]
+        else:
+            palette[label] = fallback[extra_index % len(fallback)]
+            extra_index += 1
+    return palette
+
+
 def render_empty(message: str) -> None:
     st.info(message)
 
@@ -339,13 +354,8 @@ with sting_tab:
         if plot_data.empty:
             render_empty("Các dòng đang lọc chưa có đủ feature và assignment để vẽ biểu đồ.")
         else:
-            plot_data["Cụm"] = plot_data.pred_cluster.map(
-                lambda value: "Nhiễu (-1)" if int(value) == -1 else f"Cụm {int(value)}"
-            )
-            palette = {"Nhiễu (-1)": "#64748b"}
-            palette.update(
-                {f"Cụm {code}": color for code, color in zip(sorted(year_clusters), px.colors.qualitative.Safe)}
-            )
+            plot_data["Cụm"] = plot_data.pred_cluster.map(cluster_label)
+            palette = cluster_palette(plot_data.pred_cluster)
             figure = px.scatter(
                 plot_data,
                 x=features[0],
@@ -474,9 +484,9 @@ if regression_tab.open:
                     "Được chọn theo CV": st.column_config.CheckboxColumn("Chọn bằng CV"),
                 },
             )
-            # Bảng cố tình chỉ so baseline carry-forward + 2 họ đã tune; các dòng
-            # regression khác trong artifact được liệt kê tường minh ở đây thay vì
-            # lọc im lặng (đổi tên model trong CSV sẽ lộ ra chỗ này).
+
+
+
             dropped_regression_rows = metrics.loc[
                 metrics.task.eq("regression")
                 & ~metrics.model.isin(overall_regression.model)
@@ -602,13 +612,7 @@ if external_tab.open:
             )
             ext_m4.metric("Nhóm so sánh", f"{len(pci_counts['clusters'])}")
 
-            palette = {"Nhiễu (-1)": "#64748b"}
-            palette.update(
-                {
-                    f"Cụm {code}": color
-                    for code, color in zip(sorted(pci_counts["clusters"]), px.colors.qualitative.Safe)
-                }
-            )
+            palette = cluster_palette(pci_counts["clusters"])
             cluster_order = [cluster_label(code) for code in sorted(pci_counts["clusters"])]
             pci_figure = px.box(
                 pci_view,
@@ -763,7 +767,7 @@ if external_tab.open:
                     y="median",
                     color="cluster_label",
                     markers=True,
-                    color_discrete_map=palette,
+                    color_discrete_map=cluster_palette(grdp.pred_cluster),
                     hover_data={"n": True, "mean": True, "cluster_label": False},
                     labels={
                         "cluster_label": "Nhóm",
@@ -787,9 +791,9 @@ if external_tab.open:
                 "cụm 2 (cụm 0 rỗng, cụm 1 còn ít điểm)."
             )
 
-            # Block bổ trợ: nghèo cấp tỉnh GSO V14.47 (thứ hai sau PCI).
-            # try/except RIÊNG để lỗi artifact poverty không che 4 section kiểm
-            # chứng phía trên; số hiển thị đều tự tính từ CSV (không hardcode).
+
+
+
             try:
                 poverty_assets = get_poverty_assets(artifact_identity(_POVERTY_FILES))
                 poverty_view, poverty_counts = prepare_poverty_cluster_view(
@@ -829,10 +833,7 @@ if external_tab.open:
                     ),
                 )
 
-                poverty_palette = {
-                    cluster_label(code): CLUSTER_COLORS.get(code, "#64748b")
-                    for code in poverty_counts["clusters"]
-                }
+                poverty_palette = cluster_palette(poverty_counts["clusters"])
                 poverty_order = [cluster_label(code) for code in poverty_counts["clusters"]]
                 poverty_figure = px.box(
                     poverty_view,

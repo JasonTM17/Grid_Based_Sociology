@@ -40,11 +40,6 @@ dòng nguồn ghi ngày tải lấy từ PROVENANCE.md (không tự điền ngà
 
 from __future__ import annotations
 
-import sys as _sys
-from pathlib import Path as _Path
-
-_sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))  # repo root: cho phép `from scripts.<nhóm>.<module> import ...`
-
 import math
 import sys
 import textwrap
@@ -54,12 +49,21 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-# Chuẩn trình bày hình của repo (palette Okabe–Ito, rcParams, dòng nguồn) —
-# chỉ tác động lớp vẽ, không đổi logic tính số liệu.
-from scripts.common.fig_style import (CLUSTER_COLORS, CLUSTER_LABELS, PALETTE, UNIT_LABELS,
-                       add_source, apply_style, new_fig, save_png)
-
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
+
+
+from scripts.common.fig_style import (  # noqa: E402
+    CLUSTER_COLORS,
+    CLUSTER_LABELS,
+    PALETTE,
+    UNIT_LABELS,
+    add_source,
+    apply_style,
+    new_fig,
+    save_png,
+)
 PROC = ROOT / "data" / "processed"
 RES = ROOT / "results"
 FIGS = RES / "figs"
@@ -71,11 +75,11 @@ ODM_CSV = PROC / "external_odm_health_63.csv"
 WDI_CSV = PROC / "external_worldbank_vnm.csv"
 LABELS_CSV = RES / "predict_all_years.csv"
 
-# Ngày tải của TẤT CẢ các nguồn external — xác nhận trong data/raw/*/PROVENANCE.md
-# (pci, gso, odmekong, worldbank đều ghi "Ngày tải: 2026-11-07").
+
+
 RETRIEVED_DATE = "2026-11-07"
 
-# Fallback màu cho nhãn ngoài {-1, 0, 1, 2} — không xảy ra với dữ liệu hiện có.
+
 _FALLBACK_COLOR = "#937860"
 
 
@@ -173,9 +177,9 @@ def source_rect_bottom(n_lines: int) -> float:
     return min(0.32, 0.02 + 0.032 * n_lines)
 
 
-# DPI xuất cho 2 hình bị nhận xét độ phân giải ở vòng soi 1 (GRDP, WDI): figure
-# 6.5 in x 400 dpi ≈ 2600 px rộng → chèn full-width 15–16 cm trong báo cáo vẫn
-# đạt ≥ 300 dpi hiệu dụng (chuẩn in), thay vì ~210 dpi khi lưu 200 dpi.
+
+
+
 FIG_DPI_PRINT = 400
 
 
@@ -205,25 +209,25 @@ def place_n_labels(
     Không đọc/sửa bất kỳ giá trị dữ liệu nào — chỉ chọn vị trí chữ.
     """
     fig = ax.figure
-    fig.canvas.draw()  # chốt bố cục (gọi sau tight_layout) để có tọa độ hiển thị
+    fig.canvas.draw()
     rend = fig.canvas.get_renderer()
-    pt = fig.dpi / 72.0  # điểm ảnh trên 1pt
+    pt = fig.dpi / 72.0
     pts_px = {
         lab: [tuple(ax.transData.transform((x, y))) for x, y, _ in rows]
         for lab, rows in series
     }
-    segs = [  # (đoạn nối 2 điểm liền kề, nhãn chủ)
+    segs = [
         ((pts_px[lab][k], pts_px[lab][k + 1]), lab)
         for lab, rows in series for k in range(len(pts_px[lab]) - 1)
     ]
-    markers = [  # điểm dữ liệu của từng cụm (marker tròn)
+    markers = [
         (pts_px[lab][k], lab) for lab, rows in series for k in range(len(rows))
     ]
     ax_bb = ax.get_window_extent()
     leg = ax.get_legend()
     leg_bb = leg.get_window_extent(rend) if leg is not None else None
-    placed: list[tuple[float, float, float, float]] = []  # tâm + nửa rộng/cao nhãn
-    # Ứng viên offset (dx_pt, dy_pt) — trên trước (giữ thói quen đọc cũ).
+    placed: list[tuple[float, float, float, float]] = []
+
     candidates = ((0, 8), (0, -9), (9, 8), (-9, 8), (9, -9), (-9, -9),
                   (16, 8), (-16, 8), (16, -9), (-16, -9))
     for lab, rows in series:
@@ -234,7 +238,7 @@ def place_n_labels(
                 cx, cy = x0 + dx_pt * pt, y0 + dy_pt * pt
                 if not (ax_bb.x0 + 3 <= cx <= ax_bb.x1 - 3
                         and ax_bb.y0 + 3 <= cy <= ax_bb.y1 - 3):
-                    continue  # ứng viên lòi ra ngoài khung trục
+                    continue
                 d = min((_pt_seg_dist(cx, cy, s) for s, owner in segs
                          if owner != lab), default=float("inf"))
                 md = [math.hypot(cx - qx, cy - qy)
@@ -268,7 +272,7 @@ def plot_pci(df: pd.DataFrame, t: dict, out_path: Path, title: str, source: str,
     labels = sorted(df["pred_cluster"].unique())
     arrays = [df.loc[df.pred_cluster == lab, "pci_weighted_score"].to_numpy()
               for lab in labels]
-    fig, ax = new_fig()  # 6.5 x 4.3 in — đúng cột docx
+    fig, ax = new_fig()
     bp = ax.boxplot(arrays, patch_artist=True, widths=0.55, showfliers=False,
                     medianprops={"color": "#222222"})
     for patch, lab in zip(bp["boxes"], labels):
@@ -288,8 +292,8 @@ def plot_pci(df: pd.DataFrame, t: dict, out_path: Path, title: str, source: str,
     sub = (f"One-way ANOVA F({t['df1']},{t['df2']}) = {t['f']:.2f}, "
            f"{fmt_p(t['p_anova'])}; Kruskal–Wallis H = {t['h']:.2f}, "
            f"{fmt_p(t['p_kw'])}; eta² = {t['eta_sq']:.3f}")
-    # Tiêu đề chính theo rcParams (12pt đậm); dòng thống kê là chú thích nhỏ
-    # đặt dưới tiêu đề, trên khung trục.
+
+
     ax.set_title(title, pad=30)
     ax.text(0.5, 1.01, "\n".join(textwrap.wrap(sub, 80)), transform=ax.transAxes,
             ha="center", va="bottom", fontsize=9, color="#444444")
@@ -309,7 +313,7 @@ def main() -> int:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    apply_style()  # rcParams chuẩn repo — chỉ tác động lớp trình bày hình
+    apply_style()
 
     FIGS.mkdir(parents=True, exist_ok=True)
 
@@ -317,7 +321,7 @@ def main() -> int:
     labels = pd.read_csv(LABELS_CSV)
     assert not labels.duplicated(["year", "province_code"]).any(), "nhãn trùng khóa"
 
-    # 1) Kiểm định CHÍNH: PCI 2011–2022 theo nhãn cụm STING
+
     main = pci[(pci.year >= 2011) & (pci.year <= 2022) & pci.pci_weighted_score.notna()]
     m = main.merge(labels[["year", "province_code", "pred_cluster"]],
                    on=["year", "province_code"], how="left", validate="one_to_one")
@@ -342,7 +346,7 @@ def main() -> int:
         retrieved=RETRIEVED_DATE,
     )
 
-    # 2) Kiểm tra PHỤ: Top-30 2023–2024 (chọn mẫu — chỉ tỉnh tốt)
+
     t30 = pci[(pci.year >= 2023) & pci.pci_weighted_score.notna()]
     mt = t30.merge(labels[["year", "province_code", "pred_cluster"]],
                    on=["year", "province_code"], how="left", validate="one_to_one")
@@ -360,7 +364,7 @@ def main() -> int:
           f"({fmt_p(t_top['p_anova'])}) | Kruskal H={t_top['h']:.4f} "
           f"({fmt_p(t_top['p_kw'])})")
 
-    # 3) Mật độ y tế 2020 theo cụm (ODM health + dân số GSO)
+
     odm = pd.read_csv(ODM_CSV)
     pop = pd.read_csv(POP_CSV)
     p20 = pop[pop.year == 2020][["province_code", "gso_pop_total_thousand"]]
@@ -389,7 +393,7 @@ def main() -> int:
     print("3) Y tế 2020:", len(h), "tỉnh; 10 tỉnh count=0:",
           ", ".join(sorted(zero10)))
 
-    fig, ax = new_fig()  # 6.5 x 4.3 in — đúng cột docx
+    fig, ax = new_fig()
     labs = sorted(h.pred_cluster.unique())
     arrays = [h.loc[h.pred_cluster == lab, "fac_per_1000"].to_numpy() for lab in labs]
     bp = ax.boxplot(arrays, patch_artist=True, widths=0.5, showfliers=False,
@@ -425,7 +429,7 @@ def main() -> int:
     save_png(fig, FIGS / "external_health_density_2020.png")
     plt.close(fig)
 
-    # 4) GRDP/người theo cụm, cửa sổ 2018–2024 (2024 = Sơ bộ)
+
     grdp = pd.read_csv(GRDP_CSV)
     mg = grdp.merge(labels[["year", "province_code", "pred_cluster"]],
                     on=["year", "province_code"], how="left", validate="one_to_one")
@@ -449,7 +453,7 @@ def main() -> int:
         })
     print(dg.groupby(["pred_cluster", "year"]).size().to_string())
 
-    fig, ax = new_fig()  # 6.5 x 4.3 in — đúng cột docx
+    fig, ax = new_fig()
     grdp_series: list[tuple[int, list[tuple[float, float, int]]]] = []
     for lab in sorted(dg.pred_cluster.unique()):
         sub = dg[dg.pred_cluster == lab].groupby("year").agg(
@@ -469,7 +473,7 @@ def main() -> int:
                  "(không nội suy 2011–2017)")
     ax.legend()
     ax.grid(alpha=0.25)
-    # Nhãn tỉnh có dấu cho trình bày hình (chỉ đọc, không đổi bộ masked của md)
+
     masked_vi = mg.loc[mg.pred_cluster.isna(), ["year", "province_vi"]]
     n_src = source_note(
         fig,
@@ -482,16 +486,16 @@ def main() -> int:
                            for _, r in masked_vi.iterrows())),
     )
     fig.tight_layout(rect=(0, source_rect_bottom(n_src), 1, 1))
-    # Nhãn n= đặt SAU tight_layout về phía trống nhất — đường cụm khác không
-    # còn đi xuyên qua chữ như bản trước (2019, 2020). Chỉ lớp trình bày.
+
+
     place_n_labels(ax, grdp_series)
     save_png(fig, FIGS / "external_grdp_by_cluster.png", dpi=FIG_DPI_PRINT)
     plt.close(fig)
 
-    # 5) WDI — bối cảnh vĩ mô quốc gia 2010–2024 (chuỗi không đều)
+
     wdi = pd.read_csv(WDI_CSV)
-    # (tên panel, đơn vị trục y): đơn vị đưa về nhãn trục y riêng của từng
-    # panel thay vì chỉ nằm trong tiêu đề (nhận xét soi hình vòng 1).
+
+
     VI_PANELS = {
         "NY.GDP.PCAP.CD": ("GDP/người", "USD hiện hành"),
         "SP.URB.TOTL.IN.ZS": ("Dân số đô thị", "% tổng dân số"),
@@ -513,19 +517,19 @@ def main() -> int:
         print(f"   WDI {code}: {len(sub)}/15 năm "
               f"({int(sub.year.min())}–{int(sub.year.max())})")
 
-    fig, axes = new_fig(nrows=2, ncols=2)  # 6.5 x 4.3 in — đúng cột docx
+    fig, axes = new_fig(nrows=2, ncols=2)
     from matplotlib.ticker import MaxNLocator
 
     for ax, (code, (name, unit)) in zip(axes.flat, VI_PANELS.items()):
         sub = wdi[wdi.indicator_code == code].sort_values("year")
         ax.plot(sub.year, sub.value, marker="o", color=PALETTE["blue"],
                 linewidth=1.4)
-        # Đầu trên trục y chừa 10% để marker chấm cuối (thường là max) không
-        # bị cắt phẳng tại biên axes khi tràn sát trần (GDP 2024, đô thị 2024,
-        # giường bệnh 2017) — chỉ đổi khung nhìn, không đổi dữ liệu.
+
+
+
         ax.margins(y=0.10)
-        # Mã chỉ số + phủ dữ liệu là dòng nhỏ giữa tiêu đề và khung trục —
-        # nằm NGOÀI khung nên không bao giờ đè đường số.
+
+
         ax.set_title(name, pad=16)
         ax.set_ylabel(unit)
         ax.text(0.5, 1.02,
@@ -533,10 +537,10 @@ def main() -> int:
                 f"({int(sub.year.min())}–{int(sub.year.max())})",
                 transform=ax.transAxes, ha="center", va="bottom",
                 fontsize=7.5, color="#555555")
-        # Trục năm nguyên, bước 2/5 năm — tránh tick thập phân và chồng chữ
+
         ax.xaxis.set_major_locator(MaxNLocator(nbins=4, integer=True))
         ax.grid(alpha=0.25)
-    # Nhãn trục x chung cho hàng dưới (4 panel cùng thang năm 2010–2024).
+
     for ax in axes.flat[2:]:
         ax.set_xlabel("Năm")
     note = ("Giường bệnh: chuỗi dừng 2017 phía nguồn (raw gốc rỗng 2018–2024) — "
@@ -552,13 +556,13 @@ def main() -> int:
     y_note = 0.008 + 0.032 * n_src + 0.012
     fig.text(0.5, y_note, "\n".join(textwrap.wrap(note, 100)),
              ha="center", va="bottom", fontsize=8, color="#555555")
-    # rect top = 1.0: tight_layout tính cả suptitle vào phần dự trữ phía trên,
-    # nên trần thấp hơn sẽ đẩy axes xuống tạo khoảng trống lớn dưới suptitle.
+
+
     fig.tight_layout(rect=(0, y_note + 0.075, 1, 1.0))
     save_png(fig, FIGS / "external_wdi_panel.png", dpi=FIG_DPI_PRINT)
     plt.close(fig)
 
-    # 6) Xuất CSV + md
+
     rows = (
         stats_rows("pci_2011_2022", tab_main) + test_rows("pci_2011_2022", t_main)
         + stats_rows("pci_top30_2023_2024", tab_top) + test_rows("pci_top30_2023_2024", t_top)
