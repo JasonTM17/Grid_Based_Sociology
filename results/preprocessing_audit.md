@@ -17,13 +17,13 @@ Bước làm sạch kiểm tra lần lượt trùng khóa, giá trị thiếu, t
 | Test | Result | Decision | Evidence file:line |
 |---|---|---|---|
 | Trùng khóa (province_code, year), dedup chạy ĐẦU TIÊN | 0 dòng trùng / 882 dòng (882 khóa duy nhất); trùng toàn dòng: 0 | Giữ đúng 1 dòng/khóa. Pipeline chặn cứng nếu phát hiện trùng (không tự bỏ dòng) — dedup nằm ở bước đầu của Cleaning. | scripts/data/build_external_master.py:139-140; scripts/supervised/predict_supervised.py:101-102 |
-| Ô thiếu trong 37 cột chỉ tiêu (8 chiều + tiểu chiều) | 4649/32634 ô (14.2%); 4284 ô nằm NGOÀI cửa sổ thu thập của cột (d7/sd_7_*/sd_8_*/sd_5_2) | KHÔNG nội suy, không điền: giữ NaN. Chỉ loại dòng khi ghép cặp / dựng ma trận feature. | scripts/common/papi_pred_common.py:56; scripts/analysis/predict_demo.py:67-68 |
-| Dòng thiếu ≥1 chỉ tiêu TRONG cửa sổ thu thập | 13/882 dòng, 365 ô; 13 dòng thiếu sd_4_2 hoặc sd_6_1 | Loại khỏi train/dự đoán bằng dropna trên đúng cột đang dùng; không điền, không nội suy. | scripts/analysis/predict_demo.py:67-68; scripts/supervised/predict_supervised.py:106 |
-| Tên tỉnh vs crosswalk 63 tỉnh | 0 xung đột; 63/63 mã khớp crosswalk | Tên/mã lấy từ crosswalk; mã không map được là lỗi chặn (build dừng). | scripts/data/build_panel.py:204-217; scripts/data/build_panel.py:210-213; data/raw/mendeley/Replication_package/data/province_crosswalk_63.csv:2-64 |
+| Ô thiếu trong 37 cột chỉ tiêu (8 chiều + tiểu chiều) | 4649/32634 ô (14.2%). Có 4284 ô ngoài giai đoạn khảo sát và 365 ô trong giai đoạn khảo sát, trên 13 dòng. | KHÔNG nội suy, không điền: giữ NaN. Chỉ loại dòng khi ghép cặp / dựng ma trận feature. | scripts/common/papi_pred_common.py:55-56; scripts/analysis/predict_demo.py:69,113 |
+| Dữ liệu thiếu ở hai chỉ tiêu phân cụm | 13/882 dòng thiếu ít nhất một chỉ tiêu (22 ô). Chỉ tiêu 4.2 thiếu 13 ô. Chỉ tiêu 6.1 thiếu 9 ô. | Giữ NaN trong bảng gốc. Dùng 869 dòng đủ hai chỉ tiêu cho mẫu phân cụm. | models/predict_config.json:4-11; scripts/analysis/predict_demo.py:69,113 |
+| Tên tỉnh vs crosswalk 63 tỉnh | 0 xung đột; 63/63 mã khớp crosswalk | Tên/mã lấy từ crosswalk; mã không map được là lỗi chặn (build dừng). | scripts/data/build_panel.py:205-217; data/raw/mendeley/Replication_package/data/province_crosswalk_63.csv:2-64 |
 | Khoảng giá trị vs metadata thang đo | 0 ô ngoài khoảng / 32634 ô (37 cột × 882 dòng) | Giữ nguyên giá trị; không cắt, không sửa theo metadata. | data/processed/papi_panel_scale_metadata.csv:2-38 (cột thang_2011_2020, thang_2021_2024); scripts/data/check_data.py:34-58 |
 | Giá trị ngoài cửa sổ thu thập của từng cột | 0 ô | Giữ; cửa sổ năm là metadata kiểm chứng, không dùng để xóa ô. | data/processed/papi_panel_scale_metadata.csv:2-38 (cột nam_bat_dau, nam_ket_thuc) |
-| Điểm 0.0 (quy ước 'tỉnh không được xếp hạng') | 0 ô điểm = 0.0 còn lại | 0.0 → NaN ngay khi dựng panel để không lẫn với điểm thật. | scripts/data/build_panel.py:218-226 |
-| Đánh dấu ngoại lai z-score > 3 (trị tuyệt đối) | 122 ô (0.4%), 98 dòng, 29 cột | GIỮ toàn bộ — chỉ đánh dấu, không xóa. Cờ z-score không quyết định nhãn STING; điểm nhận -1 khi không thuộc ô dày hoặc ngoài vùng lưới đã học. Dữ liệu gốc không bị loại. | src/sting.py:12-13; src/sting.py:334; scripts/analysis/predict_demo.py:110 |
+| Điểm 0.0 (quy ước 'tỉnh không được xếp hạng') | 0 ô điểm = 0.0 còn lại | 0.0 → NaN ngay khi dựng panel để không lẫn với điểm thật. | scripts/data/build_panel.py:222-226 |
+| Đánh dấu ngoại lai z-score > 3 (trị tuyệt đối) | 122 ô (0.4%), 98 dòng, 29 cột | GIỮ toàn bộ — chỉ đánh dấu, không xóa. Cờ z-score không quyết định nhãn STING; điểm nhận -1 khi không thuộc ô dày hoặc ngoài vùng lưới đã học. Dữ liệu gốc không bị loại. | src/sting.py:7-8,164-166,174-198; scripts/analysis/predict_demo.py:104-106 |
 
 ### 1.1 Thiếu theo năm (chỉ cột còn trong cửa sổ thu thập)
 
@@ -95,7 +95,7 @@ Khóa nối, cardinality, số dòng, xung đột tên/giá trị, rò rỉ dữ
 | Khóa nối duy nhất hai phía + quan hệ bản ghi | panel 0 trùng; master 0 trùng; quan hệ one_to_one (không one-to-many/many-to-many) | Nối one-to-one theo (province_code, year); không nhân dòng. | scripts/data/build_external_master.py:148; scripts/data/build_external_master.py:139-140 |
 | Số dòng trước/sau khi nối panel × master | 882 → 882; 63 tỉnh; lưới khóa giống nhau: True | LEFT join giữ đúng lưới panel; ô dữ liệu bên ngoài thiếu để trống, có mask. | scripts/data/build_external_master.py:149-150; scripts/data/build_external_master.py:180-183 |
 | Tên và giá trị trùng giữa panel và master | 0 lệch tên/63 mã; papi_province_code≠province_code: 0; 37 cột số chung lệch tối đa 8.88e-16 (sai số biểu diễn CSV); 0 ô lệch > 1e-09 | Không sửa; dung sai 1e-9 xác nhận hai file cùng một dữ liệu. | scripts/data/build_external_master.py:161; scripts/data/build_external_master.py:70-82 |
-| Scaler/lưới dự đoán có fit ngoài cutoff không | JSON khớp thống kê ≤2023: 808 dòng, Δmean=0, Δscale=0; nếu fit cả 869 dòng thì Δmean=0.011456 → không khớp JSON | Không rò rỉ: scaler + lưới STING chỉ fit ≤2023; 2024 (63 dòng, 61 đủ 2 chỉ tiêu) chỉ được transform/predict. | scripts/analysis/predict_demo.py:65-70; scripts/analysis/predict_demo.py:75-77; scripts/analysis/predict_demo.py:113; scripts/analysis/predict_sweep.py:112-113; scripts/supervised/predict_supervised.py:156-159 |
+| Scaler/lưới dự đoán có fit ngoài cutoff không | JSON khớp thống kê ≤2023: 808 dòng, Δmean=0, Δscale=0; nếu fit cả 869 dòng thì Δmean=0.011456 → không khớp JSON | Không rò rỉ: scaler + lưới STING chỉ fit ≤2023; 2024 (63 dòng, 61 đủ 2 chỉ tiêu) chỉ được transform/predict. | scripts/analysis/predict_demo.py:67-77,113-116; scripts/analysis/predict_sweep.py:53-54,108-109; scripts/supervised/predict_supervised.py:156-159 |
 
 ## 3. Transformation
 
@@ -103,13 +103,14 @@ Chuẩn hóa (scaling) — fit ở đâu, kiểm chứng số học.
 
 | Test | Result | Decision | Evidence file:line |
 |---|---|---|---|
-| Phương pháp chuẩn hóa | StandardScaler z-score (ddof=0), 2 chỉ tiêu sd_4_2, sd_6_1; fit một lần trên gộp 2011–2023 | Dùng tham số đã đóng băng trong models/sting_predict_scaler.json; không fit lại trên 2024. | scripts/analysis/predict_demo.py:70-72; models/sting_predict_scaler.json:10-17 |
-| Đối chiếu số học mean/scale với panel thật | Δmean=0; Δscale=0; ddof=1 lệch 1.13e-04 → xác nhận ddof=0 | Tham số JSON tái lập được từ đúng các năm lịch sử; giữ nguyên trạng. | models/sting_predict_scaler.json:10-17 (mean, scale); scripts/analysis/predict_demo.py:86-99 |
+| Phương pháp chuẩn hóa | StandardScaler z-score (ddof=0), 2 chỉ tiêu sd_4_2, sd_6_1; fit một lần trên gộp 2011–2023 | Dùng tham số đã đóng băng trong models/sting_predict_scaler.json; không fit lại trên 2024. | scripts/analysis/predict_demo.py:70-71; models/sting_predict_scaler.json:10-17 |
+| Đối chiếu số học mean/scale với panel thật | Δmean=0; Δscale=0; ddof=1 lệch 1.13e-04 → xác nhận ddof=0 | Tham số JSON tái lập được từ đúng các năm lịch sử; giữ nguyên trạng. | models/sting_predict_scaler.json:10-17 (mean, scale); scripts/analysis/predict_demo.py:70,85-99 |
 
 ## Kết luận
 
 - Không phát hiện lỗi chặn: 0 dòng trùng khóa, 0 xung đột tên, 0 ô ngoài khoảng metadata, rò rỉ scaler: False.
-- Thiếu dữ liệu là cấu trúc: 4284/4649 ô thiếu nằm ngoài cửa sổ thu thập của cột; 365 ô trong cửa sổ, trên 13 dòng — đúng bằng số dòng thiếu chỉ tiêu mô hình (13).
+- Trên 37 cột chỉ tiêu, 4284/4649 ô thiếu nằm ngoài giai đoạn khảo sát. Trong giai đoạn khảo sát, có 365 ô thiếu trên 13 dòng.
+- Hai chỉ tiêu phân cụm có 22 ô thiếu trên 13/882 dòng. Chỉ tiêu 4.2 thiếu 13 ô. Chỉ tiêu 6.1 thiếu 9 ô.
 - Ngoại lai chỉ đánh dấu (122 ô), không xóa; quyết định giữ dựa trên bản chất điểm khảo sát và cơ chế nhãn nhiễu của STING.
 - z-score > 3 tính gộp toàn panel nên trộn cả bước nhảy thang đo giữa các năm (metadata ghi rõ vài cột đổi thang 2021); audit này không kết luận tương đương thang đo xuyên năm.
 - Ngoài pipeline chính: `scripts/supervised/candidates_regression.py:172` dùng SimpleImputer(median) cho một ứng viên tham khảo — không thuộc pipeline đã công bố.

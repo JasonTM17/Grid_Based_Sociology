@@ -1,0 +1,51 @@
+================================================================================
+CHUYÊN ĐỀ TIỀN XỬ LÝ DỮ LIỆU PAPI 2011–2024
+Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới (Grid-based Clustering — STING)
+Sinh viên thực hiện:
+  - Nguyễn Tiến Sơn     (MSSV: 24110054)
+  - Trần Thị Ngọc Quyên (MSSV: 24110051)
+Giảng viên hướng dẫn: ThS. Lê Minh Tân
+================================================================================
+
+Thư mục này đóng gói độc lập toàn bộ mã nguồn, 14 bảng tính Excel PAPI gốc
+(2011–2024) và bảng tra mã tỉnh để chạy riêng chuyên đề tiền xử lý dữ liệu.
+
+1. CẤU TRÚC THƯ MỤC
+--------------------------------------------------------------------------------
+03-tien-xu-ly-papi/
+├── Nhom15_TienXuLy_PAPI.ipynb  Notebook tiền xử lý PAPI 6 bước
+├── HUONG_DAN.txt             Hướng dẫn cấu trúc và cách chạy
+├── requirements.txt          Danh mục thư viện Python cố định
+├── src/
+│   ├── preprocessing.py      Mô-đun tiền xử lý 6 bước PAPI
+│   └── sting.py              Thuật toán STING cài đặt từ đầu
+├── data/
+│   ├── raw/papi/             14 bảng tính Excel PAPI gốc
+│   ├── raw/mendeley/         Bảng mã 63 tỉnh & đối chiếu Mendeley
+│   └── processed/            Panel PAPI (882×41) & bảng ghép (882×59)
+├── scripts/
+│   ├── common/               Hàm đọc dữ liệu & định dạng đồ thị
+│   └── data/                 Script dựng panel & kiểm toán tiền xử lý
+├── models/
+│   ├── predict_config.json   Cấu hình chỉ tiêu & tham số lưới
+│   └── sting_predict_scaler.json  Tham số StandardScaler (≤ 2023)
+└── results/
+    ├── preprocessing_audit.*      Bảng kiểm toán quy trình tiền xử lý
+    └── preprocessing_sensitivity.* Bảng độ nhạy 3 phương án (A/B/C)
+
+2. HƯỚNG DẪN XEM VÀ CHẠY TRỰC TIẾP TỪ THƯ MỤC NÀY
+--------------------------------------------------------------------------------
+1. Trong Jupyter / VS Code: mở Nhom15_TienXuLy_PAPI.ipynb trong thư mục này,
+   chọn kernel Python 3.14, sau đó chọn Restart Kernel → Run All Cells.
+2. Bằng dòng lệnh (mở terminal tại chính thư mục 03-tien-xu-ly-papi/):
+
+python -m pip install -r requirements.txt
+python scripts/data/build_panel.py
+python scripts/data/build_scale_metadata.py
+python scripts/data/check_data.py
+python scripts/data/preprocessing_audit.py
+python scripts/data/crosscheck_mendeley.py
+python -m nbconvert --to notebook --execute Nhom15_TienXuLy_PAPI.ipynb --output Nhom15_TienXuLy_PAPI_chay_lai
+
+Trân trọng,
+Nhóm 15

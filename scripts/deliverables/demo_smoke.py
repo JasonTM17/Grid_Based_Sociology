@@ -73,6 +73,9 @@ for f in [
     "results/supervised_metrics.csv",
     "results/supervised_summary.md",
     "results/analysis_summary.md",
+    "results/preprocessing_audit.csv",
+    "results/preprocessing_sensitivity.csv",
+    "data/processed/papi_panel_scale_metadata.csv",
 ]:
     file_nonempty(f, min_bytes=100)
 
@@ -81,6 +84,7 @@ for f in [
     "notebooks/STING_PAPI_Demo_MoRong.ipynb",
     "notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb",
     "notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb",
+    "notebooks/Nhom15_TienXuLy_PAPI.ipynb",
     "slides/final.pptx",
     "slides/submission.pptx",
     "reports/final_report.docx",
@@ -114,6 +118,7 @@ for nb in [
     "notebooks/STING_PAPI_Demo_MoRong.ipynb",
     "notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb",
     "notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb",
+    "notebooks/Nhom15_TienXuLy_PAPI.ipynb",
 ]:
     try:
         n = nbformat.read(ROOT / nb, as_version=4)

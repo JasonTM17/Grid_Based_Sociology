@@ -26,8 +26,8 @@ python scripts/deliverables/update_report_fields.py
 ```
 
 Cập nhật trường bằng Microsoft Word trên Windows trước khi đóng gói.
-Bộ đóng gói kiểm tra mục lục bảy chương cùng 12 mục hình và 12 mục bảng
-đã được Word lưu. Bản có phần dự báo hai chỉ tiêu kết xuất 44 trang trong
-Word. Đã đối chiếu 74 mục dẫn đến phần thân có số trang trích xuất được,
-gồm tiêu đề mục 5.5, hai hình dự báo và bảng sai số. Bảng sai số và chú
-thích nằm trên cùng một trang.
+Bộ đóng gói kiểm tra mục lục bảy chương cùng 12 mục hình và 13 mục bảng
+đã được Word lưu. Bản hiện tại (sau khi bổ sung mục 3.7 và Bảng 4) kết
+xuất 45 trang trong Word (9 trang đầu và 36 trang nội dung đánh số 1–36).
+Các mục hình, bảng và chú thích (gồm mục 3.7, mục 5.5, các hình dự báo
+và bảng sai số) nằm trọn trên trang tương ứng.

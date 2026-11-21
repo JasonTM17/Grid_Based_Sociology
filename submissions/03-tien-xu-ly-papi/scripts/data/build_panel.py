@@ -6,7 +6,7 @@ Hai định dạng nguồn:
   (chỉ tiêu là hàng, tỉnh là cột theo Mã tỉnh; file chứa nhiều sheet năm —
   chỉ lấy sheet năm hiện tại, lấy block "Dimension" ĐẦU TIÊN).
 
-Chạy: python scripts/build_panel.py
+Chạy: python scripts/data/build_panel.py
 Ghi ra: data/processed/papi_panel_63_2011_2024.csv
 """
 from __future__ import annotations
@@ -24,7 +24,7 @@ try:
 except Exception:
     pass
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 RAW = ROOT / "data" / "raw" / "papi"
 CROSSWALK = ROOT / "data" / "raw" / "mendeley" / "Replication_package" / "data" / "province_crosswalk_63.csv"
 OUT = ROOT / "data" / "processed" / "papi_panel_63_2011_2024.csv"

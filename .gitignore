@@ -32,6 +32,7 @@ AGENTS.md
 # Gói đầy đủ tải theo DOI 10.17632/wbk42j9wc8.1 — phần còn lại giữ ngoài repo.
 data/raw/mendeley/*
 !data/raw/mendeley/PROVENANCE.md
+!data/raw/mendeley/README.md
 !data/raw/mendeley/Replication_package
 data/raw/mendeley/Replication_package/*
 !data/raw/mendeley/Replication_package/data

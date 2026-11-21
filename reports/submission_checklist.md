@@ -12,7 +12,7 @@ _Cập nhật ngày 21/11/2026 · Nhóm 15._
 
 ## Đối chiếu môn học (2026-11-12)
 
-- [x] **Bộ tiền xử lý PAPI** — hai ZIP đều có `Nhom15_TienXuLy_PAPI.ipynb` ở cấp đầu để dựng lại bảng từ 14 tệp Excel gốc. Hai notebook đồ án dùng panel và bảng kiểm tra tiền xử lý đã lưu.
+- [x] **Bộ tiền xử lý PAPI** — hai ZIP đều có `Nhom15_TienXuLy_PAPI.ipynb` ở cấp đầu (kèm bộ chạy độc lập tại `submissions/03-tien-xu-ly-papi/`) để dựng lại bảng từ 14 tệp Excel gốc qua `PREPROCESSING_PIPELINE` 6 bước, kiểm tra `scale_audit`/miền/ngoại lai và thử nghiệm Cleaning/Transformation. Hai notebook đồ án và báo cáo Word dùng panel, `results/preprocessing_audit.csv` và `results/preprocessing_sensitivity.csv`.
 - [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/supervised/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
 - [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/supervised/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).
 - [x] **Q&A theo khái niệm bài giảng** — `reports/on-tap/qa_course_concepts.md`.
@@ -50,9 +50,9 @@ python scripts/deliverables/build_submission_packages.py --verify
 
 Đầu ra tại `submissions/`:
 
-- `Nhom15_GiuaKy_STING_PAPI.zip` đặt slide 10 trang, notebook giữa kỳ, notebook tiền xử lý và hướng dẫn ở cấp đầu.
-- `Nhom15_CuoiKy_STING_PAPI.zip` đặt báo cáo, notebook cuối kỳ, notebook tiền xử lý, slide vấn đáp và hướng dẫn ở cấp đầu. Thư mục `tai_lieu_kem` trong hai ZIP chứa mã, dữ liệu và danh sách thư viện.
-- Bộ dựng và bộ xác minh dùng chung danh mục tệp. Xem số lượng và vai trò của từng tệp trong `tai_lieu_kem/MANIFEST.json`.
+- `Nhom15_GiuaKy_STING_PAPI.zip` đặt slide 10 trang, notebook giữa kỳ, notebook tiền xử lý, `HUONG_DAN.txt`, `requirements.txt` cùng các thư mục chuẩn `src/`, `data/`, `scripts/`, `models/`, `results/` ở cấp đầu.
+- `Nhom15_CuoiKy_STING_PAPI.zip` đặt báo cáo, notebook cuối kỳ, notebook tiền xử lý, slide vấn đáp, `HUONG_DAN.txt`, `requirements.txt` cùng các thư mục chuẩn `src/`, `data/`, `scripts/`, `models/`, `results/`, `reports/` ở cấp đầu.
+- Bộ dựng và bộ xác minh dùng chung danh mục tệp. Xem số lượng và vai trò của từng tệp trong `results/MANIFEST.json`.
 - `SHA256SUMS.txt`: hash hai ZIP; mỗi ZIP có `MANIFEST.json` ghi hash/vai trò từng file.
 - `verification.json` ghi kết quả chạy notebook tiền xử lý và notebook báo cáo trong mỗi gói giải nén.
 

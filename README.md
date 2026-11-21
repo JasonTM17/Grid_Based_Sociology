@@ -19,7 +19,7 @@ Toàn bộ file nộp nằm trong [`submissions/`](submissions/). Các notebook 
 | Cuối kỳ | [Báo cáo DOCX](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx) và [notebook](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.ipynb) | [ZIP cuối kỳ](submissions/Nhom15_CuoiKy_STING_PAPI.zip) |
 | Bộ tiền xử lý PAPI chạy riêng | [Notebook tiền xử lý](submissions/03-tien-xu-ly-papi/Nhom15_TienXuLy_PAPI.ipynb) | [Mã và dữ liệu tiền xử lý](submissions/03-tien-xu-ly-papi/) |
 
-Mỗi ZIP có `Nhom15_TienXuLy_PAPI.ipynb` cạnh notebook báo cáo. Giải nén cả ZIP của mốc tương ứng để chạy hai notebook cùng mã và dữ liệu trong `tai_lieu_kem/`. Slide cuối kỳ dùng khi vấn đáp là tài liệu tùy chọn. [Hướng dẫn](submissions/HUONG-DAN.txt) · [Slide vấn đáp](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
+Mỗi ZIP có `Nhom15_TienXuLy_PAPI.ipynb` cạnh notebook báo cáo cùng các thư mục chuẩn `src/`, `data/`, `scripts/`, `models/`, `results/`. Giải nén toàn bộ ZIP của mốc tương ứng để chạy hai notebook trực tiếp. Slide cuối kỳ dùng khi vấn đáp là tài liệu tùy chọn. [Hướng dẫn](submissions/HUONG-DAN.txt) · [Slide vấn đáp](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
 
 Slide cuối kỳ trình bày STING và dự báo ở trang 1–13. Trang 7–9 giải thích cách dự báo hai chỉ tiêu, sai số và kết quả đối chiếu trên lưới. Trang 14 đối chiếu PCI, trang 15 ghi nguồn và trang 16 kết thúc.
 
@@ -37,7 +37,7 @@ Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đ
 ```text
 Grid_Based_Sociology/
 ├── app.py                     # Dashboard Streamlit phân tích và kiểm chứng ngoại lai
-├── src/                       # Cài đặt lõi thuật toán STING (sting.py)
+├── src/                       # Cài đặt lõi STING (sting.py) & tiền xử lý PAPI (preprocessing.py)
 ├── scripts/                   # Mã tái lập pipeline (chi tiết trong scripts/README.md)
 │   ├── data/                  #   Dựng panel, đối chiếu Mendeley, kiểm tra tiền xử lý
 │   ├── analysis/              #   Sweep cấu hình, gán cụm, kiểm chứng PCI/GRDP/nghèo
@@ -122,7 +122,7 @@ Bảng liên kết các nội dung học máy với mã nguồn, kết quả và
 | Confusion matrix, precision/recall | Ma trận 6 model học phần: `results/figs/course_confusion_matrix.png`; LR đã chọn (một model): `results/figs/supervised_confusion.png` |
 | SVM tuyến tính + kernel RBF | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
 | Decision Tree, Random Forest | Cùng `scripts/supervised/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/supervised/predict_supervised.py` (chọn model theo CV, không theo holdout) |
-| Tiền xử lý PAPI (làm sạch, tích hợp và chuẩn hóa) | `notebooks/Nhom15_TienXuLy_PAPI.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/data/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
+| Tiền xử lý PAPI (làm sạch, tích hợp và chuẩn hóa) | Mô-đun `src/preprocessing.py` (`PREPROCESSING_PIPELINE` 6 bước, đọc trực tiếp 14 workbook PAPI + thử nghiệm Cleaning/Transformation) được nhập trực tiếp vào `notebooks/Nhom15_TienXuLy_PAPI.ipynb`, `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (§4.1) và `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` (§1). `scripts/data/preprocessing_audit.py` và `scripts/data/preprocessing_sensitivity.py` tạo bảng kiểm tra và đối chiếu độ nhạy. |
 | Linear, Polynomial & Logistic Regression | `study/Nhom15_HoiQuy_GiaiThich.ipynb` (OLS residual $\varepsilon_i$, đa thức $m \le n$, Sigmoid & Binary Cross-Entropy) + Phụ lục B của `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` |
 | K-Means, TRAP, Linkage & Dendrogram vs STING | `study/Nhom15_KMeans_PhanCumPhanCap_GiaiThich.ipynb` + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (sơ đồ 4 bước STING 2D, phản biện nhiễu `−1` & Elbow/Silhouette) |
 | Q&A thi / vấn đáp theo slide | `reports/on-tap/qa_course_concepts.md` (midterm/cuối kỳ bổ sung: `reports/on-tap/qa_midterm.md`, `reports/on-tap/qa_final.md`) |

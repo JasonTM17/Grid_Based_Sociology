@@ -43,10 +43,29 @@ CLUSTER_METRICS = _read_results_csv("metrics.csv")
 ROBUSTNESS = _read_results_csv("robustness.csv")
 PREPROC_AUDIT = _read_results_csv("preprocessing_audit.csv")
 COURSE_SUP_ROWS = _read_results_csv("course_supervised_baselines.csv")
+PREPROC_SENS_ROWS = _read_results_csv("preprocessing_sensitivity.csv")
 
 
 def _preprocessing_audit_table():
-    return [[r["test"], r["result"], r["decision"]] for r in PREPROC_AUDIT]
+    return [
+        [r["stage"], r["test"], r["result"].replace("≠", " ≠ "), r["decision"]]
+        for r in PREPROC_AUDIT
+    ]
+
+
+def _preproc_sensitivity_table():
+    rows = []
+    for r in PREPROC_SENS_ROWS:
+        rows.append([
+            f"{r['task']} — {r['model']}",
+            r["variant"],
+            r["n_train_pairs"],
+            f"{_f3(r['value_cv'])} ± {_f3(r['cv_std'])}",
+            _f3(r["delta_vs_A"]),
+            _f3(r["holdout_value"]),
+            r["verdict"],
+        ])
+    return rows
 
 
 def _course_baselines_table():
@@ -78,6 +97,7 @@ def _f3(v):
 
 
 PREPROCESSING_AUDIT_TABLE = _preprocessing_audit_table()
+PREPROC_SENS_TABLE = _preproc_sensitivity_table()
 COURSE_BASELINES_TABLE = _course_baselines_table()
 
 
@@ -259,6 +279,11 @@ _nb = json.loads((ROOT / "notebooks" / "Nhom15_CuoiKy_STING_PAPI.ipynb").read_te
 NB_CELLS = len(_nb["cells"])
 NB_IMGS = sum(1 for c in _nb["cells"] for out in c.get("outputs", [])
               if isinstance(out.get("data"), dict) and "image/png" in out["data"])
+_preproc_nb = json.loads((ROOT / "notebooks" / "Nhom15_TienXuLy_PAPI.ipynb").read_text(
+    encoding="utf-8"))
+PREPROC_CODE_CELLS = sum(1 for c in _preproc_nb["cells"] if c.get("cell_type") == "code")
+PREPROC_IMGS = sum(1 for c in _preproc_nb["cells"] for out in c.get("outputs", [])
+                   if isinstance(out.get("data"), dict) and "image/png" in out["data"])
 
 NAVY = RGBColor(0x0F, 0x2B, 0x46)
 TEAL = RGBColor(0x1B, 0x6E, 0x77)
@@ -489,8 +514,8 @@ body("Từ khóa: STING, phân cụm dựa trên lưới, PAPI, dữ liệu tỉ
 
 front_title("LỜI MỞ ĐẦU")
 body("Đề tài thuộc Topic 6 — Grid-based clustering. Theo bài giảng, cuối kỳ cần dữ liệu thật có hơn 500 dòng và 10 cột, báo cáo Word và notebook. Nhóm chọn tự cài đặt biến thể STING bằng NumPy để giải thích cơ chế lưới; đây là lựa chọn triển khai của nhóm. Scikit-learn hỗ trợ chuẩn hóa, chỉ số đánh giá và các mô hình đối chứng. PAPI được chọn vì dữ liệu công khai, có 14 năm và nhiều chỉ tiêu về quản trị, dịch vụ công.")
-body(f"Đồ án gồm: cài đặt STING từ đầu (src/sting.py); pipeline dữ liệu từ 14 workbook gốc; đối chiếu chéo với gói replication nghiên cứu công bố (Mendeley, CC BY 4.0 — lệch 0.0 trên {MENDELEY_OVERLAP_TXT} cặp giá trị có dữ liệu trên 8 chiều, tính từ reports/crosscheck_mendeley.md) [3]; phân cụm các năm; so sánh với k-means/DBSCAN; robustness đa chỉ tiêu; bản đồ 63 tỉnh; và dự báo hai điểm PAPI rồi dùng lưới STING để đối chiếu vùng năm 2024.")
-body("Mã nguồn lưu các bước dựng panel, kiểm tra dữ liệu, chọn cấu hình và phân tích kết quả. Notebook cuối kỳ tái lập ví dụ giả lập, nhãn STING và sai số dự báo từ panel đã lưu, đồng thời đọc các bảng và hình thực nghiệm. Notebook tiền xử lý PAPI dựng lại bảng từ các tệp Excel gốc; lệnh tái lập được tổng hợp ở Phụ lục A.")
+body(f"Đồ án gồm: cài đặt STING từ đầu (src/sting.py) và mô-đun tiền xử lý PAPI (src/preprocessing.py); pipeline dữ liệu từ 14 workbook gốc; đối chiếu chéo với gói replication nghiên cứu công bố (Mendeley, CC BY 4.0 — lệch 0.0 trên {MENDELEY_OVERLAP_TXT} cặp giá trị có dữ liệu trên 8 chiều, tính từ reports/crosscheck_mendeley.md) [3]; phân cụm các năm; so sánh với k-means/DBSCAN; robustness đa chỉ tiêu; bản đồ 63 tỉnh; và dự báo hai điểm PAPI rồi dùng lưới STING để đối chiếu vùng năm 2024.")
+body("Mã nguồn lưu các bước dựng panel, kiểm tra dữ liệu, tiền xử lý (src/preprocessing.py), chọn cấu hình và phân tích kết quả. Cả notebook giữa kỳ (§4.1) và cuối kỳ (§1) đều nhập trực tiếp src/preprocessing.py để chạy và đối chiếu lại panel từ 14 workbook gốc trước khi tái lập ví dụ giả lập, nhãn STING và sai số dự báo. Notebook tiền xử lý PAPI (Nhom15_TienXuLy_PAPI.ipynb) trình bày đầy đủ PREPROCESSING_PIPELINE 6 bước, biểu đồ chẩn đoán và thử nghiệm Cleaning/Transformation; lệnh tái lập được tổng hợp ở Phụ lục A.")
 body("Nhóm xin chân thành cảm ơn ThS. Lê Minh Tân và Bộ môn Trí tuệ nhân tạo đã hướng dẫn và góp ý trong quá trình thực hiện đồ án. Nhóm trân trọng ghi nhận các tổ chức cung cấp dữ liệu công khai được dẫn trong báo cáo.")
 
 
@@ -598,13 +623,13 @@ table(["Tiêu chí yêu cầu", "Kết quả"], [
 ], widths=[8.0, 8.0], caption=tbl_caption("Kiểm chứng chất lượng dữ liệu"))
 h2("3.4. Audit thang đo xuyên năm (điểm mới)")
 body("Nhóm đánh dấu 23/37 chỉ tiêu có chênh lệch trung bình giữa hai năm liền kề vượt 0,25 điểm. Đối chiếu workbook cho thấy sd_5_1, sd_5_3 và sd_5_4 đổi từ thang 0,25–2,5 sang 0,33–3,33 vào năm 2021. Với sd_2_1, mức tăng 1,355 điểm vào năm 2018 là dấu hiệu cần kiểm tra thêm. Các workbook đối chiếu quanh năm 2021 ghi cùng khoảng điểm cho sd_3_2 (0,33–3,33) và sd_6_4 (0,25–2,5). Cùng khoảng điểm vẫn cần đối chiếu nội dung chỉ tiêu và cách khảo sát khi so sánh qua các năm.")
-body("Nhóm dùng tám chỉ tiêu đã đối chiếu khoảng điểm để tạo các cặp ứng viên STING và làm đầu vào cho mô hình hồi quy bổ trợ. Phân tích STING chính chọn hai chỉ tiêu sd_4_2 và sd_6_1. Bảng metadata ở data/processed/papi_panel_scale_metadata.csv ghi các khoảng điểm và nguồn đối chiếu.")
+body("Nhóm dùng tám chỉ tiêu đã đối chiếu khoảng điểm để tạo các cặp ứng viên STING và làm đầu vào cho mô hình hồi quy bổ trợ. Phân tích STING chính sử dụng chỉ tiêu 4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công và 6.1 Y tế công lập. Bảng metadata ở data/processed/papi_panel_scale_metadata.csv ghi các khoảng điểm và nguồn đối chiếu.")
 h2("3.5. Kiểm tra quy trình tiền xử lý")
-body("Quy trình gồm làm sạch dữ liệu, tích hợp theo khóa và chuẩn hóa chỉ tiêu. Bước làm sạch kiểm tra trùng khóa, giá trị thiếu, tính nhất quán và ngoại lai. Bước tích hợp kiểm tra khóa nối và số dòng sau khi ghép. Bảng kiểm tra đọc từ results/preprocessing_audit.csv, sinh bởi scripts/data/preprocessing_audit.py. Giá trị thiếu được giữ là NaN; chỉ các dòng đủ đặc trưng mới được đưa vào từng phép phân tích. Các ô có |z|>3 được đánh dấu để khảo sát và vẫn giữ trong panel. Cờ ngoại lai z-score và nhãn nhiễu STING là hai quy tắc khác nhau: điểm chỉ nhận nhãn −1 khi không thuộc ô dày hoặc nằm ngoài vùng lưới đã học.")
+body("Quy trình gồm làm sạch dữ liệu, tích hợp theo khóa và biến đổi / chuẩn hóa chỉ tiêu (triển khai thành mô-đun src/preprocessing.py với PREPROCESSING_PIPELINE 6 bước có kiểm thử đơn vị và minh họa trực quan trong notebook Nhom15_TienXuLy_PAPI.ipynb, đồng thời được gọi trực tiếp trong notebook giữa kỳ và cuối kỳ). Bước làm sạch kiểm tra trùng khóa đầu tiên, giá trị thiếu, tính nhất quán và đánh dấu ngoại lai ở cuối bước làm sạch. Bước tích hợp kiểm tra khóa nối và số dòng sau khi ghép. Bảng kiểm tra đọc từ results/preprocessing_audit.csv, sinh bởi scripts/data/preprocessing_audit.py. Giá trị thiếu được giữ là NaN; chỉ các dòng đủ đặc trưng mới được đưa vào từng phép phân tích. Các ô có |z|>3 được đánh dấu để khảo sát và vẫn giữ trong panel. Cờ ngoại lai z-score và nhãn nhiễu STING là hai quy tắc khác nhau: điểm chỉ nhận nhãn −1 khi không thuộc ô dày hoặc nằm ngoài vùng lưới đã học.")
 table(
-    ["Test", "Kết quả", "Quyết định"],
+    ["Giai đoạn", "Test", "Kết quả", "Quyết định"],
     PREPROCESSING_AUDIT_TABLE,
-    widths=[4.8, 4.8, 6.4],
+    widths=[3.0, 3.4, 4.8, 4.8],
     caption=tbl_caption(
         "Kiểm tra quy trình tiền xử lý — nguồn: results/preprocessing_audit.csv"
     ),
@@ -655,6 +680,30 @@ table(
         "Quyết định tiền xử lý, chống rò rỉ và giới hạn pseudo-label / đánh giá"
     ),
 )
+_sens_a_std = {r["model"]: float(r["cv_std"]) for r in PREPROC_SENS_ROWS if r["variant"] == "A"}
+_sens_deltas = [float(r["delta_vs_A"]) for r in PREPROC_SENS_ROWS if r["variant"] != "A"]
+h2("3.7. Thử nghiệm độ nhạy tiền xử lý")
+body(
+    "Để kiểm chứng quyết định giữ thiếu (dropna) và giữ nguyên điểm ngoại lai ở mục 3.6 "
+    "không làm sai lệch kết luận mô hình, nhóm chạy đối chiếu ba biến thể bằng "
+    "scripts/data/preprocessing_sensitivity.py trên cùng chuỗi CV expanding-origin "
+    "2017–2022 và holdout 2024: (A) dropna mặc định; (B) SimpleImputer(median) điền chỉ "
+    "tiêu PAPI bên trong từng fold train, không rò rỉ test; (C) TrainFoldWinsorizer kẹp "
+    f"giá trị |z| > 3 theo mean/std của fold train. Chênh lệch CV giữa các biến thể chỉ "
+    f"từ {_dec(min(_sens_deltas), 3)} đến {_dec(max(_sens_deltas), 3)} "
+    "(nhỏ hơn hẳn độ lệch chuẩn giữa các fold CV của biến thể A trên mọi mô hình: "
+    f"Ridge {_dec(_sens_a_std['ridge'], 3)}, "
+    f"Logistic Regression {_dec(_sens_a_std['logistic regression'], 3)}, "
+    f"Gaussian Naive Bayes {_dec(_sens_a_std['gaussian naive bayes'], 3)})."
+)
+table(
+    ["Nhánh / Mô hình", "Biến thể", "n", "CV mean ± std", "Δ vs A", "Holdout", "Kết luận"],
+    PREPROC_SENS_TABLE,
+    widths=[3.6, 1.3, 1.1, 3.2, 1.6, 1.7, 3.5],
+    caption=tbl_caption(
+        "Độ nhạy của hồi quy Ridge (R²) và phân loại học phần (Macro-F1) theo phương án tiền xử lý — nguồn: results/preprocessing_sensitivity.csv"
+    ),
+)
 
 
 h1("CHƯƠNG 4. PHƯƠNG PHÁP")
@@ -690,7 +739,7 @@ body("Trên ví dụ 240 điểm từ hai nhóm Gauss, cài đặt thu được 
 figure("00_synthetic_sting.png", "Demo STING trên dữ liệu giả lập — blobs 2 cụm (ARI = 0.950)", 11)
 
 h2("5.2. STING theo từng năm (fit riêng từng năm)")
-body("Với cấu hình L=2, factor=3, min_count=3 và phân cụm ở mức 1, các năm trong Bảng 4 đều cho một cụm. Đây là kết quả của hai chỉ tiêu dưới cấu hình đang xét, không chứng minh toàn bộ PAPI đồng nhất. Hình 2 minh họa rằng thay đổi cấu hình trên cùng dữ liệu năm 2023 có thể cho số cụm khác.")
+body("Với cấu hình L=2, factor=3, min_count=3 và phân cụm ở mức 1, các năm trong Bảng 5 đều cho một cụm. Đây là kết quả của hai chỉ tiêu dưới cấu hình đang xét, không chứng minh toàn bộ PAPI đồng nhất. Hình 2 minh họa rằng thay đổi cấu hình trên cùng dữ liệu năm 2023 có thể cho số cụm khác.")
 table(["Năm", "n", "k", "noise", "Kích thước cụm (giảm dần)"], PER_YEAR_TABLE,
       widths=[1.6, 1.6, 1.2, 1.6, 6.0],
       caption=tbl_caption(
@@ -848,7 +897,7 @@ h2("6.4. Ảnh hưởng của cấu hình khi mở rộng số chiều")
 body("Hai thành phần PCA giữ 63,2% phương sai và cấu hình STING đang xét cho một cụm. Trong nhánh 8 chiều, thay riêng mức lưới hoặc ngưỡng số điểm tạo các tỷ lệ nhiễu rất khác nhau; cấu hình min_count=2 đạt ngưỡng số cụm và tỷ lệ nhiễu đã đặt nhưng silhouette âm. Các kết quả cho thấy sự phụ thuộc vào cấu hình trong phạm vi thử nghiệm. Chúng không bác bỏ mọi khả năng có cấu trúc ở chiều cao, vì chỉ khảo sát một số cấu hình và PCA có thể bỏ thông tin ngoài hai thành phần đầu.")
 h2("6.5. Kiểm chứng bên ngoài độc lập")
 body("Robustness nội tại (mục 5.4) là âm tính; câu hỏi còn lại: cấu trúc học không giám sát có tương ứng với một thước đo chưa từng dùng khi học — kiểm chứng bên ngoài độc lập (liên hệ giữa nhóm, không phải nhân quả) — hay không? Nhóm đối chiếu nhãn cụm STING (model chốt, results/predict_all_years.csv) với các nguồn ngoài ở mục 3.1: không đưa vào feature, không nội suy ô trống; mọi thống kê tính lại trực tiếp từ CSV trong scripts/analysis/external_validation.py (số liệu đầy đủ: results/external_validation.md).")
-body("PCI [9] là nguồn khảo sát doanh nghiệp dùng để đối chiếu mô tả với nhãn PAPI. Có 756 quan sát tỉnh–năm 2011–2022, trong đó 747 quan sát có nhãn STING. Bảng 10 gồm 149 điểm nhiễu, 5 điểm cụm 0, 16 điểm cụm 1 và 577 điểm cụm 2. ANOVA cho F(3,743)=9,04, p≈6,9×10⁻⁶; Kruskal–Wallis cho H=31,78, p≈5,8×10⁻⁷; eta²=0,035. Các phép thử gộp chưa hiệu chỉnh sự phụ thuộc giữa các lần quan sát cùng tỉnh và giữa các năm, nên p-value chỉ mang tính tham khảo. Hai cụm nhỏ có ít điểm; kết quả không chứng minh quan hệ nhân quả hoặc xác nhận nhãn cụm là nhóm xã hội thực. Dữ liệu PCI Top-30 năm 2023–2024 được đọc riêng vì có chọn mẫu.")
+body("PCI [9] là nguồn khảo sát doanh nghiệp dùng để đối chiếu mô tả với nhãn PAPI. Có 756 quan sát tỉnh–năm 2011–2022, trong đó 747 quan sát có nhãn STING. Bảng 11 gồm 149 điểm nhiễu, 5 điểm cụm 0, 16 điểm cụm 1 và 577 điểm cụm 2. ANOVA cho F(3,743)=9,04, p≈6,9×10⁻⁶; Kruskal–Wallis cho H=31,78, p≈5,8×10⁻⁷; eta²=0,035. Các phép thử gộp chưa hiệu chỉnh sự phụ thuộc giữa các lần quan sát cùng tỉnh và giữa các năm, nên p-value chỉ mang tính tham khảo. Hai cụm nhỏ có ít điểm; kết quả không chứng minh quan hệ nhân quả hoặc xác nhận nhãn cụm là nhóm xã hội thực. Dữ liệu PCI Top-30 năm 2023–2024 được đọc riêng vì có chọn mẫu.")
 table(["Nhãn nhóm", "n", "PCI trung bình", "Trung vị", "Độ lệch chuẩn"], [
     ["nhiễu (−1)", "149", "59.80", "59.16", "5.04"],
     ["cụm 0", "5", "59.00", "58.47", "1.06"],
@@ -928,8 +977,12 @@ h1("PHỤ LỤC A — LỆNH TÁI LẬP & KIỂM TRA")
 body("Mọi bước dưới đây chạy từ thư mục gốc repo và cho kết quả như cột kỳ vọng; môi trường đã kiểm chứng: Python 3.14.2, Windows 11, dependencies trong requirements.txt.")
 table(["Lệnh", "Kỳ vọng"], [
     ["python scripts/data/build_panel.py", "data/processed/papi_panel_63_2011_2024.csv (882×41); log 2 định dạng nguồn"],
+    ["python scripts/data/build_scale_metadata.py", "data/processed/papi_panel_scale_metadata.csv (37 chỉ tiêu, phạm vi điểm và cờ năm đổi thang)"],
     ["python scripts/data/check_data.py", "PASS — ≥500 hàng, ≥10 cột số; in danh sách cờ audit thang đo (23/37 heuristic)"],
     ["python scripts/data/crosscheck_mendeley.py", "max |diff| = 0.0; ghi reports/crosscheck_mendeley.md"],
+    ["python scripts/data/preprocessing_audit.py", "results/preprocessing_audit.{csv,md} (kiểm tra làm sạch → tích hợp → biến đổi)"],
+    ["python scripts/data/preprocessing_sensitivity.py", "results/preprocessing_sensitivity.{csv,md} (độ nhạy A dropna vs B median vs C winsorize z=3)"],
+    ["python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_TienXuLy_PAPI.ipynb", f"execute sạch, {PREPROC_CODE_CELLS} code cells, {PREPROC_IMGS} hình, 0 lỗi (gọi src/preprocessing.py: PREPROCESSING_PIPELINE 6 bước & thử nghiệm làm sạch/biến đổi)"],
     ["python -m pytest tests -q", "toàn bộ test xanh"],
     ["python scripts/analysis/predict_sweep.py", "chọn cấu hình train-only; ghi models/predict_config.json + results/predict_config_search.csv"],
     ["python scripts/analysis/predict_demo.py", "Gán điểm PAPI đã quan sát vào lưới lịch sử. results/predict_summary.md"],
@@ -1232,7 +1285,8 @@ bullets([
     ("Kiểm đối tái dùng pipeline — khớp 100% số đã công bố.",
      f"tái tính in-memory cho ridge CV R² = {_C_CHECK.group(1)} / holdout MAE = "
      f"{_C_CHECK.group(2)} / RF CV R² = {_C_CHECK.group(3)} — KHỚP "
-     "results/supervised_metrics.csv (MAE holdout bằng chính số Bảng 7); siêu "
+     "results/supervised_metrics.csv (chênh 0,0001 so với 0,0641 ở Bảng 8 do dùng "
+     "Ridge alpha = 0,1 theo CV R² thay vì alpha = 1,0 theo CV MAE); siêu "
      "tham số cố định (CV train-only 2017–2022 của pipeline): Ridge alpha = "
      f"{_C_HYPER.group(1)}, LR C = {_C_HYPER.group(2)}, RF max_depth = "
      f"{_C_HYPER.group(3)} / min_samples_leaf = {_C_HYPER.group(4)}."),

@@ -4,6 +4,7 @@ Cách dùng: python scripts/deliverables/build_slides.py
 """
 import csv
 import json
+import re
 import sys
 from collections import Counter
 from io import BytesIO
@@ -73,6 +74,54 @@ N_OUTSIDE = FORECAST["actual_outside"]
 
 def _dec(value, digits=4):
     return f"{value:.{digits}f}".replace(".", ",")
+
+
+def _dot_thousands(n: int) -> str:
+    return f"{n:,}".replace(",", ".")
+
+
+AUDIT = _read_results_csv("preprocessing_audit.csv")
+PREPROC_SENS = _read_results_csv("preprocessing_sensitivity.csv")
+
+
+def _audit_row(stage_sub: str, test_sub: str) -> dict[str, str]:
+    hits = [r for r in AUDIT if stage_sub in r["stage"] and test_sub in r["test"]]
+    if len(hits) != 1:
+        raise KeyError(f"{stage_sub} / {test_sub}: {len(hits)} dòng trong preprocessing_audit.csv")
+    return hits[0]
+
+
+def _nums(pattern: str, raw_text: str) -> tuple[int, ...]:
+    match = re.search(pattern, raw_text)
+    if match is None:
+        raise ValueError(f"không khớp {pattern!r} trong: {raw_text}")
+    return tuple(int(group) for group in match.groups())
+
+
+_DUP_ROW = _audit_row("(a) trùng khóa", "dedup")
+_MISS_ROW = _audit_row("(b) giá trị thiếu", "Ô thiếu trong 37 cột")
+_OUT_ROW = _audit_row("(d) ngoại lai", "z-score")
+
+N_DUP, N_ROWS = _nums(r"(\d+) dòng trùng / (\d+) dòng", _DUP_ROW["result"])
+N_MISS, N_CELLS = _nums(r"(\d+)/(\d+) ô", _MISS_ROW["result"])
+(N_OUT,) = _nums(r"^(\d+) ô", _OUT_ROW["result"])
+(Z_OUT,) = _nums(r"z-score > (\d+)", _OUT_ROW["test"])
+
+assert N_DUP == 0, "preprocessing_audit.csv: kỳ vọng 0 dòng trùng khóa"
+assert "KHÔNG nội suy" in _MISS_ROW["decision"], "preprocessing_audit.csv: quyết định ô thiếu đã đổi"
+assert "chỉ đánh dấu" in _OUT_ROW["decision"], "preprocessing_audit.csv: quyết định ngoại lai đã đổi"
+
+_SENS_STD_A = {r["model"]: float(r["cv_std"]) for r in PREPROC_SENS if r["variant"] == "A"}
+assert {"ridge", "logistic regression", "gaussian naive bayes"} <= _SENS_STD_A.keys()
+_SENS_NON_A = [r for r in PREPROC_SENS if r["variant"] != "A"]
+assert _SENS_NON_A and all(
+    abs(float(r["delta_vs_A"])) < _SENS_STD_A[r["model"]]
+    and r["verdict"] == "không khác biệt"
+    for r in _SENS_NON_A
+)
+SENS_MAX_DELTA = max(abs(float(r["delta_vs_A"])) for r in _SENS_NON_A)
+SENS_MIN_STD_A = min(_SENS_STD_A.values())
+SENS_MAX_STD_A = max(_SENS_STD_A.values())
 
 
 NAVY = RGBColor(0x0F, 0x2B, 0x46)
@@ -294,28 +343,38 @@ note(s, "Cài đặt gồm ba bước. Đầu tiên chia không gian thành lư�
 
 s = slide_new()
 header(s, "DỮ LIỆU", "PAPI 2011–2024 và lựa chọn chỉ tiêu", 4)
-bullets(s, 0.55, 1.5, 6.7, 5.3, [
-    ("Nguồn.", "14 workbook PAPI do CECODES, VFF-CRT, RTA và UNDP công bố."),
-    ("Bảng dữ liệu.", "882 dòng và 41 cột. Có 8 chiều nội dung và 29 chỉ tiêu thành phần."),
-    ("Giá trị thiếu.", "Chuyển điểm 0 theo quy ước nguồn về NaN và chọn dòng đủ hai chỉ tiêu."),
-    ("Chuẩn hóa.", "Ước lượng trung bình và độ lệch chuẩn từ dữ liệu huấn luyện."),
-    ("Đối chiếu.", "5.118 cặp giá trị hợp lệ trên 8 chỉ số nội dung 2011–2022 khớp gói dữ liệu Le và cộng sự."),
-], size=16, gap_pt=25)
-rect(s, 7.55, 1.35, 5.2, 2.45, RGBColor(0xFD, 0xF3, 0xDC))
-text(s, 7.85, 1.55, 4.7, 0.35, [("KIỂM TRA TÍNH SO SÁNH QUA CÁC NĂM", 13, True, RGBColor(0x8A, 0x5A, 0x00))])
-text(s, 7.85, 2.1, 4.65, 1.5, [
-    ("23/37 chỉ tiêu có biến động trung bình giữa hai năm liên tiếp vượt 0,25.", 14, False, INK),
-    ("Nhóm đối chiếu thang đo với workbook trước khi chọn chỉ tiêu.", 14, True, RGBColor(0x8A, 0x5A, 0x00)),
+bullets(s, 0.55, 1.38, 6.75, 3.65, [
+    ("Nguồn & đối chiếu.", "14 workbook PAPI (CECODES, VFF-CRT, RTA, UNDP); khớp 5.118 cặp 2011–2022 với gói Le và cộng sự."),
+    ("Bảng tích hợp.", f"{N_ROWS} × 41 (8 chiều, 29 tiểu chiều) và external_master_63_2011_2024.csv ({N_ROWS} × 59, nối one-to-one)."),
+    ("Làm sạch.", f"{N_DUP}/{N_ROWS} trùng khóa tỉnh–năm (đầu tiên); {_dot_thousands(N_MISS)}/{_dot_thousands(N_CELLS)} ô thiếu ({_dec(100 * N_MISS / N_CELLS, 1)}%, giữ NaN không nội suy); {N_OUT} ô |z|>{Z_OUT} chỉ đánh dấu cuối Cleaning, giữ nguyên để bảo toàn biên lưới."),
+    ("Chuẩn hóa.", "StandardScaler fit chỉ trên 2011–2023 (808 dòng); 2024 chỉ transform/predict để tránh rò rỉ."),
+], size=13.5, gap_pt=9, hang_in=0.18)
+rect(s, 7.55, 1.35, 5.23, 1.78, RGBColor(0xFD, 0xF3, 0xDC))
+text(s, 7.80, 1.48, 4.75, 0.32, [("KIỂM TRA TÍNH SO SÁNH QUA CÁC NĂM", 12.5, True, RGBColor(0x8A, 0x5A, 0x00))])
+text(s, 7.80, 1.88, 4.75, 1.15, [
+    ("23/37 chỉ tiêu có biến động trung bình giữa hai năm liên tiếp vượt 0,25.", 13.5, False, INK),
+    ("Nhóm đối chiếu thang đo với workbook trước khi chọn chỉ tiêu.", 13.5, True, RGBColor(0x8A, 0x5A, 0x00)),
 ])
-rect(s, 7.55, 4.15, 5.2, 1.85, LIGHT)
-text(s, 7.85, 4.4, 4.7, 0.35, [("HAI CHỈ TIÊU DÙNG CHO PHÂN CỤM", 13, True, TEAL)])
-text(s, 7.85, 4.9, 4.8, 0.9, [("sd_4_2 · Kiểm soát tham nhũng dịch vụ công", 14, False, INK),
-                              ("sd_6_1 · Y tế công lập", 14, False, INK)])
-note(s, "Nhóm thống nhất hai định dạng workbook thành bảng tỉnh–năm. Các chiều d7 và d8 chỉ có "
-     "từ năm 2018, vì vậy cần kiểm tra độ phủ trước khi mở rộng đặc trưng. Quy tắc chênh lệch "
-     "trung bình lớn hơn 0,25 giúp nhận diện chỉ tiêu cần rà soát. Đây là dấu hiệu để đối chiếu "
-     "nguồn, chưa đủ để kết luận mọi chỉ tiêu bị đánh dấu đều đổi thang. Ví dụ sd_5_4 đổi thang "
-     "năm 2021 đã được đối chiếu với workbook.")
+rect(s, 7.55, 3.26, 5.23, 1.72, LIGHT)
+text(s, 7.80, 3.39, 4.75, 0.32, [("HAI CHỈ TIÊU DÙNG CHO PHÂN CỤM", 12.5, True, TEAL)])
+text(s, 7.80, 3.79, 4.75, 1.05, [
+    ("sd_4_2 · Kiểm soát tham nhũng dịch vụ công", 13.5, False, INK),
+    ("sd_6_1 · Y tế công lập", 13.5, False, INK),
+    ("Cùng 8 chỉ tiêu sạch trong allowlist hồi quy.", 12.5, False, GREY),
+])
+rect(s, 0.55, 5.12, 12.23, 1.80, LIGHT)
+text(s, 0.73, 5.21, 11.88, 0.32, [("TIỀN XỬ LÝ VÀ ĐỘ NHẠY (Nhom15_TienXuLy_PAPI.ipynb)", 12.5, True, TEAL)])
+bullets(s, 0.73, 5.56, 11.88, 1.28, [
+    ("PREPROCESSING_PIPELINE 6 bước.", "Khử trùng khóa → Thiếu & 0.0→NaN → Nhất quán & thang đo → Đánh dấu ngoại lai → Tích hợp → Chuẩn hóa."),
+    ("Độ nhạy (results/preprocessing_sensitivity.csv).", f"Thay dropna (A) bằng SimpleImputer(median) (B) hay winsorize |z|≤3 (C) trên Ridge, LR, GNB đều cho |Δ| < cv_std(A) (tối đa {_dec(SENS_MAX_DELTA, 3)} < {_dec(SENS_MIN_STD_A, 3)}–{_dec(SENS_MAX_STD_A, 3)})."),
+], size=13, gap_pt=7, hang_in=0.18)
+note(s, "Nhóm thống nhất hai định dạng workbook thành bảng 882 × 41 và ghép external_master_63_2011_2024.csv (882 × 59, one-to-one). "
+     "Quy trình PREPROCESSING_PIPELINE 6 bước trong Nhom15_TienXuLy_PAPI.ipynb kiểm tra trùng khóa đầu tiên (0/882), "
+     "quy 0.0 về NaN với 4.649/32.634 ô thiếu (14,2%: 4.284 ô ngoài giai đoạn khảo sát và 365 ô trên 13 dòng, giữ NaN không nội suy), "
+     "rà soát nhất quán và đánh dấu 122 ô |z|>3 ở cuối Cleaning nhưng giữ nguyên để không làm co biên [min, max] của lưới STING. "
+     "StandardScaler chỉ fit trên 2011–2023 (808 dòng), không rò rỉ 2024. "
+     "Trên results/preprocessing_sensitivity.csv, các biến thể SimpleImputer(median) và winsorize |z|≤3 cho |Δ| < cv_std(A) ở cả Ridge, LR và GNB. "
+     "Các chiều d7 và d8 chỉ có từ năm 2018; quy tắc |Δmean| > 0,25 (23/37 chỉ tiêu) là dấu hiệu để đối chiếu workbook (như sd_5_4 đổi thang 2021), chưa tự kết luận mọi cột đều đổi thang.")
 
 
 s = slide_new()

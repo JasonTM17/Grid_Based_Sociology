@@ -30,14 +30,15 @@ md(nbf.v4.new_markdown_cell("""# ỨNG DỤNG THUẬT TOÁN PHÂN CỤM DỰA TR
 
 **Báo cáo giữa kỳ môn Học máy · Nhóm 15 · Chủ đề 6 — Grid-based clustering**
 
-Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)
+Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051) · GVHD: ThS. Lê Minh Tân
 
-Notebook trình bày cơ chế gom cụm của biến thể STING do nhóm cài đặt, kiểm
-chứng bằng dữ liệu giả lập và minh họa trên hai chỉ tiêu PAPI. Kết quả đã được
-lưu để theo dõi trực tiếp.
+Notebook trình bày cơ chế gom cụm của biến thể STING do nhóm cài đặt (`src/sting.py`),
+kiểm chứng bằng dữ liệu giả lập, thực thi trực tiếp quy trình tiền xử lý 6 bước từ
+14 bảng tính Excel PAPI gốc (`src/preprocessing.py`) và phân tích trên hai chỉ tiêu PAPI.
 
-**Chạy lại notebook.** Giải nén toàn bộ gói và mở notebook cạnh thư mục
-`tai_lieu_kem`. Chọn **Restart Kernel** (khởi động lại kernel), sau đó
+**Chạy lại notebook.** Giải nén toàn bộ gói và mở notebook trực tiếp tại thư mục
+gốc của gói (cùng cấp với `src/`, `data/`, `scripts/`, `models/`, `results/`).
+Chọn **Restart Kernel** (khởi động lại kernel), sau đó
 chọn **Run All** (chạy tất cả các ô từ đầu). Các ô phía sau sử dụng thư viện,
 dữ liệu và mô hình được nạp hoặc tạo ở các ô trước."""))
 
@@ -95,6 +96,7 @@ ROOT = _find_project_root()
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
+import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -105,14 +107,22 @@ from sklearn.cluster import KMeans, DBSCAN
 from sklearn.metrics import adjusted_rand_score, silhouette_score
 
 from sting import STING
+from preprocessing import (
+    ALLOWLIST_FEATURES,
+    PREPROCESSING_PIPELINE,
+    check_external_integration,
+    feature_selection_summary,
+    run_preprocessing_pipeline,
+    run_sting_preprocessing_experiments,
+    scale_audit,
+)
 from scripts.common.papi_pred_common import FEATURE_LABELS, load_panel
-from scripts.common.fig_style import apply_style
+from scripts.common.fig_style import PALETTE, apply_style, style_context
 from scripts.common.midterm_clustering import (
     FEATURES, GRID, THRESHOLDS, K_CANDIDATES, KMEANS_OPTIONS, DBSCAN_OPTIONS, CELL_Z_EXAMPLE,
     fit_grid, clustered_silhouette, comparison_figure, raw_dbscan_radius, scaling_comparison_figure,
     reference_grid_assignments, sting_steps_figure, kmeans_elbow_figure,
     noise_and_trap_figure, sensitivity_grid_figure, hierarchy_levels_figure,
-    kmeans_mechanism_and_trap_figure, hc_linkage_and_dendrogram_figure,
 )
 
 apply_style()
@@ -218,10 +228,35 @@ vùng điểm tập trung và các vùng nhỏ tách biệt trên mặt phẳng 
 Các tỉnh có đủ hai chỉ tiêu năm 2024 được đưa vào phân tích cùng dữ liệu các năm trước.
 Các cụm mô tả những quan sát đã có trong bảng PAPI."""))
 
-md(nbf.v4.new_markdown_cell("### 4.1 Chuẩn bị mẫu phân tích"))
+md(nbf.v4.new_markdown_cell("""### 4.1 Chuẩn bị mẫu phân tích
+
+Bảng PAPI đáp ứng hai tiêu chí về kích thước của đồ án. Bảng có **882 dòng**
+so với yêu cầu tối thiểu **500 dòng**, và **41 cột, trong đó có 39 cột số**,
+so với yêu cầu tối thiểu **10 cột số**.
+
+Notebook chạy trực tiếp chuỗi tiền xử lý 6 bước `PREPROCESSING_PIPELINE` từ mã nguồn
+`src/preprocessing.py` trên **14 bảng tính Excel gốc (2011–2024)** theo ba giai đoạn
+**Làm sạch → Tích hợp → Biến đổi** (bản phân tích chuyên sâu từng thí nghiệm nằm
+ở notebook đi kèm `Nhom15_TienXuLy_PAPI.ipynb`):
+- **Làm sạch**: khử trùng khóa `(province_code, year)` đầu tiên, quy `0.0 → NaN`
+  theo quy ước Mendeley và phân tách thiếu cấu trúc vs trong giai đoạn trên 37 cột
+  chỉ tiêu, kiểm tra nhất quán miền metadata cùng audit thang đo (`23/37` chỉ tiêu
+  cần đối chiếu workbook gốc), và đánh dấu ngoại lai `|z| > 3` ở cuối bước làm sạch
+  nhưng giữ nguyên điểm PAPI để không làm co biên lưới STING.
+- **Tích hợp & Biến đổi**: ghép các tệp PAPI 2011–2024 theo khóa `province_code × year`,
+  kiểm chứng khớp tuyệt đối với bảng đã khóa, chọn mẫu đủ cả hai chỉ tiêu STING cho
+  phân cụm (`869/882` dòng), và thử nghiệm tác động của Cleaning/Scaling lên lưới STING.
+
+Bảng dưới ghi kết quả chạy trực tiếp 6 bước, đếm ô thiếu của hai chỉ tiêu,
+và tổng hợp kiểm tra từ `results/preprocessing_audit.csv`."""))
 
 cd(nbf.v4.new_code_cell("""feats = list(FEATURES)
+prep_state = run_preprocessing_pipeline(ROOT, features=feats)
 panel = load_panel()
+pd.testing.assert_frame_equal(
+    prep_state["panel"], panel.sort_values(["province_code", "year"]).reset_index(drop=True),
+    check_dtype=False, check_exact=False, rtol=1e-12, atol=1e-12,
+)
 keys = ["province_code", "year"]
 assert panel.shape == (882, 41)
 assert not panel.duplicated(keys).any()
@@ -232,17 +267,86 @@ eligible_2024 = int(complete.year.eq(2024).sum())
 
 prep = pd.read_csv(ROOT / "results" / "preprocessing_audit.csv")
 outlier_result = prep.loc[prep["test"].str.startswith("Đánh dấu ngoại lai"), "result"].item()
+print(f"Đã chạy {len(PREPROCESSING_PIPELINE)} bước PREPROCESSING_PIPELINE (src/preprocessing.py) từ 14 workbook Excel gốc.")
 print(f"PAPI có {len(panel)} dòng, {panel.shape[1]} cột và {panel.province_code.nunique()} tỉnh.")
 print(f"Mẫu phân cụm gồm {len(complete)} quan sát đủ hai chỉ tiêu, loại {len(panel) - len(complete)} dòng thiếu.")
 print(f"Năm 2024 đóng góp {eligible_2024}/{total_2024} quan sát vào cùng mẫu phân cụm.")
 print(f"Kiểm tra ngoại lai khi tiền xử lý: {outlier_result}. Giữ điểm PAPI để phân cụm.")
 
+display(pd.DataFrame(prep_state["log"], columns=["Bước trong PREPROCESSING_PIPELINE", "Kết quả chạy từ Excel gốc"]))
+
+missing_by_feature = panel[feats].isna().sum()
+display(pd.DataFrame({
+    "Chỉ tiêu PAPI dùng cho STING": [FEATURE_LABELS[feature] for feature in feats],
+    "Mã cột": feats,
+    "Ô thiếu": missing_by_feature.to_numpy(),
+}))
+missing_cells = int(missing_by_feature.sum())
+print(f"Hai chỉ tiêu có {missing_cells} ô thiếu trên {len(panel) - len(complete)} dòng tỉnh–năm.")
+
 prep_view = prep[["stage", "test", "result", "decision"]].rename(columns={
     "stage": "Giai đoạn", "test": "Kiểm tra", "result": "Kết quả", "decision": "Quyết định",
 })
-prep_view["Kiểm tra"] = prep_view["Kiểm tra"].str.replace(", dedup chạy ĐẦU TIÊN", "", regex=False)
-with pd.option_context("display.max_colwidth", None):
-    display(prep_view)"""))
+display(
+    prep_view.style.hide(axis="index").set_uuid("papi_audit")
+    .set_table_attributes('style="width:100%;table-layout:fixed"')
+    .set_properties(**{"text-align": "left", "white-space": "normal", "overflow-wrap": "anywhere"})
+)"""))
+
+cd(nbf.v4.new_code_cell("""scale_meta = pd.read_csv(ROOT / "data" / "processed" / "papi_panel_scale_metadata.csv")
+scale_flags = scale_audit(panel)
+assert len(scale_meta) == 37 and len(scale_flags) == 23
+chosen_meta = scale_meta.loc[scale_meta["cot"].isin(feats)]
+assert (chosen_meta["thang_2011_2020"] == chosen_meta["thang_2021_2024"]).all()
+
+ext_info = check_external_integration(panel, ROOT / "data" / "processed" / "external_master_63_2011_2024.csv")
+assert ext_info["shape"] == (882, 59) and ext_info["cardinality"] == "one_to_one" and ext_info["same_keys"]
+print(f"Kiểm chứng tích hợp & thang đo: scale_audit={len(scale_flags)}/{len(scale_meta)}, external_master={ext_info['shape'][0]}×{ext_info['shape'][1]} ({ext_info['cardinality']}).")
+display(ext_info["masks"])
+
+with open(ROOT / "models" / "sting_predict_scaler.json", encoding="utf-8") as fh:
+    scaler_saved = json.load(fh)
+np.testing.assert_allclose(prep_state["scaler"].mean_, scaler_saved["mean"], atol=1e-12)
+np.testing.assert_allclose(prep_state["scaler"].scale_, scaler_saved["scale"], atol=1e-12)
+
+fs_summary, _ = feature_selection_summary(
+    panel, prep_state["score_cols"], candidate_features=ALLOWLIST_FEATURES,
+    flagged_names=prep_state["flagged_names"],
+)
+exp_df, _ = run_sting_preprocessing_experiments(panel, sting_cfg=GRID, features=feats)
+print("Sàng lọc 8 đặc trưng sạch (loại d1–d8 và 23 cột có cờ nhảy thang > 0.25):")
+display(fs_summary[["Tên chỉ tiêu", "Min (≤cutoff)", "Max (≤cutoff)", "Phương sai (ddof=0)", "|r| max với biến khác", "Bị cờ scale_audit"]].round(4))
+print("Thử nghiệm tiền xử lý trực tiếp trên lưới STING 16×16 (2011–2023):")
+display(exp_df)
+
+by_year = prep_state["missing_summary"]["by_year"]
+yearly_means = panel.groupby("year")[["sd_5_4", "sd_2_1", "sd_4_2", "sd_6_1"]].mean()
+with style_context():
+    fig, (ax_m, ax_s) = plt.subplots(1, 2, figsize=(11.8, 3.85), dpi=140, layout="constrained")
+    yrs = by_year["Năm"].to_numpy()
+    s_miss = by_year["Thiếu cấu trúc (ngoài cửa sổ)"].to_numpy()
+    w_miss = by_year["Thiếu trong cửa sổ"].to_numpy()
+    ax_m.bar(yrs, s_miss, color="#CBD5E1", label=f"Ngoài cửa sổ ({int(s_miss.sum())} ô)")
+    ax_m.bar(yrs, w_miss, bottom=s_miss, color="#D55E00", label=f"Trong cửa sổ ({int(w_miss.sum())} ô)")
+    ax_m.set_title("1. Ô thiếu cấu trúc vs trong giai đoạn (giữ NaN)", fontsize=10.5)
+    ax_m.set_xlabel("Năm")
+    ax_m.set_ylabel("Số ô thiếu / 37 cột")
+    ax_m.set_xticks(yrs[::2])
+    ax_m.grid(axis="y", alpha=0.18)
+    ax_m.legend(loc="upper right", fontsize=8.0, framealpha=0.92)
+
+    ax_s.plot(yearly_means.index, yearly_means["sd_5_4"], "o-", color="#D55E00", lw=1.7, label="sd_5_4 (nhảy thang 2021)")
+    ax_s.plot(yearly_means.index, yearly_means["sd_2_1"], "s--", color=PALETTE["purple"], lw=1.5, label="sd_2_1 (nhảy 2018)")
+    ax_s.plot(yearly_means.index, yearly_means["sd_4_2"], "o-", color=PALETTE["blue"], lw=2.0, label="sd_4_2 (chọn — ổn định)")
+    ax_s.plot(yearly_means.index, yearly_means["sd_6_1"], "^-", color=PALETTE["green"], lw=2.0, label="sd_6_1 (chọn — ổn định)")
+    ax_s.axvline(2021, color="#94A3B8", linestyle=":", lw=1.1)
+    ax_s.set_title("2. Sàng lọc thang đo qua trung bình năm", fontsize=10.5)
+    ax_s.set_xlabel("Năm")
+    ax_s.set_ylabel("Điểm trung bình 63 tỉnh")
+    ax_s.set_xticks(yrs[::2])
+    ax_s.grid(alpha=0.18)
+    ax_s.legend(loc="upper left", fontsize=8.0, framealpha=0.92)
+    plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("""### 4.2 Tính z-score từ số liệu thật
 
@@ -814,23 +918,6 @@ Việc diễn giải mức độ thay đổi cần đọc cùng hai giá trị �
   [ARI](https://scikit-learn.org/1.8/modules/generated/sklearn.metrics.adjusted_rand_score.html)
 - Le và cộng sự (2026), dữ liệu đối chiếu các chỉ số nội dung PAPI.
   [Mendeley Data, DOI 10.17632/wbk42j9wc8.1](https://data.mendeley.com/datasets/wbk42j9wc8/1)"""))
-
-md(nbf.v4.new_markdown_cell("""## Phụ lục. Minh họa các phương pháp phân cụm
-
-**K-means.** Hình minh họa cách dời tâm và ảnh hưởng của hình dạng cụm đến
-kết quả gán theo khoảng cách. Kết quả đối chiếu trên dữ liệu PAPI nằm ở
-mục 4.4–4.6."""))
-
-cd(nbf.v4.new_code_cell("""fig = kmeans_mechanism_and_trap_figure()
-plt.show()"""))
-
-md(nbf.v4.new_markdown_cell("""**Phân cụm phân cấp từ dưới lên.** Hình minh họa
-bốn quy tắc đo khoảng cách giữa các cụm (`Single`, `Complete`, `Centroid`,
-`Average`). Đường cắt ngang cây ở phần có khoảng cách gộp tăng mạnh là
-một cách chọn số cụm trên ví dụ minh họa."""))
-
-cd(nbf.v4.new_code_cell("""fig = hc_linkage_and_dendrogram_figure()
-plt.show()"""))
 
 nb["cells"] = cells
 nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}

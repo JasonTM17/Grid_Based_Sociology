@@ -21,6 +21,8 @@ chcp 65001
 
 # đối chiếu môn học — mở sẵn trước Q&A (không cần mạng)
 results\preprocessing_audit.md              # bảng kiểm tra tiền xử lý PAPI
+results\preprocessing_sensitivity.md        # đối chiếu độ nhạy dropna vs SimpleImputer vs Winsorizer
+submissions\03-tien-xu-ly-papi\Nhom15_TienXuLy_PAPI.ipynb  # notebook tiền xử lý 6 bước từ workbook gốc
 results\course_supervised_baselines.md      # bảng NB/KNN/SVM/cây/RF (pseudo-label STING)
 results\classifier_label_baselines.md       # sàn hoán vị nhãn + drift năm (exploratory)
 results\figs\course_confusion_matrix.png    # 6 panel confusion (học phần)

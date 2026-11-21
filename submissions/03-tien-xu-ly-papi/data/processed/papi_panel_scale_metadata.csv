@@ -1,0 +1,38 @@
+﻿cot,thang_2011_2020,thang_2021_2024,nam_doi_thang,nam_ngung_thu_thap,nam_bat_dau,nam_ket_thuc,so_tinh_nam_dau,so_tinh_nam_cuoi,nguon_xac_minh
+d1,1-10 điểm,1-10 điểm,,,2011,2024,63,61,workbook 2024 sheet cột C; chưa chứng minh tương đương cấu trúc xuyên năm
+d2,1-10 điểm,1-10 điểm,,,2011,2024,63,61,workbook 2024 sheet cột C; chưa chứng minh tương đương cấu trúc xuyên năm
+d3,1-10 điểm,1-10 điểm,,,2011,2024,63,61,workbook 2024 sheet cột C; chưa chứng minh tương đương cấu trúc xuyên năm
+d4,1-10 điểm,1-10 điểm,,,2011,2024,63,61,workbook 2024 sheet cột C; chưa chứng minh tương đương cấu trúc xuyên năm
+d5,1-10 điểm,1-10 điểm,,,2011,2024,63,61,workbook 2024 sheet cột C; chưa chứng minh tương đương cấu trúc xuyên năm
+d6,1-10 điểm,1-10 điểm,,,2011,2024,63,61,workbook 2024 sheet cột C; chưa chứng minh tương đương cấu trúc xuyên năm
+d7,1-10 điểm,1-10 điểm,,,2018,2024,63,61,workbook 2024 sheet cột C; chưa chứng minh tương đương cấu trúc xuyên năm
+d8,1-10 điểm,1-10 điểm,,,2018,2024,63,61,workbook 2024 sheet cột C; chưa chứng minh tương đương cấu trúc xuyên năm
+sd_1_1,,,,,2011,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 0.329 tại 2019)
+sd_1_2,,,,,2011,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 0.389 tại 2016)
+sd_1_3,0.25-2.5 điểm/points,0.25-2.5 điểm/points,,,2011,2024,63,61,workbook sheet 2020/2021/2024 giống nhau
+sd_1_4,0.25-2.5 điểm/points,0.25-2.5 điểm/points,,,2011,2024,63,61,workbook sheet 2020/2021/2024 giống nhau
+sd_2_1,,,,,2011,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 1.355 tại 2018)
+sd_2_2,,,,,2011,2024,63,61,chưa đối chiếu workbook; không bị flag heuristic (không tự chứng minh tương đương)
+sd_2_3,,,,,2011,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 0.394 tại 2018)
+sd_2_4,,,,,2018,2024,61,61,chưa đối chiếu workbook; không bị flag heuristic (không tự chứng minh tương đương)
+sd_3_1,,,,,2011,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 0.336 tại 2016)
+sd_3_2,0.33-3.33 điểm,0.33-3.33 điểm,,,2011,2024,63,61,workbook 2020 & 2021 giống nhau — jump là biến động thực (giá trị 2013-2015 lên 2.66-2.69 > 2.5)
+sd_3_3,,,,,2011,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 0.650 tại 2016)
+sd_4_1,0.25-2.5 điểm/points,0.25-2.5 điểm/points,,,2011,2024,63,61,workbook sheet 2020/2021/2024 giống nhau
+sd_4_2,0.25-2.5 điểm/points,0.25-2.5 điểm/points,,,2011,2024,63,61,workbook sheet 2020/2021/2024 giống nhau
+sd_4_3,0.25-2.5 điểm/points,0.25-2.5 điểm/points,,,2011,2024,63,61,workbook sheet 2020/2021/2024 giống nhau
+sd_4_4,0.25-2.5 điểm/points,0.25-2.5 điểm/points,,,2011,2024,63,61,workbook sheet 2020/2021/2024 giống nhau
+sd_5_1,0.25-2.5 điểm,0.33-3.33 điểm/points,2021,,2011,2024,63,61,workbook sheet 2020 vs 2021+
+sd_5_2,0.25-2.5 điểm,(không còn),,2021,2011,2020,63,63,workbook: biến mất khỏi sheet 2021+
+sd_5_3,0.25-2.5 điểm,0.33-3.33 điểm/points,2021,,2011,2024,63,61,workbook sheet 2020 vs 2021+
+sd_5_4,0.25-2.5 điểm,0.33-3.33 điểm/points,2021,,2011,2024,63,61,workbook sheet 2020 vs 2021+
+sd_6_1,0.25-2.5 điểm/points,0.25-2.5 điểm/points,,,2011,2024,63,61,workbook sheet 2020/2021/2024 giống nhau
+sd_6_2,,,,,2011,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 0.305 tại 2021)
+sd_6_3,0.25-2.5 điểm/points,0.25-2.5 điểm/points,,,2011,2024,63,61,workbook sheet 2020/2021/2024 giống nhau
+sd_6_4,0.25-2.5 điểm,0.25-2.5 điểm,,,2011,2024,63,61,workbook 2020-2023 giống nhau — jump là biến động thực
+sd_7_1,,,,,2018,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 0.970 tại 2019)
+sd_7_2,,,,,2018,2024,63,61,chưa đối chiếu workbook; không bị flag heuristic (không tự chứng minh tương đương)
+sd_7_3,,,,,2018,2024,63,61,chưa đối chiếu workbook; không bị flag heuristic (không tự chứng minh tương đương)
+sd_8_1,,,,,2018,2024,63,61,chưa đối chiếu workbook; không bị flag heuristic (không tự chứng minh tương đương)
+sd_8_2,,,,,2018,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 0.672 tại 2019)
+sd_8_3,,,,,2019,2024,63,61,chưa đối chiếu workbook; bị flag heuristic (|jump| 0.847 tại 2020)

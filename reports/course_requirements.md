@@ -89,8 +89,8 @@ vào `submissions/` và kiểm tra bằng `python scripts/deliverables/build_sub
   `reports/final_report.docx` + `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb`, thêm
   `slides/final.pptx` tùy chọn cho vấn đáp.
 
-Mỗi gói giữ cấu trúc mã, kết quả và dữ liệu mà notebook sử dụng.
-`HUONG_DAN.txt` chỉ cách chạy lại. `tai_lieu_kem/MANIFEST.json` liệt kê tệp
+Mỗi gói giữ cấu trúc mã, kết quả và dữ liệu mà notebook sử dụng (`src/`, `data/`, `scripts/`, `models/`, `results/`).
+`HUONG_DAN.txt` chỉ cách chạy lại. `results/MANIFEST.json` liệt kê tệp
 kèm theo và mã SHA-256. [Kịch bản giữa kỳ 15 phút và 5 phút hỏi đáp](on-tap/presentation_script.md)
 
 ## Liêm chính học thuật

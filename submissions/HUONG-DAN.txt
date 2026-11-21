@@ -1,35 +1,54 @@
-﻿NHÓM 15 · HỌC MÁY · PHÂN CỤM STING TRÊN PAPI
+﻿================================================================================
+HƯỚNG DẪN TỔ CHỨC GÓI BÀI NỘP — ĐỒ ÁN MÔN HỌC MÁY
+Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới (Grid-based Clustering — STING)
+Sinh viên thực hiện:
+  - Nguyễn Tiến Sơn     (MSSV: 24110054)
+  - Trần Thị Ngọc Quyên (MSSV: 24110051)
+Giảng viên hướng dẫn: ThS. Lê Minh Tân
+================================================================================
 
-01-giua-ky
-  Nhom15_GiuaKy_STING_PAPI.pptx    Slide giữa kỳ
-  Nhom15_GiuaKy_STING_PAPI.ipynb   Notebook giữa kỳ đã chạy
+1. HAI GÓI ZIP NỘP CHÍNH THỨC
+--------------------------------------------------------------------------------
+- Nhom15_GiuaKy_STING_PAPI.zip  Gói bài nộp Giữa kỳ (đầy đủ slide, 2 notebook,
+                                src/, data/, scripts/, models/, results/).
+- Nhom15_CuoiKy_STING_PAPI.zip  Gói bài nộp Cuối kỳ (đầy đủ báo cáo Word, slide,
+                                2 notebook, src/, data/, scripts/, models/,
+                                results/, reports/).
 
-02-cuoi-ky
-  Nhom15_CuoiKy_STING_PAPI.docx    Báo cáo Word
-  Nhom15_CuoiKy_STING_PAPI.ipynb   Notebook cuối kỳ đã chạy
-  Nhom15_CuoiKy_STING_PAPI.pptx    Slide vấn đáp cuối kỳ
+Mỗi gói ZIP được tổ chức theo cấu trúc dự án chuẩn: các thư mục thành phần
+(data/, models/, results/, scripts/, src/) được đặt gọn gàng ở trên, ngay bên
+dưới là các tệp báo cáo/slide/notebook chính, HUONG_DAN.txt và requirements.txt.
 
-03-tien-xu-ly-papi
-  Nhom15_TienXuLy_PAPI.ipynb  Bản tiền xử lý dùng khi cần chạy riêng
-  data, models, scripts và requirements.txt đi kèm để chạy lại.
+2. BA THƯ MỤC BẢN RỜI ĐỂ XEM NHANH
+--------------------------------------------------------------------------------
+01-giua-ky/
+  ├── Nhom15_GiuaKy_STING_PAPI.pptx    Slide trình chiếu báo cáo giữa kỳ
+  ├── Nhom15_GiuaKy_STING_PAPI.ipynb   Notebook giữa kỳ đã lưu kết quả
+  ├── Nhom15_TienXuLy_PAPI.ipynb       Notebook chuyên đề tiền xử lý PAPI 6 bước
+  ├── HUONG_DAN.txt                    Hướng dẫn cấu trúc và cách chạy gói giữa kỳ
+  └── src/                             Mã nguồn thuật toán (sting.py, preprocessing.py)
 
-Gói Nhom15_GiuaKy_STING_PAPI.zip đặt bản trình chiếu, notebook giữa kỳ
-và Nhom15_TienXuLy_PAPI.ipynb ở cấp đầu sau khi giải nén.
+02-cuoi-ky/
+  ├── Nhom15_CuoiKy_STING_PAPI.docx    Báo cáo tổng kết Word
+  ├── Nhom15_CuoiKy_STING_PAPI.pptx    Slide trình chiếu bảo vệ cuối kỳ
+  ├── Nhom15_CuoiKy_STING_PAPI.ipynb   Notebook cuối kỳ đã lưu kết quả
+  ├── Nhom15_TienXuLy_PAPI.ipynb       Notebook chuyên đề tiền xử lý PAPI 6 bước
+  ├── HUONG_DAN.txt                    Hướng dẫn cấu trúc và cách chạy gói cuối kỳ
+  └── src/                             Mã nguồn thuật toán (sting.py, preprocessing.py)
 
-Gói Nhom15_CuoiKy_STING_PAPI.zip đặt báo cáo Word, slide vấn đáp,
-notebook cuối kỳ và Nhom15_TienXuLy_PAPI.ipynb ở cấp đầu.
+03-tien-xu-ly-papi/
+  ├── Nhom15_TienXuLy_PAPI.ipynb       Notebook chuyên đề tiền xử lý chạy độc lập
+  ├── HUONG_DAN.txt                    Hướng dẫn chạy trực tiếp trong thư mục này
+  ├── requirements.txt                 Danh mục thư viện Python
+  └── src/, data/, models/, results/, scripts/
 
-Giải nén toàn bộ ZIP của mốc cần nộp. Mỗi gói đã kèm 14 tệp Excel gốc,
-bảng tra mã tỉnh và mã chạy trong tai_lieu_kem/. Xem HUONG_DAN.txt trong
-gói để chạy notebook tiền xử lý và notebook báo cáo.
+3. CÁCH CHẠY LẠI TRONG VS CODE / JUPYTER
+--------------------------------------------------------------------------------
+Giải nén toàn bộ gói ZIP của mốc cần nộp. Mở notebook trong VS Code hoặc Jupyter,
+bấm chọn kernel Python 3.14 ở góc trên bên phải (đã cài thư viện từ
+requirements.txt), sau đó chọn Restart Kernel → Run All để chạy từ ô đầu tiên.
 
-Chạy trong VS Code
-
-Bấm tên kernel ở góc trên bên phải của notebook. Trong Python Environments,
-chọn Python 3.14 đã cài thư viện theo hướng dẫn của gói. Sau đó chọn
-Restart Kernel rồi Run All để chạy từ ô đầu.
-
-Các file rời đã lưu kết quả, có thể đọc hoặc chiếu ngay.
-Bản học có giải thích nằm riêng trong thư mục study của dự án.
-SHA256SUMS.txt ghi mã kiểm tra hai ZIP.
-verification.json ghi kết quả chạy lại hai notebook từ mỗi ZIP.
+4. KIỂM TRA TOÀN VẸN
+--------------------------------------------------------------------------------
+- SHA256SUMS.txt     Mã băm SHA-256 kiểm tra toàn vẹn hai gói ZIP.
+- verification.json  Biên bản chạy kiểm chứng tự động các notebook từ mỗi ZIP.

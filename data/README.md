@@ -1,6 +1,8 @@
 # Dữ liệu gốc & Dữ liệu đã xử lý (`data/`)
 
 Toàn bộ dữ liệu được tách rõ thành hai tầng bất biến (`raw/`) và dẫn xuất (`processed/`).
+Để biết nhanh trong `raw/` file nào là dữ liệu, nguồn nào dùng làm gì (đặc biệt gói
+đối chiếu Mendeley), xem **[`raw/README.md`](raw/README.md)** và **[`raw/mendeley/README.md`](raw/mendeley/README.md)**.
 
 ## `data/raw/` — Dữ liệu nguồn gốc (không chỉnh tay)
 

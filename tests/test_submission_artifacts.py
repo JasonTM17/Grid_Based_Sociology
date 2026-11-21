@@ -292,6 +292,7 @@ def test_submission_notebook_key_numbers(submission_notebook: dict):
     assert f"ARI = {EXPECTED_ARI_STR}" in output
     for expected in (
         "869 quan sát đủ hai chỉ tiêu", "61/63 quan sát vào cùng mẫu",
+        "Hai chỉ tiêu có 22 ô thiếu trên 13 dòng tỉnh–năm.",
         "56 ô dày tạo thành 3 vùng liên thông.",
         "1 ô dày, 5 quan sát.", "3 ô dày, 16 quan sát.", "52 ô dày, 677 quan sát.",
         "Nhiễu: 171/869 quan sát (19.7%)",

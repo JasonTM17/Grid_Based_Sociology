@@ -365,8 +365,8 @@ def noise_and_trap_figure(
                    color="#D55E00", marker="D", edgecolors="white", linewidths=0.5,
                    label=f"Điểm |z|>3 ({n_zflag})", zorder=5)
         ax.set_title(
-            f"1. Khung |z| ≤ 3 vs nhiễu −1 ({title_prefix})\n"
-            f"{n_clean_noise}/{n_noise} điểm −1 vẫn nằm TRONG |z| ≤ 3",
+            f"1. Khung |z| ≤ 3 và nhãn nhiễu −1 ({title_prefix})\n"
+            f"{n_clean_noise}/{n_noise} điểm −1 nằm trong miền |z| ≤ 3",
             fontsize=10.5,
         )
         ax.set_ylabel("6.1 Y tế công lập (z-score)")
@@ -391,11 +391,11 @@ def noise_and_trap_figure(
         ax.scatter(kept[~t_ass, 0], kept[~t_ass, 1], s=18, color=PALETTE["gray"], marker="x",
                    linewidths=0.95, label=f"Nhiễu mới ({trimmed_noise})", zorder=3)
         ax.scatter(points[z_flag, 0], points[z_flag, 1], s=36, facecolors="none", edgecolors="#D55E00",
-                   marker="D", linewidths=1.1, label=f"Đã xóa ({n_zflag})", zorder=5)
+                   marker="D", linewidths=1.1, label=f"Đã loại ({n_zflag})", zorder=5)
         ax.set_title(
-            f"2. BẪY: Xóa |z|>3 rồi dựng lại lưới\n"
+            f"2. Loại điểm |z| > 3 rồi dựng lại lưới\n"
             f"{trimmed_model.n_clusters_} cụm · {trimmed_noise}/{len(trimmed_labels)} nhiễu "
-            f"({trimmed_noise / len(trimmed_labels):.1%}, TĂNG!)",
+            f"({trimmed_noise / len(trimmed_labels):.1%})",
             fontsize=10.5,
         )
         ax.set_xlabel("4.2 Kiểm soát tham nhũng dịch vụ công (z-score)")
@@ -410,8 +410,8 @@ def noise_and_trap_figure(
         ax.scatter(points[~c8_ass, 0], points[~c8_ass, 1], s=18, color=PALETTE["gray"], marker="x",
                    linewidths=0.95, label=f"Nhiễu giữ nguyên ({conn8_noise})", zorder=3)
         ax.set_title(
-            f"3. BẪY: Đổi kề 8 hướng (connectivity=2)\n"
-            f"Gộp qua góc → {conn8_model.n_clusters_} cụm · {conn8_noise}/{len(conn8_labels)} nhiễu (KHÔNG giảm)",
+            f"3. Kề 8 hướng (connectivity=2)\n"
+            f"Gộp qua góc → {conn8_model.n_clusters_} cụm · {conn8_noise}/{len(conn8_labels)} nhiễu",
             fontsize=10.5,
         )
         ax.legend(loc="upper left", fontsize=7.6, framealpha=0.92)

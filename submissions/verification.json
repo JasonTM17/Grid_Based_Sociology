@@ -2,47 +2,23 @@
   {
     "milestone": "midterm",
     "status": "PASS",
-    "sha256": "4d18333d6a10a2b8142f35ea9e6ada69aa4244b8a03e427c5a69ea543c1b49a7",
-    "code_cells": 24,
-    "preprocessing_code_cells": 4,
+    "sha256": "a4b478ccb53922aa88a6ae476e0c80bb250445a41093690ba2e33c2b074b6422",
+    "code_cells": 23,
+    "preprocessing_code_cells": 9,
     "isolation_guard": true,
     "python": "3.14.2",
     "system": "Windows",
-    "launcher_messages": true,
-    "ubuntu": {
-      "milestone": "midterm",
-      "status": "PASS",
-      "sha256": "4d18333d6a10a2b8142f35ea9e6ada69aa4244b8a03e427c5a69ea543c1b49a7",
-      "code_cells": 24,
-      "preprocessing_code_cells": 4,
-      "isolation_guard": true,
-      "python": "3.12.3",
-      "system": "Linux",
-      "launcher_messages": true,
-      "distribution": "Ubuntu 24.04 LTS"
-    }
+    "launcher_messages": false
   },
   {
     "milestone": "final",
     "status": "PASS",
-    "sha256": "cfae94a56c9481e28ae3cfecc94b260339141e2bbc3254f762bc807a4a5bc127",
-    "code_cells": 26,
-    "preprocessing_code_cells": 4,
+    "sha256": "b66cf56243ec17269fae17895ca67332599b24c8017e502e23f164aeb44c0649",
+    "code_cells": 27,
+    "preprocessing_code_cells": 9,
     "isolation_guard": true,
     "python": "3.14.2",
     "system": "Windows",
-    "launcher_messages": true,
-    "ubuntu": {
-      "milestone": "final",
-      "status": "PASS",
-      "sha256": "cfae94a56c9481e28ae3cfecc94b260339141e2bbc3254f762bc807a4a5bc127",
-      "code_cells": 26,
-      "preprocessing_code_cells": 4,
-      "isolation_guard": true,
-      "python": "3.12.3",
-      "system": "Linux",
-      "launcher_messages": true,
-      "distribution": "Ubuntu 24.04 LTS"
-    }
+    "launcher_messages": false
   }
 ]

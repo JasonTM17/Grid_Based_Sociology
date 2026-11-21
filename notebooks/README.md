@@ -8,7 +8,7 @@ Toàn bộ notebook đã chạy đầy đủ từ ô đầu đến ô cuối (0 
 |---|---|---|
 | `Nhom15_GiuaKy_STING_PAPI.ipynb` | Notebook nộp **giữa kỳ** (demo 2D, 869 điểm PAPI, phản biện nhiễu `−1`, K-Means/DBSCAN, gán năm 2024) | `python scripts/notebooks/gen_submission_demo.py` |
 | `Nhom15_CuoiKy_STING_PAPI.ipynb` | Notebook nộp **cuối kỳ** (STING đầy đủ, đối chứng ngoại lai, dự báo 2 chỉ tiêu & phụ lục minh họa hồi quy) | `python scripts/notebooks/gen_final_analysis.py` |
-| `Nhom15_TienXuLy_PAPI.ipynb` | **Tiền xử lý PAPI** từ 14 bảng tính gốc | Notebook tự chạy |
+| `Nhom15_TienXuLy_PAPI.ipynb` | **Tiền xử lý PAPI** từ 14 bảng tính gốc, thử nghiệm làm sạch/biến đổi và pipeline 6 bước | `python scripts/notebooks/gen_preprocessing_notebook.py` |
 | `STING_PAPI_Demo_MoRong.ipynb` | Notebook minh họa mở rộng dùng cho kịch bản demo dài | `python scripts/notebooks/gen_midterm_demo.py` |
 
 ## Notebook thử nghiệm Phase 1–4 (`notebooks/exploratory/`)

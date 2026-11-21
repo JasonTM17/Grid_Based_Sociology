@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
-from scripts.common.papi_pred_common import load_panel  # noqa: E402
+from scripts.common.papi_pred_common import FEATURE_LABELS, load_panel  # noqa: E402
 
 MASTER_PATH = ROOT / "data" / "processed" / "external_master_63_2011_2024.csv"
 METADATA_PATH = ROOT / "data" / "processed" / "papi_panel_scale_metadata.csv"
@@ -390,7 +390,14 @@ def main() -> int:
     in_window_missing = int(window["missing"].sum())
     in_window_rows = int(window["rows_with_missing"].sum())
     structural_missing = total_missing - in_window_missing
-    incomplete_feature_rows = int(panel[features].isna().any(axis=1).sum())
+    missing_features = panel[features].isna()
+    missing_by_feature = missing_features.sum()
+    incomplete_feature_rows = int(missing_features.any(axis=1).sum())
+    incomplete_feature_cells = int(missing_by_feature.sum())
+    feature_details = ". ".join(
+        f"Chỉ tiêu {FEATURE_LABELS.get(feature, feature).split(' ', 1)[0]} thiếu {count} ô"
+        for feature, count in missing_by_feature.items()
+    )
     conflicts = name_conflicts(panel, crosswalk)
     ranges = score_range_violations(panel, metadata)
     windows = window_violations(panel, metadata)
@@ -473,30 +480,31 @@ def main() -> int:
             "stage": "1. Cleaning — (b) giá trị thiếu",
             "test": f"Ô thiếu trong {len(columns)} cột chỉ tiêu (8 chiều + tiểu chiều)",
             "result": (
-                f"{total_missing}/{total_cells} ô ({_percent(total_missing, total_cells):.1f}%); "
-                f"{structural_missing} ô nằm NGOÀI cửa sổ thu thập của cột (d7/sd_7_*/sd_8_*/sd_5_2)"
+                f"{total_missing}/{total_cells} ô ({_percent(total_missing, total_cells):.1f}%). "
+                f"Có {structural_missing} ô ngoài giai đoạn khảo sát và "
+                f"{in_window_missing} ô trong giai đoạn khảo sát, trên {in_window_rows} dòng."
             ),
             "decision": (
                 "KHÔNG nội suy, không điền: giữ NaN. Chỉ loại dòng khi ghép cặp / "
                 "dựng ma trận feature."
             ),
             "evidence": (
-                "scripts/common/papi_pred_common.py:56; scripts/analysis/predict_demo.py:67-68"
+                "scripts/common/papi_pred_common.py:55-56; scripts/analysis/predict_demo.py:69,113"
             ),
         },
         {
             "stage": "1. Cleaning — (b) giá trị thiếu",
-            "test": "Dòng thiếu ≥1 chỉ tiêu TRONG cửa sổ thu thập",
+            "test": "Dữ liệu thiếu ở hai chỉ tiêu phân cụm",
             "result": (
-                f"{in_window_rows}/{len(panel)} dòng, {in_window_missing} ô; "
-                f"{incomplete_feature_rows} dòng thiếu sd_4_2 hoặc sd_6_1"
+                f"{incomplete_feature_rows}/{len(panel)} dòng thiếu ít nhất một chỉ tiêu "
+                f"({incomplete_feature_cells} ô). {feature_details}."
             ),
             "decision": (
-                "Loại khỏi train/dự đoán bằng dropna trên đúng cột đang dùng; "
-                "không điền, không nội suy."
+                f"Giữ NaN trong bảng gốc. Dùng {len(panel) - incomplete_feature_rows} "
+                "dòng đủ hai chỉ tiêu cho mẫu phân cụm."
             ),
             "evidence": (
-                "scripts/analysis/predict_demo.py:67-68; scripts/supervised/predict_supervised.py:106"
+                "models/predict_config.json:4-11; scripts/analysis/predict_demo.py:69,113"
             ),
         },
         {
@@ -511,7 +519,7 @@ def main() -> int:
                 "Tên/mã lấy từ crosswalk; mã không map được là lỗi chặn (build dừng)."
             ),
             "evidence": (
-                "scripts/data/build_panel.py:204-217; scripts/data/build_panel.py:210-213; "
+                "scripts/data/build_panel.py:205-217; "
                 "data/raw/mendeley/Replication_package/data/province_crosswalk_63.csv:2-64"
             ),
         },
@@ -547,7 +555,7 @@ def main() -> int:
             "test": "Điểm 0.0 (quy ước 'tỉnh không được xếp hạng')",
             "result": f"{zeros} ô điểm = 0.0 còn lại",
             "decision": "0.0 → NaN ngay khi dựng panel để không lẫn với điểm thật.",
-            "evidence": "scripts/data/build_panel.py:218-226",
+            "evidence": "scripts/data/build_panel.py:222-226",
         },
         {
             "stage": "1. Cleaning — (d) ngoại lai (CUỐI CÙNG)",
@@ -562,7 +570,7 @@ def main() -> int:
                 "vùng lưới đã học. Dữ liệu gốc không bị loại."
             ),
             "evidence": (
-                "src/sting.py:12-13; src/sting.py:334; scripts/analysis/predict_demo.py:110"
+                "src/sting.py:7-8,164-166,174-198; scripts/analysis/predict_demo.py:104-106"
             ),
         },
         {
@@ -628,8 +636,8 @@ def main() -> int:
                 "chỉ được transform/predict."
             ),
             "evidence": (
-                "scripts/analysis/predict_demo.py:65-70; scripts/analysis/predict_demo.py:75-77; "
-                "scripts/analysis/predict_demo.py:113; scripts/analysis/predict_sweep.py:112-113; "
+                "scripts/analysis/predict_demo.py:67-77,113-116; "
+                "scripts/analysis/predict_sweep.py:53-54,108-109; "
                 "scripts/supervised/predict_supervised.py:156-159"
             ),
         },
@@ -646,7 +654,7 @@ def main() -> int:
                 "không fit lại trên 2024."
             ),
             "evidence": (
-                "scripts/analysis/predict_demo.py:70-72; "
+                "scripts/analysis/predict_demo.py:70-71; "
                 "models/sting_predict_scaler.json:10-17"
             ),
         },
@@ -663,7 +671,7 @@ def main() -> int:
             ),
             "evidence": (
                 "models/sting_predict_scaler.json:10-17 (mean, scale); "
-                "scripts/analysis/predict_demo.py:86-99"
+                "scripts/analysis/predict_demo.py:70,85-99"
             ),
         },
     ]
@@ -788,10 +796,11 @@ def main() -> int:
             f"{len(conflicts)} xung đột tên, "
             f"{int(ranges['n_bad'].sum()) if len(ranges) else 0} ô ngoài khoảng metadata, "
             f"rò rỉ scaler: {leak.leaked}.",
-            f"- Thiếu dữ liệu là cấu trúc: {structural_missing}/{total_missing} ô thiếu "
-            f"nằm ngoài cửa sổ thu thập của cột; {in_window_missing} ô trong cửa sổ, "
-            f"trên {in_window_rows} dòng — đúng bằng số dòng thiếu chỉ tiêu mô hình "
-            f"({incomplete_feature_rows}).",
+            f"- Trên {len(columns)} cột chỉ tiêu, {structural_missing}/{total_missing} ô thiếu "
+            f"nằm ngoài giai đoạn khảo sát. Trong giai đoạn khảo sát, có "
+            f"{in_window_missing} ô thiếu trên {in_window_rows} dòng.",
+            f"- Hai chỉ tiêu phân cụm có {incomplete_feature_cells} ô thiếu trên "
+            f"{incomplete_feature_rows}/{len(panel)} dòng. {feature_details}.",
             f"- Ngoại lai chỉ đánh dấu ({outlier_cells} ô), không xóa; quyết định giữ "
             "dựa trên bản chất điểm khảo sát và cơ chế nhãn nhiễu của STING.",
             "- z-score > 3 tính gộp toàn panel nên trộn cả bước nhảy thang đo giữa các năm "
