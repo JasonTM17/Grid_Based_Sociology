@@ -369,8 +369,7 @@ class STING:
             return True
         se = parent.std / np.sqrt(cell.count)
         diff = np.abs(cell.mean - parent.mean)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            return bool(np.any(diff > self.significance_z * se))
+        return bool(np.any(diff > self.significance_z * se))
 
     def _parent_of(self, cell: Cell) -> Cell | None:
         """Ô cha gộp ``factor`` ô con theo từng chiều; None ở mức 0."""
