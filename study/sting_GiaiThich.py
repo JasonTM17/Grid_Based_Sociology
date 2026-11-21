@@ -247,9 +247,19 @@ class STING:
 
         rect: danh sách [(lo0, hi0), (lo1, hi1), ...] theo từng chiều.
         """
+        if not hasattr(self, "cells_"):
+            raise RuntimeError("Hãy gọi fit(X) trước khi query_rect()")
         if level is None:
             level = self.n_levels - 1
+        if not (0 <= level < self.n_levels):
+            raise ValueError(
+                f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
+            )
         rect = np.asarray(rect, dtype=float)
+        if rect.ndim != 2 or rect.shape != (self.n_dims_, 2):
+            raise ValueError(
+                f"rect cần shape ({self.n_dims_}, 2), nhận {rect.shape}"
+            )
         lo, hi = rect[:, 0], rect[:, 1]
 
         total = 0
@@ -285,10 +295,22 @@ class STING:
 
     def point_cell_index(self, level: int) -> np.ndarray:
         """Chỉ số ô (theo từng chiều) của mỗi điểm tại mức `level` — shape (n, d)."""
+        if not hasattr(self, "_point_idx_"):
+            raise RuntimeError("Hãy gọi fit(X) trước khi point_cell_index()")
+        if not (0 <= level < self.n_levels):
+            raise ValueError(
+                f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
+            )
         return self._point_idx_[level].copy()
 
     def cell_stats(self, level: int) -> list[Cell]:
         """Danh sách các ô có dữ liệu tại mức `level`, sắp xếp theo chỉ số."""
+        if not hasattr(self, "cells_"):
+            raise RuntimeError("Hãy gọi fit(X) trước khi cell_stats()")
+        if not (0 <= level < self.n_levels):
+            raise ValueError(
+                f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
+            )
         return [self.cells_[level][k] for k in sorted(self.cells_[level])]
 
     # Nội bộ
@@ -306,7 +328,7 @@ class STING:
     def _accumulate(
         self, X: np.ndarray, flat: np.ndarray, res: int, level: int
     ) -> dict[tuple[int, ...], Cell]:
-        """Tính thống kê từng ô từ nhóm điểm theo `flat` (một lượt O(n))."""
+        """Tính thống kê từng ô từ nhóm điểm theo `flat` (nhóm điểm bằng argsort)."""
         span = self.bounds_max_ - self.bounds_min_
         step = span / res
         cells: dict[tuple[int, ...], Cell] = {}
