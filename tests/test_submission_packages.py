@@ -14,7 +14,8 @@ import pytest
 from scripts.common.notebook_checks import notebook_issues
 from scripts.deliverables.build_submission_packages import (
     MANIFEST_REL, MIDTERM_FILES, PACKAGES, PREPROCESSING_NOTEBOOK, RAW_REFERENCES, ROOT, archive_path,
-    build_package, check_member, instructions, package_files, preprocessing_instructions, verify_package,
+    build_package, check_member, instructions, loose_instructions, package_files, preprocessing_instructions,
+    verify_package,
 )
 
 
@@ -119,6 +120,7 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
                 top = {p.removeprefix(f"{name}/").split("/")[0] for p in archive.namelist()}
                 assert top == visible | {"data", "models", "results", "scripts", "src"}
                 assert archive.read(f"{name}/{name}.pptx") == (ROOT / "slides/submission.pptx").read_bytes()
+                assert guide.count("--output-dir chay_lai ") == 2
             else:
                 top = {p.removeprefix(f"{name}/").split("/")[0] for p in archive.namelist()}
                 assert top == visible | {"data", "models", "reports", "results", "scripts", "src"}
@@ -149,13 +151,17 @@ def test_package_keeps_available_papi_pdf_when_replication_zip_is_absent(tmp_pat
 
 
 @pytest.mark.parametrize("milestone", PACKAGES)
-def test_delivered_zip_matches_current_sting_source_and_notebooks(milestone):
+def test_delivered_zip_matches_sources_notebooks_and_packaged_guide(milestone):
     name, notebook = PACKAGES[milestone]
     sources = ("src/sting.py", "src/preprocessing.py", f"notebooks/{notebook}", f"notebooks/{PREPROCESSING_NOTEBOOK}")
     with zipfile.ZipFile(ROOT / "submissions" / f"{name}.zip") as archive:
         for relative in sources:
             member = f"{name}/{archive_path(relative, milestone)}"
             assert archive.read(member) == (ROOT / relative).read_bytes(), member
+        names = set(archive.namelist())
+        references = tuple(relative for relative in RAW_REFERENCES if f"{name}/{relative}" in names)
+        guide = archive.read(f"{name}/HUONG_DAN.txt").decode("utf-8")
+        assert guide == instructions(milestone, source_references=references)
 
 
 @pytest.mark.parametrize("name", ["../escape", "/absolute", "root/../escape", "C:/escape", "root\\escape", "root//duplicate"])
@@ -315,11 +321,15 @@ def test_loose_submission_folders_match_canonical_deliverables():
         "submissions/03-tien-xu-ly-papi/preprocessing.py",
     ):
         assert not (ROOT / stale_rel).exists(), f"Còn tệp cũ hỏng {stale_rel}"
-    present_refs = tuple(r for r in RAW_REFERENCES if (ROOT / r).is_file())
     for folder, kind in (("01-giua-ky", "midterm"), ("02-cuoi-ky", "final")):
         guide_file = ROOT / "submissions" / folder / "HUONG_DAN.txt"
         assert guide_file.is_file(), f"Thiếu submissions/{folder}/HUONG_DAN.txt"
-        assert guide_file.read_text(encoding="utf-8") == instructions(kind, source_references=present_refs)
+        guide = guide_file.read_text(encoding="utf-8")
+        name, notebook = PACKAGES[kind]
+        assert guide == loose_instructions(kind)
+        assert f"../{name}.zip" in guide and (guide_file.parent.parent / f"{name}.zip").is_file()
+        assert notebook in guide and PREPROCESSING_NOTEBOOK in guide
+        assert "requirements.txt" not in guide
     preproc_guide = ROOT / "submissions/03-tien-xu-ly-papi/HUONG_DAN.txt"
     assert preproc_guide.is_file(), "Thiếu submissions/03-tien-xu-ly-papi/HUONG_DAN.txt"
     guide_text = preproc_guide.read_text(encoding="utf-8")

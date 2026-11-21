@@ -11,15 +11,15 @@ Nhóm 15 · Môn Học máy · Chủ đề 6 — Grid-based clustering · Sociol
 
 ## Nộp bài
 
-Toàn bộ file nộp nằm trong [`submissions/`](submissions/). Các notebook đã lưu kết quả chạy.
+Chọn gói ZIP theo mốc trong [`submissions/`](submissions/) khi gửi bài cho giảng viên. Các notebook đã lưu kết quả chạy để mở xem ngay trong repo.
 
-| Mốc | File nộp | Mã và dữ liệu để chạy lại |
+| Mốc | Mở nhanh trong repo | Gói nộp và chạy lại |
 |---|---|---|
 | Giữa kỳ | [Slide PPTX](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx) và [notebook](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.ipynb) | [ZIP giữa kỳ](submissions/Nhom15_GiuaKy_STING_PAPI.zip) |
 | Cuối kỳ | [Báo cáo DOCX](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx) và [notebook](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.ipynb) | [ZIP cuối kỳ](submissions/Nhom15_CuoiKy_STING_PAPI.zip) |
 | Bộ tiền xử lý PAPI chạy riêng | [Notebook tiền xử lý](submissions/03-tien-xu-ly-papi/Nhom15_TienXuLy_PAPI.ipynb) | [Mã và dữ liệu tiền xử lý](submissions/03-tien-xu-ly-papi/) |
 
-Mỗi ZIP có `Nhom15_TienXuLy_PAPI.ipynb` cạnh notebook báo cáo cùng các thư mục chuẩn `src/`, `data/`, `scripts/`, `models/`, `results/`. Giải nén toàn bộ ZIP của mốc tương ứng để chạy hai notebook trực tiếp. Slide cuối kỳ dùng khi vấn đáp là tài liệu tùy chọn. [Hướng dẫn](submissions/HUONG-DAN.txt) · [Slide vấn đáp](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
+Mỗi ZIP có notebook báo cáo, notebook tiền xử lý, mã và dữ liệu để chạy lại. Giải nén toàn bộ gói và mở `HUONG_DAN.txt` bên trong để xem lệnh chạy. [Hướng dẫn chọn gói](submissions/HUONG-DAN.txt) · [Slide vấn đáp cuối kỳ](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
 
 Slide cuối kỳ trình bày STING và dự báo ở trang 1–13. Trang 7–9 giải thích cách dự báo hai chỉ tiêu, sai số và kết quả đối chiếu trên lưới. Trang 14 đối chiếu PCI, trang 15 ghi nguồn và trang 16 kết thúc.
 

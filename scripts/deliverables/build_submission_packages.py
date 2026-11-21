@@ -208,84 +208,63 @@ def instructions(milestone: str, *, source_references: tuple[str, ...] = ()) -> 
             f"  - {relative} — {RAW_REFERENCES[relative]}.\n"
             for relative in source_references
         )
-    run_preprocessing = (
-        f"python -m nbconvert --to notebook --execute {PREPROCESSING_NOTEBOOK} "
-        f"--output {Path(PREPROCESSING_NOTEBOOK).stem}_chay_lai"
-    )
     if milestone == "midterm":
-        return f"""================================================================================
-BÁO CÁO GIỮA KỲ MÔN HỌC MÁY
-Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới (Grid-based Clustering — STING)
-Sinh viên thực hiện:
-  - Nguyễn Tiến Sơn     (MSSV: 24110054)
-  - Trần Thị Ngọc Quyên (MSSV: 24110051)
+        replay = "python -X utf8 -m nbconvert --to notebook --execute"
+        return f"""BÀI NỘP GIỮA KỲ · MÔN HỌC MÁY
+Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới STING
+Nguyễn Tiến Sơn (24110054) · Trần Thị Ngọc Quyên (24110051)
 Giảng viên hướng dẫn: ThS. Lê Minh Tân
-================================================================================
 
 Kính gửi Thầy Lê Minh Tân,
 
-Nhóm 15 xin gửi gói bài nộp Giữa kỳ nghiên cứu thuật toán phân cụm dựa trên lưới
-STING (Statistical Information Grid) và ứng dụng phân tích dữ liệu quản trị,
-hành chính công cấp tỉnh PAPI giai đoạn 2011–2024 (882 quan sát tỉnh–năm).
+Nhóm 15 trình bày cách ứng dụng STING để quan sát đặc điểm và biến động của
+các chỉ số quản trị, hành chính công cấp tỉnh trên bảng PAPI 2011–2024.
 
-1. CẤU TRÚC THƯ MỤC GÓI NỘP
---------------------------------------------------------------------------------
-{MIDTERM_NAME}/
-├── {MIDTERM_NAME}.pptx       Slide giữa kỳ (10 trang đầu kể cả bìa và 1 trang cảm ơn)
-├── {notebook}      Notebook phân cụm STING & đối chiếu PAPI
-├── {PREPROCESSING_NOTEBOOK}  Notebook tiền xử lý PAPI 6 bước
-├── HUONG_DAN.txt             Hướng dẫn cấu trúc và cách chạy
-├── requirements.txt          Danh mục thư viện Python cố định
-├── src/
-│   ├── sting.py              Thuật toán STING cài đặt từ đầu
-│   └── preprocessing.py      Mô-đun tiền xử lý 6 bước PAPI
-├── data/
-│   ├── raw/papi/             14 bảng tính Excel PAPI gốc (2011–2024)
-│   ├── raw/mendeley/         Bảng mã 63 tỉnh & đối chiếu Mendeley
-│   └── processed/            Panel PAPI (882×41) & bảng ghép (882×59)
-├── scripts/
-│   ├── common/               Hàm dùng chung & cấu hình đồ thị
-│   ├── data/                 Script dựng panel & kiểm toán tiền xử lý
-│   ├── analysis/             Script quét tham số & phân cụm STING
-│   └── figures/              Script sinh biểu đồ lưới & K-means Elbow
-├── models/
-│   ├── predict_config.json   Cấu hình lưới STING (3 mức, 16×16)
-│   └── sting_predict_scaler.json  Tham số StandardScaler (≤ 2023)
-└── results/
-    ├── preprocessing_audit.*      Bảng kiểm toán quy trình tiền xử lý
-    ├── preprocessing_sensitivity.* Bảng độ nhạy 3 phương án (A/B/C)
-    ├── MANIFEST.json              Danh mục tệp & mã kiểm tra SHA-256
-    └── figs/                      Bộ biểu đồ trực quan hóa phân cụm
-{raw_references}
-2. HƯỚNG DẪN XEM VÀ CHẠY LẠI NOTEBOOK
---------------------------------------------------------------------------------
-Hai notebook ở thư mục gốc đã lưu sẵn kết quả và biểu đồ để xem trực tiếp.
-Để chạy lại từ đầu:
-- Trong Jupyter / VS Code: giải nén toàn bộ gói, mở {PREPROCESSING_NOTEBOOK}
-  hoặc {notebook}, chọn kernel Python 3.14, rồi chọn
-  Restart Kernel → Run All Cells.
-- Bằng dòng lệnh (mở terminal tại thư mục {MIDTERM_NAME}/ vừa giải nén):
+1. XEM BÀI NỘP
 
+- {MIDTERM_NAME}.pptx — 10 slide trình bày kể cả bìa, cộng 1 slide cảm ơn.
+- {notebook} — Từ ví dụ lưới nhỏ đến phân cụm và so sánh PAPI qua các năm.
+- {PREPROCESSING_NOTEBOOK} — Sáu bước xử lý dữ liệu từ 14 bảng tính Excel gốc.
+
+Hai notebook đã lưu sẵn bảng kết quả và biểu đồ. Có thể mở trực tiếp để xem.
+
+2. CHẠY LẠI NOTEBOOK
+
+Giải nén toàn bộ ZIP và mở terminal trong thư mục có requirements.txt.
+Dùng môi trường Python 3.14. Có thể tạo môi trường riêng bằng
+python -m venv .venv rồi chọn trình thông dịch của môi trường đó.
+Các lệnh dưới đây dùng python của môi trường đã chọn.
+
+python --version
 python -m pip install -r requirements.txt
-{run_preprocessing}
-python -m nbconvert --to notebook --execute {notebook} --output {MIDTERM_NAME}_chay_lai
+{replay} {PREPROCESSING_NOTEBOOK} --output-dir chay_lai --output {Path(PREPROCESSING_NOTEBOOK).stem}
+{replay} {notebook} --output-dir chay_lai --output {MIDTERM_NAME}
 
-3. TÁI LẬP PANEL & KIỂM TOÁN TIỀN XỬ LÝ TỪ 14 BẢNG TÍNH EXCEL GỐC
---------------------------------------------------------------------------------
-Chạy trực tiếp các lệnh sau ngay tại thư mục {MIDTERM_NAME}/:
+Kết quả chạy lại nằm trong chay_lai/. Trong Jupyter hoặc VS Code, mở
+notebook từ thư mục đã giải nén, chọn kernel Python 3.14 đã cài thư viện,
+rồi dùng Restart Kernel → Run All Cells.
+
+3. ĐỐI CHIẾU MÃ NGUỒN VÀ DỮ LIỆU
+
+- src/sting.py — Cài đặt STING. src/preprocessing.py — Quy trình xử lý PAPI.
+- scripts/common/midterm_clustering.py — Tham số và hàm dùng trong notebook.
+- data/raw/ và data/processed/ — Dữ liệu nguồn và bảng PAPI 882 dòng, 41 cột.
+- models/ — Cấu hình lưới và tham số chuẩn hóa đến năm 2023.
+- results/papi_observed_grid_2024.csv — Kết quả đối chiếu từng tỉnh với lưới tham chiếu.
+- results/MANIFEST.json — Danh mục và mã SHA-256 của các tệp trong gói.
+{raw_references}
+Để dựng lại bảng PAPI và kiểm tra dữ liệu từ Excel gốc, chạy ở cùng thư mục:
 
 python scripts/data/build_panel.py
 python scripts/data/build_scale_metadata.py
 python scripts/data/check_data.py
 python scripts/data/preprocessing_audit.py
 python scripts/data/crosscheck_mendeley.py
-python scripts/analysis/predict_sweep.py
-python scripts/analysis/first_real_cluster.py
-python scripts/figures/fig_grid_levels_and_elbow.py
-
-Trân trọng,
-Nhóm 15
 """
+    run_preprocessing = (
+        f"python -m nbconvert --to notebook --execute {PREPROCESSING_NOTEBOOK} "
+        f"--output {Path(PREPROCESSING_NOTEBOOK).stem}_chay_lai"
+    )
     return f"""================================================================================
 BÁO CÁO CUỐI KỲ MÔN HỌC MÁY
 Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới (Grid-based Clustering — STING)
@@ -367,6 +346,27 @@ Phụ lục A của báo cáo Word trình bày đầy đủ danh mục các lệ
 
 Trân trọng,
 Nhóm 15
+"""
+
+
+def loose_instructions(milestone: str) -> str:
+    """Guide for the files visible in a milestone folder in the repo."""
+    name, notebook = PACKAGES[milestone]
+    if milestone == "midterm":
+        title = "GIỮA KỲ"
+        presentation = f"- {name}.pptx — 10 slide trình bày kể cả bìa, cộng 1 slide cảm ơn."
+    else:
+        title = "CUỐI KỲ"
+        presentation = f"- {name}.docx — Báo cáo đồ án.\n- {name}.pptx — Slide bảo vệ."
+    return f"""BẢN XEM NHANH {title} · NHÓM 15 · MÔN HỌC MÁY
+
+{presentation}
+- {notebook} — Notebook phân tích STING đã lưu kết quả.
+- {PREPROCESSING_NOTEBOOK} — Notebook tiền xử lý PAPI đã lưu kết quả.
+- src/ — Mã nguồn STING và tiền xử lý để đọc cùng notebook.
+
+Để gửi bài hoặc chạy lại notebook độc lập, dùng ../{name}.zip.
+Giải nén toàn bộ ZIP rồi mở HUONG_DAN.txt trong gói để cài thư viện và chạy.
 """
 
 
@@ -644,14 +644,8 @@ def sync_loose_deliverables(root: Path, output: Path, *, report_source: Path | N
         src_subdir.mkdir(parents=True, exist_ok=True)
         for src_rel in ("src/sting.py", "src/preprocessing.py"):
             shutil.copy2(root / src_rel, target_dir / src_rel)
-        sources = package_files(root, milestone)
         (target_dir / "HUONG_DAN.txt").write_text(
-            instructions(
-                milestone,
-                source_references=tuple(relative for relative in RAW_REFERENCES if relative in sources),
-            ),
-            encoding="utf-8",
-            newline="\n",
+            loose_instructions(milestone), encoding="utf-8", newline="\n",
         )
 
     preproc_dir = output / "03-tien-xu-ly-papi"
