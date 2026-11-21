@@ -79,7 +79,7 @@ def test_candidate_pairs_exclude_unverified_dimensions_and_train_flags():
     pairs = candidate_pairs(pd.DataFrame(rows))
     used = {feature for pair in pairs for feature in pair}
 
-    assert len(pairs) == 21  # 7 eligible sub-dimensions choose 2
+    assert len(pairs) == 21
     assert "sd_1_3" not in used
     assert not any(feature in {f"d{i}" for i in range(1, 7)} for feature in used)
 

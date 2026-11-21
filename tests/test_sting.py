@@ -12,7 +12,7 @@ import pytest
 from sklearn.datasets import make_blobs
 from sklearn.metrics import adjusted_rand_score
 
-from sting import STING
+from sting import Cell, STING
 
 
 def test_assignment_counts_and_means_known_data():
@@ -21,7 +21,7 @@ def test_assignment_counts_and_means_known_data():
     model = STING(n_levels=2, factor=4, min_count=1).fit(X)
 
     cell00 = model.cells_[1][(0, 0)]
-    cell33 = model.cells_[1][(3, 3)]  # điểm tại cận trên rơi vào ô cuối
+    cell33 = model.cells_[1][(3, 3)]
 
     assert cell00.count == 4 and cell33.count == 4
     assert np.allclose(cell00.mean, [0.0, 0.0])
@@ -50,7 +50,7 @@ def test_boundary_point_goes_to_last_cell():
     """Điểm đúng ở cận trên không bị mất, rơi vào ô cuối cùng."""
     X = np.array([[0.0, 0.0], [1.0, 1.0], [0.25, 0.25]])
     model = STING(n_levels=2, factor=2, min_count=1).fit(X)
-    idx = model.point_cell_index(1)  # res = 2
+    idx = model.point_cell_index(1)
     assert tuple(idx[1]) == (1, 1)
     assert tuple(idx[2]) == (0, 0)
     assert model.cells_[1][(1, 1)].count == 1
@@ -74,7 +74,7 @@ def test_two_blobs_recovered():
     model = STING(n_levels=3, factor=4, min_count=3).fit(X)
     labels = model.cluster(level=2, connectivity=1)
     assert adjusted_rand_score(y, labels) >= 0.9
-    assert (labels == -1).mean() <= 0.05  # hầu như không có nhiễu
+    assert (labels == -1).mean() <= 0.05
 
 
 def test_deterministic():
@@ -148,12 +148,12 @@ def test_predict_assigns_new_points_to_clusters():
     model = STING(n_levels=3, factor=4, min_count=3).fit(X)
     model.cluster(level=2, connectivity=1)
 
-    new_points = np.array([[5.9, 6.1], [-6.1, -5.9]])  # gần tâm hai cụm
+    new_points = np.array([[5.9, 6.1], [-6.1, -5.9]])
     pred = model.predict(new_points)
 
     assert pred.shape == (2,)
-    assert -1 not in pred  # không rơi vào nhiễu
-    assert pred[0] != pred[1]  # hai điểm thuộc hai cụm khác nhau
+    assert -1 not in pred
+    assert pred[0] != pred[1]
 
 
 def test_predict_before_cluster_raises():
@@ -175,7 +175,7 @@ def test_predict_out_of_support_returns_noise():
     far = np.array([[-50.0, -50.0], [0.0, -80.0]])
     assert np.array_equal(model.predict(far), np.array([-1, -1]))
 
-    # điểm trong vùng huấn luyện vẫn dự đoán bình thường
+
     inside = np.array([[6.0, 6.0]])
     assert model.predict(inside)[0] != -1
 
@@ -270,7 +270,7 @@ def test_query_rect_default_level_and_empty_region():
     rng = np.random.default_rng(9)
     X = rng.uniform(-5, 5, size=(400, 2))
     model = STING(n_levels=3, factor=4, min_count=1).fit(X)
-    res = model.query_rect([(-5, 5), (-5, 5)])  # level mặc định, toàn bộ vùng dữ liệu
+    res = model.query_rect([(-5, 5), (-5, 5)])
     assert res["count"] == 400
     empty = model.query_rect([(1000, 1001), (1000, 1001)])
     assert empty["count"] == 0
@@ -311,16 +311,16 @@ def test_connectivity_semantics():
     Khóa tính chất kề mặt/kề góc mà docstring cluster() tuyên bố — một sửa sai
     bỏ qua giới hạn connectivity trong _neighbors() phải làm test này đỏ.
     """
-    X = np.array([[0.1, 0.1]] * 3 + [[0.9, 0.9]] * 3)  # ô (0,0) và ô (1,1) chéo nhau
+    X = np.array([[0.1, 0.1]] * 3 + [[0.9, 0.9]] * 3)
     model = STING(n_levels=2, factor=2, min_count=2).fit(X)
 
     lab_face = model.cluster(level=1, connectivity=1)
-    assert np.all(lab_face >= 0)  # mọi điểm thuộc ô dày
-    assert sorted(set(lab_face.tolist())) == [0, 1]  # kề chéo KHÔNG gom: 2 cụm
+    assert np.all(lab_face >= 0)
+    assert sorted(set(lab_face.tolist())) == [0, 1]
 
     lab_diag = model.cluster(level=1, connectivity=2)
     assert np.all(lab_diag >= 0)
-    assert sorted(set(lab_diag.tolist())) == [0]  # kề cả góc: gộp thành 1 cụm
+    assert sorted(set(lab_diag.tolist())) == [0]
 
 
 def test_face_neighbors_8d_do_not_enumerate_diagonals(monkeypatch):
@@ -345,7 +345,7 @@ def test_cluster_invalid_level():
         np.random.default_rng(0).normal(size=(60, 2))
     )
     with pytest.raises(ValueError):
-        model.cluster(level=3)  # == n_levels
+        model.cluster(level=3)
     with pytest.raises(ValueError):
         model.cluster(level=-1)
 
@@ -388,7 +388,7 @@ def test_query_rect_boundary():
                 total += cell.count
         return total
 
-    # (a) vùng thẳng lưới — rect trùng đúng biên của một ô có dữ liệu
+
     cell = max(model.cells_[level].values(), key=lambda c: c.count)
     rect_aligned = [
         (cell.bounds_min[0], cell.bounds_max[0]),
@@ -397,7 +397,7 @@ def test_query_rect_boundary():
     res = model.query_rect(rect_aligned, level=level)
     assert res["count"] == direct_count(rect_aligned)
 
-    # (b) vùng lệch biên — dịch 30% bước ô so với lưới 3x3 ô
+
     res_grid = model.factor ** level
     step = (model.bounds_max_ - model.bounds_min_) / res_grid
     base_lo = model.bounds_min_ + 4 * step
@@ -502,3 +502,74 @@ def test_predict_non_finite_returns_noise_without_warning():
     pred = model.predict(bad)
     assert list(pred[:2]) == [-1, -1]
     assert pred[2] != -1
+
+
+def test_query_rect_validates_fit_level_and_shape():
+    """query_rect() phải báo lỗi rõ khi chưa fit, level sai hoặc shape rect sai."""
+    unfit = STING(n_levels=2, factor=2, min_count=1)
+    with pytest.raises(RuntimeError, match="fit"):
+        unfit.query_rect([(0, 1), (0, 1)])
+
+    X = np.random.default_rng(0).normal(size=(20, 2))
+    model = unfit.fit(X)
+    with pytest.raises(ValueError, match="level"):
+        model.query_rect([(0, 1), (0, 1)], level=2)
+    with pytest.raises(ValueError, match="level"):
+        model.query_rect([(0, 1), (0, 1)], level=-1)
+    with pytest.raises(ValueError, match="rect"):
+        model.query_rect([(0, 1)], level=1)
+    with pytest.raises(ValueError, match="rect"):
+        model.query_rect([0, 1], level=1)
+
+
+def test_study_sting_matches_src_ast():
+    """Bản giải thích study/sting_GiaiThich.py phải giữ nguyên logic với src/sting.py."""
+    import ast
+
+    def strip_docstrings(path: Path) -> str:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(
+                node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+            ):
+                if (
+                    node.body
+                    and isinstance(node.body[0], ast.Expr)
+                    and isinstance(node.body[0].value, ast.Constant)
+                    and isinstance(node.body[0].value.value, str)
+                ):
+                    node.body = node.body[1:]
+        return ast.dump(tree)
+
+    root = Path(__file__).resolve().parents[1]
+    assert strip_docstrings(root / "src" / "sting.py") == strip_docstrings(
+        root / "study" / "sting_GiaiThich.py"
+    )
+
+
+def test_point_cell_index_and_cell_stats_guards_and_bounds():
+    """point_cell_index và cell_stats phải chặn gọi trước fit và chặn level ngoài dải."""
+    unfit = STING(n_levels=2, factor=2)
+    with pytest.raises(RuntimeError, match="fit"):
+        unfit.point_cell_index(0)
+    with pytest.raises(RuntimeError, match="fit"):
+        unfit.cell_stats(0)
+
+    X = np.random.default_rng(42).normal(size=(25, 2))
+    model = unfit.fit(X)
+
+    with pytest.raises(ValueError, match="level"):
+        model.point_cell_index(2)
+    with pytest.raises(ValueError, match="level"):
+        model.point_cell_index(-1)
+
+    with pytest.raises(ValueError, match="level"):
+        model.cell_stats(2)
+    with pytest.raises(ValueError, match="level"):
+        model.cell_stats(-1)
+
+    pts_idx = model.point_cell_index(1)
+    assert pts_idx.shape == (25, 2)
+    cells = model.cell_stats(1)
+    assert isinstance(cells, list) and len(cells) > 0
+    assert all(isinstance(c, Cell) for c in cells)

@@ -14,7 +14,11 @@ import hashlib
 import json
 import re
 from pathlib import Path
+import shutil
+import subprocess
+import sys
 
+import pandas as pd
 import pytest
 from docx import Document
 from docx.oxml.ns import qn
@@ -241,7 +245,8 @@ def test_submission_pptx_exists_and_notes():
     assert "869/869 điểm cùng ô" in titles_and_text and "68 điểm đổi cụm" in titles_and_text
     assert "8 điểm đổi trạng thái nhiễu" in titles_and_text
     assert "482 và 195 điểm" in titles_and_text
-    assert "Mục 4.8 dự báo hai điểm PAPI 2024" in titles_and_text
+    assert "48/61 tỉnh nằm ở 21 ô dày thuộc 1 cụm trên lưới 2011–2023." in titles_and_text
+    assert "dự báo" not in titles_and_text.lower()
     assert "869 quan sát tỉnh–năm" in titles_and_text
     assert "677" in titles_and_text and "19.7%" in titles_and_text
     assert "huấn luyện" not in titles_and_text
@@ -307,6 +312,12 @@ def test_submission_runs_all_kmeans_and_sensitivity_trials(submission_notebook: 
 def test_midterm_compares_shared_points_and_check_scaling_effect(submission_notebook: dict):
     output = notebook_executed_text(submission_notebook)
     assert "Silhouette trên cùng 680/869 điểm" in output
+    assert "869 − (171 + 120 − 102) = 680" in output
+    assert "162/171 điểm nhãn −1 có |z| ≤ 3 trên cả hai trục" in output
+    assert "Nếu loại 9 điểm |z| > 3 rồi dựng lại lưới trên 860 điểm: 4 cụm, 173/860 điểm nhiễu (20.1%)." in output
+    assert "Lưới 4 × 4 | 12 ô dày | 1 cụm | 6/869 điểm nhiễu" in output
+    assert "Lưới 16 × 16 | 56 ô dày | 3 cụm | 171/869 điểm nhiễu" in output
+    assert "Kề 8 hướng (connectivity=2) | 56 ô dày | 1 cụm | 171/869 điểm nhiễu" in output
     for method, score in (("STING", "0.3802"), ("K-means k=2", "0.4605"),
                           ("K-means k=3", "0.3499"), ("DBSCAN", "0.2740")):
         assert f"{method} | silhouette cùng tập = {score}" in output
@@ -317,9 +328,15 @@ def test_midterm_compares_shared_points_and_check_scaling_effect(submission_note
     assert "ARI giữa hai lần chạy K-means: 0.7103" in output
     assert "DBSCAN: ε gốc = 0.0316, 5 cụm, 116 điểm nhiễu" in output
     assert "DBSCAN sau chuẩn hóa: 6 cụm, 120 điểm nhiễu, 8/869 điểm đổi trạng thái nhiễu" in output
+    assert "DBSCAN: 6 điểm chuyển sang nhiễu, 2 điểm từ nhiễu vào cụm" in output
     assert "Thêm significance_z=2.0: 46 ô đạt, 4 cụm, 270/869 điểm nhiễu" in output
-    assert "738 cặp lịch sử, 61 tỉnh có dự báo 2024" in output
-    assert "Dự báo điểm nhận ra 0/11 tỉnh" in output
+    assert "Lưới tham chiếu dùng 808 quan sát 2011–2023." in output
+    assert "48/61 tỉnh đủ hai chỉ tiêu vào cụm (78.7%)." in output
+    assert "48 điểm nằm ở 21 ô dày thuộc 1 cụm." in output
+    assert "Cả 13/13 tỉnh ô thưa năm 2024 đều có |z| ≤ 3 trên lưới tham chiếu (|z| lớn nhất = 2.1299)." in output
+    assert "Ghép được 59 tỉnh đủ chỉ tiêu ở cả hai năm." in output
+    assert "39/43 tỉnh giữ nguyên cụm nhưng đổi ô." in output
+    assert "papi_forecast" not in "\n".join(_cell_source_text(cell) for cell in submission_notebook["cells"])
     assert "Lạng Sơn 2023: ngoài vùng dày trên cùng lưới" in output
     assert "Lạng Sơn 2024: cụm 2 trên cùng lưới" in output
     assert "Ô (13, 9) có 2 điểm tham chiếu." in output
@@ -337,6 +354,36 @@ def test_midterm_contains_the_comparison_and_observed_figures(submission_noteboo
     for cell, filename in figures:
         png = next(output["data"]["image/png"] for output in cell["outputs"] if "image/png" in output.get("data", {}))
         assert b64decode("".join(png)) == (ROOT / "results/figs" / filename).read_bytes()
+
+
+def test_midterm_slide_uses_current_panel_for_2024_coverage(tmp_path):
+    panel_path = Path("data/processed/papi_panel_63_2011_2024.csv")
+    slide_builder = Path("scripts/deliverables/build_slides_10.py")
+    for relative in (
+        panel_path, slide_builder, Path("src/sting.py"),
+        Path("scripts/common/midterm_clustering.py"), Path("scripts/common/papi_pred_common.py"),
+        Path("scripts/common/fig_style.py"), Path("results/preprocessing_audit.csv"),
+        Path("results/papi_observed_grid_2024.csv"), Path("results/figs/00_synthetic_sting.png"),
+    ):
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, target)
+
+
+    panel = pd.read_csv(tmp_path / panel_path)
+    year = panel.year.eq(2024)
+    features = ["sd_4_2", "sd_6_1"]
+    panel.loc[year & panel.province_vi.eq("Quảng Ninh"), features] = (
+        panel.loc[year & panel.province_vi.eq("Lạng Sơn"), features].to_numpy()
+    )
+    panel.to_csv(tmp_path / panel_path, index=False)
+    completed = subprocess.run(
+        [sys.executable, str(slide_builder)], cwd=tmp_path, capture_output=True, timeout=120,
+    )
+    assert completed.returncode == 0, completed.stderr.decode(errors="replace")
+    slide = Presentation(str(tmp_path / "slides/submission.pptx")).slides[-1]
+    text = "\n".join(shape.text for shape in slide.shapes if shape.has_text_frame)
+    assert "49/61 tỉnh nằm ở 21 ô dày thuộc 1 cụm" in text
 
 
 def test_papi_pdf_provenance_chain():

@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -11,7 +12,8 @@ import zipfile
 import pytest
 
 from scripts.deliverables.build_submission_packages import (
-    PACKAGES, ROOT, SUPPORT, build_package, check_member, package_files, verify_package,
+    MIDTERM_FILES, PACKAGES, RAW_REFERENCES, ROOT, SUPPORT, archive_path,
+    build_package, check_member, package_files, verify_package,
 )
 
 
@@ -53,12 +55,12 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
             assert {f"{prefix}{p}" for p in (
                 "src/sting.py", "scripts/common/papi_pred_common.py", "scripts/common/fig_style.py",
                 "scripts/common/midterm_clustering.py", "results/preprocessing_audit.csv",
-                "scripts/common/papi_forecast.py",
                 "results/figs/predict_2024.png",
                 "data/processed/papi_panel_63_2011_2024.csv", "requirements.txt",
             )} <= files
             assert not {"models/predict_config.json", "results/predict_all_years.csv",
-                        "results/metrics.csv", "results/predict_summary.md"} & support_files
+                        "results/metrics.csv", "results/predict_summary.md",
+                        "scripts/common/papi_forecast.py"} & support_files
             assert not any(p.endswith((".pkl", ".joblib")) or p.startswith(
                 (f"{prefix}tests/", f"{prefix}reports/", f"{prefix}scripts/supervised/")
             ) for p in files)
@@ -68,13 +70,8 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
             "reports/on-tap/qa_course_concepts.md", "reports/on-tap/presentation-script-261116.md",
         } & support_files
         assert not any("__pycache__" in p or "probe" in p for p in files)
-        raw_references = {
-            "data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf",
-            "data/raw/mendeley/mendeley_replication.zip",
-        }
         bundled_references = {p for p in support_files if p.endswith((".pdf", ".zip", ".rar"))}
-        have_sources = all((ROOT / p).is_file() for p in raw_references)
-        assert bundled_references == (raw_references if have_sources else set())
+        assert bundled_references == {path for path in RAW_REFERENCES if (ROOT / path).is_file()}
         with zipfile.ZipFile(path) as archive:
             guide = archive.read(f"{name}/HUONG_DAN.txt").decode("utf-8")
             assert f"--execute {notebook}" in guide
@@ -94,6 +91,34 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
                 assert b"tabulate==" in archive.read(f"{name}/{prefix}requirements.txt")
                 assert "python scripts/data/build_external_master.py" in guide
         assert all(phrase not in guide for phrase in ("luyện trình bày", "deadline", "nộp lên LMS"))
+
+
+def test_package_keeps_available_papi_pdf_when_replication_zip_is_absent(tmp_path):
+    present = "data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf"
+    checkout = tmp_path / "checkout"
+    for relative in (*MIDTERM_FILES, present):
+        destination = checkout / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, destination)
+
+    path = build_package(checkout, tmp_path / "submissions", "midterm")
+    manifest = verify_package(path, "midterm")
+    sources = {row["path"] for row in manifest["files"]}
+    present_path = f"{SUPPORT}/{present}"
+    assert sources.intersection(f"{SUPPORT}/{ref}" for ref in RAW_REFERENCES) == {present_path}
+    name, _ = PACKAGES["midterm"]
+    with zipfile.ZipFile(path) as archive:
+        assert archive.read(f"{name}/{present_path}") == (ROOT / present).read_bytes()
+        guide = archive.read(f"{name}/HUONG_DAN.txt").decode("utf-8")
+        assert present_path in guide and "mendeley_replication.zip" not in guide
+
+
+@pytest.mark.parametrize("milestone", PACKAGES)
+def test_delivered_zip_uses_current_sting_source(milestone):
+    name, _ = PACKAGES[milestone]
+    relative = "src/sting.py"
+    with zipfile.ZipFile(ROOT / "submissions" / f"{name}.zip") as archive:
+        assert archive.read(f"{name}/{archive_path(relative, milestone)}") == (ROOT / relative).read_bytes()
 
 
 @pytest.mark.parametrize("name", ["../escape", "/absolute", "root/../escape", "C:/escape", "root\\escape", "root//duplicate"])
@@ -190,8 +215,8 @@ def test_preprocessing_rebuilds_master_and_audit_from_extracted_package(packages
             cwd=package, env=env, capture_output=True, text=True, encoding="utf-8", timeout=60,
         )
         assert result.returncode == 0, result.stderr
-    # Git normalizes CSV to LF; pandas on Windows writes CRLF. Keep every
-    # logical character/cell identical while accepting the platform newline.
+
+
     assert master.read_text(encoding="utf-8-sig") == saved_master.read_text(encoding="utf-8-sig")
     assert (package / "results/preprocessing_audit.csv").read_text(encoding="utf-8-sig") == (
         ROOT / "results/preprocessing_audit.csv"

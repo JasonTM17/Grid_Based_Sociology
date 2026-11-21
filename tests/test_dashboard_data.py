@@ -128,7 +128,7 @@ def test_sting_view_empty_and_nonmatching_filters():
     )
     required_features = ["sd_4_2", "sd_6_1"]
 
-    # Baseline: no filter (None)
+
     vis_all, counts_all = prepare_sting_view(
         panel, assignments, 2024, required_features, province_codes=None, cluster_codes=None
     )
@@ -138,7 +138,7 @@ def test_sting_view_empty_and_nonmatching_filters():
     assert counts_all["noise_rows"] == 1
     assert counts_all["filtered_noise_rows"] == 1
 
-    # Empty province filter: set()
+
     vis_empty_p, counts_empty_p = prepare_sting_view(
         panel, assignments, 2024, required_features, province_codes=set()
     )
@@ -147,12 +147,12 @@ def test_sting_view_empty_and_nonmatching_filters():
     assert counts_empty_p["filtered_noise_rows"] == 0
     assert counts_empty_p["filtered_missing_feature_rows"] == 0
     assert counts_empty_p["filtered_unassigned_artifact_rows"] == 0
-    # Unfiltered aggregate counts remain based on the joined year frame
+
     assert counts_empty_p["source_rows"] == 2
     assert counts_empty_p["eligible_assignments"] == 2
     assert counts_empty_p["noise_rows"] == 1
 
-    # Non-matching province filter: {999}
+
     vis_nomatch_p, counts_nomatch_p = prepare_sting_view(
         panel, assignments, 2024, required_features, province_codes={999}
     )
@@ -161,7 +161,7 @@ def test_sting_view_empty_and_nonmatching_filters():
     assert counts_nomatch_p["filtered_noise_rows"] == 0
     assert counts_nomatch_p["source_rows"] == 2
 
-    # Empty cluster filter: set()
+
     vis_empty_c, counts_empty_c = prepare_sting_view(
         panel, assignments, 2024, required_features, cluster_codes=set()
     )
@@ -171,7 +171,7 @@ def test_sting_view_empty_and_nonmatching_filters():
     assert counts_empty_c["source_rows"] == 2
     assert counts_empty_c["noise_rows"] == 1
 
-    # Non-matching cluster filter: {999}
+
     vis_nomatch_c, counts_nomatch_c = prepare_sting_view(
         panel, assignments, 2024, required_features, cluster_codes={999}
     )
@@ -194,7 +194,7 @@ def test_regression_holdout_empty_and_nonmatching_filters():
     holdout, counts = prepare_regression_holdout(panel, assignments)
     assert counts["holdout_pairs"] == 2
 
-    # Baseline: no filter
+
     vis_all, f_counts_all = filter_regression_holdout(
         holdout, province_codes=None, origin_clusters=None
     )
@@ -202,26 +202,26 @@ def test_regression_holdout_empty_and_nonmatching_filters():
     assert f_counts_all["after_province_filter"] == 2
     assert f_counts_all["after_origin_cluster_filter"] == 2
 
-    # Empty province filter set()
+
     vis_empty_p, f_counts_empty_p = filter_regression_holdout(holdout, province_codes=set())
     assert vis_empty_p.empty
     assert f_counts_empty_p["after_province_filter"] == 0
     assert f_counts_empty_p["after_origin_cluster_filter"] == 0
     assert f_counts_empty_p["holdout_pairs"] == 2
 
-    # Non-matching province filter {999}
+
     vis_nomatch_p, f_counts_nomatch_p = filter_regression_holdout(holdout, province_codes={999})
     assert vis_nomatch_p.empty
     assert f_counts_nomatch_p["after_province_filter"] == 0
     assert f_counts_nomatch_p["after_origin_cluster_filter"] == 0
 
-    # Empty cluster filter set()
+
     vis_empty_c, f_counts_empty_c = filter_regression_holdout(holdout, origin_clusters=set())
     assert vis_empty_c.empty
     assert f_counts_empty_c["after_province_filter"] == 2
     assert f_counts_empty_c["after_origin_cluster_filter"] == 0
 
-    # Non-matching cluster filter {999}
+
     vis_nomatch_c, f_counts_nomatch_c = filter_regression_holdout(holdout, origin_clusters={999})
     assert vis_nomatch_c.empty
     assert f_counts_nomatch_c["after_province_filter"] == 2
@@ -246,13 +246,13 @@ def test_regression_holdout_noise_cluster_labeled_and_filtered():
     assert row_noise.origin_cluster_label == "Nhiễu (-1)"
     assert row_clean.origin_cluster_label == "Cụm 0"
 
-    # Filter with origin_clusters={-1} keeps only the noise row
+
     filtered_noise, f_counts_noise = filter_regression_holdout(holdout, origin_clusters={-1})
     assert len(filtered_noise) == 1
     assert filtered_noise.iloc[0].province_code == 1
     assert f_counts_noise["after_origin_cluster_filter"] == 1
 
-    # Filter with origin_clusters={0} excludes the noise row
+
     filtered_clean, f_counts_clean = filter_regression_holdout(holdout, origin_clusters={0})
     assert len(filtered_clean) == 1
     assert filtered_clean.iloc[0].province_code == 2
@@ -294,9 +294,9 @@ def test_classification_holdout_maps_labels_and_drops_unlabeled():
     )
     pairs, counts = prepare_classification_holdout(panel, assignments, DummyRegressor())
 
-    # Province 3 có pred_cluster NaN -> không có pseudo-label, bị loại như pipeline
+
     assert counts["holdout_pairs"] == 2
-    assert pairs.actual_label.tolist() == [1, 0]  # cụm -> vùng dày, nhiễu -> ngoại vi
+    assert pairs.actual_label.tolist() == [1, 0]
     assert pairs.predicted_label.tolist() == [0, 0]
     assert pairs.correct.tolist() == [False, True]
     assert counts["correct"] == 1
@@ -310,7 +310,7 @@ def test_classifier_artifact_missing_reports_rebuild_command(tmp_path):
 
 
 def test_missing_artifact_errors_contain_rebuild_commands(tmp_path):
-    # 1. Missing panel -> python scripts/data/build_panel.py
+
     with pytest.raises(DashboardDataError, match=r"python scripts/data/build_panel\.py"):
         load_dashboard_assets(tmp_path)
 
@@ -318,7 +318,7 @@ def test_missing_artifact_errors_contain_rebuild_commands(tmp_path):
     panel_file.parent.mkdir(parents=True, exist_ok=True)
     panel_file.write_text("province_code,year\n1,2024\n", encoding="utf-8")
 
-    # 2. Missing config -> python scripts/analysis/predict_sweep.py
+
     with pytest.raises(DashboardDataError, match=r"python scripts/analysis/predict_sweep\.py"):
         load_dashboard_assets(tmp_path)
 
@@ -326,7 +326,7 @@ def test_missing_artifact_errors_contain_rebuild_commands(tmp_path):
     config_file.parent.mkdir(parents=True, exist_ok=True)
     config_file.write_text('{"features": []}', encoding="utf-8")
 
-    # 3. Missing assignments -> python scripts/analysis/predict_demo.py
+
     with pytest.raises(DashboardDataError, match=r"python scripts/analysis/predict_demo\.py"):
         load_dashboard_assets(tmp_path)
 
@@ -334,15 +334,15 @@ def test_missing_artifact_errors_contain_rebuild_commands(tmp_path):
     assignments_file.parent.mkdir(parents=True, exist_ok=True)
     assignments_file.write_text("province_code,year\n1,2024\n", encoding="utf-8")
 
-    # 4. Missing metrics -> python scripts/supervised/predict_supervised.py
+
     with pytest.raises(DashboardDataError, match=r"python scripts/supervised/predict_supervised\.py"):
         load_dashboard_assets(tmp_path)
 
-    # 5. Missing ridge model in load_regression_models -> python scripts/supervised/predict_supervised.py
+
     with pytest.raises(DashboardDataError, match=r"python scripts/supervised/predict_supervised\.py"):
         load_regression_models(tmp_path)
 
-    # 6. Missing random forest model in load_regression_models -> python scripts/supervised/predict_supervised.py
+
     ridge_file = tmp_path / "models" / "sup_ridge.joblib"
     ridge_file.write_text("dummy", encoding="utf-8")
     with pytest.raises(DashboardDataError, match=r"python scripts/supervised/predict_supervised\.py"):
@@ -359,7 +359,7 @@ def test_sting_view_ignores_phantom_provinces_in_assignments():
             "sd_6_1": [2.0],
         }
     )
-    # Province 999 exists only in assignments, not in panel
+
     assignments = pd.DataFrame(
         {
             "province_code": [1, 999],
@@ -383,7 +383,7 @@ def test_sting_view_ignores_phantom_provinces_in_assignments():
 
 def test_regression_holdout_unassigned_origin_province():
     panel = _make_regression_panel(provinces=(1, 2))
-    # Province 1 is assigned in 2023, Province 2 has no assignment row in 2023
+
     assignments = pd.DataFrame(
         {
             "province_code": [1],
@@ -408,11 +408,11 @@ def test_regression_holdout_unassigned_origin_province():
     assert row2.origin_cluster_label == "Không có assignment trong artifact"
 
 
-# Kiểm chứng ngoại lai — PCI · y tế 2020 · GRDP 2018–2024
+
 
 
 def _make_pci_frame():
-    # 2011–2022 đủ ô; (2022, tỉnh 4) thiếu điểm; 2023–2024 kiểu Top-30.
+
     return pd.DataFrame({
         "papi_province_code": [1, 2, 3, 4, 5, 6],
         "province_code": [1, 2, 3, 4, 5, 6],
@@ -425,7 +425,7 @@ def _make_pci_frame():
 
 
 def _make_external_assignments():
-    # Tỉnh 999 chỉ tồn tại trong assignments (phantom) — phải bị bỏ qua.
+
     return pd.DataFrame({
         "province_code": [1, 2, 3, 5, 999],
         "year": [2011, 2011, 2022, 2023, 2011],
@@ -516,7 +516,7 @@ def test_prepare_external_pci_view_counts_and_labels():
     view, counts = prepare_external_pci_view(pci, assignments)
     assert counts["year_min"] == 2011
     assert counts["year_max"] == 2022
-    assert counts["window_cells"] == 3  # 2011×2 + 2022×1; ô (2022, 4) thiếu điểm
+    assert counts["window_cells"] == 3
     assert counts["missing_label_cells"] == 0
     assert counts["tested_points"] == 3
     assert counts["clusters"] == [-1, 2]
@@ -526,12 +526,12 @@ def test_prepare_external_pci_view_counts_and_labels():
     ]
     assert view.cluster_label.tolist() == ["Nhiễu (-1)", "Cụm 2", "Cụm 2"]
     assert view.pci_weighted_score.tolist() == [50.0, 60.0, 55.0]
-    # Tỉnh 999 chỉ có trong assignments — không được lọt vào view
+
     assert 999 not in view.province_code.values
 
     top_view, top_counts = prepare_external_pci_view(pci, assignments, 2023, 2024)
     assert top_counts["window_cells"] == 2
-    assert top_counts["missing_label_cells"] == 1  # tỉnh 6 năm 2024 không có nhãn
+    assert top_counts["missing_label_cells"] == 1
     assert top_counts["tested_points"] == 1
     assert top_counts["n_by_cluster"] == {-1: 1}
     assert top_view.cluster_label.tolist() == ["Nhiễu (-1)"]
@@ -557,8 +557,8 @@ def test_prepare_external_pci_view_rejects_bad_inputs():
 
 
 def test_external_pci_tests_hand_computed_values():
-    # Ba nhóm [1,2,3], [4,5,6], [7,8,9]: F = MS giữa / MS trong = 54/2 / 1 = 27;
-    # Kruskal không tie: H = 12/90 × (6²+15²+24²)/3 − 30 = 7.2; eta² = 54/60 = 0.9.
+
+
     view = pd.DataFrame({
         "pred_cluster": [0] * 3 + [1] * 3 + [2] * 3,
         "pci_weighted_score": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
@@ -713,7 +713,7 @@ def _published_rows_for(view, section):
 
 
 def test_ensure_external_pci_consistency_passes_then_flags_drift():
-    # Nhóm -1 chỉ 1 điểm: std trống hai phía phải được chấp nhận.
+
     view = pd.DataFrame({
         "pred_cluster": [-1, 0, 0, 0, 2, 2, 2],
         "pci_weighted_score": [60.0, 1.0, 2.0, 3.0, 7.0, 8.0, 9.0],
@@ -756,17 +756,17 @@ def test_ensure_external_pci_consistency_accepts_bound_p_note():
     dạng' dù dữ liệu nhất quán và rebuild không chữa được."""
     view = _tiny_p_view()
     recomputed = external_pci_tests(view)
-    assert recomputed["p_anova"] < 1e-12  # note ANOVA chắc chắn ở dạng chặn trên
+    assert recomputed["p_anova"] < 1e-12
 
     validation = _published_rows_for(view, "pci_main")
     anova_note = validation.loc[
         validation.group.str.startswith("ANOVA"), "note"
     ].iloc[0]
-    assert "p < 1e-12" in anova_note  # format_p_value đã phát hành dạng chặn trên
+    assert "p < 1e-12" in anova_note
 
     result = ensure_external_pci_consistency(view, validation, section="pci_main")
     assert result["p_anova"] == pytest.approx(external_pci_tests(view)["p_anova"])
-    # Cờ bound nằm ở phía artifact đã parse, không phải dict số tính lại.
+
     published = published_external_pci_tests(validation, "pci_main")
     assert published["p_anova_is_bound"] is True
     assert published["p_kw_is_bound"] is False
@@ -841,7 +841,7 @@ def test_external_section_frame_maps_labels_and_sorts():
         external_section_frame(pci_like, "pci_2011_2022")
 
 
-# Kiểm chứng bổ trợ — nghèo cấp tỉnh GSO V14.47 theo nhãn cụm
+
 
 
 def _make_poverty_frame() -> pd.DataFrame:
@@ -853,7 +853,7 @@ def _make_poverty_frame() -> pd.DataFrame:
         for code in (1, 2, 3):
             value = float(10 + code + (year - 2012))
             if year == 2013 and code == 3:
-                value = np.nan  # nguồn ghi ".." — KHÔNG nội suy
+                value = np.nan
             rows.append({
                 "province_code": code,
                 "province_ascii": f"P{code}",
@@ -862,7 +862,7 @@ def _make_poverty_frame() -> pd.DataFrame:
                 "poverty_rate_pct": value,
                 "papi_province_code": code,
             })
-    # Năm poverty-only: có poverty nhưng predict_all_years không phủ (pattern 2006/2008/2010/2025).
+
     rows.append({
         "province_code": 4,
         "province_ascii": "P4",
@@ -925,37 +925,37 @@ def test_prepare_poverty_cluster_view_counts_and_masks():
     assert counts["overlap_years"] == list(POVERTY_OVERLAP_YEARS)
     assert counts["pov_only_years"] == [2006]
     assert counts["label_only_years"] == [2011]
-    assert counts["window_cells"] == 39  # 3 tỉnh × 13 năm giao
-    assert counts["valid_cells"] == 38  # (2013, 3) thiếu phía nguồn
+    assert counts["window_cells"] == 39
+    assert counts["valid_cells"] == 38
     assert [
         (int(cell["year"]), int(cell["province_code"]), cell["province_vi"])
         for cell in counts["missing_source_cells"]
     ] == [(2013, 3, "Tỉnh 3")]
-    # Ô (2014, 3) có poverty nhưng không có nhãn — mask tường minh, không vào view
+
     assert [
         (int(cell["year"]), int(cell["province_code"]), cell["province_vi"])
         for cell in counts["no_label_cells"]
     ] == [(2014, 3, "Tỉnh 3")]
-    assert counts["panel_rows"] == 37  # 38 ô hợp lệ − 1 ô không nhãn
+    assert counts["panel_rows"] == 37
     assert counts["clusters"] == [-1, 0, 2]
     assert counts["n_by_cluster"] == {-1: 13, 0: 11, 2: 13}
     assert counts["noise_by_year"] == {int(year): 1 for year in POVERTY_OVERLAP_YEARS}
 
     noise_row = view.loc[(view.year == 2012) & (view.province_code == 1)].iloc[0]
     assert noise_row.poverty_rate_pct == pytest.approx(11.0)
-    assert noise_row.pov_dm == pytest.approx(-1.0)  # median năm 2012 = 12
+    assert noise_row.pov_dm == pytest.approx(-1.0)
     assert noise_row.cluster_label == "Nhiễu (-1)"
-    # Năm chỉ còn 2 ô: median là trung bình 2 giá trị (12, 13) → dm = ±0.5
+
     half_row = view.loc[(view.year == 2013) & (view.province_code == 1)].iloc[0]
     assert half_row.pov_dm == pytest.approx(-0.5)
-    assert (view.year == 2006).sum() == 0  # năm poverty-only bị loại khỏi view
+    assert (view.year == 2006).sum() == 0
 
 
 def test_prepare_poverty_cluster_view_rejects_protocol_drift_and_bad_inputs():
     poverty = _make_poverty_frame()
     assignments = _make_poverty_assignments()
 
-    # Mất 1 năm phía poverty → cửa sổ giao tự tính lệch protocol → từ chối.
+
     truncated = poverty.loc[poverty.year.ne(2020)]
     with pytest.raises(DashboardDataError, match="lệch protocol"):
         prepare_poverty_cluster_view(truncated, assignments)
@@ -990,8 +990,8 @@ def test_poverty_demean_preserves_within_year_comparison():
 
 
 def test_poverty_cluster_tests_hand_computed_values():
-    # Ba nhóm [1,2,3], [4,5,6], [7,8,9]: F = MS giữa / MS trong = 54/2 / 1 = 27;
-    # Kruskal không tie: H = 12/90 × (6²+15²+24²)/3 − 30 = 7.2; eta² = 54/60 = 0.9.
+
+
     view = pd.DataFrame({
         "pred_cluster": [0] * 3 + [1] * 3 + [2] * 3,
         "poverty_rate_pct": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
@@ -1015,7 +1015,7 @@ def test_poverty_cluster_tests_separates_year_effect_from_cluster_effect():
     (nhiễu năm át hiệu ứng cụm) còn đã-trừ-median-năm thì có."""
     rows = []
     for year, base in ((2012, 10.0), (2016, 4.0), (2024, 1.0)):
-        # Nhiễu cao hơn cụm 2 đúng 0.5 điểm ở MỌI năm, baseline năm trôi 10→1.
+
         rows += [
             {"pred_cluster": -1, "poverty_rate_pct": base, "year": year},
             {"pred_cluster": -1, "poverty_rate_pct": base + 0.1, "year": year},
@@ -1023,15 +1023,15 @@ def test_poverty_cluster_tests_separates_year_effect_from_cluster_effect():
             {"pred_cluster": 2, "poverty_rate_pct": base + 0.6, "year": year},
         ]
     view = pd.DataFrame(rows)
-    # pov_dm đúng cách prepare_poverty_cluster_view sinh ra (trừ median trong năm).
+
     view["pov_dm"] = view.poverty_rate_pct - view.groupby("year").poverty_rate_pct.transform("median")
 
     raw = poverty_cluster_tests(view)
     demeaned = poverty_cluster_tests(view, "pov_dm")
 
-    assert raw["p_kw"] > 0.05  # gộp thô: không đáng kể
+    assert raw["p_kw"] > 0.05
     assert raw["p_anova"] > 0.05
-    assert demeaned["p_kw"] < 0.05  # đã trừ median năm: đáng kể
+    assert demeaned["p_kw"] < 0.05
     assert demeaned["p_anova"] < 0.05
     assert demeaned["h"] > raw["h"]
 
@@ -1060,7 +1060,7 @@ def test_poverty_noise_vs_c2_hand_computed():
 
     mw = poverty_noise_vs_c2(view)
 
-    assert mw["u"] == pytest.approx(0.0)  # nhiễu thấp hơn cụm 2 toàn bộ → U = 0
+    assert mw["u"] == pytest.approx(0.0)
     assert mw["n"] == 6
     assert mw["p"] == pytest.approx(
         scipy_stats.mannwhitneyu([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]).pvalue
@@ -1119,15 +1119,13 @@ def test_poverty_protocol_recomputed_on_real_artifacts():
     raw = poverty_cluster_tests(view)
     demeaned = poverty_cluster_tests(view, "pov_dm")
     assert raw["h"] == pytest.approx(4.6670, abs=5e-4)
-    assert raw["p_kw"] == pytest.approx(0.1979, abs=5e-4)  # KHÔNG đáng kể
+    assert raw["p_kw"] == pytest.approx(0.1979, abs=5e-4)
     assert demeaned["h"] == pytest.approx(20.6285, abs=5e-4)
-    assert demeaned["p_kw"] == pytest.approx(1.257e-04, rel=0.05)  # đáng kể
+    assert demeaned["p_kw"] == pytest.approx(1.257e-04, rel=0.05)
     assert raw["n"] == demeaned["n"] == 805
 
     mw_raw = poverty_noise_vs_c2(view)
     mw_dm = poverty_noise_vs_c2(view, "pov_dm")
-    assert mw_raw["n"] == mw_dm["n"] == 793  # 144 nhiễu + 649 cụm 2
-    assert mw_raw["p"] > 0.05  # thô: không khác biệt
-    assert mw_dm["p"] > 0.10  # đã trừ median năm: không khác biệt
-    # (trước khi điền 2017–2019, mw_dm p = 0.0836 — biên; thêm 3 năm làm mất
-    # tín hiệu biên đó — phải báo cáo thẳng, không giữ claim cũ)
+    assert mw_raw["n"] == mw_dm["n"] == 793
+    assert mw_raw["p"] > 0.05
+    assert mw_dm["p"] > 0.10

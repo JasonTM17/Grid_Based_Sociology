@@ -80,7 +80,7 @@ def real_classification_pairs():
 @pytest.fixture(scope="module")
 def baseline_run(real_classification_pairs):
     """Giống script chính: 50 cây RF, cặp STING đã cache qua real_classification_pairs."""
-    del real_classification_pairs  # chỉ warmup _PAIRS_CACHE
+    del real_classification_pairs
     cfg = load_config()
     df = load_panel()
     metrics, grids, yte, Xte = build_metrics_table(df, cfg)

@@ -44,7 +44,7 @@ from scripts.analysis.dashboard_data import (
 )
 from scripts.common.papi_pred_common import REGRESSION_FEATURES, ROOT
 
-# Nhãn UI của app (app.py:130, 193-203).
+
 APP_TITLE = "Khám phá kết quả STING và dự báo PAPI"
 TAB_LABELS = [
     "Tổng quan",
@@ -57,15 +57,15 @@ TAB_REGRESSION = "Hồi quy 2023 → 2024"
 TAB_EXTERNAL = "Kiểm chứng ngoại lai"
 TAB_AUDIT = "Audit dữ liệu"
 
-# Hằng số HÀNH VI của app (không phải số liệu): bộ tên model hardcode mà app.py:365
-# và scripts/analysis/dashboard_data.py:275-277/280-286 dùng để lọc bảng so sánh.
+
+
 APP_HOLDOUT_TABLE_MODELS = (
     "carry-forward (giữ giá trị năm nay)",
     "ridge",
     "random forest",
 )
 APP_TUNED_CLASSIFIERS = ("logistic regression", "random forest")
-NO_CV_SCORE_MESSAGE = "Không có CV score để chọn model."  # papi_pred_common.py:64
+NO_CV_SCORE_MESSAGE = "Không có CV score để chọn model."
 
 APP_PATH = ROOT / "app.py"
 RUN_TIMEOUT_S = 120
@@ -111,7 +111,7 @@ def container_texts(tab) -> list[str]:
     texts: list[str] = []
     for child in tab.children.values():
         if child.type == "plotly_chart":
-            continue  # element plotly ném KeyError khi đọc .value trong AppTest
+            continue
         value = getattr(child, "value", None)
         if isinstance(value, str):
             texts.append(value)
@@ -196,7 +196,7 @@ def expected_poverty_tables(assignments: pd.DataFrame) -> dict:
     }
 
 
-# Happy path — từng section trong danh sách của ask
+
 
 
 def test_app_renders_clean_with_title_tabs_and_sidebar_filters(assets):
@@ -329,15 +329,15 @@ def test_tab3_hoi_quy_holdout_table_matches_metrics_csv(assets):
     detailed = regression.dataframe[1].value
     assert len(detailed) == holdout_counts["holdout_pairs"]
 
-    # Dòng regression trong artifact nhưng ngoài bảng so sánh phải được liệt
-    # kê tường minh (fix risk #2 — không còn lọc im lặng).
+
+
     compared = set(APP_HOLDOUT_TABLE_MODELS)
     dropped = [
         model
         for model in metrics.loc[metrics.task.eq("regression"), "model"]
         if model not in compared
     ]
-    assert dropped  # artifact thật có ít nhất 'trung bình train' ngoài bảng
+    assert dropped
     text = "\n".join(container_texts(regression))
     assert "không thuộc bảng so sánh" in text
     for model in dropped:
@@ -356,8 +356,8 @@ def test_tab4_kiem_ngoai_numbers_match_external_validation_csv(assets, external_
     published_top = published_external_pci_tests(validation, "pci_top30_2023_2024")
     pov = expected_poverty_tables(assets["assignments"])
 
-    # Số hiển thị khớp artifact theo đúng dung sai gate của dashboard
-    # (dashboard_data.py:540-552): 5.1e-5 cho F/H/eta², rel_tol 0.006 cho p.
+
+
     assert abs(tests["f"] - published["f"]) <= 5.1e-5
     assert abs(tests["h"] - published["h"]) <= 5.1e-5
     assert abs(tests["eta_sq"] - published["eta_sq"]) <= 5.1e-5
@@ -412,9 +412,9 @@ def test_tab4_kiem_ngoai_numbers_match_external_validation_csv(assets, external_
     assert health_table["cluster_label"].tolist() == health["cluster_label"].tolist()
     assert [int(value) for value in health_table["n"]] == list(health["n"])
     text = "\n".join(container_texts(external))
-    assert "GRDP/người" in text  # section GRDP render (px.line sau bảng y tế)
+    assert "GRDP/người" in text
 
-    # Block bổ trợ nghèo GSO (dataframe[4], sau GRDP; boxplot là chart thứ 3)
+
     poverty_table = external.dataframe[4].value
     assert poverty_table["Kiểm định"].tolist() == [
         "Kruskal–Wallis H (gộp thô — nhiễm hiệu ứng năm)",
@@ -431,12 +431,12 @@ def test_tab4_kiem_ngoai_numbers_match_external_validation_csv(assets, external_
     assert poverty_table.iloc[3]["Giá trị"] == f"{pov['mw_dm']['u']:.0f}"
     assert int(poverty_table.iloc[3]["n"]) == pov["mw_dm"]["n"]
     assert "Nghèo cấp tỉnh (GSO V14.47)" in text
-    assert "python scripts/data/build_poverty_63.py" in text  # caption nguồn block
-    assert "không vẽ không test" in text  # 11 ô không nhãn được liệt kê tường minh
+    assert "python scripts/data/build_poverty_63.py" in text
+    assert "không vẽ không test" in text
 
 
 def test_tab5_audit_renders_scale_flags_and_classification_from_csv(assets):
-    at = run_app(TAB_AUDIT)  # tab Audit lazy (fix rủi ro DOM-nonslazy vòng 1)
+    at = run_app(TAB_AUDIT)
     assert not at.exception
     assert not at.error
 
@@ -518,7 +518,7 @@ def test_tab5_audit_content_is_lazy_until_tab_opened(assets):
     assert len(at_open.tabs[4].dataframe) == 4
 
 
-# Widget-test cho các rủi ro scout nêu (mục 1-11)
+
 
 
 def test_risk1_metrics_without_regression_cv_rows_crash_app_uncaught(
@@ -555,7 +555,7 @@ def test_risk1b_classification_baseline_only_crashes_audit_tab_uncaught(
     stage_dashboard_artifacts(tmp_path, tampered)
     patch_dashboard_assets(monkeypatch, tmp_path)
 
-    at = run_app(TAB_AUDIT)  # tab Audit lazy — mở như tab 3/4
+    at = run_app(TAB_AUDIT)
 
     assert not at.exception
     error_messages = [element.value for element in at.error]
@@ -590,7 +590,7 @@ def test_risk2_renamed_regression_model_surfaced_by_holdout_table_caption(
     assert chosen == ["random forest"]
     text = "\n".join(container_texts(at.tabs[2]))
     assert "không thuộc bảng so sánh" in text
-    assert "ridge (đổi tên)" in text  # model bị loại giờ hiển thị rõ
+    assert "ridge (đổi tên)" in text
 
 
 def test_risk3_holdout_pairs_label_in_source_matches_artifact_pairs(assets):
@@ -625,14 +625,14 @@ def test_risk4_tampered_external_validation_fails_closed_and_hides_sections(
 
     at = run_app(TAB_EXTERNAL)
 
-    assert not at.exception  # fail-closed: bắt lỗi, không crash app
+    assert not at.exception
     error_messages = [element.value for element in at.error]
     assert any("KHÔNG khớp artifact" in message for message in error_messages)
     text = "\n".join(container_texts(at.tabs[3]))
     assert "Mật độ cơ sở y tế 2020" not in text
     assert "GRDP/người" not in text
-    assert "Nghèo cấp tỉnh" not in text  # block poverty cũng ẩn khi gate PCI fail
-    assert metric_values(at.tabs[0])  # tab Tổng quan vẫn render
+    assert "Nghèo cấp tỉnh" not in text
+    assert metric_values(at.tabs[0])
 
 
 def test_risk5_pci_without_province_ascii_loads_but_crashes_app(
@@ -652,7 +652,7 @@ def test_risk5_pci_without_province_ascii_loads_but_crashes_app(
     assert any("province_ascii" in message for message in error_messages)
     text = "\n".join(container_texts(at.tabs[3]))
     assert "Kiểm định khác biệt PCI" not in text
-    assert metric_values(at.tabs[0])  # tab Tổng quan vẫn render
+    assert metric_values(at.tabs[0])
 
 
 def test_risk6_single_feature_config_crashes_sting_tab_uncaught(
@@ -706,8 +706,8 @@ def test_risk8_wdi_excluded_from_external_tab_intentionally(external_assets):
     sections = set(
         external_assets["validation"].section.dropna().astype(str).str.strip()
     )
-    assert "wdi_2010_2024" in sections  # artifact vẫn sinh đủ 5 section
-    # Gate cố ý chỉ yêu cầu đúng 4 section kiểm chứng theo cụm:
+    assert "wdi_2010_2024" in sections
+
     assert set(dd._REQUIRED_VALIDATION_SECTIONS) == {
         "pci_2011_2022",
         "pci_top30_2023_2024",
@@ -726,7 +726,7 @@ def test_risk8_wdi_excluded_from_external_tab_intentionally(external_assets):
         "Mật độ cơ sở y tế 2020",
         "GRDP/người",
     ):
-        assert header in text  # Tab 4 render đúng 4 section theo cụm
+        assert header in text
     assert "WDI" not in text
     assert "World Bank" not in text
 
@@ -740,8 +740,8 @@ def test_risk9_streamlit_runtime_matches_requirements_pin():
         if line.startswith("streamlit==")
     )
     assert st.__version__ == pin
-    # Tái hiện StreamlitAPIException bằng phiên bản thấp hơn pin: NOT_RUN —
-    # môi trường cấm pip install (ràng buộc của ask).
+
+
 
 
 def test_risk10_cluster_counts_fit_within_plotly_palette(assets, external_assets):
@@ -769,9 +769,9 @@ def test_risk11_grdp_rows_without_year_render_silently(external_assets, tmp_path
     assert not at.error
     external = at.tabs[3]
     text = "\n".join(container_texts(external))
-    assert "Mật độ cơ sở y tế 2020" in text  # section y tế vẫn render trước
-    assert "GRDP/người" in text  # section GRDP vẫn render
+    assert "Mật độ cơ sở y tế 2020" in text
+    assert "GRDP/người" in text
     info_messages = [element.value for element in at.info]
     assert any("GRDP" in message for message in info_messages)
     plotly_charts = [child for child in external.children.values() if child.type == "plotly_chart"]
-    assert len(plotly_charts) == 2  # box PCI + box poverty (không line GRDP rỗng)
+    assert len(plotly_charts) == 2

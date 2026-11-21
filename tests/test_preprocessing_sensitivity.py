@@ -58,7 +58,7 @@ def test_imputer_fits_train_fold_only():
     )
     pipe.fit(X_train_fold, y[train_idx])
     train_medians = pipe.named_steps["impute"].statistics_.copy()
-    # Thêm giá trị cực đoan chỉ ở validation — median train không được đổi.
+
     X_spy = X.copy()
     if val_idx.size > 0:
         X_spy[val_idx, 0] = 1e6
@@ -117,7 +117,7 @@ def test_csv_schema_after_run(tmp_path, monkeypatch):
     assert tmp_md.is_file()
     frame = pd.read_csv(tmp_csv)
     assert list(frame.columns) == list(CSV_COLUMNS)
-    assert len(frame) == 3 + 2 * 3  # ridge + (LR, GNB) × 3 variants
+    assert len(frame) == 3 + 2 * 3
 
 
 def test_determinism_two_runs_identical_csv(tmp_path):

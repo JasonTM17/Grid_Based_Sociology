@@ -19,7 +19,7 @@ from scripts.common.papi_pred_common import CONFIG_PATH, PANEL_PATH, ROOT
 from sting import STING
 
 PREDICT_CSV = ROOT / "results" / "predict_all_years.csv"
-TRAIN_MAX_YEAR = 2023  # khớp TRAIN_MAX_YEAR của scripts/analysis/predict_demo.py
+TRAIN_MAX_YEAR = 2023
 
 _REQUIRED = (PANEL_PATH, CONFIG_PATH, PREDICT_CSV)
 pytestmark = pytest.mark.skipif(

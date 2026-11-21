@@ -44,8 +44,8 @@ def test_scaler_audit_flags_scaler_fitted_on_all_years():
     rows = []
     for year in (2011, 2012, 2013, 2014):
         for province_code in range(1, 5):
-            # Năm 2014 nằm sau cutoff và lệch hẳn — nếu scaler học cả 2014 thì
-            # mean/scale không thể khớp thống kê lịch sử.
+
+
             offset = 0.0 if year <= 2013 else 10.0
             rows.append(
                 {"province_code": province_code, "year": year, "x": 1.0 + province_code + offset}
