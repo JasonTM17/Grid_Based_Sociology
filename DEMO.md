@@ -24,7 +24,7 @@ results\preprocessing_audit.md              # audit Day 4 (bảng Test → Decid
 results\course_supervised_baselines.md      # bảng NB/KNN/SVM/cây/RF (pseudo-label STING)
 results\classifier_label_baselines.md       # sàn hoán vị nhãn + drift năm (exploratory)
 results\figs\course_confusion_matrix.png    # 6 panel confusion (học phần)
-reports\on-tap\qa_course_concepts.md               # cheat sheet Q&A Day 1–4
+reports\on-tap\qa_course_concepts.md               # cheat sheet Q&A Day 1–9 + chuyên sâu nhiễu STING
 ```
 
 Mở [slide giữa kỳ](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx) và
@@ -65,9 +65,9 @@ Khi cần minh họa kết quả đối chiếu PCI, mở dashboard bằng
 | Tiền xử lý (Day 4) | `results/preprocessing_audit.md` — 0 trùng khóa / 882 dòng; không nội suy; outlier giữ + đánh dấu |
 | Classifier học phần | `results/course_supervised_baselines.csv` — CV macro-F1; holdout 2023→2024 **một lần**; so **khớp pseudo-label STING**, không ground truth xã hội (NB CV cao nhất ≠ “tốt nhất” tổng quát — xem `qa_course_concepts.md` câu 7) |
 | Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột bị cờ heuristic audit (`check_data.py`; chưa chứng minh đổi thang) |
-| Gán cụm 2024 bằng lưới cố định (cuối kỳ) | Lưới dựng trên dữ liệu ≤2023. Trong 61 tỉnh có đủ hai chỉ tiêu năm 2024, 48 rơi vào cụm lớn và 13 vào ô thưa. Kết quả chỉ mô tả độ phủ của lưới trên điểm đã quan sát. |
+| Gán quan sát 2024 bằng lưới cố định | Mục 4.8 giữa kỳ dùng lưới dựng từ 2011–2023. Trong 61 tỉnh có đủ hai chỉ tiêu năm 2024, 48 nằm ở 21 ô dày thuộc một cụm và 13 nằm trong ô thưa. |
 | Kiểm chứng bên ngoài | PCI theo cụm STING: ANOVA F(3,743)=9.04, p=6.9e-06 · Kruskal–Wallis H=31.78, p=5.8e-07 · nhóm {nhiễu: 149, cụm 0: 5, cụm 1: 16, cụm 2: 577} · không chứng minh nhân quả (`results/external_validation.md`) |
-| Dự báo hai điểm và lưới STING | Chọn Ridge theo MAE kiểm định trước 2024. Đối chiếu 59 tỉnh, MAE của 4.2 là 0,0736 vs 0,0763 và của 6.1 là 0,0641 vs 0,0683 khi giữ điểm 2023. Dự báo điểm nhận ra 0/11 tỉnh ngoài vùng dày. Xem slide 7–9 cuối kỳ và mục 4.8 giữa kỳ. |
+| Thí nghiệm dự báo hai điểm (cuối kỳ) | Chọn Ridge theo MAE kiểm định trước 2024. Đối chiếu 59 tỉnh, MAE của 4.2 là 0,0736 vs 0,0763 và của 6.1 là 0,0641 vs 0,0683 khi giữ điểm 2023. Dự báo điểm nhận ra 0/11 tỉnh ngoài vùng dày. Xem slide 7–9 và mục 4.1 notebook cuối kỳ. |
 | Robustness | PCA d1–d6 (63.2% phương sai, k=1) → không nhận diện · 8 chiều 2018–2024 OFAT so với gốc (k=3, nhiễu 60.5%): f=3 → k=1/91.9%, lv=2 → k=0/100% → không nhận diện; mc=2 → k=2/10.9% vượt ngưỡng k/noise NHƯNG silhouette −0.089 (âm — tách yếu) (`results/robustness.csv`) |
 | Đối chứng giữa kỳ | Trên cùng 680 quan sát đã được cả ba cách gán cụm, silhouette là 0,3802 (STING), 0,4605 (K-means k = 2), 0,3499 (K-means k = 3), 0,2740 (DBSCAN). Số cụm và nhiễu tính trên 869 quan sát. |
 | Vai trò z-score | Dựng lại lưới theo biên từng trục giữ nguyên 869 chỉ số ô STING. Cùng k = 2, có 68 điểm đổi cụm K-means sau khi ghép tên cụm. Mục 4.7 thử riêng điều kiện so ô con với ô cha. |

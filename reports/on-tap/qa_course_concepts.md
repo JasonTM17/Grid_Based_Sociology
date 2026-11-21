@@ -1,4 +1,4 @@
-# Q&A theo khái niệm bài giảng (Day 1–4, Day 9) | Topic 6 · STING × PAPI
+# Q&A theo khái niệm bài giảng (Day 1–4, Day 6, Day 9) | Topic 6 · STING × PAPI
 
 _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được toàn bộ câu hỏi. Mọi số lấy từ file ghi ở dòng "Repo" của từng câu; không đọc số từ trí nhớ._
 
@@ -144,8 +144,8 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
     - **Repo:** `results/preprocessing_audit.md:20-21, 112`; `scripts/data/preprocessing_audit.py:86-113`; `scripts/common/papi_pred_common.py:53-57`; `scripts/analysis/predict_demo.py:67-68`; `scripts/supervised/candidates_regression.py:172`.
     - **Bài giảng:** Day 4, trang 7; trang 14.
 
-25. **Vì sao outlier removal phải làm cuối, và repo xử lý ngoại lai thế nào?** — Vì nó phụ thuộc phân bố sau khi đã sửa lỗi và tích hợp; xóa sớm dễ xóa nhầm điểm hợp lệ. Audit đánh dấu |z| > 3 trên toàn panel: 122 ô (0.4%), 98 dòng, 29 cột — và GIỮ toàn bộ, chỉ đánh dấu. Lý do: đây là điểm khảo sát thật; điểm cực trị rơi vào ô lưới thưa nên tự nhận nhãn nhiễu −1 theo cơ chế `min_count` của STING, dữ liệu gốc không bị xóa. Vì vậy không được nói repo "đã xử lý outlier" theo nghĩa xóa.
-    - **Hỏi bẫy:** "Nhiễu −1 có phải outlier?" — Không; −1 = ô không đủ `min_count` tại mức lưới đang dùng. Thêm nữa z tính gộp toàn panel nên trộn bước nhảy thang đo 2021; audit không kết luận tương đương thang đo xuyên năm.
+25. **Vì sao outlier removal phải làm cuối, và repo xử lý ngoại lai thế nào?** — Vì nó phụ thuộc phân bố sau khi đã sửa lỗi và tích hợp; xóa sớm dễ xóa nhầm điểm hợp lệ. Audit đánh dấu |z| > 3 trên toàn panel: 122 ô (0.4%), 98 dòng, 29 cột — và GIỮ toàn bộ, chỉ đánh dấu. Trên hai chỉ tiêu STING, lưới tham chiếu 2011–2023 (`808` dòng) chỉ có 7 dòng `|z| > 3` (còn 151/158 điểm `−1` có `|z| ≤ 3`, năm 2024 có 13/13 tỉnh ô thưa với `max |z| = 2.1299`); bảng gộp 2011–2024 (`869` dòng) chỉ có 9 dòng `|z| > 3` (còn 162/171 điểm `−1` có `|z| ≤ 3`). Nếu xóa các dòng `|z| > 3` rồi dựng lại lưới thì khung `[min, max]` co lại vẫn tạo 197/801 điểm `−1` (24.6% trên 2011–2023) và 173/860 điểm `−1` (20.1% trên 2011–2024). Lý do: dữ liệu PAPI là điểm khảo sát thật trong thang hợp lệ `[0.25, 2.5]`, còn nhãn `−1` của STING là vùng thưa 2D theo `min_count`, không phải xóa dữ liệu bẩn.
+    - **Hỏi bẫy:** "Nhiễu −1 có phải outlier?" — Không; −1 = ô không đủ `min_count` tại mức lưới đang dùng (hoặc ngoài vùng lưới đã học). Thêm nữa z trên toàn panel trộn bước nhảy thang đo 2021 ở một số cột khác; audit không kết luận tương đương thang đo xuyên năm.
     - **Repo:** `results/preprocessing_audit.md:26, 113-114`; `scripts/data/preprocessing_audit.py:261-290`; `src/sting.py:12-13, 151-155`; `results/predict_summary.md:48`.
     - **Bài giảng:** Day 4, trang 7.
 
@@ -180,8 +180,8 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
 
 ## Bổ sung — GV dễ hỏi (vấn đáp thêm)
 
-32. **Vì sao không xóa ngoại lai khi audit đã gắn cờ 122 ô |z|>3?** — Day 4 xếp xử lý ngoại lai CUỐI bước Cleaning vì phải biết phân bố sau dedup, thiếu và nhất quán; audit đo trên panel thật: 122 ô (0.4%), 98 dòng, 29 cột — quyết định GIỮ toàn bộ, chỉ đánh dấu, không xóa. Điểm PAPI là khảo sát thật; cắt 122 ô làm méo thống kê panel 882×41. Điểm cực trị thường rơi vào ô lưới thưa nên STING tự gán nhiễu −1 qua `min_count`, không cần phá dữ liệu gốc — đúng tinh thần outlier removal cuối nhưng lựa chọn là không loại.
-   - **Hỏi bẫy:** "122 ô >3 sigma thì bắt buộc cắt theo slide?" — Không; slide yêu cầu Test → Decide, và audit ghi rõ z-score gộp toàn panel nên cờ chỉ mang tính mô tả.
+32. **Vì sao không xóa ngoại lai khi audit đã gắn cờ 122 ô |z|>3?** — Day 4 xếp xử lý ngoại lai CUỐI bước Cleaning vì phải biết phân bố sau dedup, thiếu và nhất quán; audit đo trên panel thật: 122 ô (0.4%), 98 dòng, 29 cột — quyết định GIỮ toàn bộ, chỉ đánh dấu, không xóa. Điểm PAPI là khảo sát thật trong thang hợp lệ; cắt 122 ô làm méo thống kê panel 882×41. Hơn nữa thực nghiệm trên hai trục STING (`sd_4_2`, `sd_6_1`) chứng minh: trên `2011–2023` chỉ có 7/808 điểm `|z| > 3` còn 151/158 điểm nhiễu `−1` có `|z| ≤ 3` (và 13/13 tỉnh ô thưa 2024 có `|z| ≤ 2.1299`); trên bảng gộp `2011–2024` chỉ có 9/869 điểm `|z| > 3` còn 162/171 điểm nhiễu `−1` có `|z| ≤ 3`. Thậm chí nếu bỏ hết điểm `|z| > 3` rồi dựng lại lưới thì vẫn sinh 197/801 điểm `−1` (24.6% trên 2011–2023) và 173/860 điểm `−1` (20.1% trên 2011–2024) vì khung `[min, max]` co lại làm ranh giới `16 × 16` dịch chuyển.
+   - **Hỏi bẫy:** "122 ô >3 sigma thì bắt buộc cắt theo slide?" — Không; slide yêu cầu Test → Decide, và audit ghi rõ z-score gộp toàn panel nên cờ chỉ mang tính mô tả; cắt `|z| > 3` cũng không làm hết nhãn `−1` của STING.
    - **Repo:** `results/preprocessing_audit.md:15,26,113-114`; `scripts/data/preprocessing_audit.py:261-290`; `src/sting.py:12-13`.
    - **Bài giảng:** Day 4, trang 7.
 
@@ -244,3 +244,66 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
 
 45. **Vì sao chưa kết luận nghèo khác nhau giữa noise và cụm lớn?** — Mann–Whitney trong artifact hiện tại: thô p=0.767, trừ median năm p=0.269; cả hai >0.05. Kruskal–Wallis sau tách năm có tín hiệu trên toàn bộ nhóm nhưng hai cụm nhỏ n=2/10: không thay kết luận cặp noise-vs-cụm2. Đây là kiểm chứng bổ trợ; tỉnh lặp qua năm còn làm giả định độc lập của kiểm định gộp hạn chế.
    - **Repo:** `results/poverty_validation.csv`; `results/poverty_validation.md`.
+
+46. **Bẫy khởi tạo xấu (TRAP!) của K-Means khác gì các bẫy cấu hình của STING?** — Day 9 tr.19–24 minh họa K-Means chọn tâm ban đầu tệ sẽ kẹt ở cực tiểu địa phương (`WCSS = 146.40` vs `38.01` trong notebook ôn tập, chẻ 1 cụm và gộp nhầm 2 cụm). STING không phụ thuộc ngẫu nhiên nhưng có 3 bẫy riêng trên đồ thị 2D: (i) xóa điểm `|z| > 3` làm co biên `[min, max]` khiến lưới dịch và nhiễu tăng (`19.7% → 20.1%` / `19.6% → 24.6%`); (ii) đặt lưới quá mịn với `min_count` cao biến đa số điểm thành `−1`; (iii) đổi sang kề 8 hướng (`connectivity=2`) chỉ gộp cụm qua góc thành `1` cụm mà không giảm 1 điểm nhiễu nào.
+   - **Hỏi bẫy:** "STING không bị ngẫu nhiên nên không bao giờ ra kết quả dở?" — Sai; chọn sai `min_count`, độ mịn hoặc biên lưới vẫn tạo cấu trúc méo hoặc 100% nhiễu.
+   - **Repo:** `scripts/notebooks/gen_study_kmeans_hc.py:136-149,343-360`; `scripts/common/midterm_clustering.py:308-370`.
+   - **Bài giảng:** Day 9, tr.19–24 (TRAP).
+
+47. **Bốn khoảng cách Linkage của Hierarchical Clustering và mẹo cắt Dendrogram hoạt động thế nào?** — Agglomerative bắt đầu mỗi điểm một cụm rồi ghép dần từ dưới lên theo `#1 Closest points (Single)`, `#2 Furthest points (Complete)`, `#3 Centroid distance`, hoặc `#4 Average distance` (cùng `Ward` trong thực nghiệm); Dendrogram ghi độ cao ghép dần và mẹo Day 9 tr.47 là cắt ngang tại khoảng trống chiều cao lớn nhất. Bản STING của nhóm không xây Dendrogram HC mà nối ô dày ở đúng một mức lưới chọn trước.
+   - **Hỏi bẫy:** "Single linkage luôn tốt nhất?" — Không; Single dễ bị hiện tượng dây xích nối bắc cầu qua vài điểm lẻ, còn Complete/Ward tạo cụm gọn hơn.
+   - **Repo:** `scripts/notebooks/gen_study_kmeans_hc.py:210-305`; `src/sting.py:1-13`.
+   - **Bài giảng:** Day 9, tr.32–47 (bốn linkage tr.35, cắt dendrogram tr.47).
+
+## Day 6 — Regressions (Linear, Polynomial, Logistic)
+
+48. **OLS tính hệ số và tối ưu sai số thế nào, khác Ridge của repo ở đâu?** — Linear Regression giả định $y = X\beta + \beta_0 + \varepsilon$, cực tiểu hóa tổng bình phương các đoạn phần dư dọc $\sum \varepsilon_i^2$ để thu nghiệm đóng $\hat{\beta} = (X^T X)^{-1} X^T y$. Khi áp dụng lên 8 chỉ tiêu PAPI có tương quan với nhau, repo dùng `Ridge` (OLS + phạt $L_2 = \alpha \|\mathbf{w}\|_2^2$) bọc trong `Pipeline([('sc', StandardScaler()), ...])` đạt CV $R^2 = 0.265$ và holdout MAE `0.0640` cho chỉ tiêu `6.1`.
+   - **Hỏi bẫy:** "Ridge có thay đổi phần dư trên tập train thành 0?" — Không; phạt $L_2$ thu nhỏ hệ số để chống quá khớp trên mẫu mới thay vì ép lỗi train nhỏ nhất.
+   - **Repo:** `scripts/supervised/predict_supervised.py:274-287,322-323`; `results/supervised_metrics.csv:4`.
+   - **Bài giảng:** Day 6, tr.3–12 (residuals & OLS).
+
+49. **Polynomial Regression xử lý quan hệ phi tuyến ra sao, vì sao repo không dùng đa thức bậc cao trên PAPI?** — Slide tạo ma trận thiết kế bậc $m$: $X' = [1, x, x^2, \dots, x^m]$ ($m \le n$) rồi giải $\hat{\beta} = (X'^T X')^{-1} X'^T y$. Khi $m = n - 1$ (như $m = 5$ trên 6 điểm tr.19), đường cong đi qua mọi điểm với MSE train `= 0` nhưng dao động gắt (overfit). Trên ~738 cặp PAPI với 8 chỉ tiêu, các mô hình phi tuyến (`RF`, `HGB`) đều thua `Ridge` theo CV $R^2$ (`0.265`), nên giữ mô hình tuyến tính điều chuẩn.
+   - **Hỏi bẫy:** "Tăng bậc đa thức luôn cải thiện dự báo?" — Sai; chỉ giảm sai số train trong khi phương sai trên holdout tăng mạnh.
+   - **Repo:** `scripts/notebooks/gen_study_day6_regressions.py:121-150`; `results/supervised_metrics.csv:4-5`.
+   - **Bài giảng:** Day 6, tr.13–14, 19.
+
+50. **Logistic Regression phân loại qua Sigmoid và Binary Cross-Entropy thế nào?** — Thay vì xuất số thực không chặn, Logistic đưa logit tuyến tính $z = \beta_0 + \mathbf{w}^T \mathbf{x}$ qua Sigmoid $f(z) = \frac{1}{1 + e^{-z}} \in (0, 1)$, tối đa hóa Bernoulli likelihood $\prod f_i^{y_i}(1-f_i)^{1-y_i}$ — tương đương tối thiểu **Binary Cross-Entropy (Log Loss)** $L_{\text{BCE}} = -\frac{1}{M}\sum [y_i \ln f_i + (1-y_i)\ln(1-f_i)]$. Trên holdout 59 tỉnh (`0 = nhiễu`, `1 = vùng dày`), model đạt `BCE = 0.7059`, Accuracy `0.644`, Macro-F1 `0.541`.
+   - **Hỏi bẫy:** "Có thể dùng MSE cho Logistic Regression thay Log Loss?" — Rất dở: với Sigmoid, MSE không lồi và gradient rất nhỏ khi đoán tự tin sai, còn Log Loss phạt logarit tiến tới $+\infty$.
+   - **Repo:** `scripts/supervised/predict_supervised.py:338-363`; `results/supervised_metrics.csv:7`; `scripts/notebooks/gen_study_day6_regressions.py:162-180`.
+   - **Bài giảng:** Day 6, tr.15–18.
+
+51. **Vì sao Linear/OLS có nghiệm đóng còn Logistic Regression phải tối ưu lặp (`max_iter=3000`)?** — Ở OLS, đạo hàm của $\sum (y_i - \mathbf{x}_i^T \beta)^2$ là hệ phương trình tuyến tính theo $\beta$ nên giải thẳng $(X^T X)^{-1} X^T y$. Ở Binary Cross-Entropy, dự báo chứa hàm phi tuyến $f(z) = \frac{1}{1+e^{-z}}$ nên phương trình $\nabla L = 0$ không có nghiệm đóng đại số, scikit-learn phải lặp gradient/Newton (`max_iter=3000`) tới cực tiểu lồi.
+   - **Hỏi bẫy:** "Tăng `max_iter=3000` có làm model học nhiều hơn để overfit?" — Không; khi đã hội tụ nghiệm cực tiểu lồi duy nhất của Binary Cross-Entropy (+ phạt L2 mặc định), các bước dư không chạy thêm.
+   - **Repo:** `scripts/supervised/predict_supervised.py:274,338-340`; `scripts/notebooks/gen_study_day6_regressions.py:76-84`.
+   - **Bài giảng:** Day 6, tr.10–12, 16–18.
+
+52. **Vì sao Ridge giảm MAE hồi quy điểm nhưng chiếu lên lưới STING vẫn bỏ sót 11/11 tỉnh nhiễu?** — Hồi quy bình phương tối thiểu/Ridge ước lượng kỳ vọng có điều kiện $\mathbb{E}[y \mid x]$, vốn co các dự báo về vùng trung tâm phân bố (*regression to the mean*). Vùng trung tâm đó trùng khít 52 ô dày cụm lớn của STING, nên cả `59/59` điểm dự báo rơi vào cụm lớn (`balanced_zone_accuracy = 0.50`). Để nhận diện vùng thưa, repo kết hợp thêm 364 cặp sai số lịch sử để xếp hạng rủi ro (AUC `0.816`).
+   - **Hỏi bẫy:** "Vậy dùng Random Forest regressor thay Ridge thì có bắt được 11 tỉnh nhiễu?" — Phần lớn vẫn co về trung tâm; muốn bắt lớp `0` trực tiếp phải dự báo xác suất/xếp hạng với cân bằng lớp (`class_weight='balanced'`), không lấy mỗi dự báo điểm kỳ vọng.
+   - **Repo:** `results/papi_forecast_2024.json:49-87,100-105`; `scripts/common/papi_forecast.py:1-28`.
+   - **Bài giảng:** Day 6, tr.5–8 (kỳ vọng & phần dư); đối chiếu Day 9 (mật độ biên ngoài).
+
+## Chuyên sâu về nhiễu (−1) trong STING — 6 câu hỏi hay bị vặn nhất
+
+53. **Tiền xử lý Day 4 lọc rồi sao vẫn còn 19,7% (171/869) và 19,6% (158/808) điểm nhiễu −1?** — Tiền xử lý chỉ làm sạch bản ghi thiếu (`dropna` loại `11/819` năm `2011–2023` và `2/63` năm `2024`, giữ `869` dòng đủ 2 chỉ tiêu trong khoảng hợp lệ `[0.25, 2.5]`). Còn nhãn `−1` của STING là **đầu ra của thuật toán phân cụm dựa trên mật độ ô 2D**: điểm nào rơi vào ô lưới `16 × 16` có dưới `5` quan sát tham chiếu thì nhận `−1`, hoàn toàn không phải dữ liệu lỗi bị bỏ sót.
+   - **Hỏi bẫy:** "Vậy nói 19,7% dữ liệu là dữ liệu rác chưa sạch đúng không?" — Sai hoàn toàn; `162/171` điểm `−1` (và `151/158` trên `2011–2023`) đều nằm gọn trong khung sạch `|z| ≤ 3`.
+   - **Repo:** `results/preprocessing_audit.md:19-26`; `scripts/notebooks/gen_submission_demo.py:299-335`.
+
+54. **Nếu xóa hết các điểm `|z| > 3` rồi chạy lại STING thì có hết nhãn −1 không?** — Không — ngược lại tỷ lệ nhiễu còn **tăng thêm**. Lý do: STING tự chia lưới đều trên hộp bao `[min, max]` của dữ liệu đưa vào. Khi bỏ `7` điểm `|z| > 3` trên `2011–2023` (`808 → 801`), khung `[min, max]` bị co hẹp, kích thước từng ô lưới nhỏ lại và đường chia ô dịch chuyển, làm số điểm rơi vào ô thưa tăng từ `158/808 (19,6%)` lên `197/801 (24,6%)` (`4` cụm); trên `869 → 860` cũng tăng từ `171/869 (19,7%)` lên `173/860 (20,1%)`.
+   - **Hỏi bẫy:** "Co ô lại nhỏ hơn thì điểm không đáng ra phải cụm chặt hơn sao?" — Ô nhỏ hơn lại chứa ít điểm hơn trên mỗi ô nên càng dễ rớt xuống dưới ngưỡng `min_count = 5`!
+   - **Repo:** `scripts/notebooks/gen_final_analysis.py:208-221`; `scripts/common/midterm_clustering.py:308-399`.
+
+55. **Đổi quy tắc kề 8 hướng (`connectivity=2`) có giảm được nhiễu không; muốn giảm nhiễu thì đổi gì?** — Đổi `connectivity=2` (cho nối chéo góc) **không giảm bất kỳ một điểm nhiễu nào** (`158/808` trên `2011–2023` và `171/869` trên `2011–2024` giữ nguyên tuyệt đối), chỉ gộp `56` ô dày từ `3` cụm thành `1` cụm duy nhất vì chạm góc. Nhiễu chỉ thay đổi khi đổi tiêu chí "ô dày": hạ `min_count` (ví dụ `5 → 3` giảm nhiễu còn `9,8%`), giảm `cluster_level` (`2 → 1`, lưới `4 × 4` giảm nhiễu còn `0,7%`), hoặc thay đổi `factor`.
+   - **Hỏi bẫy:** "Lý do không giảm nhiễu là gì trong code?" — Vì `dense_set` chỉ lọc theo `count >= min_count`, còn `connectivity` chỉ chạy DFS nối các ô đã có trong `dense_set`.
+   - **Repo:** `src/sting.py:133-168`; `scripts/notebooks/gen_submission_demo.py:525-545`.
+
+56. **Trong 13 tỉnh nhãn −1 năm 2024, có tỉnh nào bị `outside_grid` (tràn biên) hoặc `|z| > 3` không?** — Không một tỉnh nào: `0/61` tỉnh năm `2024` có `|z| > 3` và `0` tỉnh `outside_grid`. Cả `13/13` tỉnh nhãn `−1` đều nằm trọn trong miền lưới tham chiếu `2011–2023`, với `|z|` lớn nhất trên cả hai trục chỉ là `2,1299` (Tây Ninh), và nhận nhãn `−1` thuần túy vì rơi vào ô thưa (`sparse_cell`) có từ `0` đến `3` quan sát tham chiếu (`< 5`).
+   - **Hỏi bẫy:** "Đoán xem tỉnh nào có `reference_count = 0`?" — Quảng Ninh (`sd_4_2 = 2,2598; sd_6_1 = 1,8891`, ô `(14, 9)` chưa từng có điểm tham chiếu nào `2011–2023`).
+   - **Repo:** `results/papi_observed_grid_2024.csv:1-64`; `scripts/notebooks/gen_submission_demo.py:609-620`.
+
+57. **Nhãn nhiễu `−1` có đồng nghĩa tỉnh quản trị yếu kém không?** — Không. Phân tích CSV gán năm 2024 cho thấy 13 tỉnh `sparse_cell` đứng ở hai nhóm rìa đối lập nhau: nhóm đạt **điểm rất cao** ở rìa phải/trên (Tây Ninh `4.2 = 2,285`, Quảng Ninh `4.2 = 2,260`, Bà Rịa - Vũng Tàu `4.2 = 2,258`, Sóc Trăng `4.2 = 2,252`, Bình Thuận `4.2 = 2,218; 6.1 = 2,112`, Hà Tĩnh `6.1 = 2,191`) và nhóm điểm `6.1` thấp hơn ở rìa dưới (Hà Nội `1,686`, Cần Thơ `1,698`). Nhãn `−1` chỉ có nghĩa *"nằm ngoài vùng tập trung phổ biến 2011–2023"*, không gắn phán xét tốt/xấu.
+   - **Hỏi bẫy:** "Hà Nội hay Quảng Ninh cũng bị −1 à?" — Đúng; Hà Nội (ô `(10, 5)`, `3` điểm) và Quảng Ninh (ô `(14, 9)`, `0` điểm) đều đủ dữ liệu hợp lệ nhưng thuộc 2 cực khác nhau trên mặt phẳng PAPI 2024.
+   - **Repo:** `results/papi_observed_grid_2024.csv:2,15,29,40,47,50,60,62`; `scripts/notebooks/gen_submission_demo.py:575-590`.
+
+58. **Điểm nhiễu `−1` ảnh hưởng thế nào khi tính WCSS, Silhouette và ARI để so với K-Means và DBSCAN?** — K-Means không tạo nhiễu nên WCSS và Silhouette tính trên đủ `100%` điểm (`808` hoặc `869`). STING (`−1 = 158/808`) và DBSCAN (`−1 = 115/808`) loại các điểm rìa thưa nên Silhouette trên tập riêng của mỗi thuật toán trông cao/thấp khác nhau không cùng mẫu số. Vì vậy nhóm khóa thêm **hai quy tắc bắt buộc**: (i) tính Silhouette lại trên **cùng tập giao** được tất cả thuật toán gán cụm (`631/808` hoặc `680/869` điểm), và (ii) khi đọc ARI phải nói rõ tính trên toàn mẫu gồm nhãn `−1` (`0,647`) hay chỉ trên tập giao không nhiễu (`0,431`).
+   - **Hỏi bẫy:** "Nếu dùng Silhouette cao hơn (`0,445` vs `0,361`) để kết luận K-Means thắng STING có được không?" — Không; hai con số đó đo trên hai hình học khác nhau (`808` vs `650` điểm) và K-Means ép mọi điểm rìa vào tâm thay vì giữ mục tiêu phát hiện vùng dày/ngoại vi của grid-based clustering.
+   - **Repo:** `results/metrics.csv:2-7`; `scripts/notebooks/gen_final_analysis.py:332-365`; `scripts/notebooks/gen_submission_demo.py:400-427`.

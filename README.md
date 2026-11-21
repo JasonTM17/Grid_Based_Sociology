@@ -25,7 +25,7 @@ Slide cuối kỳ trình bày STING và dự báo ở trang 1–13. Trang 7–9 
 
 ## Ôn tập
 
-Bốn notebook có giải thích nằm ngay trong `study/`. [Giữa kỳ](study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) · [Cuối kỳ](study/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) · [Day 4](study/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb) · [Day 9: K-Means & HC](study/Nhom15_Day9_KMeans_HC_GiaiThich.ipynb)
+Năm notebook có giải thích nằm ngay trong [`study/`](study/README.md): [Giữa kỳ](study/Nhom15_GiuaKy_STING_PAPI_GiaiThich.ipynb) · [Cuối kỳ](study/Nhom15_CuoiKy_STING_PAPI_GiaiThich.ipynb) · [Day 4: Tiền xử lý](study/Nhom15_Day4_TienXuLy_PAPI_GiaiThich.ipynb) · [Day 6: Regressions](study/Nhom15_Day6_Regressions_GiaiThich.ipynb) · [Day 9: K-Means & HC](study/Nhom15_Day9_KMeans_HC_GiaiThich.ipynb).
 
 Tài liệu hỏi đáp, kịch bản nói và nhật ký luyện tập nằm trong `reports/on-tap/`.
 Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đó mở
@@ -34,17 +34,49 @@ Bắt đầu từ [Câu hỏi giữa kỳ](reports/on-tap/qa_midterm.md), sau đ
 
 ## Cấu trúc dự án
 
+```text
+Grid_Based_Sociology/
+├── app.py                     # Dashboard Streamlit phân tích và kiểm chứng ngoại lai
+├── src/                       # Cài đặt lõi thuật toán STING (sting.py)
+├── scripts/                   # Mã tái lập pipeline (chi tiết trong scripts/README.md)
+│   ├── data/                  #   Dựng panel, đối chiếu Mendeley, kiểm tra tiền xử lý
+│   ├── analysis/              #   Sweep cấu hình, gán cụm, kiểm chứng PCI/GRDP/nghèo
+│   ├── supervised/            #   Hồi quy & phân loại đối chứng theo nội dung môn học
+│   ├── figures/               #   Sinh hình phân tích & sơ đồ lưới
+│   ├── notebooks/             #   Script sinh notebook nộp bài & notebook ôn tập
+│   ├── deliverables/          #   Sinh báo cáo Word, slide PPTX, gói ZIP & kiểm chứng
+│   └── common/                #   Hàm dùng chung (fig_style, midterm_clustering, ...)
+├── notebooks/                 # Notebook chính (chi tiết trong notebooks/README.md)
+│   └── thu-nghiem/            #   Notebook kiểm chứng giả lập & khảo sát tham số Phase 1–4
+├── slides/                    # Slide PowerPoint (submission.pptx 10 trang, final.pptx 16 trang)
+├── reports/                   # Báo cáo final_report.docx & hồ sơ kỹ thuật (reports/README.md)
+│   ├── on-tap/                #   Bộ Q&A giữa kỳ/cuối kỳ/bài giảng & kịch bản thuyết trình
+│   └── luu-tru/               #   Tài liệu theo dõi lịch sử đã chốt
+├── submissions/               # Sản phẩm đóng gói sẵn theo từng mốc nộp
+│   ├── 01-giua-ky/            #   Slide & notebook giữa kỳ
+│   ├── 02-cuoi-ky/            #   DOCX, notebook & slide cuối kỳ
+│   └── 03-day-4/              #   Gói tự chạy bài thực hành tiền xử lý Day 4
+├── study/                     # 5 notebook giải thích bám sát bài giảng + sting_GiaiThich.py
+├── data/
+│   ├── raw/                   #   Dữ liệu gốc & PROVENANCE.md từng nguồn (course/ lưu local)
+│   └── processed/             #   Panel PAPI 882×41 & các bảng dữ liệu ngoài đã làm sạch
+├── models/                    # Model STING (.pkl), scaler JSON và joblib hồi quy/phân loại
+├── results/                   # Kết quả CSV/MD/JSON & thư mục hình figs/ (results/README.md)
+├── tests/                     # Bộ kiểm thử pytest toàn dự án
+└── assets/                    # Ảnh bìa repo & mẫu XML trang bìa báo cáo
+```
+
 | Khi cần | Mở thư mục |
 |---|---|
-| Gửi bài cho thầy | `submissions/` có file nộp đặt tên theo từng mốc và hai gói ZIP. |
-| Đọc giải thích để học | `study/` có bốn notebook ôn tập (gồm bài tập K-Means và HC của Day 9) và `sting_GiaiThich.py` (bản `src/sting.py` có chú thích đầy đủ, cùng logic). |
-| Xem thuật toán và cách chạy | `src/` chứa STING tự cài đặt. `scripts/` chia theo chức năng: `data/` dựng và kiểm tra dữ liệu, `analysis/` phân cụm STING và kiểm định, `supervised/` mô hình có giám sát, `figures/` vẽ hình, `notebooks/` sinh notebook, `deliverables/` báo cáo, slide và gói nộp, `common/` tiện ích dùng chung. Chạy từ thư mục gốc, ví dụ `python scripts/data/check_data.py`. |
-| Tìm dữ liệu | `data/raw/` chứa workbook và các nguồn tham chiếu. `data/processed/` chứa panel PAPI và dữ liệu đã xử lý. |
-| Xem kết quả đã lưu | `models/` chứa model và cấu hình. `results/` chứa bảng và hình kết quả. |
-| Tái tạo bài nộp | `notebooks/`, `slides/` và `reports/` chứa notebook, slide và báo cáo dùng để tạo các gói nộp. `reports/` cũng có tài liệu chuyên môn. |
+| Gửi bài cho thầy | `submissions/` có file nộp đặt tên theo từng mốc (`01-giua-ky/`, `02-cuoi-ky/`, `03-day-4/`) và hai gói ZIP tự chứa. |
+| Đọc giải thích để học | [`study/`](study/README.md) có năm notebook ôn tập (giữa kỳ, cuối kỳ, Day 4, Day 6 Regressions, Day 9 K-Means & HC) và `sting_GiaiThich.py`. |
+| Xem thuật toán và cách chạy | `src/` chứa STING tự cài đặt. [`scripts/`](scripts/README.md) chia theo chức năng; chạy từ thư mục gốc, ví dụ `python scripts/data/check_data.py`. |
+| Tìm dữ liệu | [`data/`](data/README.md): `data/raw/` chứa workbook và nguồn tham chiếu; `data/processed/` chứa panel PAPI và dữ liệu đã xử lý. |
+| Xem kết quả đã lưu | `models/` chứa model và cấu hình. [`results/`](results/README.md) chứa bảng CSV/MD/JSON và hình `figs/`. |
+| Tái tạo bài nộp | [`notebooks/`](notebooks/README.md), `slides/` và [`reports/`](reports/README.md) chứa notebook, slide, báo cáo nguồn và tài liệu ôn tập. |
 | Kiểm tra hoặc chỉnh tài liệu | `tests/` có bộ kiểm thử. `assets/` chứa ảnh bìa repo và mẫu bìa báo cáo. |
 
-`plans/` lưu hồ sơ làm việc cục bộ. Các thư mục bắt đầu bằng dấu chấm chứa cấu hình Git, CI, dashboard hoặc công cụ phát triển. Tư liệu giảng viên lưu cục bộ trong `data/raw/course/`.
+`plans/templates/` lưu mẫu lập kế hoạch. Các thư mục bắt đầu bằng dấu chấm chứa cấu hình Git, CI, dashboard hoặc công cụ phát triển. Tư liệu bài giảng của giảng viên lưu cục bộ trong `data/raw/course/` (không commit, không đưa vào ZIP).
 
 ## Nguồn dữ liệu & giấy phép
 
@@ -81,7 +113,7 @@ Ghi chú: `jupyter` CLI chưa vào PATH — dùng `python -m jupyter` / `python 
 
 ## Đối chiếu nội dung môn học
 
-Bảng dưới ánh xạ chủ đề đã dạy (Day 1–4, môn Học máy — STING vẫn là đề tài clustering Topic 6) sang script/kết quả/notebook trong repo. Số liệu classifier là **mức khớp với pseudo-label STING**, holdout **một lần** 2023→2024 — không có kết luận “vượt trội” so với ground truth xã hội.
+Bảng dưới ánh xạ chủ đề đã dạy (Day 1–9, môn Học máy — STING vẫn là đề tài clustering Topic 6) sang script/kết quả/notebook trong repo. Số liệu classifier là **mức khớp với pseudo-label STING**, holdout **một lần** 2023→2024 — không có kết luận “vượt trội” so với ground truth xã hội.
 
 | Chủ đề (Day) | Trong repo |
 |---|---|
@@ -92,6 +124,8 @@ Bảng dưới ánh xạ chủ đề đã dạy (Day 1–4, môn Học máy — 
 | SVM tuyến tính + kernel RBF (Day 3) | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
 | Decision Tree, Random Forest (Day 3) | Cùng `scripts/supervised/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/supervised/predict_supervised.py` (chọn model theo CV, không theo holdout) |
 | Tiền xử lý Day 4 (Cleaning → Integration → Transformation) | `notebooks/Nhom15_Day4_TienXuLy_PAPI.ipynb` chạy trực tiếp từ workbook PAPI. `scripts/data/preprocessing_audit.py` tạo bảng kiểm tra dùng trong đồ án. |
+| Linear, Polynomial & Logistic Regression (Day 6) | `study/Nhom15_Day6_Regressions_GiaiThich.ipynb` (OLS residual $\varepsilon_i$, đa thức $m \le n$, Sigmoid & Binary Cross-Entropy) + Phụ lục B của `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` |
+| K-Means, TRAP, Linkage & Dendrogram vs STING (Day 9) | `study/Nhom15_Day9_KMeans_HC_GiaiThich.ipynb` + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (sơ đồ 4 bước STING 2D, phản biện nhiễu `−1` & Elbow/Silhouette) |
 | Q&A thi / vấn đáp theo slide | `reports/on-tap/qa_course_concepts.md` (midterm/cuối kỳ bổ sung: `reports/on-tap/qa_midterm.md`, `reports/on-tap/qa_final.md`) |
 
 Tái tạo audit và bảng classifier (nếu artifact cũ):
@@ -125,6 +159,12 @@ python scripts/deliverables/build_submission_packages.py --verify
 ZIP lấy các bản gốc trong `notebooks/`, `slides/` và `reports/`. Khi đổi các
 bản gốc, đồng bộ cả bản rời trong `submissions/01-giua-ky/` hoặc
 `submissions/02-cuoi-ky/` theo bảng file nộp ở đầu trang.
+
+Slide 10 và mục 4.8 của notebook giữa kỳ cùng tính kết quả gán năm 2024
+từ panel PAPI. Khi cập nhật panel, chạy `python scripts/analysis/predict_demo.py`
+để dựng lại hình phân bổ và bảng chi tiết trước khi tạo notebook. Trình đóng
+gói kiểm tra riêng PDF báo cáo PAPI và ZIP Mendeley. Tệp nào có sẵn sẽ được
+đưa vào gói và liệt kê trong hướng dẫn.
 
 ## Dự báo hai chỉ tiêu và đối chiếu trên lưới STING
 

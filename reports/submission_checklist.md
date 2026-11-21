@@ -19,7 +19,7 @@ _Cập nhật ngày 19/11/2026 · Nhóm 15._
 
 ## Tái lập / chất lượng mã
 
-- [x] 197 kiểm thử đạt với `python -m pytest tests -q`, bao gồm hai trường hợp số học biên của STING.
+- [x] 215 kiểm thử đạt với `python -m pytest tests -q`, bao gồm các trường hợp biên của STING, notebook và tính đồng bộ gói nộp.
 - [x] Smoke demo (`python scripts/deliverables/demo_smoke.py` → SAN SANG DEMO, toàn bộ mục PASS)
 - [x] Từ ZIP giải nén, dựng lại panel và metadata thang đo trùng từng byte. Đối chiếu Mendeley cho 5.118 cặp giá trị có độ lệch bằng 0 trên 756 khóa tỉnh–năm.
 - [x] Gói cuối kỳ có đủ mã ghép nguồn và CSV rác thải GSO. Bảng ghép 882 × 59 trùng từng byte khi dựng lại. Bảng kiểm tiền xử lý chạy trên dữ liệu vừa tạo và cho đúng kết quả đã lưu.
@@ -52,7 +52,7 @@ python scripts/deliverables/build_submission_packages.py --verify
 
 - `Nhom15_GiuaKy_STING_PAPI.zip`: slide 10 trang + notebook giữa kỳ + phụ thuộc.
 - `Nhom15_CuoiKy_STING_PAPI.zip` đặt báo cáo, notebook, slide vấn đáp và hướng dẫn ở cấp đầu. Thư mục `tai_lieu_kem` chứa mã, dữ liệu và thư viện.
-- Bộ dựng và bộ xác minh dùng chung danh mục tệp. Bản cuối kỳ ngày 19/11 có 120 mục, gồm các đầu vào và kết quả cần để đọc và tái lập bài.
+- Bộ dựng và bộ xác minh dùng chung danh mục tệp. Bản cuối kỳ hiện có 127 mục, gồm các đầu vào và kết quả cần để đọc và tái lập bài.
 - `SHA256SUMS.txt`: hash hai ZIP; mỗi ZIP có `MANIFEST.json` ghi hash/vai trò từng file.
 - `verification.json`: chỉ sinh sau khi notebook trong cả hai gói giải nén chạy qua.
 
@@ -61,7 +61,7 @@ và chặn đọc kho mã gốc và Downloads. Gói nộp chứa 14 bảng tính
 báo cáo PAPI 2024, ZIP dữ liệu đối chiếu Mendeley, metadata thang đo và hồ sơ nguồn.
 
 Cấu trúc này là đề xuất; tên file/nơi nộp/deadline chính thức cần theo GV/LMS.
-Hồ sơ kiểm tra ngày 16/11 nằm ở `reports/submission-readiness-261116.md`. Các file nộp hiện tại được liệt kê trong README và submissions/HUONG-DAN.txt.
+Hồ sơ kiểm tra ngày 16/11 nằm ở `reports/luu-tru/submission-readiness-261116.md`. Các file nộp hiện tại được liệt kê trong README và submissions/HUONG-DAN.txt.
 Kịch bản giữa kỳ 15 phút + Q&A 5 phút: `reports/on-tap/presentation-script-261116.md`.
 
 ## Git tag
