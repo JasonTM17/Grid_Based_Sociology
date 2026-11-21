@@ -2,8 +2,8 @@
   {
     "milestone": "midterm",
     "status": "PASS",
-    "sha256": "d2be2352b2522dd7e731de13726ee6be07476dc2c0998eb78f3dc2689e240062",
-    "code_cells": 23,
+    "sha256": "24478195001d3e6552e9e9023433df3b00014a2014b740d051de98a757ef77d7",
+    "code_cells": 24,
     "isolation_guard": true,
     "python": "3.14.2",
     "launcher_messages": true
@@ -11,8 +11,8 @@
   {
     "milestone": "final",
     "status": "PASS",
-    "sha256": "8fbdd60adad8d6cde9b3a218e806e76fbc8b55c72aa0ff500b83b3749e628bd1",
-    "code_cells": 26,
+    "sha256": "1a8d54f93b323dbaad341eb07cad97d920aa2f84ba1605bcf6073a8fc2420b4e",
+    "code_cells": 27,
     "isolation_guard": true,
     "python": "3.14.2",
     "launcher_messages": true

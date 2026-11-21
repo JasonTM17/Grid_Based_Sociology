@@ -298,12 +298,12 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
 
 56. **Trong 13 tỉnh nhãn −1 năm 2024, có tỉnh nào bị `outside_grid` (tràn biên) hoặc `|z| > 3` không?** — Không một tỉnh nào: `0/61` tỉnh năm `2024` có `|z| > 3` và `0` tỉnh `outside_grid`. Cả `13/13` tỉnh nhãn `−1` đều nằm trọn trong miền lưới tham chiếu `2011–2023`, với `|z|` lớn nhất trên cả hai trục chỉ là `2,1299` (Tây Ninh), và nhận nhãn `−1` thuần túy vì rơi vào ô thưa (`sparse_cell`) có từ `0` đến `3` quan sát tham chiếu (`< 5`).
    - **Hỏi bẫy:** "Đoán xem tỉnh nào có `reference_count = 0`?" — Quảng Ninh (`sd_4_2 = 2,2598; sd_6_1 = 1,8891`, ô `(14, 9)` chưa từng có điểm tham chiếu nào `2011–2023`).
-   - **Repo:** `results/papi_observed_grid_2024.csv:1-64`; `scripts/notebooks/gen_submission_demo.py:631-648`.
+   - **Repo:** `results/papi_observed_grid_2024.csv:1-64`; `scripts/notebooks/gen_submission_demo.py:697-714`.
 
 57. **Nhãn nhiễu `−1` có đồng nghĩa tỉnh quản trị yếu kém không?** — Không. Phân tích CSV gán năm 2024 cho thấy 13 tỉnh `sparse_cell` đứng ở hai nhóm rìa đối lập nhau: nhóm đạt **điểm rất cao** ở rìa phải/trên (Tây Ninh `4.2 = 2,285`, Quảng Ninh `4.2 = 2,260`, Bà Rịa - Vũng Tàu `4.2 = 2,258`, Sóc Trăng `4.2 = 2,252`, Bình Thuận `4.2 = 2,218; 6.1 = 2,112`, Hà Tĩnh `6.1 = 2,191`) và nhóm điểm `6.1` thấp hơn ở rìa dưới (Hà Nội `1,686`, Cần Thơ `1,698`). Nhãn `−1` chỉ có nghĩa *"nằm ngoài vùng tập trung phổ biến 2011–2023"*, không gắn phán xét tốt/xấu.
    - **Hỏi bẫy:** "Hà Nội hay Quảng Ninh cũng bị −1 à?" — Đúng; Hà Nội (ô `(10, 5)`, `3` điểm) và Quảng Ninh (ô `(14, 9)`, `0` điểm) đều đủ dữ liệu hợp lệ nhưng thuộc 2 cực khác nhau trên mặt phẳng PAPI 2024.
-   - **Repo:** `results/papi_observed_grid_2024.csv:2,15,29,40,47,50,60,62`; `scripts/notebooks/gen_submission_demo.py:595-617`.
+   - **Repo:** `results/papi_observed_grid_2024.csv:2,15,29,40,47,50,60,62`; `scripts/notebooks/gen_submission_demo.py:661-683`.
 
 58. **Điểm nhiễu `−1` ảnh hưởng thế nào khi tính WCSS, Silhouette và ARI để so với K-Means và DBSCAN?** — K-Means không tạo nhiễu nên WCSS và Silhouette tính trên đủ `100%` điểm (`808` hoặc `869`). STING (`−1 = 158/808`) và DBSCAN (`−1 = 115/808`) loại các điểm rìa thưa nên Silhouette trên tập riêng của mỗi thuật toán trông cao/thấp khác nhau không cùng mẫu số. Vì vậy nhóm khóa thêm **hai quy tắc bắt buộc**: (i) tính Silhouette lại trên **cùng tập giao** được tất cả thuật toán gán cụm (`631/808` hoặc `680/869` điểm), và (ii) khi đọc ARI phải nói rõ tính trên toàn mẫu gồm nhãn `−1` (`0,647`) hay chỉ trên tập giao không nhiễu (`0,431`).
    - **Hỏi bẫy:** "Nếu dùng Silhouette cao hơn (`0,445` vs `0,361`) để kết luận K-Means thắng STING có được không?" — Không; hai con số đó đo trên hai hình học khác nhau (`808` vs `650` điểm) và K-Means ép mọi điểm rìa vào tâm thay vì giữ mục tiêu phát hiện vùng dày/ngoại vi của grid-based clustering.
-   - **Repo:** `results/metrics.csv:2-7`; `scripts/notebooks/gen_final_analysis.py:332-365`; `scripts/notebooks/gen_submission_demo.py:423-445`.
+   - **Repo:** `results/metrics.csv:2-7`; `scripts/notebooks/gen_final_analysis.py:344-377`; `scripts/notebooks/gen_submission_demo.py:423-445`.

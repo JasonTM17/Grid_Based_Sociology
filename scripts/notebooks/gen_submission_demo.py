@@ -590,6 +590,72 @@ print(f"Ô chứa Lạng Sơn 2024: ô con {example_cell}, ô cha {parent_key}."
 display(pd.DataFrame({"Chỉ tiêu": feats, "Chênh lệch tuyệt đối": gap,
                       "Mức so sánh": cutoff, "Đạt": satisfied}).round(4))"""))
 
+md(nbf.v4.new_markdown_cell("""**Cải tiến trực tiếp trong STING: truy vấn tỉa nhánh top-down & lưới phân vị.**
+Nhóm cài đặt và kiểm chứng hai cải tiến trực tiếp trên 869 quan sát PAPI:
+
+1. **Truy vấn phân cấp từ trên xuống (`query_top_down`)**: mở rộng từ gốc `1 × 1` xuống `16 × 16`, cắt bỏ sớm các nhánh rời hoặc có xác suất rơi vào vùng truy vấn thấp hơn `1 − confidence` theo phân phối từng ô (Wang 1997).
+2. **Lưới thích nghi theo phân vị (Rank/Quantile Grid)**: thay trục `[min, max]` chia đều bằng hạng phân vị đều `[0, 1]` để loại bỏ ảnh hưởng kéo giãn biên của 9 điểm `|z| > 3`."""))
+
+cd(nbf.v4.new_code_cell(r"""from matplotlib.patches import Rectangle
+from scripts.common.fig_style import CLUSTER_COLORS, PALETTE, style_context
+
+# 1. Kiểm chứng truy vấn top-down vs query_rect trên góc phần tư hiệu suất cao
+q_rect_box = [(0.0, 2.5), (0.0, 2.5)]
+res_full = grid_model.query_rect(q_rect_box, level=2)
+res_td = grid_model.query_top_down(q_rect_box, confidence=0.95, level=2)
+assert res_td["count"] == res_full["count"]
+np.testing.assert_allclose(res_td["mean"], res_full["mean"])
+total_occ = sum(len(grid_model.cells_[lvl]) for lvl in range(grid_model.n_levels))
+print(
+    f"Truy vấn top-down [0; 2,5]²: khớp {res_td['count']} điểm (μ = {res_td['mean'].round(3)}), "
+    f"duyệt {res_td['visited_cells']}/{total_occ} ô có dữ liệu, "
+    f"tỉa bỏ {res_td['pruned_cells']} nhánh/ô biên."
+)
+
+# 2. Lưới đều vs Lưới thích nghi theo phân vị (Quantile Grid, mc=3)
+Xq = pd.DataFrame(Xz).rank(pct=True).to_numpy()
+mq = STING(n_levels=3, factor=4, min_count=3).fit(Xq)
+lq = mq.cluster(level=2, connectivity=1)
+Xq_trim = pd.DataFrame(Xz[~z_flag]).rank(pct=True).to_numpy()
+lq_trim = STING(n_levels=3, factor=4, min_count=3).fit(Xq_trim).cluster(level=2, connectivity=1)
+print(
+    f"Lưới phân vị (16×16, mc=3): {int((lq == -1).sum())}/{len(lq)} nhiễu ({(lq == -1).mean():.1%}); "
+    f"sau khi bỏ 9 điểm |z|>3: {int((lq_trim == -1).sum())}/{len(lq_trim)} nhiễu "
+    f"(không đẩy thêm điểm lõi ra nhiễu do co biên)."
+)
+
+with style_context():
+    fig, (ax_u, ax_q) = plt.subplots(1, 2, figsize=(11.2, 4.35), dpi=150, layout="constrained")
+    for idx_cell, cid in grid_model.label_of_.items():
+        cell = grid_model.cells_[2][idx_cell]
+        ax_u.add_patch(Rectangle(cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
+                                 facecolor="none", edgecolor=CLUSTER_COLORS.get(cid, PALETTE["purple"]), linewidth=0.75, alpha=0.6))
+    ns_u = lab == -1
+    ax_u.scatter(Xz[ns_u, 0], Xz[ns_u, 1], s=14, color=PALETTE["gray"], marker="x", label=f"Nhiễu ({int(ns_u.sum())})", zorder=2)
+    for cid in sorted(set(lab[lab >= 0])):
+        mk = lab == cid
+        ax_u.scatter(Xz[mk, 0], Xz[mk, 1], s=10, color=CLUSTER_COLORS.get(cid, PALETTE["purple"]), alpha=0.72, linewidths=0, label=f"Cụm {cid} ({int(mk.sum())})")
+    ax_u.set_title(f"1. Lưới đều [min, max] (mc = 5)\n3 cụm · {int(ns_u.sum())}/{len(lab)} nhiễu ({ns_u.mean():.1%})", fontsize=10.5)
+    ax_u.set_xlabel("4.2 Kiểm soát tham nhũng (z-score)")
+    ax_u.set_ylabel("6.1 Y tế công lập (z-score)")
+    ax_u.grid(alpha=0.14)
+    ax_u.legend(loc="upper left", fontsize=7.6, framealpha=0.92, ncols=2)
+
+    for idx_cell, cid in mq.label_of_.items():
+        cell = mq.cells_[2][idx_cell]
+        ax_q.add_patch(Rectangle(cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
+                                 facecolor="none", edgecolor=CLUSTER_COLORS.get(cid % 4, PALETTE["purple"]), linewidth=0.75, alpha=0.55))
+    ns_q = lq == -1
+    ax_q.scatter(Xq[ns_q, 0], Xq[ns_q, 1], s=14, color=PALETTE["gray"], marker="x", label=f"Nhiễu ({int(ns_q.sum())})", zorder=2)
+    ax_q.scatter(Xq[~ns_q, 0], Xq[~ns_q, 1], s=10, color=PALETTE["blue"], alpha=0.72, linewidths=0,
+                 label=f"Vào {mq.n_clusters_} cụm ({int((~ns_q).sum())})")
+    ax_q.set_title(f"2. Lưới thích nghi phân vị (Quantile, mc = 3)\nBiên ổn định khi lọc outlier · {int(ns_q.sum())}/{len(lq)} nhiễu ({ns_q.mean():.1%})", fontsize=10.5)
+    ax_q.set_xlabel("Phân vị chỉ tiêu 4.2 [0, 1]")
+    ax_q.set_ylabel("Phân vị chỉ tiêu 6.1 [0, 1]")
+    ax_q.grid(alpha=0.14)
+    ax_q.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
+    plt.show()"""))
+
 md(nbf.v4.new_markdown_cell("""### 4.8 Gán quan sát năm 2024 lên lưới cố định
 
 Nhóm dựng lưới từ dữ liệu 2011–2023, rồi đặt hai điểm PAPI đã quan sát năm

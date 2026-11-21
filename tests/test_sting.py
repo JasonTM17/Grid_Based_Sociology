@@ -573,3 +573,53 @@ def test_point_cell_index_and_cell_stats_guards_and_bounds():
     cells = model.cell_stats(1)
     assert isinstance(cells, list) and len(cells) > 0
     assert all(isinstance(c, Cell) for c in cells)
+
+
+def test_query_top_down_matches_query_rect_and_prunes_branches():
+    """Truy vấn top-down có tỉa nhánh phải cho thống kê khớp query_rect và ít ô duyệt hơn."""
+    from sklearn.datasets import make_blobs
+
+    X, _ = make_blobs(n_samples=240, centers=[(-5.0, -5.0), (5.0, 5.0)], cluster_std=0.6, random_state=42)
+    model = STING(n_levels=3, factor=4, min_count=3).fit(X)
+    rect = [(3.0, 7.0), (3.0, 7.0)]
+
+    ref = model.query_rect(rect, level=2)
+    top_down = model.query_top_down(rect, confidence=0.95, level=2)
+
+    assert top_down["count"] == ref["count"] > 0
+    np.testing.assert_allclose(top_down["mean"], ref["mean"])
+    np.testing.assert_allclose(top_down["std"], ref["std"])
+    np.testing.assert_allclose(top_down["min"], ref["min"])
+    np.testing.assert_allclose(top_down["max"], ref["max"])
+
+    total_occupied = sum(len(model.cells_[lvl]) for lvl in range(3))
+    assert top_down["pruned_cells"] > 0
+    assert top_down["visited_cells"] < total_occupied
+
+
+def test_query_top_down_empty_region():
+    """Vùng ngoài miền dữ liệu phải bị tỉa sạch và trả count=0."""
+    X = np.random.default_rng(7).normal(size=(80, 2))
+    model = STING(n_levels=3, factor=4, min_count=3).fit(X)
+    res = model.query_top_down([(10.0, 12.0), (10.0, 12.0)], confidence=0.95, level=2)
+    assert res["count"] == 0
+    assert res["mean"] is None
+    assert res["pruned_cells"] > 0
+    assert res["leaf_cells_matched"] == 0
+
+
+def test_query_top_down_guards():
+    """query_top_down phải kiểm tra fit(), confidence, level và shape của rect."""
+    unfit = STING(n_levels=2, factor=2)
+    with pytest.raises(RuntimeError, match="fit"):
+        unfit.query_top_down([(0, 1), (0, 1)])
+
+    model = unfit.fit(np.random.default_rng(0).normal(size=(30, 2)))
+    with pytest.raises(ValueError, match="confidence"):
+        model.query_top_down([(0, 1), (0, 1)], confidence=0.0)
+    with pytest.raises(ValueError, match="confidence"):
+        model.query_top_down([(0, 1), (0, 1)], confidence=1.2)
+    with pytest.raises(ValueError, match="level"):
+        model.query_top_down([(0, 1), (0, 1)], level=5)
+    with pytest.raises(ValueError, match="rect"):
+        model.query_top_down([(0, 1)], level=1)

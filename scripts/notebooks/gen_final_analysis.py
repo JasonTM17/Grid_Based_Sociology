@@ -298,7 +298,19 @@ Mức 0 là một ô chứa toàn bộ điểm. Mức 1 chia mỗi chiều thàn
 trong từng ô. Mức 2 chia thành 16 đoạn; các ô có ít nhất 5 điểm là ô dày, các ô dày
 kề mặt được gom thành cụm, điểm ở ô còn lại là nhiễu."""))
 
-cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/sting_grid_levels.png")))"""))
+cd(nbf.v4.new_code_cell("""display(Image(filename=str(ROOT / "results/figs/sting_grid_levels.png")))
+
+rect_hi = [(0.0, 2.5), (0.0, 2.5)]
+q_rect_808 = sting.query_rect(rect_hi, level=2)
+q_td_808 = sting.query_top_down(rect_hi, confidence=0.95, level=2)
+assert q_td_808["count"] == q_rect_808["count"]
+np.testing.assert_allclose(q_td_808["mean"], q_rect_808["mean"])
+occ_808 = sum(len(sting.cells_[lvl]) for lvl in range(sting.n_levels))
+print(
+    f"Truy vấn top-down trên lưới PAPI 2011–2023 [0; 2,5]²: khớp {q_td_808['count']} điểm "
+    f"(μ = {q_td_808['mean'].round(3)}), duyệt {q_td_808['visited_cells']}/{occ_808} ô có dữ liệu, "
+    f"tỉa bỏ {q_td_808['pruned_cells']} nhánh."
+)"""))
 
 md(nbf.v4.new_markdown_cell("""## 2. So sánh STING, K-means và DBSCAN trên PAPI 2011–2023
 
@@ -794,6 +806,71 @@ with style_context():
     ax_log.set_title(f"3. Day 6 Logistic Sigmoid (nhãn STING)\nBinary Cross-Entropy = {bce_loss:.4f} · Acc = {clf_acc:.3f}", fontsize=10.0)
     ax_log.grid(alpha=0.18)
     ax_log.legend(loc="center left", fontsize=7.6, framealpha=0.92)
+    plt.show()"""))
+
+md(nbf.v4.new_markdown_cell("""### Cải thiện phân loại mất cân bằng nhãn bằng `class_weight='balanced'`
+
+Do cụm lớn chiếm đa số (~80%), mô hình mặc định dễ bỏ sót lớp rìa `0`. Nhóm kiểm chứng trực tiếp phương án cân bằng lớp trên **cùng 6 fold expanding-origin (2017–2022, 738 cặp)** và đối chiếu trên holdout 2023→2024 (59 tỉnh)."""))
+
+cd(nbf.v4.new_code_cell(r"""from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import recall_score
+from sklearn.pipeline import Pipeline
+from scripts.supervised.predict_supervised import expanding_year_splits
+
+clf_tr = clf_pairs[clf_pairs.year_t < 2023].reset_index(drop=True)
+X_ctr, y_ctr = clf_tr[REGRESSION_FEATURES].to_numpy(), clf_tr["y"].to_numpy()
+splits_cv = expanding_year_splits(clf_tr["year_t"].to_numpy(), y_ctr)
+
+bal_specs = (
+    ("LR gốc (mặc định)", lambda: Pipeline([("sc", StandardScaler()), ("m", LogisticRegression(C=1.0, max_iter=3000, random_state=42))])),
+    ("LR balanced (C=0,3)", lambda: Pipeline([("sc", StandardScaler()), ("m", LogisticRegression(C=0.3, class_weight="balanced", max_iter=3000, random_state=42))])),
+    ("RF balanced (depth=6, leaf=2)", lambda: RandomForestClassifier(n_estimators=300, max_depth=6, min_samples_leaf=2, class_weight="balanced", random_state=42, n_jobs=1)),
+)
+bal_rows = []
+for bname, bfactory in bal_specs:
+    cv_mf1 = [
+        f1_score(y_ctr[vi], bfactory().fit(X_ctr[ti], y_ctr[ti]).predict(X_ctr[vi]),
+                 average="macro", labels=[0, 1], zero_division=0)
+        for ti, vi in splits_cv
+    ]
+    bfit = bfactory().fit(X_ctr, y_ctr)
+    bpred = bfit.predict(Xc_te)
+    bal_rows.append((
+        bname,
+        float(np.mean(cv_mf1)),
+        accuracy_score(yc_te, bpred),
+        f1_score(yc_te, bpred, average="macro", labels=[0, 1], zero_division=0),
+        recall_score(yc_te, bpred, pos_label=0),
+    ))
+bal_df = pd.DataFrame(bal_rows, columns=[
+    "Mô hình", "Macro-F1 CV (6 fold)", "Acc holdout", "Macro-F1 holdout", "Recall lớp 0 (nhiễu)",
+])
+show_md(bal_df.round(4).to_markdown(index=False))
+
+with style_context():
+    fig_b, (ax_cv, ax_ho) = plt.subplots(1, 2, figsize=(10.8, 3.8), dpi=150, layout="constrained")
+    x_pos = np.arange(len(bal_df))
+    cols_b = ("#64748B", PALETTE["blue"], PALETTE["green"])
+    bars1 = ax_cv.bar(x_pos, bal_df["Macro-F1 CV (6 fold)"], width=0.52, color=cols_b)
+    ax_cv.bar_label(bars1, fmt="%.3f", padding=3, fontsize=9)
+    ax_cv.set_xticks(x_pos, bal_df["Mô hình"], rotation=12, fontsize=8.5)
+    ax_cv.set_ylim(0.0, 0.66)
+    ax_cv.set_ylabel("Macro-F1 trung bình")
+    ax_cv.set_title("1. Kiểm định 6 fold (2017–2022, 738 cặp)", fontsize=10.2)
+    ax_cv.grid(axis="y", alpha=0.18)
+
+    w_bar = 0.34
+    b_mf1 = ax_ho.bar(x_pos - w_bar / 2, bal_df["Macro-F1 holdout"], width=w_bar, color=PALETTE["blue"], label="Macro-F1 holdout")
+    b_rec = ax_ho.bar(x_pos + w_bar / 2, bal_df["Recall lớp 0 (nhiễu)"], width=w_bar, color=PALETTE["orange"], label="Recall lớp 0 (11 tỉnh rìa)")
+    ax_ho.bar_label(b_mf1, fmt="%.3f", padding=3, fontsize=8.2)
+    ax_ho.bar_label(b_rec, fmt="%.3f", padding=3, fontsize=8.2)
+    ax_ho.set_xticks(x_pos, bal_df["Mô hình"], rotation=12, fontsize=8.5)
+    ax_ho.set_ylim(0.0, 0.72)
+    ax_ho.set_ylabel("Điểm trên holdout 2024 (n = 59)")
+    ax_ho.set_title("2. Hiệu quả khi kiểm chứng holdout 2023→2024", fontsize=10.2)
+    ax_ho.grid(axis="y", alpha=0.18)
+    ax_ho.legend(loc="upper right", fontsize=8.2, framealpha=0.92)
     plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("""## Phụ lục C. Đối chiếu PCI và nghèo GSO

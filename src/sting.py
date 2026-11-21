@@ -217,21 +217,91 @@ class STING:
         level: int | None = None,
     ) -> dict[str, int | np.ndarray | None]:
         """Thống kê gộp của các ô nằm trọn trong ``rect`` = [(lo0, hi0), ...]."""
+        lo, hi, level = self._validate_query(rect, level, caller="query_rect()")
+        matched = [
+            cell
+            for cell in self.cells_[level].values()
+            if np.all(cell.bounds_min >= lo) and np.all(cell.bounds_max <= hi)
+        ]
+        return self._merge_cells(matched)
+
+    def query_top_down(
+        self,
+        rect: Sequence[Sequence[float]] | np.ndarray,
+        confidence: float = 0.95,
+        level: int | None = None,
+    ) -> dict[str, int | np.ndarray | None]:
+        """Truy vấn vùng từ trên xuống (Wang 1997), tỉa nhánh có xác suất nằm trong ``rect`` thấp."""
+        lo, hi, target_level = self._validate_query(rect, level, caller="query_top_down()")
+        if not (0.0 < confidence <= 1.0):
+            raise ValueError(f"confidence phải thuộc (0, 1], nhận {confidence}")
+
+        root = self.cells_[0].get((0,) * self.n_dims_)
+        frontier: list[Cell] = [root] if root is not None else []
+        visited_cells = 0
+        pruned_cells = 0
+
+        for lvl in range(target_level + 1):
+            next_frontier: list[Cell] = []
+            visited_cells += len(frontier)
+            for cell in frontier:
+                if (
+                    np.any(cell.bounds_max < lo)
+                    or np.any(cell.bounds_min > hi)
+                    or np.any(cell.max_ < lo)
+                    or np.any(cell.min_ > hi)
+                ):
+                    pruned_cells += 1
+                    continue
+                inside = np.all(cell.bounds_min >= lo) and np.all(cell.bounds_max <= hi)
+                if lvl < target_level:
+                    p_one = self._cell_rect_prob(cell, lo, hi)
+                    p_any = 1.0 if p_one >= 1.0 else (1.0 - (1.0 - p_one) ** cell.count)
+                    if not inside and p_any < (1.0 - confidence):
+                        pruned_cells += 1
+                        continue
+                    prefix = cell.index
+                    child_map = self.cells_[lvl + 1]
+                    for offsets in itertools.product(range(self.factor), repeat=self.n_dims_):
+                        ckey = tuple(p * self.factor + o for p, o in zip(prefix, offsets, strict=True))
+                        child = child_map.get(ckey)
+                        if child is not None:
+                            next_frontier.append(child)
+                elif inside:
+                    next_frontier.append(cell)
+                else:
+                    pruned_cells += 1
+            frontier = next_frontier
+
+        stats = self._merge_cells(frontier)
+        stats["visited_cells"] = visited_cells
+        stats["pruned_cells"] = pruned_cells
+        stats["leaf_cells_matched"] = len(frontier)
+        return stats
+
+    def _validate_query(
+        self,
+        rect: Sequence[Sequence[float]] | np.ndarray,
+        level: int | None,
+        *,
+        caller: str,
+    ) -> tuple[np.ndarray, np.ndarray, int]:
         if not hasattr(self, "cells_"):
-            raise RuntimeError("Hãy gọi fit(X) trước khi query_rect()")
+            raise RuntimeError(f"Hãy gọi fit(X) trước khi {caller}")
         if level is None:
             level = self.n_levels - 1
         if not (0 <= level < self.n_levels):
             raise ValueError(
                 f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
             )
-        rect = np.asarray(rect, dtype=float)
-        if rect.ndim != 2 or rect.shape != (self.n_dims_, 2):
+        rect_arr = np.asarray(rect, dtype=float)
+        if rect_arr.ndim != 2 or rect_arr.shape != (self.n_dims_, 2):
             raise ValueError(
-                f"rect cần shape ({self.n_dims_}, 2), nhận {rect.shape}"
+                f"rect cần shape ({self.n_dims_}, 2), nhận {rect_arr.shape}"
             )
-        lo, hi = rect[:, 0], rect[:, 1]
+        return rect_arr[:, 0], rect_arr[:, 1], level
 
+    def _merge_cells(self, cells: Sequence[Cell]) -> dict[str, int | np.ndarray | None]:
         total = 0
         origin = np.zeros(self.n_dims_)
         mean_offset = np.zeros(self.n_dims_)
@@ -239,19 +309,18 @@ class STING:
         mins = np.full(self.n_dims_, np.inf)
         maxs = np.full(self.n_dims_, -np.inf)
 
-        for cell in self.cells_[level].values():
-            if np.all(cell.bounds_min >= lo) and np.all(cell.bounds_max <= hi):
-                if total == 0:
-                    origin = cell.mean
-                new_total = total + cell.count
-                weight = cell.count / new_total
+        for cell in cells:
+            if total == 0:
+                origin = cell.mean
+            new_total = total + cell.count
+            weight = cell.count / new_total
 
-                delta = (cell.mean - origin) - mean_offset
-                m2 += cell.count * cell.std ** 2 + total * weight * delta ** 2
-                mean_offset += weight * delta
-                total = new_total
-                mins = np.minimum(mins, cell.min_)
-                maxs = np.maximum(maxs, cell.max_)
+            delta = (cell.mean - origin) - mean_offset
+            m2 += cell.count * cell.std ** 2 + total * weight * delta ** 2
+            mean_offset += weight * delta
+            total = new_total
+            mins = np.minimum(mins, cell.min_)
+            maxs = np.maximum(maxs, cell.max_)
 
         if total == 0:
             return {"count": 0, "mean": None, "std": None, "min": None, "max": None}
@@ -262,6 +331,23 @@ class STING:
             "min": mins,
             "max": maxs,
         }
+
+    @staticmethod
+    def _cell_rect_prob(cell: Cell, lo: np.ndarray, hi: np.ndarray) -> float:
+        """Xác suất xấp xỉ theo phân phối chuẩn các chiều ô rơi vào vùng ``[lo, hi]``."""
+        import math
+
+        prob = 1.0
+        inv_sqrt2 = 1.0 / math.sqrt(2.0)
+        for mu, sigma, low, high in zip(cell.mean, cell.std, lo, hi, strict=True):
+            if sigma <= 0.0:
+                p_dim = 1.0 if low <= mu <= high else 0.0
+            else:
+                cdf_hi = 0.5 * (1.0 + math.erf((high - mu) * inv_sqrt2 / sigma))
+                cdf_lo = 0.5 * (1.0 + math.erf((low - mu) * inv_sqrt2 / sigma))
+                p_dim = max(0.0, min(1.0, cdf_hi - cdf_lo))
+            prob *= p_dim
+        return float(max(0.0, min(1.0, prob)))
 
     def point_cell_index(self, level: int) -> np.ndarray:
         """Chỉ số ô của mỗi điểm tại ``level``, shape (n, d)."""
