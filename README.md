@@ -17,9 +17,9 @@ Toàn bộ file nộp nằm trong [`submissions/`](submissions/). Các notebook 
 |---|---|---|
 | Giữa kỳ | [Slide PPTX](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.pptx) và [notebook](submissions/01-giua-ky/Nhom15_GiuaKy_STING_PAPI.ipynb) | [ZIP giữa kỳ](submissions/Nhom15_GiuaKy_STING_PAPI.zip) |
 | Cuối kỳ | [Báo cáo DOCX](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.docx) và [notebook](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.ipynb) | [ZIP cuối kỳ](submissions/Nhom15_CuoiKy_STING_PAPI.zip) |
-| Bộ tiền xử lý PAPI | [Notebook tiền xử lý](submissions/03-tien-xu-ly-papi/Nhom15_TienXuLy_PAPI.ipynb) | [Mã và dữ liệu tiền xử lý](submissions/03-tien-xu-ly-papi/) |
+| Bộ tiền xử lý PAPI chạy riêng | [Notebook tiền xử lý](submissions/03-tien-xu-ly-papi/Nhom15_TienXuLy_PAPI.ipynb) | [Mã và dữ liệu tiền xử lý](submissions/03-tien-xu-ly-papi/) |
 
-Khi chuyển sang máy khác, giải nén cả ZIP của mốc tương ứng. Slide cuối kỳ dùng khi vấn đáp là tài liệu tùy chọn. [Hướng dẫn](submissions/HUONG-DAN.txt) · [Slide vấn đáp](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
+Mỗi ZIP có `Nhom15_TienXuLy_PAPI.ipynb` cạnh notebook báo cáo. Giải nén cả ZIP của mốc tương ứng để chạy hai notebook cùng mã và dữ liệu trong `tai_lieu_kem/`. Slide cuối kỳ dùng khi vấn đáp là tài liệu tùy chọn. [Hướng dẫn](submissions/HUONG-DAN.txt) · [Slide vấn đáp](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
 
 Slide cuối kỳ trình bày STING và dự báo ở trang 1–13. Trang 7–9 giải thích cách dự báo hai chỉ tiêu, sai số và kết quả đối chiếu trên lưới. Trang 14 đối chiếu PCI, trang 15 ghi nguồn và trang 16 kết thúc.
 

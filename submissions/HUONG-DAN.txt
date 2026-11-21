@@ -10,20 +10,18 @@
   Nhom15_CuoiKy_STING_PAPI.pptx    Slide vấn đáp cuối kỳ
 
 03-tien-xu-ly-papi
-  Nhom15_TienXuLy_PAPI.ipynb  Bài thực hành tiền xử lý
+  Nhom15_TienXuLy_PAPI.ipynb  Bản tiền xử lý dùng khi cần chạy riêng
   data, models, scripts và requirements.txt đi kèm để chạy lại.
 
-Gói Nhom15_GiuaKy_STING_PAPI.zip đặt bản trình chiếu và notebook ngay
-ở cấp đầu của thư mục sau khi giải nén. Thư mục tai_lieu_kem chứa mã nguồn,
-dữ liệu và danh sách thư viện cần cài. Hướng dẫn chi tiết nằm trong
-HUONG_DAN.txt của gói giữa kỳ.
+Gói Nhom15_GiuaKy_STING_PAPI.zip đặt bản trình chiếu, notebook giữa kỳ
+và Nhom15_TienXuLy_PAPI.ipynb ở cấp đầu sau khi giải nén.
 
-Giải nén toàn bộ gói Nhom15_CuoiKy_STING_PAPI.zip để mở báo cáo Word,
-notebook và slide vấn đáp ở cấp đầu của thư mục. Xem HUONG_DAN.txt
-trong gói để chạy lại notebook, dựng bảng PAPI từ Excel gốc và ghép
-các nguồn đối chiếu bằng mã trong tai_lieu_kem/.
-Để chạy quy trình tiền xử lý PAPI trên máy khác, sao chép cả thư mục 03-tien-xu-ly-papi, cài
-requirements.txt trong thư mục đó rồi mở notebook cùng cấp.
+Gói Nhom15_CuoiKy_STING_PAPI.zip đặt báo cáo Word, slide vấn đáp,
+notebook cuối kỳ và Nhom15_TienXuLy_PAPI.ipynb ở cấp đầu.
+
+Giải nén toàn bộ ZIP của mốc cần nộp. Mỗi gói đã kèm 14 tệp Excel gốc,
+bảng tra mã tỉnh và mã chạy trong tai_lieu_kem/. Xem HUONG_DAN.txt trong
+gói để chạy notebook tiền xử lý và notebook báo cáo.
 
 Chạy trong VS Code
 
@@ -34,4 +32,4 @@ Restart Kernel rồi Run All để chạy từ ô đầu.
 Các file rời đã lưu kết quả, có thể đọc hoặc chiếu ngay.
 Bản học có giải thích nằm riêng trong thư mục study của dự án.
 SHA256SUMS.txt ghi mã kiểm tra hai ZIP.
-verification.json ghi kết quả chạy lại từ từng ZIP.
+verification.json ghi kết quả chạy lại hai notebook từ mỗi ZIP.

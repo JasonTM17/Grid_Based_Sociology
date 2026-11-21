@@ -283,10 +283,21 @@ display(pd.DataFrame({
 
 md(nbf.v4.new_markdown_cell("""### 4.3 STING tìm được ba cụm như thế nào?
 
-Tại mức 2, mỗi trục có 4² = 16 khoảng, tạo lưới 16 × 16. Một ô có ít nhất
-**5 quan sát** là ô dày. Các ô dày nối được với nhau qua cạnh tạo thành một
-cụm. Dấu và độ lớn của z-score chỉ xác định tọa độ của điểm. Quy tắc nhiễu
-dựa vào **số điểm trong ô** mà điểm rơi vào.
+1. **Chia lưới và xác định ô.** Tại mức 2, mỗi trục có r = 4² = 16 khoảng
+   bằng nhau. Độ rộng một ô trên trục là **Δ = (z_max − z_min) / r**. Tính vị
+   trí **u = (z − z_min) / Δ** rồi lấy phần nguyên dưới để có chỉ số ô, đếm
+   từ 0. Nếu điểm đúng biên trên, dùng chỉ số cuối r − 1.
+2. **Tìm ô dày.** `STING.fit` đếm và lưu thống kê cho từng ô ở mỗi mức.
+   Tại mức đang xét, một ô là ô dày khi có ít nhất **5 quan sát tỉnh–năm**.
+   Điểm nằm trong ô chưa đạt ngưỡng nhận nhãn −1.
+3. **Nối các ô dày kề cạnh.** Hai ô kề cạnh khi chỉ số trên một trục lệch
+   đúng một đơn vị và chỉ số trên trục kia bằng nhau. `STING.cluster` gán
+   cùng nhãn cho mọi ô dày có thể đi tới nhau qua các cạnh như vậy. Mỗi
+   vùng liên thông là một cụm, kể cả vùng chỉ có một ô dày.
+
+Bảng bên dưới dùng tọa độ z-score của Lạng Sơn năm 2024 ở mục 4.2. Đọc
+từng hàng để thấy phép tính chỉ số theo từng trục, rồi kiểm tra số quan
+sát trong ô và các ô dày kề cạnh để hiểu nhãn cụm.
 
 **Vì sao dùng ngưỡng 5?** Cặp chỉ tiêu, độ mịn và ngưỡng được chọn cùng
 nhau trong khảo sát cấu hình trên dữ liệu đến 2020, đối chiếu độ phủ
@@ -298,10 +309,6 @@ Bản nhóm lưu thống kê ở ba mức rồi chọn một mức để gom cá
 STING gốc lưu cả loại phân phối và dùng khoảng tin cậy để duyệt các
 ô con của ô cha được giữ ở bước truy vấn.
 
-Để tính ô trên một trục, lấy phần nguyên dưới của
-**r × (x − min) / (max − min)** với r là số ô trên trục. Chỉ số bắt đầu
-từ 0 và điểm đúng biên trên rơi vào ô cuối có chỉ số r − 1.
-
 **Phân biệt ba bước lọc và đánh dấu (vì sao tiền xử lý xong vẫn còn nhãn −1):**
 
 | Bước | Tiêu chí | Số lượng trên mẫu PAPI | Xử lý |
@@ -310,10 +317,9 @@ từ 0 và điểm đúng biên trên rơi vào ô cuối có chỉ số r − 1
 | Ngoại lai đơn biến | `\\|z\\| > 3` trên từng trục | `9/869` quan sát | Chỉ đánh dấu, không xóa vì là điểm khảo sát thật trong thang đo PAPI. |
 | Nhiễu STING (`−1`) | Ô lưới `16 × 16` có `< 5` điểm | `171/869` quan sát (`162/171` có `\\|z\\| ≤ 3` cả hai trục) | Đầu ra của thuật toán cho các điểm hợp lệ nằm ở vùng thưa. |
 
-Vì `−1` đo mật độ đồng thời trong ô lưới chứ không phải điểm lỗi trên một trục, kể cả nếu bỏ 9 điểm `|z| > 3` rồi dựng lại lưới trên 860 điểm còn lại, biên `min–max` co lại làm ô nhỏ hơn và vẫn có `173/860` điểm (`20,1%`) rơi vào ô thưa.
-
-Ô dưới in số ô dày và số quan sát trong từng cụm. Hàm thiết lập lưới gọi
-STING.fit để đếm điểm và STING.cluster để gom các ô dày kề cạnh."""))
+Khi bỏ 9 điểm `|z| > 3` rồi dựng lại lưới trên 860 điểm còn lại, biên
+`min–max` co lại làm ô nhỏ hơn. Có `173/860` điểm (`20,1%`) rơi vào ô
+thưa theo lưới mới."""))
 
 cd(nbf.v4.new_code_cell("""grid_model, lab = fit_grid(Xz)
 points_per_cluster = Counter(lab)
@@ -338,26 +344,142 @@ print(f"Nếu loại {z_flag.sum()} điểm |z| > 3 rồi dựng lại lưới t
       f"({trimmed_noise / len(trimmed_lab):.1%}).")
 
 step = (grid_model.bounds_max_ - grid_model.bounds_min_) / grid_width
-bin_indices = np.floor((z_example - grid_model.bounds_min_) / step).astype(int)
+relative_position = (z_example - grid_model.bounds_min_) / step
+bin_indices = np.floor(relative_position).astype(int)
 example_cell = tuple(np.clip(bin_indices, 0, grid_width - 1).tolist())
 np.testing.assert_array_equal(
     example_cell, grid_model.point_cell_index(grid_model.cluster_level_)[example_mask.to_numpy()][0],
 )
-assert grid_model.label_of_.get(example_cell, -1) == lab[example_mask.to_numpy()][0]
+example_label = grid_model.label_of_.get(example_cell, -1)
+assert example_label == lab[example_mask.to_numpy()][0]
+display(pd.DataFrame({
+    "Chỉ tiêu": [feature.removeprefix("sd_").replace("_", ".") for feature in feats],
+    "z-score": z_example,
+    "Biên thấp của lưới": grid_model.bounds_min_,
+    "Độ rộng ô Δ": step,
+    "Vị trí u": relative_position,
+    "Chỉ số ô": example_cell,
+}).round(4))
 print(f"Lạng Sơn 2024 vào ô {example_cell} (đếm từ 0), ô có {cell_stats[example_cell].count} quan sát.")
-print(f"Nhãn cụm của điểm này: {grid_model.label_of_.get(example_cell, -1)}.")"""))
+i, j = example_cell
+adjacent = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
+neighbor_labels = [grid_model.label_of_[key] for key in adjacent if key in grid_model.label_of_]
+print(f"Trong bốn hướng kề cạnh, có {len(neighbor_labels)} ô dày. "
+      f"{neighbor_labels.count(example_label)} ô mang cùng nhãn với ô đang xét.")
+print(f"Nhãn cụm của điểm này: {example_label}.")"""))
+
+md(nbf.v4.new_markdown_cell("""#### 4.3.1 Thử chia lưới theo phân vị
+
+Thử một cách đặt ô khác trên cùng 869 quan sát. Thay tọa độ z-score bằng
+hạng tương đối của từng chỉ tiêu rồi chia lưới 16 × 16. Trên trục phân vị,
+0,8 là vị trí khoảng 80% khi xếp điểm từ thấp đến cao.
+
+Hình trái dùng ngưỡng 5 điểm mỗi ô. Hình phải dùng ngưỡng 3. Một ô có
+4 điểm đạt ngưỡng 3 và được xếp là ô thưa ở lượt dùng ngưỡng 5. Hai hình
+cho thấy kết quả khi đổi cả cách chia lưới và ngưỡng. Mục 4.7 kiểm tra
+riêng ảnh hưởng của ngưỡng trên lưới chia đều.
+
+Ở lượt thử bỏ các điểm có |z| > 3, nhóm tính lại phân vị và dựng lại lưới.
+Code đếm số điểm đổi trạng thái nhiễu trong các quan sát còn lại."""))
+
+cd(nbf.v4.new_code_cell(r"""from matplotlib.patches import Rectangle
+from scripts.common.fig_style import CLUSTER_COLORS, PALETTE, style_context
+
+Xq = pd.DataFrame(Xz).rank(pct=True).to_numpy()
+mq, lq = fit_grid(Xq, min_count=3)
+Xq_trim = pd.DataFrame(Xz[~z_flag]).rank(pct=True).to_numpy()
+_, lq_trim = fit_grid(Xq_trim, min_count=3)
+
+noise_before = lq[~z_flag] == -1
+noise_after = lq_trim == -1
+to_noise = int((~noise_before & noise_after).sum())
+to_cluster = int((noise_before & ~noise_after).sum())
+print(
+    f"Lưới phân vị {grid_width} × {grid_width}, ngưỡng {mq.min_count_}: "
+    f"{int((lq == -1).sum())}/{len(lq)} điểm nhiễu ({(lq == -1).mean():.1%})."
+)
+print(
+    f"Sau khi bỏ {z_flag.sum()} điểm |z| > 3 và dựng lại lưới phân vị: "
+    f"{noise_after.sum()}/{len(lq_trim)} điểm nhiễu ({noise_after.mean():.1%})."
+)
+print(f"Trong các điểm còn lại, {to_noise} điểm chuyển từ cụm sang nhiễu "
+      f"và {to_cluster} điểm chuyển từ nhiễu vào cụm.")
+
+with style_context():
+    fig, (ax_u, ax_q) = plt.subplots(1, 2, figsize=(11.2, 4.35), dpi=150, layout="constrained")
+    for idx_cell, cid in grid_model.label_of_.items():
+        cell = grid_model.cells_[2][idx_cell]
+        ax_u.add_patch(Rectangle(cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
+                                 facecolor="none", edgecolor=CLUSTER_COLORS.get(cid, PALETTE["purple"]), linewidth=0.75, alpha=0.6))
+    ns_u = lab == -1
+    ax_u.scatter(Xz[ns_u, 0], Xz[ns_u, 1], s=14, color=PALETTE["gray"], marker="x", label=f"Nhiễu ({int(ns_u.sum())})", zorder=2)
+    for cid in sorted(set(lab[lab >= 0])):
+        mk = lab == cid
+        ax_u.scatter(Xz[mk, 0], Xz[mk, 1], s=10, color=CLUSTER_COLORS.get(cid, PALETTE["purple"]), alpha=0.72, linewidths=0, label=f"Cụm {cid} ({int(mk.sum())})")
+    ax_u.set_title(f"1. Lưới chia đều (ngưỡng {grid_model.min_count_})\n{grid_model.n_clusters_} cụm · {int(ns_u.sum())}/{len(lab)} nhiễu ({ns_u.mean():.1%})", fontsize=10.5)
+    ax_u.set_xlabel("4.2 Kiểm soát tham nhũng (z-score)")
+    ax_u.set_ylabel("6.1 Y tế công lập (z-score)")
+    ax_u.grid(alpha=0.14)
+    ax_u.legend(loc="upper left", fontsize=7.6, framealpha=0.92, ncols=2)
+
+    for idx_cell, cid in mq.label_of_.items():
+        cell = mq.cells_[2][idx_cell]
+        ax_q.add_patch(Rectangle(cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
+                                 facecolor="none", edgecolor=CLUSTER_COLORS.get(cid % 4, PALETTE["purple"]), linewidth=0.75, alpha=0.55))
+    ns_q = lq == -1
+    ax_q.scatter(Xq[ns_q, 0], Xq[ns_q, 1], s=14, color=PALETTE["gray"], marker="x", label=f"Nhiễu ({int(ns_q.sum())})", zorder=2)
+    ax_q.scatter(Xq[~ns_q, 0], Xq[~ns_q, 1], s=10, color=PALETTE["blue"], alpha=0.72, linewidths=0,
+                 label=f"Vào {mq.n_clusters_} cụm ({int((~ns_q).sum())})")
+    ax_q.set_title(f"2. Lưới phân vị (ngưỡng {mq.min_count_})\n{mq.n_clusters_} cụm · {int(ns_q.sum())}/{len(lq)} nhiễu ({ns_q.mean():.1%})", fontsize=10.5)
+    ax_q.set_xlabel("Phân vị chỉ tiêu 4.2 [0, 1]")
+    ax_q.set_ylabel("Phân vị chỉ tiêu 6.1 [0, 1]")
+    ax_q.grid(alpha=0.14)
+    ax_q.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
+    plt.show()"""))
+
+md(nbf.v4.new_markdown_cell("""#### 4.3.2 Ba mức của lưới STING chính
+
+Hình dưới trở lại tọa độ z-score của lưới ở mục 4.3. Mức 0 có một ô
+bao toàn bộ dữ liệu. Mỗi mức tiếp theo chia ô cha thành 4 phần trên
+mỗi trục, tạo ba mức 1 × 1, 4 × 4 và 16 × 16. Các cụm chính được tạo
+từ những ô dày ở mức 16 × 16."""))
 
 cd(nbf.v4.new_code_cell("""fig = hierarchy_levels_figure(Xz)
 plt.show()"""))
 
-cd(nbf.v4.new_code_cell("""fig = noise_and_trap_figure(Xz, grid_model, lab, title_prefix="PAPI 2011–2024")
-plt.show()"""))
+md(nbf.v4.new_markdown_cell("""#### 4.3.3 Truy vấn vùng từ trên xuống
+
+Ví dụ dùng lại `grid_model` của mục 4.3. Vùng truy vấn lấy z-score từ
+0 đến 2,5 trên cả hai trục. `query_top_down` duyệt từ ô gốc qua các mức
+lưới, tỉa nhánh rời vùng hoặc có xác suất ước lượng thấp. Sau đó, nó
+gộp thống kê của các ô nằm trọn vùng tại mức 16 × 16.
+
+Code đối chiếu số điểm và trung bình với `query_rect`, cách quét trực
+tiếp các ô ở mức 16 × 16 trên cùng lưới."""))
+
+cd(nbf.v4.new_code_cell("""q_rect_box = [(0.0, 2.5), (0.0, 2.5)]
+query_level = grid_model.cluster_level_
+res_full = grid_model.query_rect(q_rect_box, level=query_level)
+res_td = grid_model.query_top_down(q_rect_box, confidence=0.95, level=query_level)
+assert res_td["count"] == res_full["count"]
+np.testing.assert_allclose(res_td["mean"], res_full["mean"])
+total_occ = sum(len(grid_model.cells_[lvl]) for lvl in range(grid_model.n_levels))
+print(
+    f"Truy vấn từ trên xuống tổng hợp {res_td['count']} điểm "
+    f"(z-score trung bình = {res_td['mean'].round(3)})."
+)
+print(
+    f"Duyệt {res_td['visited_cells']}/{total_occ} ô có dữ liệu trên ba mức "
+    f"và tỉa {res_td['pruned_cells']} nhánh hoặc ô biên."
+)"""))
 
 md(nbf.v4.new_markdown_cell("""### 4.4 Vì sao K-means dùng k = 2?
 
-K-means cần chỉ định số cụm k và gán mỗi điểm vào tâm cụm gần nhất. Nhóm
-thử k từ 2 đến 5 trên **cùng 869 điểm sau chuẩn hóa**. Silhouette đo độ
-gần của mỗi điểm với cụm của nó so với cụm gần nhất khác. Điểm càng gần 1,
+Nhóm dùng K-means làm đối chứng để xem cách gán theo tâm chia các vùng
+dày STING thế nào. K-means cần chỉ định số cụm k và gán mỗi điểm vào tâm
+gần nhất. Nhóm thử k từ 2 đến 5 trên **cùng 869 điểm sau chuẩn hóa**.
+Silhouette đo độ gần của mỗi điểm với cụm của nó so với cụm gần nhất khác.
+Điểm càng gần 1,
 sự phân tách càng rõ theo khoảng cách Euclid. Nhóm dùng k có điểm cao nhất
 trong bốn giá trị đã thử để vẽ và đối chiếu.
 
@@ -381,9 +503,6 @@ distances = np.linalg.norm(km.cluster_centers_ - z_example, axis=1)
 assert distances.argmin() == km.labels_[example_mask.to_numpy()][0]
 print("Khoảng cách từ Lạng Sơn 2024 đến các tâm, theo thứ tự gần đến xa: "
       + " và ".join(f"{distance:.4f}" for distance in sorted(distances)))"""))
-
-cd(nbf.v4.new_code_cell("""fig = kmeans_mechanism_and_trap_figure()
-plt.show()"""))
 
 cd(nbf.v4.new_code_cell("""fig = kmeans_elbow_figure(Xz)
 plt.show()"""))
@@ -458,15 +577,6 @@ for k in (2, 3):
           f"K-means k={k} chia các điểm này thành {' + '.join(map(str, sizes))}.")
     display(table)"""))
 
-md(nbf.v4.new_markdown_cell("""**Liên hệ Hierarchical Clustering (Linkage & Dendrogram).** Ngoài STING,
-K-means và DBSCAN, phương pháp phân cụm phân cấp từ dưới lên (Agglomerative)
-đo khoảng cách giữa hai cụm qua 4 quy tắc (`Single`, `Complete`, `Centroid`,
-`Average`) và chọn số cụm bằng đường cắt ngang trên Dendrogram ở khoảng
-trống chiều cao lớn nhất."""))
-
-cd(nbf.v4.new_code_cell("""fig = hc_linkage_and_dendrogram_figure()
-plt.show()"""))
-
 md(nbf.v4.new_markdown_cell("""### 4.6 Cùng thuật toán, trước và sau z-score
 
 **STING.** Bản cài đặt dựng lại biên lưới theo min và max của từng trục.
@@ -535,7 +645,7 @@ cd(nbf.v4.new_code_cell("""fig = scaling_comparison_figure(Xz, grid_model, (
 ))
 plt.show()""", metadata={"tags": ["papi-zscore-comparison"]}))
 
-md(nbf.v4.new_markdown_cell("""### 4.7 Kiểm tra hai cách thay tiêu chí ô dày
+md(nbf.v4.new_markdown_cell("""### 4.7 Độ nhạy theo ngưỡng, mức lưới và quy tắc kề
 
 **Đổi số điểm tối thiểu.** Giữ dữ liệu, trạng thái chuẩn hóa, mức lưới, biên và
 quy tắc kề cạnh. Thử 3, 5 và 8 để quan sát số cụm và tỷ lệ điểm nhiễu thay đổi.
@@ -564,6 +674,13 @@ print(f"Kề 8 hướng (connectivity=2) | {len(levels.label_of_)} ô dày | "
 cd(nbf.v4.new_code_cell("""fig = sensitivity_grid_figure(Xz)
 plt.show()"""))
 
+md(nbf.v4.new_markdown_cell("""Hình tiếp theo minh họa các điểm nhiễu trên
+lưới chính và ảnh hưởng của hai thay đổi là bỏ điểm |z| > 3 hoặc nối thêm
+các ô chạm góc."""))
+
+cd(nbf.v4.new_code_cell("""fig = noise_and_trap_figure(Xz, grid_model, lab, title_prefix="PAPI 2011–2024")
+plt.show()"""))
+
 md(nbf.v4.new_markdown_cell("""**Thử thêm ngưỡng so ô con với ô cha.** Tham số tùy chọn
 **significance_z** của bản cài đặt áp dụng sau khi ô đạt tối thiểu 5 điểm.
 Ô đạt thêm điều kiện nếu có ít nhất một chỉ tiêu thỏa
@@ -589,72 +706,6 @@ assert bool(satisfied.any()) == (example_cell in filtered.label_of_)
 print(f"Ô chứa Lạng Sơn 2024: ô con {example_cell}, ô cha {parent_key}.")
 display(pd.DataFrame({"Chỉ tiêu": feats, "Chênh lệch tuyệt đối": gap,
                       "Mức so sánh": cutoff, "Đạt": satisfied}).round(4))"""))
-
-md(nbf.v4.new_markdown_cell("""**Cải tiến trực tiếp trong STING: truy vấn tỉa nhánh top-down & lưới phân vị.**
-Nhóm cài đặt và kiểm chứng hai cải tiến trực tiếp trên 869 quan sát PAPI:
-
-1. **Truy vấn phân cấp từ trên xuống (`query_top_down`)**: mở rộng từ gốc `1 × 1` xuống `16 × 16`, cắt bỏ sớm các nhánh rời hoặc có xác suất rơi vào vùng truy vấn thấp hơn `1 − confidence` theo phân phối từng ô (Wang 1997).
-2. **Lưới thích nghi theo phân vị (Rank/Quantile Grid)**: thay trục `[min, max]` chia đều bằng hạng phân vị đều `[0, 1]` để loại bỏ ảnh hưởng kéo giãn biên của 9 điểm `|z| > 3`."""))
-
-cd(nbf.v4.new_code_cell(r"""from matplotlib.patches import Rectangle
-from scripts.common.fig_style import CLUSTER_COLORS, PALETTE, style_context
-
-
-q_rect_box = [(0.0, 2.5), (0.0, 2.5)]
-res_full = grid_model.query_rect(q_rect_box, level=2)
-res_td = grid_model.query_top_down(q_rect_box, confidence=0.95, level=2)
-assert res_td["count"] == res_full["count"]
-np.testing.assert_allclose(res_td["mean"], res_full["mean"])
-total_occ = sum(len(grid_model.cells_[lvl]) for lvl in range(grid_model.n_levels))
-print(
-    f"Truy vấn top-down [0; 2,5]²: khớp {res_td['count']} điểm (μ = {res_td['mean'].round(3)}), "
-    f"duyệt {res_td['visited_cells']}/{total_occ} ô có dữ liệu, "
-    f"tỉa bỏ {res_td['pruned_cells']} nhánh/ô biên."
-)
-
-
-Xq = pd.DataFrame(Xz).rank(pct=True).to_numpy()
-mq = STING(n_levels=3, factor=4, min_count=3).fit(Xq)
-lq = mq.cluster(level=2, connectivity=1)
-Xq_trim = pd.DataFrame(Xz[~z_flag]).rank(pct=True).to_numpy()
-lq_trim = STING(n_levels=3, factor=4, min_count=3).fit(Xq_trim).cluster(level=2, connectivity=1)
-print(
-    f"Lưới phân vị (16×16, mc=3): {int((lq == -1).sum())}/{len(lq)} nhiễu ({(lq == -1).mean():.1%}); "
-    f"sau khi bỏ 9 điểm |z|>3: {int((lq_trim == -1).sum())}/{len(lq_trim)} nhiễu "
-    f"(không đẩy thêm điểm lõi ra nhiễu do co biên)."
-)
-
-with style_context():
-    fig, (ax_u, ax_q) = plt.subplots(1, 2, figsize=(11.2, 4.35), dpi=150, layout="constrained")
-    for idx_cell, cid in grid_model.label_of_.items():
-        cell = grid_model.cells_[2][idx_cell]
-        ax_u.add_patch(Rectangle(cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
-                                 facecolor="none", edgecolor=CLUSTER_COLORS.get(cid, PALETTE["purple"]), linewidth=0.75, alpha=0.6))
-    ns_u = lab == -1
-    ax_u.scatter(Xz[ns_u, 0], Xz[ns_u, 1], s=14, color=PALETTE["gray"], marker="x", label=f"Nhiễu ({int(ns_u.sum())})", zorder=2)
-    for cid in sorted(set(lab[lab >= 0])):
-        mk = lab == cid
-        ax_u.scatter(Xz[mk, 0], Xz[mk, 1], s=10, color=CLUSTER_COLORS.get(cid, PALETTE["purple"]), alpha=0.72, linewidths=0, label=f"Cụm {cid} ({int(mk.sum())})")
-    ax_u.set_title(f"1. Lưới đều [min, max] (mc = 5)\n3 cụm · {int(ns_u.sum())}/{len(lab)} nhiễu ({ns_u.mean():.1%})", fontsize=10.5)
-    ax_u.set_xlabel("4.2 Kiểm soát tham nhũng (z-score)")
-    ax_u.set_ylabel("6.1 Y tế công lập (z-score)")
-    ax_u.grid(alpha=0.14)
-    ax_u.legend(loc="upper left", fontsize=7.6, framealpha=0.92, ncols=2)
-
-    for idx_cell, cid in mq.label_of_.items():
-        cell = mq.cells_[2][idx_cell]
-        ax_q.add_patch(Rectangle(cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
-                                 facecolor="none", edgecolor=CLUSTER_COLORS.get(cid % 4, PALETTE["purple"]), linewidth=0.75, alpha=0.55))
-    ns_q = lq == -1
-    ax_q.scatter(Xq[ns_q, 0], Xq[ns_q, 1], s=14, color=PALETTE["gray"], marker="x", label=f"Nhiễu ({int(ns_q.sum())})", zorder=2)
-    ax_q.scatter(Xq[~ns_q, 0], Xq[~ns_q, 1], s=10, color=PALETTE["blue"], alpha=0.72, linewidths=0,
-                 label=f"Vào {mq.n_clusters_} cụm ({int((~ns_q).sum())})")
-    ax_q.set_title(f"2. Lưới thích nghi phân vị (Quantile, mc = 3)\nBiên ổn định khi lọc outlier · {int(ns_q.sum())}/{len(lq)} nhiễu ({ns_q.mean():.1%})", fontsize=10.5)
-    ax_q.set_xlabel("Phân vị chỉ tiêu 4.2 [0, 1]")
-    ax_q.set_ylabel("Phân vị chỉ tiêu 6.1 [0, 1]")
-    ax_q.grid(alpha=0.14)
-    ax_q.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
-    plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("""### 4.8 Gán quan sát năm 2024 lên lưới cố định
 
@@ -763,6 +814,23 @@ Việc diễn giải mức độ thay đổi cần đọc cùng hai giá trị �
   [ARI](https://scikit-learn.org/1.8/modules/generated/sklearn.metrics.adjusted_rand_score.html)
 - Le và cộng sự (2026), dữ liệu đối chiếu các chỉ số nội dung PAPI.
   [Mendeley Data, DOI 10.17632/wbk42j9wc8.1](https://data.mendeley.com/datasets/wbk42j9wc8/1)"""))
+
+md(nbf.v4.new_markdown_cell("""## Phụ lục. Minh họa các phương pháp phân cụm
+
+**K-means.** Hình minh họa cách dời tâm và ảnh hưởng của hình dạng cụm đến
+kết quả gán theo khoảng cách. Kết quả đối chiếu trên dữ liệu PAPI nằm ở
+mục 4.4–4.6."""))
+
+cd(nbf.v4.new_code_cell("""fig = kmeans_mechanism_and_trap_figure()
+plt.show()"""))
+
+md(nbf.v4.new_markdown_cell("""**Phân cụm phân cấp từ dưới lên.** Hình minh họa
+bốn quy tắc đo khoảng cách giữa các cụm (`Single`, `Complete`, `Centroid`,
+`Average`). Đường cắt ngang cây ở phần có khoảng cách gộp tăng mạnh là
+một cách chọn số cụm trên ví dụ minh họa."""))
+
+cd(nbf.v4.new_code_cell("""fig = hc_linkage_and_dendrogram_figure()
+plt.show()"""))
 
 nb["cells"] = cells
 nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}

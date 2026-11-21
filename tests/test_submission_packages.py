@@ -12,7 +12,7 @@ import zipfile
 import pytest
 
 from scripts.deliverables.build_submission_packages import (
-    MIDTERM_FILES, PACKAGES, RAW_REFERENCES, ROOT, SUPPORT, archive_path,
+    MIDTERM_FILES, PACKAGES, PREPROCESSING_NOTEBOOK, RAW_REFERENCES, ROOT, SUPPORT, archive_path,
     build_package, check_member, package_files, verify_package,
 )
 
@@ -24,6 +24,7 @@ def packages(tmp_path_factory):
 
 
 def test_archives_include_consumed_dependencies_and_exclude_private_material(packages):
+    preprocessing = "Nhom15_TienXuLy_PAPI.ipynb"
     for kind, path in packages.items():
         manifest = verify_package(path, kind)
         files = {row["path"] for row in manifest["files"]}
@@ -31,6 +32,13 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
         prefix = f"{SUPPORT}/"
         support_files = {p.removeprefix(prefix) for p in files}
         assert sum(p.endswith(".xlsx") and p.startswith(f"{prefix}data/raw/papi/") for p in files) == 14
+        assert preprocessing in files
+        assert {
+            "scripts/data/build_panel.py", "scripts/common/papi_pred_common.py",
+            "data/raw/mendeley/Replication_package/data/province_crosswalk_63.csv",
+            "data/processed/papi_panel_63_2011_2024.csv", "models/predict_config.json",
+        } <= support_files
+        visible = {f"{name}.pptx", notebook, preprocessing, "HUONG_DAN.txt"}
         audit = "results/papi_observed_grid_2024.csv"
         assert audit in support_files
         if kind == "final":
@@ -44,26 +52,26 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
                 "scripts/common/papi_forecast.py", "results/papi_forecast_provinces_2024.csv",
                 "results/figs/papi_forecast_grid.png", "results/figs/papi_forecast_values.png",
             } <= support_files
-            assert {p for p in files if "/" not in p} == {f"{name}.docx", f"{name}.pptx", notebook, "HUONG_DAN.txt"}
+            visible.add(f"{name}.docx")
             assert not any(p.startswith(("tests/", "scripts/deliverables/", "assets/", "results/candidates_"))
                            for p in support_files)
             assert not {"scripts/common/notebook_checks.py", "results/model_improvement_candidates.md",
                         "results/figs/00_synthetic_sting.png", "results/figs/supervised_regression.png"} & support_files
             assert "pytest.ini" not in support_files
         else:
-            assert {p for p in files if "/" not in p} == {f"{name}.pptx", notebook, "HUONG_DAN.txt"}
             assert {f"{prefix}{p}" for p in (
                 "src/sting.py", "scripts/common/papi_pred_common.py", "scripts/common/fig_style.py",
                 "scripts/common/midterm_clustering.py", "results/preprocessing_audit.csv",
                 "results/figs/predict_2024.png",
                 "data/processed/papi_panel_63_2011_2024.csv", "requirements.txt",
             )} <= files
-            assert not {"models/predict_config.json", "results/predict_all_years.csv",
+            assert not {"results/predict_all_years.csv",
                         "results/metrics.csv", "results/predict_summary.md",
                         "scripts/common/papi_forecast.py"} & support_files
             assert not any(p.endswith((".pkl", ".joblib")) or p.startswith(
                 (f"{prefix}tests/", f"{prefix}reports/", f"{prefix}scripts/supervised/")
             ) for p in files)
+        assert {p for p in files if "/" not in p} == visible
         assert not any(p.startswith((".git", ".codex", ".agentkit", "plans/", "study/", "reports/on-tap/", "data/raw/course/")) for p in support_files)
         assert not {
             "reports/course_requirements.md", "reports/report_format_notes.md",
@@ -75,15 +83,18 @@ def test_archives_include_consumed_dependencies_and_exclude_private_material(pac
         with zipfile.ZipFile(path) as archive:
             guide = archive.read(f"{name}/HUONG_DAN.txt").decode("utf-8")
             assert f"--execute {notebook}" in guide
+            assert f"--execute {preprocessing}" in guide
             assert "Kính gửi Thầy Lê Minh Tân" in guide
             assert archive.read(f"{name}/{notebook}") == (ROOT / "notebooks" / notebook).read_bytes()
+            assert archive.read(f"{name}/{preprocessing}") == (ROOT / "notebooks" / preprocessing).read_bytes()
+            assert b"openpyxl==" in archive.read(f"{name}/{prefix}requirements.txt")
             assert archive.read(f"{name}/{prefix}{audit}") == (ROOT / audit).read_bytes()
             for relative in bundled_references:
                 assert f"{prefix}{relative}" in guide
                 assert archive.read(f"{name}/{prefix}{relative}") == (ROOT / relative).read_bytes()
             if kind == "midterm":
                 top = {p.removeprefix(f"{name}/").split("/")[0] for p in archive.namelist()}
-                assert top == {f"{name}.pptx", notebook, "HUONG_DAN.txt", "tai_lieu_kem"}
+                assert top == visible | {SUPPORT}
                 assert archive.read(f"{name}/{name}.pptx") == (ROOT / "slides/submission.pptx").read_bytes()
             else:
                 assert archive.read(f"{name}/{name}.docx") == (ROOT / "reports/final_report.docx").read_bytes()
@@ -114,11 +125,13 @@ def test_package_keeps_available_papi_pdf_when_replication_zip_is_absent(tmp_pat
 
 
 @pytest.mark.parametrize("milestone", PACKAGES)
-def test_delivered_zip_uses_current_sting_source(milestone):
-    name, _ = PACKAGES[milestone]
-    relative = "src/sting.py"
+def test_delivered_zip_matches_current_sting_source_and_notebooks(milestone):
+    name, notebook = PACKAGES[milestone]
+    sources = ("src/sting.py", f"notebooks/{notebook}", f"notebooks/{PREPROCESSING_NOTEBOOK}")
     with zipfile.ZipFile(ROOT / "submissions" / f"{name}.zip") as archive:
-        assert archive.read(f"{name}/{archive_path(relative, milestone)}") == (ROOT / relative).read_bytes()
+        for relative in sources:
+            member = f"{name}/{archive_path(relative, milestone)}"
+            assert archive.read(member) == (ROOT / relative).read_bytes(), member
 
 
 @pytest.mark.parametrize("name", ["../escape", "/absolute", "root/../escape", "C:/escape", "root\\escape", "root//duplicate"])

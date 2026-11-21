@@ -9,6 +9,7 @@
 *.txt text eol=lf
 *.csv text eol=lf
 *.json text eol=lf
+*.ipynb text eol=lf
 *.geojson text eol=lf
 
 # Binary — không được chuẩn hóa/line-ending

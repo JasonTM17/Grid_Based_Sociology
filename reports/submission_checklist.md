@@ -12,7 +12,7 @@ _Cập nhật ngày 21/11/2026 · Nhóm 15._
 
 ## Đối chiếu môn học (2026-11-12)
 
-- [x] **Bộ tiền xử lý PAPI** — `notebooks/Nhom15_TienXuLy_PAPI.ipynb` là bài riêng đã chạy từ workbook gốc và có bảng kết quả. Hai notebook đồ án dùng panel và bảng kiểm tra tiền xử lý đã lưu.
+- [x] **Bộ tiền xử lý PAPI** — hai ZIP đều có `Nhom15_TienXuLy_PAPI.ipynb` ở cấp đầu để dựng lại bảng từ 14 tệp Excel gốc. Hai notebook đồ án dùng panel và bảng kiểm tra tiền xử lý đã lưu.
 - [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/supervised/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
 - [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/supervised/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).
 - [x] **Q&A theo khái niệm bài giảng** — `reports/on-tap/qa_course_concepts.md`.
@@ -50,11 +50,11 @@ python scripts/deliverables/build_submission_packages.py --verify
 
 Đầu ra tại `submissions/`:
 
-- `Nhom15_GiuaKy_STING_PAPI.zip`: slide 10 trang + notebook giữa kỳ + phụ thuộc.
-- `Nhom15_CuoiKy_STING_PAPI.zip` đặt báo cáo, notebook, slide vấn đáp và hướng dẫn ở cấp đầu. Thư mục `tai_lieu_kem` chứa mã, dữ liệu và thư viện.
+- `Nhom15_GiuaKy_STING_PAPI.zip` đặt slide 10 trang, notebook giữa kỳ, notebook tiền xử lý và hướng dẫn ở cấp đầu.
+- `Nhom15_CuoiKy_STING_PAPI.zip` đặt báo cáo, notebook cuối kỳ, notebook tiền xử lý, slide vấn đáp và hướng dẫn ở cấp đầu. Thư mục `tai_lieu_kem` trong hai ZIP chứa mã, dữ liệu và danh sách thư viện.
 - Bộ dựng và bộ xác minh dùng chung danh mục tệp. Xem số lượng và vai trò của từng tệp trong `tai_lieu_kem/MANIFEST.json`.
 - `SHA256SUMS.txt`: hash hai ZIP; mỗi ZIP có `MANIFEST.json` ghi hash/vai trò từng file.
-- `verification.json`: chỉ sinh sau khi notebook trong cả hai gói giải nén chạy qua.
+- `verification.json` ghi kết quả chạy notebook tiền xử lý và notebook báo cáo trong mỗi gói giải nén.
 
 Verifier xóa output cũ ở bản sao notebook, dùng kernel mới, kiểm tra đếm lần chạy
 và chặn đọc kho mã gốc và Downloads. Gói nộp chứa 14 bảng tính PAPI gốc,
