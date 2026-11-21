@@ -57,63 +57,63 @@ __all__ = [
     "save_png",
 ]
 
-# palette
-# Okabe–Ito (CVD-safe), tối đa 6 màu. Thứ tự hue trùng với palette cụm cũ
-# của repo (xám / xanh dương / cam / xanh lá) để hình cũ và mới cùng ngữ nghĩa.
+
+
+
 PALETTE = {
-    "gray": "#999999",   # xám — điểm nhiễu (nhãn -1)
-    "blue": "#0072B2",   # xanh dương — cụm 0
-    "orange": "#E69F00",  # cam — cụm 1
-    "green": "#009E73",   # xanh lá — cụm 2
-    "sky": "#56B4E9",     # xanh da trời — chuỗi phụ thứ 4
-    "purple": "#CC79A7",  # hồng tím — chuỗi phụ thứ 5
+    "gray": "#999999",
+    "blue": "#0072B2",
+    "orange": "#E69F00",
+    "green": "#009E73",
+    "sky": "#56B4E9",
+    "purple": "#CC79A7",
 }
-# Vòng màu mặc định: chuỗi dữ liệu trước, xám (nhiễu) sau cùng.
+
 COLOR_CYCLE = [
     PALETTE["blue"], PALETTE["orange"], PALETTE["green"],
     PALETTE["sky"], PALETTE["purple"], PALETTE["gray"],
 ]
-# Đổi nhãn cụm -> màu. Khớp ngữ nghĩa với external_validation.py:60.
+
 CLUSTER_COLORS = {
     -1: PALETTE["gray"],
     0: PALETTE["blue"],
     1: PALETTE["orange"],
     2: PALETTE["green"],
 }
-# Nhãn tiếng Việt cho cụm; khớp ngữ nghĩa external_validation.py:59
-# (viết thường "cụm {k}" như hình hiện có, giữ dấu gạch ngang en-dash).
+
+
 CLUSTER_LABELS = {-1: "nhiễu (–1)", 0: "cụm 0", 1: "cụm 1", 2: "cụm 2"}
 
-# Nhãn trục tiếng Việt thay cho "longitude"/"latitude" (run_analysis.py:246-247).
+
 AX_KINH_DO = "Kinh độ"
 AX_VI_DO = "Vĩ độ"
 
-# Đơn vị/thang đo đã đối chiếu với dữ liệu:
-# - "papi": thang 1-10 của d1..d8 xác nhận theo data/processed/
-#   papi_panel_scale_metadata.csv (cột thang_2011_2020/thang_2021_2024).
-#   CHỈ dùng cho d1..d8; các cột sd_* CHƯA đối chiếu workbook, không gắn thang.
-# - "pci": thang 0-100 như external_validation.py:165.
+
+
+
+
+
 UNIT_LABELS = {
     "papi": "thang điểm 1–10",
     "pci": "thang 0–100",
 }
 
-# kích thước
+
 DEFAULT_DPI = 200
-MIN_DPI = 200  # chuẩn repo: PNG lưu ra phải >= 200 DPI
-# "docx":  6.5 inch rộng — khớp lề khổ A4 của reports/final_report.docx.
-# "slide": 9 x 5.0625 inch — tỉ lệ 16:9 cho slides/final.pptx.
+MIN_DPI = 200
+
+
 FIG_SIZE_IN = {
     "docx": (6.5, 4.3),
     "slide": (9.0, 5.0625),
 }
-SOURCE_FONTSIZE = 8  # dòng nguồn nhỏ hơn chú thích nhưng vẫn đọc được khi in
+SOURCE_FONTSIZE = 8
 
-# rcParams
+
 RC = {
     "font.family": "sans-serif",
-    # DejaVu Sans đi kèm matplotlib, phủ đủ ký tự tiếng Việt (kiểm chứng
-    # bằng hình mẫu); các phông sau chỉ là dự phòng khi có sẵn.
+
+
     "font.sans-serif": ["DejaVu Sans", "Segoe UI", "Arial", "Noto Sans"],
     "font.size": 10,
     "figure.titlesize": 13,
@@ -155,7 +155,7 @@ def style_context() -> Iterator[None]:
         mpl.rcParams.update(old)
 
 
-# helper
+
 def new_fig(
     target: Optional[str] = "docx", **subplots_kw: object
 ) -> tuple["mpl.figure.Figure", "mpl.axes.Axes"]:
@@ -164,7 +164,7 @@ def new_fig(
     ``target``: ``"docx"`` (6.5 x 4.3 inch), ``"slide"`` (16:9) hoặc ``None``
     (kích thước mặc định matplotlib — dùng cho hình dọc như bản đồ tỉnh).
     """
-    import matplotlib.pyplot as plt  # import muộn để không chọn backend sớm
+    import matplotlib.pyplot as plt
 
     if target is None:
         return plt.subplots(**subplots_kw)
@@ -198,7 +198,7 @@ def add_source(
     Nên gọi TRƯỚC ``tight_layout`` và chừa lề dưới, ví dụ
     ``fig.tight_layout(rect=(0, 0.05, 1, 1))`` để chữ không đè nhãn trục.
     """
-    if hasattr(fig, "get_figure"):  # Axes -> Figure
+    if hasattr(fig, "get_figure"):
         fig = fig.get_figure()
     parts = [f"Nguồn: {source}"]
     if retrieved:

@@ -31,7 +31,7 @@ from sklearn.preprocessing import StandardScaler
 from scripts.common.fig_style import PALETTE, style_context
 from scripts.common.midterm_clustering import (
     FEATURES, GRID, THRESHOLDS, K_CANDIDATES, KMEANS_OPTIONS, DBSCAN_OPTIONS,
-    fit_grid, comparison_figure, raw_dbscan_radius,
+    fit_grid, comparison_figure, raw_dbscan_radius, reference_grid_assignments, sting_steps_figure,
 )
 from scripts.common.papi_pred_common import load_panel
 from sting import STING
@@ -46,8 +46,9 @@ def _read_results_csv(name: str) -> list[dict[str, str]]:
         return list(csv.DictReader(f))
 
 
-# Tính trên cùng mẫu 2011–2024 và với cùng tham số như notebook giữa kỳ.
-PAPI_COMPLETE = load_panel().dropna(subset=FEATURES)
+
+PAPI_PANEL = load_panel()
+PAPI_COMPLETE = PAPI_PANEL.dropna(subset=FEATURES)
 PAPI_COUNT = len(PAPI_COMPLETE)
 PAPI_RAW = PAPI_COMPLETE[list(FEATURES)].to_numpy()
 PAPI_SCALER = StandardScaler().fit(PAPI_RAW)
@@ -68,6 +69,8 @@ DB_RAW = DBSCAN(eps=DB_EPS_RAW, min_samples=DBSCAN_OPTIONS['min_samples']).fit_p
 DB_NOISE_CHANGED = int(((DB_RAW == -1) != (DB_LABELS == -1)).sum())
 COMMON = (PAPI_LABELS >= 0) & (KM_MODEL.labels_ >= 0) & (DB_LABELS >= 0)
 N_COMMON = int(COMMON.sum())
+DBSCAN_NOISE = int((DB_LABELS == -1).sum())
+BOTH_NOISE = int(((PAPI_LABELS == -1) & (DB_LABELS == -1)).sum())
 LARGEST = Counter(PAPI_LABELS[PAPI_LABELS >= 0]).most_common(1)[0][0]
 
 RAW_GRID, RAW_LABELS = fit_grid(PAPI_RAW)
@@ -83,7 +86,7 @@ for threshold in THRESHOLDS:
     trial, _ = fit_grid(PAPI_Z, min_count=threshold)
     SENSITIVITY[threshold] = trial.n_clusters_
 
-# Số đo tiền xử lý — đọc từ audit Day 4, không gõ tay.
+
 AUDIT = _read_results_csv("preprocessing_audit.csv")
 
 
@@ -126,7 +129,7 @@ PP_FACTS = (
     f"{N_OUT} ô |z|>{Z_OUT} chỉ đánh dấu, không xóa"
 )
 
-# Demo tổng hợp — tái lập test_two_blobs (assert khớp hình 00_synthetic_sting.png)
+
 _X_SYN, _Y_SYN = make_blobs(
     n_samples=240, centers=[(-6, -6), (6, 6)], cluster_std=0.6, random_state=42
 )
@@ -381,7 +384,7 @@ def pic_bytes(slide, bio: BytesIO, x, y, w=None, h=None):
     slide.shapes.add_picture(bio, Inches(x), Inches(y), **kw)
 
 
-# 1 — Bìa + thesis
+
 s = slide_new()
 rect(s, 0, 0, SW, SH, NAVY)
 rect(s, 0, SH - 0.18, SW, 0.18, GOLD)
@@ -414,7 +417,7 @@ note(
     "và tạo cụm. Nhóm cũng đã chuẩn bị dữ liệu PAPI để minh họa thêm phần ứng dụng.",
 )
 
-# 2 — Bài toán & dữ liệu
+
 s = slide_new()
 header(s, "CHỦ ĐỀ VÀ DỮ LIỆU", "Grid-based clustering, STING và dữ liệu PAPI", 2)
 bullets(
@@ -442,7 +445,7 @@ text(
     [(f"z = (x − μ) / σ. Tính theo từng chỉ tiêu trên {PAPI_COUNT} quan sát đủ dữ liệu.", 12.5, False, GREY)],
 )
 
-# Dải tiền xử lý Day 4 — thứ tự dạy học + số đo audit, đọc từ preprocessing_audit.csv.
+
 rect(s, 0.55, 5.7, 12.23, 1.2, LIGHT)
 text(s, 0.72, 5.73, 11.8, 0.38, [
     ("TIỀN XỬ LÝ DỮ LIỆU", 12, True, TEAL),
@@ -475,10 +478,13 @@ note(
     "trong notebook ghi cả lý do và số quan sát tham chiếu của từng ô thưa. "
     f"Tính trung bình và độ lệch chuẩn của từng chỉ tiêu trên {PAPI_COUNT} quan sát đủ dữ liệu. "
     "Điểm z bằng 0 là trung bình, điểm z bằng +1 cao hơn trung bình một độ lệch chuẩn. "
-    "Notebook cho phép kiểm lại phép tính từ điểm PAPI gốc của Lạng Sơn năm 2024.",
+    "Notebook cho phép kiểm lại phép tính từ điểm PAPI gốc của Lạng Sơn năm 2024. "
+    "Nếu thầy hỏi sao lọc rồi mà vẫn nhiễu: tiền xử lý chỉ loại 13/882 dòng thiếu chỉ tiêu, "
+    "còn 869 điểm đều hợp lệ trong thang 0,25–2,5; chỉ 9/869 điểm có |z| > 3, trong khi "
+    "162/171 điểm nhãn −1 của STING nằm gọn trong khung |z| ≤ 3 nhưng ở ô thưa dưới 5 điểm.",
 )
 
-# 3 — Các mức lưới
+
 s = slide_new()
 header(s, "LƯỚI THỐNG KÊ", "Lưới từ thô đến mịn", 3)
 pic_bytes(s, _sting_hierarchy_figure_png(_syn_model, _X_SYN), 0.55, 1.32, w=SW - 1.1)
@@ -500,7 +506,7 @@ note(
     "Wang, Yang & Muntz (VLDB 1997).",
 )
 
-# 4 — Quy tắc gom cụm
+
 s = slide_new()
 header(s, "CƠ CHẾ", "Biến thể STING tạo cụm từ các ô dày", 4)
 steps = [
@@ -510,27 +516,35 @@ steps = [
 ]
 for i, (title, rule, description) in enumerate(steps):
     x = 0.6 + i * 4.12
-    rect(s, x, 1.67, 3.86, 3.42, LIGHT)
-    text(s, x + 0.2, 1.89, 3.46, 0.5, [(title, 20, True, TEAL)])
-    rect(s, x + 0.23, 2.69, 3.4, 0.7, WHITE)
-    text(s, x + 0.23, 2.8, 3.4, 0.46, [(rule, 19, True, NAVY)], align=PP_ALIGN.CENTER)
-    text(s, x + 0.2, 3.73, 3.46, 1.16, [(description, 17, False, INK)])
-text(s, 0.63, 5.44, 12.04, 0.55, [
-    ("Điểm trong ô thưa nhận nhãn −1 (nhiễu).", 19, True, NAVY),
+    rect(s, x, 1.30, 3.86, 1.78, LIGHT)
+    text(s, x + 0.16, 1.39, 3.54, 0.34, [(title, 15, True, TEAL)])
+    rect(s, x + 0.20, 1.77, 3.46, 0.38, WHITE)
+    text(s, x + 0.20, 1.81, 3.46, 0.32, [(rule, 14, True, NAVY)], align=PP_ALIGN.CENTER)
+    text(s, x + 0.16, 2.21, 3.54, 0.80, [(description, 13, False, INK)])
+step_fig = sting_steps_figure(figsize=(12.2, 2.95), dpi=200)
+step_bio = BytesIO()
+step_fig.savefig(step_bio, format="png", dpi=200, facecolor="white")
+plt.close(step_fig)
+step_bio.seek(0)
+pic_bytes(s, step_bio, 0.96, 3.16, w=11.41)
+text(s, 0.63, 6.02, 12.04, 0.40, [
+    ("Điểm trong ô thưa nhận nhãn −1 (nhiễu).", 16.5, True, NAVY),
 ])
-text(s, 0.63, 6.14, 12.04, 0.55, [
-    ("STING gốc còn lưu loại phân phối và lọc ô từ trên xuống theo độ tin cậy.", 16, False, GREY),
+text(s, 0.63, 6.46, 12.04, 0.42, [
+    ("STING gốc còn lưu loại phân phối và lọc ô từ trên xuống theo độ tin cậy.", 14.5, False, GREY),
 ])
 note(
     s,
     "Trong cài đặt của nhóm, một ô được xem là dày khi số điểm trong ô đạt min_count. "
     "Tại mức lưới đã chọn, chương trình duyệt từ một ô dày sang các ô dày chung cạnh "
     "cho đến khi hết ô có thể đi tới. Các ô đã duyệt tạo thành một cụm. "
+    "Hình bốn bước bên dưới minh họa đầy đủ quy trình từ 15 điểm thô đến chia lưới 3×3, "
+    "chọn ô dày (≥ 3), gắn nhãn −1 cho ô thưa (1 điểm) và nối kề 4 hướng (chạm góc không nối). "
     "Điểm trong ô thưa nhận nhãn nhiễu −1. Đây là biến thể STING dùng ngưỡng số đếm. "
     "STING gốc còn mô hình hóa phân phối và dùng kiểm định thống kê để duyệt lưới từ trên xuống.",
 )
 
-# 5 — Đọc một lưới mẫu
+
 s = slide_new()
 header(s, "VÍ DỤ", "Đọc cụm từ bảng đếm 3 × 3", 5)
 text(s, 0.85, 1.43, 6.1, 0.45, [("Số trong ô là số điểm", 17, True, NAVY)])
@@ -564,7 +578,7 @@ note(
     "chúng thuộc hai cụm khác nhau. Điểm trong ô chứa 1 điểm nhận nhãn nhiễu.",
 )
 
-# 6 — Kiểm tra trên dữ liệu giả lập
+
 s = slide_new()
 header(s, "DỮ LIỆU GIẢ LẬP", "Đối chiếu kết quả với hai cụm đã biết", 6)
 pic(s, "00_synthetic_sting.png", 0.55, 1.55, h=4.65)
@@ -584,7 +598,7 @@ note(
     "Phép thử này kiểm tra cách cài đặt trên ví dụ có nhãn tham chiếu.",
 )
 
-# 7 — Ứng dụng PAPI
+
 s = slide_new()
 header(s, "ỨNG DỤNG", "Cùng dữ liệu PAPI, hai cách tạo cụm", 7)
 text(s, 0.65, 1.26, 12.0, 0.34, [
@@ -609,7 +623,7 @@ note(
     "Giá trị z thể hiện khoảng cách tới trung bình của chỉ tiêu theo đơn vị độ lệch chuẩn.",
 )
 
-# 8 — Đối chiếu trên cùng nhóm điểm
+
 s = slide_new()
 header(s, "ĐÁNH GIÁ", f"Vì sao STING có {PAPI_GRID.n_clusters_} cụm, K-means dùng k = {BEST_K}?", 8)
 text(s, 0.6, 1.37, 12.16, 0.34, [
@@ -671,14 +685,16 @@ note(
     f"Trên {PAPI_COUNT} điểm, các kết quả K-means khi dò k là "
     + ", ".join(f"k={k} đạt {score:.4f}" for k, score in KM_SCORES.items())
     + f". Bảng trên slide giữ các nhãn đã có và tính silhouette Euclid trên cùng {N_COMMON} điểm "
-      "được cả STING, K-means và DBSCAN gán cụm. Cột số cụm và nhiễu lấy trên mẫu đầy đủ. "
+      f"được cả STING, K-means và DBSCAN gán cụm. Trong {PAPI_COUNT} điểm, có {PAPI_NOISE} nhiễu STING, "
+      f"{DBSCAN_NOISE} nhiễu DBSCAN và {BOTH_NOISE} điểm bị cả hai gắn nhãn nhiễu. "
+      f"Trừ hợp của hai tập nhiễu được {N_COMMON} điểm. Cột số cụm và nhiễu lấy trên mẫu đầy đủ. "
       "K-means k=3 là đối chứng cùng số cụm với STING. Bảng chéo trong notebook cho thấy cách chia khác "
       "kể cả khi cùng có ba cụm. DBSCAN dùng ε=0,2 trên tọa độ z-score, với tối thiểu 5 điểm "
       "trong lân cận tính cả điểm đang xét. Silhouette mô tả hình học trên phần giao. "
       "Tỷ lệ nhiễu và kích thước cụm cho thấy phần còn lại của dữ liệu.",
 )
 
-# 9 — Sơ đồ tác động của z-score
+
 s = slide_new()
 header(s, "CHUẨN HÓA", "Z-score thay đổi điều gì?", 9)
 rect(s, 2.74, 1.37, 7.86, 0.68, TEAL)
@@ -734,20 +750,29 @@ note(
     "với trục có độ lệch chuẩn dương. K-means dùng khoảng cách đến tâm, ghép tên cụm 0/1 trước "
     "khi đếm điểm đổi nhóm. DBSCAN chạy với min_samples = 5. Vòng ε gốc có cùng diện tích với elip "
     "tương ứng của ε z nhưng khác hình dạng. Mục 4.6 hiển thị nhãn của cả hai lượt trên cùng tọa độ z. "
-    f"Khảo sát thêm chỉ thay ngưỡng STING: {threshold_line}. Xem chi tiết ở mục 4.7.",
+    f"Khảo sát ngưỡng STING. {threshold_line}. Mục 4.7 cũng giữ ngưỡng 5 "
+    "và đổi riêng mức lưới để xem số cụm và số điểm nhiễu.",
 )
 
-# 10 — Kết luận
+
 s = slide_new()
 header(s, "KẾT LUẬN", "Kết quả phân cụm mô tả với STING", 10)
 assigned = PAPI_COUNT - PAPI_NOISE
+assignments, _ = reference_grid_assignments(PAPI_PANEL, reference_year=2023)
+observed_2024 = assignments.loc[assignments.year.eq(2024)]
+clustered_2024 = observed_2024.loc[observed_2024.cluster.ge(0)]
+outside_2024 = int(observed_2024.cluster.eq(-1).sum())
+eligible_2024 = observed_2024.cluster.count()
+occupied_cells = clustered_2024.grid_cell.nunique()
+represented_clusters = clustered_2024.cluster.nunique()
 bullets(
     s, 0.55, 1.5, 12.0, 2.4,
     [
         ("Cài đặt.", "STING chia lưới, lưu thống kê ô và gom các ô dày liên thông."),
         ("PAPI 2011–2024.", f"Cụm lớn chứa {PAPI_SIZES[0] / assigned:.0%} số điểm được gán cụm."),
         ("Phạm vi.", "Kết quả mô tả hai chỉ tiêu. Số cụm và tỷ lệ nhiễu phụ thuộc ngưỡng ô dày."),
-        ("Mở rộng.", "Mục 4.8 dự báo hai điểm PAPI 2024 rồi đối chiếu trên lưới dựng đến 2023."),
+        ("Quan sát 2024.", f"{len(clustered_2024)}/{eligible_2024} tỉnh nằm ở {occupied_cells} ô dày "
+         f"thuộc {represented_clusters} cụm trên lưới 2011–2023."),
     ],
     size=16, gap_pt=16,
 )
@@ -771,6 +796,13 @@ note(
     "Ba cụm có kích thước chênh lệch lớn. Trên cùng nhóm điểm đã vào cụm, silhouette đo độ gọn "
     "và tách biệt theo Euclid. Đây là các nhóm quan sát tỉnh–năm, "
     "với kết quả phụ thuộc cách chọn chỉ tiêu, kích thước ô và ngưỡng mật độ. "
+    "Mục 4.8 lấy hai chỉ tiêu đã quan sát năm 2024 và giữ nguyên lưới dựng từ 2011–2023. "
+    f"Có {outside_2024} tỉnh đủ dữ liệu nằm ngoài vùng dày — cả 13 tỉnh đều có |z| ≤ 3 "
+    "(tối đa 2,13 tại Tây Ninh) và nằm trong ô có dưới 5 điểm tham chiếu, gồm cả tỉnh điểm cao "
+    "như Hà Tĩnh, Bình Thuận, Quảng Ninh, Tây Ninh. Nếu xóa 9 điểm |z| > 3 của mẫu 869 rồi dựng lại "
+    "lưới thì biên min–max co lại và vẫn sinh 173/860 điểm nhiễu (20,1%). Bảng theo mã tỉnh cho biết "
+    "trường hợp đổi ô hoặc đổi trạng thái qua hai năm. Quảng Ninh và Bình Dương thiếu điểm 2023, "
+    "nên số tỉnh ghép hai năm là 59. Số đếm ô của Lạng Sơn là số quan sát tham chiếu tích lũy. "
     "Nguồn phương pháp là Wang, Yang và Muntz, VLDB 1997. Nguồn dữ liệu là PAPI "
     "và gói đối chiếu Le cùng cộng sự, DOI 10.17632/wbk42j9wc8.1.",
 )

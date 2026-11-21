@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
+from matplotlib.patches import FancyArrowPatch, Rectangle
+from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
 
 from scripts.common.fig_style import CLUSTER_COLORS, PALETTE, style_context
-from scripts.common.papi_pred_common import FEATURE_LABELS
+from scripts.common.papi_pred_common import FEATURE_LABELS, describe_grid_assignment
 from sting import STING
 
 FEATURES = ("sd_4_2", "sd_6_1")
@@ -28,6 +31,15 @@ def fit_grid(
                   significance_z=significance_z).fit(points)
     labels = model.cluster(level=GRID["cluster_level"], connectivity=GRID["connectivity"])
     return model, labels
+
+
+def reference_grid_assignments(panel: pd.DataFrame, reference_year: int) -> tuple[pd.DataFrame, int]:
+    """Gán hai năm liên tiếp lên lưới dựng từ dữ liệu đến hết năm tham chiếu."""
+    scores = panel.loc[panel.year.le(reference_year), list(FEATURES)].dropna()
+    scaler = StandardScaler().fit(scores)
+    grid, _ = fit_grid(scaler.transform(scores))
+    recent = panel.loc[panel.year.isin([reference_year, reference_year + 1])]
+    return describe_grid_assignment(recent, FEATURES, scaler, grid), len(scores)
 
 
 def clustered_silhouette(points: np.ndarray, labels: np.ndarray) -> float:
@@ -120,4 +132,342 @@ def comparison_figure(points: np.ndarray, model: STING, labels: np.ndarray, kmea
         km_ax.set_title(f"K-means · k = {kmeans.n_clusters}")
         for ax in (grid_ax, km_ax):
             ax.legend(loc="upper left", ncols=2, frameon=True, framealpha=0.95, fontsize=9)
+        return fig
+
+
+def sting_steps_figure(figsize: tuple[float, float] = (12.2, 3.15), dpi: int = 160):
+    """Vẽ 4 bước STING trên đồ thị 2D cho ví dụ lưới 3×3 (15 điểm, min_count=3)."""
+    counts = np.array([[4, 3, 0], [1, 0, 4], [0, 0, 3]])
+    offsets = {
+        1: [(0.38, 0.36)],
+        3: [(0.24, 0.28), (0.62, 0.28), (0.43, 0.58)],
+        4: [(0.24, 0.24), (0.60, 0.24), (0.24, 0.56), (0.60, 0.56)],
+    }
+    pts_list: list[tuple[float, float]] = []
+    cell_of_pt: list[tuple[int, int]] = []
+    for row in range(3):
+        cell_y = 2 - row
+        for col in range(3):
+            cnt = int(counts[row, col])
+            for dx, dy in offsets.get(cnt, ()):
+                pts_list.append((col + dx, cell_y + dy))
+                cell_of_pt.append((col, cell_y))
+    pts = np.asarray(pts_list, dtype=float)
+    pt_cells = np.asarray(cell_of_pt, dtype=int)
+
+    model = STING(n_levels=2, factor=3, min_count=3).fit(pts)
+    labels = model.cluster(level=1, connectivity=1)
+    assert model.n_clusters_ == 2 and int((labels == -1).sum()) == 1
+
+    titles = (
+        "1. Điểm đầu vào (n = 15)",
+        "2. Phủ lưới 3×3 & đếm ô",
+        "3. Lọc ô dày (count ≥ 3)",
+        "4. Nối kề 4 hướng → 2 cụm",
+    )
+    teal_hi = "#D4E8EA"
+    blue_hi = "#DBE8F4"
+    gold_hi = "#FDE8BA"
+    empty_hi = "#F3F5F7"
+
+    with style_context():
+        fig, axes = plt.subplots(
+            1, 4, figsize=figsize, dpi=dpi, sharex=True, sharey=True, layout="constrained"
+        )
+        for step_idx, (ax, title) in enumerate(zip(axes, titles, strict=True)):
+            ax.set_xlim(0.0, 3.0)
+            ax.set_ylim(0.0, 3.0)
+            ax.set_aspect("equal", adjustable="box")
+            ax.set_xticks([0, 1, 2, 3])
+            ax.set_yticks([0, 1, 2, 3])
+            ax.tick_params(labelsize=8)
+            ax.set_title(title, fontsize=10.5, pad=6)
+
+            if step_idx >= 1:
+                for row in range(3):
+                    cy = 2 - row
+                    for col in range(3):
+                        cnt = int(counts[row, col])
+                        if step_idx == 1:
+                            fill = "#EFF6F9" if cnt > 0 else "#FFFFFF"
+                        elif step_idx == 2:
+                            fill = teal_hi if cnt >= 3 else (gold_hi if cnt > 0 else empty_hi)
+                        else:
+                            if (col, cy) in ((0, 2), (1, 2)):
+                                fill = teal_hi
+                            elif (col, cy) in ((2, 1), (2, 0)):
+                                fill = blue_hi
+                            elif cnt > 0:
+                                fill = gold_hi
+                            else:
+                                fill = empty_hi
+                        ax.add_patch(
+                            Rectangle(
+                                (col, cy), 1.0, 1.0,
+                                facecolor=fill, edgecolor="#5D748A", linewidth=0.95, zorder=1,
+                            )
+                        )
+                        txt_col = "#0F2B46" if cnt >= 3 else ("#8A5A00" if cnt > 0 else "#9AA5B1")
+                        ax.text(
+                            col + 0.80, cy + 0.80, str(cnt),
+                            ha="center", va="center", fontsize=10.5, fontweight="bold",
+                            color=txt_col,
+                            bbox=dict(boxstyle="round,pad=0.16", fc="white", ec="none", alpha=0.82),
+                            zorder=3,
+                        )
+            else:
+                ax.grid(alpha=0.22, linestyle=":")
+
+            if step_idx < 3:
+                if step_idx == 2:
+                    dense_mask = np.array([counts[2 - cy, cx] >= 3 for cx, cy in pt_cells])
+                    ax.scatter(pts[dense_mask, 0], pts[dense_mask, 1], s=44,
+                               color=PALETTE["blue"], edgecolors="white", linewidths=0.7, zorder=4)
+                    ax.scatter(pts[~dense_mask, 0], pts[~dense_mask, 1], s=55,
+                               color=PALETTE["gray"], marker="X", zorder=4)
+                    ax.text(0.46, 1.13, "ô thưa → −1", ha="center", va="bottom",
+                            fontsize=8, color="#8A5A00", fontweight="bold", zorder=5)
+                else:
+                    ax.scatter(pts[:, 0], pts[:, 1], s=44,
+                               color="#1E3D5E", edgecolors="white", linewidths=0.7, zorder=4)
+                    if step_idx == 1:
+                        ax.text(2.50, 2.38, "ô lưu:\ncount, μ, σ,\nmin, max",
+                                ha="center", va="center", fontsize=7.5, color="#4A5D70", zorder=4)
+            else:
+                grp_a = np.array([tuple(c) in ((0, 2), (1, 2)) for c in pt_cells])
+                grp_b = np.array([tuple(c) in ((2, 1), (2, 0)) for c in pt_cells])
+                noise_m = ~(grp_a | grp_b)
+                ax.scatter(pts[grp_a, 0], pts[grp_a, 1], s=46, color=PALETTE["green"],
+                           edgecolors="white", linewidths=0.7, zorder=4)
+                ax.scatter(pts[grp_b, 0], pts[grp_b, 1], s=46, color=PALETTE["blue"],
+                           edgecolors="white", linewidths=0.7, zorder=4)
+                ax.scatter(pts[noise_m, 0], pts[noise_m, 1], s=60, color=PALETTE["gray"],
+                           marker="X", zorder=5)
+                for (x0, y0), (x1, y1), col_ar in (
+                    ((0.76, 2.66), (1.24, 2.66), PALETTE["green"]),
+                    ((2.50, 1.22), (2.50, 0.78), PALETTE["blue"]),
+                ):
+                    ax.add_patch(FancyArrowPatch(
+                        (x0, y0), (x1, y1), arrowstyle="<->", mutation_scale=11,
+                        linewidth=1.5, color=col_ar, zorder=5,
+                    ))
+                ax.text(1.00, 2.06, "Cụm A (7)", ha="center", va="bottom",
+                        fontsize=8.2, fontweight="bold", color="#0F5C48", zorder=5)
+                ax.text(2.44, 0.14, "Cụm B (7)", ha="center", va="bottom",
+                        fontsize=8.2, fontweight="bold", color=PALETTE["blue"], zorder=5)
+                ax.text(0.46, 1.13, "Nhiễu (−1)", ha="center", va="bottom",
+                        fontsize=8, fontweight="bold", color="#5A5A5A", zorder=5)
+                ax.annotate(
+                    "Chạm góc\n(≠ nối)",
+                    xy=(2.0, 2.0), xytext=(2.46, 2.34),
+                    ha="center", va="center", fontsize=7.6, color="#B04E27", fontweight="bold",
+                    arrowprops=dict(arrowstyle="->", color="#B04E27", lw=1.1),
+                    zorder=5,
+                )
+        return fig
+
+
+def kmeans_elbow_figure(points: np.ndarray, ks=range(1, 7), sil_ks=K_CANDIDATES):
+    """Vẽ WCSS (Elbow) và Silhouette theo k cho K-means đối chứng."""
+    ks_list = list(ks)
+    wcss = [float(KMeans(n_clusters=k, **KMEANS_OPTIONS).fit(points).inertia_) for k in ks_list]
+    sil_list = list(sil_ks)
+    sils = [
+        float(silhouette_score(points, KMeans(n_clusters=k, **KMEANS_OPTIONS).fit_predict(points)))
+        for k in sil_list
+    ]
+    best_k = sil_list[int(np.argmax(sils))]
+    best_sil = max(sils)
+
+    with style_context():
+        fig, (ax_wcss, ax_sil) = plt.subplots(1, 2, figsize=(10.6, 3.8), dpi=150, layout="constrained")
+        ax_wcss.plot(ks_list, wcss, "o-", color=PALETTE["blue"], linewidth=1.8, markersize=6)
+        ax_wcss.axvline(best_k, color="#667788", linestyle="--", linewidth=1.1)
+        ax_wcss.set_xticks(ks_list)
+        ax_wcss.set_title("WCSS theo k (giảm dần đều, không gãy gập rõ)", fontsize=11)
+        ax_wcss.set_xlabel("Số cụm k")
+        ax_wcss.set_ylabel("WCSS (Inertia)")
+        ax_wcss.grid(alpha=0.2)
+
+        ax_sil.plot(sil_list, sils, "o-", color=PALETTE["orange"], linewidth=1.8, markersize=6)
+        ax_sil.axvline(best_k, color="#667788", linestyle="--", linewidth=1.1)
+        ax_sil.annotate(
+            f"k = {best_k} ({best_sil:.4f})",
+            xy=(best_k, best_sil), xytext=(best_k + 0.38, best_sil - 0.015),
+            fontsize=9.5, fontweight="bold", color="#8A5A00",
+            arrowprops=dict(arrowstyle="->", color=PALETTE["orange"], lw=1.1),
+        )
+        ax_sil.set_xticks(sil_list)
+        ax_sil.set_title(f"Silhouette theo k — cao nhất tại k = {best_k}", fontsize=11)
+        ax_sil.set_xlabel("Số cụm k")
+        ax_sil.set_ylabel("Silhouette trung bình")
+        ax_sil.grid(alpha=0.2)
+        return fig
+
+
+def noise_and_trap_figure(
+    points: np.ndarray, grid_model: STING, labels: np.ndarray, *, title_prefix: str = "PAPI 2011–2024",
+):
+    """3 panel đồ thị giải thích nhiễu STING (−1) và hai cái bẫy hay gặp."""
+    import copy
+
+    z_flag = (np.abs(points) > 3).any(axis=1)
+    noise_mask = labels == -1
+    sparse_clean = noise_mask & ~z_flag
+    n_noise = int(noise_mask.sum())
+    n_clean_noise = int(sparse_clean.sum())
+    n_zflag = int(z_flag.sum())
+
+    trimmed_model, trimmed_labels = fit_grid(points[~z_flag])
+    trimmed_noise = int((trimmed_labels == -1).sum())
+
+    conn8_model = copy.deepcopy(grid_model)
+    conn8_labels = conn8_model.cluster(level=conn8_model.cluster_level_, connectivity=2)
+    conn8_noise = int((conn8_labels == -1).sum())
+
+    lo, hi = grid_model.bounds_min_, grid_model.bounds_max_
+    pad_x = (hi[0] - lo[0]) * 0.06
+    pad_y = (hi[1] - lo[1]) * 0.06
+
+    def _draw_grid(ax, m: STING, *, grid_color: str = "#CBD5E1", dense_fill: str = "#EBF5F5") -> None:
+        res = m.factor ** m.cluster_level_
+        b_lo, b_hi = m.bounds_min_, m.bounds_max_
+        step = (b_hi - b_lo) / res
+        for idx in m.label_of_:
+            cell = m.cells_[m.cluster_level_][idx]
+            ax.add_patch(Rectangle(
+                cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
+                facecolor=dense_fill, edgecolor="#94B8BC", linewidth=0.5, zorder=1,
+            ))
+        for i in range(res + 1):
+            ax.axvline(b_lo[0] + i * step[0], ymin=0, ymax=1, color=grid_color, linewidth=0.35, zorder=0.5)
+            ax.axhline(b_lo[1] + i * step[1], xmin=0, xmax=1, color=grid_color, linewidth=0.35, zorder=0.5)
+
+    with style_context():
+        fig, axes = plt.subplots(
+            1, 3, figsize=(13.0, 4.35), dpi=150, sharex=True, sharey=True, layout="constrained"
+        )
+
+        # Panel 1: Khung |z| <= 3 vs nhieu STING (-1)
+        ax = axes[0]
+        _draw_grid(ax, grid_model)
+        ax.add_patch(Rectangle(
+            (-3.0, -3.0), 6.0, 6.0,
+            facecolor="none", edgecolor="#D55E00", linestyle="--", linewidth=1.35,
+            label="Khung |z| ≤ 3 (vùng 'sạch' 1D)", zorder=4,
+        ))
+        ax.scatter(points[~noise_mask, 0], points[~noise_mask, 1], s=10,
+                   color=PALETTE["blue"], alpha=0.68, linewidths=0, label=f"Vào cụm ({int((~noise_mask).sum())})", zorder=2)
+        ax.scatter(points[sparse_clean, 0], points[sparse_clean, 1], s=18,
+                   color=PALETTE["gray"], marker="x", linewidths=0.95,
+                   label=f"−1 trong |z|≤3 ({n_clean_noise})", zorder=3)
+        ax.scatter(points[z_flag, 0], points[z_flag, 1], s=32,
+                   color="#D55E00", marker="D", edgecolors="white", linewidths=0.5,
+                   label=f"Điểm |z|>3 ({n_zflag})", zorder=5)
+        ax.set_title(
+            f"1. Khung |z| ≤ 3 vs nhiễu −1 ({title_prefix})\n"
+            f"{n_clean_noise}/{n_noise} điểm −1 vẫn nằm TRONG |z| ≤ 3",
+            fontsize=10.5,
+        )
+        ax.set_ylabel("6.1 Y tế công lập (z-score)")
+        ax.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
+
+        # Panel 2: BẪY Xóa |z| > 3 rồi dựng lại lưới
+        ax = axes[1]
+        _draw_grid(ax, trimmed_model, grid_color="#E2CFC9", dense_fill="#F3EEEA")
+        ax.add_patch(Rectangle(
+            lo, *(hi - lo), facecolor="none", edgecolor="#64748B", linestyle=":", linewidth=1.2,
+            label="Biên [min, max] cũ", zorder=3,
+        ))
+        t_lo, t_hi = trimmed_model.bounds_min_, trimmed_model.bounds_max_
+        ax.add_patch(Rectangle(
+            t_lo, *(t_hi - t_lo), facecolor="none", edgecolor="#D55E00", linestyle="--", linewidth=1.3,
+            label="Biên mới co lại", zorder=4,
+        ))
+        kept = points[~z_flag]
+        t_ass = trimmed_labels >= 0
+        ax.scatter(kept[t_ass, 0], kept[t_ass, 1], s=10, color=PALETTE["green"],
+                   alpha=0.68, linewidths=0, label=f"Vào cụm ({int(t_ass.sum())})", zorder=2)
+        ax.scatter(kept[~t_ass, 0], kept[~t_ass, 1], s=18, color=PALETTE["gray"], marker="x",
+                   linewidths=0.95, label=f"Nhiễu mới ({trimmed_noise})", zorder=3)
+        ax.scatter(points[z_flag, 0], points[z_flag, 1], s=36, facecolors="none", edgecolors="#D55E00",
+                   marker="D", linewidths=1.1, label=f"Đã xóa ({n_zflag})", zorder=5)
+        ax.set_title(
+            f"2. BẪY: Xóa |z|>3 rồi dựng lại lưới\n"
+            f"{trimmed_model.n_clusters_} cụm · {trimmed_noise}/{len(trimmed_labels)} nhiễu "
+            f"({trimmed_noise / len(trimmed_labels):.1%}, TĂNG!)",
+            fontsize=10.5,
+        )
+        ax.set_xlabel("4.2 Kiểm soát tham nhũng dịch vụ công (z-score)")
+        ax.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
+
+        # Panel 3: BẪY Kề 8 hướng (connectivity=2)
+        ax = axes[2]
+        _draw_grid(ax, conn8_model, dense_fill="#E4EFF7")
+        c8_ass = conn8_labels >= 0
+        ax.scatter(points[c8_ass, 0], points[c8_ass, 1], s=10, color=PALETTE["blue"],
+                   alpha=0.72, linewidths=0, label=f"1 cụm gộp ({int(c8_ass.sum())})", zorder=2)
+        ax.scatter(points[~c8_ass, 0], points[~c8_ass, 1], s=18, color=PALETTE["gray"], marker="x",
+                   linewidths=0.95, label=f"Nhiễu giữ nguyên ({conn8_noise})", zorder=3)
+        ax.set_title(
+            f"3. BẪY: Đổi kề 8 hướng (connectivity=2)\n"
+            f"Gộp qua góc → {conn8_model.n_clusters_} cụm · {conn8_noise}/{len(conn8_labels)} nhiễu (KHÔNG giảm)",
+            fontsize=10.5,
+        )
+        ax.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
+
+        axes[0].set_xlim(min(lo[0], -3.15) - pad_x, max(hi[0], 3.15) + pad_x)
+        axes[0].set_ylim(min(lo[1], -3.15) - pad_y, max(hi[1], 3.15) + pad_y)
+        return fig
+
+
+def sensitivity_grid_figure(points: np.ndarray):
+    """Vẽ 4 cấu hình trên cùng 869 điểm để thấy tác động của ngưỡng và độ mịn lưới."""
+    configs = (
+        (2, 3, "Ngưỡng min_count = 3 (lưới 16×16)"),
+        (2, 5, "Cấu hình chính: min_count = 5 (lưới 16×16)"),
+        (2, 8, "Ngưỡng min_count = 8 (lưới 16×16)"),
+        (1, 5, "Đổi mức lưới: level = 1 (lưới 4×4, mc = 5)"),
+    )
+    with style_context():
+        fig, axes = plt.subplots(
+            2, 2, figsize=(10.8, 7.6), dpi=150, sharex=True, sharey=True, layout="constrained"
+        )
+        for ax, (lvl, mc, caption) in zip(axes.ravel(), configs, strict=True):
+            m = STING(n_levels=GRID["n_levels"], factor=GRID["factor"], min_count=mc).fit(points)
+            lab = m.cluster(level=lvl, connectivity=GRID["connectivity"])
+            res = m.factor ** lvl
+            b_lo, b_hi = m.bounds_min_, m.bounds_max_
+            step = (b_hi - b_lo) / res
+            for i in range(1, res):
+                ax.axvline(b_lo[0] + i * step[0], color="#DDE5EC", linewidth=0.45, zorder=0.5)
+                ax.axhline(b_lo[1] + i * step[1], color="#DDE5EC", linewidth=0.45, zorder=0.5)
+            for idx, cid in m.label_of_.items():
+                cell = m.cells_[lvl][idx]
+                col = CLUSTER_COLORS.get(cid, PALETTE["purple"])
+                ax.add_patch(Rectangle(
+                    cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
+                    facecolor="none", edgecolor=col, linewidth=0.85, alpha=0.65, zorder=1.5,
+                ))
+            noise = lab == -1
+            ax.scatter(points[noise, 0], points[noise, 1], s=14, color=PALETTE["gray"], marker="x",
+                       linewidths=0.85, label=f"Nhiễu ({int(noise.sum())})", zorder=2)
+            for cid in sorted(set(lab[lab >= 0])):
+                in_c = lab == cid
+                ax.scatter(points[in_c, 0], points[in_c, 1], s=10,
+                           color=CLUSTER_COLORS.get(cid, PALETTE["purple"]), alpha=0.75, linewidths=0,
+                           label=f"Cụm {cid} ({int(in_c.sum())})", zorder=2.5)
+            ax.set_title(
+                f"{caption}\n{m.n_clusters_} cụm · {len(m.label_of_)} ô dày · "
+                f"{int(noise.sum())}/{len(lab)} nhiễu ({noise.mean():.1%})",
+                fontsize=10.5,
+            )
+            ax.grid(alpha=0.14)
+            ax.legend(loc="upper left", fontsize=8, framealpha=0.92, ncols=2)
+
+        for ax in axes[1, :]:
+            ax.set_xlabel("4.2 Kiểm soát tham nhũng dịch vụ công (z-score)")
+        for ax in axes[:, 0]:
+            ax.set_ylabel("6.1 Y tế công lập (z-score)")
+        fig.suptitle(f"Độ nhạy tham số STING trên {len(points)} quan sát PAPI", fontsize=13)
         return fig

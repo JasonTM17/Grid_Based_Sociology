@@ -70,7 +70,7 @@ def _temporal_validation(pairs: pd.DataFrame, final_origin: int) -> tuple[pd.Dat
         validation = pairs.loc[pairs.year == origin]
         if train.empty or validation.empty:
             raise ValueError(f"Thiếu cặp đánh giá theo thời gian tại mốc {origin}.")
-        # Năm đích của một cặp train là năm đặc trưng + 1, tối đa đến mốc origin.
+
         last_target = int(train.year.max()) + 1
         validation_errors = validation[["province_code", "year"]].copy()
         for target in TARGETS:

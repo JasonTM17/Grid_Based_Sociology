@@ -104,6 +104,82 @@ print(f"Dữ liệu giả lập: ARI = {ari:.3f}, {synthetic.n_clusters_} cụm,
       f"{(synthetic_labels == -1).mean():.1%} điểm nhiễu.")
 print("Tổng số điểm được bảo toàn tại từng mức lưới.")"""))
 
+cd(nbf.v4.new_code_cell(r"""import matplotlib.pyplot as plt
+from matplotlib.patches import FancyArrowPatch, Rectangle
+from scripts.common.fig_style import PALETTE, style_context
+
+_counts_demo = np.array([[4, 3, 0], [1, 0, 4], [0, 0, 3]])
+_offsets_demo = {
+    1: [(0.38, 0.36)],
+    3: [(0.24, 0.28), (0.62, 0.28), (0.43, 0.58)],
+    4: [(0.24, 0.24), (0.60, 0.24), (0.24, 0.56), (0.60, 0.56)],
+}
+_pts_d, _cells_d = [], []
+for _r in range(3):
+    _cy = 2 - _r
+    for _c in range(3):
+        _cnt = int(_counts_demo[_r, _c])
+        for _dx, _dy in _offsets_demo.get(_cnt, ()):
+            _pts_d.append((_c + _dx, _cy + _dy))
+            _cells_d.append((_c, _cy))
+_pts_d = np.asarray(_pts_d)
+_step_titles = ("1. Điểm đầu vào (n = 15)", "2. Chia lưới 3×3 & đếm ô",
+                "3. Lọc ô dày (count ≥ 3)", "4. Nối kề 4 hướng → 2 cụm")
+with style_context():
+    fig, axes = plt.subplots(1, 4, figsize=(12.2, 3.15), dpi=150, sharex=True, sharey=True, layout="constrained")
+    for s_idx, (ax, s_title) in enumerate(zip(axes, _step_titles, strict=True)):
+        ax.set_xlim(0.0, 3.0)
+        ax.set_ylim(0.0, 3.0)
+        ax.set_aspect("equal", adjustable="box")
+        ax.set_xticks([0, 1, 2, 3])
+        ax.set_yticks([0, 1, 2, 3])
+        ax.tick_params(labelsize=8)
+        ax.set_title(s_title, fontsize=10.5, pad=6)
+        if s_idx >= 1:
+            for _r in range(3):
+                _cy = 2 - _r
+                for _c in range(3):
+                    _cnt = int(_counts_demo[_r, _c])
+                    if s_idx == 1:
+                        _fill = "#EFF6F9" if _cnt > 0 else "#FFFFFF"
+                    elif s_idx == 2:
+                        _fill = "#D4E8EA" if _cnt >= 3 else ("#FDE8BA" if _cnt > 0 else "#F3F5F7")
+                    else:
+                        _fill = ("#D4E8EA" if (_c, _cy) in ((0, 2), (1, 2))
+                                 else ("#DBE8F4" if (_c, _cy) in ((2, 1), (2, 0))
+                                       else ("#FDE8BA" if _cnt > 0 else "#F3F5F7")))
+                    ax.add_patch(Rectangle((_c, _cy), 1.0, 1.0, facecolor=_fill, edgecolor="#5D748A", linewidth=0.95))
+                    _tcol = "#0F2B46" if _cnt >= 3 else ("#8A5A00" if _cnt > 0 else "#9AA5B1")
+                    ax.text(_c + 0.80, _cy + 0.80, str(_cnt), ha="center", va="center", fontsize=10.5, fontweight="bold",
+                            color=_tcol, bbox=dict(boxstyle="round,pad=0.16", fc="white", ec="none", alpha=0.82), zorder=3)
+        else:
+            ax.grid(alpha=0.22, linestyle=":")
+        if s_idx < 3:
+            if s_idx == 2:
+                _dm = np.array([_counts_demo[2 - _cy, _cx] >= 3 for _cx, _cy in _cells_d])
+                ax.scatter(_pts_d[_dm, 0], _pts_d[_dm, 1], s=44, color=PALETTE["blue"], edgecolors="white", linewidths=0.7, zorder=4)
+                ax.scatter(_pts_d[~_dm, 0], _pts_d[~_dm, 1], s=55, color=PALETTE["gray"], marker="X", zorder=4)
+                ax.text(0.46, 1.13, "ô thưa → −1", ha="center", va="bottom", fontsize=8, color="#8A5A00", fontweight="bold", zorder=5)
+            else:
+                ax.scatter(_pts_d[:, 0], _pts_d[:, 1], s=44, color="#1E3D5E", edgecolors="white", linewidths=0.7, zorder=4)
+                if s_idx == 1:
+                    ax.text(2.50, 2.38, "ô lưu:\ncount, μ, σ,\nmin, max", ha="center", va="center", fontsize=7.5, color="#4A5D70", zorder=4)
+        else:
+            _ga = np.array([tuple(c) in ((0, 2), (1, 2)) for c in _cells_d])
+            _gb = np.array([tuple(c) in ((2, 1), (2, 0)) for c in _cells_d])
+            _nm = ~(_ga | _gb)
+            ax.scatter(_pts_d[_ga, 0], _pts_d[_ga, 1], s=46, color=PALETTE["green"], edgecolors="white", linewidths=0.7, zorder=4)
+            ax.scatter(_pts_d[_gb, 0], _pts_d[_gb, 1], s=46, color=PALETTE["blue"], edgecolors="white", linewidths=0.7, zorder=4)
+            ax.scatter(_pts_d[_nm, 0], _pts_d[_nm, 1], s=60, color=PALETTE["gray"], marker="X", zorder=5)
+            for (_x0, _y0), (_x1, _y1), _ca in (((0.76, 2.66), (1.24, 2.66), PALETTE["green"]), ((2.50, 1.22), (2.50, 0.78), PALETTE["blue"])):
+                ax.add_patch(FancyArrowPatch((_x0, _y0), (_x1, _y1), arrowstyle="<->", mutation_scale=11, linewidth=1.5, color=_ca, zorder=5))
+            ax.text(1.00, 2.06, "Cụm A (7)", ha="center", va="bottom", fontsize=8.2, fontweight="bold", color="#0F5C48", zorder=5)
+            ax.text(2.44, 0.14, "Cụm B (7)", ha="center", va="bottom", fontsize=8.2, fontweight="bold", color=PALETTE["blue"], zorder=5)
+            ax.text(0.46, 1.13, "Nhiễu (−1)", ha="center", va="bottom", fontsize=8, fontweight="bold", color="#5A5A5A", zorder=5)
+            ax.annotate("Chạm góc\n(≠ nối)", xy=(2.0, 2.0), xytext=(2.46, 2.34), ha="center", va="center",
+                        fontsize=7.6, color="#B04E27", fontweight="bold", arrowprops=dict(arrowstyle="->", color="#B04E27", lw=1.1), zorder=5)
+    plt.show()"""))
+
 cd(nbf.v4.new_code_cell("""features, params = cfg["features"], cfg["sting"]
 train = panel[panel.year <= 2023].dropna(subset=features)
 scaler = StandardScaler().fit(train[features])
@@ -128,7 +204,92 @@ print(f"Tái lập STING: {len(comparison)}/{len(saved)} nhãn khớp với kế
 print("Mô hình đã lưu và mô hình dựng lại cho cùng nhãn.")
 test_noise = int(test.pred_cluster.eq(-1).sum())
 print(f"Năm 2024: {len(test)}/63 tỉnh đủ hai chỉ tiêu. "
-      f"{len(test) - test_noise} tỉnh được gán cụm, {test_noise} tỉnh nhận nhãn nhiễu.")"""))
+      f"{len(test) - test_noise} tỉnh được gán cụm, {test_noise} tỉnh nhận nhãn nhiễu.")
+train_z_flag = (np.abs(train_scaled) > 3).any(axis=1)
+train_noise = int((train_labels == -1).sum())
+train_sparse_no_flag = int(((train_labels == -1) & ~train_z_flag).sum())
+trimmed_sting = STING(n_levels=params["n_levels"], factor=params["factor"],
+                      min_count=params["min_count"]).fit(train_scaled[~train_z_flag])
+trimmed_train_labels = trimmed_sting.cluster(level=params["cluster_level"],
+                                             connectivity=params["connectivity"])
+trimmed_train_noise = int((trimmed_train_labels == -1).sum())
+print(f"2011–2023: {train_z_flag.sum()} quan sát có |z| > 3; "
+      f"{train_sparse_no_flag}/{train_noise} điểm nhãn −1 có |z| ≤ 3 trên cả hai trục.")
+print(f"Nếu loại {train_z_flag.sum()} điểm |z| > 3 rồi dựng lại lưới trên {len(trimmed_train_labels)} điểm: "
+      f"{trimmed_sting.n_clusters_} cụm, {trimmed_train_noise}/{len(trimmed_train_labels)} điểm nhiễu "
+      f"({trimmed_train_noise / len(trimmed_train_labels):.1%}).")"""))
+
+cd(nbf.v4.new_code_cell(r"""import copy
+
+conn8_sting = copy.deepcopy(sting)
+conn8_labels = conn8_sting.cluster(level=params["cluster_level"], connectivity=2)
+conn8_noise = int((conn8_labels == -1).sum())
+print(f"Đổi kề 8 hướng (connectivity=2) trên 2011–2023: {len(conn8_sting.label_of_)} ô dày → "
+      f"{conn8_sting.n_clusters_} cụm, {conn8_noise}/{len(conn8_labels)} điểm nhiễu ({conn8_noise / len(conn8_labels):.1%}).")
+
+def _draw_sting_grid(ax, m, *, grid_color="#CBD5E1", dense_fill="#EBF5F5"):
+    res = m.factor ** m.cluster_level_
+    b_lo, b_hi = m.bounds_min_, m.bounds_max_
+    step = (b_hi - b_lo) / res
+    for idx in m.label_of_:
+        cell = m.cells_[m.cluster_level_][idx]
+        ax.add_patch(Rectangle(cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
+                               facecolor=dense_fill, edgecolor="#94B8BC", linewidth=0.5, zorder=1))
+    for i in range(res + 1):
+        ax.axvline(b_lo[0] + i * step[0], color=grid_color, linewidth=0.35, zorder=0.5)
+        ax.axhline(b_lo[1] + i * step[1], color=grid_color, linewidth=0.35, zorder=0.5)
+
+_lo_t, _hi_t = sting.bounds_min_, sting.bounds_max_
+_px_t, _py_t = (_hi_t[0] - _lo_t[0]) * 0.06, (_hi_t[1] - _lo_t[1]) * 0.06
+with style_context():
+    fig, axes = plt.subplots(1, 3, figsize=(13.0, 4.35), dpi=150, sharex=True, sharey=True, layout="constrained")
+    # Panel 1: |z| <= 3 vs nhiễu STING (-1)
+    _draw_sting_grid(axes[0], sting)
+    axes[0].add_patch(Rectangle((-3.0, -3.0), 6.0, 6.0, facecolor="none", edgecolor="#D55E00",
+                                linestyle="--", linewidth=1.35, label="Khung |z| ≤ 3 ('sạch' 1D)", zorder=4))
+    _nm = train_labels == -1
+    _sc = _nm & ~train_z_flag
+    axes[0].scatter(train_scaled[~_nm, 0], train_scaled[~_nm, 1], s=10, color=PALETTE["blue"], alpha=0.68, linewidths=0,
+                    label=f"Vào cụm ({int((~_nm).sum())})", zorder=2)
+    axes[0].scatter(train_scaled[_sc, 0], train_scaled[_sc, 1], s=18, color=PALETTE["gray"], marker="x", linewidths=0.95,
+                    label=f"−1 trong |z|≤3 ({train_sparse_no_flag})", zorder=3)
+    axes[0].scatter(train_scaled[train_z_flag, 0], train_scaled[train_z_flag, 1], s=32, color="#D55E00", marker="D",
+                    edgecolors="white", linewidths=0.5, label=f"Điểm |z|>3 ({int(train_z_flag.sum())})", zorder=5)
+    axes[0].set_title(f"1. Khung |z| ≤ 3 vs nhiễu −1 (2011–2023)\n{train_sparse_no_flag}/{train_noise} điểm −1 vẫn TRONG |z| ≤ 3", fontsize=10.5)
+    axes[0].set_ylabel("6.1 Y tế công lập (z-score)")
+    axes[0].legend(loc="upper left", fontsize=7.6, framealpha=0.92)
+
+    # Panel 2: BẪY xóa |z|>3
+    _draw_sting_grid(axes[1], trimmed_sting, grid_color="#E2CFC9", dense_fill="#F3EEEA")
+    axes[1].add_patch(Rectangle(_lo_t, *(_hi_t - _lo_t), facecolor="none", edgecolor="#64748B",
+                                linestyle=":", linewidth=1.2, label="Biên [min, max] cũ", zorder=3))
+    axes[1].add_patch(Rectangle(trimmed_sting.bounds_min_, *(trimmed_sting.bounds_max_ - trimmed_sting.bounds_min_),
+                                facecolor="none", edgecolor="#D55E00", linestyle="--", linewidth=1.3, label="Biên mới co lại", zorder=4))
+    _kept = train_scaled[~train_z_flag]
+    _ta = trimmed_train_labels >= 0
+    axes[1].scatter(_kept[_ta, 0], _kept[_ta, 1], s=10, color=PALETTE["green"], alpha=0.68, linewidths=0,
+                    label=f"Vào cụm ({int(_ta.sum())})", zorder=2)
+    axes[1].scatter(_kept[~_ta, 0], _kept[~_ta, 1], s=18, color=PALETTE["gray"], marker="x", linewidths=0.95,
+                    label=f"Nhiễu mới ({trimmed_train_noise})", zorder=3)
+    axes[1].scatter(train_scaled[train_z_flag, 0], train_scaled[train_z_flag, 1], s=36, facecolors="none", edgecolors="#D55E00",
+                    marker="D", linewidths=1.1, label=f"Đã xóa ({int(train_z_flag.sum())})", zorder=5)
+    axes[1].set_title(f"2. BẪY: Xóa |z|>3 rồi dựng lại lưới\n{trimmed_sting.n_clusters_} cụm · {trimmed_train_noise}/{len(trimmed_train_labels)} nhiễu ({trimmed_train_noise / len(trimmed_train_labels):.1%}, TĂNG!)", fontsize=10.5)
+    axes[1].set_xlabel("4.2 Kiểm soát tham nhũng dịch vụ công (z-score)")
+    axes[1].legend(loc="upper left", fontsize=7.6, framealpha=0.92)
+
+    # Panel 3: BẪY connectivity=2
+    _draw_sting_grid(axes[2], conn8_sting, dense_fill="#E4EFF7")
+    _c8a = conn8_labels >= 0
+    axes[2].scatter(train_scaled[_c8a, 0], train_scaled[_c8a, 1], s=10, color=PALETTE["blue"], alpha=0.72, linewidths=0,
+                    label=f"1 cụm gộp ({int(_c8a.sum())})", zorder=2)
+    axes[2].scatter(train_scaled[~_c8a, 0], train_scaled[~_c8a, 1], s=18, color=PALETTE["gray"], marker="x", linewidths=0.95,
+                    label=f"Nhiễu giữ nguyên ({conn8_noise})", zorder=3)
+    axes[2].set_title(f"3. BẪY: Đổi kề 8 hướng (connectivity=2)\nGộp qua góc → {conn8_sting.n_clusters_} cụm · {conn8_noise}/{len(conn8_labels)} nhiễu (KHÔNG giảm)", fontsize=10.5)
+    axes[2].legend(loc="upper left", fontsize=7.6, framealpha=0.92)
+
+    axes[0].set_xlim(min(_lo_t[0], -3.15) - _px_t, max(_hi_t[0], 3.15) + _px_t)
+    axes[0].set_ylim(min(_lo_t[1], -3.15) - _py_t, max(_hi_t[1], 3.15) + _py_t)
+    plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("""### 1.2 Lưới STING trên PAPI
 
@@ -233,9 +394,13 @@ hai năm. Phần dự báo dùng nhãn suy ra từ điểm quan sát làm mốc 
 với nhãn suy ra từ điểm do mô hình sinh.
 
 Hai tỉnh thiếu chỉ tiêu được loại khỏi phép gán. Cả 13 tỉnh mang nhãn −1
-đều đủ điểm và nằm trong ô có dưới 5 quan sát tham chiếu. Nhóm giữ các điểm
-này trong mẫu để báo đúng độ phủ 48/61 tỉnh và theo dõi các trường hợp ngoài
-vùng dày."""))
+đều đủ điểm và nằm trong ô có dưới 5 quan sát tham chiếu (không có tỉnh nào
+rơi ngoài biên lưới hay có `|z| > 3`; `max |z| = 2,1299`). Nhóm giữ các điểm
+này trong mẫu để báo đúng độ phủ 48/61 tỉnh và theo dõi cả các trường hợp đạt
+điểm rất cao ở rìa phải/trên (Hà Tĩnh, Bình Thuận, Sóc Trăng, Bà Rịa - Vũng Tàu,
+Quảng Ninh, Tây Ninh) lẫn các tỉnh thấp hơn ở chỉ tiêu 6.1 (Hà Nội, Cần Thơ).
+Quảng Ninh và Bình Dương thiếu điểm năm 2023 nên sau khi ghép hai năm, bảng còn
+59 tỉnh, gồm 48 trong vùng dày và 11 ngoài vùng dày."""))
 
 cd(nbf.v4.new_code_cell("""from scripts.common.papi_pred_common import GRID_ASSIGNMENT_LABELS, describe_grid_assignment
 
@@ -243,6 +408,22 @@ display(Image(filename=str(ROOT / "results/figs/predict_2024.png")))
 observed_grid = describe_grid_assignment(panel.loc[panel.year.eq(2024)], features, scaler, sting)
 status_counts = observed_grid.grid_status.value_counts().rename(index=GRID_ASSIGNMENT_LABELS)
 display(status_counts.rename("Số tỉnh").rename_axis("Kết quả gán").to_frame())
+review_2024 = observed_grid.loc[observed_grid.grid_status.ne("in_cluster")].copy()
+valid_2024 = review_2024[features].notna().all(axis=1)
+review_2024["max_abs_z"] = np.nan
+review_2024.loc[valid_2024, "max_abs_z"] = np.abs(
+    scaler.transform(review_2024.loc[valid_2024, features])
+).max(axis=1)
+sparse_2024 = review_2024.loc[review_2024.grid_status.eq("sparse_cell")]
+assert (sparse_2024["max_abs_z"] <= 3).all()
+print(f"Cả {len(sparse_2024)}/{len(sparse_2024)} tỉnh ô thưa năm 2024 đều có |z| ≤ 3 "
+      f"trên lưới tham chiếu (|z| lớn nhất = {sparse_2024['max_abs_z'].max():.4f}).")
+review_2024["grid_status"] = review_2024.grid_status.map(GRID_ASSIGNMENT_LABELS)
+display(review_2024[["province_vi", *features, "max_abs_z", "grid_cell", "reference_count", "grid_status"]].rename(columns={
+    "province_vi": "Tỉnh/thành phố", "sd_4_2": "Điểm 4.2", "sd_6_1": "Điểm 6.1",
+    "max_abs_z": "|z| lớn nhất", "grid_cell": "Ô lưới",
+    "reference_count": "Số điểm tham chiếu", "grid_status": "Lý do",
+}).round(4).reset_index(drop=True))
 print("Bảng 63 tỉnh kèm ô, số điểm tham chiếu và lý do gán nằm trong results/papi_observed_grid_2024.csv.")
 lang_son_code = panel.loc[panel.province_vi.eq("Lạng Sơn"), "province_code"].iat[0]
 lang_son = paired.loc[lang_son_code]
@@ -291,7 +472,12 @@ md(nbf.v4.new_markdown_cell("""### 4.2 Đo sai số dự báo trên các tỉnh 
 Ghép điểm PAPI 2024 theo mã tỉnh. Cùng một nhóm tỉnh có đủ hai điểm thực
 tế được dùng để tính MAE, RMSE và độ lệch trung bình cho cả mô hình lẫn
 mốc giữ nguyên. MAE là trung bình độ lệch tuyệt đối. RMSE nhạy hơn với
-sai số lớn. Độ lệch âm cho biết dự báo thấp hơn quan sát về trung bình."""))
+sai số lớn. Độ lệch âm cho biết dự báo thấp hơn quan sát về trung bình.
+
+Có 61 tỉnh đủ tám đầu vào năm 2023 để tạo dự báo và 61 tỉnh đủ hai điểm
+quan sát năm 2024 để gán lên lưới. Hai tiêu chí chọn được 59 tỉnh chung.
+Với chỉ tiêu 4.2, Ridge giảm MAE. So với giữ điểm 2023, RMSE tăng từ
+0,0953 lên 0,0972 và độ lệch trung bình từ −0,0245 xuống −0,0581."""))
 
 cd(nbf.v4.new_code_cell("""observed = panel.loc[panel.year == ORIGIN_YEAR + 1].copy()
 scored, errors, zones = score_forecast(run, observed)
@@ -300,6 +486,12 @@ pd.testing.assert_frame_equal(scored.astype({"actual_cluster": "float64"}), arch
                               check_dtype=False, check_exact=False, atol=1e-9, rtol=1e-9)
 n_matched = int(scored.actual_cluster.notna().sum())
 print(f"Có {len(scored)} dự báo, đối chiếu được {n_matched} tỉnh đủ hai điểm quan sát.")
+actual_eligible = observed_grid.loc[observed_grid.cluster.notna()]
+matched_codes = scored.loc[scored.actual_cluster.notna(), "province_code"]
+omitted = actual_eligible.loc[~actual_eligible.province_code.isin(matched_codes), "province_vi"]
+print(f"Có điểm thực tế 2024 nhưng thiếu đầu vào 2023: {', '.join(omitted)}.")
+print(f"Ngoài vùng dày: {actual_eligible.cluster.eq(-1).sum()}/{len(actual_eligible)} tỉnh quan sát, "
+      f"{scored.actual_cluster.eq(-1).sum()}/{n_matched} tỉnh đối chiếu dự báo.")
 display(errors.rename(columns={
     "target": "Chỉ tiêu", "method": "Cách dự báo", "n": "Số tỉnh", "mae": "MAE", "rmse": "RMSE",
     "bias": "Độ lệch trung bình",
@@ -312,6 +504,9 @@ Chiếu các điểm dự báo, điểm giữ nguyên và điểm quan sát vào
 đến 2023**. Thêm đối chứng luôn chọn cụm phổ biến nhất trong lịch sử.
 Tỷ lệ trùng nhãn dùng nhãn suy ra từ lưới, còn tỷ lệ phát hiện ngoài vùng
 dày tính riêng trên số tỉnh có điểm quan sát ngoài vùng dày.
+
+Điểm dự báo đưa cả 59 tỉnh vào cụm lớn và nhận ra 0/11 tỉnh ngoài vùng.
+Mức trùng nhãn 48/59 và độ đúng cân bằng 0,50 bằng mốc luôn chọn cụm lớn.
 
 Nhóm giữ nguyên từng cặp sai số ngoài lượt kiểm định của hai chỉ tiêu,
 cộng chúng vào hai điểm dự báo rồi chiếu từng kịch bản lên lưới. Tỷ lệ
@@ -414,6 +609,69 @@ ridge_row = regression_metrics[(regression_metrics.task == "regression") & (regr
 assert abs(ridge_mae - ridge_row.holdout_mae) < 1e-5
 print(f"Tính lại trên {len(holdout)} cặp 2023→2024: MAE của Ridge = {ridge_mae:.4f}, "
       f"MAE khi giữ điểm năm trước = {carry_mae:.4f}.")"""))
+
+cd(nbf.v4.new_code_cell(r"""from sklearn.metrics import accuracy_score, f1_score, log_loss, r2_score
+from scripts.supervised.predict_supervised import build_classification_pairs
+
+y_true_reg = holdout.y.to_numpy()
+y_pred_ridge = ridge.predict(holdout[REGRESSION_FEATURES].to_numpy())
+ridge_r2 = r2_score(y_true_reg, y_pred_ridge)
+
+clf_model = joblib.load(ROOT / "models/sup_classifier.joblib")
+clf_pairs = build_classification_pairs(panel, features, params)
+clf_hold = clf_pairs[clf_pairs.year_t == 2023]
+Xc_te = clf_hold[REGRESSION_FEATURES].to_numpy()
+yc_te = clf_hold["y"].to_numpy()
+probs_te = clf_model.predict_proba(Xc_te)[:, 1]
+logits_te = clf_model.decision_function(Xc_te)
+preds_te = clf_model.predict(Xc_te)
+bce_loss = log_loss(yc_te, probs_te)
+clf_acc = accuracy_score(yc_te, preds_te)
+clf_mf1 = f1_score(yc_te, preds_te, average="macro", labels=[0, 1], zero_division=0)
+print(f"Day 6 Logistic holdout 2023→2024 ({len(yc_te)} tỉnh): "
+      f"Binary Cross-Entropy = {bce_loss:.4f} | Acc = {clf_acc:.3f} | Macro-F1 = {clf_mf1:.3f}.")
+
+with style_context():
+    fig, (ax_reg, ax_log) = plt.subplots(1, 2, figsize=(11.6, 4.35), dpi=150, layout="constrained")
+    # Trái: Ridge + đoạn phần dư dọc ε_i
+    lo_r = float(min(y_true_reg.min(), y_pred_ridge.min())) - 0.03
+    hi_r = float(max(y_true_reg.max(), y_pred_ridge.max())) + 0.03
+    ax_reg.plot([lo_r, hi_r], [lo_r, hi_r], "--", color="#5A6B7C", lw=1.2, label="Đường chéo y = ŷ", zorder=1)
+    for idx_i, (yt, yp) in enumerate(zip(y_true_reg, y_pred_ridge, strict=True)):
+        ax_reg.plot([yp, yp], [yp, yt], "-", color="#D55E00", alpha=0.58, lw=1.05,
+                    label="Phần dư ε_i = y_i − ŷ_i" if idx_i == 0 else None, zorder=2)
+    ax_reg.scatter(y_pred_ridge, y_true_reg, s=30, color=PALETTE["blue"], edgecolors="white", linewidths=0.5,
+                   label="Quan sát 2024 (n = 59)", zorder=3)
+    ax_reg.set_xlim(lo_r, hi_r)
+    ax_reg.set_ylim(lo_r, hi_r)
+    ax_reg.set_xlabel("Điểm dự báo Ridge ŷ (2023 → 2024)")
+    ax_reg.set_ylabel("Điểm 6.1 Y tế công lập thực tế y (2024)")
+    ax_reg.set_title(f"Day 6 Hồi quy Ridge & phần dư ε_i\nMAE = {ridge_mae:.4f} · Holdout R² = {ridge_r2:.3f}", fontsize=10.5)
+    ax_reg.grid(alpha=0.18)
+    ax_reg.legend(loc="upper left", fontsize=8.5, framealpha=0.92)
+
+    # Phải: Logistic Regression Sigmoid & Binary Cross-Entropy
+    z_grid = np.linspace(float(logits_te.min()) - 0.6, float(logits_te.max()) + 0.6, 200)
+    sig_grid = 1.0 / (1.0 + np.exp(-z_grid))
+    ax_log.plot(z_grid, sig_grid, "-", color=PALETTE["blue"], lw=2.0, label="Sigmoid f(z) = 1 / (1 + e⁻ᶻ)", zorder=2)
+    ax_log.axvline(0.0, color="#64748B", linestyle="--", lw=1.0, label="Ngưỡng z = 0 (P = 0,5)", zorder=1)
+    ax_log.axhline(0.5, color="#CBD5E1", linestyle=":", lw=1.0, zorder=1)
+    m0 = yc_te == 0
+    m1 = yc_te == 1
+    rng_j = np.random.default_rng(42)
+    y0_j = rng_j.uniform(-0.03, 0.03, size=int(m0.sum()))
+    y1_j = 1.0 + rng_j.uniform(-0.03, 0.03, size=int(m1.sum()))
+    ax_log.scatter(logits_te[m0], y0_j, s=42, color="#D55E00", marker="x", linewidths=1.3,
+                   label=f"Lớp 0: nhiễu −1 ({int(m0.sum())})", zorder=4)
+    ax_log.scatter(logits_te[m1], y1_j, s=30, color=PALETTE["green"], alpha=0.85, edgecolors="white", linewidths=0.45,
+                   label=f"Lớp 1: vùng dày ({int(m1.sum())})", zorder=4)
+    ax_log.set_ylim(-0.14, 1.15)
+    ax_log.set_xlabel("Logit tuyến tính z = β₀ + wᵀx")
+    ax_log.set_ylabel("Xác suất dự báo P(vùng dày | x)")
+    ax_log.set_title(f"Day 6 Logistic Sigmoid (nhãn STING 2024)\nBinary Cross-Entropy = {bce_loss:.4f} · Acc = {clf_acc:.3f}", fontsize=10.5)
+    ax_log.grid(alpha=0.18)
+    ax_log.legend(loc="center left", fontsize=8.2, framealpha=0.92)
+    plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("""## Phụ lục C. Đối chiếu PCI và nghèo GSO
 
