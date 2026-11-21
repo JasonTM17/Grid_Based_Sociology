@@ -48,14 +48,14 @@ NEW_FILES = {
     2024: "2024PAPI_ProvincialIndicators_BangChiTieuCapTinh.xlsx",
 }
 
-# "1: Participation..." (chiều) — không khớp "1.1: ..." vì cần ':' ngay sau số
+
 DIM_RE = re.compile(r"^\s*([1-8])\s*:\s")
 SUB_RE = re.compile(r"^\s*([1-8])\.(\d+)\s*:")
 DIM_ROW_RE = re.compile(r"^Dimension\s*([1-8])\s*:")
 
-# Viết tắt / biến thể tên tỉnh giữa các năm (khóa & giá trị đều đã chuẩn hóa)
+
 NAME_ALIASES = {
-    "tthue": "thuathienhue",  # 2019 viết tắt TT-Hue
+    "tthue": "thuathienhue",
 }
 
 
@@ -140,8 +140,8 @@ def parse_new(year: int, fname: str, rows: list):
         raise RuntimeError(f"{fname}: không tìm thấy sheet {year}_VIE_ENG")
     ws = wb[target]
     it = ws.iter_rows(values_only=True)
-    row1 = next(it)   # mã tỉnh
-    next(it)          # dòng 2: tên tỉnh — bỏ qua, dữ liệu bắt đầu từ dòng 3
+    row1 = next(it)
+    next(it)
 
     col_code = {}
     for j in range(3, len(row1)):
@@ -159,7 +159,7 @@ def parse_new(year: int, fname: str, rows: list):
         m = DIM_ROW_RE.match(c0)
         if m:
             n = int(m.group(1))
-            if not dim_data[n]:  # chỉ lấy block đầu tiên
+            if not dim_data[n]:
                 for j, code in col_code.items():
                     dim_data[n][code] = to_float(r[j]) if j < len(r) else np.nan
             continue
@@ -201,7 +201,7 @@ def main() -> int:
 
     df = pd.DataFrame(rows)
 
-    # Gắn mã tỉnh cho các hàng định dạng cũ (map từ tên ASCII qua crosswalk)
+
     if "province_code" not in df.columns:
         df["province_code"] = np.nan
     df["province_code"] = df["province_code"].astype("float64").fillna(
@@ -216,16 +216,16 @@ def main() -> int:
     df["province_vi"] = df["province_code"].map(lambda c: code2info.get(c, {}).get("province_vi", ""))
     df["province_ascii"] = df["province_code"].map(lambda c: code2info.get(c, {}).get("province_ascii", ""))
 
-    # Làm sạch: 0.0 trong cột điểm = "không được xếp hạng" (không phải điểm thật —
-    # thang chiều là 1–10, thang tiểu-chiều bắt đầu từ 0.25). Gói Mendeley lưu các ô
-    # này là NaN; ta chuyển về NaN để đồng nhất trước khi phân tích.
+
+
+
     score_cols = [c for c in df.columns if re.fullmatch(r"d[1-8]", c) or c.startswith("sd_")]
     n_zero = int((df[score_cols] == 0).sum().sum())
     df[score_cols] = df[score_cols].mask(df[score_cols] == 0)
     if n_zero:
         print(f"[clean] chuyển {n_zero} giá trị 0.0 -> NaN (tỉnh không được xếp hạng năm đó)")
 
-    # Cột chuẩn: id trước, d1..d8, rồi các sub-dim đã sắp xếp
+
     id_cols = ["province_code", "province_ascii", "province_vi", "year"]
     dim_cols = [f"d{i}" for i in range(1, 9)]
     sub_cols = sorted([c for c in df.columns if c.startswith("sd_")],

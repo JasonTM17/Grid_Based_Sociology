@@ -2,7 +2,7 @@
 
 - `load_panel()`  — đọc panel sạch 63 tỉnh × 2011–2024.
 - `load_config()` — đọc cấu hình đã ĐÓNG BĂNG tại `models/predict_config.json`
-  (do `scripts/predict_sweep.py` chọn theo quy trình train-only).
+  (do `scripts/analysis/predict_sweep.py` chọn theo quy trình train-only).
 - `year_frame()`  — ma trận một năm với đủ chỉ tiêu + tên tỉnh.
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ REGRESSION_FEATURES = [
 ]
 REGRESSION_TARGET = "sd_6_1"
 
-# Nhãn tiếng Việt của các chỉ tiêu ỨNG VIÊN đạt audit thang đo (xem check_data.py).
+
 FEATURE_LABELS = {
     "sd_1_3": "1.3 Chất lượng bầu cử",
     "sd_1_4": "1.4 Đóng góp tự nguyện",
@@ -32,7 +32,7 @@ FEATURE_LABELS = {
     "sd_4_4": "4.4 Quyết tâm chống tham nhũng của chính quyền địa phương",
     "sd_6_1": "6.1 Y tế công lập",
     "sd_6_3": "6.3 Cơ sở hạ tầng căn bản",
-    # d6 jump +0.715 tại 2021 — được loại khỏi mô hình
+
     "d1": "Chiều 1 – Tham gia ở cấp cơ sở",
     "d2": "Chiều 2 – Minh bạch",
     "d3": "Chiều 3 – Trách nhiệm giải trình",
