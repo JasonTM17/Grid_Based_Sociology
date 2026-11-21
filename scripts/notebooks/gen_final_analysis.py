@@ -354,6 +354,108 @@ assert abs(ari_all - reference.loc["DBSCAN eps=0.2", "ari_vs_sting"]) <= 0.0005
 print(f"ARI STING–DBSCAN trên toàn bộ mẫu (gồm nhãn nhiễu): {ari_all:.3f}.")
 print(f"ARI STING–DBSCAN trên tập giao các điểm thuộc cụm: {ari_shared:.3f}.")"""))
 
+cd(nbf.v4.new_code_cell(r"""from matplotlib.patches import Ellipse
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import cdist
+from scripts.common.fig_style import CLUSTER_COLORS
+
+with style_context():
+    # Hình A: So sánh phân bố 2D của STING, K-means và DBSCAN trên 808 điểm 2011-2023
+    fig_cmp, axes_cmp = plt.subplots(1, 3, figsize=(13.2, 4.35), dpi=150, sharex=True, sharey=True, layout="constrained")
+    n_db_clusters = len(set(dbscan_labels[dbscan_labels >= 0]))
+    cmp_specs = (
+        (axes_cmp[0], train_labels, f"1. STING (16×16, min_count=5)\n{sting.n_clusters_} cụm · {int((train_labels == -1).sum())} nhiễu ({(train_labels == -1).mean():.1%})"),
+        (axes_cmp[1], kmeans_labels, f"2. K-Means (k=2, k-means++)\n2 cụm ({int((kmeans_labels == 0).sum())} + {int((kmeans_labels == 1).sum())}) · 0 nhiễu"),
+        (axes_cmp[2], dbscan_labels, f"3. DBSCAN (ε=0,2, min_samples=5)\n{n_db_clusters} cụm · {int((dbscan_labels == -1).sum())} nhiễu ({(dbscan_labels == -1).mean():.1%})"),
+    )
+    for ax_c, lbls_c, ttl_c in cmp_specs:
+        if ax_c is axes_cmp[0]:
+            _draw_sting_grid(ax_c, sting)
+        ns_c = lbls_c == -1
+        if np.any(ns_c):
+            ax_c.scatter(train_scaled[ns_c, 0], train_scaled[ns_c, 1], s=16, color=PALETTE["gray"],
+                         marker="x", linewidths=0.85, label=f"Nhiễu −1 ({int(ns_c.sum())})", zorder=2.5)
+        for cid_c in sorted(set(lbls_c[lbls_c >= 0])):
+            mk_c = lbls_c == cid_c
+            ax_c.scatter(train_scaled[mk_c, 0], train_scaled[mk_c, 1], s=10,
+                         color=CLUSTER_COLORS.get(cid_c, PALETTE["purple"]), alpha=0.72, linewidths=0,
+                         label=f"Cụm {cid_c} ({int(mk_c.sum())})", zorder=2.2)
+        ax_c.set_title(ttl_c, fontsize=10.2)
+        ax_c.grid(alpha=0.14)
+        ax_c.legend(loc="upper left", fontsize=7.5, framealpha=0.92, ncols=2 if cid_c >= 2 or np.any(ns_c) else 1)
+    axes_cmp[0].set_ylabel("6.1 Y tế công lập (z-score)")
+    axes_cmp[1].set_xlabel("4.2 Kiểm soát tham nhũng dịch vụ công (z-score)")
+    fig_cmp.suptitle("Đối chiếu trực quan STING, K-means và DBSCAN trên 808 quan sát PAPI (2011–2023)", fontsize=12.2)
+    plt.show()
+
+    # Hình B: Bốn khoảng cách Linkage & ghép vòng lồng nhau + Dendrogram (Day 9 slides 35-47)
+    a_pts = np.array([[0.7, 1.2], [1.1, 2.0], [1.5, 1.0], [1.8, 1.7], [0.9, 2.5]])
+    b_pts = np.array([[4.1, 2.3], [4.5, 3.2], [5.1, 2.6], [4.8, 1.6], [5.4, 2.1]])
+    d_ab = cdist(a_pts, b_pts)
+    i_min, j_min = np.unravel_index(np.argmin(d_ab), d_ab.shape)
+    i_max, j_max = np.unravel_index(np.argmax(d_ab), d_ab.shape)
+    mu_a, mu_b = a_pts.mean(axis=0), b_pts.mean(axis=0)
+    pts6 = np.array([[0.8, 1.0], [1.3, 1.25], [4.6, 3.2], [5.1, 3.45], [1.05, 1.85], [4.85, 2.55]])
+    z6 = linkage(pts6, method="single")
+    members6 = {i: [i] for i in range(len(pts6))}
+
+    fig_hc, (ax_lnk, ax_2d, ax_dn) = plt.subplots(1, 3, figsize=(13.4, 4.4), dpi=150, layout="constrained")
+    for pa in a_pts:
+        for pb in b_pts:
+            ax_lnk.plot([pa[0], pb[0]], [pa[1], pb[1]], "-", color="#94A3B8", alpha=0.22, lw=0.75, zorder=1)
+    ax_lnk.plot([], [], "-", color="#94A3B8", lw=1.4, label=f"#4 Average = {d_ab.mean():.2f}")
+    ax_lnk.plot([a_pts[i_min, 0], b_pts[j_min, 0]], [a_pts[i_min, 1], b_pts[j_min, 1]],
+                "-", color="#D55E00", lw=2.4, label=f"#1 Single = {d_ab[i_min, j_min]:.2f}", zorder=4)
+    ax_lnk.plot([a_pts[i_max, 0], b_pts[j_max, 0]], [a_pts[i_max, 1], b_pts[j_max, 1]],
+                "--", color=PALETTE["purple"], lw=2.0, label=f"#2 Complete = {d_ab[i_max, j_max]:.2f}", zorder=4)
+    ax_lnk.scatter([mu_a[0], mu_b[0]], [mu_a[1], mu_b[1]], marker="*", s=160, color="#0F766E", zorder=6)
+    ax_lnk.plot([mu_a[0], mu_b[0]], [mu_a[1], mu_b[1]], "-.", color="#0F766E", lw=2.0,
+                label=f"#3 Centroid = {np.linalg.norm(mu_a - mu_b):.2f}", zorder=5)
+    ax_lnk.scatter(a_pts[:, 0], a_pts[:, 1], s=48, color=PALETTE["blue"], label="Cụm A", zorder=5)
+    ax_lnk.scatter(b_pts[:, 0], b_pts[:, 1], s=48, color=PALETTE["green"], label="Cụm B", zorder=5)
+    ax_lnk.set_xlim(0.2, 5.9)
+    ax_lnk.set_ylim(0.5, 4.1)
+    ax_lnk.set_title("1. Bốn khoảng cách Linkage (Day 9 tr.35)", fontsize=10.2)
+    ax_lnk.set_xlabel("x1")
+    ax_lnk.set_ylabel("x2")
+    ax_lnk.grid(alpha=0.16)
+    ax_lnk.legend(loc="upper left", fontsize=7.3, framealpha=0.92, ncols=2)
+
+    ax_2d.scatter(pts6[:, 0], pts6[:, 1], s=65, color="#1E3D5E", zorder=5)
+    for idx_p, (px, py) in enumerate(pts6):
+        ax_2d.text(px + 0.12, py + 0.08, f"P{idx_p}", fontsize=9, fontweight="bold", color="#0F2B46")
+    ring_cols = (PALETTE["blue"], PALETTE["green"], PALETTE["orange"], PALETTE["purple"], "#64748B")
+    for step_i, row in enumerate(z6):
+        c1, c2, dist, _ = int(row[0]), int(row[1]), float(row[2]), row[3]
+        merged = members6[c1] + members6[c2]
+        members6[len(pts6) + step_i] = merged
+        sub = pts6[merged]
+        cx, cy = sub.mean(axis=0)
+        sx = max(0.82, (sub[:, 0].max() - sub[:, 0].min()) + 0.55 + 0.18 * step_i)
+        sy = max(0.72, (sub[:, 1].max() - sub[:, 1].min()) + 0.50 + 0.18 * step_i)
+        ax_2d.add_patch(Ellipse((cx, cy), width=sx, height=sy, facecolor="none",
+                                edgecolor=ring_cols[step_i], linestyle="-" if step_i < 4 else "--",
+                                linewidth=1.45, label=f"Bước {step_i + 1} (d={dist:.2f})", zorder=2))
+    ax_2d.set_xlim(0.1, 6.2)
+    ax_2d.set_ylim(0.2, 4.4)
+    ax_2d.set_title("2. Ghép vòng từ dưới lên (tr.37–43)", fontsize=10.2)
+    ax_2d.set_xlabel("x1")
+    ax_2d.grid(alpha=0.16)
+    ax_2d.legend(loc="lower right", fontsize=7.5, framealpha=0.94)
+
+    heights6 = z6[:, 2]
+    cut_i = int(np.argmax(np.diff(heights6)))
+    thr6 = float((heights6[cut_i] + heights6[cut_i + 1]) / 2)
+    k6 = len(pts6) - (cut_i + 1)
+    dendrogram(z6, ax=ax_dn, labels=[f"P{i}" for i in range(len(pts6))], color_threshold=thr6)
+    ax_dn.axhline(thr6, color="#D55E00", ls="--", lw=1.6, label=f"Cắt ngang d = {thr6:.2f} → k = {k6} cụm")
+    ax_dn.set_ylim(0.0, float(heights6.max()) * 1.18)
+    ax_dn.set_title("3. Dendrogram & mẹo chọn k (tr.44–47)", fontsize=10.2)
+    ax_dn.set_ylabel("Khoảng cách ghép")
+    ax_dn.legend(loc="upper left", fontsize=7.8, framealpha=0.92)
+    fig_hc.suptitle("Day 9 Hierarchical Clustering: Bốn Linkage & Cắt Dendrogram trên 2D", fontsize=12.5)
+    plt.show()"""))
+
 md(nbf.v4.new_markdown_cell("## 3. STING theo từng năm"))
 
 cd(nbf.v4.new_code_cell("""per_year = pd.read_csv(ROOT / "results/per_year.csv")
@@ -632,7 +734,7 @@ print(f"Day 6 Logistic holdout 2023→2024 ({len(yc_te)} tỉnh): "
       f"Binary Cross-Entropy = {bce_loss:.4f} | Acc = {clf_acc:.3f} | Macro-F1 = {clf_mf1:.3f}.")
 
 with style_context():
-    fig, (ax_reg, ax_log) = plt.subplots(1, 2, figsize=(11.6, 4.35), dpi=150, layout="constrained")
+    fig, (ax_reg, ax_poly, ax_log) = plt.subplots(1, 3, figsize=(13.4, 4.4), dpi=150, layout="constrained")
     # Trái: Ridge + đoạn phần dư dọc ε_i
     lo_r = float(min(y_true_reg.min(), y_pred_ridge.min())) - 0.03
     hi_r = float(max(y_true_reg.max(), y_pred_ridge.max())) + 0.03
@@ -640,15 +742,36 @@ with style_context():
     for idx_i, (yt, yp) in enumerate(zip(y_true_reg, y_pred_ridge, strict=True)):
         ax_reg.plot([yp, yp], [yp, yt], "-", color="#D55E00", alpha=0.58, lw=1.05,
                     label="Phần dư ε_i = y_i − ŷ_i" if idx_i == 0 else None, zorder=2)
-    ax_reg.scatter(y_pred_ridge, y_true_reg, s=30, color=PALETTE["blue"], edgecolors="white", linewidths=0.5,
+    ax_reg.scatter(y_pred_ridge, y_true_reg, s=28, color=PALETTE["blue"], edgecolors="white", linewidths=0.5,
                    label="Quan sát 2024 (n = 59)", zorder=3)
     ax_reg.set_xlim(lo_r, hi_r)
     ax_reg.set_ylim(lo_r, hi_r)
     ax_reg.set_xlabel("Điểm dự báo Ridge ŷ (2023 → 2024)")
-    ax_reg.set_ylabel("Điểm 6.1 Y tế công lập thực tế y (2024)")
-    ax_reg.set_title(f"Day 6 Hồi quy Ridge & phần dư ε_i\nMAE = {ridge_mae:.4f} · Holdout R² = {ridge_r2:.3f}", fontsize=10.5)
+    ax_reg.set_ylabel("Điểm 6.1 thực tế y (2024)")
+    ax_reg.set_title(f"1. Day 6 Hồi quy Ridge & phần dư ε_i\nMAE = {ridge_mae:.4f} · Holdout R² = {ridge_r2:.3f}", fontsize=10.0)
     ax_reg.grid(alpha=0.18)
-    ax_reg.legend(loc="upper left", fontsize=8.5, framealpha=0.92)
+    ax_reg.legend(loc="upper left", fontsize=7.8, framealpha=0.92)
+
+    # Giữa: Polynomial Regression bậc m <= n (Day 6 tr.13-14 & 19)
+    x_d6 = np.array([1.5, 2.0, 3.5, 5.0, 6.5, 7.0])
+    y_d6 = np.array([-3.0, -3.5, 0.5, -1.0, 2.5, 1.5])
+    x_gd = np.linspace(1.2, 7.3, 250)
+    for deg_d, col_d, ls_d, lbl_d in (
+        (1, "#64748B", "--", "m = 1 (tuyến tính)"),
+        (2, PALETTE["green"], "-.", "m = 2 (bậc hai)"),
+        (5, "#D55E00", "-", "m = 5 (6 ẩn/6 điểm: Overfit!)"),
+    ):
+        xp = np.column_stack([x_d6 ** p for p in range(deg_d + 1)])
+        bp = np.linalg.solve(xp.T @ xp, xp.T @ y_d6)
+        xg = np.column_stack([x_gd ** p for p in range(deg_d + 1)])
+        ax_poly.plot(x_gd, xg @ bp, ls=ls_d, color=col_d, lw=1.8 if deg_d == 5 else 1.5, label=lbl_d, zorder=3 if deg_d == 5 else 2)
+    ax_poly.scatter(x_d6, y_d6, s=44, color="#1E3D5E", edgecolors="white", linewidths=0.7, zorder=4)
+    ax_poly.set_ylim(-5.2, 5.2)
+    ax_poly.set_xlabel("x (ví dụ 6 điểm Day 6 tr.19)")
+    ax_poly.set_ylabel("y")
+    ax_poly.set_title("2. Day 6 Đa thức m = 1, 2, 5 & Bẫy Overfit\nm = 5 (MSE train = 0, dao động mạnh)", fontsize=10.0)
+    ax_poly.grid(alpha=0.18)
+    ax_poly.legend(loc="upper left", fontsize=7.6, framealpha=0.92)
 
     # Phải: Logistic Regression Sigmoid & Binary Cross-Entropy
     z_grid = np.linspace(float(logits_te.min()) - 0.6, float(logits_te.max()) + 0.6, 200)
@@ -661,16 +784,16 @@ with style_context():
     rng_j = np.random.default_rng(42)
     y0_j = rng_j.uniform(-0.03, 0.03, size=int(m0.sum()))
     y1_j = 1.0 + rng_j.uniform(-0.03, 0.03, size=int(m1.sum()))
-    ax_log.scatter(logits_te[m0], y0_j, s=42, color="#D55E00", marker="x", linewidths=1.3,
+    ax_log.scatter(logits_te[m0], y0_j, s=40, color="#D55E00", marker="x", linewidths=1.3,
                    label=f"Lớp 0: nhiễu −1 ({int(m0.sum())})", zorder=4)
-    ax_log.scatter(logits_te[m1], y1_j, s=30, color=PALETTE["green"], alpha=0.85, edgecolors="white", linewidths=0.45,
+    ax_log.scatter(logits_te[m1], y1_j, s=28, color=PALETTE["green"], alpha=0.85, edgecolors="white", linewidths=0.45,
                    label=f"Lớp 1: vùng dày ({int(m1.sum())})", zorder=4)
     ax_log.set_ylim(-0.14, 1.15)
     ax_log.set_xlabel("Logit tuyến tính z = β₀ + wᵀx")
-    ax_log.set_ylabel("Xác suất dự báo P(vùng dày | x)")
-    ax_log.set_title(f"Day 6 Logistic Sigmoid (nhãn STING 2024)\nBinary Cross-Entropy = {bce_loss:.4f} · Acc = {clf_acc:.3f}", fontsize=10.5)
+    ax_log.set_ylabel("Xác suất P(vùng dày | x)")
+    ax_log.set_title(f"3. Day 6 Logistic Sigmoid (nhãn STING)\nBinary Cross-Entropy = {bce_loss:.4f} · Acc = {clf_acc:.3f}", fontsize=10.0)
     ax_log.grid(alpha=0.18)
-    ax_log.legend(loc="center left", fontsize=8.2, framealpha=0.92)
+    ax_log.legend(loc="center left", fontsize=7.6, framealpha=0.92)
     plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("""## Phụ lục C. Đối chiếu PCI và nghèo GSO

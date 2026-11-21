@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.patches import FancyArrowPatch, Rectangle
+from matplotlib.patches import Ellipse, FancyArrowPatch, Rectangle
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
@@ -470,4 +470,235 @@ def sensitivity_grid_figure(points: np.ndarray):
         for ax in axes[:, 0]:
             ax.set_ylabel("6.1 Y tế công lập (z-score)")
         fig.suptitle(f"Độ nhạy tham số STING trên {len(points)} quan sát PAPI", fontsize=13)
+        return fig
+
+
+def hierarchy_levels_figure(points: np.ndarray):
+    """Vẽ đủ 3 mức lưới phân cấp STING (Level 0: 1×1, Level 1: 4×4, Level 2: 16×16)."""
+    model = STING(n_levels=GRID["n_levels"], factor=GRID["factor"], min_count=GRID["min_count"]).fit(points)
+    lo, hi = model.bounds_min_, model.bounds_max_
+    pad_x, pad_y = (hi[0] - lo[0]) * 0.06, (hi[1] - lo[1]) * 0.06
+    with style_context():
+        fig, axes = plt.subplots(
+            1, 3, figsize=(13.2, 4.35), dpi=150, sharex=True, sharey=True, layout="constrained"
+        )
+        for ax, lvl in zip(axes, (0, 1, 2), strict=True):
+            lab = model.cluster(level=lvl, connectivity=GRID["connectivity"])
+            res = model.factor ** lvl
+            step = (hi - lo) / res
+            for i in range(res + 1):
+                lw = 0.7 if lvl == 0 else (0.6 if lvl == 1 else 0.35)
+                ax.axvline(lo[0] + i * step[0], color="#CFD9E3", linewidth=lw, zorder=0.5)
+                ax.axhline(lo[1] + i * step[1], color="#CFD9E3", linewidth=lw, zorder=0.5)
+            for idx, cid in model.label_of_.items():
+                cell = model.cells_[lvl][idx]
+                col = CLUSTER_COLORS.get(cid, PALETTE["purple"])
+                ax.add_patch(Rectangle(
+                    cell.bounds_min, *(cell.bounds_max - cell.bounds_min),
+                    facecolor="#EBF5F5" if lvl == 0 else "none",
+                    edgecolor=col, linewidth=1.0 if lvl < 2 else 0.8, alpha=0.8, zorder=1.5,
+                ))
+            noise = lab == -1
+            if np.any(noise):
+                ax.scatter(
+                    points[noise, 0], points[noise, 1], s=16, color=PALETTE["gray"],
+                    marker="x", linewidths=0.9, label=f"Nhiễu ({int(noise.sum())})", zorder=2.5,
+                )
+            for cid in sorted(set(lab[lab >= 0])):
+                in_c = lab == cid
+                ax.scatter(
+                    points[in_c, 0], points[in_c, 1], s=10,
+                    color=CLUSTER_COLORS.get(cid, PALETTE["purple"]), alpha=0.72,
+                    linewidths=0, label=f"Cụm {cid} ({int(in_c.sum())})", zorder=2.2,
+                )
+            if lvl == 1:
+                for cell in model.cells_[1].values():
+                    if cell.count > 0:
+                        cx, cy = (cell.bounds_min + cell.bounds_max) / 2.0
+                        dense = cell.count >= model.min_count_
+                        ax.text(
+                            cx, cy, str(cell.count), ha="center", va="center", fontsize=8.5,
+                            fontweight="bold" if dense else "normal",
+                            color="#0F2B46" if dense else "#8A5A00",
+                            bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.78),
+                            zorder=4,
+                        )
+            titles = {
+                0: f"Mức 0: Lưới 1 × 1 (Ô gốc)\n1 ô · {len(points)} điểm · {model.n_clusters_} cụm",
+                1: f"Mức 1: Lưới 4 × 4 (16 ô)\n{len(model.label_of_)} ô dày · {model.n_clusters_} cụm · {int(noise.sum())} nhiễu",
+                2: f"Mức 2: Lưới 16 × 16 (256 ô)\n{len(model.label_of_)} ô dày · {model.n_clusters_} cụm · {int(noise.sum())} nhiễu",
+            }
+            ax.set_title(titles[lvl], fontsize=10.5)
+            ax.grid(alpha=0.12)
+            ax.legend(loc="upper left", fontsize=7.6, framealpha=0.92, ncols=2 if lvl == 2 else 1)
+
+        axes[0].set_xlim(lo[0] - pad_x, hi[0] + pad_x)
+        axes[0].set_ylim(lo[1] - pad_y, hi[1] + pad_y)
+        axes[0].set_ylabel("6.1 Y tế công lập (z-score)")
+        axes[1].set_xlabel("4.2 Kiểm soát tham nhũng dịch vụ công (z-score)")
+        fig.suptitle(f"Lưới phân cấp 3 mức của STING trên {len(points)} quan sát PAPI", fontsize=12.5)
+        return fig
+
+
+def kmeans_mechanism_and_trap_figure():
+    """Minh họa 3 đồ thị Day 9 cho K-Means: dịch chuyển tâm, BẪY khởi tạo xấu và WCSS."""
+    from scipy.spatial.distance import cdist
+    from sklearn.datasets import make_blobs
+
+    rng = np.random.default_rng(42)
+    X_blobs, _ = make_blobs(
+        n_samples=150, centers=[(-4, -3), (0, 4), (5, -1)],
+        cluster_std=[0.9, 0.8, 1.0], random_state=42,
+    )
+    X_noise = rng.uniform(low=[-8, -7], high=[9, 8], size=(12, 2))
+    Xs = StandardScaler().fit_transform(np.vstack([X_blobs, X_noise]))
+
+    c0 = np.array([[-1.6, 0.2], [0.2, -1.5], [1.2, 0.8]], dtype=float)
+    cur = c0.copy()
+    for _ in range(25):
+        labs = np.argmin(cdist(Xs, cur), axis=1)
+        nxt = np.array([Xs[labs == i].mean(axis=0) for i in range(3)])
+        if np.allclose(nxt, cur, atol=1e-4):
+            cur = nxt
+            break
+        cur = nxt
+    wcss_ok = float(np.sum((Xs - cur[labs]) ** 2))
+
+    bad_init = np.array([[-1.10, -0.80], [-1.10, -1.20], [0.60, 0.40]])
+    km_trap = KMeans(n_clusters=3, init=bad_init, n_init=1, max_iter=50, random_state=42).fit(Xs)
+    pal3 = (PALETTE["blue"], PALETTE["orange"], PALETTE["green"])
+
+    with style_context():
+        fig, axes = plt.subplots(
+            1, 3, figsize=(13.2, 4.35), dpi=150, sharex=True, sharey=True, layout="constrained"
+        )
+        # Panel 1: Cơ chế dịch chuyển tâm K-Means
+        for g in range(3):
+            mk = labs == g
+            axes[0].scatter(Xs[mk, 0], Xs[mk, 1], s=14, color=pal3[g], alpha=0.72, linewidths=0)
+            axes[0].add_patch(FancyArrowPatch(
+                c0[g], cur[g], arrowstyle="->", mutation_scale=12, lw=1.7, color="#111111", zorder=5,
+            ))
+        axes[0].scatter(c0[:, 0], c0[:, 1], marker="*", s=160, facecolors="white",
+                        edgecolors="#111111", linewidths=1.1, label="Tâm ban đầu μ⁽⁰⁾", zorder=6)
+        axes[0].scatter(cur[:, 0], cur[:, 1], marker="X", s=140, color="#111111",
+                        edgecolors="white", linewidths=0.9, label="Tâm hội tụ μ*", zorder=7)
+        axes[0].set_title(f"1. K-Means dịch chuyển tâm (Day 9 tr.11–16)\nHội tụ 3 nhóm chuẩn · WCSS = {wcss_ok:.2f}", fontsize=10.2)
+        axes[0].set_ylabel("x2 (z-score)")
+        axes[0].legend(loc="upper left", fontsize=7.8, framealpha=0.92)
+
+        # Panel 2: Bẫy khởi tạo xấu (TRAP!)
+        for g in range(3):
+            mk = km_trap.labels_ == g
+            axes[1].scatter(Xs[mk, 0], Xs[mk, 1], s=14, color=pal3[g], alpha=0.72, linewidths=0)
+        axes[1].scatter(bad_init[:, 0], bad_init[:, 1], marker="^", s=95, facecolors="#FDE047",
+                        edgecolors="#B04E27", linewidths=1.1, label="Khởi tạo xấu", zorder=6)
+        axes[1].scatter(km_trap.cluster_centers_[:, 0], km_trap.cluster_centers_[:, 1], marker="X",
+                        s=140, color="#111111", edgecolors="white", linewidths=0.9, label="Tâm kẹt bẫy", zorder=7)
+        axes[1].set_title(f"2. BẪY khởi tạo xấu (TRAP! — tr.19–24)\nWCSS = {km_trap.inertia_:.2f} (chẻ 1, gộp nhầm 2 nhóm)", fontsize=10.2)
+        axes[1].set_xlabel("x1 (z-score)")
+        axes[1].legend(loc="upper left", fontsize=7.8, framealpha=0.92)
+
+        # Panel 3: Các đoạn WCSS từ điểm tới tâm cụm
+        for pt, lbl in zip(Xs, labs, strict=True):
+            c = cur[int(lbl)]
+            axes[2].plot([pt[0], c[0]], [pt[1], c[1]], "-", color=pal3[int(lbl)], alpha=0.25, lw=0.8, zorder=1)
+        for g in range(3):
+            mk = labs == g
+            axes[2].scatter(Xs[mk, 0], Xs[mk, 1], s=14, color=pal3[g], alpha=0.82, linewidths=0, zorder=3)
+        axes[2].scatter(cur[:, 0], cur[:, 1], marker="X", s=140, color="#111111",
+                        edgecolors="white", linewidths=0.9, label="Tâm cụm", zorder=6)
+        axes[2].set_title(f"3. WCSS trên đồ thị 2D (tr.27–30)\nTổng Σ‖xᵢ − μ‖² = {wcss_ok:.2f}", fontsize=10.2)
+        axes[2].legend(loc="upper left", fontsize=7.8, framealpha=0.92)
+
+        for ax in axes:
+            ax.grid(alpha=0.16)
+        fig.suptitle("Day 9 Clustering: Cơ chế K-Means, Bẫy khởi tạo (TRAP!) & Độ gọn WCSS", fontsize=12.5)
+        return fig
+
+
+def hc_linkage_and_dendrogram_figure():
+    """Minh họa 4 kiểu Linkage, ghép cụm vòng lồng nhau & Dendrogram cắt ngang (Day 9 tr.35–47)."""
+    from scipy.cluster.hierarchy import dendrogram, linkage
+    from scipy.spatial.distance import cdist
+
+    a_pts = np.array([[0.7, 1.2], [1.1, 2.0], [1.5, 1.0], [1.8, 1.7], [0.9, 2.5]])
+    b_pts = np.array([[4.1, 2.3], [4.5, 3.2], [5.1, 2.6], [4.8, 1.6], [5.4, 2.1]])
+    d_ab = cdist(a_pts, b_pts)
+    i_min, j_min = np.unravel_index(np.argmin(d_ab), d_ab.shape)
+    i_max, j_max = np.unravel_index(np.argmax(d_ab), d_ab.shape)
+    mu_a, mu_b = a_pts.mean(axis=0), b_pts.mean(axis=0)
+
+    pts6 = np.array([
+        [0.8, 1.0], [1.3, 1.25],
+        [4.6, 3.2], [5.1, 3.45],
+        [1.05, 1.85],
+        [4.85, 2.55],
+    ])
+    z6 = linkage(pts6, method="single")
+    n6 = len(pts6)
+    members = {i: [i] for i in range(n6)}
+
+    with style_context():
+        fig, (ax_lnk, ax_2d, ax_dn) = plt.subplots(1, 3, figsize=(13.4, 4.4), dpi=150, layout="constrained")
+        # Panel 1: 4 khoảng cách Linkage trên cùng mặt phẳng 2D
+        for pa in a_pts:
+            for pb in b_pts:
+                ax_lnk.plot([pa[0], pb[0]], [pa[1], pb[1]], "-", color="#94A3B8", alpha=0.22, lw=0.75, zorder=1)
+        ax_lnk.plot([], [], "-", color="#94A3B8", lw=1.4, label=f"#4 Average = {d_ab.mean():.2f}")
+        ax_lnk.plot([a_pts[i_min, 0], b_pts[j_min, 0]], [a_pts[i_min, 1], b_pts[j_min, 1]],
+                    "-", color="#D55E00", lw=2.4, label=f"#1 Single = {d_ab[i_min, j_min]:.2f}", zorder=4)
+        ax_lnk.plot([a_pts[i_max, 0], b_pts[j_max, 0]], [a_pts[i_max, 1], b_pts[j_max, 1]],
+                    "--", color=PALETTE["purple"], lw=2.0, label=f"#2 Complete = {d_ab[i_max, j_max]:.2f}", zorder=4)
+        ax_lnk.scatter([mu_a[0], mu_b[0]], [mu_a[1], mu_b[1]], marker="*", s=160, color="#0F766E", zorder=6)
+        ax_lnk.plot([mu_a[0], mu_b[0]], [mu_a[1], mu_b[1]], "-.", color="#0F766E", lw=2.0,
+                    label=f"#3 Centroid = {np.linalg.norm(mu_a - mu_b):.2f}", zorder=5)
+        ax_lnk.scatter(a_pts[:, 0], a_pts[:, 1], s=48, color=PALETTE["blue"], label="Cụm A", zorder=5)
+        ax_lnk.scatter(b_pts[:, 0], b_pts[:, 1], s=48, color=PALETTE["green"], label="Cụm B", zorder=5)
+        ax_lnk.set_xlim(0.2, 5.9)
+        ax_lnk.set_ylim(0.5, 4.1)
+        ax_lnk.set_title("1. Bốn khoảng cách Linkage (Day 9 tr.35)", fontsize=10.2)
+        ax_lnk.set_xlabel("x1")
+        ax_lnk.set_ylabel("x2")
+        ax_lnk.grid(alpha=0.16)
+        ax_lnk.legend(loc="upper left", fontsize=7.3, framealpha=0.92, ncols=2)
+
+        # Panel 2: Vòng bao ghép dần 6 điểm từ dưới lên
+        ax_2d.scatter(pts6[:, 0], pts6[:, 1], s=65, color="#1E3D5E", zorder=5)
+        for idx_p, (px, py) in enumerate(pts6):
+            ax_2d.text(px + 0.12, py + 0.08, f"P{idx_p}", fontsize=9, fontweight="bold", color="#0F2B46")
+        ring_cols = (PALETTE["blue"], PALETTE["green"], PALETTE["orange"], PALETTE["purple"], "#64748B")
+        for step_i, row in enumerate(z6):
+            c1, c2, dist, _ = int(row[0]), int(row[1]), float(row[2]), row[3]
+            merged = members[c1] + members[c2]
+            members[n6 + step_i] = merged
+            sub = pts6[merged]
+            cx, cy = sub.mean(axis=0)
+            span_x = max(0.82, (sub[:, 0].max() - sub[:, 0].min()) + 0.55 + 0.18 * step_i)
+            span_y = max(0.72, (sub[:, 1].max() - sub[:, 1].min()) + 0.50 + 0.18 * step_i)
+            ax_2d.add_patch(Ellipse(
+                (cx, cy), width=span_x, height=span_y, facecolor="none",
+                edgecolor=ring_cols[step_i], linestyle="-" if step_i < 4 else "--",
+                linewidth=1.45, label=f"Bước {step_i + 1} (d={dist:.2f})", zorder=2,
+            ))
+        ax_2d.set_xlim(0.1, 6.2)
+        ax_2d.set_ylim(0.2, 4.4)
+        ax_2d.set_title("2. Ghép vòng từ dưới lên (tr.37–43)", fontsize=10.2)
+        ax_2d.set_xlabel("x1")
+        ax_2d.grid(alpha=0.16)
+        ax_2d.legend(loc="lower right", fontsize=7.5, framealpha=0.94)
+
+        # Panel 3: Dendrogram tương ứng & cắt ngang
+        heights6 = z6[:, 2]
+        cut_i = int(np.argmax(np.diff(heights6)))
+        thr6 = float((heights6[cut_i] + heights6[cut_i + 1]) / 2)
+        k6 = n6 - (cut_i + 1)
+        dendrogram(z6, ax=ax_dn, labels=[f"P{i}" for i in range(n6)], color_threshold=thr6)
+        ax_dn.axhline(thr6, color="#D55E00", ls="--", lw=1.6, label=f"Cắt ngang d = {thr6:.2f} → k = {k6} cụm")
+        ax_dn.set_ylim(0.0, float(heights6.max()) * 1.18)
+        ax_dn.set_title("3. Dendrogram & mẹo chọn k (tr.44–47)", fontsize=10.2)
+        ax_dn.set_ylabel("Khoảng cách ghép")
+        ax_dn.legend(loc="upper left", fontsize=7.8, framealpha=0.92)
+
+        fig.suptitle("Day 9 Hierarchical Clustering: Bốn Linkage & Cắt Dendrogram trên 2D", fontsize=12.5)
         return fig

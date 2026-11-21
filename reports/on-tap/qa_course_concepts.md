@@ -286,7 +286,7 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
 
 53. **Tiền xử lý Day 4 lọc rồi sao vẫn còn 19,7% (171/869) và 19,6% (158/808) điểm nhiễu −1?** — Tiền xử lý chỉ làm sạch bản ghi thiếu (`dropna` loại `11/819` năm `2011–2023` và `2/63` năm `2024`, giữ `869` dòng đủ 2 chỉ tiêu trong khoảng hợp lệ `[0.25, 2.5]`). Còn nhãn `−1` của STING là **đầu ra của thuật toán phân cụm dựa trên mật độ ô 2D**: điểm nào rơi vào ô lưới `16 × 16` có dưới `5` quan sát tham chiếu thì nhận `−1`, hoàn toàn không phải dữ liệu lỗi bị bỏ sót.
    - **Hỏi bẫy:** "Vậy nói 19,7% dữ liệu là dữ liệu rác chưa sạch đúng không?" — Sai hoàn toàn; `162/171` điểm `−1` (và `151/158` trên `2011–2023`) đều nằm gọn trong khung sạch `|z| ≤ 3`.
-   - **Repo:** `results/preprocessing_audit.md:19-26`; `scripts/notebooks/gen_submission_demo.py:299-335`.
+   - **Repo:** `results/preprocessing_audit.md:19-26`; `scripts/notebooks/gen_submission_demo.py:305-348`.
 
 54. **Nếu xóa hết các điểm `|z| > 3` rồi chạy lại STING thì có hết nhãn −1 không?** — Không — ngược lại tỷ lệ nhiễu còn **tăng thêm**. Lý do: STING tự chia lưới đều trên hộp bao `[min, max]` của dữ liệu đưa vào. Khi bỏ `7` điểm `|z| > 3` trên `2011–2023` (`808 → 801`), khung `[min, max]` bị co hẹp, kích thước từng ô lưới nhỏ lại và đường chia ô dịch chuyển, làm số điểm rơi vào ô thưa tăng từ `158/808 (19,6%)` lên `197/801 (24,6%)` (`4` cụm); trên `869 → 860` cũng tăng từ `171/869 (19,7%)` lên `173/860 (20,1%)`.
    - **Hỏi bẫy:** "Co ô lại nhỏ hơn thì điểm không đáng ra phải cụm chặt hơn sao?" — Ô nhỏ hơn lại chứa ít điểm hơn trên mỗi ô nên càng dễ rớt xuống dưới ngưỡng `min_count = 5`!
@@ -294,16 +294,16 @@ _Quy tắc: ≤60 giây/câu; mỗi thành viên phải giải thích được t
 
 55. **Đổi quy tắc kề 8 hướng (`connectivity=2`) có giảm được nhiễu không; muốn giảm nhiễu thì đổi gì?** — Đổi `connectivity=2` (cho nối chéo góc) **không giảm bất kỳ một điểm nhiễu nào** (`158/808` trên `2011–2023` và `171/869` trên `2011–2024` giữ nguyên tuyệt đối), chỉ gộp `56` ô dày từ `3` cụm thành `1` cụm duy nhất vì chạm góc. Nhiễu chỉ thay đổi khi đổi tiêu chí "ô dày": hạ `min_count` (ví dụ `5 → 3` giảm nhiễu còn `9,8%`), giảm `cluster_level` (`2 → 1`, lưới `4 × 4` giảm nhiễu còn `0,7%`), hoặc thay đổi `factor`.
    - **Hỏi bẫy:** "Lý do không giảm nhiễu là gì trong code?" — Vì `dense_set` chỉ lọc theo `count >= min_count`, còn `connectivity` chỉ chạy DFS nối các ô đã có trong `dense_set`.
-   - **Repo:** `src/sting.py:133-168`; `scripts/notebooks/gen_submission_demo.py:525-545`.
+   - **Repo:** `src/sting.py:133-168`; `scripts/notebooks/gen_submission_demo.py:548-566`.
 
 56. **Trong 13 tỉnh nhãn −1 năm 2024, có tỉnh nào bị `outside_grid` (tràn biên) hoặc `|z| > 3` không?** — Không một tỉnh nào: `0/61` tỉnh năm `2024` có `|z| > 3` và `0` tỉnh `outside_grid`. Cả `13/13` tỉnh nhãn `−1` đều nằm trọn trong miền lưới tham chiếu `2011–2023`, với `|z|` lớn nhất trên cả hai trục chỉ là `2,1299` (Tây Ninh), và nhận nhãn `−1` thuần túy vì rơi vào ô thưa (`sparse_cell`) có từ `0` đến `3` quan sát tham chiếu (`< 5`).
    - **Hỏi bẫy:** "Đoán xem tỉnh nào có `reference_count = 0`?" — Quảng Ninh (`sd_4_2 = 2,2598; sd_6_1 = 1,8891`, ô `(14, 9)` chưa từng có điểm tham chiếu nào `2011–2023`).
-   - **Repo:** `results/papi_observed_grid_2024.csv:1-64`; `scripts/notebooks/gen_submission_demo.py:609-620`.
+   - **Repo:** `results/papi_observed_grid_2024.csv:1-64`; `scripts/notebooks/gen_submission_demo.py:631-648`.
 
 57. **Nhãn nhiễu `−1` có đồng nghĩa tỉnh quản trị yếu kém không?** — Không. Phân tích CSV gán năm 2024 cho thấy 13 tỉnh `sparse_cell` đứng ở hai nhóm rìa đối lập nhau: nhóm đạt **điểm rất cao** ở rìa phải/trên (Tây Ninh `4.2 = 2,285`, Quảng Ninh `4.2 = 2,260`, Bà Rịa - Vũng Tàu `4.2 = 2,258`, Sóc Trăng `4.2 = 2,252`, Bình Thuận `4.2 = 2,218; 6.1 = 2,112`, Hà Tĩnh `6.1 = 2,191`) và nhóm điểm `6.1` thấp hơn ở rìa dưới (Hà Nội `1,686`, Cần Thơ `1,698`). Nhãn `−1` chỉ có nghĩa *"nằm ngoài vùng tập trung phổ biến 2011–2023"*, không gắn phán xét tốt/xấu.
    - **Hỏi bẫy:** "Hà Nội hay Quảng Ninh cũng bị −1 à?" — Đúng; Hà Nội (ô `(10, 5)`, `3` điểm) và Quảng Ninh (ô `(14, 9)`, `0` điểm) đều đủ dữ liệu hợp lệ nhưng thuộc 2 cực khác nhau trên mặt phẳng PAPI 2024.
-   - **Repo:** `results/papi_observed_grid_2024.csv:2,15,29,40,47,50,60,62`; `scripts/notebooks/gen_submission_demo.py:575-590`.
+   - **Repo:** `results/papi_observed_grid_2024.csv:2,15,29,40,47,50,60,62`; `scripts/notebooks/gen_submission_demo.py:595-617`.
 
 58. **Điểm nhiễu `−1` ảnh hưởng thế nào khi tính WCSS, Silhouette và ARI để so với K-Means và DBSCAN?** — K-Means không tạo nhiễu nên WCSS và Silhouette tính trên đủ `100%` điểm (`808` hoặc `869`). STING (`−1 = 158/808`) và DBSCAN (`−1 = 115/808`) loại các điểm rìa thưa nên Silhouette trên tập riêng của mỗi thuật toán trông cao/thấp khác nhau không cùng mẫu số. Vì vậy nhóm khóa thêm **hai quy tắc bắt buộc**: (i) tính Silhouette lại trên **cùng tập giao** được tất cả thuật toán gán cụm (`631/808` hoặc `680/869` điểm), và (ii) khi đọc ARI phải nói rõ tính trên toàn mẫu gồm nhãn `−1` (`0,647`) hay chỉ trên tập giao không nhiễu (`0,431`).
    - **Hỏi bẫy:** "Nếu dùng Silhouette cao hơn (`0,445` vs `0,361`) để kết luận K-Means thắng STING có được không?" — Không; hai con số đó đo trên hai hình học khác nhau (`808` vs `650` điểm) và K-Means ép mọi điểm rìa vào tâm thay vì giữ mục tiêu phát hiện vùng dày/ngoại vi của grid-based clustering.
-   - **Repo:** `results/metrics.csv:2-7`; `scripts/notebooks/gen_final_analysis.py:332-365`; `scripts/notebooks/gen_submission_demo.py:400-427`.
+   - **Repo:** `results/metrics.csv:2-7`; `scripts/notebooks/gen_final_analysis.py:332-365`; `scripts/notebooks/gen_submission_demo.py:423-445`.

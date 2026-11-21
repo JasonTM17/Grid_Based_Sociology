@@ -111,7 +111,8 @@ from scripts.common.midterm_clustering import (
     FEATURES, GRID, THRESHOLDS, K_CANDIDATES, KMEANS_OPTIONS, DBSCAN_OPTIONS, CELL_Z_EXAMPLE,
     fit_grid, clustered_silhouette, comparison_figure, raw_dbscan_radius, scaling_comparison_figure,
     reference_grid_assignments, sting_steps_figure, kmeans_elbow_figure,
-    noise_and_trap_figure, sensitivity_grid_figure,
+    noise_and_trap_figure, sensitivity_grid_figure, hierarchy_levels_figure,
+    kmeans_mechanism_and_trap_figure, hc_linkage_and_dendrogram_figure,
 )
 
 apply_style()
@@ -234,7 +235,14 @@ outlier_result = prep.loc[prep["test"].str.startswith("Đánh dấu ngoại lai"
 print(f"PAPI có {len(panel)} dòng, {panel.shape[1]} cột và {panel.province_code.nunique()} tỉnh.")
 print(f"Mẫu phân cụm gồm {len(complete)} quan sát đủ hai chỉ tiêu, loại {len(panel) - len(complete)} dòng thiếu.")
 print(f"Năm 2024 đóng góp {eligible_2024}/{total_2024} quan sát vào cùng mẫu phân cụm.")
-print(f"Kiểm tra ngoại lai khi tiền xử lý: {outlier_result}. Giữ điểm PAPI để phân cụm.")"""))
+print(f"Kiểm tra ngoại lai khi tiền xử lý: {outlier_result}. Giữ điểm PAPI để phân cụm.")
+
+prep_view = prep[["stage", "test", "result", "decision"]].rename(columns={
+    "stage": "Giai đoạn", "test": "Kiểm tra", "result": "Kết quả", "decision": "Quyết định",
+})
+prep_view["Kiểm tra"] = prep_view["Kiểm tra"].str.replace(", dedup chạy ĐẦU TIÊN", "", regex=False)
+with pd.option_context("display.max_colwidth", None):
+    display(prep_view)"""))
 
 md(nbf.v4.new_markdown_cell("""### 4.2 Tính z-score từ số liệu thật
 
@@ -339,6 +347,9 @@ assert grid_model.label_of_.get(example_cell, -1) == lab[example_mask.to_numpy()
 print(f"Lạng Sơn 2024 vào ô {example_cell} (đếm từ 0), ô có {cell_stats[example_cell].count} quan sát.")
 print(f"Nhãn cụm của điểm này: {grid_model.label_of_.get(example_cell, -1)}.")"""))
 
+cd(nbf.v4.new_code_cell("""fig = hierarchy_levels_figure(Xz)
+plt.show()"""))
+
 cd(nbf.v4.new_code_cell("""fig = noise_and_trap_figure(Xz, grid_model, lab, title_prefix="PAPI 2011–2024")
 plt.show()"""))
 
@@ -370,6 +381,9 @@ distances = np.linalg.norm(km.cluster_centers_ - z_example, axis=1)
 assert distances.argmin() == km.labels_[example_mask.to_numpy()][0]
 print("Khoảng cách từ Lạng Sơn 2024 đến các tâm, theo thứ tự gần đến xa: "
       + " và ".join(f"{distance:.4f}" for distance in sorted(distances)))"""))
+
+cd(nbf.v4.new_code_cell("""fig = kmeans_mechanism_and_trap_figure()
+plt.show()"""))
 
 cd(nbf.v4.new_code_cell("""fig = kmeans_elbow_figure(Xz)
 plt.show()"""))
@@ -443,6 +457,15 @@ for k in (2, 3):
     print(f"Cụm STING lớn nhất: {points_per_cluster[biggest]} điểm. "
           f"K-means k={k} chia các điểm này thành {' + '.join(map(str, sizes))}.")
     display(table)"""))
+
+md(nbf.v4.new_markdown_cell("""**Liên hệ Hierarchical Clustering (Linkage & Dendrogram).** Ngoài STING,
+K-means và DBSCAN, phương pháp phân cụm phân cấp từ dưới lên (Agglomerative)
+đo khoảng cách giữa hai cụm qua 4 quy tắc (`Single`, `Complete`, `Centroid`,
+`Average`) và chọn số cụm bằng đường cắt ngang trên Dendrogram ở khoảng
+trống chiều cao lớn nhất."""))
+
+cd(nbf.v4.new_code_cell("""fig = hc_linkage_and_dendrogram_figure()
+plt.show()"""))
 
 md(nbf.v4.new_markdown_cell("""### 4.6 Cùng thuật toán, trước và sau z-score
 
