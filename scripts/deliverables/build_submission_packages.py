@@ -284,7 +284,7 @@ quản trị hành chính công cấp tỉnh PAPI giai đoạn 2011–2024 (882 
 --------------------------------------------------------------------------------
 {FINAL_NAME}/
 ├── {FINAL_NAME}.docx       Báo cáo tổng kết đồ án (Word, 45 trang)
-├── {FINAL_NAME}.pptx       Slide bảo vệ cuối kỳ (16 trang)
+├── {FINAL_NAME}.pptx       Slide bảo vệ cuối kỳ (10 trang đầu kể cả bìa và 1 trang cảm ơn)
 ├── {notebook}      Notebook phân tích cuối kỳ đã chạy sẵn
 ├── {PREPROCESSING_NOTEBOOK}  Notebook tiền xử lý PAPI 6 bước
 ├── HUONG_DAN.txt             Hướng dẫn cấu trúc và cách chạy

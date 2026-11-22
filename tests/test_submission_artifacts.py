@@ -482,29 +482,49 @@ def test_gate_detects_missing_output_in_memory(submission_notebook: dict):
 def test_optional_final_slides_match_grid_method_and_presentation_scope():
     """Keep the method caveat and teacher-facing results in the oral deck."""
     deck = Presentation(ROOT / "slides/final.pptx")
-    text = "\n".join(
-        shape.text for slide in deck.slides for shape in slide.shapes if shape.has_text_frame
-    )
-    assert len(deck.slides) == 16
+
+    def slide_text(slide):
+        parts = []
+        for shape in slide.shapes:
+            if shape.has_text_frame:
+                parts.append(shape.text)
+            if shape.has_table:
+                parts.extend(cell.text for row in shape.table.rows for cell in row.cells)
+        return "\n".join(parts).strip()
+
+    visible = [slide_text(slide) for slide in deck.slides]
+    assert len(visible) == 11
     assert all(slide.has_notes_slide and slide.notes_slide.notes_text_frame.text.strip()
                for slide in deck.slides)
-    assert "STING rút gọn" in text
-    assert "Cài đặt dùng ngưỡng số đếm" in text
-    assert "STING gốc còn dùng phân phối và kiểm định thống kê" in text
-    assert "23/37 cột đổi thang" not in text
-    assert "28 unit test" not in text
-    assert "Kết quả chính và hướng phát triển" in text
-    assert "Dự báo hai điểm PAPI rồi đối chiếu theo vùng" in text
-    assert "0/11 tỉnh ngoài vùng dày được nhận ra" in text
-    assert "0,0736" in text and "0,0641" in text
-    assert "Cảm ơn thầy và các bạn đã lắng nghe" in text
-    closing_text = "\n".join(
-        shape.text for shape in deck.slides[-1].shapes if shape.has_text_frame
-    ).strip()
-    assert closing_text == "Cảm ơn thầy và các bạn đã lắng nghe"
+    assert "Đặc điểm và biến động PAPI qua 14 năm" in visible[1]
+    assert "run_preprocessing_pipeline" in visible[2] and "StandardScaler" in visible[2]
+    assert "808" in visible[2] and "869" in visible[2]
+    assert "Biến thể STING" in visible[3]
+    assert "ngưỡng 5 điểm mỗi ô" in visible[3]
+    assert all(call in visible[3] for call in (
+        "fit(X_train_z)", "cluster(level=2, connectivity=1)", "predict(X_2024_z)", "clip(floor",
+    ))
+    assert "STING gốc xét phân phối và khoảng tin cậy" in visible[3]
+    assert "629/650" in visible[5] and "Silhouette" in visible[5]
+    assert "56 ô dày" in visible[5] and "silhouette_score trên cùng 631 điểm" in visible[5]
+    assert all(value in visible[5] for value in ("0,366", "0,457", "0,258"))
+    assert "48 trong 61 tỉnh đủ điểm" in visible[6]
+    assert "describe_grid_assignment" in visible[6]
+    assert "Dịch chuyển qua các năm trên cùng lưới" in visible[7]
+    assert "7 tỉnh sang ô thưa, 5 tỉnh vào cụm lớn" in visible[7]
+    assert all(value in visible[7] for value in (
+        "Lạng Sơn", "z-score", "(13, 9)", "(12, 10)", "−1 (ô thưa)", "2 (cụm lớn)",
+    ))
+    assert "forecast_from_history" in visible[8] and "score_forecast" in visible[8]
+    assert "Ridge nhận ra 0/11 tỉnh ngoài vùng dày" in visible[8]
+    assert "0,0736" in visible[8] and "0,0641" in visible[8]
+    assert "Kết quả chính và giới hạn" in visible[9]
+    assert "Wang, Yang & Muntz (VLDB 1997)" in visible[9]
+    assert visible[-1] == "Cảm ơn thầy và các bạn đã lắng nghe"
+    text = "\n".join(visible)
     assert all(phrase not in text.lower() for phrase in (
         "báo cáo trung thực", "slide ghi điểm", "nói rõ trước khi được hỏi",
-        "nghi thức phản biện", "bộ nộp cuối kỳ",
+        "nghi thức phản biện", "bộ nộp cuối kỳ", "23/37 cột đổi thang", "28 unit test",
     ))
     notes = "\n".join(slide.notes_slide.notes_text_frame.text for slide in deck.slides)
     assert all(name in notes for name in ["Nhom15_CuoiKy_STING_PAPI.docx", "Nhom15_CuoiKy_STING_PAPI.ipynb"])

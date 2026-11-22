@@ -69,7 +69,7 @@ _File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản 
 ## Thông tin đã chốt và mục cần xác nhận
 
 - [x] **Định dạng `.docx`** đã áp dụng theo file mẫu người dùng chọn (`reports/report_format_notes.md`). Đã khảo sát dàn ý ba chương trong tài liệu mẫu GV.
-- [x] **Số slide.** 11 slide giữa kỳ (`slides/submission.pptx`), tính cả bìa và trang cảm ơn. Slide vấn đáp cuối kỳ nằm ở `slides/final.pptx`.
+- [x] **Số slide.** 11 slide giữa kỳ (`slides/submission.pptx`), tính cả bìa và trang cảm ơn. Bộ vấn đáp cuối kỳ (`slides/final.pptx`) cũng có 11 slide, gồm một trang cảm ơn.
 - [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051).
 - [x] **Tệp giữa kỳ** — slide PowerPoint và notebook Jupyter theo yêu cầu giảng viên.
 - [x] **Trọng số cuối kỳ** — bài giảng nhập môn học máy, trang 10 ghi 8 điểm nhóm và 2 điểm vấn đáp cá nhân.

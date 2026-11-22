@@ -21,7 +21,7 @@ Chọn gói ZIP theo mốc trong [`submissions/`](submissions/) khi gửi bài c
 
 Mỗi ZIP có notebook báo cáo, notebook tiền xử lý, mã và dữ liệu để chạy lại. Giải nén toàn bộ gói và mở `HUONG_DAN.txt` bên trong để xem lệnh chạy. [Hướng dẫn chọn gói](submissions/HUONG-DAN.txt) · [Slide vấn đáp cuối kỳ](submissions/02-cuoi-ky/Nhom15_CuoiKy_STING_PAPI.pptx)
 
-Slide cuối kỳ trình bày STING và dự báo ở trang 1–13. Trang 7–9 giải thích cách dự báo hai chỉ tiêu, sai số và kết quả đối chiếu trên lưới. Trang 14 đối chiếu PCI, trang 15 ghi nguồn và trang 16 kết thúc.
+Slide cuối kỳ có **11 trang**. Trang 3–4 chỉ rõ phần tiền xử lý và luồng `fit → cluster → predict` trong code. Trang 5–8 kiểm chứng STING, mô tả cụm và theo dõi biến động, kèm bảng điểm gốc, z-score và ô lưới của Lạng Sơn. Trang 9 tóm tắt thử nghiệm dự báo, trang 10 kết luận và ghi nguồn, trang 11 dành để cảm ơn.
 
 ## Ôn tập
 
@@ -48,7 +48,7 @@ Grid_Based_Sociology/
 │   └── common/                #   Hàm dùng chung (fig_style, midterm_clustering, ...)
 ├── notebooks/                 # Notebook chính (chi tiết trong notebooks/README.md)
 │   └── exploratory/           #   Notebook kiểm chứng giả lập & khảo sát tham số Phase 1–4
-├── slides/                    # Slide PowerPoint (submission.pptx 11 trang, final.pptx 16 trang)
+├── slides/                    # Slide PowerPoint (submission.pptx 11 trang, final.pptx 11 trang)
 ├── reports/                   # Báo cáo cuối kỳ và hồ sơ kỹ thuật (reports/README.md)
 │   └── on-tap/                #   Hỏi đáp và kịch bản thuyết trình
 ├── submissions/               # Sản phẩm đóng gói sẵn theo từng mốc nộp

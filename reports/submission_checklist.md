@@ -8,7 +8,7 @@ _Cập nhật ngày 21/11/2026 · Nhóm 15._
 - [x] **Notebook cuối kỳ** — `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb` chạy từ gói giải nén theo `HUONG_DAN.txt` và tái lập 869/869 nhãn STING. [Kết quả chạy lại](../submissions/verification.json)
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/data/check_data.py` → PASS.
 - [x] **Notebook nộp bài (giữa kỳ)** — `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch, 0 lỗi; sinh bằng `python scripts/notebooks/gen_submission_demo.py`).
-- [x] **Slides nộp bài (giữa kỳ)** — `slides/submission.pptx` gồm 10 trang đầu kể cả bìa và một trang cảm ơn. Chạy `python scripts/deliverables/build_slides_10.py` để tạo lại slide và ghi chú. Slide cuối kỳ nằm ở `slides/final.pptx`.
+- [x] **Slides nộp bài (giữa kỳ)** — `slides/submission.pptx` gồm 10 trang đầu kể cả bìa và một trang cảm ơn. Chạy `python scripts/deliverables/build_slides_10.py` để tạo lại slide và ghi chú. Slide cuối kỳ (`slides/final.pptx`) cũng dành riêng trang 11 để cảm ơn.
 
 ## Đối chiếu môn học (2026-11-12)
 
