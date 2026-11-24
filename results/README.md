@@ -2,6 +2,8 @@
 
 Toàn bộ bảng số liệu và hình ảnh trong báo cáo/slide được sinh tự động từ các script trong `scripts/`.
 
+Mở [Bảng kết quả STING–PAPI trong Excel](KetQua_STING_PAPI.xlsx) để xem 23 bảng CSV đã được trình bày theo cột. Trang **Mục lục** dẫn đến từng bảng và ghi tên tệp nguồn. Bản Excel hiển thị dữ liệu tại thời điểm xuất.
+
 ## Nhóm kết quả chính
 
 | Nhóm | Tệp tiêu biểu | Nội dung |
