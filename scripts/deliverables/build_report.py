@@ -503,7 +503,6 @@ table(["STT", "Họ và tên", "Mã số sinh viên"], [
 ], widths=[2.0, 8.3, 6.2])
 topic_line = doc.add_paragraph("Chủ đề 6: Phân cụm dựa trên lưới (Grid-based clustering).")
 topic_line.paragraph_format.space_before = Pt(8)
-doc.add_paragraph("Mã nguồn dự án: https://github.com/JasonTM17/Grid_Based_Sociology")
 
 
 front_title("TÓM TẮT")
