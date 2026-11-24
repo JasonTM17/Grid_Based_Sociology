@@ -32,14 +32,27 @@ các ô từ trên xuống. Các kết quả đã lưu có thể xem trực ti�
 cd(nbf.v4.new_code_cell("""import sys
 from pathlib import Path
 
-cwd = Path.cwd().resolve()
-ROOT = next((p for parent in (cwd, *cwd.parents)
-             for p in (parent / "tai_lieu_kem", parent)
-             if (p / "src" / "sting.py").is_file()), None)
-if ROOT is None:
+_PROJECT_MARKERS = (
+    "src/sting.py",
+    "src/preprocessing.py",
+    "data/processed/papi_panel_63_2011_2024.csv",
+    "models/predict_config.json",
+)
+
+
+def _find_project_root() -> Path:
+    cwd = Path.cwd().resolve()
+    for parent in (cwd, *cwd.parents):
+        for candidate in (parent / "tai_lieu_kem", parent):
+            if all((candidate / marker).is_file() for marker in _PROJECT_MARKERS):
+                return candidate
     raise FileNotFoundError(
-        "Vui lòng giải nén toàn bộ gói và mở notebook cạnh thư mục tai_lieu_kem."
+        "Không tìm thấy thư mục chứa mã và dữ liệu PAPI. "
+        "Hãy mở notebook trong repo hoặc giải nén toàn bộ ZIP rồi mở notebook tại gốc gói."
     )
+
+
+ROOT = _find_project_root()
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
@@ -75,9 +88,9 @@ md(nbf.v4.new_markdown_cell("""## 1. Dữ liệu, tiền xử lý và chất lư
 
 - **Bảng PAPI 2011–2024** (`papi_panel_63_2011_2024.csv`): **882 quan sát** tỉnh–năm và **41 cột**, trong đó có **39 cột số** (đạt chuẩn tối thiểu 500 dòng và 10 cột số).
 - **Quy trình tiền xử lý 3 giai đoạn trong `src/preprocessing.py`** (`PREPROCESSING_PIPELINE` 6 bước, chạy trực tiếp từ 14 workbook PAPI gốc; bản phân tích chuyên sâu từng bước nằm ở `Nhom15_TienXuLy_PAPI.ipynb`):
-  1. **Làm sạch**: khử trùng khóa `(province_code, year)` đầu tiên, quy `0.0 → NaN` khớp quy ước replication Mendeley, kiểm tra tính nhất quán miền `[0, 10]` và audit thang đo (`23/37` chỉ tiêu cần đối chiếu workbook gốc trước khi chọn đặc trưng; `d7/d8` có từ năm 2018), đánh dấu ngoại lai `|z| > 3` ở cuối bước làm sạch nhưng giữ nguyên điểm thực để bảo toàn cụm biên.
+  1. **Làm sạch**: khử trùng khóa `(province_code, year)` đầu tiên, quy `0.0 → NaN` khớp quy ước replication Mendeley, kiểm tra tính nhất quán miền `[0, 10]` và audit toàn kỳ (`23/37` chỉ tiêu có bước nhảy cần đối chiếu workbook gốc, `d7/d8` có từ năm 2018) và kiểm tra cờ của chỉ tiêu đã chọn trên dữ liệu đến hết 2023, đánh dấu ngoại lai `|z| > 3` ở cuối bước làm sạch nhưng giữ nguyên điểm thực để bảo toàn cụm biên.
   2. **Tích hợp**: ghép đồng bộ `882 × 59` trên `external_master_63_2011_2024.csv` với cột mask `*_present` tường minh (`one_to_one`).
-  3. **Biến đổi & chống rò rỉ**: sàng lọc 8 chỉ tiêu sạch (`ALLOWLIST_FEATURES`), `StandardScaler` fit duy nhất trên tập huấn luyện `≤ 2023` (khớp `models/sting_predict_scaler.json`); đối chiếu thử nghiệm trên lưới STING và độ nhạy CV (`SimpleImputer(median)` / winsorize `|z| ≤ 3`) từ `results/preprocessing_sensitivity.csv`."""))
+  3. **Biến đổi & chống rò rỉ**: từ 8 chỉ tiêu đã sàng lọc (`ALLOWLIST_FEATURES`), lưới STING chính dùng hai chỉ tiêu 4.2 và 6.1. `StandardScaler` cho hai chỉ tiêu này học từ các quan sát đủ điểm đến 2023 và được dùng lại cho 2024 (khớp `models/sting_predict_scaler.json`). Bảng `results/preprocessing_sensitivity.csv` đối chiếu cách giữ hàng đủ điểm với điền trung vị và winsorize ở `|z| = 3`."""))
 
 cd(nbf.v4.new_code_cell("""cfg = json.loads((ROOT / "models/predict_config.json").read_text(encoding="utf-8"))
 print("Hai chỉ tiêu PAPI dùng cho STING")
@@ -120,13 +133,13 @@ scaler_saved = json.loads((ROOT / "models/sting_predict_scaler.json").read_text(
 assert np.allclose(scaler_check.mean_, scaler_saved["mean"])
 assert np.allclose(scaler_check.scale_, scaler_saved["scale"])
 print(
-    f"Kiểm chứng tích hợp & anti-leakage: scale_audit={len(scale_flags)}/{len(scale_meta)}, "
+    f"Kiểm chứng tích hợp: audit toàn kỳ={len(scale_flags)}/{len(scale_meta)}, "
     f"external_master={ext_info['shape'][0]}×{ext_info['shape'][1]}, StandardScaler fit trên n={len(train_fit)} (<=2023) khớp scaler JSON."
 )
 
 fs_summary, _ = feature_selection_summary(
     panel, prep_state["score_cols"], candidate_features=ALLOWLIST_FEATURES,
-    flagged_names=prep_state["flagged_names"],
+    flagged_names=prep_state["training_flagged_names"],
 )
 display(fs_summary[["Tên chỉ tiêu", "Min (≤cutoff)", "Max (≤cutoff)", "Phương sai (ddof=0)", "|r| max với biến khác", "Bị cờ scale_audit"]].round(4))
 
@@ -201,8 +214,11 @@ with style_context():
 md(nbf.v4.new_markdown_cell("""### 1.1 Phương pháp STING và kiểm chứng cài đặt
 
 STING gốc [Wang, Yang & Muntz, VLDB 1997](https://www.vldb.org/conf/1997/P186.PDF)
-lưu thống kê và phân phối của từng ô lưới. Cài đặt của nhóm dùng ngưỡng số đếm,
-gom các ô dày liên thông qua cạnh tại một mức lưới.
+lưu thống kê và loại phân phối của từng ô. Ở §5, tác giả chọn ô liên quan
+từ tầng thô xuống tầng mịn và tìm vùng bằng BFS. Trong biến thể của nhóm,
+`fit()` đưa điểm vào ô và tính thống kê theo từng tầng. `cluster()` giữ ô
+đạt ngưỡng số đếm ở mức đã chọn, rồi dùng DFS để nối các ô dày chung cạnh.
+`predict()` dùng lưới đã dựng để tra nhãn cho điểm mới.
 
 ARI trên dữ liệu giả lập được đối chiếu với nhãn đã biết. Với PAPI, ARI giữa
 các phương pháp biểu thị mức đồng thuận giữa các phân hoạch."""))

@@ -16,7 +16,6 @@ Thiết kế theo quy trình ba giai đoạn:
      - Thử nghiệm định lượng Cleaning/Scaling/Discretization trực tiếp trên lưới STING
 """
 from __future__ import annotations
-
 import re
 from collections.abc import Callable, Sequence
 from pathlib import Path
@@ -559,12 +558,14 @@ def step_check_consistency(ctx: dict[str, Any]) -> dict[str, Any]:
             f"Phát hiện lỗi nhất quán: code_mismatch={n_code_mismatch}, range_bad={n_range_bad}"
         )
     flags = scale_audit(df)
-    flagged = {c for c, _, _ in flags}
-    bad_selected = [c for c in ctx["features"] if c in flagged]
+    cutoff = int(ctx.get("cutoff_year", DEFAULT_CUTOFF_YEAR))
+    training_flags = {c for c, _, _ in scale_audit(df.loc[df["year"] <= cutoff])}
+    bad_selected = [c for c in ctx["features"] if c in training_flags]
     if bad_selected:
-        raise ValueError(f"Đặc trưng chọn bị cờ nhảy thang: {bad_selected}")
+        raise ValueError(f"Đặc trưng chọn bị cờ nhảy thang trên tập huấn luyện: {bad_selected}")
     ctx["scale_flags"] = flags
-    ctx["flagged_names"] = flagged
+    ctx["flagged_names"] = {c for c, _, _ in flags}
+    ctx["training_flagged_names"] = training_flags
     ctx["consistency_stats"] = {
         "code_mismatch": n_code_mismatch,
         "range_violations": n_range_bad,
@@ -573,8 +574,9 @@ def step_check_consistency(ctx: dict[str, Any]) -> dict[str, Any]:
     ctx["log"].append(
         (
             "3. Cleaning — Consistency & Scale Audit",
-            f"{n_code_mismatch} xung đột mã; {n_range_bad} vi phạm miền; "
-            f"{len(flags)}/{len(ctx['score_cols'])} cột bị cờ >0.25 (không chọn)",
+            f"{n_code_mismatch} xung đột mã, {n_range_bad} vi phạm miền. "
+            f"Toàn kỳ có {len(flags)}/{len(ctx['score_cols'])} cột bị cờ >0.25. "
+            f"Cổng kiểm tra chỉ tiêu dùng dữ liệu đến {cutoff}.",
         )
     )
     return ctx
@@ -734,12 +736,13 @@ def feature_selection_summary(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Đánh giá phương sai, tương quan Pearson và cờ audit của các đặc trưng sạch <= cutoff."""
     feats = list(candidate_features)
-    train_subset = panel.loc[panel["year"] <= cutoff_year, feats].dropna()
+    train = panel.loc[panel["year"] <= cutoff_year]
+    train_subset = train[feats].dropna()
     variances = train_subset.var(ddof=0)
     corr = train_subset.corr()
     corr_other = corr.abs().mask(np.eye(len(feats), dtype=bool))
     max_abs_r = corr_other.max()
-    flagged = flagged_names if flagged_names is not None else {c for c, _, _ in scale_audit(panel)}
+    flagged = flagged_names if flagged_names is not None else {c for c, _, _ in scale_audit(train)}
 
     summary = pd.DataFrame(
         {

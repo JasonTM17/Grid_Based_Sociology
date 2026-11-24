@@ -222,6 +222,23 @@ def test_step_check_consistency_detects_crosswalk_range_and_scale_audit_violatio
         step_check_consistency(ctx_jump)
 
 
+def test_holdout_scale_jump_is_reported_without_changing_training_eligibility():
+    raw = pd.DataFrame({
+        "province_code": 1,
+        "province_ascii": "Ha Noi",
+        "year": range(2018, 2025),
+        "sd_4_2": [1.8] * 6 + [2.4],
+        "sd_6_1": 1.9,
+    })
+    ctx = step_clean_codes_and_zeros(step_deduplicate(_sample_ctx(raw)))
+    checked = step_check_consistency(ctx)
+    assert ("sd_4_2", 0.6, 2024) in checked["scale_flags"]
+    assert "sd_4_2" in checked["flagged_names"]
+    assert "sd_4_2" not in checked["training_flagged_names"]
+    summary, _ = feature_selection_summary(raw, score_columns(raw), STING_FEATURES)
+    assert not summary["Bị cờ scale_audit"].any()
+
+
 def test_step_flag_outliers_preserves_rows_and_handles_constant_columns():
     df = pd.DataFrame({"x": [1.0] * 20 + [100.0], "const": [2.0] * 21})
     mask = flag_outliers_zscore(df, ["x", "const"], z_threshold=3.0)

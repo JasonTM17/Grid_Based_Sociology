@@ -2,6 +2,10 @@
 
 Toàn bộ notebook đã chạy đầy đủ từ ô đầu đến ô cuối (0 lỗi, 0 cảnh báo, đường dẫn tương đối).
 
+Script sinh notebook giữa kỳ chạy và kiểm tra tệp tạm trước khi cập nhật notebook và hình đối chiếu. Trình replay ZIP lưu nội dung stderr của ô vào log khi notebook chạy xong nhưng chưa đạt kiểm tra.
+
+Trong tiền xử lý, cờ bước nhảy trên toàn panel phục vụ báo cáo chất lượng dữ liệu. Điều kiện kiểm tra chỉ tiêu đã chọn và bảng đặc trưng dùng dữ liệu đến năm chốt huấn luyện.
+
 ## Notebook nộp bài & trình bày
 
 | Tệp | Mục đích | Cách tái lập |

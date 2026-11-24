@@ -127,7 +127,7 @@ Thực hiện đúng thứ tự bắt buộc qua các bước của `src/preproc
 Vì sao phải làm sạch đúng thứ tự **Deduplicate → Missing/0.0→NaN → Consistency & Scale Audit → Outliers**?
 1. **Khử trùng lặp đầu tiên**: nếu trùng dòng chưa bỏ mà đi tính `mean/std` hay `NaN` thì mọi thống kê bước sau đều lệch (khử cả trùng toàn dòng và trùng khóa `(province_code, year)` sau quy đổi crosswalk).
 2. **Xử lý thiếu & `0.0 → NaN`**: trong bộ Mendeley/PAPI, `0.0` biểu thị tỉnh chưa được xếp hạng chứ không phải điểm `0`; tách bạch thiếu cấu trúc (`d7/d8` trước 2018, các tiểu chiều mới) và thiếu trong giai đoạn (`13` dòng thiếu `sd_4_2` hoặc `sd_6_1`). Không điền `median` vì sẽ dồn điểm giả về ô trung tâm.
-3. **Tính nhất quán & `scale_audit`**: kiểm tra `0` lệch mã crosswalk, `0` ô vượt khoảng metadata, và dùng bước nhảy `|Δmean| > 0.25` sàng lọc `23/37` cột nghi biến động thang đo.
+3. **Tính nhất quán & `scale_audit`**: kiểm tra `0` lệch mã crosswalk, `0` ô vượt khoảng metadata, và ghi cờ bước nhảy `|Δmean| > 0.25` của `23/37` cột trên toàn kỳ. Kiểm tra chỉ tiêu được chọn bằng cờ tính đến năm chốt huấn luyện.
 4. **Đánh dấu ngoại lai cuối cùng**: chỉ dùng `|z| > 3` để gán cờ nhận diện điểm cực trị (cả 37 cột và 2 biến STING), **không xóa** vì đây là điểm thật hợp lệ của các địa phương."""))
 
     cd(nbf.v4.new_code_cell("""crosswalk_path = (
@@ -168,11 +168,11 @@ display(miss["per_column"].loc[[*features, "Toàn bộ 37 cột chỉ tiêu"]])
 ctx = step_check_consistency(ctx)
 cons = ctx["consistency_stats"]
 jump_flags = ctx["scale_flags"]
-flagged_names = ctx["flagged_names"]
+training_flags = ctx["training_flagged_names"]
 print(f"[2c. Nhất quán & thang đo] Lệch mã tỉnh crosswalk: {cons['code_mismatch']} | "
       f"Ô ngoài khoảng metadata: {cons['range_violations']} | "
       f"Cờ biến động TB năm > 0.25: {cons['scale_flagged_count']}/37 cột.")
-print("  8 đặc trưng allowlist bị cờ:", [c for c in ALLOWLIST_FEATURES if c in flagged_names])
+print("  Chỉ tiêu trong allowlist có cờ trên tập huấn luyện", [c for c in ALLOWLIST_FEATURES if c in training_flags])
 display(pd.DataFrame(jump_flags, columns=["Chỉ tiêu", "Bước nhảy |Δmean| lớn nhất", "Tại năm"]).head(8))
 
 ctx = step_flag_outliers(ctx)
@@ -261,7 +261,7 @@ display(panel[["province_code", "year", "province_vi", *features]].head())"""))
 
 ### 4.1 Sàng lọc đặc trưng và chuẩn hóa z-score (`StandardScaler` fit chỉ trên 2011–2023)
 Nhóm dùng danh sách 8 tiểu chỉ tiêu đã rà soát thang đo trong `ALLOWLIST_FEATURES`.
-`scale_audit` đánh cờ 23/37 cột có bước nhảy trung bình năm đáng kiểm tra.
+`scale_audit` đánh cờ 23/37 cột có bước nhảy trung bình năm đáng kiểm tra trên toàn kỳ. Cột cờ trong bảng chọn đặc trưng chỉ dùng dữ liệu đến 2023.
 Phương sai và tương quan Pearson trên 2011–2023 dùng để mô tả các biến trong
 danh sách. Cặp `(sd_4_2, sd_6_1)` lấy từ cấu hình được chọn bằng khảo sát
 đến năm 2020 và đối chiếu độ phủ năm 2021–2022. `StandardScaler` fit trên mẫu
@@ -270,11 +270,11 @@ danh sách. Cặp `(sd_4_2, sd_6_1)` lấy từ cấu hình được chọn bằ
         md(nbf.v4.new_markdown_cell("""## 4. Giai đoạn 3 — Chọn đặc trưng, Chuẩn hóa & Thử nghiệm tiền xử lý
 
 ### 4.1 Giải thích bước sàng lọc đặc trưng & StandardScaler
-- Loại `d1–d8` (chỉ số tổng hợp thang `1–10`) và loại các tiểu chiều bị cờ `scale_audit` hoặc thiếu cấu trúc, giữ **8 chỉ tiêu sạch** trong `ALLOWLIST_FEATURES`.
+- Đối chiếu **8 chỉ tiêu** đã sàng lọc trong `ALLOWLIST_FEATURES` bằng cờ `scale_audit` trên tập đến hết 2023. Bảng cờ toàn kỳ phục vụ đối chiếu chất lượng dữ liệu.
 - Kiểm tra phương sai `> 0.01` (không biến gần hằng số) và tương quan cặp Pearson trên `2011–2023` (không đa cộng tuyến; cặp chọn `sd_4_2, sd_6_1` có `r = 0.5006`), sau đó fit `StandardScaler` (`ddof=0`) **chỉ trên `2011–2023`** rồi transform sang `2024`."""))
 
     cd(nbf.v4.new_code_cell("""fs_summary, corr_8 = feature_selection_summary(
-    panel, s_cols, candidate_features=ALLOWLIST_FEATURES, cutoff_year=DEFAULT_CUTOFF_YEAR, flagged_names=flagged_names
+    panel, s_cols, candidate_features=ALLOWLIST_FEATURES, cutoff_year=DEFAULT_CUTOFF_YEAR, flagged_names=training_flags
 )
 variances = fs_summary["Phương sai (ddof=0)"]
 assert (variances > 0.01).all(), "Phát hiện đặc trưng gần hằng số."
@@ -452,7 +452,7 @@ display(pd.DataFrame(state["log"], columns=["Bước trong pipeline", "Kết qu�
 1. Hợp nhất 14 workbook (`2011–2019` và `2020–2024`) → `882` dòng thô.
 2. Deduplicate toàn dòng (`0`) và khóa `(province_code, year)` (`0`) ở **đầu Cleaning**.
 3. Quy `109` ô `0.0 → NaN`, tách thiếu cấu trúc vs trong giai đoạn, **giữ `NaN` và chỉ `dropna` theo mẫu bài toán**.
-4. Kiểm chứng `0` lỗi crosswalk, `0` lỗi khoảng metadata, dùng `scale_audit` (`23/37`) để chỉ giữ `8` chỉ tiêu ổn định (`sd_4_2, sd_6_1` cho STING).
+4. Kiểm chứng `0` lỗi crosswalk, `0` lỗi khoảng metadata, ghi cờ `23/37` cột trên toàn kỳ. Cổng kiểm chỉ tiêu dùng dữ liệu đến 2023 để đối chiếu `sd_4_2, sd_6_1` đã chọn cho STING.
 5. Đánh dấu ngoại lai `|z| > 3` ở **cuối Cleaning** nhưng **giữ nguyên** (xóa làm tăng nhiễu STING `19.6% → 24.6%`).
 6. Tích hợp `882 × 41`, fit `StandardScaler` duy nhất trên `2011–2023` (`808` dòng), chạy trọn vẹn qua `src/preprocessing.py` (`PREPROCESSING_PIPELINE`)."""))
 

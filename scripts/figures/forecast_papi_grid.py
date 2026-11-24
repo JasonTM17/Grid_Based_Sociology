@@ -100,8 +100,11 @@ def main() -> int:
     (dest / "papi_forecast_2024.json").write_text(
         json.dumps(evidence, ensure_ascii=False, allow_nan=False, indent=2) + "\n", encoding="utf-8",
     )
-    rows.to_csv(dest / "papi_forecast_provinces_2024.csv", index=False, encoding="utf-8-sig", float_format="%.10f")
-    run.validation.to_csv(dest / "papi_forecast_cv.csv", index=False, float_format="%.10f")
+    rows.to_csv(
+        dest / "papi_forecast_provinces_2024.csv", index=False,
+        encoding="utf-8-sig", float_format="%.10f", lineterminator="\n",
+    )
+    run.validation.to_csv(dest / "papi_forecast_cv.csv", index=False, float_format="%.10f", lineterminator="\n")
     for stem, figure in (("papi_forecast_values", _value_figure(comparable, metrics)),
                          ("papi_forecast_grid", _grid_figure(run, comparable))):
         figure.savefig(dest / "figs" / f"{stem}.png", dpi=300, facecolor="white")

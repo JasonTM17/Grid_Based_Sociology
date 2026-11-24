@@ -516,7 +516,19 @@ def replay_notebook(path: Path, guard: str, log: Path) -> tuple[int, bool]:
     executed = nbformat.read(replay_output, as_version=4)
     issues = notebook_issues(executed)
     if issues:
-        raise ValueError(f"Chạy lại {path.name}: " + "; ".join(issues))
+        diagnostics = [f"Chạy lại {path.name}. Danh sách kiểm tra tính cả ô cách ly đầu tiên.", *issues]
+        code_cells = (cell for cell in executed.cells if cell.cell_type == "code")
+        for number, cell in enumerate(code_cells):
+            for output in cell.outputs:
+                if output.output_type == "stream" and output.name == "stderr":
+                    detail = "".join(output.text).rstrip()
+                    position = f"ô code gốc {number}" if number else "ô cách ly"
+                    diagnostics.extend((f"stderr ở {position}", detail))
+        content = "\n".join(diagnostics) + "\n"
+        for home_path in {str(Path.home()), Path.home().as_posix()}:
+            content = content.replace(home_path, "<HOME>")
+        log.write_text(content, encoding="utf-8")
+        raise ValueError(f"Chạy lại {path.name} chưa đạt. Xem {log.name}. " + "; ".join(issues))
     return sum(c.cell_type == "code" for c in executed.cells[1:]), bool(proc.stderr.strip())
 
 

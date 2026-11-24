@@ -111,6 +111,26 @@ def test_final_notebook_has_code_cells(final_notebook: dict):
     assert len(code_cells) >= 10, f"chỉ có {len(code_cells)} ô code"
 
 
+def test_final_notebook_skips_loose_folder_without_data(final_notebook, tmp_path, monkeypatch):
+    root = tmp_path / "Đồ án PAPI"
+    loose = root / "submissions/02-cuoi-ky"
+    for relative in (
+        "src/sting.py", "src/preprocessing.py", "data/processed/papi_panel_63_2011_2024.csv",
+        "models/predict_config.json", "submissions/02-cuoi-ky/src/sting.py",
+        "submissions/02-cuoi-ky/src/preprocessing.py",
+    ):
+        marker = root / relative
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.touch()
+
+    monkeypatch.chdir(loose)
+    setup = next(cell for cell in final_notebook["cells"] if cell["cell_type"] == "code")
+    finder = _cell_source_text(setup).split("sys.path.insert", 1)[0]
+    namespace = {}
+    exec(finder, namespace)
+    assert namespace["ROOT"] == root
+
+
 def test_per_year_summary_matches_published_clusters(final_notebook: dict):
     with (ROOT / "results" / "per_year.csv").open(encoding="utf-8-sig", newline="") as table:
         rows = list(csv.DictReader(table))

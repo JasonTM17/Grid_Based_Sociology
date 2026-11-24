@@ -5,7 +5,9 @@ import json
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.preprocessing import StandardScaler
 
+from sting import STING
 from scripts.common.papi_forecast import TARGETS, forecast_from_history, scenario_auc, score_forecast
 from scripts.common.papi_pred_common import describe_grid_assignment, load_config, load_panel
 
@@ -70,6 +72,10 @@ def test_current_summary_matches_recomputed_results(study):
     panel, _, run = study
     rows, scores, metrics = score_forecast(run, panel.loc[panel.year.eq(2024)])
     summary = json.loads((RESULTS / "papi_forecast_2024.json").read_text(encoding="utf-8"))
+    archived_rows = pd.read_csv(RESULTS / "papi_forecast_provinces_2024.csv")
+    pd.testing.assert_frame_equal(
+        archived_rows, rows.astype({"actual_cluster": "float64"}), check_dtype=False, atol=1e-9, rtol=1e-9,
+    )
     assert summary["selected_method"] == run.selection
     pd.testing.assert_frame_equal(pd.DataFrame(summary["scores"]), scores, check_exact=False)
     pd.testing.assert_frame_equal(pd.DataFrame(summary["grid"]), metrics, check_exact=False)
@@ -105,3 +111,26 @@ def test_assignment_distinguishes_out_of_bounds_and_nonfinite(study):
     assert audit.grid_status.tolist() == ["outside_grid", "nonfinite_score"]
     assert audit.cluster.iat[0] == -1 and pd.isna(audit.cluster.iat[1])
     assert audit[["grid_cell", "reference_count"]].isna().all().all()
+
+
+
+def test_predict_and_assignment_reject_padded_constant_axis():
+    features = list(TARGETS)
+    training = pd.DataFrame([[2.0, 1.0], [2.0, 1.1], [2.0, 2.0]], columns=features)
+    scaler = StandardScaler().fit(training)
+    grid = STING(n_levels=2, factor=2, min_count=1).fit(scaler.transform(training))
+    grid.cluster()
+    observed = pd.DataFrame({
+        "province_code": [1, 2],
+        "province_vi": ["A", "B"],
+        "year": 2024,
+        features[0]: [2.0, 2.1],
+        features[1]: [1.1, 1.1],
+    })
+    points = scaler.transform(observed[features])
+    assert points[1, 0] < grid.bounds_max_[0]  # the padded grid still covers the point
+    assert grid.predict(points).tolist() == [0, -1]
+    assignment = describe_grid_assignment(observed, features, scaler, grid)
+    assert assignment.grid_status.tolist() == ["in_cluster", "outside_grid"]
+    assert assignment.cluster.tolist() == [0, -1]
+    assert assignment.loc[1, ["grid_cell", "reference_count"]].isna().all()

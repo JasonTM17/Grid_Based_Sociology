@@ -12,17 +12,17 @@ Mở slide trong `submissions/01-giua-ky`. Để chạy notebook ở máy trình
 
 | Slide | Thời gian | Nội dung cần nói và thao tác |
 |---|---|---|
-| 1 | 0:00–0:30 | Nêu chủ đề Grid-based clustering và thuật toán STING đã chọn. |
-| 2 | 0:30–2:00 | Chỉ rõ chủ đề, thuật toán, dữ liệu. Nêu ba ví dụ và giải thích một dòng PAPI là một tỉnh trong một năm. |
-| 3 | 2:00–3:30 | Chỉ cùng một tập điểm ở các mức lưới. Giải thích ô lưu số điểm và thống kê. |
-| 4 | 3:30–5:00 | Chỉ thẳng sơ đồ 4 bước trên đồ thị 2D ngay ở Slide 4 (từ 15 điểm thô → phủ lưới `3×3` → lọc ô dày `≥ 3` & đánh dấu ô thưa `−1` → nối kề 4 hướng, chạm góc không nối), rồi đối chiếu nhanh sang **Mục 2** của notebook. Gọi đúng là biến thể rút gọn của STING. |
-| 5 | 5:00–7:00 | Mở mục 2 của notebook. Ngưỡng 3 cho hai cụm 7 điểm và một điểm nhiễu. Giải thích hai vùng chỉ chạm góc. |
-| 6 | 7:00–8:30 | Bộ giả lập có 240 điểm và hai nhóm tham chiếu. Giải thích ARI 0,950 đo mức khớp với nhãn khi sinh dữ liệu. |
-| 7 | 8:30–10:30 | Nêu 869 quan sát đã có, gồm 61 quan sát năm 2024. Dùng ví dụ Lạng Sơn ở mục 4.2 để giải thích hai trục z-score. Chỉ vùng ô dày trên hình. |
-| 8 | 10:30–12:00 | Chỉ 56 ô dày tạo 3 vùng. K-means chọn k = 2 trong các giá trị 2–5. Đọc số cụm và nhiễu trên 869 điểm, silhouette trên 680 điểm giao. Chỉ bảng chéo để giải thích cùng k = 3 vẫn ra cách chia khác. |
-| 9 | 12:00–14:00 | Đọc ba nhánh sơ đồ. Chỉ các ô STING giữ nguyên và các vòng đen trên hình ở mục 4.6. Nêu 68 điểm đổi cụm K-means và 8 điểm đổi trạng thái nhiễu DBSCAN. Khi hỏi về bán kính, giải thích vòng gốc có cùng diện tích với elip lân cận sau đổi thang. |
-| 10 | 14:00–14:50 | Mục 4.8 đặt điểm đã ghi nhận năm 2024 lên lưới 2011–2023. Nêu 48 tỉnh ở 21 ô thuộc cùng cụm, 13 tỉnh ở ô thưa và 2 tỉnh thiếu điểm. Đọc từ điểm gốc đến nhãn của Lạng Sơn trong bảng. |
-| 11 | 14:50–15:00 | Cảm ơn thầy và các bạn, chuyển sang hỏi đáp. |
+| 1 | 0:00–0:25 | Nêu chủ đề Grid-based clustering và thuật toán STING đã chọn. |
+| 2 | 0:25–1:30 | Giải thích một dòng PAPI là một tỉnh trong một năm. Chỉ hai trục 4.2 và 6.1 cùng số hàng đủ điểm. |
+| 3 | 1:30–2:55 | Chỉ cùng một tập điểm ở các mức lưới. Giải thích ô lưu số điểm và thống kê. |
+| 4 | 2:55–6:00 | Chỉ công thức dưới hình. Chia độ dài trục cho số ô để có bề rộng Δ, đo vị trí từ biên dưới theo Δ rồi dùng `floor` và `clip` ở `sting.py` dòng 378–379. Chỉ ngưỡng ô dày và DFS ở dòng 133–158. Nối ý tưởng lưới thống kê và truy vấn từ trên xuống của bài gốc với cách tạo cụm tại một tầng của nhóm. |
+| 5 | 6:00–7:30 | Đọc bảng đếm ở mục 2 của notebook. Ngưỡng 3 cho hai cụm 7 điểm và một điểm nhiễu. Giải thích hai vùng chỉ chạm góc. |
+| 6 | 7:30–8:25 | Chỉ hai cụm tham chiếu của 240 điểm và sáu điểm nhiễu. Trong hai phân số, T đếm cặp cùng nhóm theo cả hai bộ nhãn và E là mức khớp kỳ vọng khi xáo nhãn. ARI 0,950 đo mức khớp sau hiệu chỉnh. |
+| 7 | 8:25–9:40 | Nêu 869 quan sát, gồm 61 quan sát năm 2024. Dùng Lạng Sơn ở mục 4.2 để giải thích hai trục z-score và chỉ vùng ô dày. |
+| 8 | 9:40–10:55 | Chỉ 56 ô dày tạo 3 vùng rồi nhắc K-means chọn k = 2 trong 2–5. Đọc số cụm và nhiễu trên 869 điểm, silhouette trên 680 điểm giao. |
+| 9 | 10:55–12:20 | Giải thích vì sao 869 điểm STING giữ cùng ô khi dựng lại lưới sau z-score. Nêu 68 điểm đổi cụm K-means và 8 điểm đổi trạng thái nhiễu DBSCAN khi đối chiếu. |
+| 10 | 12:20–14:45 | Mục 4.8 đặt điểm đã quan sát năm 2024 lên lưới 2011–2023. Nêu 48 tỉnh ở cụm lớn, 13 tỉnh ở ô thưa và 2 tỉnh thiếu điểm. Đọc từ điểm gốc đến ô và nhãn của Lạng Sơn. |
+| 11 | 14:45–15:00 | Cảm ơn thầy và các bạn, chuyển sang hỏi đáp. |
 
 Ghi người trình bày và thời gian đo được vào [nhật ký luyện tập](rehearsal_log.md).
 

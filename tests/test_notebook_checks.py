@@ -3,6 +3,9 @@
 import copy
 import json
 import re
+import runpy
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -58,6 +61,53 @@ def test_warning_suppression_is_rejected():
     notebook = executed_notebook()
     notebook["cells"][0]["source"] = 'warnings.filterwarnings("ignore")'
     assert notebook_issues(notebook)
+
+
+@pytest.mark.parametrize("failure", ["execution", "publication", "contention"])
+def test_midterm_generator_preserves_published_notebook_on_failure(tmp_path, monkeypatch, failure):
+    script = tmp_path / "scripts/notebooks/gen_submission_demo.py"
+    script.parent.mkdir(parents=True)
+    shutil.copy2(ROOT / "scripts/notebooks/gen_submission_demo.py", script)
+    destination = tmp_path / "notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb"
+    destination.parent.mkdir()
+    original = (ROOT / "notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb").read_bytes()
+    destination.write_bytes(original)
+    image = tmp_path / "results/figs/papi_zscore_comparison.png"
+    image.parent.mkdir(parents=True)
+    image.write_bytes(b"previous-image")
+
+    def execute(argv, **kwargs):
+        if failure == "execution":
+            return subprocess.CompletedProcess(argv, 1, stdout="", stderr="kernel error")
+        Path(argv[-1]).write_bytes(original)
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.setattr(subprocess, "run", execute)
+    namespace = runpy.run_path(str(script))
+    if failure == "publication":
+        replace_file = Path.replace
+
+        def fail_notebook_replace(source, target):
+            if target == destination:
+                raise PermissionError("notebook locked")
+            return replace_file(source, target)
+
+        monkeypatch.setattr(Path, "replace", fail_notebook_replace)
+        with pytest.raises(PermissionError, match="notebook locked"):
+            namespace["main"]()
+    elif failure == "contention":
+        with namespace["_publication_lock"](destination):
+            with pytest.raises(RuntimeError, match="khóa cập nhật"):
+                namespace["main"]()
+    else:
+        assert namespace["main"]() == 1
+    assert destination.read_bytes() == original
+    assert image.read_bytes() == b"previous-image"
+
+    if failure == "contention":
+        assert namespace["main"]() == 0
+        assert image.read_bytes() == (ROOT / "results/figs/papi_zscore_comparison.png").read_bytes()
 
 
 def test_repo_and_study_notebooks_are_clean_and_portable():

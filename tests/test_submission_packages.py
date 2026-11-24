@@ -9,14 +9,40 @@ import subprocess
 import sys
 import zipfile
 
+import nbformat as nbf
 import pytest
 
 from scripts.common.notebook_checks import notebook_issues
 from scripts.deliverables.build_submission_packages import (
-    MANIFEST_REL, MIDTERM_FILES, PACKAGES, PREPROCESSING_NOTEBOOK, RAW_REFERENCES, ROOT, archive_path,
-    build_package, check_member, instructions, loose_instructions, package_files, preprocessing_instructions,
-    verify_package,
+    MANIFEST_REL, MIDTERM_FILES, PACKAGES, PREPROCESSING_NOTEBOOK, PREPROCESSING_SOURCE, RAW_REFERENCES,
+    ROOT, VISIBLE, archive_path, build_package, check_member, instructions, loose_instructions,
+    package_files, preprocessing_instructions, replay_notebook, verify_package,
 )
+
+
+def test_replay_saves_cell_stderr_after_nbconvert_exits_successfully(tmp_path, monkeypatch):
+    notebook = tmp_path / "demo.ipynb"
+    log = tmp_path / "replay.log"
+    cell = nbf.v4.new_code_cell("print('diagnostic')")
+    nbf.write(nbf.v4.new_notebook(cells=[cell]), notebook)
+
+    def execute(argv, **kwargs):
+        replayed = nbf.read(notebook.with_suffix(".replay-input.ipynb"), as_version=4)
+        replayed.cells[0].execution_count = 1
+        replayed.cells[0].outputs = [nbf.v4.new_output("stream", name="stdout", text="guard")]
+        replayed.cells[1].execution_count = 2
+        replayed.cells[1].outputs = [
+            nbf.v4.new_output("stream", name="stderr", text="original cell diagnostic\n"),
+        ]
+        nbf.write(replayed, notebook.with_suffix(".replayed.ipynb"))
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="launcher message")
+
+    monkeypatch.setattr(subprocess, "run", execute)
+    with pytest.raises(ValueError, match="stderr"):
+        replay_notebook(notebook, "print('guard')", log)
+    diagnostic = log.read_text(encoding="utf-8")
+    assert "original cell diagnostic" in diagnostic
+    assert "stderr ở ô code gốc 1" in diagnostic
 
 
 @pytest.fixture(scope="module")
@@ -152,8 +178,12 @@ def test_package_keeps_available_papi_pdf_when_replication_zip_is_absent(tmp_pat
 
 @pytest.mark.parametrize("milestone", PACKAGES)
 def test_delivered_zip_matches_sources_notebooks_and_packaged_guide(milestone):
-    name, notebook = PACKAGES[milestone]
-    sources = ("src/sting.py", "src/preprocessing.py", f"notebooks/{notebook}", f"notebooks/{PREPROCESSING_NOTEBOOK}")
+    name, _ = PACKAGES[milestone]
+    sources = [
+        "src/sting.py", "src/preprocessing.py", PREPROCESSING_SOURCE, *VISIBLE[milestone],
+    ]
+    if milestone == "final":
+        sources.append("results/papi_forecast_provinces_2024.csv")
     with zipfile.ZipFile(ROOT / "submissions" / f"{name}.zip") as archive:
         for relative in sources:
             member = f"{name}/{archive_path(relative, milestone)}"

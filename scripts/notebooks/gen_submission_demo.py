@@ -11,8 +11,11 @@ import json
 import os
 import subprocess
 import sys
-from pathlib import Path
 from base64 import b64decode
+from collections.abc import Iterator
+from contextlib import contextmanager
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import nbformat as nbf
 
@@ -311,7 +314,7 @@ assert (chosen_meta["thang_2011_2020"] == chosen_meta["thang_2021_2024"]).all()
 
 ext_info = check_external_integration(panel, ROOT / "data" / "processed" / "external_master_63_2011_2024.csv")
 assert ext_info["shape"] == (882, 59) and ext_info["cardinality"] == "one_to_one" and ext_info["same_keys"]
-print(f"Kiểm chứng tích hợp & thang đo: scale_audit={len(scale_flags)}/{len(scale_meta)}, external_master={ext_info['shape'][0]}×{ext_info['shape'][1]} ({ext_info['cardinality']}).")
+print(f"Kiểm chứng tích hợp & thang đo: audit toàn kỳ={len(scale_flags)}/{len(scale_meta)}, external_master={ext_info['shape'][0]}×{ext_info['shape'][1]} ({ext_info['cardinality']}).")
 display(ext_info["masks"])
 
 with open(ROOT / "models" / "sting_predict_scaler.json", encoding="utf-8") as fh:
@@ -321,10 +324,10 @@ np.testing.assert_allclose(prep_state["scaler"].scale_, scaler_saved["scale"], a
 
 fs_summary, _ = feature_selection_summary(
     panel, prep_state["score_cols"], candidate_features=ALLOWLIST_FEATURES,
-    flagged_names=prep_state["flagged_names"],
+    flagged_names=prep_state["training_flagged_names"],
 )
 exp_df, _ = run_sting_preprocessing_experiments(panel, sting_cfg=GRID, features=feats)
-print("Sàng lọc 8 đặc trưng sạch (loại d1–d8 và 23 cột có cờ nhảy thang > 0.25):")
+print("Kiểm tra 8 chỉ tiêu trong allowlist trên tập đến hết 2023.")
 display(fs_summary[["Tên chỉ tiêu", "Min (≤cutoff)", "Max (≤cutoff)", "Phương sai (ddof=0)", "|r| max với biến khác", "Bị cờ scale_audit"]].round(4))
 print("Thử nghiệm tiền xử lý trực tiếp trên lưới STING 16×16 (2011–2023):")
 display(exp_df)
@@ -919,25 +922,68 @@ for row in lang_son.itertuples(index=False):
 
 md(nbf.v4.new_markdown_cell("""## 5. Kết luận và hạn chế
 
-Trên dữ liệu giả lập, STING đạt ARI 0,950 khi đối chiếu với nhãn tham chiếu.
-Trên 869 quan sát PAPI 2011–2024, ở ngưỡng 5, ba cụm STING có 677, 16 và
-5 điểm. Cụm lớn chiếm khoảng 97% trong số 698 điểm được gán cụm. Còn
-171 điểm (19,7% toàn mẫu) nằm trong các ô thưa. Kết quả nổi bật là một
-vùng tập trung lớn và hai vùng nhỏ. Ở ngưỡng 8, kết quả còn một cụm.
+### 5.1 Kết quả chính
 
-K-means k = 2 chia 677 điểm ở vùng STING lớn nhất thành hai phần gồm
-482 và 195 điểm. Ở cấu hình đang dùng, z-score giữ nguyên chỉ số ô STING
-vì hai lưới đều dựng lại theo biên từng trục. Kết quả K-means có thể đổi
-do phép chuẩn hóa thay đổi khoảng cách. So sánh silhouette dựa trên nhóm
-điểm được cả ba phương pháp gán cụm, nên kết quả mô tả phần dữ liệu này.
-Mỗi cụm gồm các quan sát tỉnh–năm. Diễn giải giới hạn trong hai chỉ tiêu,
-giai đoạn và cấu hình đã xét.
+Trên bộ dữ liệu giả lập ở mục 3, STING tìm được hai cụm với ARI 0,950,
+cho thấy kết quả khớp cao với nhãn tham chiếu trong kịch bản đã thiết kế.
+Với dữ liệu PAPI, nhóm dùng STING để mô tả sự tập trung của các cặp điểm
+**4.2 Kiểm soát tham nhũng trong cung ứng dịch vụ công** và **6.1 Y tế công lập**.
 
-Trên lưới cố định 2011–2023, 48/61 tỉnh đủ điểm năm 2024 được gán vào
-cụm lớn. Trong 59 tỉnh đủ dữ liệu hai năm, 7 tỉnh sang ô thưa và 5 tỉnh
-từ ô thưa vào cụm. Lạng Sơn đi từ ô có 2 điểm tham chiếu sang ô có 12
-điểm, vượt ngưỡng 5. Việc diễn giải dịch chuyển cần đọc cùng điểm gốc
-của 4.2 và 6.1, trong phạm vi hai chỉ tiêu đã chọn.
+Trong giai đoạn 2011–2024, 869/882 quan sát tỉnh–năm có đủ hai chỉ tiêu.
+Trên mẫu này, lưới 16 × 16 với ngưỡng 5 quan sát mỗi ô và quy tắc nối qua
+cạnh tạo ba cụm gồm 677, 16 và 5 quan sát. Cụm lớn nhất chứa 52/56 ô dày
+và chiếm 677/698 quan sát được gán cụm (97,0%). 171 quan sát còn lại
+(19,7% toàn mẫu) nằm ở ô thưa và mang nhãn −1. Nhãn này phản ánh mật độ
+của tổ hợp điểm trên lưới. Trong 171 quan sát mang nhãn −1, 162 có |z| ≤ 3
+ở cả hai chỉ tiêu.
+
+### 5.2 Thảo luận về kết quả phân cụm
+
+K-means với k = 2 được khớp trên toàn bộ 869 quan sát. Trong 677 điểm
+của cụm STING lớn nhất, 482 điểm được gán về một tâm và 195 điểm về tâm
+còn lại. STING nối các ô dày kề cạnh thành một vùng, nên cùng một vùng
+có thể chứa các điểm gần những tâm K-means khác nhau.
+
+Trên 680 quan sát được cả ba phương pháp gán cụm, K-means k = 2 đạt
+silhouette 0,4605, tiếp đến là STING (0,3802) và DBSCAN (0,2740). Các
+giá trị này đo độ kết tụ và tách biệt theo khoảng cách trên cùng tập điểm
+chuẩn hóa. Để đánh giá cả độ phủ, cần đọc thêm số quan sát được mỗi phương
+pháp gán cụm trên toàn mẫu ở mục 4.5.
+
+Khi dựng lại lưới chia đều, z-score dời và co giãn cả điểm lẫn ranh giới
+ô theo cùng một phép biến đổi trên từng trục. Vì vậy, cả 869 điểm giữ
+nguyên ô và nhãn STING trong phép thử ở mục 4.6. Với K-means, chuẩn hóa
+thay đổi mức đóng góp của từng trục vào khoảng cách Euclid, dẫn đến
+68/869 điểm đổi nhóm sau khi đối chiếu tên cụm.
+
+### 5.3 Biến động 2023–2024 trên lưới tham chiếu
+
+Nhóm xây dựng bộ chuẩn hóa và lưới tham chiếu từ 808 quan sát 2011–2023,
+sau đó đặt các điểm PAPI đã quan sát năm 2024 vào lưới. Trong 61 tỉnh
+đủ hai chỉ tiêu, 48 tỉnh (78,7%) thuộc cụm lớn và 13 tỉnh ở ô thưa. Hai
+tỉnh thiếu chỉ tiêu được loại khỏi phép gán.
+
+Trong 59 tỉnh ghép được ở cả hai năm, 43 tỉnh thuộc cụm ở cả hai năm,
+4 tỉnh ở ô thưa cả hai năm, 7 tỉnh từ cụm sang ô thưa và 5 tỉnh từ ô
+thưa vào cụm. Trong 43 tỉnh giữ nguyên cụm, 39 tỉnh đổi sang ô khác.
+
+Ở Lạng Sơn, điểm 4.2 giảm từ 2,1400 xuống 2,0727, trong khi điểm 6.1
+tăng từ 1,8922 lên 1,9596. Tổ hợp điểm đi từ ô (13, 9) có 2 quan sát
+tham chiếu sang ô (12, 10) có 12 quan sát, vượt ngưỡng 5 của ô dày.
+Nhãn chuyển từ −1 sang 2 vì cặp điểm mới nằm ở một ô dày trên lưới cố định.
+
+### 5.4 Hạn chế và phạm vi diễn giải
+
+Ở mục 4.7, tăng ngưỡng từ 5 lên 8 với cùng lưới làm số cụm giảm từ ba
+còn một và số quan sát ở ô thưa tăng từ 171 lên 271 (31,2%). Khi giữ
+ngưỡng 5 và cho phép nối qua góc, ba cụm cũng gộp thành một dù số quan sát
+ở ô thưa giữ nguyên. Số cụm vì vậy phụ thuộc cả ngưỡng xác định ô dày
+và quy tắc nối các ô đạt ngưỡng.
+
+Các cụm mô tả hai chỉ tiêu đã chọn trên các quan sát có đủ dữ liệu.
+Một tỉnh có thể đóng góp nhiều quan sát và xuất hiện ở các vùng khác
+nhau theo năm. Khi diễn giải biến động của một tỉnh, cần đọc vị trí
+trên lưới cùng chiều thay đổi của từng điểm gốc.
 
 **Nguồn tham khảo**
 
@@ -955,48 +1001,90 @@ của 4.2 và 6.1, trong phạm vi hai chỉ tiêu đã chọn.
 nb["cells"] = cells
 nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}
 
-OUT.parent.mkdir(parents=True, exist_ok=True)
-nbf.write(nb, str(OUT))
-print("written:", OUT)
+@contextmanager
+def _publication_lock(target: Path) -> Iterator[None]:
+    """Serialize publication for one notebook and release the lock on process exit."""
+    lock_path = target.parent / ".ipynb_checkpoints" / f".{target.name}.publish.lock"
+    lock_path.parent.mkdir(exist_ok=True)
+    with lock_path.open("a+b") as lock_file:
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                lock_file.seek(0)
+                msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as error:
+            raise RuntimeError("Không giữ được khóa cập nhật notebook giữa kỳ.") from error
+        yield
 
 
 def main() -> int:
-    env = {
-        **os.environ,
-        "STING_REPO_ROOT": str(ROOT),
-        "SUBMISSION_DEMO_NB_PATH": str(OUT),
-    }
-    proc = subprocess.run(
-        [sys.executable, "-X", "utf8", "-m", "nbconvert", "--to", "notebook", "--execute", "--inplace", str(OUT)],
-        cwd=str(ROOT),
-        env=env,
-        capture_output=True,
-        encoding="utf-8",
-        timeout=600,
-    )
-    if proc.returncode != 0:
-        print("nbconvert FAILED:\n" + proc.stdout[-4000:])
-        print("STDERR:\n" + proc.stderr[-4000:])
-        return 1
+    sys.path.insert(0, str(ROOT))
+    from scripts.common.notebook_checks import notebook_issues
 
-    executed = OUT.read_text(encoding="utf-8")
-    OUT.write_text(executed, encoding="utf-8", newline="\n")
-    check = json.loads(executed)
-    code_cells = [c for c in check["cells"] if c["cell_type"] == "code"]
-    n_code = len(code_cells)
-    n_err = sum(1 for c in code_cells for o in c.get("outputs", [])
-                if o.get("output_type") == "error")
-    n_noout = sum(1 for c in code_cells if not c.get("outputs"))
-    if n_err or n_noout:
-        print(f"FAIL: {n_err} lỗi, {n_noout} ô code thiếu output (trong {n_code} ô)")
-        return 1
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    image = ROOT / "results/figs/papi_zscore_comparison.png"
+    with TemporaryDirectory(prefix=".midterm-", dir=OUT.parent) as directory:
+        staged = Path(directory) / OUT.name
+        nbf.write(nb, staged)
+        env = {
+            **os.environ,
+            "STING_REPO_ROOT": str(ROOT),
+            "SUBMISSION_DEMO_NB_PATH": str(staged),
+        }
+        proc = subprocess.run(
+            [sys.executable, "-X", "utf8", "-m", "nbconvert", "--to", "notebook", "--execute", "--inplace", str(staged)],
+            cwd=ROOT,
+            env=env,
+            capture_output=True,
+            encoding="utf-8",
+            timeout=600,
+        )
+        if proc.returncode != 0:
+            print("nbconvert FAILED:\n" + proc.stdout[-4000:])
+            print("STDERR:\n" + proc.stderr[-4000:])
+            return 1
 
-    visual = next(cell for cell in code_cells if "papi-zscore-comparison" in cell["metadata"].get("tags", []))
-    png = next(out["data"]["image/png"] for out in visual["outputs"] if "image/png" in out.get("data", {}))
-    (ROOT / "results/figs/papi_zscore_comparison.png").write_bytes(b64decode("".join(png)))
+        executed = staged.read_text(encoding="utf-8")
+        checked = json.loads(executed)
+        issues = notebook_issues(checked)
+        if issues:
+            print("Notebook chưa đạt. " + "; ".join(issues))
+            return 1
 
-    print(f"notebook OK: {n_code} code cells, 0 error outputs, mọi ô có output")
-    print("OK")
+        code_cells = [cell for cell in checked["cells"] if cell["cell_type"] == "code"]
+        png = next((
+            output["data"]["image/png"]
+            for cell in code_cells if "papi-zscore-comparison" in cell["metadata"].get("tags", [])
+            for output in cell["outputs"] if "image/png" in output.get("data", {})
+        ), None)
+        if png is None:
+            print("Notebook thiếu hình đối chiếu z-score.")
+            return 1
+
+        staged.write_text(executed, encoding="utf-8", newline="\n")
+        staged_image = staged.with_name(image.name)
+        staged_image.write_bytes(b64decode("".join(png), validate=True))
+        with _publication_lock(OUT):
+            prior_image = image.read_bytes() if image.exists() else None
+            staged_image.replace(image)
+            try:
+                staged.replace(OUT)
+            except OSError:
+                # Keep the existing notebook and its figure together when publication fails.
+                if prior_image is None:
+                    image.unlink()
+                else:
+                    staged_image.write_bytes(prior_image)
+                    staged_image.replace(image)
+                raise
+
+    print(f"notebook OK: {len(code_cells)} code cells, 0 error outputs, mọi ô có output")
+    print("written:", OUT)
     return 0
 
 

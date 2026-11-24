@@ -184,10 +184,7 @@ class STING:
             X = X.reshape(1, -1)
         if X.ndim != 2 or X.shape[1] != self.n_dims_:
             raise ValueError(f"X cần đúng {self.n_dims_} chiều, nhận shape={X.shape}")
-        finite = np.isfinite(X).all(axis=1)
-        in_support = finite & ~np.any(
-            (X < self.bounds_min_) | (X > self.bounds_max_), axis=1
-        )
+        in_support = self._in_training_support(X)
         res = self.factor ** self.cluster_level_
         preds = np.full(X.shape[0], -1, dtype=int)
         if np.any(in_support):
@@ -368,6 +365,11 @@ class STING:
                 f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
             )
         return [self.cells_[level][k] for k in sorted(self.cells_[level])]
+
+    def _in_training_support(self, X: np.ndarray) -> np.ndarray:
+        """Kiểm tra cực trị đã quan sát từ ô gốc, kể cả model lưu trước đây."""
+        root = self.cells_[0][(0,) * self.n_dims_]
+        return np.isfinite(X).all(axis=1) & ((X >= root.min_) & (X <= root.max_)).all(axis=1)
 
     def _assign(self, X: np.ndarray, res: int) -> tuple[np.ndarray, np.ndarray]:
         """Chỉ số ô (theo chiều và phẳng) của từng điểm trên lưới ``res`` ô/chiều."""

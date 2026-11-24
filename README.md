@@ -9,6 +9,12 @@
 
 Nhóm 15 · Môn Học máy · Chủ đề 6 — Grid-based clustering · Sociology / History
 
+Luồng chính của STING gồm ba bước. `fit()` dựng lưới nhiều mức và đếm điểm theo ô.
+`cluster()` giữ các ô đủ điểm ở mức được chọn, rồi dùng DFS nối các ô dày chung cạnh.
+`predict()` tra ô và nhãn trên lưới đã học. Trong cấu hình PAPI, hai trục là chỉ tiêu 4.2
+và 6.1, lưới có 16 × 16 ô và ngưỡng là 5 quan sát mỗi ô. Bài báo gốc trình bày
+cấu trúc lưới thống kê và phép truy vấn phân cấp. [STING, Wang, Yang và Muntz (1997)](https://www.vldb.org/conf/1997/P186.PDF)
+
 ## Nộp bài
 
 Chọn gói ZIP theo mốc trong [`submissions/`](submissions/) khi gửi bài cho giảng viên. Các notebook đã lưu kết quả chạy để mở xem ngay trong repo.

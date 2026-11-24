@@ -85,7 +85,7 @@ def describe_grid_assignment(frame: pd.DataFrame, features, scaler, grid) -> pd.
     labels = grid.predict(points)
     rows.loc[complete, "cluster"] = labels
     rows.loc[complete, "grid_status"] = "outside_grid"
-    within = ((points >= grid.bounds_min_) & (points <= grid.bounds_max_)).all(axis=1)
+    within = grid._in_training_support(points)
     if not within.any():
         return rows
 

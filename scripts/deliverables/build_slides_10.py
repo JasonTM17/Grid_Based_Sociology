@@ -216,6 +216,21 @@ def note(slide, text_md: str):
     slide.notes_slide.notes_text_frame.text = text_md
 
 
+def ari_fraction(group, x, y, label, numerator, denominator, label_w, fraction_w):
+    """An editable fraction built from PowerPoint text and a horizontal bar."""
+    part_x = x + label_w
+    for value, left, top, width in (
+        (label, x, y + 0.16, label_w),
+        (numerator, part_x, y, fraction_w),
+        (denominator, part_x, y + 0.34, fraction_w),
+    ):
+        box = text(group, left, top, width, 0.34, [(value, 19, False, NAVY)], align=PP_ALIGN.CENTER)
+        frame = box.text_frame
+        frame.margin_left = frame.margin_right = frame.margin_top = frame.margin_bottom = Pt(0)
+        frame.paragraphs[0].runs[0].font.name = "Cambria Math"
+    rect(group, part_x, y + 0.326, fraction_w, 0.012, NAVY)
+
+
 def bullets(slide, x, y, w, h, items, size=13, color=INK, gap_pt=6, bold_first=True,
             lead_color=TEAL, align=PP_ALIGN.LEFT, hang_in=0.22, gap_first=None):
     tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
@@ -514,7 +529,12 @@ note(
     "chọn ô dày (≥ 3), gắn nhãn −1 cho ô thưa (1 điểm) và nối kề 4 hướng (chạm góc không nối). "
     "Điểm trong ô thưa nhận nhãn nhiễu −1. Phần phân cụm PAPI chọn một mức lưới. "
     "Ở ví dụ 3×3, notebook gọi fit trên 15 điểm và cluster(level=1, connectivity=1). "
-    "Ô biên trên dùng chỉ số r−1. Mục 4.3.3 cho thấy query_top_down thống kê 322 điểm "
+    "Dưới hình, r là số ô trên một trục và Δ là bề rộng một ô. Lấy tọa độ trừ biên dưới "
+    "rồi chia cho Δ để đo điểm đã đi qua bao nhiêu độ rộng ô. Floor(1,7) cho ô chỉ số 1, "
+    "tức ô thứ hai. Ở đúng biên trên, clip đưa chỉ số r về r−1. Khi gán điểm mới, "
+    "predict kiểm tra biên trước và trả −1 cho điểm ngoài lưới.\n\n"
+    "Mục 5 của bài báo dùng phân phối và khoảng tin cậy để xét ô nào còn liên quan, rồi đi "
+    "xuống ô con. Mục 4.3.3 trong notebook minh họa query_top_down. Hàm thống kê 322 điểm "
     "trong các ô nằm trọn vùng, còn lọc trực tiếp từng điểm cho 348. "
     "Xem Wang, Yang và Muntz (VLDB 1997) tại https://www.vldb.org/conf/1997/P186.PDF",
 )
@@ -567,11 +587,33 @@ bullets(
     ],
     size=17, gap_pt=24,
 )
+ari = s.shapes.add_group_shape()
+ari.name = "Công thức ARI"
+ari._element.xpath("./p:nvGrpSpPr/p:cNvPr")[0].set(
+    "descr",
+    "E = (A × B) / C(n, 2). ARI = (T − E) / ((A + B)/2 − E).",
+)
+text(ari, 7.85, 3.97, 4.9, 0.34, [("Công thức ARI", 16, True, TEAL)])
+ari_fraction(ari, 7.97, 4.38, "E =", "A × B", "C(n, 2)", 0.47, 1.14)
+ari_fraction(ari, 9.83, 4.38, "ARI =", "T − E", "(A + B)/2 − E", 0.78, 2.08)
+text(
+    ari, 7.85, 5.20, 4.9, 1.32,
+    [
+        ("A, B đếm cặp cùng nhóm theo từng bộ nhãn.", 14, False, INK),
+        ("T đếm cặp cùng nhóm theo cả hai bộ nhãn.", 14, False, INK),
+        ("E là số cặp kỳ vọng khi xáo nhãn.", 14, False, INK),
+        ("C(n, 2) là tổng số cặp điểm.", 14, False, INK),
+    ],
+    space_after=3,
+)
 note(
     s,
     "Với 240 điểm sinh từ hai phân bố Gauss, STING tìm được hai cụm và đánh dấu 2,5% điểm là nhiễu. "
     "ARI bằng 0,950 đo mức khớp giữa kết quả và nhãn đã biết khi sinh dữ liệu. "
-    "Phép thử này kiểm tra cách cài đặt trên ví dụ có nhãn tham chiếu.",
+    "Phép thử này kiểm tra cách cài đặt trên ví dụ có nhãn tham chiếu.\n\n"
+    "Chỉ vào hai phân số. A đếm cặp cùng nhóm theo nhãn lúc sinh, B đếm theo nhãn STING và T đếm cặp cùng nhóm ở cả hai bộ nhãn. "
+    "C(n, 2) là số cách chọn 2 điểm trong n điểm. Khi xáo nhãn STING và giữ kích thước các nhóm, E là số cặp cùng nhóm kỳ vọng. "
+    "ARI lấy T trừ E rồi chia cho mốc chuẩn hóa (A + B)/2 − E. Kết quả của nhóm khoảng 0,9504.",
 )
 
 
