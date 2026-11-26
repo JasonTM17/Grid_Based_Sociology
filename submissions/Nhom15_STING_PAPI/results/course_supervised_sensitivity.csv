@@ -1,0 +1,4 @@
+﻿model,metric_cv,value_cv,holdout_acc,holdout_macro_f1,cv_std,cv_folds
+"svm (rbf) (cân bằng lớp, tham khảo)",f1_macro (expanding origin 2017–2022),0.526,0.78,0.592,0.073,6
+"decision tree (cân bằng lớp, tham khảo)",f1_macro (expanding origin 2017–2022),0.494,0.661,0.553,0.097,6
+"random forest (cân bằng lớp, tham khảo)",f1_macro (expanding origin 2017–2022),0.539,0.78,0.649,0.123,6

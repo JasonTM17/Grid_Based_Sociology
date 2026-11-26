@@ -1,4 +1,4 @@
-"""Gate artifact notebook nộp cuối kỳ: ``notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb``.
+"""Gate artifact notebook thống nhất: ``notebooks/Nhom15_STING_PAPI.ipynb``.
 
 Notebook đã execute phải có output ở mọi ô code, không lỗi, không stderr, không dòng
 cảnh báo trong output và không lệnh bỏ qua cảnh báo. Các hàm ``check_*`` tách riêng
@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-FINAL_NOTEBOOK = ROOT / "notebooks" / "Nhom15_CuoiKy_STING_PAPI.ipynb"
+FINAL_NOTEBOOK = ROOT / "notebooks" / "Nhom15_STING_PAPI.ipynb"
 
 _IGNORE_PATTERNS = (
     re.compile(r"""filterwarnings\s*\(\s*['"]ignore['"]""", re.IGNORECASE),
@@ -95,7 +95,7 @@ def check_executed_notebook(nb: dict) -> list[str]:
 
 @pytest.fixture(scope="module")
 def final_notebook() -> dict:
-    assert FINAL_NOTEBOOK.is_file(), "thiếu notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb"
+    assert FINAL_NOTEBOOK.is_file(), "thiếu notebooks/Nhom15_STING_PAPI.ipynb"
     return json.loads(FINAL_NOTEBOOK.read_text(encoding="utf-8"))
 
 
@@ -108,16 +108,20 @@ def test_final_notebook_has_code_cells(final_notebook: dict):
     code_cells = [
         cell for cell in final_notebook.get("cells", []) if cell.get("cell_type") == "code"
     ]
-    assert len(code_cells) >= 10, f"chỉ có {len(code_cells)} ô code"
+    assert len(code_cells) >= 15, f"chỉ có {len(code_cells)} ô code"
 
 
-def test_final_notebook_skips_loose_folder_without_data(final_notebook, tmp_path, monkeypatch):
+def test_final_notebook_skips_incomplete_loose_folder(final_notebook, tmp_path, monkeypatch):
     root = tmp_path / "Đồ án PAPI"
-    loose = root / "submissions/02-cuoi-ky"
+    loose = root / "submissions/Nhom15_STING_PAPI"
     for relative in (
-        "src/sting.py", "src/preprocessing.py", "data/processed/papi_panel_63_2011_2024.csv",
-        "models/predict_config.json", "submissions/02-cuoi-ky/src/sting.py",
-        "submissions/02-cuoi-ky/src/preprocessing.py",
+        "src/sting.py",
+        "src/preprocessing.py",
+        "scripts/common/midterm_clustering.py",
+        "data/processed/papi_panel_63_2011_2024.csv",
+        "models/predict_config.json",
+        "submissions/Nhom15_STING_PAPI/src/sting.py",
+        "submissions/Nhom15_STING_PAPI/src/preprocessing.py",
     ):
         marker = root / relative
         marker.parent.mkdir(parents=True, exist_ok=True)
@@ -125,10 +129,10 @@ def test_final_notebook_skips_loose_folder_without_data(final_notebook, tmp_path
 
     monkeypatch.chdir(loose)
     setup = next(cell for cell in final_notebook["cells"] if cell["cell_type"] == "code")
-    finder = _cell_source_text(setup).split("sys.path.insert", 1)[0]
+    finder = _cell_source_text(setup).split("ROOT = _find_project_root()", 1)[0]
     namespace = {}
     exec(finder, namespace)
-    assert namespace["ROOT"] == root
+    assert namespace["_find_project_root"]() == root
 
 
 def test_per_year_summary_matches_published_clusters(final_notebook: dict):
@@ -136,7 +140,11 @@ def test_per_year_summary_matches_published_clusters(final_notebook: dict):
         rows = list(csv.DictReader(table))
     single_cluster_years = sum(row["k"] == "1" for row in rows)
     summary = f"{single_cluster_years}/{len(rows)} năm có một cụm"
-    assert summary in notebook_output_text(final_notebook)
+    out = notebook_output_text(final_notebook)
+    assert summary in out
+    assert "Biên bứt phá vượt chuẩn" in out
+    assert "Ưu tiên cải thiện Y tế 6.1" in out
+    assert "Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long" in out
 
 
 def test_gate_detects_stderr_in_memory(final_notebook: dict):

@@ -1,10 +1,4 @@
-"""Gate artifact nộp bài: slide, notebook demo, và provenance PDF PAPI.
-
-Đối chiếu demo tổng hợp và kết quả phân cụm PAPI với artifact. Các hàm
-``check_*`` dùng chung cho artifact thật và bản sao đột biến trong RAM.
-
-Chạy: python -m pytest tests/test_submission_artifacts.py -q
-"""
+"""Gate artifact nộp bài thống nhất: báo cáo DOCX, slide 11 trang, notebook và provenance PAPI."""
 
 from __future__ import annotations
 
@@ -26,12 +20,13 @@ from pptx import Presentation
 
 ROOT = Path(__file__).resolve().parents[1]
 
-SUBMISSION_PPTX = ROOT / "slides" / "submission.pptx"
-SUBMISSION_NB = ROOT / "notebooks" / "Nhom15_GiuaKy_STING_PAPI.ipynb"
+REPORT_DOCX = ROOT / "reports" / "Nhom15_BaoCao_STING_PAPI.docx"
+SUBMISSION_PPTX = ROOT / "slides" / "Nhom15_STING_PAPI.pptx"
+SUBMISSION_NB = ROOT / "notebooks" / "Nhom15_STING_PAPI.ipynb"
 PROVENANCE = ROOT / "data" / "raw" / "papi" / "PROVENANCE.md"
 PAPI_PDF = ROOT / "data" / "raw" / "papi" / "PAPI_2024_REPORT_VIE_final.pdf"
 EXPECTED_ARI_STR = "0.950"
-MIDTERM_SLIDE_COUNT = 11
+SLIDE_COUNT = 11
 THANK_YOU = "Cảm ơn thầy và các bạn đã lắng nghe"
 
 _IGNORE_PATTERNS = (
@@ -59,17 +54,31 @@ def _sha256_file(path: Path) -> str:
 
 def test_report_embeds_current_canonical_figures():
     figures = (
-        "00_synthetic_sting.png", "sting_first_real.png", "papi_forecast_values.png",
-        "papi_forecast_grid.png", "course_confusion_matrix.png", "evolution.png",
-        "map_2024.png", "external_pci_by_cluster.png", "external_health_density_2020.png",
-        "external_grdp_by_cluster.png", "external_wdi_panel.png", "external_poverty_by_cluster.png",
+        "00_synthetic_sting.png",
+        "sting_first_real.png",
+        "papi_forecast_values.png",
+        "papi_forecast_grid.png",
+        "course_confusion_matrix.png",
+        "evolution.png",
+        "map_2024.png",
+        "stakeholder_quadrants_2024.png",
+        "external_pci_by_cluster.png",
+        "external_health_density_2020.png",
+        "external_grdp_by_cluster.png",
+        "external_wdi_panel.png",
+        "external_poverty_by_cluster.png",
     )
-    report = Document(ROOT / "reports" / "final_report.docx")
+    report = Document(REPORT_DOCX)
     shapes = list(report.inline_shapes)
     assert len(shapes) == len(figures) + 1
-    for shape, path in zip(shapes, (
-        ROOT / "assets/report-cover-logo.png", *(ROOT / "results" / "figs" / name for name in figures)
-    ), strict=True):
+    for shape, path in zip(
+        shapes,
+        (
+            ROOT / "assets/report-cover-logo.png",
+            *(ROOT / "results" / "figs" / name for name in figures),
+        ),
+        strict=True,
+    ):
         relation = shape._inline.graphic.graphicData.pic.blipFill.blip.embed
         embedded = report.part.related_parts[relation].blob
         assert hashlib.sha256(embedded).hexdigest() == _sha256_file(path), (
@@ -78,7 +87,7 @@ def test_report_embeds_current_canonical_figures():
 
 
 def test_report_uses_the_user_final_template_geometry():
-    report = Document(ROOT / "reports" / "final_report.docx")
+    report = Document(REPORT_DOCX)
     cover, front, body = report.sections
     assert (cover.left_margin.twips, cover.right_margin.twips) == (1417, 1134)
     assert (cover.page_width.twips, cover.page_height.twips) == (11906, 16838)
@@ -91,11 +100,11 @@ def test_report_uses_the_user_final_template_geometry():
 
 
 def check_pptx_submission(prs: Presentation) -> list[str]:
-    """Kiểm tra 10 slide đầu, slide cảm ơn và ghi chú thuyết trình."""
+    """Kiểm tra 11 slide, slide cảm ơn cuối và ghi chú thuyết trình mọi trang."""
     violations: list[str] = []
     count = len(prs.slides)
-    if count != MIDTERM_SLIDE_COUNT:
-        violations.append(f"submission.pptx có {count} slide, cần đúng {MIDTERM_SLIDE_COUNT}")
+    if count != SLIDE_COUNT:
+        violations.append(f"Nhom15_STING_PAPI.pptx có {count} slide, cần đúng {SLIDE_COUNT}")
     else:
         closing_text = [
             shape.text.strip() for shape in prs.slides[-1].shapes if shape.has_text_frame and shape.text.strip()
@@ -120,7 +129,6 @@ def _cell_source_text(cell: dict) -> str:
 
 
 def check_notebook_cells(nb: dict) -> list[str]:
-    """Ô code phải có output; không error/stderr; không filterwarnings ignore."""
     violations: list[str] = []
     code_cells = [c for c in nb.get("cells", []) if c.get("cell_type") == "code"]
     if not code_cells:
@@ -131,9 +139,7 @@ def check_notebook_cells(nb: dict) -> list[str]:
         source = _cell_source_text(cell)
         for pattern in _IGNORE_PATTERNS:
             if pattern.search(source):
-                violations.append(
-                    f"ô code #{index}: nguồn chứa lệnh bỏ qua cảnh báo ({pattern.pattern})"
-                )
+                violations.append(f"ô code #{index}: nguồn chứa lệnh bỏ qua cảnh báo ({pattern.pattern})")
 
         outputs = cell.get("outputs")
         if not outputs:
@@ -150,16 +156,12 @@ def check_notebook_cells(nb: dict) -> list[str]:
 
 
 def notebook_markdown_text(nb: dict) -> str:
-    chunks: list[str] = []
-    for cell in nb.get("cells", []):
-        if cell.get("cell_type") != "markdown":
-            continue
-        chunks.append(_cell_source_text(cell))
-    return "\n".join(chunks)
+    return "\n".join(
+        _cell_source_text(cell) for cell in nb.get("cells", []) if cell.get("cell_type") == "markdown"
+    )
 
 
 def notebook_executed_text(nb: dict) -> str:
-    """Ghép mọi stdout / text/plain từ output đã lưu."""
     chunks: list[str] = []
     for cell in nb.get("cells", []):
         if cell.get("cell_type") != "code":
@@ -178,15 +180,12 @@ def notebook_executed_text(nb: dict) -> str:
 
 
 def check_notebook_no_absolute_host_paths(nb: dict) -> list[str]:
-    """Output đã lưu không được chứa đường dẫn tuyệt đối máy chủ."""
     blob = notebook_executed_text(nb)
-    violations: list[str] = []
-    for pattern in _HOST_ABS_PATH_PATTERNS:
-        if pattern.search(blob):
-            violations.append(
-                f"output notebook chứa đường dẫn host khớp {pattern.pattern!r}"
-            )
-    return violations
+    return [
+        f"output notebook chứa đường dẫn host khớp {pattern.pattern!r}"
+        for pattern in _HOST_ABS_PATH_PATTERNS
+        if pattern.search(blob)
+    ]
 
 
 def provenance_pdf_sha256(md_text: str) -> str | None:
@@ -194,10 +193,7 @@ def provenance_pdf_sha256(md_text: str) -> str | None:
     return match.group(1).lower() if match else None
 
 
-def check_papi_pdf_provenance(
-    provenance_path: Path = PROVENANCE,
-    pdf_path: Path = PAPI_PDF,
-) -> list[str]:
+def check_papi_pdf_provenance(provenance_path: Path = PROVENANCE, pdf_path: Path = PAPI_PDF) -> list[str]:
     violations: list[str] = []
     if not provenance_path.is_file():
         violations.append(f"thiếu {provenance_path.relative_to(ROOT)}")
@@ -212,67 +208,73 @@ def check_papi_pdf_provenance(
 
     listed = provenance_pdf_sha256(text)
     if listed is None:
-        violations.append(
-            "PROVENANCE.md không ghi SHA-256 của PAPI_2024_REPORT_VIE_final.pdf"
-        )
+        violations.append("PROVENANCE.md không ghi SHA-256 của PAPI_2024_REPORT_VIE_final.pdf")
         return violations
 
     actual = _sha256_file(pdf_path)
     if listed != actual:
-        violations.append(
-            f"SHA-256 trong PROVENANCE ({listed}) khác file thực ({actual})"
-        )
+        violations.append(f"SHA-256 trong PROVENANCE ({listed}) khác file thực ({actual})")
     return violations
 
 
 @pytest.fixture(scope="module")
 def submission_notebook() -> dict:
-    assert SUBMISSION_NB.is_file(), "thiếu notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb"
+    assert SUBMISSION_NB.is_file(), "thiếu notebooks/Nhom15_STING_PAPI.ipynb"
     return json.loads(SUBMISSION_NB.read_text(encoding="utf-8"))
 
 
-def test_submission_pptx_exists_and_notes():
-    assert SUBMISSION_PPTX.is_file(), "thiếu slides/submission.pptx"
+def test_unified_pptx_exists_notes_and_content():
+    assert SUBMISSION_PPTX.is_file(), "thiếu slides/Nhom15_STING_PAPI.pptx"
     presentation = Presentation(str(SUBMISSION_PPTX))
     violations = check_pptx_submission(presentation)
     assert not violations, "\n".join(violations)
-    titles_and_text = "\n".join(shape.text for slide in presentation.slides
-                                for shape in slide.shapes if shape.has_text_frame)
-    assert "Đọc cụm từ bảng đếm 3 × 3" in titles_and_text
-    assert "Tài liệu tham khảo" not in titles_and_text
-    assert "nhóm báo cáo trung thực" not in titles_and_text.lower()
-    assert "PHÂN CỤM DỰA TRÊN LƯỚI STING" in titles_and_text
-    assert "APPLICATION OF STING GRID-BASED CLUSTERING" in titles_and_text
-    assert all(call in titles_and_text for call in (
-        "run_preprocessing_pipeline(...)", "fit(X)", "cluster(level, connectivity=1)", "predict(X_moi)",
-    ))
-    assert "Vì sao STING có 3 cụm, K-means dùng k = 2?" in titles_and_text
-    assert "56 ô dày" in titles_and_text
-    assert "Z-score thay đổi điều gì?" in titles_and_text
-    assert "Silhouette trên cùng 680 điểm" in titles_and_text
-    assert "print((idx_raw == idx_z).all(axis=1).sum())" in titles_and_text
-    assert "869/869 điểm cùng ô" in titles_and_text and "68 điểm đổi cụm" in titles_and_text
-    assert "8 điểm đổi trạng thái nhiễu" in titles_and_text
-    assert "482 và 195 điểm" in titles_and_text
-    assert "48/61 tỉnh nằm ở 21 ô dày thuộc 1 cụm trên lưới 2011–2023." in titles_and_text
-    assert "7 tỉnh sang ô thưa, 5 tỉnh từ ô thưa vào cụm." in titles_and_text
-    assert "dự báo" not in titles_and_text.lower()
-    assert "869 quan sát tỉnh–năm" in titles_and_text
-    assert "677" in titles_and_text and "19.7%" in titles_and_text
-    assert "huấn luyện" not in titles_and_text
-    table = next(shape.table for shape in presentation.slides[7].shapes if shape.has_table)
-    assert [table.cell(i, 3).text for i in range(1, 5)] == ["0.3802", "0.4605", "0.3499", "0.2740"]
-    trace = next(shape.table for shape in presentation.slides[9].shapes if shape.has_table)
-    assert [trace.cell(i, 2).text for i in (1, 2)] == ["(13, 9)", "(12, 10)"]
-    assert [trace.cell(i, 3).text for i in (1, 2)] == ["2", "12"]
+
+    def slide_text(slide):
+        parts = []
+        for shape in slide.shapes:
+            if shape.has_text_frame:
+                parts.append(shape.text)
+            if shape.has_table:
+                parts.extend(cell.text for row in shape.table.rows for cell in row.cells)
+        return "\n".join(parts).strip()
+
+    visible = [slide_text(slide) for slide in presentation.slides]
+    full_text = "\n".join(visible)
+    for required in (
+        "Phân cụm dựa trên lưới STING",
+        "ARI = 0,950",
+        "869/869 ô",
+        "48/61 tỉnh đủ điểm vào cụm lớn",
+        "Biến mã kỹ thuật (−1, 2) thành 4 nhóm hành động",
+        "Biên bứt phá vượt chuẩn",
+        "Ưu tiên cải thiện Y tế 6.1",
+        "Lạng Sơn",
+        "(13, 9)",
+        "(12, 10)",
+        "0,0736",
+        "0,0641",
+        "Wang, Yang & Muntz (VLDB 1997)",
+    ):
+        assert required in full_text, f"Thiếu nội dung slide: {required}"
+    assert "Nhiễu¹" not in full_text
+    assert "(kèm Bạc Liêu, Huế" not in full_text
+    assert visible[-1] == THANK_YOU
+
+    notes = "\n".join(slide.notes_slide.notes_text_frame.text for slide in presentation.slides)
+    for name in ("Nhom15_BaoCao_STING_PAPI.docx", "Nhom15_STING_PAPI.ipynb", "Nhom15_TienXuLy_PAPI.ipynb"):
+        assert name in notes
 
 
-def test_midterm_notebook_root_skips_incomplete_loose_folder(submission_notebook, tmp_path, monkeypatch):
+def test_unified_notebook_root_skips_incomplete_loose_folder(submission_notebook, tmp_path, monkeypatch):
     root = tmp_path / "Đồ án PAPI"
-    loose = root / "submissions/01-giua-ky"
+    loose = root / "submissions/Nhom15_STING_PAPI"
     for relative in (
-        "src/sting.py", "src/preprocessing.py", "scripts/common/midterm_clustering.py",
-        "data/processed/papi_panel_63_2011_2024.csv", "submissions/01-giua-ky/src/sting.py",
+        "src/sting.py",
+        "src/preprocessing.py",
+        "scripts/common/midterm_clustering.py",
+        "data/processed/papi_panel_63_2011_2024.csv",
+        "models/predict_config.json",
+        "submissions/Nhom15_STING_PAPI/src/sting.py",
     ):
         marker = root / relative
         marker.parent.mkdir(parents=True, exist_ok=True)
@@ -285,7 +287,6 @@ def test_midterm_notebook_root_skips_incomplete_loose_folder(submission_notebook
     finder = _cell_source_text(setup).split("ROOT = _find_project_root()", 1)[0]
     namespace = {}
     exec(finder, namespace)
-
     assert namespace["_find_project_root"]() == root
 
 
@@ -299,115 +300,60 @@ def test_submission_notebook_no_absolute_host_paths(submission_notebook: dict):
     assert not violations, "\n".join(violations)
 
 
-def test_submission_notebook_course_rubric_sections(submission_notebook: dict):
-    """Giữa kỳ cần tiền xử lý, demo Grid-based và đánh giá phân cụm."""
+def test_submission_notebook_sections_and_key_numbers(submission_notebook: dict):
     md_text = notebook_markdown_text(submission_notebook)
-    code_cells = [
-        c for c in submission_notebook.get("cells", []) if c.get("cell_type") == "code"
-    ]
-    missing: list[str] = []
-    for section in ("Lý thuyết STING", "Cài đặt từ đầu", "Phân cụm trên dữ liệu PAPI",
-                    "Chuẩn bị mẫu phân tích", "Tính z-score từ số liệu thật"):
-        if section not in md_text:
-            missing.append(f"thiếu mục {section}")
-    if not any("preprocessing_audit.csv" in _cell_source_text(c) for c in code_cells):
-        missing.append("không có ô đọc preprocessing_audit.csv")
-    for calculation in ("KMeans(", "DBSCAN(", "scores.std(ddof=0)", "Counter(grid_model.label_of_.values())"):
-        if not any(calculation in _cell_source_text(c) for c in code_cells):
-            missing.append(f"thiếu phép tính {calculation}")
-    assert not missing, "\n".join(missing)
-    assert all(phrase not in md_text for phrase in (
-        "Thứ tự giảng dạy", "Test → Decide", "Cách chạy", "Cùng ví dụ với slide",
-    ))
+    code_cells = [c for c in submission_notebook.get("cells", []) if c.get("cell_type") == "code"]
+    for section in (
+        "Phần 1. Lý thuyết STING",
+        "Phần 2. Dữ liệu PAPI",
+        "Phần 3. Phân cụm STING trên PAPI",
+        "Phần 4. STING theo từng năm",
+        "Phần 5. Thống kê bàn giao cho khách hàng",
+        "Phần 6. Thí nghiệm dự báo 2024",
+        "Phần 7. Kết luận tổng hợp",
+        "Phụ lục A.",
+        "Phụ lục B.",
+        "Phụ lục C.",
+    ):
+        assert section in md_text, f"Thiếu mục {section}"
+    for calculation in ("KMeans(", "DBSCAN(", "build_stakeholder_tables", "PREPROCESSING_PIPELINE"):
+        assert any(calculation in _cell_source_text(c) for c in code_cells)
 
-
-def test_submission_notebook_key_numbers(submission_notebook: dict):
     output = notebook_executed_text(submission_notebook)
-    assert "2 cụm, mỗi cụm 7 điểm. 1 điểm nhiễu." in output
-    assert f"ARI = {EXPECTED_ARI_STR}" in output
     for expected in (
-        "869 quan sát đủ hai chỉ tiêu", "61/63 quan sát vào cùng mẫu",
-        "Hai chỉ tiêu có 22 ô thiếu trên 13 dòng tỉnh–năm.",
+        "2 cụm, mỗi cụm 7 điểm. 1 điểm nhiễu.",
+        f"ARI = {EXPECTED_ARI_STR}",
+        "869 quan sát đủ hai chỉ tiêu",
         "56 ô dày tạo thành 3 vùng liên thông.",
-        "1 ô dày, 5 quan sát.", "3 ô dày, 16 quan sát.", "52 ô dày, 677 quan sát.",
-        "Nhiễu: 171/869 quan sát (19.7%)",
-        "= 0.9005", "= 0.3737", "ô (12, 10) (đếm từ 0), ô có 17 quan sát",
-        "K-means chọn k=2 trong các giá trị đã thử và gán đủ 869 điểm.",
+        "Nhiễu: 171/869 quan sát (19.7%).",
+        "STING: 869/869 điểm cùng chỉ số ô, 869/869 nhãn trùng.",
+        "K-means k=2: 68/869 điểm đổi nhóm sau ghép tên cụm.",
+        "Biên bứt phá vượt chuẩn",
+        "Ưu tiên cải thiện Y tế 6.1",
+        "Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long",
     ):
         assert expected in output
 
 
-def test_submission_runs_all_kmeans_and_sensitivity_trials(submission_notebook: dict):
-    output = notebook_executed_text(submission_notebook)
-    for k, score in ((2, "0.4472"), (3, "0.3354"), (4, "0.3649"), (5, "0.3311")):
-        assert f"k={k}  |  Silhouette = {score}" in output
-    for threshold, k, n_noise, pct in ((3, 3, 85, "9.8"), (5, 3, 171, "19.7"), (8, 1, 271, "31.2")):
-        assert f"Ngưỡng {threshold}  |  {k} cụm  |  {n_noise}/869 nhiễu ({pct}%)" in output
-
-
-def test_midterm_compares_shared_points_and_check_scaling_effect(submission_notebook: dict):
-    output = notebook_executed_text(submission_notebook)
-    assert "Silhouette trên cùng 680/869 điểm" in output
-    assert "869 − (171 + 120 − 102) = 680" in output
-    assert "162/171 điểm nhãn −1 có |z| ≤ 3 trên cả hai trục" in output
-    assert "Nếu loại 9 điểm |z| > 3 rồi dựng lại lưới trên 860 điểm: 4 cụm, 173/860 điểm nhiễu (20.1%)." in output
-    assert "Lưới 4 × 4 | 12 ô dày | 1 cụm | 6/869 điểm nhiễu" in output
-    assert "Lưới 16 × 16 | 56 ô dày | 3 cụm | 171/869 điểm nhiễu" in output
-    assert "Kề 8 hướng (connectivity=2) | 56 ô dày | 1 cụm | 171/869 điểm nhiễu" in output
-    for method, score in (("STING", "0.3802"), ("K-means k=2", "0.4605"),
-                          ("K-means k=3", "0.3499"), ("DBSCAN", "0.2740")):
-        assert f"{method} | silhouette cùng tập = {score}" in output
-    assert "K-means k=2 chia các điểm này thành 482 + 195" in output
-    assert "K-means k=3 chia các điểm này thành 306 + 303 + 68" in output
-    assert "STING: 869/869 điểm cùng chỉ số ô, 869/869 nhãn trùng" in output
-    assert "K-means k=2: 68/869 điểm đổi nhóm sau ghép tên cụm" in output
-    assert "ARI giữa hai lần chạy K-means: 0.7103" in output
-    assert "DBSCAN: ε gốc = 0.0316, 5 cụm, 116 điểm nhiễu" in output
-    assert "DBSCAN sau chuẩn hóa: 6 cụm, 120 điểm nhiễu, 8/869 điểm đổi trạng thái nhiễu" in output
-    assert "DBSCAN: 6 điểm chuyển sang nhiễu, 2 điểm từ nhiễu vào cụm" in output
-    assert "Thêm significance_z=2.0: 46 ô đạt, 4 cụm, 270/869 điểm nhiễu" in output
-    assert "Lưới tham chiếu dùng 808 quan sát 2011–2023." in output
-    assert "48/61 tỉnh đủ hai chỉ tiêu vào cụm (78.7%)." in output
-    assert "48 điểm nằm ở 21 ô dày thuộc 1 cụm." in output
-    assert "Cả 13/13 tỉnh ô thưa năm 2024 đều có |z| ≤ 3 trên lưới tham chiếu (|z| lớn nhất = 2.1299)." in output
-    assert "Ghép được 59 tỉnh đủ chỉ tiêu ở cả hai năm." in output
-    assert "39/43 tỉnh giữ nguyên cụm nhưng đổi ô." in output
-    assert "papi_forecast" not in "\n".join(_cell_source_text(cell) for cell in submission_notebook["cells"])
-    assert "Lạng Sơn 2023: ngoài vùng dày trên cùng lưới" in output
-    assert "Lạng Sơn 2024: cụm 2 trên cùng lưới" in output
-    assert "Ô (13, 9) có 2 điểm tham chiếu." in output
-    assert "Ô (12, 10) có 12 điểm tham chiếu." in output
-    assert "7 tỉnh sang ô thưa, 5 tỉnh từ ô thưa vào cụm." in output
-    assert "Truy vấn từ trên xuống tổng hợp 322 điểm trong các ô nằm trọn vùng" in output
-    assert "Đếm trực tiếp từng điểm trong vùng: 348 điểm." in output
-
-
-def test_midterm_contains_the_comparison_and_observed_figures(submission_notebook):
+def test_unified_notebook_contains_zscore_and_stakeholder_figures(submission_notebook):
     cells = submission_notebook["cells"]
-    figures = (
-        (next(cell for cell in cells if "papi-zscore-comparison" in cell.get("metadata", {}).get("tags", [])),
-         "papi_zscore_comparison.png"),
-        (next(cell for cell in cells if 'results/figs/predict_2024.png' in _cell_source_text(cell)),
-         "predict_2024.png"),
-    )
-    for cell, filename in figures:
-        png = next(output["data"]["image/png"] for output in cell["outputs"] if "image/png" in output.get("data", {}))
-        assert b64decode("".join(png)) == (ROOT / "results/figs" / filename).read_bytes()
+    z_cell = next(c for c in cells if "papi-zscore-comparison" in c.get("metadata", {}).get("tags", []))
+    png_z = next(out["data"]["image/png"] for out in z_cell["outputs"] if "image/png" in out.get("data", {}))
+    assert b64decode("".join(png_z)) == (ROOT / "results/figs/papi_zscore_comparison.png").read_bytes()
+
+    stake_cell = next(c for c in cells if "results/figs/stakeholder_quadrants_2024.png" in _cell_source_text(c))
+    png_s = next(out["data"]["image/png"] for out in stake_cell["outputs"] if "image/png" in out.get("data", {}))
+    assert b64decode("".join(png_s)) == (ROOT / "results/figs/stakeholder_quadrants_2024.png").read_bytes()
 
 
-def test_midterm_slide_uses_current_panel_for_2024_coverage(tmp_path):
+def test_unified_slide_uses_current_panel_for_2024_coverage(tmp_path):
     panel_path = Path("data/processed/papi_panel_63_2011_2024.csv")
-    slide_builder = Path("scripts/deliverables/build_slides_10.py")
-    for relative in (
-        panel_path, slide_builder, Path("src/sting.py"),
-        Path("scripts/common/midterm_clustering.py"), Path("scripts/common/papi_pred_common.py"),
-        Path("scripts/common/fig_style.py"), Path("results/preprocessing_audit.csv"),
-        Path("results/papi_observed_grid_2024.csv"), Path("results/figs/00_synthetic_sting.png"),
-    ):
-        target = tmp_path / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(ROOT / relative, target)
-
+    slide_builder = Path("scripts/deliverables/build_slides.py")
+    copy_dirs = ("src", "scripts/common", "scripts/analysis", "data/processed", "models", "results")
+    for rel_dir in copy_dirs:
+        shutil.copytree(ROOT / rel_dir, tmp_path / rel_dir)
+    (tmp_path / slide_builder.parent).mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / slide_builder, tmp_path / slide_builder)
 
     panel = pd.read_csv(tmp_path / panel_path)
     year = panel.year.eq(2024)
@@ -417,12 +363,15 @@ def test_midterm_slide_uses_current_panel_for_2024_coverage(tmp_path):
     )
     panel.to_csv(tmp_path / panel_path, index=False)
     completed = subprocess.run(
-        [sys.executable, str(slide_builder)], cwd=tmp_path, capture_output=True, timeout=120,
+        [sys.executable, str(slide_builder)],
+        cwd=tmp_path,
+        capture_output=True,
+        timeout=120,
     )
     assert completed.returncode == 0, completed.stderr.decode(errors="replace")
-    slide = Presentation(str(tmp_path / "slides/submission.pptx")).slides[9]
+    slide = Presentation(str(tmp_path / "slides/Nhom15_STING_PAPI.pptx")).slides[4]
     text = "\n".join(shape.text for shape in slide.shapes if shape.has_text_frame)
-    assert "49/61 tỉnh nằm ở 21 ô dày thuộc 1 cụm" in text
+    assert "49/61 tỉnh đủ điểm vào cụm lớn" in text
 
 
 def test_papi_pdf_provenance_chain():
@@ -431,7 +380,6 @@ def test_papi_pdf_provenance_chain():
 
 
 def test_gate_detects_twelfth_slide_in_memory():
-    """Đột biến RAM: thêm slide thứ 12 phải làm gate đỏ (không ghi file)."""
     presentation = Presentation(str(SUBMISSION_PPTX))
     layout_index = 6 if len(presentation.slide_layouts) > 6 else 0
     presentation.slides.add_slide(presentation.slide_layouts[layout_index])
@@ -448,23 +396,18 @@ def test_gate_rejects_content_on_thank_you_slide():
 
 
 def test_gate_detects_error_output_in_memory(submission_notebook: dict):
-    """Đột biến RAM: chèn output error phải làm gate đỏ."""
     mutant = copy.deepcopy(submission_notebook)
     for cell in mutant.get("cells", []):
-        if cell.get("cell_type") != "code":
-            continue
-        cell.setdefault("outputs", []).append(
-            {
-                "output_type": "error",
-                "ename": "SyntheticError",
-                "evalue": "cố ý",
-                "traceback": ["SyntheticError: cố ý"],
-            }
-        )
-        break
-    else:
-        pytest.fail("notebook không có ô code để đột biến")
-
+        if cell.get("cell_type") == "code":
+            cell.setdefault("outputs", []).append(
+                {
+                    "output_type": "error",
+                    "ename": "SyntheticError",
+                    "evalue": "cố ý",
+                    "traceback": ["SyntheticError: cố ý"],
+                }
+            )
+            break
     violations = check_notebook_cells(mutant)
     assert any("output_type=error" in message for message in violations)
 
@@ -477,54 +420,3 @@ def test_gate_detects_missing_output_in_memory(submission_notebook: dict):
             break
     violations = check_notebook_cells(mutant)
     assert any("không có output" in message for message in violations)
-
-
-def test_optional_final_slides_match_grid_method_and_presentation_scope():
-    """Keep the method caveat and teacher-facing results in the oral deck."""
-    deck = Presentation(ROOT / "slides/final.pptx")
-
-    def slide_text(slide):
-        parts = []
-        for shape in slide.shapes:
-            if shape.has_text_frame:
-                parts.append(shape.text)
-            if shape.has_table:
-                parts.extend(cell.text for row in shape.table.rows for cell in row.cells)
-        return "\n".join(parts).strip()
-
-    visible = [slide_text(slide) for slide in deck.slides]
-    assert len(visible) == 11
-    assert all(slide.has_notes_slide and slide.notes_slide.notes_text_frame.text.strip()
-               for slide in deck.slides)
-    assert "Đặc điểm và biến động PAPI qua 14 năm" in visible[1]
-    assert "run_preprocessing_pipeline" in visible[2] and "StandardScaler" in visible[2]
-    assert "808" in visible[2] and "869" in visible[2]
-    assert "Biến thể STING" in visible[3]
-    assert "ngưỡng 5 điểm mỗi ô" in visible[3]
-    assert all(call in visible[3] for call in (
-        "fit(X_train_z)", "cluster(level=2, connectivity=1)", "predict(X_2024_z)", "clip(floor",
-    ))
-    assert "STING gốc xét phân phối và khoảng tin cậy" in visible[3]
-    assert "629/650" in visible[5] and "Silhouette" in visible[5]
-    assert "56 ô dày" in visible[5] and "silhouette_score trên cùng 631 điểm" in visible[5]
-    assert all(value in visible[5] for value in ("0,366", "0,457", "0,258"))
-    assert "48 trong 61 tỉnh đủ điểm" in visible[6]
-    assert "describe_grid_assignment" in visible[6]
-    assert "Dịch chuyển qua các năm trên cùng lưới" in visible[7]
-    assert "7 tỉnh sang ô thưa, 5 tỉnh vào cụm lớn" in visible[7]
-    assert all(value in visible[7] for value in (
-        "Lạng Sơn", "z-score", "(13, 9)", "(12, 10)", "−1 (ô thưa)", "2 (cụm lớn)",
-    ))
-    assert "forecast_from_history" in visible[8] and "score_forecast" in visible[8]
-    assert "Ridge nhận ra 0/11 tỉnh ngoài vùng dày" in visible[8]
-    assert "0,0736" in visible[8] and "0,0641" in visible[8]
-    assert "Kết quả chính và giới hạn" in visible[9]
-    assert "Wang, Yang & Muntz (VLDB 1997)" in visible[9]
-    assert visible[-1] == "Cảm ơn thầy và các bạn đã lắng nghe"
-    text = "\n".join(visible)
-    assert all(phrase not in text.lower() for phrase in (
-        "báo cáo trung thực", "slide ghi điểm", "nói rõ trước khi được hỏi",
-        "nghi thức phản biện", "bộ nộp cuối kỳ", "23/37 cột đổi thang", "28 unit test",
-    ))
-    notes = "\n".join(slide.notes_slide.notes_text_frame.text for slide in deck.slides)
-    assert all(name in notes for name in ["Nhom15_CuoiKy_STING_PAPI.docx", "Nhom15_CuoiKy_STING_PAPI.ipynb"])

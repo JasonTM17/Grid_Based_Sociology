@@ -1,0 +1,58 @@
+================================================================================
+HỒ SƠ ĐỒ ÁN MÔN HỌC MÁY — BẢN THỐNG NHẤT HOÀN CHỈNH
+Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới (Grid-based Clustering — STING)
+
+Kính gửi Thầy Lê Minh Tân,
+Đây là gói bài nộp hoàn chỉnh của Nhóm 15, hợp nhất toàn bộ phần cơ chế STING,
+quy trình tiền xử lý 6 bước, phân tích PAPI 2011–2024, thống kê bàn giao 63 tỉnh
+cho khách hàng, kiểm chứng ngoại lai và dashboard tương tác.
+
+Sinh viên thực hiện:
+  - Nguyễn Tiến Sơn     (MSSV: 24110054)
+  - Trần Thị Ngọc Quyên (MSSV: 24110051)
+================================================================================
+
+1. CẤU TRÚC THƯ MỤC (Nhom15_STING_PAPI/)
+--------------------------------------------------------------------------------
+Nhom15_STING_PAPI/
+├── Nhom15_BaoCao_STING_PAPI.docx       Báo cáo đồ án (Word có mục lục và danh mục tự động)
+├── Nhom15_STING_PAPI.pptx              Slide thuyết trình 11 trang 16:9 kèm ghi chú
+├── Nhom15_STING_PAPI.ipynb             Notebook phân tích STING × PAPI & Thống kê khách hàng
+├── Nhom15_TienXuLy_PAPI.ipynb          Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc
+├── app.py                              Dashboard Streamlit (chạy: streamlit run app.py)
+├── requirements.txt                    Danh mục thư viện Python cố định
+├── HUONG_DAN.txt                       Tệp hướng dẫn này
+├── src/                                Mã nguồn lõi STING & tiền xử lý
+├── scripts/                            Script tái lập panel, phân tích, dự báo & khách hàng
+├── reports/                            Tài liệu phụ (panel_lock, crosscheck_mendeley, model_deep_dive)
+├── data/                               14 workbook PAPI gốc, Mendeley & nguồn đối chiếu ngoài
+├── models/                             Cấu hình, scaler & model đã khóa
+└── results/                            Bảng CSV/MD/Excel (KetQua_STING_PAPI.xlsx) & hình PNG
+
+Tài liệu đối chiếu kèm theo:
+├── data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf  Báo cáo PAPI 2024 (bản tiếng Việt)
+├── data/raw/mendeley/mendeley_replication.zip  Dữ liệu và mã đối chiếu của Le và cộng sự (2026), Mendeley Data, DOI 10.17632/wbk42j9wc8.1, CC BY 4.0
+
+2. CHẠY LẠI ĐỘC LẬP TRÊN MÁY KHÁC
+--------------------------------------------------------------------------------
+Giải nén toàn bộ ZIP và mở terminal tại thư mục Nhom15_STING_PAPI/:
+
+python -m pip install -r requirements.txt
+python -m nbconvert --to notebook --execute Nhom15_TienXuLy_PAPI.ipynb --output Nhom15_TienXuLy_PAPI_chay_lai
+python -m nbconvert --to notebook --execute Nhom15_STING_PAPI.ipynb --output Nhom15_STING_PAPI_chay_lai
+python -m streamlit run app.py
+
+3. TÁI LẬP SỐ LIỆU & THỐNG KÊ KHÁCH HÀNG TỪ DỮ LIỆU GỐC
+--------------------------------------------------------------------------------
+python scripts/data/build_panel.py
+python scripts/data/build_scale_metadata.py
+python scripts/data/check_data.py
+python scripts/data/build_external_master.py
+python scripts/data/preprocessing_audit.py
+python scripts/data/preprocessing_sensitivity.py
+python scripts/data/crosscheck_mendeley.py
+python -E scripts/analysis/stakeholder_summary.py --with-excel
+python scripts/figures/forecast_papi_grid.py
+
+Trân trọng,
+Nhóm 15

@@ -1,9 +1,0 @@
-BẢN XEM NHANH GIỮA KỲ · NHÓM 15 · MÔN HỌC MÁY
-
-- Nhom15_GiuaKy_STING_PAPI.pptx — 10 slide trình bày kể cả bìa, cộng 1 slide cảm ơn.
-- Nhom15_GiuaKy_STING_PAPI.ipynb — Notebook phân tích STING đã lưu kết quả.
-- Nhom15_TienXuLy_PAPI.ipynb — Notebook tiền xử lý PAPI đã lưu kết quả.
-- src/ — Mã nguồn STING và tiền xử lý để đọc cùng notebook.
-
-Để gửi bài hoặc chạy lại notebook độc lập, dùng ../Nhom15_GiuaKy_STING_PAPI.zip.
-Giải nén toàn bộ ZIP rồi mở HUONG_DAN.txt trong gói để cài thư viện và chạy.

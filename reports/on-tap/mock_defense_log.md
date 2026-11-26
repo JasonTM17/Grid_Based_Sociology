@@ -25,6 +25,7 @@ _Trạng thái: **chưa chạy live** — cần có mặt cả nhóm (hoặc nh�
 3. Giải thích một cụm lớn và hai cụm nhỏ trên hai chỉ tiêu đang xét, cùng giới hạn khi liên hệ thực tế. (#10–11, report Ch.6)
 4. Pipeline train-only chống selection-on-test — nói được "2024 không tham gia chọn cấu hình". (#9)
 5. Kết quả âm tính là kết quả — không giấu, không tô vẽ. (#5, #13)
+6. Thống kê bàn giao 63 tỉnh cho khách hàng — tách 13 tỉnh nhãn `-1` thành `8` Biên bứt phá & `5` Ưu tiên Y tế 6.1, giải thích 5 chuẩn 14/14 năm, tách 7 tỉnh rời Cụm 2 và nghịch lý Đô thị–Y tế. (#45, Slide 6–7)
 
 ## Biên bản (điền khi chạy xong)
 

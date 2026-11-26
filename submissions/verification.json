@@ -1,24 +1,11 @@
-[
-  {
-    "milestone": "midterm",
-    "status": "PASS",
-    "sha256": "0c462d9b9f7ea7991b20821dfcf8827bfd6a59eb3441675914b7e7f4260c772b",
-    "code_cells": 23,
-    "preprocessing_code_cells": 9,
-    "isolation_guard": true,
-    "python": "3.14.2",
-    "system": "Windows",
-    "launcher_messages": true
-  },
-  {
-    "milestone": "final",
-    "status": "PASS",
-    "sha256": "55b370eb70743e1ac67e8227119bec24390ac745c562f9a4a9a36d1dba5a4991",
-    "code_cells": 27,
-    "preprocessing_code_cells": 9,
-    "isolation_guard": true,
-    "python": "3.14.2",
-    "system": "Windows",
-    "launcher_messages": true
-  }
-]
+{
+  "package": "Nhom15_STING_PAPI",
+  "status": "PASS",
+  "sha256": "f796418be77576c067f4cb97464289a509fab67a77e7f1a559d80101432908f5",
+  "code_cells": 18,
+  "preprocessing_code_cells": 9,
+  "isolation_guard": true,
+  "python": "3.14.2",
+  "system": "Windows",
+  "launcher_messages": true
+}

@@ -18,3 +18,13 @@ data/raw/molisa/QD1052_2018_luatvietnam.html:gcp-api-key:2362
 data/raw/molisa/QD1052_2018_luatvietnam.html:generic-api-key:2442
 data/raw/molisa/QD862_2017_luatvietnam.html:gcp-api-key:28953
 data/raw/molisa/QD862_2017_luatvietnam.html:generic-api-key:29033
+#
+# Tên file notebook/ZIP thống nhất (Nhom15_STING_PAPI.ipynb, Nhom15_TienXuLy_PAPI.ipynb,
+# Nhom15_GiuaKy_STING_PAPI.zip) và tên cột dữ liệu (`grdp_2024_mil_vnd`) bị khớp nhầm rule generic-api-key.
+scripts/deliverables/build_slides.py:generic-api-key:440
+scripts/deliverables/build_slides.py:generic-api-key:785
+scripts/analysis/stakeholder_summary.py:generic-api-key:269
+submissions/Nhom15_STING_PAPI/scripts/analysis/stakeholder_summary.py:generic-api-key:269
+tests/test_notebook_checks.py:generic-api-key:122
+tests/test_submission_artifacts.py:generic-api-key:264
+tests/test_submission_packages.py:generic-api-key:159

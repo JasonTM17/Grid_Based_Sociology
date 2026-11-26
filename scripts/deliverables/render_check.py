@@ -2,12 +2,12 @@
 
 Yêu cầu: Word + PowerPoint (COM), pymupdf. Chạy:
     python scripts/deliverables/render_check.py
-    python scripts/deliverables/render_check.py --slides-only --pptx slides/submission.pptx
+    python scripts/deliverables/render_check.py --slides-only --pptx slides/Nhom15_STING_PAPI.pptx
 
 Đầu ra mặc định (xem bằng mắt):
     %TEMP%\\sting_papi_render\\
         slides\\*.png      — từng slide
-        final_report.pdf + report_p01.png ... — từng trang báo cáo
+        Nhom15_BaoCao_STING_PAPI.pdf + report_p01.png ... — từng trang báo cáo
 """
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = Path(tempfile.gettempdir()) / "sting_papi_render"
-REPORT = ROOT / "reports" / "final_report.docx"
-DEFAULT_SLIDES = ROOT / "slides" / "final.pptx"
+REPORT = ROOT / "reports" / "Nhom15_BaoCao_STING_PAPI.docx"
+DEFAULT_SLIDES = ROOT / "slides" / "Nhom15_STING_PAPI.pptx"
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")

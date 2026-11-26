@@ -4,14 +4,14 @@ Chạy ngay sau khi dựng file:
     python scripts/deliverables/build_report.py
     python scripts/deliverables/update_report_fields.py
 
-Cần Microsoft Word và pywin32 trên Windows; ghi đè ``reports/final_report.docx`` tại chỗ.
+Cần Microsoft Word và pywin32 trên Windows; ghi đè ``reports/Nhom15_BaoCao_STING_PAPI.docx`` tại chỗ.
 """
 from __future__ import annotations
 
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DOCX = ROOT / "reports" / "final_report.docx"
+DOCX = ROOT / "reports" / "Nhom15_BaoCao_STING_PAPI.docx"
 
 
 def main() -> int:

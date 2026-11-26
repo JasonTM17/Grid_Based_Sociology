@@ -52,10 +52,12 @@ TAB_LABELS = [
     "Hồi quy 2023 → 2024",
     "Kiểm chứng ngoại lai",
     "Audit dữ liệu",
+    "Thống kê khách hàng",
 ]
 TAB_REGRESSION = "Hồi quy 2023 → 2024"
 TAB_EXTERNAL = "Kiểm chứng ngoại lai"
 TAB_AUDIT = "Audit dữ liệu"
+TAB_CLIENT = "Thống kê khách hàng"
 
 
 
@@ -775,3 +777,147 @@ def test_risk11_grdp_rows_without_year_render_silently(external_assets, tmp_path
     assert any("GRDP" in message for message in info_messages)
     plotly_charts = [child for child in external.children.values() if child.type == "plotly_chart"]
     assert len(plotly_charts) == 2
+
+
+def test_tab6_khach_hang_renders_action_groups_and_is_lazy():
+    expected = dd.load_stakeholder_summary()
+    expected_groups = dict(
+        zip(expected["group_stats"]["action_group"], expected["group_stats"]["n_provinces"])
+    )
+    total_provinces = len(expected["summary"])
+
+    at_default = run_app()
+    assert not at_default.exception
+    assert not at_default.error
+    assert len(at_default.tabs[5].dataframe) == 0
+
+    at_open = run_app(TAB_CLIENT)
+    assert not at_open.exception
+    assert not at_open.error
+    client = at_open.tabs[5]
+    assert client.subheader[0].value == "Thống kê bàn giao cho khách hàng · 63 tỉnh (năm 2024)"
+    values = metric_values(client)
+    assert values["Vùng lõi ổn định (Cụm 2)"] == (
+        f"{expected_groups.get('Vùng lõi ổn định (Cụm 2)', 0)} / {total_provinces}"
+    )
+    assert values["Biên bứt phá vượt chuẩn"] == f"{expected_groups.get('Biên bứt phá vượt chuẩn', 0)}"
+    assert values["Ưu tiên cải thiện Y tế 6.1"] == f"{expected_groups.get('Ưu tiên cải thiện Y tế 6.1', 0)}"
+    assert values["Thiếu dữ liệu 2024"] == f"{expected_groups.get('Thiếu dữ liệu 2024', 0)}"
+    assert len(client.dataframe) == 2
+    group_table = client.dataframe[0].value
+    assert not group_table.astype(str).apply(lambda col: col.str.contains("NaN")).any().any()
+    assert "—" in group_table["median_sd_4_2"].tolist()
+    assert len(client.dataframe[1].value) == total_provinces
+    detail_table = client.dataframe[1].value
+    assert list(detail_table.columns) == [
+        "province_vi",
+        "action_group",
+        "action_subtier",
+        "sd_4_2",
+        "sd_6_1",
+        "years_cluster2_2011_2024",
+        "risk_outside_scenario_share",
+        "grdp_2024_mil_vnd",
+    ]
+    missing_rows = detail_table.loc[detail_table["action_group"].eq("Thiếu dữ liệu 2024")]
+    assert len(missing_rows) == expected_groups.get("Thiếu dữ liệu 2024", 0)
+    assert (missing_rows["sd_4_2"] == "—").all()
+    assert (missing_rows["sd_6_1"] == "—").all()
+
+
+def test_tab6_khach_hang_view_modes_filter_and_missing_formatting(monkeypatch):
+    expected = dd.load_stakeholder_summary()
+    expected_groups = dict(
+        zip(expected["group_stats"]["action_group"], expected["group_stats"]["n_provinces"])
+    )
+
+    at = run_app(TAB_CLIENT)
+    assert not at.exception
+    assert not at.error
+
+    # Download buttons rendered in Tab 6 (CSV handover + 1-page Province Scorecard)
+    download_buttons = at.get("download_button")
+    assert len(download_buttons) == 2
+    assert download_buttons[0].label == f"Tải CSV bàn giao ({len(expected['summary'])} tỉnh)"
+    assert "Phiếu chẩn đoán" in download_buttons[1].label
+
+    # Verify chart mode toggle between Choropleth Map and 2D Scatter
+    chart_radio = at.radio(key="client_chart_mode")
+    assert chart_radio.value == "Bản đồ Việt Nam 63 tỉnh"
+    chart_radio.set_value("Biểu đồ phân tán 2D (4.2 × 6.1)").run()
+    assert not at.exception
+    assert not at.error
+    chart_radio.set_value("Bản đồ Việt Nam 63 tỉnh").run()
+    assert not at.exception
+
+    # Verify selecting a province for 1-page scorecard export
+    at.selectbox(key="client_scorecard_province").set_value("Đà Nẵng").run()
+    assert not at.exception
+    assert "Đà Nẵng" in at.get("download_button")[1].label
+
+    # Switch to view mode 2 ("Khuyến nghị & dịch chuyển")
+    at.radio(key="client_detail_view_mode").set_value("Khuyến nghị & dịch chuyển").run()
+    assert not at.exception
+    assert not at.error
+    mode2_df = at.tabs[5].dataframe[1].value
+    assert list(mode2_df.columns) == [
+        "province_vi",
+        "transition_2023_2024",
+        "pci_2022",
+        "poverty_2024_pct",
+        "client_recommendation",
+    ]
+    assert len(mode2_df) == len(expected["summary"])
+
+    # Switch to view mode 3 ("Đầy đủ 10 cột")
+    at.radio(key="client_detail_view_mode").set_value("Đầy đủ 10 cột").run()
+    assert not at.exception
+    mode3_df = at.tabs[5].dataframe[1].value
+    assert len(mode3_df.columns) == 10
+    assert "client_recommendation" in mode3_df.columns
+    assert "grdp_2024_mil_vnd" in mode3_df.columns
+
+    # Filter by action group ("Ưu tiên cải thiện Y tế 6.1")
+    at.multiselect(key="client_action_groups").select("Ưu tiên cải thiện Y tế 6.1").run()
+    assert not at.exception
+    assert not at.error
+    filtered_df = at.tabs[5].dataframe[1].value
+    assert len(filtered_df) == expected_groups["Ưu tiên cải thiện Y tế 6.1"]
+    assert (filtered_df["action_group"] == "Ưu tiên cải thiện Y tế 6.1").all()
+    assert (
+        at.get("download_button")[0].label
+        == f"Tải CSV bàn giao ({expected_groups['Ưu tiên cải thiện Y tế 6.1']} tỉnh)"
+    )
+
+    # Filter to "Thiếu dữ liệu 2024" -> info banner explaining missing 2D coordinates
+    at.multiselect(key="client_action_groups").unselect("Ưu tiên cải thiện Y tế 6.1").select(
+        "Thiếu dữ liệu 2024"
+    ).run()
+    assert not at.exception
+    assert not at.error
+    missing_df = at.tabs[5].dataframe[1].value
+    assert len(missing_df) == expected_groups["Thiếu dữ liệu 2024"]
+    assert any("Thiếu dữ liệu 2024" in el.value for el in at.tabs[5].info)
+
+    # Conflicting sidebar province + action-group filter renders empty state cleanly
+    at.sidebar.multiselect[0].select(1).run()
+    assert not at.exception
+    assert not at.error
+    assert len(at.tabs[5].dataframe) == 1  # Only group summary table remains; detail shows empty info
+    assert any("Không có tỉnh nào khớp" in el.value for el in at.tabs[5].info)
+    at.sidebar.multiselect[0].unselect(1)
+    at.multiselect(key="client_action_groups").unselect("Thiếu dữ liệu 2024")
+
+    # Verify missing numeric fields (GRDP/PCI/poverty/risk) format cleanly as "—"
+    tampered = {
+        key: (val.copy() if isinstance(val, pd.DataFrame) else val)
+        for key, val in expected.items()
+    }
+    tampered["summary"].loc[0, ["grdp_2024_mil_vnd", "pci_2022", "poverty_2024_pct"]] = np.nan
+    monkeypatch.setattr(dd, "load_stakeholder_summary", lambda root=ROOT: tampered)
+    at_missing = run_app(TAB_CLIENT)
+    assert not at_missing.exception
+    assert at_missing.tabs[5].dataframe[1].value.iloc[0]["grdp_2024_mil_vnd"] == "—"
+    at_missing.radio(key="client_detail_view_mode").set_value("Khuyến nghị & dịch chuyển").run()
+    assert at_missing.tabs[5].dataframe[1].value.iloc[0]["pci_2022"] == "—"
+    assert at_missing.tabs[5].dataframe[1].value.iloc[0]["poverty_2024_pct"] == "—"

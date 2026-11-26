@@ -1,0 +1,53 @@
+indicator_code,indicator_name,year,value
+NY.GDP.PCAP.CD,GDP per capita (current US$),2010,1683.16182443979
+NY.GDP.PCAP.CD,GDP per capita (current US$),2011,1950.92504174913
+NY.GDP.PCAP.CD,GDP per capita (current US$),2012,2185.11767654291
+NY.GDP.PCAP.CD,GDP per capita (current US$),2013,2359.51736472828
+NY.GDP.PCAP.CD,GDP per capita (current US$),2014,2546.38464459903
+NY.GDP.PCAP.CD,GDP per capita (current US$),2015,2577.56885340113
+NY.GDP.PCAP.CD,GDP per capita (current US$),2016,2735.0604380416
+NY.GDP.PCAP.CD,GDP per capita (current US$),2017,2956.10992127753
+NY.GDP.PCAP.CD,GDP per capita (current US$),2018,3222.31003125366
+NY.GDP.PCAP.CD,GDP per capita (current US$),2019,3440.90025375434
+NY.GDP.PCAP.CD,GDP per capita (current US$),2020,3534.03953482647
+NY.GDP.PCAP.CD,GDP per capita (current US$),2021,3704.1935590038
+NY.GDP.PCAP.CD,GDP per capita (current US$),2022,4147.69777213621
+NY.GDP.PCAP.CD,GDP per capita (current US$),2023,4322.82572261566
+NY.GDP.PCAP.CD,GDP per capita (current US$),2024,4716.6599379632
+SH.MED.BEDS.ZS,"Hospital beds (per 1,000 people)",2010,2.02
+SH.MED.BEDS.ZS,"Hospital beds (per 1,000 people)",2011,2.21
+SH.MED.BEDS.ZS,"Hospital beds (per 1,000 people)",2012,2.27
+SH.MED.BEDS.ZS,"Hospital beds (per 1,000 people)",2013,2.3
+SH.MED.BEDS.ZS,"Hospital beds (per 1,000 people)",2014,2.42
+SH.MED.BEDS.ZS,"Hospital beds (per 1,000 people)",2015,2.51
+SH.MED.BEDS.ZS,"Hospital beds (per 1,000 people)",2016,2.47
+SH.MED.BEDS.ZS,"Hospital beds (per 1,000 people)",2017,2.52
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2010,5.07146072
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2011,4.97468519
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2012,5.00178242
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2013,4.41233158
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2014,4.69078779
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2015,4.71140909
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2016,4.86994743
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2017,4.99014759
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2018,5.02678823
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2019,4.97407484
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2020,4.33219814
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2021,4.53792429
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2022,4.53809595
+SH.XPD.CHEX.GD.ZS,Current health expenditure (% of GDP),2023,4.56109476
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2010,30.2504027258526
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2011,30.6996041680996
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2012,31.1222779403029
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2013,31.5334201724543
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2014,31.9480269945454
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2015,32.3810945365679
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2016,32.8476189285136
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2017,33.3625963003742
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2018,33.9410227821412
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2019,34.6239134999511
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2020,35.5706676299742
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2021,36.6540656426603
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2022,37.5478515625
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2023,38.1298904418945
+SP.URB.TOTL.IN.ZS,Urban population (% of total population),2024,38.4900703430176

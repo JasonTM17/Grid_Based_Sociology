@@ -1,35 +1,31 @@
-# Kịch bản giữa kỳ — Grid-based clustering với STING
+# Kịch bản thuyết trình 11 slide thống nhất — STING × PAPI
 
-Giữa kỳ trình bày định nghĩa và demo cơ bản. Nhóm minh họa cơ chế bằng lưới 3 × 3, kiểm chứng trên dữ liệu giả lập và giới thiệu ứng dụng PAPI đã chuẩn bị.
-
-Mở slide trong `submissions/01-giua-ky`. Để chạy notebook ở máy trình chiếu, giải nén toàn bộ ZIP giữa kỳ và mở notebook ở thư mục gốc của gói. Dùng mục 4 để minh họa phép tính và mã. [Hướng dẫn demo](../../DEMO.md)
+Bản thuyết trình hợp nhất phần cơ chế STING (giữa kỳ), kết quả PAPI 2011–2024, **thống kê bàn giao 63 tỉnh cho khách hàng** và kiểm chứng cuối kỳ trong `slides/Nhom15_STING_PAPI.pptx` (và bản đồng bộ `submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx`). Để chạy lại notebook ở máy trình chiếu, mở `notebooks/Nhom15_STING_PAPI.ipynb` hoặc `submissions/Nhom15_STING_PAPI/`. [Hướng dẫn demo](../../DEMO.md)
 
 ## Lời mở đầu có thể dùng
 
-> Thưa thầy, nhóm em phụ trách chủ đề phân cụm dựa trên lưới và chọn biến thể rút gọn của STING. Nhóm em dùng ví dụ lưới 3 × 3 để minh họa cách đếm điểm, chọn ô dày và nối các ô thành cụm. Nhóm em cũng đã chuẩn bị dữ liệu PAPI 2011–2024 để giới thiệu thêm phần ứng dụng.
+> Thưa thầy, nhóm em báo cáo bản hoàn thiện thống nhất của đề tài phân cụm dựa trên lưới STING trên dữ liệu PAPI 2011–2024. Ngoài phần cơ chế lưới 3×3 và đối chứng thuật toán, nhóm đã bổ sung trọng tâm trả lời câu hỏi thống kê bàn giao 63 tỉnh cho khách hàng (Slide 6–7), kết hợp dự báo cảnh báo sớm và kiểm chứng ngoại lai.
 
-## Thời lượng dự kiến
+## Thời lượng dự kiến (11 slide thống nhất)
 
 | Slide | Thời gian | Nội dung cần nói và thao tác |
 |---|---|---|
-| 1 | 0:00–0:25 | Nêu chủ đề Grid-based clustering và thuật toán STING đã chọn. |
-| 2 | 0:25–1:30 | Giải thích một dòng PAPI là một tỉnh trong một năm. Chỉ hai trục 4.2 và 6.1 cùng số hàng đủ điểm. |
-| 3 | 1:30–2:55 | Chỉ cùng một tập điểm ở các mức lưới. Giải thích ô lưu số điểm và thống kê. |
-| 4 | 2:55–6:00 | Chỉ công thức dưới hình. Chia độ dài trục cho số ô để có bề rộng Δ, đo vị trí từ biên dưới theo Δ rồi dùng `floor` và `clip` ở `sting.py` dòng 378–379. Chỉ ngưỡng ô dày và DFS ở dòng 133–158. Nối ý tưởng lưới thống kê và truy vấn từ trên xuống của bài gốc với cách tạo cụm tại một tầng của nhóm. |
-| 5 | 6:00–7:30 | Đọc bảng đếm ở mục 2 của notebook. Ngưỡng 3 cho hai cụm 7 điểm và một điểm nhiễu. Giải thích hai vùng chỉ chạm góc. |
-| 6 | 7:30–8:25 | Chỉ hai cụm tham chiếu của 240 điểm và sáu điểm nhiễu. Trong hai phân số, T đếm cặp cùng nhóm theo cả hai bộ nhãn và E là mức khớp kỳ vọng khi xáo nhãn. ARI 0,950 đo mức khớp sau hiệu chỉnh. |
-| 7 | 8:25–9:40 | Nêu 869 quan sát, gồm 61 quan sát năm 2024. Dùng Lạng Sơn ở mục 4.2 để giải thích hai trục z-score và chỉ vùng ô dày. |
-| 8 | 9:40–10:55 | Chỉ 56 ô dày tạo 3 vùng rồi nhắc K-means chọn k = 2 trong 2–5. Đọc số cụm và nhiễu trên 869 điểm, silhouette trên 680 điểm giao. |
-| 9 | 10:55–12:20 | Giải thích vì sao 869 điểm STING giữ cùng ô khi dựng lại lưới sau z-score. Nêu 68 điểm đổi cụm K-means và 8 điểm đổi trạng thái nhiễu DBSCAN khi đối chiếu. |
-| 10 | 12:20–14:45 | Mục 4.8 đặt điểm đã quan sát năm 2024 lên lưới 2011–2023. Nêu 48 tỉnh ở cụm lớn, 13 tỉnh ở ô thưa và 2 tỉnh thiếu điểm. Đọc từ điểm gốc đến ô và nhãn của Lạng Sơn. |
+| 1 | 0:00–0:25 | Tiêu đề đồ án thống nhất: Nhóm 15, chủ đề STING × PAPI & Thống kê bàn giao 63 tỉnh. |
+| 2 | 0:25–1:25 | Bài toán & tiền xử lý từ 14 workbook (`882×41`): pipeline 6 bước, giữ 7 cực trị, audit 23/37 cột nhảy thang và đối chiếu Mendeley lệch 0,0. |
+| 3 | 1:25–3:25 | Cơ chế STING (`clip(floor)` ở `sting.py`, DFS kề 4 hướng), ví dụ lưới 3×3 (2 cụm 7 điểm + 1 nhiễu) và giả lập 240 điểm (`ARI = 0,950`). |
+| 4 | 3:25–5:20 | Phân cụm PAPI 808 train / 869 toàn kỳ (1 cụm lớn `629` hoặc `677` điểm), phản biện 162/171 nhiễu nằm trong `|z| ≤ 3`, so silhouette cùng 680 điểm giao (0,380 vs 0,461 vs 0,274) và bất biến 869/869 ô dưới z-score. |
+| 5 | 5:20–6:45 | Quan sát năm 2024 trên lưới cố định 2011–2023: `48/61` tỉnh vào Cụm 2, `13` ô thưa, `2` thiếu điểm; truy vết ca Lạng Sơn từ `(13,9)` sang `(12,10)`. |
+| 6 | 6:45–8:45 | **Thống kê bàn giao khách hàng (1/2):** Biểu đồ 4 vùng hành động trên 63 tỉnh 2024 (`stakeholder_quadrants_2024.png`), chứng minh không đánh đồng `13` tỉnh mã `−1` là kém. |
+| 7 | 8:45–11:15 | **Thống kê bàn giao khách hàng (2/2):** Bảng tổng hợp 4 nhóm (`8` Biên bứt phá / `48` Vùng lõi gồm `5` chuẩn 14/14 năm / `5` Ưu tiên Y tế `6.1` / `2` Thiếu DL), tách 7 tỉnh rời Cụm 2 (5 lên biên, 2 xuống rìa `6.1`), watchlist trượt vùng và nghịch lý GRDP cao (`104,3` tr) – Y tế `6.1` thấp (`1,69–1,81`). |
+| 8 | 11:15–12:35 | Thí nghiệm dự báo bổ trợ Ridge + kịch bản sai số CV 2024 (`AUC = 0,816` xếp hạng tỉnh trượt vùng khi dự báo điểm bị co về trung bình). |
+| 9 | 12:35–13:55 | Đối chứng dữ liệu độc lập (PCI, GRDP, Y tế ODM, Nghèo GSO) & kiểm tra độ bền đa chiều PCA/8D OFAT. |
+| 10 | 13:55–14:45 | Kết luận giá trị thuật toán, giá trị khách hàng, giới hạn trung thực & 2 nhánh đề xuất cải thiện tiếp theo (cân bằng lớp CV `0,524`, Conformal, bản đồ Choropleth & PAPI 2025). |
 | 11 | 14:45–15:00 | Cảm ơn thầy và các bạn, chuyển sang hỏi đáp. |
 
 Ghi người trình bày và thời gian đo được vào [nhật ký luyện tập](rehearsal_log.md).
 
-## Hỏi đáp trong 5 phút
+## Hỏi đáp trọng tâm
 
-Ưu tiên tự trả lời câu 1–10 trong câu hỏi giữa kỳ. Các câu 12–23 giải thích phần PAPI và nhiễu khi thầy hỏi thêm. Mỗi người cần nói được quan hệ Grid-based → STING → dữ liệu minh họa. Nếu thầy hỏi *"Sao lọc rồi mà vẫn nhiễu?"*, mở ngay biểu đồ 3 panel ở **Mục 4.3** của notebook để chỉ cho thầy thấy: (i) tiền xử lý chỉ loại dòng thiếu, còn `162/171` điểm `−1` vẫn nằm gọn trong khung `|z| ≤ 3`; (ii) xóa 9 điểm `|z| > 3` khiến biên co lại làm nhiễu tăng lên `20,1%`; (iii) cả 13 tỉnh `−1` năm 2024 nằm ở ô thưa `< 5` điểm tham chiếu (gồm cả tỉnh điểm cao như Hà Tĩnh, Bình Thuận, Quảng Ninh, Tây Ninh). [Câu hỏi giữa kỳ](qa_midterm.md)
-
-## Chuẩn bị cuối kỳ
-
-Cuối kỳ có báo cáo Word và notebook trong submissions/02-cuoi-ky, cùng slide vấn đáp tùy chọn. Phần này phát triển ứng dụng PAPI, đánh giá, độ nhạy và giới hạn của kết quả. Bộ câu hỏi cuối kỳ ở [qa_final.md](qa_final.md).
+- Giải đáp cơ chế thuật toán & nhiễu STING: `reports/on-tap/qa_midterm.md` và `reports/on-tap/qa_course_concepts.md`.
+- Giải đáp **thống kê bàn giao 63 tỉnh cho khách hàng** (Câu 45), dự báo & kiểm chứng ngoại lai: `reports/on-tap/qa_final.md`.
+- Khi cần chứng minh trực quan trên số liệu sống: chạy `python -m streamlit run app.py` và mở tab **Thống kê khách hàng**.

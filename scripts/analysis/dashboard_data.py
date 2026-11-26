@@ -910,3 +910,28 @@ def poverty_noise_vs_c2(view: pd.DataFrame, value_col: str = "poverty_rate_pct")
         raise DashboardDataError("Thiếu nhóm nhiễu hoặc cụm 2 cho Mann–Whitney poverty.")
     u_stat, p_value = stats.mannwhitneyu(noise, cluster2)
     return {"u": float(u_stat), "p": float(p_value), "n": int(len(noise) + len(cluster2))}
+
+
+def load_stakeholder_summary(root: Path = ROOT) -> dict:
+    """Tổng hợp thống kê bàn giao 63 tỉnh năm 2024 cho khách hàng (chỉ đọc artifact)."""
+    from scripts.analysis.stakeholder_summary import build_stakeholder_tables
+
+    root = Path(root)
+    required = [
+        (Path("results/papi_observed_grid_2024.csv"), "python scripts/analysis/predict_demo.py"),
+        (Path("results/predict_all_years.csv"), "python scripts/analysis/predict_demo.py"),
+        (Path("results/papi_forecast_provinces_2024.csv"), "python scripts/figures/forecast_papi_grid.py"),
+        (Path("data/processed/external_pci_63_full.csv"), "python scripts/data/build_pci_full.py"),
+        (Path("data/processed/external_gso_grdp_63.csv"), "python scripts/data/build_gso_grdp_pop.py"),
+        (Path("data/processed/external_poverty_63.csv"), "python scripts/data/build_poverty_63.py"),
+        (Path("data/processed/external_gso_population_63_full.csv"), "python scripts/data/build_gso_grdp_pop.py"),
+    ]
+    for relative_path, command in required:
+        if not (root / relative_path).is_file():
+            raise DashboardDataError(
+                f"Thiếu artifact {relative_path.as_posix()}. Tạo lại bằng `{command}`."
+            )
+    try:
+        return build_stakeholder_tables(root)
+    except Exception as exc:
+        raise DashboardDataError(f"Không thể tổng hợp bảng thống kê khách hàng: {exc}") from exc

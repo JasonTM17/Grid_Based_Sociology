@@ -141,15 +141,14 @@ _RANGE_RE = re.compile(r"(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)")
 
 
 def resolve_project_root(start: Path | None = None) -> Path:
-    """Tìm thư mục gốc dự án hoặc thư mục ``tai_lieu_kem`` chứa dữ liệu tiền xử lý."""
+    """Tìm thư mục gốc dự án hoặc gói nộp ``Nhom15_STING_PAPI`` chứa dữ liệu tiền xử lý."""
     seed = (start or Path.cwd()).resolve()
     marker = Path("data") / "raw" / "papi"
     for candidate_parent in (seed, *seed.parents):
-        for cand in (candidate_parent / "tai_lieu_kem", candidate_parent):
-            if (cand / "src" / "sting.py").is_file() and (cand / marker).is_dir():
-                return cand
+        if (candidate_parent / "src" / "sting.py").is_file() and (candidate_parent / marker).is_dir():
+            return candidate_parent
     raise FileNotFoundError(
-        "Không tìm thấy thư mục dự án hoặc tai_lieu_kem chứa src/sting.py và data/raw/papi."
+        "Không tìm thấy thư mục dự án chứa src/sting.py và data/raw/papi."
     )
 
 

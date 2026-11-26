@@ -1,12 +1,12 @@
-# Nhật ký luyện trình bày giữa kỳ
+# Nhật ký luyện thuyết trình thống nhất (11 slide)
 
-Bộ trình chiếu hiện tại nằm trong submissions/01-giua-ky. Phân bổ 15 phút ở [kịch bản giữa kỳ](presentation_script.md). Bảng dưới dùng để ghi thời gian đo trực tiếp khi nhóm tập.
+Bộ trình chiếu thống nhất hiện nằm trong `slides/Nhom15_STING_PAPI.pptx` (đồng bộ tại `submissions/Nhom15_STING_PAPI/`). Phân bổ 15 phút ở [kịch bản thuyết trình](presentation_script.md). Bảng dưới dùng để ghi thời gian đo trực tiếp khi nhóm tập vấn đáp cuối kỳ.
 
 ## A. Lượt chạy thử kỹ thuật đã ghi nhận
 
-Đây là bản ghi dry-run kỹ thuật cá nhân do AI thực hiện. Thời gian luyện thuyết trình thực tế của nhóm được ghi ở mục B khi nhóm tập.
+Đây là bản ghi dry-run kỹ thuật do kiểm thử tự động thực hiện trên gói thống nhất. Thời gian luyện thuyết trình thực tế của nhóm được ghi ở mục B khi nhóm tập.
 
-Nhật ký ban đầu ghi notebook mở rộng STING_PAPI_Demo_MoRong chạy hết khoảng 18 giây. Đây là thời gian thực thi notebook của đợt chạy thử đó. Lượt kiểm tra file nộp hiện tại chạy bằng python scripts/deliverables/demo_smoke.py từ thư mục dự án.
+Kiểm tra toàn bộ tệp nộp, slide, báo cáo và notebook hiện tại chạy bằng `python scripts/deliverables/demo_smoke.py` và `python scripts/deliverables/build_submission_packages.py --verify` từ thư mục dự án.
 
 ## B. Ghi khi nhóm tập
 
@@ -21,9 +21,10 @@ Nhật ký ban đầu ghi notebook mở rộng STING_PAPI_Demo_MoRong chạy h�
 
 ## C. Tự đối chiếu sau mỗi lượt
 
-- Nhóm giải thích được Grid-based clustering, STING và vai trò của PAPI.
-- Ví dụ 3 × 3 được trình bày từ đầu vào đến cụm và điểm nhiễu.
-- Thời lượng bài nói nằm trong 15 phút, dành 5 phút cho hỏi đáp.
-- Mỗi thành viên trả lời được những câu hỏi cơ bản trong [qa_midterm.md](qa_midterm.md).
+- Nhóm giải thích mạch lạc Grid-based clustering, STING (`3×3` & `240` điểm giả lập), tiền xử lý 6 bước PAPI (`882×41`) và ý nghĩa nhãn nhiễu `−1` (Slide 2–5).
+- Trình bày rõ **thống kê bàn giao 63 tỉnh cho khách hàng** (Slide 6–7: 4 nhóm hành động, 5 chuẩn tham chiếu 14/14 năm, tách 7 tỉnh rời Cụm 2, watchlist trượt vùng và nghịch lý đô thị–y tế).
+- Giải thích được dự báo bổ trợ (`AUC = 0,816`), kiểm chứng ngoại lai độc lập (PCI, GRDP, y tế ODM, nghèo GSO) và giới hạn độ bền đa chiều (Slide 8–10).
+- Thời lượng bài nói 11 slide nằm trong 15 phút, dành 5 phút cho hỏi đáp.
+- Mỗi thành viên trả lời được bộ câu hỏi bảo vệ cuối kỳ trong [qa_final.md](qa_final.md), [qa_course_concepts.md](qa_course_concepts.md) và [qa_midterm.md](qa_midterm.md).
 
-Ghi nhận xét của thầy sau buổi trình bày vào [midterm_feedback.md](midterm_feedback.md).
+Ghi câu hỏi yếu và biên bản luyện tập bảo vệ cuối kỳ vào [mock_defense_log.md](mock_defense_log.md) (ghi nhận phản hồi giữa kỳ đã xử lý lưu đối chiếu tại [midterm_feedback.md](midterm_feedback.md)).

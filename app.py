@@ -21,6 +21,7 @@ from scripts.analysis.dashboard_data import (
     load_external_validation_assets,
     load_poverty_assets,
     load_regression_models,
+    load_stakeholder_summary,
     poverty_cluster_tests,
     poverty_noise_vs_c2,
     prepare_classification_holdout,
@@ -30,6 +31,12 @@ from scripts.analysis.dashboard_data import (
     prepare_regression_holdout,
     prepare_sting_view,
     select_regression_model,
+)
+from scripts.analysis.client_product import (
+    build_action_choropleth_figure,
+    build_province_scorecard_html,
+    load_vietnam_geojson,
+    scorecard_filename,
 )
 from scripts.common.fig_style import CLUSTER_COLORS
 from scripts.common.papi_pred_common import FEATURE_LABELS, ROOT
@@ -61,6 +68,11 @@ st.markdown(
       .eyebrow { color: #2563eb; font-weight: 700; letter-spacing: .08em;
         text-transform: uppercase; font-size: .78rem; }
       .muted { color: #64748b; }
+      @media (max-width: 1320px) {
+        [data-testid="stMetric"] { padding: 10px 12px !important; }
+        [data-testid="stMetricLabel"] { font-size: 0.82rem !important; }
+        [data-testid="stMetricValue"] { font-size: 1.45rem !important; }
+      }
     </style>
     """,
     unsafe_allow_html=True,
@@ -83,6 +95,7 @@ _EXTERNAL_FILES = (
     "results/external_validation.csv",
 )
 _POVERTY_FILES = ("data/processed/external_poverty_63.csv",)
+_GEOJSON_FILES = ("data/raw/boundaries/diaphantinh.geojson",)
 
 
 def artifact_identity(relative_paths: tuple[str, ...]) -> tuple[tuple[str, int | None, int | None], ...]:
@@ -126,6 +139,12 @@ def get_external_assets(artifact_identity: tuple[tuple[str, int | None, int | No
 def get_poverty_assets(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
     del artifact_identity
     return load_poverty_assets()
+
+
+@st.cache_resource(show_spinner="Đang nạp bản đồ ranh giới 63 tỉnh…")
+def get_vietnam_geojson(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
+    del artifact_identity
+    return load_vietnam_geojson(ROOT / "data" / "raw" / "boundaries" / "diaphantinh.geojson")
 
 
 def feature_label(feature: str, config: dict) -> str:
@@ -236,13 +255,14 @@ try:
 except ValueError as exc:
     st.error(str(exc))
     selected_model = ""
-overview_tab, sting_tab, regression_tab, external_tab, audit_tab = st.tabs(
+overview_tab, sting_tab, regression_tab, external_tab, audit_tab, client_tab = st.tabs(
     [
         "Tổng quan",
         "STING theo năm",
         "Hồi quy 2023 → 2024",
         "Kiểm chứng ngoại lai",
         "Audit dữ liệu",
+        "Thống kê khách hàng",
     ],
     key="dashboard_tabs",
     on_change="rerun",
@@ -1059,6 +1079,413 @@ if audit_tab.open:
                             "correct": st.column_config.CheckboxColumn("Đúng"),
                         },
                     )
+
+with client_tab:
+    if client_tab.open:
+        st.subheader("Thống kê bàn giao cho khách hàng · 63 tỉnh (năm 2024)")
+        st.caption(
+            "Biến đầu ra kỹ thuật STING (−1, 0, 1, 2 và ô lưới) thành 4 nhóm hành động quản trị "
+            "cụ thể cho từng địa phương; phần phân nhóm tách từ mốc phân vị Cụm 2 năm 2024."
+        )
+        try:
+            stakeholder = load_stakeholder_summary()
+        except DashboardDataError as exc:
+            st.error(str(exc))
+        else:
+            s_df = stakeholder["summary"]
+            g_df = stakeholder["group_stats"]
+            bench = stakeholder["bench"]
+            watchlist = stakeholder["watchlist"]
+            benchmarks_14y = stakeholder["benchmarks_14y"]
+
+            counts_map = dict(zip(g_df["action_group"], g_df["n_provinces"]))
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric(
+                "Vùng lõi ổn định (Cụm 2)",
+                f"{counts_map.get('Vùng lõi ổn định (Cụm 2)', 0)} / {len(s_df)}",
+                help=f"{len(benchmarks_14y)} tỉnh giữ Cụm 2 trọn 14/14 năm.",
+            )
+            c2.metric(
+                "Biên bứt phá vượt chuẩn",
+                f"{counts_map.get('Biên bứt phá vượt chuẩn', 0)}",
+                help="Ô thưa phía trên/phải: 4.2 > trung vị lõi và 6.1 >= ngưỡng dưới lõi.",
+            )
+            c3.metric(
+                "Ưu tiên cải thiện Y tế 6.1",
+                f"{counts_map.get('Ưu tiên cải thiện Y tế 6.1', 0)}",
+                help=f"Ô thưa có 6.1 < Q25 − 0.5×IQR ({bench['lower_61_fence']:.3f}).",
+            )
+            c4.metric(
+                "Thiếu dữ liệu 2024",
+                f"{counts_map.get('Thiếu dữ liệu 2024', 0)}",
+            )
+
+            st.markdown("#### Tổng hợp 4 nhóm hành động trên 63 tỉnh năm 2024")
+            g_display = g_df[
+                [
+                    "action_group",
+                    "n_provinces",
+                    "share_63_pct",
+                    "median_sd_4_2",
+                    "median_sd_6_1",
+                    "median_years_c2",
+                    "median_risk_outside_pct",
+                    "median_grdp_2024_mil",
+                    "median_pci_2022",
+                ]
+            ].copy()
+            for col_name, fmt in (
+                ("share_63_pct", "{:.1f}"),
+                ("median_sd_4_2", "{:.3f}"),
+                ("median_sd_6_1", "{:.3f}"),
+                ("median_years_c2", "{:.1f}"),
+                ("median_risk_outside_pct", "{:.1f}"),
+                ("median_grdp_2024_mil", "{:.2f}"),
+                ("median_pci_2022", "{:.2f}"),
+            ):
+                g_display[col_name] = pd.to_numeric(g_display[col_name], errors="coerce").map(
+                    lambda v, _fmt=fmt: _fmt.format(v) if pd.notna(v) else "—"
+                )
+            st.dataframe(
+                g_display,
+                hide_index=True,
+                width="stretch",
+                column_config={
+                    "action_group": st.column_config.TextColumn("Nhóm hành động", width=205),
+                    "n_provinces": st.column_config.NumberColumn("Tỉnh", width=55),
+                    "share_63_pct": st.column_config.TextColumn("Tỉ lệ (%)", width=80, alignment="right"),
+                    "median_sd_4_2": st.column_config.TextColumn("Med 4.2", width=78, alignment="right"),
+                    "median_sd_6_1": st.column_config.TextColumn("Med 6.1", width=78, alignment="right"),
+                    "median_years_c2": st.column_config.TextColumn("Năm C2", width=78, alignment="right"),
+                    "median_risk_outside_pct": st.column_config.TextColumn(
+                        "Rủi ro (med %)", width=112, alignment="right"
+                    ),
+                    "median_grdp_2024_mil": st.column_config.TextColumn(
+                        "GRDP 24", width=92, alignment="right"
+                    ),
+                    "median_pci_2022": st.column_config.TextColumn("PCI 22", width=78, alignment="right"),
+                },
+            )
+
+            ctrl_col1, ctrl_col2 = st.columns([2.4, 1.0], vertical_alignment="bottom")
+            with ctrl_col1:
+                selected_action_groups = st.multiselect(
+                    "Lọc theo nhóm hành động",
+                    options=g_df["action_group"].tolist(),
+                    default=[],
+                    placeholder="Tất cả nhóm hành động…",
+                    key="client_action_groups",
+                    help="Lọc biểu đồ và danh sách bàn giao theo một hoặc nhiều nhóm hành động.",
+                )
+
+            filtered_s = s_df
+            if selected_provinces:
+                filtered_s = filtered_s.loc[filtered_s["province_code"].isin(selected_provinces)]
+            if selected_action_groups:
+                filtered_s = filtered_s.loc[filtered_s["action_group"].isin(selected_action_groups)]
+
+            export_cols = [
+                "province_code",
+                "province_vi",
+                "action_group",
+                "action_subtier",
+                "sd_4_2",
+                "sd_6_1",
+                "grid_cell",
+                "reference_count",
+                "years_cluster2_2011_2024",
+                "years_noise_2011_2024",
+                "transition_2023_2024",
+                "risk_outside_scenario_share",
+                "grdp_2024_mil_vnd",
+                "pci_2022",
+                "poverty_2024_pct",
+                "client_recommendation",
+            ]
+            csv_bytes = filtered_s[export_cols].to_csv(index=False).encode("utf-8-sig")
+            with ctrl_col2:
+                st.download_button(
+                    f"Tải CSV bàn giao ({len(filtered_s)} tỉnh)",
+                    data=csv_bytes,
+                    file_name="sting_papi_ban_giao_2024.csv",
+                    mime="text/csv",
+                    width="stretch",
+                    key="client_download_csv",
+                )
+
+            if selected_provinces or selected_action_groups:
+                st.caption(
+                    f"Các thẻ và bảng nhóm phía trên phản ánh toàn bộ {len(s_df)} tỉnh; "
+                    f"biểu đồ và bảng chi tiết bên dưới đang lọc còn {len(filtered_s)} tỉnh."
+                )
+
+            chart_mode = st.radio(
+                "Chế độ trực quan 63 tỉnh",
+                options=["Bản đồ Việt Nam 63 tỉnh", "Biểu đồ phân tán 2D (4.2 × 6.1)"],
+                horizontal=True,
+                key="client_chart_mode",
+            )
+
+            plot_df = filtered_s.loc[filtered_s["grid_status"].ne("missing_score")]
+            if filtered_s.empty:
+                render_empty("Không có tỉnh nào khớp bộ lọc tỉnh và nhóm hành động đang chọn.")
+            else:
+                if plot_df.empty:
+                    st.info(
+                        "Các tỉnh đang lọc thuộc nhóm **Thiếu dữ liệu 2024** (chưa có đủ chỉ tiêu 4.2 và 6.1 "
+                        "để vẽ lên bản đồ 2D); xem khuyến nghị kiểm toán mẫu ở bảng bên dưới."
+                    )
+
+                rendered_map = False
+                if chart_mode == "Bản đồ Việt Nam 63 tỉnh":
+                    try:
+                        geojson = get_vietnam_geojson(artifact_identity(_GEOJSON_FILES))
+                        hi_codes = (
+                            set(filtered_s["province_code"].dropna().astype(int))
+                            if (selected_provinces or selected_action_groups)
+                            else None
+                        )
+                        fig_map = build_action_choropleth_figure(
+                            s_df, geojson, highlight_codes=hi_codes
+                        )
+                    except Exception:
+                        st.warning("Không nạp được bản đồ ranh giới tỉnh; chuyển sang biểu đồ 2D.")
+                    else:
+                        st.plotly_chart(fig_map, width="stretch")
+                        rendered_map = True
+
+                if not rendered_map and not plot_df.empty:
+                    from scripts.analysis.stakeholder_summary import ACTION_GROUP_COLORS
+
+                    fig_client = px.scatter(
+                        plot_df,
+                        x="sd_4_2",
+                        y="sd_6_1",
+                        color="action_group",
+                        color_discrete_map=ACTION_GROUP_COLORS,
+                        hover_name="province_vi",
+                        hover_data={
+                            "action_subtier": True,
+                            "years_cluster2_2011_2024": True,
+                            "grdp_2024_mil_vnd": ":.2f",
+                            "risk_outside_scenario_share": ":.1%",
+                        },
+                        labels={
+                            "sd_4_2": "4.2 Kiểm soát tham nhũng (2024)",
+                            "sd_6_1": "6.1 Y tế công lập (2024)",
+                            "action_group": "Nhóm hành động",
+                        },
+                        title="Bản đồ phân nhóm hành động 63 tỉnh năm 2024 (tách 2 cực trong nhãn −1)",
+                    )
+                    fig_client.add_vline(x=bench["med_42"], line_dash="dash", line_color="#009E73")
+                    fig_client.add_hline(y=bench["lower_61_fence"], line_dash="dot", line_color="#D55E00")
+                    fig_client.update_layout(height=420, margin=dict(l=20, r=20, t=50, b=20))
+                    st.plotly_chart(fig_client, width="stretch")
+
+            st.markdown("#### Danh sách bàn giao theo từng tỉnh (đã xếp theo mức ưu tiên)")
+            detail_view_mode = st.radio(
+                "Chế độ hiển thị bảng chi tiết",
+                options=[
+                    "Phân nhóm & chỉ số chính",
+                    "Khuyến nghị & dịch chuyển",
+                    "Đầy đủ 10 cột",
+                ],
+                horizontal=True,
+                key="client_detail_view_mode",
+                help=(
+                    "Hai chế độ đầu chia bảng theo nhóm chỉ số hoặc khuyến nghị để dễ đọc hết chữ; "
+                    "chế độ thứ ba gộp đủ 10 cột kèm ghim tên tỉnh."
+                ),
+            )
+            if not filtered_s.empty:
+                detail_base = filtered_s[
+                    [
+                        "province_vi",
+                        "action_group",
+                        "action_subtier",
+                        "sd_4_2",
+                        "sd_6_1",
+                        "years_cluster2_2011_2024",
+                        "transition_2023_2024",
+                        "risk_outside_scenario_share",
+                        "grdp_2024_mil_vnd",
+                        "pci_2022",
+                        "poverty_2024_pct",
+                        "client_recommendation",
+                    ]
+                ].copy()
+                for score_col in ("sd_4_2", "sd_6_1"):
+                    detail_base[score_col] = pd.to_numeric(
+                        detail_base[score_col], errors="coerce"
+                    ).map(lambda v: f"{v:.3f}" if pd.notna(v) else "—")
+                detail_base["years_cluster2_2011_2024"] = pd.to_numeric(
+                    detail_base["years_cluster2_2011_2024"], errors="coerce"
+                ).map(lambda v: f"{int(round(v))}" if pd.notna(v) else "—")
+                detail_base["risk_outside_scenario_share"] = pd.to_numeric(
+                    detail_base["risk_outside_scenario_share"], errors="coerce"
+                ).map(lambda v: f"{100.0 * v:.1f}%" if pd.notna(v) else "—")
+                detail_base["grdp_2024_mil_vnd"] = pd.to_numeric(
+                    detail_base["grdp_2024_mil_vnd"], errors="coerce"
+                ).map(lambda v: f"{v:.1f}" if pd.notna(v) else "—")
+                detail_base["pci_2022"] = pd.to_numeric(
+                    detail_base["pci_2022"], errors="coerce"
+                ).map(lambda v: f"{v:.2f}" if pd.notna(v) else "—")
+                detail_base["poverty_2024_pct"] = pd.to_numeric(
+                    detail_base["poverty_2024_pct"], errors="coerce"
+                ).map(lambda v: f"{v:.1f}%" if pd.notna(v) else "—")
+                for text_col in ("action_subtier", "transition_2023_2024", "client_recommendation"):
+                    detail_base[text_col] = detail_base[text_col].map(
+                        lambda v: str(v).strip() if pd.notna(v) and str(v).strip() else "—"
+                    )
+
+                if detail_view_mode == "Phân nhóm & chỉ số chính":
+                    view_cols = [
+                        "province_vi",
+                        "action_group",
+                        "action_subtier",
+                        "sd_4_2",
+                        "sd_6_1",
+                        "years_cluster2_2011_2024",
+                        "risk_outside_scenario_share",
+                        "grdp_2024_mil_vnd",
+                    ]
+                    col_cfg = {
+                        "province_vi": st.column_config.TextColumn("Tỉnh / TP", width=130),
+                        "action_group": st.column_config.TextColumn("Nhóm hành động", width=170),
+                        "action_subtier": st.column_config.TextColumn("Phân tầng", width=270),
+                        "sd_4_2": st.column_config.TextColumn("4.2", width=64, alignment="right"),
+                        "sd_6_1": st.column_config.TextColumn("6.1", width=64, alignment="right"),
+                        "years_cluster2_2011_2024": st.column_config.TextColumn(
+                            "Năm C2", width=72, alignment="right"
+                        ),
+                        "risk_outside_scenario_share": st.column_config.TextColumn(
+                            "Rủi ro trượt", width=92, alignment="right"
+                        ),
+                        "grdp_2024_mil_vnd": st.column_config.TextColumn(
+                            "GRDP 24 (tr.đ)", width=112, alignment="right"
+                        ),
+                    }
+                elif detail_view_mode == "Khuyến nghị & dịch chuyển":
+                    view_cols = [
+                        "province_vi",
+                        "transition_2023_2024",
+                        "pci_2022",
+                        "poverty_2024_pct",
+                        "client_recommendation",
+                    ]
+                    col_cfg = {
+                        "province_vi": st.column_config.TextColumn("Tỉnh / TP", width=130),
+                        "transition_2023_2024": st.column_config.TextColumn(
+                            "Dịch chuyển 23→24", width=190
+                        ),
+                        "pci_2022": st.column_config.TextColumn("PCI 22", width=65, alignment="right"),
+                        "poverty_2024_pct": st.column_config.TextColumn(
+                            "Nghèo 24", width=83, alignment="right"
+                        ),
+                        "client_recommendation": st.column_config.TextColumn(
+                            "Khuyến nghị bàn giao", width=510
+                        ),
+                    }
+                else:
+                    view_cols = [
+                        "province_vi",
+                        "action_group",
+                        "action_subtier",
+                        "sd_4_2",
+                        "sd_6_1",
+                        "years_cluster2_2011_2024",
+                        "transition_2023_2024",
+                        "risk_outside_scenario_share",
+                        "grdp_2024_mil_vnd",
+                        "client_recommendation",
+                    ]
+                    col_cfg = {
+                        "province_vi": st.column_config.TextColumn(
+                            "Tỉnh / TP", width=135, pinned=True
+                        ),
+                        "action_group": st.column_config.TextColumn("Nhóm hành động", width=175),
+                        "action_subtier": st.column_config.TextColumn("Phân tầng", width=270),
+                        "sd_4_2": st.column_config.TextColumn(
+                            "4.2 (2024)", width=74, alignment="right"
+                        ),
+                        "sd_6_1": st.column_config.TextColumn(
+                            "6.1 (2024)", width=74, alignment="right"
+                        ),
+                        "years_cluster2_2011_2024": st.column_config.TextColumn(
+                            "Năm C2", width=72, alignment="right"
+                        ),
+                        "transition_2023_2024": st.column_config.TextColumn("Dịch chuyển", width=195),
+                        "risk_outside_scenario_share": st.column_config.TextColumn(
+                            "Rủi ro trượt", width=92, alignment="right"
+                        ),
+                        "grdp_2024_mil_vnd": st.column_config.TextColumn(
+                            "GRDP 24 (tr.đ)", width=112, alignment="right"
+                        ),
+                        "client_recommendation": st.column_config.TextColumn(
+                            "Khuyến nghị bàn giao", width=510
+                        ),
+                    }
+
+                st.dataframe(
+                    detail_base[view_cols],
+                    hide_index=True,
+                    width="stretch",
+                    column_config=col_cfg,
+                )
+            st.caption(
+                f"Top 5 chuẩn tham chiếu 14/14 năm trong Cụm 2: "
+                f"{', '.join(benchmarks_14y['province_vi'].tolist())}. "
+                f"Top 3 cảnh báo biến động vùng: "
+                + ", ".join(
+                    f"{r['province_vi']} ({100.0 * r['risk_outside_scenario_share']:.1f}%)"
+                    if pd.notna(r["risk_outside_scenario_share"])
+                    else f"{r['province_vi']} (—)"
+                    for _, r in watchlist.head(3).iterrows()
+                )
+                + "."
+            )
+
+            st.markdown("#### Phiếu chẩn đoán từng tỉnh (In PDF / Bàn giao địa phương)")
+            scorecard_pool = filtered_s if not filtered_s.empty else s_df
+            pool_names = scorecard_pool["province_vi"].tolist()
+            default_idx = (
+                pool_names.index("Hà Nội")
+                if (not (selected_provinces or selected_action_groups) and "Hà Nội" in pool_names)
+                else 0
+            )
+            sc_col1, sc_col2 = st.columns([2.0, 1.2], vertical_alignment="bottom")
+            with sc_col1:
+                selected_scorecard_prov = st.selectbox(
+                    "Chọn tỉnh xem & xuất phiếu chẩn đoán 1 trang",
+                    options=pool_names,
+                    index=default_idx,
+                    key="client_scorecard_province",
+                )
+            sc_rows = s_df.loc[s_df["province_vi"].eq(selected_scorecard_prov)]
+            if sc_rows.empty:
+                st.warning("Không tìm thấy dữ liệu tỉnh để tạo phiếu chẩn đoán.")
+            else:
+                sc_row = sc_rows.iloc[0]
+                sc_code = int(sc_row["province_code"])
+                sc_html = build_province_scorecard_html(
+                    sc_code, s_df, assignments, bench, benchmarks_14y
+                )
+                with sc_col2:
+                    st.download_button(
+                        f"Tải Phiếu chẩn đoán ({selected_scorecard_prov} · HTML/PDF)",
+                        data=sc_html.encode("utf-8"),
+                        file_name=scorecard_filename(selected_scorecard_prov),
+                        mime="text/html",
+                        width="stretch",
+                        key="client_download_scorecard",
+                    )
+                sc_42 = f"{float(sc_row['sd_4_2']):.3f}" if pd.notna(sc_row["sd_4_2"]) else "—"
+                sc_61 = f"{float(sc_row['sd_6_1']):.3f}" if pd.notna(sc_row["sd_6_1"]) else "—"
+                st.caption(
+                    f"**{selected_scorecard_prov}** · {sc_row['action_group']} ({sc_row['action_subtier']}) · "
+                    f"4.2 = {sc_42}, 6.1 = {sc_61}. Khuyến nghị: {sc_row['client_recommendation']} "
+                    "Mở tệp HTML đã tải bằng trình duyệt rồi nhấn Ctrl+P → Save as PDF để in trang A4."
+                )
 
 st.divider()
 st.caption(

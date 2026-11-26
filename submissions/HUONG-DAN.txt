@@ -1,24 +1,17 @@
-HƯỚNG DẪN NỘP BÀI · ĐỒ ÁN MÔN HỌC MÁY
-Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới STING
+HƯỚNG DẪN BÀI NỘP THỐNG NHẤT — NHÓM 15 (STING × PAPI 2011–2024)
 
-1. TỆP GỬI GIẢNG VIÊN
+Thư mục này chứa 1 gói hoàn thiện duy nhất (gộp đầy đủ phần giữa kỳ, cuối kỳ,
+tiền xử lý 6 bước từ Excel gốc và thống kê bàn giao 63 tỉnh cho khách hàng):
 
-Giữa kỳ   Nhom15_GiuaKy_STING_PAPI.zip
-          Slide 11 trang, hai notebook, mã nguồn, dữ liệu và hướng dẫn chạy.
-Cuối kỳ   Nhom15_CuoiKy_STING_PAPI.zip
-          Báo cáo Word, slide bảo vệ, hai notebook, mã nguồn và dữ liệu.
+1. Nhom15_STING_PAPI.zip
+   - Gói nén tự chạy độc lập toàn bộ đồ án (báo cáo Word, slide, 2 notebook,
+     dashboard app.py, mã nguồn, 14 workbook PAPI gốc, model & kết quả).
+   - Xác thực toàn vẹn qua SHA256SUMS.txt và verification.json.
 
-2. MỞ NHANH TRONG REPO
-
-01-giua-ky/           Slide, notebook giữa kỳ, notebook tiền xử lý và mã nguồn.
-02-cuoi-ky/           Báo cáo Word, slide, notebook và mã nguồn cuối kỳ.
-03-tien-xu-ly-papi/    Chuyên đề tiền xử lý độc lập với mã, dữ liệu và thư viện.
-
-3. CHẠY LẠI VÀ KIỂM TRA TOÀN VẸN
-
-Giải nén toàn bộ ZIP của mốc cần nộp. Mở HUONG_DAN.txt bên trong gói để
-cài thư viện và chạy hai notebook với Python 3.14. Các notebook đã có sẵn
-bảng và biểu đồ để đọc trực tiếp.
-
-SHA256SUMS.txt ghi mã băm của hai ZIP. verification.json ghi kết quả chạy
-lại notebook trên môi trường được nêu trong biên bản.
+2. Nhom15_STING_PAPI/
+   - Bản giải nén đồng nhất 1-1 với Nhom15_STING_PAPI.zip để xem hoặc mở trực tiếp:
+     + Nhom15_BaoCao_STING_PAPI.docx  (Báo cáo Word đầy đủ có mục lục & danh mục)
+     + Nhom15_STING_PAPI.pptx           (Bộ slide bảo vệ 11 trang 16:9)
+     + Nhom15_STING_PAPI.ipynb          (Notebook đồ án hoàn chỉnh)
+     + Nhom15_TienXuLy_PAPI.ipynb    (Notebook tiền xử lý PAPI 6 bước)
+     + app.py                          (Dashboard tương tác Streamlit)

@@ -26,8 +26,6 @@ python scripts/deliverables/update_report_fields.py
 ```
 
 Cập nhật trường bằng Microsoft Word trên Windows trước khi đóng gói.
-Bộ đóng gói kiểm tra mục lục bảy chương cùng 12 mục hình và 13 mục bảng
-đã được Word lưu. Bản hiện tại (sau khi bổ sung mục 3.7 và Bảng 4) kết
-xuất 45 trang trong Word (9 trang đầu và 36 trang nội dung đánh số 1–36).
-Các mục hình, bảng và chú thích (gồm mục 3.7, mục 5.5, các hình dự báo
-và bảng sai số) nằm trọn trên trang tương ứng.
+Bộ đóng gói kiểm tra mục lục bảy chương cùng 13 mục hình và 15 mục bảng
+đã được Word lưu trong `reports/Nhom15_BaoCao_STING_PAPI.docx` (sau khi bổ sung mục 5.8 Thống kê bàn giao 63 tỉnh, Hình 8 và Bảng 11–12).
+Các mục hình, bảng và chú thích nằm trọn trên trang tương ứng khi render qua Word COM.

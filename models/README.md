@@ -27,7 +27,7 @@ python scripts/supervised/predict_supervised.py  # 3) train model có giám sát
 ```
 
 Đầu vào: `data/processed/papi_panel_63_2011_2024.csv` (tái tạo bằng `python scripts/data/build_panel.py`).
-Chi tiết pipeline & giới hạn đánh giá: [`../README.md`](../README.md) mục "Dự đoán";
+Chi tiết pipeline & giới hạn đánh giá: [`../README.md`](../README.md) mục "Dự báo hai chỉ tiêu và đối chiếu trên lưới STING";
 kết quả số: [`../results/predict_summary.md`](../results/predict_summary.md),
 [`../results/supervised_summary.md`](../results/supervised_summary.md).
 

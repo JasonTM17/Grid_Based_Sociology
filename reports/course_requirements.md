@@ -1,6 +1,6 @@
 # Yêu cầu môn học và hồ sơ nộp bài
 
-_Cập nhật ngày 21/11/2026 · Nhóm 15._
+_Cập nhật ngày 26/11/2026 · Nhóm 15._
 
 ## Tiêu chí chấm và nội dung môn học
 
@@ -14,10 +14,10 @@ _Cập nhật ngày 21/11/2026 · Nhóm 15._
 | Báo cáo (report) | 2.5 |
 | Q&A | 2 |
 
-_Liên hệ deliverable giữa kỳ:_ slide và notebook đã chạy trình bày định nghĩa,
-demo lưới, tiền xử lý, kết quả STING trên PAPI và hai đối chứng phân cụm.
-Notebook giữa kỳ tính lại z-score, số ô dày, silhouette và độ nhạy trên 869
-quan sát đủ hai chỉ tiêu PAPI 2011–2024. Kiểm tra tiền xử lý tham chiếu bảng
+_Liên hệ đồ án thống nhất:_ phần cơ chế thuật toán giữa kỳ (định nghĩa, lưới 3×3,
+tiền xử lý, kết quả STING trên PAPI, z-score và hai đối chứng phân cụm trên 869
+quan sát) đã được hợp nhất trực tiếp vào `slides/Nhom15_STING_PAPI.pptx` (Slide 2–4)
+và `notebooks/Nhom15_STING_PAPI.ipynb` (Phần 1–3). Kiểm tra tiền xử lý tham chiếu bảng
 `results/preprocessing_audit.md`.
 
 ### Tiêu chí chấm cuối kỳ
@@ -33,7 +33,7 @@ Các **hạng mục** (tên category) đọc được từ text trích PDF bài 
 
 Trang 10 của tài liệu `data/raw/course/bai-giang-nhap-mon-hoc-may.pdf` ghi điểm tiền xử lý **1.5**, học model **1**, đánh giá & thảo luận **2**, quy ước code + cảnh báo **1**, báo cáo **2.5** (nhóm, tổng 8); thi vấn đáp **2** (cá nhân). Chia theo Group/Individual nên phần Q&A mỗi thành viên phải tự trả lời được.
 
-Bộ giữa kỳ gồm 10 slide đầu kể cả bìa và một slide cảm ơn riêng theo hướng dẫn về số trang được nhóm xác nhận.
+Bộ slide trình bày thống nhất gồm 11 trang (hợp nhất cơ chế giữa kỳ, thống kê bàn giao 63 tỉnh, kết quả cuối kỳ và slide cảm ơn riêng ở trang 11).
 
 ### Bài thực hành tiền xử lý dữ liệu
 
@@ -45,7 +45,7 @@ Nguyên tắc: **với mỗi giai đoạn: Test → Decide** (có bằng chứng
 
 _Áp dụng trong repo:_ `scripts/data/preprocessing_audit.py` ghi bảng Test | Result | Decision | Evidence vào `results/preprocessing_audit.{md,csv}`; quyết định “cứng” nằm trong `scripts/data/build_panel.py`, `predict_demo.py`, `predict_supervised.py`, v.v.
 
-Trang 17 của bài giảng về tiền xử lý yêu cầu bài nhóm chạy pipeline tiền xử lý, in kết quả và ghi lại các bước đã chọn. Bài thực hành riêng `notebooks/Nhom15_TienXuLy_PAPI.ipynb` dựng panel từ 14 workbook, đối chiếu panel 882 × 41 và chạy chuẩn hóa bằng thống kê của tập 2011–2023. Bản chạy độc lập cùng dữ liệu gốc nằm trong [bộ tiền xử lý PAPI](../submissions/03-tien-xu-ly-papi/).
+Trang 17 của bài giảng về tiền xử lý yêu cầu bài nhóm chạy pipeline tiền xử lý, in kết quả và ghi lại các bước đã chọn. Bài thực hành `notebooks/Nhom15_TienXuLy_PAPI.ipynb` dựng panel từ 14 workbook gốc, đối chiếu panel 882 × 41 và chạy chuẩn hóa bằng thống kê của tập 2011–2023. Tệp này nằm trực tiếp ở cấp đầu của gói nộp thống nhất [Nhom15_STING_PAPI.zip](../submissions/Nhom15_STING_PAPI.zip).
 
 ### Mẫu báo cáo GV (`Report-proj.docx`) — quan sát một lần, không có trong repo
 
@@ -61,37 +61,30 @@ _File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản 
 
 ## Deliverable theo đề
 
-| Mốc | Yêu cầu đề | Sản phẩm dự kiến | Trạng thái |
+| Mốc | Yêu cầu đề | Sản phẩm thống nhất đã hoàn thiện | Trạng thái |
 |---|---|---|---|
-| Giữa kỳ | 15' trình bày + 5' Q&A; nộp slides (PPTX) + notebook (đã execute — Jupyter/Zeppelin) | `slides/submission.pptx` (11 slide) + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb` (execute sạch) | Sẵn sàng kỹ thuật (smoke + test) — rehearsal: con người |
-| Cuối kỳ | Thi vấn đáp trực tiếp, nộp DOCX + notebook, PPTX tùy chọn, dataset ≥500×10 | Báo cáo Word, notebook Jupyter và slide vấn đáp trong [gói cuối kỳ](../submissions/Nhom15_CuoiKy_STING_PAPI.zip) | Có bản rời và gói tự chứa. [Kết quả chạy lại](../submissions/verification.json) |
+| Đồ án thống nhất (gộp Giữa kỳ + Cuối kỳ + Thống kê khách hàng) | Báo cáo DOCX tiếng Việt, Slide PPTX, Notebook thực thi sạch (Jupyter), Dataset ≥500×10, kiểm chứng & thống kê bàn giao 63 tỉnh | `reports/Nhom15_BaoCao_STING_PAPI.docx` + `slides/Nhom15_STING_PAPI.pptx` (11 slide) + `notebooks/Nhom15_STING_PAPI.ipynb` + `notebooks/Nhom15_TienXuLy_PAPI.ipynb` trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip) | Hoàn thiện, đồng bộ 1-1 (`submissions/Nhom15_STING_PAPI/`). [Kết quả chạy lại](../submissions/verification.json) |
 
 ## Thông tin đã chốt và mục cần xác nhận
 
-- [x] **Định dạng `.docx`** đã áp dụng theo file mẫu người dùng chọn (`reports/report_format_notes.md`). Đã khảo sát dàn ý ba chương trong tài liệu mẫu GV.
-- [x] **Số slide.** 11 slide giữa kỳ (`slides/submission.pptx`), tính cả bìa và trang cảm ơn. Bộ vấn đáp cuối kỳ (`slides/final.pptx`) cũng có 11 slide, gồm một trang cảm ơn.
+- [x] **Định dạng `.docx`** đã áp dụng theo file mẫu người dùng chọn (`reports/report_format_notes.md`), cấu trúc **7 chương** (có Chương 5.8 **Thống kê bàn giao cho khách hàng trên 63 tỉnh**).
+- [x] **Số slide.** 11 slide thống nhất (`slides/Nhom15_STING_PAPI.pptx`), gồm cơ chế giữa kỳ (3×3, 240 điểm, z-score), quan sát 2024, **2 slide thống kê bàn giao 63 tỉnh**, dự báo bổ trợ, đối chứng ngoại lai và kết luận.
 - [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051).
-- [x] **Tệp giữa kỳ** — slide PowerPoint và notebook Jupyter theo yêu cầu giảng viên.
+- [x] **Phản hồi giữa kỳ đã xử lý** — đã báo cáo xong giữa kỳ, bổ sung thống kê bàn giao khách hàng (`scripts/analysis/stakeholder_summary.py`) và gộp hoàn chỉnh toàn đồ án.
 - [x] **Trọng số cuối kỳ** — bài giảng nhập môn học máy, trang 10 ghi 8 điểm nhóm và 2 điểm vấn đáp cá nhân.
-- [ ] **Quy cách đặt tên, hạn và nơi nộp** — theo thông báo của giảng viên hoặc LMS.
-- [ ] **Phân công trình bày và luyện vấn đáp** — nhóm xác nhận trước buổi báo cáo.
-- [ ] **Bố cục báo cáo cuối kỳ** — nhóm dùng bố cục bảy chương và đối chiếu với yêu cầu chính thức của giảng viên.
+- [ ] **Hạn và cổng nộp cuối kỳ chính thức** — theo thông báo của giảng viên trên LMS.
+- [ ] **Phân công vấn đáp cuối kỳ** — nhóm rà soát trước buổi vấn đáp bằng `reports/on-tap/qa_final.md`.
 
-## Định dạng nộp đề xuất (default đến khi GV chốt khác)
+## Định dạng gói nộp thống nhất
 
-Trong kho dự án, hai gói được sinh bằng
+Trong kho dự án, gói nộp duy nhất được sinh bằng
 `python scripts/deliverables/build_submission_packages.py`
-vào `submissions/` và kiểm tra bằng `python scripts/deliverables/build_submission_packages.py --verify`.
+vào `submissions/Nhom15_STING_PAPI.zip` (kèm thư mục giải nén sẵn `submissions/Nhom15_STING_PAPI/`) và kiểm tra bằng `python scripts/deliverables/build_submission_packages.py --verify`.
 
-- Giữa kỳ: `Nhom15_GiuaKy_STING_PAPI.zip`, trọng tâm
-  `slides/submission.pptx` + `notebooks/Nhom15_GiuaKy_STING_PAPI.ipynb`.
-- Cuối kỳ: `Nhom15_CuoiKy_STING_PAPI.zip`, trọng tâm
-  `reports/final_report.docx` + `notebooks/Nhom15_CuoiKy_STING_PAPI.ipynb`, thêm
-  `slides/final.pptx` tùy chọn cho vấn đáp.
+- Thành phần trọng tâm: `reports/Nhom15_BaoCao_STING_PAPI.docx`, `slides/Nhom15_STING_PAPI.pptx`, `notebooks/Nhom15_STING_PAPI.ipynb` và `notebooks/Nhom15_TienXuLy_PAPI.ipynb`.
+- Mã nguồn, dữ liệu, model và kết quả đi kèm: `src/`, `data/`, `scripts/`, `models/`, `results/`, `reports/`.
 
-Mỗi gói giữ cấu trúc mã, kết quả và dữ liệu mà notebook sử dụng (`src/`, `data/`, `scripts/`, `models/`, `results/`).
-`HUONG_DAN.txt` chỉ cách chạy lại. `results/MANIFEST.json` liệt kê tệp
-kèm theo và mã SHA-256. [Kịch bản giữa kỳ 15 phút và 5 phút hỏi đáp](on-tap/presentation_script.md)
+`submissions/Nhom15_STING_PAPI/HUONG_DAN.txt` chỉ cách chạy lại. `submissions/Nhom15_STING_PAPI/results/MANIFEST.json` (bên trong gói ZIP) liệt kê tệp kèm theo và mã SHA-256. [Kịch bản thuyết trình 11 slide](on-tap/presentation_script.md)
 
 ## Liêm chính học thuật
 

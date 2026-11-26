@@ -41,8 +41,8 @@ jobs:
       - name: Dataset compliance check
         run: python scripts/data/check_data.py
 
-  midterm-replay:
-    name: Midterm ZIP (${{ matrix.os }})
+  package-replay:
+    name: Unified ZIP (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
@@ -58,12 +58,12 @@ jobs:
 
       - name: Install the ZIP's pinned dependencies
         run: |
-          python -X utf8 -c "from pathlib import Path; from zipfile import ZipFile; p = Path('submissions/Nhom15_GiuaKy_STING_PAPI.zip'); z = ZipFile(p); Path('midterm-requirements.txt').write_bytes(z.read(p.stem + '/requirements.txt')); z.close()"
-          python -m pip install -r midterm-requirements.txt
+          python -X utf8 -c "from pathlib import Path; from zipfile import ZipFile; p = Path('submissions/Nhom15_STING_PAPI.zip'); z = ZipFile(p); Path('package-requirements.txt').write_bytes(z.read(p.stem + '/requirements.txt')); z.close()"
+          python -m pip install -r package-requirements.txt
 
       - name: Replay both notebooks from the extracted ZIP
-        run: python -X utf8 scripts/deliverables/build_submission_packages.py --verify --milestone midterm
+        run: python -X utf8 scripts/deliverables/build_submission_packages.py --verify
 
       - name: Print notebook logs if replay failed
         if: failure()
-        run: python -X utf8 -c "from pathlib import Path; [print(p.name, p.read_text(encoding='utf-8')) for p in Path('submissions').glob('replay-midterm*.log')]"
+        run: python -X utf8 -c "from pathlib import Path; [print(p.name, p.read_text(encoding='utf-8')) for p in Path('submissions').glob('replay-*.log')]"

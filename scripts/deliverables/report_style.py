@@ -142,6 +142,46 @@ def replace_cover(document):
         marker._p.addprevious(block)
 
 
+def _add_page_number_footer(
+    section, placeholder: str, *, fmt: str = "decimal", start: str | None = None
+) -> None:
+    properties = section._sectPr
+    numbering = properties.find(qn("w:pgNumType"))
+    if numbering is None:
+        numbering = OxmlElement("w:pgNumType")
+        properties.insert_element_before(
+            numbering,
+            "w:cols",
+            "w:formProt",
+            "w:vAlign",
+            "w:noEndnote",
+            "w:titlePg",
+            "w:textDirection",
+            "w:bidi",
+            "w:rtlGutter",
+            "w:docGrid",
+            "w:printerSettings",
+            "w:sectPrChange",
+        )
+    numbering.set(qn("w:fmt"), fmt)
+    if start is not None:
+        numbering.set(qn("w:start"), start)
+    elif qn("w:start") in numbering.attrib:
+        del numbering.attrib[qn("w:start")]
+    paragraph = section.footer.paragraphs[0]
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = paragraph.add_run()
+    _font(run, 12)
+    field = OxmlElement("w:fldSimple")
+    field.set(qn("w:instr"), "PAGE")
+    result = OxmlElement("w:r")
+    text = OxmlElement("w:t")
+    text.text = placeholder
+    result.append(text)
+    field.append(result)
+    paragraph._p.append(field)
+
+
 def apply_reference_style(document):
     """Change layout only; retain all scientific text, tables and field content."""
     for section in document.sections:
@@ -204,25 +244,12 @@ def apply_reference_style(document):
         for footer in (section.footer, section.first_page_footer):
             for paragraph in footer.paragraphs:
                 paragraph.clear()
-        if index == len(sections) - 1 and index > 0:
-            properties = section._sectPr
-            numbering = properties.find(qn("w:pgNumType"))
-            if numbering is None:
-                numbering = OxmlElement("w:pgNumType")
-                properties.insert_element_before(numbering, "w:cols")
-            numbering.set(qn("w:start"), "1")
-            paragraph = section.footer.paragraphs[0]
-            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            run = paragraph.add_run()
-            _font(run, 12)
-            field = OxmlElement("w:fldSimple")
-            field.set(qn("w:instr"), "PAGE")
-            result = OxmlElement("w:r")
-            text = OxmlElement("w:t")
-            text.text = "1"
-            result.append(text)
-            field.append(result)
-            paragraph._p.append(field)
+        if 0 < index < len(sections) - 1:
+            _add_page_number_footer(
+                section, "i", fmt="lowerRoman", start="1" if index == 1 else None
+            )
+        elif index == len(sections) - 1 and index > 0:
+            _add_page_number_footer(section, "1", fmt="decimal", start="1")
     settings = document.settings.element
     update = settings.find(qn("w:updateFields"))
     if update is None:

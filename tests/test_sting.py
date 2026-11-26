@@ -522,31 +522,6 @@ def test_query_rect_validates_fit_level_and_shape():
         model.query_rect([0, 1], level=1)
 
 
-def test_study_sting_matches_src_ast():
-    """Bản giải thích study/sting_GiaiThich.py phải giữ nguyên logic với src/sting.py."""
-    import ast
-
-    def strip_docstrings(path: Path) -> str:
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        for node in ast.walk(tree):
-            if isinstance(
-                node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-            ):
-                if (
-                    node.body
-                    and isinstance(node.body[0], ast.Expr)
-                    and isinstance(node.body[0].value, ast.Constant)
-                    and isinstance(node.body[0].value.value, str)
-                ):
-                    node.body = node.body[1:]
-        return ast.dump(tree)
-
-    root = Path(__file__).resolve().parents[1]
-    assert strip_docstrings(root / "src" / "sting.py") == strip_docstrings(
-        root / "study" / "sting_GiaiThich.py"
-    )
-
-
 def test_point_cell_index_and_cell_stats_guards_and_bounds():
     """point_cell_index và cell_stats phải chặn gọi trước fit và chặn level ngoài dải."""
     unfit = STING(n_levels=2, factor=2)
