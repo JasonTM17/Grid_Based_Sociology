@@ -160,7 +160,7 @@ PACKAGE_FILES_CATALOG = {
     "reports/Nhom15_BaoCao_STING_PAPI.docx": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)",
     f"notebooks/{ANALYSIS_NOTEBOOK}": "Notebook phân tích STING × PAPI & Thống kê khách hàng đã lưu kết quả",
     f"notebooks/{PREPROCESSING_NOTEBOOK}": "Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc đã lưu kết quả",
-    "slides/Nhom15_STING_PAPI.pptx": "Slide trình bày thống nhất (15 trang 16:9 kèm ghi chú)",
+    "slides/Nhom15_STING_PAPI.pptx": "Slide trình bày thống nhất (12 trang 16:9 kèm ghi chú)",
     "app.py": "Ứng dụng dashboard Streamlit tương tác (6 tab, gồm Thống kê khách hàng)",
     "DEMO.md": "Kịch bản demo và cách đọc kết quả; đường dẫn tài liệu gốc được đối chiếu trong HUONG_DAN.txt",
     "src/sting.py": "Mã nguồn thuật toán STING cài đặt từ đầu",
@@ -220,6 +220,8 @@ PACKAGE_FILES_CATALOG = {
     **{f"results/{name}": "Bảng kết quả thực nghiệm và thống kê bàn giao" for name in PACKAGE_RESULTS},
     **{f"results/figs/{name}.png": "Hình minh họa trong báo cáo, slide và notebook" for name in PACKAGE_FIGURES},
     "reports/panel_lock.md": "Phiên bản và mã kiểm tra bảng PAPI",
+    "reports/customer_guide.md": "Hướng dẫn khách hàng mở dashboard, đọc nhóm tỉnh và xuất kết quả",
+    "reports/ban-giao-khach-hang-2024.md": "Phạm vi, ý nghĩa và giới hạn của bảng bàn giao 63 tỉnh",
     "reports/crosscheck_mendeley.md": "Kết quả đối chiếu PAPI với Mendeley",
     "reports/model_deep_dive.md": "Minh chứng các phép phân tích bổ sung trong báo cáo",
     "reports/external_data_expansion.md": "Phạm vi và nguồn dữ liệu đối chiếu được dẫn trong ghi chú slide",
@@ -312,7 +314,7 @@ Sinh viên thực hiện:
 --------------------------------------------------------------------------------
 {PACKAGE_NAME}/
 ├── {REPORT_NAME}       Báo cáo đồ án (Word có mục lục và danh mục tự động)
-├── {SLIDES_NAME}              Slide thuyết trình 15 trang 16:9 kèm ghi chú
+├── {SLIDES_NAME}              Slide thuyết trình 12 trang 16:9 kèm ghi chú
 ├── {ANALYSIS_NOTEBOOK}             Notebook phân tích STING × PAPI & Thống kê khách hàng
 ├── {PREPROCESSING_NOTEBOOK}          Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc
 ├── app.py                              Dashboard Streamlit (chạy: streamlit run app.py)
@@ -320,20 +322,28 @@ Sinh viên thực hiện:
 ├── HUONG_DAN.txt                       Tệp hướng dẫn này
 ├── src/                                Mã nguồn lõi STING & tiền xử lý
 ├── scripts/                            Script tái lập panel, phân tích, dự báo & khách hàng
-├── reports/                            Tài liệu phụ (panel_lock, crosscheck_mendeley, model_deep_dive)
+├── reports/                            Hướng dẫn khách hàng, nguồn dữ liệu và phân tích bổ sung
 ├── data/                               14 workbook PAPI gốc, Mendeley & nguồn đối chiếu ngoài
 ├── models/                             Cấu hình, scaler & model đã khóa
 └── results/                            Bảng CSV/MD/Excel (KetQua_STING_PAPI.xlsx) & hình PNG
 {reference_lines}{reference_pdf_note}
 2. CHẠY LẠI ĐỘC LẬP TRÊN MÁY KHÁC
 --------------------------------------------------------------------------------
-Giải nén toàn bộ ZIP và mở terminal tại thư mục {PACKAGE_NAME}/:
+Giải nén toàn bộ ZIP và mở terminal tại thư mục {PACKAGE_NAME}/.
+Dùng Python 3.14; kiểm tra bằng python --version. Tạo môi trường riêng với
+python -m venv .venv, kích hoạt môi trường hoặc dùng trực tiếp trình thông dịch
+trong .venv. Hướng dẫn theo Windows/Linux/macOS: reports/customer_guide.md.
+Sau đó chạy:
 
 python -m pip install -r requirements.txt
 python scripts/deliverables/demo_smoke.py
 python -m nbconvert --to notebook --execute {PREPROCESSING_NOTEBOOK} --output {Path(PREPROCESSING_NOTEBOOK).stem}_chay_lai
 python -m nbconvert --to notebook --execute {ANALYSIS_NOTEBOOK} --output {Path(ANALYSIS_NOTEBOOK).stem}_chay_lai
 python -m streamlit run app.py
+
+Hướng dẫn sử dụng dashboard: reports/customer_guide.md.
+Ý nghĩa các nhóm, mẫu số và giới hạn: reports/ban-giao-khach-hang-2024.md.
+Hai tài liệu này đi kèm trong ZIP; có thể đọc trước khi mở ứng dụng.
 
 3. TÁI LẬP SỐ LIỆU & THỐNG KÊ KHÁCH HÀNG TỪ DỮ LIỆU GỐC
 --------------------------------------------------------------------------------
@@ -674,10 +684,11 @@ tiền xử lý 6 bước từ Excel gốc và thống kê bàn giao 63 tỉnh c
 2. {PACKAGE_NAME}/
    - Bản giải nén đồng nhất 1-1 với {PACKAGE_NAME}.zip để xem hoặc mở trực tiếp:
      + {REPORT_NAME}  (Báo cáo Word đầy đủ có mục lục & danh mục)
-     + {SLIDES_NAME}           (Bộ slide bảo vệ 15 trang 16:9)
+     + {SLIDES_NAME}           (Bộ slide bảo vệ 12 trang 16:9)
      + {ANALYSIS_NOTEBOOK}          (Notebook đồ án hoàn chỉnh)
      + {PREPROCESSING_NOTEBOOK}    (Notebook tiền xử lý PAPI 6 bước)
      + app.py                          (Dashboard tương tác Streamlit)
+     + reports/customer_guide.md       (Hướng dẫn người nhận sử dụng và xuất kết quả)
 
 3. PDF THAM KHẢO PAPI 2024
    - {reference_pdf_note}

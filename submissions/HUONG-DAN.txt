@@ -11,10 +11,11 @@ tiền xử lý 6 bước từ Excel gốc và thống kê bàn giao 63 tỉnh c
 2. Nhom15_STING_PAPI/
    - Bản giải nén đồng nhất 1-1 với Nhom15_STING_PAPI.zip để xem hoặc mở trực tiếp:
      + Nhom15_BaoCao_STING_PAPI.docx  (Báo cáo Word đầy đủ có mục lục & danh mục)
-     + Nhom15_STING_PAPI.pptx           (Bộ slide bảo vệ 15 trang 16:9)
+     + Nhom15_STING_PAPI.pptx           (Bộ slide bảo vệ 12 trang 16:9)
      + Nhom15_STING_PAPI.ipynb          (Notebook đồ án hoàn chỉnh)
      + Nhom15_TienXuLy_PAPI.ipynb    (Notebook tiền xử lý PAPI 6 bước)
      + app.py                          (Dashboard tương tác Streamlit)
+     + reports/customer_guide.md       (Hướng dẫn người nhận sử dụng và xuất kết quả)
 
 3. PDF THAM KHẢO PAPI 2024
    - Gói mặc định không kèm PDF báo cáo PAPI 2024 để giảm dung lượng.

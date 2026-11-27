@@ -26,6 +26,7 @@ import streamlit as st
 from streamlit.testing.v1 import AppTest
 
 from scripts.analysis import dashboard_data as dd
+from scripts.analysis.client_product import CUSTOMER_GROUP_LABELS
 from scripts.data.check_data import scale_audit
 from scripts.analysis.dashboard_data import (
     PCI_TOP30_WINDOW,
@@ -782,7 +783,7 @@ def test_risk11_grdp_rows_without_year_render_silently(external_assets, tmp_path
 def test_tab6_khach_hang_renders_action_groups_and_is_lazy():
     expected = dd.load_stakeholder_summary()
     expected_groups = dict(
-        zip(expected["group_stats"]["action_group"], expected["group_stats"]["n_provinces"])
+        zip(expected["group_stats"]["action_group"].map(CUSTOMER_GROUP_LABELS), expected["group_stats"]["n_provinces"])
     )
     total_provinces = len(expected["summary"])
 
@@ -797,11 +798,11 @@ def test_tab6_khach_hang_renders_action_groups_and_is_lazy():
     client = at_open.tabs[5]
     assert client.subheader[0].value == "Thống kê bàn giao cho khách hàng · 63 tỉnh (năm 2024)"
     values = metric_values(client)
-    assert values["Vùng lõi ổn định (Cụm 2)"] == (
-        f"{expected_groups.get('Vùng lõi ổn định (Cụm 2)', 0)} / {total_provinces}"
+    assert values["Trong vùng dày (Cụm 2)"] == (
+        f"{expected_groups.get('Trong vùng dày (Cụm 2)', 0)} / {total_provinces}"
     )
-    assert values["Biên bứt phá vượt chuẩn"] == f"{expected_groups.get('Biên bứt phá vượt chuẩn', 0)}"
-    assert values["Ưu tiên cải thiện Y tế 6.1"] == f"{expected_groups.get('Ưu tiên cải thiện Y tế 6.1', 0)}"
+    assert values["Ngoài vùng dày phía điểm cao"] == f"{expected_groups.get('Ngoài vùng dày phía điểm cao', 0)}"
+    assert values["Ngoài vùng dày, 6.1 thấp"] == f"{expected_groups.get('Ngoài vùng dày, 6.1 thấp', 0)}"
     assert values["Thiếu dữ liệu 2024"] == f"{expected_groups.get('Thiếu dữ liệu 2024', 0)}"
     assert len(client.dataframe) == 2
     group_table = client.dataframe[0].value
@@ -828,7 +829,7 @@ def test_tab6_khach_hang_renders_action_groups_and_is_lazy():
 def test_tab6_khach_hang_view_modes_filter_and_missing_formatting(monkeypatch):
     expected = dd.load_stakeholder_summary()
     expected_groups = dict(
-        zip(expected["group_stats"]["action_group"], expected["group_stats"]["n_provinces"])
+        zip(expected["group_stats"]["action_group"].map(CUSTOMER_GROUP_LABELS), expected["group_stats"]["n_provinces"])
     )
 
     at = run_app(TAB_CLIENT)
@@ -839,7 +840,7 @@ def test_tab6_khach_hang_view_modes_filter_and_missing_formatting(monkeypatch):
     download_buttons = at.get("download_button")
     assert len(download_buttons) == 2
     assert download_buttons[0].label == f"Tải CSV bàn giao ({len(expected['summary'])} tỉnh)"
-    assert "Phiếu chẩn đoán" in download_buttons[1].label
+    assert "Phiếu rà soát tỉnh" in download_buttons[1].label
 
     # Verify chart mode toggle between Choropleth Map and 2D Scatter
     chart_radio = at.radio(key="client_chart_mode")
@@ -877,20 +878,20 @@ def test_tab6_khach_hang_view_modes_filter_and_missing_formatting(monkeypatch):
     assert "client_recommendation" in mode3_df.columns
     assert "grdp_2024_mil_vnd" in mode3_df.columns
 
-    # Filter by action group ("Ưu tiên cải thiện Y tế 6.1")
-    at.multiselect(key="client_action_groups").select("Ưu tiên cải thiện Y tế 6.1").run()
+    # Filter by action group ("Ngoài vùng dày, 6.1 thấp")
+    at.multiselect(key="client_action_groups").select("Ngoài vùng dày, 6.1 thấp").run()
     assert not at.exception
     assert not at.error
     filtered_df = at.tabs[5].dataframe[1].value
-    assert len(filtered_df) == expected_groups["Ưu tiên cải thiện Y tế 6.1"]
-    assert (filtered_df["action_group"] == "Ưu tiên cải thiện Y tế 6.1").all()
+    assert len(filtered_df) == expected_groups["Ngoài vùng dày, 6.1 thấp"]
+    assert (filtered_df["action_group"] == "Ngoài vùng dày, 6.1 thấp").all()
     assert (
         at.get("download_button")[0].label
-        == f"Tải CSV bàn giao ({expected_groups['Ưu tiên cải thiện Y tế 6.1']} tỉnh)"
+        == f"Tải CSV bàn giao ({expected_groups['Ngoài vùng dày, 6.1 thấp']} tỉnh)"
     )
 
     # Filter to "Thiếu dữ liệu 2024" -> info banner explaining missing 2D coordinates
-    at.multiselect(key="client_action_groups").unselect("Ưu tiên cải thiện Y tế 6.1").select(
+    at.multiselect(key="client_action_groups").unselect("Ngoài vùng dày, 6.1 thấp").select(
         "Thiếu dữ liệu 2024"
     ).run()
     assert not at.exception
@@ -905,6 +906,8 @@ def test_tab6_khach_hang_view_modes_filter_and_missing_formatting(monkeypatch):
     assert not at.error
     assert len(at.tabs[5].dataframe) == 1  # Only group summary table remains; detail shows empty info
     assert any("Không có tỉnh nào khớp" in el.value for el in at.tabs[5].info)
+    assert len(at.get("download_button")) == 1  # Empty CSV only; no unrelated scorecard.
+    assert not any(widget.key == "client_scorecard_province" for widget in at.selectbox)
     at.sidebar.multiselect[0].unselect(1)
     at.multiselect(key="client_action_groups").unselect("Thiếu dữ liệu 2024")
 

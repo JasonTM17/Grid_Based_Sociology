@@ -1,4 +1,4 @@
-"""Gate artifact nộp bài thống nhất: báo cáo DOCX, slide 15 trang, notebook và provenance PAPI."""
+"""Gate artifact nộp bài thống nhất: báo cáo DOCX, slide 12 trang, notebook và provenance PAPI."""
 
 from __future__ import annotations
 
@@ -26,8 +26,8 @@ SUBMISSION_NB = ROOT / "notebooks" / "Nhom15_STING_PAPI.ipynb"
 PROVENANCE = ROOT / "data" / "raw" / "papi" / "PROVENANCE.md"
 PAPI_PDF = ROOT / "data" / "raw" / "papi" / "PAPI_2024_REPORT_VIE_final.pdf"
 EXPECTED_ARI_STR = "0.950"
-SLIDE_COUNT = 15
-THANK_YOU = "Cảm ơn thầy và các bạn đã lắng nghe"
+SLIDE_COUNT = 12
+THANK_YOU = "Cảm ơn thầy và các bạn."
 
 _IGNORE_PATTERNS = (
     re.compile(r"""filterwarnings\s*\(\s*['"]ignore['"]""", re.IGNORECASE),
@@ -89,28 +89,31 @@ def test_report_embeds_current_canonical_figures():
 def test_report_uses_the_user_final_template_geometry():
     report = Document(REPORT_DOCX)
     cover, front, body = report.sections
-    assert (cover.left_margin.twips, cover.right_margin.twips) == (1417, 1134)
+    assert (cover.left_margin.twips, cover.right_margin.twips) == (1699, 1138)
     assert (cover.page_width.twips, cover.page_height.twips) == (11906, 16838)
     border = cover._sectPr.find(qn("w:pgBorders"))
     assert border.get(qn("w:display")) == "firstPage"
-    assert [edge.get(qn("w:val")) for edge in border] == ["double"] * 4
+    assert [edge.get(qn("w:val")) for edge in border] == ["single"] * 4
+    assert (body.left_margin.twips, body.right_margin.twips) == (1417, 1134)
     assert front._sectPr.find(qn("w:pgBorders")) is None
     assert body._sectPr.find(qn("w:pgNumType")).get(qn("w:start")) == "1"
     assert report.styles["Body Text"].paragraph_format.line_spacing == 1.5
 
 
 def check_pptx_submission(prs: Presentation) -> list[str]:
-    """Kiểm tra 15 slide, slide cảm ơn cuối và ghi chú thuyết trình mọi trang."""
+    """Kiểm tra 12 slide, kết luận gộp cảm ơn và ghi chú ở mọi trang."""
     violations: list[str] = []
     count = len(prs.slides)
     if count != SLIDE_COUNT:
         violations.append(f"Nhom15_STING_PAPI.pptx có {count} slide, cần đúng {SLIDE_COUNT}")
     else:
-        closing_text = [
+        closing_text = "\n".join(
             shape.text.strip() for shape in prs.slides[-1].shapes if shape.has_text_frame and shape.text.strip()
-        ]
-        if closing_text != [THANK_YOU]:
-            violations.append("slide cuối chỉ dành cho lời cảm ơn")
+        )
+        if THANK_YOU not in closing_text:
+            violations.append("slide kết luận thiếu lời cảm ơn")
+        if "kết luận" not in closing_text.lower():
+            violations.append("slide cuối thiếu phần kết luận")
     for index, slide in enumerate(prs.slides, start=1):
         notes = ""
         if slide.has_notes_slide:
@@ -239,14 +242,15 @@ def test_unified_pptx_exists_notes_and_content():
         return "\n".join(parts).strip()
 
     visible = [slide_text(slide) for slide in presentation.slides]
-    full_text = "\n".join(visible)
+    # Line breaks inside editable cells are layout choices, not missing evidence.
+    full_text = " ".join("\n".join(visible).split())
     for required in (
         "Phân cụm dựa trên lưới STING",
         "ARI = 0,950",
         "869/869 điểm giữ nguyên ô STING",
         "631 điểm",
         "48 / 61",
-        "Bảng mô tả 63 tỉnh",
+        "bảng mô tả 63 tỉnh",
         "Ngoài vùng dày, phía điểm cao",
         "Ngoài vùng dày, điểm 6.1 thấp",
         "Thiếu dữ liệu 2024",
@@ -259,14 +263,15 @@ def test_unified_pptx_exists_notes_and_content():
         "0,0641",
         "0 / 11",
         "AUC 0,816",
-        "Kết quả hồi cứu",
+        "Hồi cứu thăm dò",
         "Wang, Yang & Muntz (VLDB 1997)",
     ):
         assert required in full_text, f"Thiếu nội dung slide: {required}"
     assert "Nhiễu¹" not in full_text
     assert "(kèm Bạc Liêu, Huế" not in full_text
     assert "bứt phá vượt chuẩn" not in full_text.lower()
-    assert visible[-1] == THANK_YOU
+    assert THANK_YOU in visible[-1]
+    assert "kết luận" in visible[-1].lower()
 
     # Core evidence must remain editable, with data embedded in both charts.
     tables = [shape.table for slide in presentation.slides for shape in slide.shapes if shape.has_table]
@@ -370,6 +375,7 @@ def test_unified_slide_rejects_changed_panel_without_overwriting_reviewed_output
     )
     for rel_dir in copy_dirs:
         shutil.copytree(ROOT / rel_dir, tmp_path / rel_dir)
+    shutil.copy2(ROOT / "app.py", tmp_path / "app.py")
     panel = pd.read_csv(tmp_path / panel_path)
     year = panel.year.eq(2024)
     features = ["sd_4_2", "sd_6_1"]
@@ -407,11 +413,14 @@ def test_gate_detects_extra_slide_in_memory():
     assert any(f"cần đúng {SLIDE_COUNT}" in message for message in violations)
 
 
-def test_gate_rejects_content_on_thank_you_slide():
+def test_gate_rejects_missing_thanks_on_conclusion_slide():
     presentation = Presentation(str(SUBMISSION_PPTX))
-    text_box = next(shape for shape in presentation.slides[-1].shapes if shape.has_text_frame and shape.text)
-    text_box.text += "\nChi tiết kết quả"
-    assert "slide cuối chỉ dành cho lời cảm ơn" in check_pptx_submission(presentation)
+    text_box = next(
+        shape for shape in presentation.slides[-1].shapes
+        if shape.has_text_frame and THANK_YOU in shape.text
+    )
+    text_box.text = text_box.text.replace(THANK_YOU, "")
+    assert "slide kết luận thiếu lời cảm ơn" in check_pptx_submission(presentation)
 
 
 def test_gate_detects_error_output_in_memory(submission_notebook: dict):

@@ -33,8 +33,10 @@ from scripts.analysis.dashboard_data import (
     select_regression_model,
 )
 from scripts.analysis.client_product import (
+    CUSTOMER_GROUP_COLORS,
     build_action_choropleth_figure,
     build_province_scorecard_html,
+    customer_display_frame,
     load_vietnam_geojson,
     scorecard_filename,
 )
@@ -185,9 +187,18 @@ def render_empty(message: str) -> None:
 st.markdown('<div class="eyebrow">PAPI · 63 tỉnh · 2011–2024</div>', unsafe_allow_html=True)
 st.title("Khám phá kết quả STING và dự báo PAPI")
 st.caption(
-    "Dashboard local chỉ đọc dữ liệu và model đã lưu. App không huấn luyện lại, "
-    "không ghi artifact và không gửi dữ liệu ra ngoài."
+    "Xem dữ liệu PAPI 2011–2024, lọc tỉnh và xuất bảng hoặc phiếu rà soát. "
+    "Để bắt đầu, mở tab Thống kê khách hàng; các kết quả phản ánh phạm vi dữ liệu lịch sử."
 )
+with st.expander("Hướng dẫn đọc và nhận kết quả"):
+    st.markdown(
+        "1. Mở **Thống kê khách hàng** để xem đủ 63 tỉnh năm 2024, gồm cả hai tỉnh thiếu dữ liệu.\n"
+        "2. Chọn tỉnh ở thanh bên hoặc nhóm mô tả trong tab, rồi đọc điểm 4.2, 6.1 và gợi ý rà soát.\n"
+        "3. Tải CSV của các tỉnh đang lọc hoặc phiếu HTML của một tỉnh; mở HTML và dùng chức năng in để lưu PDF.\n\n"
+        "Nhãn cụm không phải xếp hạng chất lượng. Tỉ lệ kịch bản ngoài vùng là kết quả hồi kiểm 2024, "
+        "chưa phải xác suất cảnh báo. Hướng dẫn cài đặt, ý nghĩa từng cột và tình huống thường gặp: "
+        "`reports/customer_guide.md`."
+    )
 
 try:
     assets = get_assets(artifact_identity(_ASSET_FILES))
@@ -237,7 +248,10 @@ with st.sidebar:
         help="-1 là điểm nhiễu, không phải một cụm thông thường.",
     )
     st.divider()
-    st.caption("Năm và cụm ở đây chỉ lọc các mục STING; không lọc holdout hồi quy.")
+    st.caption(
+        "Năm và cụm chỉ lọc phần Tổng quan/STING. Bộ lọc tỉnh cũng áp dụng cho "
+        "bảng khách hàng; tab khách hàng luôn dùng năm 2024. Hồi quy giữ kỳ đánh giá 2023→2024."
+    )
 
 sting_view, sting_counts = prepare_sting_view(
     panel,
@@ -1084,16 +1098,17 @@ with client_tab:
     if client_tab.open:
         st.subheader("Thống kê bàn giao cho khách hàng · 63 tỉnh (năm 2024)")
         st.caption(
-            "Biến đầu ra kỹ thuật STING (−1, 0, 1, 2 và ô lưới) thành 4 nhóm hành động quản trị "
-            "cụ thể cho từng địa phương; phần phân nhóm tách từ mốc phân vị Cụm 2 năm 2024."
+            "Bốn nhóm mô tả vị trí của điểm PAPI 2024 trên lưới dựng từ dữ liệu đến 2023, "
+            "kèm gợi ý đối chiếu tại địa phương. Tab này cố định ở năm 2024; bộ lọc năm và cụm "
+            "ở thanh bên không thay đổi bảng này."
         )
         try:
             stakeholder = load_stakeholder_summary()
         except DashboardDataError as exc:
             st.error(str(exc))
         else:
-            s_df = stakeholder["summary"]
-            g_df = stakeholder["group_stats"]
+            s_df = customer_display_frame(stakeholder["summary"])
+            g_df = customer_display_frame(stakeholder["group_stats"])
             bench = stakeholder["bench"]
             watchlist = stakeholder["watchlist"]
             benchmarks_14y = stakeholder["benchmarks_14y"]
@@ -1101,18 +1116,18 @@ with client_tab:
             counts_map = dict(zip(g_df["action_group"], g_df["n_provinces"]))
             c1, c2, c3, c4 = st.columns(4)
             c1.metric(
-                "Vùng lõi ổn định (Cụm 2)",
-                f"{counts_map.get('Vùng lõi ổn định (Cụm 2)', 0)} / {len(s_df)}",
-                help=f"{len(benchmarks_14y)} tỉnh giữ Cụm 2 trọn 14/14 năm.",
+                "Trong vùng dày (Cụm 2)",
+                f"{counts_map.get('Trong vùng dày (Cụm 2)', 0)} / {len(s_df)}",
+                help=f"{len(benchmarks_14y)} tỉnh giữ nhãn Cụm 2 trong 14/14 năm; điều này không chứng minh điểm số ổn định.",
             )
             c2.metric(
-                "Biên bứt phá vượt chuẩn",
-                f"{counts_map.get('Biên bứt phá vượt chuẩn', 0)}",
-                help="Ô thưa phía trên/phải: 4.2 > trung vị lõi và 6.1 >= ngưỡng dưới lõi.",
+                "Ngoài vùng dày phía điểm cao",
+                f"{counts_map.get('Ngoài vùng dày phía điểm cao', 0)}",
+                help="Ô thưa có 4.2 từ trung vị vùng dày trở lên và 6.1 từ mốc rà soát trở lên; không phải chuẩn quốc gia.",
             )
             c3.metric(
-                "Ưu tiên cải thiện Y tế 6.1",
-                f"{counts_map.get('Ưu tiên cải thiện Y tế 6.1', 0)}",
+                "Ngoài vùng dày, 6.1 thấp",
+                f"{counts_map.get('Ngoài vùng dày, 6.1 thấp', 0)}",
                 help=f"Ô thưa có 6.1 < Q25 − 0.5×IQR ({bench['lower_61_fence']:.3f}).",
             )
             c4.metric(
@@ -1120,7 +1135,14 @@ with client_tab:
                 f"{counts_map.get('Thiếu dữ liệu 2024', 0)}",
             )
 
-            st.markdown("#### Tổng hợp 4 nhóm hành động trên 63 tỉnh năm 2024")
+            st.info(
+                f"Vùng dày là các ô có ít nhất {config['sting']['min_count']} quan sát tham chiếu, "
+                "không phải vùng địa lý hay mức chất lượng. Nhãn −1 có cả điểm cao và điểm thấp. "
+                f"Mốc rà soát 6.1 = {bench['lower_61_fence']:.4f} tính hồi cứu từ {int(bench['n_core'])} "
+                "tỉnh trong vùng dày năm 2024, chưa được kiểm chứng độc lập. "
+                "Tỉ lệ kịch bản ngoài vùng dùng để đọc thứ hạng thăm dò, không phải xác suất dự báo."
+            )
+            st.markdown("#### Tổng hợp 4 nhóm mô tả trên 63 tỉnh năm 2024")
             g_display = g_df[
                 [
                     "action_group",
@@ -1151,14 +1173,14 @@ with client_tab:
                 hide_index=True,
                 width="stretch",
                 column_config={
-                    "action_group": st.column_config.TextColumn("Nhóm hành động", width=205),
+                    "action_group": st.column_config.TextColumn("Nhóm mô tả", width=205),
                     "n_provinces": st.column_config.NumberColumn("Tỉnh", width=55),
                     "share_63_pct": st.column_config.TextColumn("Tỉ lệ (%)", width=80, alignment="right"),
                     "median_sd_4_2": st.column_config.TextColumn("Med 4.2", width=78, alignment="right"),
                     "median_sd_6_1": st.column_config.TextColumn("Med 6.1", width=78, alignment="right"),
                     "median_years_c2": st.column_config.TextColumn("Năm C2", width=78, alignment="right"),
                     "median_risk_outside_pct": st.column_config.TextColumn(
-                        "Rủi ro (med %)", width=112, alignment="right"
+                        "Kịch bản ngoài vùng (%)", width=165, alignment="right"
                     ),
                     "median_grdp_2024_mil": st.column_config.TextColumn(
                         "GRDP 24", width=92, alignment="right"
@@ -1170,12 +1192,12 @@ with client_tab:
             ctrl_col1, ctrl_col2 = st.columns([2.4, 1.0], vertical_alignment="bottom")
             with ctrl_col1:
                 selected_action_groups = st.multiselect(
-                    "Lọc theo nhóm hành động",
+                    "Lọc theo nhóm mô tả",
                     options=g_df["action_group"].tolist(),
                     default=[],
-                    placeholder="Tất cả nhóm hành động…",
+                    placeholder="Tất cả nhóm mô tả…",
                     key="client_action_groups",
-                    help="Lọc biểu đồ và danh sách bàn giao theo một hoặc nhiều nhóm hành động.",
+                    help="Lọc biểu đồ, danh sách và tệp tải theo một hoặc nhiều nhóm mô tả.",
                 )
 
             filtered_s = s_df
@@ -1228,7 +1250,7 @@ with client_tab:
 
             plot_df = filtered_s.loc[filtered_s["grid_status"].ne("missing_score")]
             if filtered_s.empty:
-                render_empty("Không có tỉnh nào khớp bộ lọc tỉnh và nhóm hành động đang chọn.")
+                render_empty("Không có tỉnh nào khớp bộ lọc tỉnh và nhóm mô tả đang chọn.")
             else:
                 if plot_df.empty:
                     st.info(
@@ -1255,14 +1277,12 @@ with client_tab:
                         rendered_map = True
 
                 if not rendered_map and not plot_df.empty:
-                    from scripts.analysis.stakeholder_summary import ACTION_GROUP_COLORS
-
                     fig_client = px.scatter(
                         plot_df,
                         x="sd_4_2",
                         y="sd_6_1",
                         color="action_group",
-                        color_discrete_map=ACTION_GROUP_COLORS,
+                        color_discrete_map=CUSTOMER_GROUP_COLORS,
                         hover_name="province_vi",
                         hover_data={
                             "action_subtier": True,
@@ -1273,16 +1293,16 @@ with client_tab:
                         labels={
                             "sd_4_2": "4.2 Kiểm soát tham nhũng (2024)",
                             "sd_6_1": "6.1 Y tế công lập (2024)",
-                            "action_group": "Nhóm hành động",
+                            "action_group": "Nhóm mô tả",
                         },
-                        title="Bản đồ phân nhóm hành động 63 tỉnh năm 2024 (tách 2 cực trong nhãn −1)",
+                        title="Nhóm mô tả theo hai chỉ tiêu PAPI năm 2024",
                     )
                     fig_client.add_vline(x=bench["med_42"], line_dash="dash", line_color="#009E73")
                     fig_client.add_hline(y=bench["lower_61_fence"], line_dash="dot", line_color="#D55E00")
                     fig_client.update_layout(height=420, margin=dict(l=20, r=20, t=50, b=20))
                     st.plotly_chart(fig_client, width="stretch")
 
-            st.markdown("#### Danh sách bàn giao theo từng tỉnh (đã xếp theo mức ưu tiên)")
+            st.markdown("#### Danh sách theo tỉnh và gợi ý rà soát")
             detail_view_mode = st.radio(
                 "Chế độ hiển thị bảng chi tiết",
                 options=[
@@ -1351,7 +1371,7 @@ with client_tab:
                     ]
                     col_cfg = {
                         "province_vi": st.column_config.TextColumn("Tỉnh / TP", width=130),
-                        "action_group": st.column_config.TextColumn("Nhóm hành động", width=170),
+                        "action_group": st.column_config.TextColumn("Nhóm mô tả", width=205),
                         "action_subtier": st.column_config.TextColumn("Phân tầng", width=270),
                         "sd_4_2": st.column_config.TextColumn("4.2", width=64, alignment="right"),
                         "sd_6_1": st.column_config.TextColumn("6.1", width=64, alignment="right"),
@@ -1403,7 +1423,7 @@ with client_tab:
                         "province_vi": st.column_config.TextColumn(
                             "Tỉnh / TP", width=135, pinned=True
                         ),
-                        "action_group": st.column_config.TextColumn("Nhóm hành động", width=175),
+                        "action_group": st.column_config.TextColumn("Nhóm mô tả", width=205),
                         "action_subtier": st.column_config.TextColumn("Phân tầng", width=270),
                         "sd_4_2": st.column_config.TextColumn(
                             "4.2 (2024)", width=74, alignment="right"
@@ -1433,7 +1453,7 @@ with client_tab:
                     column_config=col_cfg,
                 )
             st.caption(
-                f"Top 5 chuẩn tham chiếu 14/14 năm trong Cụm 2: "
+                f"{len(benchmarks_14y)} tỉnh giữ nhãn Cụm 2 trong 14/14 năm: "
                 f"{', '.join(benchmarks_14y['province_vi'].tolist())}. "
                 f"Top 3 tỉ lệ kịch bản ngoài vùng (hồi kiểm 2023→2024): "
                 + ", ".join(
@@ -1442,50 +1462,51 @@ with client_tab:
                     else f"{r['province_vi']} (—)"
                     for _, r in watchlist.head(3).iterrows()
                 )
-                + ". Tỉ lệ kịch bản không phải xác suất dự báo."
+                + ". Giữ nhãn không chứng minh điểm số ổn định. Tỉ lệ kịch bản không phải xác suất dự báo."
             )
 
-            st.markdown("#### Phiếu chẩn đoán từng tỉnh (In PDF / Bàn giao địa phương)")
-            scorecard_pool = filtered_s if not filtered_s.empty else s_df
-            pool_names = scorecard_pool["province_vi"].tolist()
-            default_idx = (
-                pool_names.index("Hà Nội")
-                if (not (selected_provinces or selected_action_groups) and "Hà Nội" in pool_names)
-                else 0
-            )
-            sc_col1, sc_col2 = st.columns([2.0, 1.2], vertical_alignment="bottom")
-            with sc_col1:
-                selected_scorecard_prov = st.selectbox(
-                    "Chọn tỉnh xem & xuất phiếu chẩn đoán 1 trang",
-                    options=pool_names,
-                    index=default_idx,
-                    key="client_scorecard_province",
+            if not filtered_s.empty:
+                st.markdown("#### Phiếu rà soát tỉnh (in PDF và bàn giao)")
+                scorecard_pool = filtered_s
+                pool_names = scorecard_pool["province_vi"].tolist()
+                default_idx = (
+                    pool_names.index("Hà Nội")
+                    if (not (selected_provinces or selected_action_groups) and "Hà Nội" in pool_names)
+                    else 0
                 )
-            sc_rows = s_df.loc[s_df["province_vi"].eq(selected_scorecard_prov)]
-            if sc_rows.empty:
-                st.warning("Không tìm thấy dữ liệu tỉnh để tạo phiếu chẩn đoán.")
-            else:
-                sc_row = sc_rows.iloc[0]
-                sc_code = int(sc_row["province_code"])
-                sc_html = build_province_scorecard_html(
-                    sc_code, s_df, assignments, bench, benchmarks_14y
-                )
-                with sc_col2:
-                    st.download_button(
-                        f"Tải Phiếu chẩn đoán ({selected_scorecard_prov} · HTML/PDF)",
-                        data=sc_html.encode("utf-8"),
-                        file_name=scorecard_filename(selected_scorecard_prov),
-                        mime="text/html",
-                        width="stretch",
-                        key="client_download_scorecard",
+                sc_col1, sc_col2 = st.columns([2.0, 1.2], vertical_alignment="bottom")
+                with sc_col1:
+                    selected_scorecard_prov = st.selectbox(
+                        "Chọn tỉnh để xuất phiếu rà soát khổ A4",
+                        options=pool_names,
+                        index=default_idx,
+                        key="client_scorecard_province",
                     )
-                sc_42 = f"{float(sc_row['sd_4_2']):.3f}" if pd.notna(sc_row["sd_4_2"]) else "—"
-                sc_61 = f"{float(sc_row['sd_6_1']):.3f}" if pd.notna(sc_row["sd_6_1"]) else "—"
-                st.caption(
-                    f"**{selected_scorecard_prov}** · {sc_row['action_group']} ({sc_row['action_subtier']}) · "
-                    f"4.2 = {sc_42}, 6.1 = {sc_61}. Khuyến nghị: {sc_row['client_recommendation']} "
-                    "Mở tệp HTML đã tải bằng trình duyệt rồi nhấn Ctrl+P → Save as PDF để in trang A4."
-                )
+                sc_rows = s_df.loc[s_df["province_vi"].eq(selected_scorecard_prov)]
+                if sc_rows.empty:
+                    st.warning("Không tìm thấy dữ liệu tỉnh để tạo phiếu rà soát tỉnh.")
+                else:
+                    sc_row = sc_rows.iloc[0]
+                    sc_code = int(sc_row["province_code"])
+                    sc_html = build_province_scorecard_html(
+                        sc_code, s_df, assignments, bench, benchmarks_14y
+                    )
+                    with sc_col2:
+                        st.download_button(
+                            f"Tải Phiếu rà soát tỉnh ({selected_scorecard_prov} · HTML)",
+                            data=sc_html.encode("utf-8"),
+                            file_name=scorecard_filename(selected_scorecard_prov),
+                            mime="text/html",
+                            width="stretch",
+                            key="client_download_scorecard",
+                        )
+                    sc_42 = f"{float(sc_row['sd_4_2']):.3f}" if pd.notna(sc_row["sd_4_2"]) else "—"
+                    sc_61 = f"{float(sc_row['sd_6_1']):.3f}" if pd.notna(sc_row["sd_6_1"]) else "—"
+                    st.caption(
+                        f"**{selected_scorecard_prov}** · {sc_row['action_group']} ({sc_row['action_subtier']}) · "
+                        f"4.2 = {sc_42}, 6.1 = {sc_61}. Khuyến nghị: {sc_row['client_recommendation']} "
+                        "Mở tệp HTML đã tải bằng trình duyệt rồi nhấn Ctrl+P → Save as PDF để in trang A4."
+                    )
 
 st.divider()
 st.caption(

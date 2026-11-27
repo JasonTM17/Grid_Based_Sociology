@@ -1,13 +1,13 @@
-# Checklist nộp bài thống nhất cuối kỳ — Topic 6 · STING × PAPI
+# Danh sách kiểm tra trước khi nộp bài cuối kỳ — Topic 6 · STING × PAPI
 
 _Cập nhật ngày 27/11/2026 · Nhóm 15._
 
-## Deliverable thống nhất của đồ án
+## Hồ sơ của đồ án
 
 - [x] **Báo cáo DOCX tiếng Việt** — `reports/Nhom15_BaoCao_STING_PAPI.docx` (49 trang khi render bằng LibreOffice, bảy chương, có Mục 5.8 **Thống kê mô tả và gợi ý rà soát 63 tỉnh**, mục lục và danh mục 13 hình, 15 bảng có số trang đã cập nhật), đồng bộ trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip).
 - [x] **Notebook phân tích thống nhất** — `notebooks/Nhom15_STING_PAPI.ipynb` chạy sạch 18 code cell từ gói giải nén (gộp demo 3×3 giữa kỳ, 240 điểm giả lập, phân cụm PAPI, thống kê bàn giao 63 tỉnh, dự báo, kiểm chứng ngoại lai & phụ lục học phần). [Kết quả chạy lại](../submissions/verification.json)
 - [x] **Notebook tiền xử lý PAPI** — `notebooks/Nhom15_TienXuLy_PAPI.ipynb` chạy sạch 9 code cell trực tiếp từ 14 workbook PAPI gốc qua `PREPROCESSING_PIPELINE` 6 bước.
-- [x] **Slide trình bày thống nhất (15 trang)** — `slides/Nhom15_STING_PAPI.pptx` (10 bảng, hai biểu đồ với workbook dữ liệu nhúng; Slide 7–9 quan sát 2024, thống kê 63 tỉnh và dịch chuyển; Slide 15 cảm ơn; sinh bằng `python scripts/deliverables/build_slides.py`).
+- [x] **Slide trình bày thống nhất (12 trang)** — `slides/Nhom15_STING_PAPI.pptx` (bảng có thể chỉnh sửa, hai biểu đồ với workbook dữ liệu nhúng; slide 6–7 quan sát 2024, thống kê 63 tỉnh và dịch chuyển; slide 12 kết luận và cảm ơn; sinh bằng `python scripts/deliverables/build_slides.py`).
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/data/check_data.py` → PASS.
 - [x] **Gỡ bỏ phân mảnh & thư mục `study/`** — bỏ các bản tách giữa kỳ/cuối kỳ rời, thư mục `study/` và `notebooks/exploratory/` để giữ 1 cấu trúc đồ án hoàn thiện duy nhất.
 
@@ -30,30 +30,21 @@ _Cập nhật ngày 27/11/2026 · Nhóm 15._
 - [x] Model lưu local `models/` (STING pkl + scaler JSON + joblib Ridge/RF)
 - [x] Panel v1 khóa với hash (`reports/panel_lock.md`)
 
-## Phạm vi kiểm tra đợt hoàn thiện đầu ngày 27/11/2026
+## Rà soát hình thức và nội dung
 
-- Đã duyệt toàn bộ 49 trang báo cáo và 15 slide qua bản render; mục lục Word có 82 mục điều hướng. Hình nhóm tỉnh, bảng, ghi chú slide và phần diễn giải notebook dùng cùng cách gọi mô tả.
-- Môi trường cục bộ dùng Python 3.14.2 và đúng các phiên bản trong `requirements-dev.txt`: **252 test đạt**, độ bao phủ `src/` **95%**. Một test mở kernel Jupyter tiêu chuẩn được để lại cho CI vì môi trường cục bộ từ chối bind socket; không sửa hoặc nới điều kiện test đó.
-- **41/41 mục smoke demo đạt**, Ruff đạt, 239 tham chiếu Q&A không có đường dẫn lỗi. Excel giữ nguyên 25 sheet, 17.598 ô số và 24 công thức; chỉ đồng bộ chú thích.
-- ZIP mặc định có 141 file được kê trong manifest, đủ các đầu vào để chạy. PDF báo cáo PAPI gốc được giữ trong repo và có thể kèm thêm bằng `--include-reference-pdf`. Đã giải nén vào thư mục riêng và thực thi lại **9 + 18 ô mã** bằng `InProcessKernelManager`, mỗi notebook trong một subprocess mới; xóa outputs cũ, bật guard chặn đọc repo gốc/Downloads, không có error hoặc stderr trong ô. [Biên bản](../submissions/verification.json) ghi rõ engine và phạm vi này, không coi đó là lượt replay bằng kernel ngoài tiến trình.
-- [GitHub Actions](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml) chạy toàn bộ 254 test (gồm test bổ sung về PDF tham khảo tùy chọn) và replay bằng kernel Jupyter tiêu chuẩn trên Ubuntu, Windows, macOS. ZIP/mirror giữ nguyên byte qua checkout; cache font được tạo trước khi chạy kernel để thông báo thiết lập lần đầu không lọt vào ô notebook. Gate lỗi/stderr vẫn được giữ nguyên.
+- Bìa theo mẫu giảng viên cung cấp ngày 27/11/2026; giữ thông tin hai thành viên và đề tài. Các bảng Word dùng nền trắng, chữ và đường viền đen; mục lục và danh mục có 82 mục điều hướng.
+- Báo cáo dùng cách diễn đạt học thuật, giải thích CV, MAE, RMSE, AUC và OFAT; giữ khai báo công cụ AI và phân biệt kết quả mô tả với kết luận đã được kiểm chứng.
+- Bộ slide gồm 12 trang với ghi chú, số liệu có nguồn và giới hạn đi cùng kết quả; trang cuối gộp kết luận và hỏi đáp. Kịch bản thuyết trình và tài liệu ôn tập dùng cùng số thứ tự slide.
+- Người nhận có [hướng dẫn sử dụng dashboard](customer_guide.md) và [giải thích bảng bàn giao 2024](ban-giao-khach-hang-2024.md), cùng nằm trong ZIP. Nhóm mô tả và chỉ số thăm dò không được trình bày như xếp hạng chất lượng chính thức.
+- Word, PowerPoint, notebook và các bản sao trong gói được đối chiếu từng byte. `results/MANIFEST.json` trong ZIP liệt kê tệp, vai trò và mã kiểm tra; [verification.json](../submissions/verification.json) gắn kết quả chạy lại với SHA-256 của đúng ZIP.
+- Bộ kiểm thử, Ruff, kiểm tra dữ liệu và thực thi lại hai notebook bằng kernel Jupyter tiêu chuẩn trên Ubuntu, Windows, macOS được chạy trong [GitHub Actions](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml).
 
-## Rà soát bổ sung ngày 27/11/2026
-
-- Sửa hai đoạn nguồn Mendeley tại Mục 3.1 và Phụ lục A trong Word, đồng bộ với generator. Repo có ZIP nguồn đầy đủ và bốn tệp giải nén dùng trực tiếp. Tài liệu nguồn ghi đúng 5.118 cặp giá trị hợp lệ trên 756 khóa tỉnh–năm, độ lệch tối đa 0.0.
-- Render lại toàn bộ Word: vẫn 49 trang, 82 mục điều hướng; 47 trang giống từng pixel, hai trang còn lại chỉ thay đúng đoạn nguồn. Duyệt lại 15 slide và các workbook biểu đồ. Số liệu slide giữ nguyên; evidence cập nhật theo mã STING đã sửa.
-- STING từ chối tham số lưới không nguyên, giá trị kiểm định không hữu hạn, ma trận không có đặc trưng và vùng truy vấn không hợp lệ. Gate tái lập giữ nguyên 869/869 nhãn đã công bố.
-- Đồng bộ diễn giải `future_work.md` với Word: phân biệt hồi cứu với kiểm chứng độc lập, ghi đúng thắng 4/6 năm theo MAE, và ghi rõ p-value Moran chưa hiệu chỉnh nhiều phép thử. Không thay số liệu hoặc cấu hình thực nghiệm.
-- ZIP hiện có **156 tệp được kê trong manifest**, bổ sung đúng bằng chứng được dẫn trong báo cáo/slide, panel khóa, hướng dẫn nguồn và lệnh smoke chạy được ngay trong bản giải nén. Word, slide, notebook và các bản sao đóng gói vẫn được đối chiếu từng byte.
-- Smoke kiểm tra outputs đã lưu, không thực thi lại notebook. Trong ZIP, smoke kiểm tra thêm checksum; sửa một tệp bằng chứng phải làm kiểm tra thất bại. Khi chạy lại notebook thất bại, verifier xóa biên nhận PASS cũ để không gây hiểu nhầm.
-- Kết quả thực thi lại bản hiện hành nằm tại [verification.json](../submissions/verification.json), gắn với SHA-256 của đúng ZIP. Bộ kiểm thử và replay ba hệ điều hành tiếp tục chạy trên [GitHub Actions](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml).
-
-## Đã xong giữa kỳ & Còn lại cuối kỳ (CON NGƯỜI thực hiện)
+## Các bước nhóm cần thực hiện trước khi nộp bài
 
 - [x] Báo cáo xong giữa kỳ + ghi nhận phản hồi thầy tại `reports/on-tap/midterm_feedback.md` (*"em phân cụm vậy nhưng cuối cùng thống kê với khách hàng cái gì á"*) → đã bổ sung đầy đủ trước khi chốt bản thống nhất.
 - [x] Điền họ tên và MSSV ở trang Nhóm thực hiện (Nguyễn Tiến Sơn — 24110054 · Trần Thị Ngọc Quyên — 24110051).
-- [ ] Rehearsal vấn đáp cuối kỳ ≤ 15' + Q&A 5' (`reports/on-tap/rehearsal_log.md`)
-- [ ] Mock defense cuối kỳ (`reports/on-tap/mock_defense_log.md`)
+- [ ] Luyện trình bày cuối kỳ ≤ 15' + Q&A 5' (`reports/on-tap/rehearsal_log.md`)
+- [ ] Tập hỏi đáp bảo vệ cuối kỳ (`reports/on-tap/mock_defense_log.md`)
 - [ ] Nộp gói `submissions/Nhom15_STING_PAPI.zip` lên cổng LMS theo thông báo giảng viên
 
 ## Tạo & kiểm chứng gói thống nhất
@@ -72,7 +63,7 @@ python scripts/deliverables/build_submission_packages.py --verify
 
 Verifier xóa output cũ ở bản sao notebook, dùng kernel mới, kiểm tra đếm lần chạy
 và chặn đọc kho mã gốc. Cách mở tệp và chạy lại được ghi trong [hướng dẫn nộp bài](../submissions/HUONG-DAN.txt).
-Kịch bản 15 slide: `reports/on-tap/presentation_script.md`.
+Kịch bản 12 slide: `reports/on-tap/presentation_script.md`.
 
 ## Git tag
 

@@ -16,7 +16,7 @@ _Cập nhật ngày 27/11/2026 · Nhóm 15._
 
 _Liên hệ đồ án thống nhất:_ phần cơ chế thuật toán giữa kỳ (định nghĩa, lưới 3×3,
 tiền xử lý, kết quả STING trên PAPI, bất biến z-score trên 869
-quan sát và đối chứng lịch sử trên 808 quan sát, với silhouette cùng mẫu 631 điểm) đã được hợp nhất trực tiếp vào `slides/Nhom15_STING_PAPI.pptx` (Slide 2–6)
+quan sát và đối chứng lịch sử trên 808 quan sát, với silhouette cùng mẫu 631 điểm) đã được hợp nhất trực tiếp vào `slides/Nhom15_STING_PAPI.pptx` (slide 2–5)
 và `notebooks/Nhom15_STING_PAPI.ipynb` (Phần 1–3). Kiểm tra tiền xử lý tham chiếu bảng
 `results/preprocessing_audit.md`.
 
@@ -33,7 +33,7 @@ Các **hạng mục** (tên category) đọc được từ text trích PDF bài 
 
 Trang 10 của tài liệu `data/raw/course/bai-giang-nhap-mon-hoc-may.pdf` ghi điểm tiền xử lý **1.5**, học model **1**, đánh giá & thảo luận **2**, quy ước code + cảnh báo **1**, báo cáo **2.5** (nhóm, tổng 8); thi vấn đáp **2** (cá nhân). Chia theo Group/Individual nên phần Q&A mỗi thành viên phải tự trả lời được.
 
-Bộ slide trình bày thống nhất gồm 15 trang (hợp nhất cơ chế giữa kỳ, thống kê bàn giao 63 tỉnh, kết quả cuối kỳ và slide cảm ơn riêng ở trang 15).
+Bộ trình bày gồm 12 slide, kết hợp cơ chế STING, dữ liệu và tiền xử lý, kết quả thực nghiệm, thống kê 63 tỉnh, phần bàn giao và giới hạn. Slide cuối gộp kết luận, cảm ơn và hỏi đáp.
 
 ### Bài thực hành tiền xử lý dữ liệu
 
@@ -47,28 +47,22 @@ _Áp dụng trong repo:_ `scripts/data/preprocessing_audit.py` ghi bảng Test |
 
 Trang 17 của bài giảng về tiền xử lý yêu cầu bài nhóm chạy pipeline tiền xử lý, in kết quả và ghi lại các bước đã chọn. Bài thực hành `notebooks/Nhom15_TienXuLy_PAPI.ipynb` dựng panel từ 14 workbook gốc, đối chiếu panel 882 × 41 và chạy chuẩn hóa bằng thống kê của tập 2011–2023. Tệp này nằm trực tiếp ở cấp đầu của gói nộp thống nhất [Nhom15_STING_PAPI.zip](../submissions/Nhom15_STING_PAPI.zip).
 
-### Mẫu báo cáo GV (`Report-proj.docx`) — quan sát một lần, không có trong repo
+### Mẫu bìa báo cáo của giảng viên
 
-Lead đã đọc **chỉ dạng text** file mẫu `Report-proj.docx` (sau đó file không còn trên máy local). Cấu trúc text quan sát (không khẳng định font/lề):
+Bìa dùng mẫu `Report-proj.pdf.docx` được cung cấp ngày 27/11/2026: khung đen một nét, ba dòng tên trường/khoa/bộ môn, logo, sinh viên, đề tài, tên môn và giảng viên hướng dẫn. Thông tin mẫu được thay bằng thông tin Nhóm 15; các vùng tô vàng được bỏ sau khi điền.
 
-- Trường → Khoa CNTT → Bộ môn trí tuệ nhân tạo → sinh viên (placeholder) → đề tài → **Đồ án môn HỌC MAY** → GV: **ThS. Le Minh Tan** → Khóa 2023–2027
-- **Lời cảm ơn**, **Mục lục**
-- Nội dung gợi ý **3 chương:** Chương 1 Lý thuyết liên quan (mục/tiểu mục cấp 3) · Chương 2 Mô tả hệ thống · Chương 3 Kết luận
+Thân báo cáo giữ bảy chương để trình bày phương pháp, dữ liệu, kết quả và giới hạn, kèm các phụ lục tái lập. [Ghi chú định dạng](report_format_notes.md) lưu thông số bìa và cách dựng lại tài liệu.
 
-**Báo cáo hiện tại** có **7 chương**, kèm phần mở đầu và tài liệu tham khảo. Bìa và thể thức theo mẫu nhóm chọn ngày 18/11. Mẫu giảng viên cung cấp gợi ý dàn ý ba chương. [Ghi chú định dạng báo cáo](report_format_notes.md)
+## Hồ sơ theo yêu cầu môn học
 
-_File mẫu không được commit vào repo (tài liệu bên thứ ba). Bản sao slide/mẫu có thể để local tại `data/raw/course/` — cũng không commit._
-
-## Deliverable theo đề
-
-| Mốc | Yêu cầu đề | Sản phẩm thống nhất đã hoàn thiện | Trạng thái |
+| Mốc | Yêu cầu đề | Tệp bàn giao | Trạng thái |
 |---|---|---|---|
-| Đồ án thống nhất (gộp Giữa kỳ + Cuối kỳ + Thống kê khách hàng) | Báo cáo DOCX tiếng Việt, Slide PPTX, Notebook thực thi sạch (Jupyter), Dataset ≥500×10, kiểm chứng & thống kê bàn giao 63 tỉnh | `reports/Nhom15_BaoCao_STING_PAPI.docx` + `slides/Nhom15_STING_PAPI.pptx` (15 slide) + `notebooks/Nhom15_STING_PAPI.ipynb` + `notebooks/Nhom15_TienXuLy_PAPI.ipynb` trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip) | Hoàn thiện, đồng bộ 1-1 (`submissions/Nhom15_STING_PAPI/`). [Kết quả chạy lại](../submissions/verification.json) |
+| Đồ án thống nhất (gộp Giữa kỳ + Cuối kỳ + Thống kê khách hàng) | Báo cáo DOCX tiếng Việt, Slide PPTX, Notebook thực thi sạch (Jupyter), Dataset ≥500×10, kiểm chứng & thống kê bàn giao 63 tỉnh | `reports/Nhom15_BaoCao_STING_PAPI.docx` + `slides/Nhom15_STING_PAPI.pptx` (12 slide) + `notebooks/Nhom15_STING_PAPI.ipynb` + `notebooks/Nhom15_TienXuLy_PAPI.ipynb` trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip) | Hoàn thiện, đồng bộ 1-1 (`submissions/Nhom15_STING_PAPI/`). [Kết quả chạy lại](../submissions/verification.json) |
 
 ## Thông tin đã chốt và mục cần xác nhận
 
 - [x] **Định dạng `.docx`** đã áp dụng theo file mẫu người dùng chọn (`reports/report_format_notes.md`), cấu trúc **7 chương** (có Chương 5.8 **Thống kê bàn giao cho khách hàng trên 63 tỉnh**).
-- [x] **Số slide.** 15 slide thống nhất (`slides/Nhom15_STING_PAPI.pptx`), gồm cơ chế giữa kỳ (3×3, 240 điểm, z-score), quan sát 2024, **phần quan sát, thống kê 63 tỉnh và dịch chuyển**, dự báo bổ trợ, đối chứng ngoại lai và kết luận.
+- [x] **Số slide.** 12 slide thống nhất (`slides/Nhom15_STING_PAPI.pptx`), gồm cơ chế giữa kỳ (3×3, 240 điểm, z-score), quan sát 2024, **phần quan sát, thống kê 63 tỉnh và dịch chuyển**, dự báo bổ trợ, đối chứng ngoại lai và kết luận.
 - [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051).
 - [x] **Phản hồi giữa kỳ đã xử lý** — đã báo cáo xong giữa kỳ, bổ sung thống kê bàn giao khách hàng (`scripts/analysis/stakeholder_summary.py`) và gộp hoàn chỉnh toàn đồ án.
 - [x] **Trọng số cuối kỳ** — bài giảng nhập môn học máy, trang 10 ghi 8 điểm nhóm và 2 điểm vấn đáp cá nhân.
@@ -84,7 +78,7 @@ vào `submissions/Nhom15_STING_PAPI.zip` (kèm thư mục giải nén sẵn `sub
 - Thành phần trọng tâm: `reports/Nhom15_BaoCao_STING_PAPI.docx`, `slides/Nhom15_STING_PAPI.pptx`, `notebooks/Nhom15_STING_PAPI.ipynb` và `notebooks/Nhom15_TienXuLy_PAPI.ipynb`.
 - Mã nguồn, dữ liệu, model và kết quả đi kèm: `src/`, `data/`, `scripts/`, `models/`, `results/`, `reports/`.
 
-`submissions/Nhom15_STING_PAPI/HUONG_DAN.txt` chỉ cách chạy lại các notebook và phân tích. `submissions/Nhom15_STING_PAPI/results/MANIFEST.json` (bên trong gói ZIP) liệt kê tệp kèm theo và mã SHA-256. [Kịch bản thuyết trình 15 slide](on-tap/presentation_script.md)
+`submissions/Nhom15_STING_PAPI/HUONG_DAN.txt` chỉ cách chạy lại các notebook và phân tích. `submissions/Nhom15_STING_PAPI/results/MANIFEST.json` (bên trong gói ZIP) liệt kê tệp kèm theo và mã SHA-256. [Kịch bản thuyết trình 12 slide](on-tap/presentation_script.md)
 
 ## Liêm chính học thuật
 

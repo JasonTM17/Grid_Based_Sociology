@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "slide_count": 15,
-  "evidence_sha256": "1742fb25d0fa579461641c2c0fce688eb510c51c49e4a37610f6f4ae52cb38fe",
-  "template_sha256": "9dee36e264b026c93308bf6a98fcf36eee6c715acee0d86fa65b6b760c899473",
-  "authoring_source_sha256": "3a1629b594b65c9ba471ff7917f0ad4aa994a966d91aa48d2edeb4585d9b570d",
+  "slide_count": 12,
+  "evidence_sha256": "117ec28788052302fe3238f6b012b40607045cbf673c7f8eb4def4aac16cf832",
+  "template_sha256": "2aee921f3ff58c765fd73a3195b4fb8a37460553a3904b5a89c56c839c3f6f9d",
+  "authoring_source_sha256": "b5500726748e526430b99143d3dced976cc47dfb629b1d6bd1366e7e4f6adecb",
   "evidence": {
-    "slide_count": 15,
+    "slide_count": 12,
     "config": {
       "frozen_at": "2026-11-14",
       "selection_protocol": "Candidates: pairwise allowlist of screened sub-dimensions; mean-jump heuristic checked on train years ≤2020; dimension-level d1–d6 excluded pending cross-year comparability evidence. Fit ≤2020; chấm trên tương lai giả 2021–2022; 2024 không tham gia chọn. Lọc: k 2–6, noise≤0.25, largest≤0.85, coverage≥0.75. Điểm = coverage - 0.5*noise - 0.15*largest - 0.02*|k-3| + 0.03*stable(mc±1).",
@@ -47,7 +47,7 @@
       "poverty_eta_note": "eta² = 0.0124 (SS giữa / SS tổng)"
     },
     "source_sha256": {
-      "scripts/deliverables/build_slides.py": "8e62ed5fc957df4ffb381edc8115952467a4f00afc8b671b39128c45e2002739",
+      "scripts/deliverables/build_slides.py": "17a45c85871c4bd25620ee15ead0cf76475d3a13d375b232bb44a92265bdbb35",
       "scripts/deliverables/slides_chart_workbooks.py": "c31db3d2c92448c893d6ad436e9704c2a9f5593f440a88308943c7e38b7aa9cf",
       "src/sting.py": "b8f6f09fb73de4d682036461c13b0fdd86e46170b065fc55b0c9c788ee8fb1f2",
       "src/preprocessing.py": "a34fbc55410393a2a48a012d25fc595bccd5ea53ceab076f2c2107765cc2b2e3",
@@ -66,6 +66,8 @@
       "results/preprocessing_audit.csv": "2356f56f0010db95910428dbe21036f75359d9665f6a96d8903b7344169cbab5",
       "results/metrics.csv": "5b98555ee83d477f64bc47c85a827520a2f81ba122223b92f5da0919492f479f",
       "results/predict_summary.md": "2d9e7e88739c4398f49ece31f481fda8317244b43b024bafa9b67d216d6060f1",
+      "results/course_supervised_baselines.csv": "881f20ce79905ee930bac899b7c98c0e699a2d7bd4d573afcb17b45d20199cc2",
+      "results/course_supervised_baselines.md": "6428ece15634ca71c7792d5c91d2a361a52fd09f2323b46ae8efbb7f9f9942fb",
       "reports/crosscheck_mendeley.md": "deccebdf869ec76af3a1465063298dae0abf353b746b71e56bd89ae7a351275e",
       "data/processed/papi_panel_scale_metadata.csv": "f52835a3c8cee130de6d9fa65cb14c8e142a391f959195bc9bfbfcc551c8bcc3",
       "data/processed/external_gso_grdp_63.csv": "1b5d186740be9f6d8d59bc4c0d72823dceecdfdde12b544b37256fd14b2a67b3",
@@ -73,7 +75,10 @@
       "data/processed/external_odm_health_63.csv": "06a439a68d4e4d1feeb2df63751e1c8544f95d7efc21496314702f188ccc9d6e",
       "scripts/common/midterm_clustering.py": "2ef94c5a991007796597fb43ec7877352131f27e2f78ac0b1c1fc11749a2e602",
       "scripts/common/papi_forecast.py": "3267b5744e0cdd036a46a260e10483515561648abfb950ad8ec4d6a246412983",
-      "scripts/analysis/predict_sweep.py": "3a382984b9321f6505ee63aebb965dc71a3268a4a191dcdd82a3055dea761090"
+      "scripts/analysis/predict_sweep.py": "3a382984b9321f6505ee63aebb965dc71a3268a4a191dcdd82a3055dea761090",
+      "app.py": "1c36068975b955a8523b36c2e9f68e0ff1836a0911cd5b7b14ad75f7195dfa4d",
+      "scripts/analysis/client_product.py": "7b55ad84cf51ca7f72dd8021de6e54b28a532054765c2aae9dcd895ad92abe51",
+      "reports/customer_guide.md": "bc9750ed6245922c91c0843535aef1b55b874f6b9ff87306de4b0e96509131b9"
     },
     "panel_rows": 882,
     "panel_columns": 41,
@@ -3133,6 +3138,80 @@
         "ch": null,
         "ari_vs_2d": null,
         "verdict": "không nhận diện"
+      }
+    ],
+    "course_baselines": [
+      {
+        "model": "majority (lớp đa số)",
+        "metric_cv": "f1_macro (expanding origin 2017–2022)",
+        "value_cv": 0.228,
+        "holdout_acc": 0.186,
+        "holdout_macro_f1": 0.157,
+        "cv_std": 0.107,
+        "cv_folds": 6
+      },
+      {
+        "model": "gaussian naive bayes",
+        "metric_cv": "f1_macro (expanding origin 2017–2022)",
+        "value_cv": 0.514,
+        "holdout_acc": 0.746,
+        "holdout_macro_f1": 0.566,
+        "cv_std": 0.12,
+        "cv_folds": 6
+      },
+      {
+        "model": "knn",
+        "metric_cv": "f1_macro (expanding origin 2017–2022)",
+        "value_cv": 0.486,
+        "holdout_acc": 0.593,
+        "holdout_macro_f1": 0.534,
+        "cv_std": 0.066,
+        "cv_folds": 6
+      },
+      {
+        "model": "svm (linear)",
+        "metric_cv": "f1_macro (expanding origin 2017–2022)",
+        "value_cv": 0.343,
+        "holdout_acc": 0.695,
+        "holdout_macro_f1": 0.556,
+        "cv_std": 0.127,
+        "cv_folds": 6
+      },
+      {
+        "model": "svm (rbf)",
+        "metric_cv": "f1_macro (expanding origin 2017–2022)",
+        "value_cv": 0.437,
+        "holdout_acc": 0.678,
+        "holdout_macro_f1": 0.566,
+        "cv_std": 0.126,
+        "cv_folds": 6
+      },
+      {
+        "model": "decision tree",
+        "metric_cv": "f1_macro (expanding origin 2017–2022)",
+        "value_cv": 0.426,
+        "holdout_acc": 0.559,
+        "holdout_macro_f1": 0.508,
+        "cv_std": 0.091,
+        "cv_folds": 6
+      },
+      {
+        "model": "random forest",
+        "metric_cv": "f1_macro (expanding origin 2017–2022)",
+        "value_cv": 0.394,
+        "holdout_acc": 0.627,
+        "holdout_macro_f1": 0.56,
+        "cv_std": 0.07,
+        "cv_folds": 6
+      },
+      {
+        "model": "logistic regression",
+        "metric_cv": "f1_macro (expanding origin 2017–2022)",
+        "value_cv": 0.434,
+        "holdout_acc": 0.644,
+        "holdout_macro_f1": 0.541,
+        "cv_std": 0.056,
+        "cv_folds": 6
       }
     ]
   }

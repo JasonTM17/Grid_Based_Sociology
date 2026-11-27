@@ -1,15 +1,19 @@
-"""Kiểm thử mô-đun sản phẩm khách hàng: bản đồ Choropleth 63 tỉnh & Phiếu chẩn đoán 1 trang."""
+"""Kiểm thử mô-đun sản phẩm khách hàng: bản đồ Choropleth 63 tỉnh & Phiếu rà soát tỉnh định dạng in A4."""
 
 from __future__ import annotations
+
+import io
 
 import pandas as pd
 import plotly.graph_objects as go
 import pytest
 
 from scripts.analysis.client_product import (
+    CUSTOMER_GROUP_LABELS,
     GEOJSON_PROVINCE_ALIAS,
     build_action_choropleth_figure,
     build_province_scorecard_html,
+    customer_display_frame,
     load_vietnam_geojson,
     scorecard_filename,
 )
@@ -80,6 +84,25 @@ def test_scorecard_filename_ascii_safe():
     assert scorecard_filename("TP. Hồ Chí Minh") == "phieu_chan_doan_tp_ho_chi_minh_2024.html"
 
 
+def test_customer_export_labels_preserve_observations_and_source_data():
+    source = build_stakeholder_tables(ROOT)["summary"]
+    before = source.copy(deep=True)
+    displayed = customer_display_frame(source)
+    text_columns = ["action_group", "action_subtier", "transition_2023_2024", "client_recommendation"]
+    pd.testing.assert_frame_equal(source, before)
+    pd.testing.assert_frame_equal(displayed.drop(columns=text_columns), source.drop(columns=text_columns))
+    pd.testing.assert_frame_equal(customer_display_frame(displayed), displayed)
+    assert displayed["action_group"].value_counts().to_dict() == {
+        CUSTOMER_GROUP_LABELS[name]: count for name, count in source["action_group"].value_counts().items()
+    }
+    assert not displayed["action_group"].str.contains("vượt chuẩn|ổn định").any()
+    assert not displayed["client_recommendation"].str.contains("Nhân rộng thực hành tốt").any()
+    # A customer receives the same raw proportions and missing values in CSV.
+    exported = pd.read_csv(io.StringIO(displayed.to_csv(index=False)))
+    pd.testing.assert_series_equal(exported["risk_outside_scenario_share"], source["risk_outside_scenario_share"])
+    assert exported["sd_4_2"].isna().sum() == source["sd_4_2"].isna().sum()
+
+
 def test_build_province_scorecard_html_covers_groups_missing_and_escaping():
     data = build_stakeholder_tables(ROOT)
     summary = data["summary"]
@@ -95,6 +118,9 @@ def test_build_province_scorecard_html_covers_groups_missing_and_escaping():
         assert "Hồi kiểm 2023→2024; không phải xác suất" in out
         assert "năm tới" not in out
         assert "Chỉ mô tả bối cảnh kinh tế–xã hội độc lập" in out
+        assert "Mốc 6.1 là quy tắc hồi cứu" in out
+        assert "chuẩn tham chiếu bền vững" not in out
+        assert "vượt chuẩn" not in out
         assert "<script>" not in out
         assert "https://" not in out
 

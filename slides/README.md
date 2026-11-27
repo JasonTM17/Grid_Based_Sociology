@@ -1,6 +1,6 @@
 # Slide bảo vệ STING trên dữ liệu PAPI
 
-[Nhom15_STING_PAPI.pptx](Nhom15_STING_PAPI.pptx) gồm 15 trang khổ 16:9, có ghi chú
+[Nhom15_STING_PAPI.pptx](Nhom15_STING_PAPI.pptx) gồm 12 trang khổ 16:9, có ghi chú
 thuyết trình và nguồn cho từng trang. Văn bản, bảng và biểu đồ chính là đối tượng
 PowerPoint có thể chỉnh sửa. Nội dung dự kiến trình bày trong 15 phút, thêm 5 phút
 hỏi đáp. Xem [kịch bản theo từng slide](../reports/on-tap/presentation_script.md).
@@ -9,13 +9,25 @@ hỏi đáp. Xem [kịch bản theo từng slide](../reports/on-tap/presentation
 
 | Slide | Chủ đề |
 |---:|---|
-| 1 | Đề tài và nhóm thực hiện |
-| 2–3 | Bài toán, nguồn dữ liệu, mẫu số và tiền xử lý theo thời gian |
-| 4–6 | Cơ chế STING, cụm trên 808 quan sát lịch sử và đối chứng cùng mẫu |
-| 7–9 | Quan sát 2024, bảng 63 tỉnh, dịch chuyển trên 59 tỉnh và ca Lạng Sơn |
-| 10 | Dự báo hai chỉ tiêu, baseline và giới hạn hồi kiểm |
-| 11–12 | Đối chiếu với nguồn ngoài và độ bền của kết quả |
-| 13–15 | Demo, kết luận và cảm ơn |
+| 1 | Đề tài, câu hỏi phân tích, mục tiêu và nhóm thực hiện |
+| 2 | Hai chỉ tiêu PAPI, 882 × 41, dữ liệu thiếu, thang đo và tiền xử lý theo thời gian |
+| 3 | Cơ chế gom ô dày STING, ví dụ 3 × 3 và kiểm chứng 240 điểm giả lập |
+| 4 | Phân bố cụm trên 808 quan sát lịch sử và giới hạn cụm lớn chiếm ưu thế |
+| 5 | Đối chứng STING, K-means, DBSCAN trên cùng mẫu và bất biến z-score |
+| 6 | Đồ thị quan sát 2024 cùng bảng mô tả đủ 63 tỉnh |
+| 7 | Dịch chuyển trên 59 tỉnh và truy vết ca Lạng Sơn |
+| 8 | Dự báo Ridge, baseline, 0/11 trường hợp ngoài vùng và phạm vi phân loại nhãn STING |
+| 9 | Đối chiếu PCI, GRDP, ODM và nghèo; giới hạn suy luận thống kê |
+| 10 | Độ bền PCA/8D khi thay biểu diễn hoặc tham số |
+| 11 | Sản phẩm bàn giao và một ca demo có thể truy vết |
+| 12 | Kết luận, giới hạn, bước tiếp theo và hỏi đáp |
+
+Bản 12 trang gộp dữ liệu với tiền xử lý, đặt đồ thị 2024 cạnh bảng 63 tỉnh và
+đưa lời cảm ơn vào trang kết luận. Các số liệu, mẫu số và giới hạn chính vẫn
+hiển thị. Chi tiết kiểm định, tham số, nguồn và các classifier theo học phần
+nằm trong ghi chú của từng trang để dùng khi bảo vệ. Hai biểu đồ và mười bảng
+đều là đối tượng PowerPoint có thể chỉnh sửa; hai biểu đồ có workbook dữ liệu
+nhúng.
 
 ## Tái tạo bản đã chốt
 
@@ -54,7 +66,7 @@ Nhánh này tự nhúng hai workbook Excel vào biểu đồ và đối chiếu 
 dữ liệu hiển thị trước khi ghi tệp đích. Các bảng, biểu đồ và dữ liệu biểu đồ vẫn
 có thể chỉnh sửa trong PowerPoint; không cần bước đóng gói workbook riêng.
 
-Kiểm tra toàn bộ 15 trang, số liệu, chú thích và ghi chú sau khi dựng. Khi bản mới
+Kiểm tra toàn bộ 12 trang, số liệu, chú thích và ghi chú sau khi dựng. Khi bản mới
 đã được duyệt, lưu mẫu và đồng bộ lại gói nộp:
 
 ```bash

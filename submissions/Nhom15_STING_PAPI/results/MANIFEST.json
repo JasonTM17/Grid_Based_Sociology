@@ -5,20 +5,20 @@
   "files": [
     {
       "path": "DEMO.md",
-      "bytes": 10266,
-      "sha256": "730629a85f5995f60434fbd76def556047ad883e573e7d9771da08b73771eaf1",
+      "bytes": 11346,
+      "sha256": "b86230f738ae523f12466a05221397181ca70b16293ed1d36ba25055f79abe98",
       "role": "Kịch bản demo và cách đọc kết quả; đường dẫn tài liệu gốc được đối chiếu trong HUONG_DAN.txt"
     },
     {
       "path": "HUONG_DAN.txt",
-      "bytes": 5747,
-      "sha256": "09087dfa82e445402b092027db078f26035d9cde75abde7f5556b970f0d60d5a",
+      "bytes": 6282,
+      "sha256": "db93b465472db96d4ceda0341126fc7652352faf05a4caa4e15b91dc295df564",
       "role": "Hướng dẫn mở và chạy lại đồ án"
     },
     {
       "path": "Nhom15_BaoCao_STING_PAPI.docx",
-      "bytes": 3015815,
-      "sha256": "3e07d7372e58f85505aac350556e60010c4cfdeb11e612e9e0454d9240210314",
+      "bytes": 3075127,
+      "sha256": "3b66283bc570df9e4939d4ec8038a09e3bfeda1bd659e38c3fb69161b8e79e67",
       "role": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)"
     },
     {
@@ -29,9 +29,9 @@
     },
     {
       "path": "Nhom15_STING_PAPI.pptx",
-      "bytes": 91296,
-      "sha256": "9dee36e264b026c93308bf6a98fcf36eee6c715acee0d86fa65b6b760c899473",
-      "role": "Slide trình bày thống nhất (15 trang 16:9 kèm ghi chú)"
+      "bytes": 90210,
+      "sha256": "2aee921f3ff58c765fd73a3195b4fb8a37460553a3904b5a89c56c839c3f6f9d",
+      "role": "Slide trình bày thống nhất (12 trang 16:9 kèm ghi chú)"
     },
     {
       "path": "Nhom15_TienXuLy_PAPI.ipynb",
@@ -41,8 +41,8 @@
     },
     {
       "path": "app.py",
-      "bytes": 74411,
-      "sha256": "2a59e6b4c9d0f164798a06623599d1da90dc6b4a9cddef71ccae5dff42cd9017",
+      "bytes": 76332,
+      "sha256": "1c36068975b955a8523b36c2e9f68e0ff1836a0911cd5b7b14ad75f7195dfa4d",
       "role": "Ứng dụng dashboard Streamlit tương tác (6 tab, gồm Thống kê khách hàng)"
     },
     {
@@ -328,10 +328,22 @@
       "role": "Mô hình, scaler, cấu hình đóng băng và hướng dẫn"
     },
     {
+      "path": "reports/ban-giao-khach-hang-2024.md",
+      "bytes": 7586,
+      "sha256": "ce96b3d825448d4fc9fa3d81588db9fabb49d5614d7c231969f32313246dfc12",
+      "role": "Phạm vi, ý nghĩa và giới hạn của bảng bàn giao 63 tỉnh"
+    },
+    {
       "path": "reports/crosscheck_mendeley.md",
       "bytes": 571,
       "sha256": "deccebdf869ec76af3a1465063298dae0abf353b746b71e56bd89ae7a351275e",
       "role": "Kết quả đối chiếu PAPI với Mendeley"
+    },
+    {
+      "path": "reports/customer_guide.md",
+      "bytes": 13043,
+      "sha256": "bc9750ed6245922c91c0843535aef1b55b874f6b9ff87306de4b0e96509131b9",
+      "role": "Hướng dẫn khách hàng mở dashboard, đọc nhóm tỉnh và xuất kết quả"
     },
     {
       "path": "reports/external_data_expansion.md",
@@ -749,8 +761,8 @@
     },
     {
       "path": "scripts/analysis/client_product.py",
-      "bytes": 19997,
-      "sha256": "a6cbf16237592b33c31db9273f2cb2bff9212a72bd30ba02ef1c7daa606893b9",
+      "bytes": 24377,
+      "sha256": "7b55ad84cf51ca7f72dd8021de6e54b28a532054765c2aae9dcd895ad92abe51",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -894,7 +906,7 @@
     {
       "path": "scripts/deliverables/demo_smoke.py",
       "bytes": 6704,
-      "sha256": "e1106f980283ce4ab682decd78c2538a4d1a5fe160e8648cdeab5abdcfb13e67",
+      "sha256": "9f75238ab566f109cb0cab996fbb4832d59ca9fbc5544675f08b4a69c102a04a",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {

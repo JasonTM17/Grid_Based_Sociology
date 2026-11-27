@@ -17,12 +17,12 @@ cấu trúc lưới thống kê và phép truy vấn phân cấp. Đồ án dùn
 
 ## Hồ sơ nộp & Thống kê bàn giao khách hàng
 
-Toàn bộ sản phẩm giữa kỳ và cuối kỳ đã được gộp thành **một bộ đồ án hoàn thiện, đồng nhất** trong [`submissions/`](submissions/) (đã bỏ các bản chia tách và thư mục `study/`). Các notebook và báo cáo đều đã lưu sẵn đầu ra để mở xem ngay.
+Bộ hồ sơ trong [`submissions/`](submissions/) gồm báo cáo Word, 12 slide, hai notebook và các tệp dữ liệu, mã nguồn cần để chạy lại. Các notebook đã lưu kết quả để mở xem và đối chiếu với báo cáo.
 
 | Thành phần | Tệp chuẩn trong repo | Bản đồng bộ đóng gói & chạy lại |
 |---|---|---|
 | Báo cáo Word (DOCX) | [`reports/Nhom15_BaoCao_STING_PAPI.docx`](reports/Nhom15_BaoCao_STING_PAPI.docx) | [`submissions/Nhom15_STING_PAPI/Nhom15_BaoCao_STING_PAPI.docx`](submissions/Nhom15_STING_PAPI/Nhom15_BaoCao_STING_PAPI.docx) |
-| Slide trình bày (15 trang) | [`slides/Nhom15_STING_PAPI.pptx`](slides/Nhom15_STING_PAPI.pptx) | [`submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx`](submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx) |
+| Slide trình bày (12 trang) | [`slides/Nhom15_STING_PAPI.pptx`](slides/Nhom15_STING_PAPI.pptx) | [`submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx`](submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx) |
 | Notebook phân tích chính | [`notebooks/Nhom15_STING_PAPI.ipynb`](notebooks/Nhom15_STING_PAPI.ipynb) | [`submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.ipynb`](submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.ipynb) |
 | Notebook tiền xử lý PAPI | [`notebooks/Nhom15_TienXuLy_PAPI.ipynb`](notebooks/Nhom15_TienXuLy_PAPI.ipynb) | [`submissions/Nhom15_STING_PAPI/Nhom15_TienXuLy_PAPI.ipynb`](submissions/Nhom15_STING_PAPI/Nhom15_TienXuLy_PAPI.ipynb) |
 | Gói ZIP tự chứa toàn đồ án | [`submissions/Nhom15_STING_PAPI.zip`](submissions/Nhom15_STING_PAPI.zip) | [`HUONG-DAN.txt`](submissions/HUONG-DAN.txt) · [`SHA256SUMS.txt`](submissions/SHA256SUMS.txt) |
@@ -48,7 +48,11 @@ outputs đã lưu và checksum; dùng `nbconvert --execute` để thực thi l�
 
 Tên nhóm lưu trong CSV/Excel hiện gồm “Biên bứt phá vượt chuẩn”, “Vùng lõi ổn định (Cụm 2)” và “Ưu tiên cải thiện Y tế 6.1”. Đây là nhãn diễn giải của sản phẩm; cách hiểu đúng là các nhóm mô tả ở trên. Mốc `6.1 = 1.8791` tính từ 48 tỉnh trong vùng dày năm 2024, là quy tắc rà soát hồi cứu, không phải ngưỡng đã được kiểm chứng trước năm 2024.
 
-Slide trình bày có **15 trang**: bài toán và tiền xử lý (2–3), cơ chế STING và cụm lịch sử (4–5), đối chứng trên cùng tập điểm (6), quan sát 2024 và bảng 63 tỉnh (7–8), dịch chuyển và Lạng Sơn (9), dự báo bổ trợ (10), đối chiếu nguồn ngoài và độ bền (11–12), demo (13), kết luận (14) và cảm ơn (15). Kịch bản dự kiến 15 phút trình bày, thêm 5 phút hỏi đáp.
+Bộ trình bày gồm **12 slide**: đề tài và mục tiêu (1), dữ liệu và tiền xử lý (2), cơ chế STING và kiểm chứng giả lập (3), kết quả lịch sử (4), đối chứng thuật toán và z-score (5), quan sát 2024 và bảng bàn giao 63 tỉnh (6), dịch chuyển và Lạng Sơn (7), dự báo và bài toán có giám sát (8), đối chiếu nguồn ngoài (9), độ bền và giới hạn (10), demo bàn giao (11), kết luận và hỏi đáp (12). Kịch bản dự kiến 15 phút trình bày, thêm 5 phút hỏi đáp.
+
+### Hướng dẫn cho người nhận bàn giao
+
+Đọc [hướng dẫn sử dụng dashboard](reports/customer_guide.md) để cài môi trường, lọc tỉnh và xuất bảng hoặc phiếu rà soát. [Tài liệu bàn giao 2024](reports/ban-giao-khach-hang-2024.md) giải thích các nhóm, mẫu số và giới hạn diễn giải. Hai tài liệu đều có trong ZIP.
 
 ### Đọc đúng mẫu số và loại thực nghiệm
 
@@ -76,10 +80,10 @@ Grid_Based_Sociology/
 │   ├── supervised/            #   Hồi quy & phân loại đối chứng theo nội dung môn học
 │   ├── figures/               #   Sinh hình phân tích & sơ đồ lưới
 │   ├── notebooks/             #   Sinh bộ đôi notebook thống nhất
-│   ├── deliverables/          #   Sinh báo cáo Word, slide PPTX 15 trang, ZIP thống nhất & smoke test
+│   ├── deliverables/          #   Sinh báo cáo Word, slide PPTX 12 trang, ZIP thống nhất & smoke test
 │   └── common/                #   Hàm dùng chung (fig_style, midterm_clustering, ...)
 ├── notebooks/                 # Hai notebook thống nhất (Nhom15_STING_PAPI & Nhom15_TienXuLy_PAPI)
-├── slides/                    # Slide PowerPoint thống nhất (Nhom15_STING_PAPI.pptx — 15 trang)
+├── slides/                    # Slide PowerPoint thống nhất (Nhom15_STING_PAPI.pptx — 12 trang)
 ├── reports/                   # Báo cáo Word thống nhất (Nhom15_BaoCao_STING_PAPI.docx) & hồ sơ kỹ thuật
 │   └── on-tap/                #   Hỏi đáp, phản hồi giữa kỳ và kịch bản thuyết trình
 ├── submissions/               # Sản phẩm đóng gói thống nhất
@@ -98,7 +102,7 @@ Grid_Based_Sociology/
 |---|---|
 | Gửi bài hoặc chạy lại toàn đồ án | `submissions/Nhom15_STING_PAPI/` hoặc gói tự chứa `submissions/Nhom15_STING_PAPI.zip`. |
 | Xem thuật toán và cách chạy | `src/` chứa STING tự cài đặt. [`scripts/`](scripts/README.md) chia theo chức năng; chạy từ thư mục gốc, ví dụ `python scripts/data/check_data.py`. |
-| Xem thống kê bàn giao 63 tỉnh | `python scripts/analysis/stakeholder_summary.py`, bảng `results/stakeholder_province_summary_2024.csv` hoặc chạy `app.py` ở tab **Thống kê khách hàng** (kèm bản đồ Choropleth 63 tỉnh & xuất Phiếu chẩn đoán từng tỉnh từ `scripts/analysis/client_product.py`). |
+| Xem thống kê bàn giao 63 tỉnh | `python scripts/analysis/stakeholder_summary.py`, bảng `results/stakeholder_province_summary_2024.csv` hoặc chạy `app.py` ở tab **Thống kê khách hàng** (kèm bản đồ Choropleth 63 tỉnh & xuất Phiếu rà soát tỉnh từ `scripts/analysis/client_product.py`). |
 | Tìm dữ liệu | [`data/`](data/README.md): `data/raw/` chứa workbook và nguồn tham chiếu; `data/processed/` chứa panel PAPI và dữ liệu đã xử lý. |
 | Xem kết quả đã lưu | `models/` chứa model và cấu hình. [`results/`](results/README.md) chứa bảng CSV/MD/JSON, Excel và hình `figs/`. |
 | Tái tạo bài nộp & ôn tập | [`notebooks/`](notebooks/README.md), `slides/` và [`reports/`](reports/README.md) chứa bộ đôi notebook, slide, báo cáo nguồn và tài liệu ôn tập. |
@@ -138,11 +142,11 @@ python -m pytest tests -q
 # Lint (tùy chọn): python -m pip install -r requirements-dev.txt
 python -m ruff check .
 
-# Kiểm tra dữ liệu (sau khi panel được tạo ở Phase 2)
+# Kiểm tra panel PAPI đã lưu
 python scripts/data/check_data.py
 ```
 
-Ghi chú: `jupyter` CLI chưa vào PATH — dùng `python -m jupyter` / `python -m nbconvert`.
+Nếu lệnh `jupyter` chưa có trong PATH, dùng `python -m jupyter` hoặc `python -m nbconvert`.
 
 ## Đối chiếu nội dung môn học
 
@@ -159,7 +163,7 @@ Bảng liên kết các nội dung học máy với mã nguồn, kết quả và
 | Tiền xử lý PAPI (làm sạch, tích hợp và chuẩn hóa) | Mô-đun `src/preprocessing.py` (`PREPROCESSING_PIPELINE` 6 bước, đọc trực tiếp 14 workbook PAPI + thử nghiệm Cleaning/Transformation) được nhập trực tiếp vào `notebooks/Nhom15_TienXuLy_PAPI.ipynb` và `notebooks/Nhom15_STING_PAPI.ipynb` (§2). `scripts/data/preprocessing_audit.py` và `scripts/data/preprocessing_sensitivity.py` tạo bảng kiểm tra và đối chiếu độ nhạy. |
 | Linear, Polynomial & Logistic Regression | Phụ lục B của `notebooks/Nhom15_STING_PAPI.ipynb` (OLS residual $\varepsilon_i$, đa thức $m \le n$, Sigmoid & Binary Cross-Entropy) |
 | K-Means, TRAP, Linkage & Dendrogram vs STING | Mục 1–3 & Phụ lục C của `notebooks/Nhom15_STING_PAPI.ipynb` (sơ đồ lưới 3×3, phản biện nhiễu `−1`, đối chứng K-Means/DBSCAN, Elbow/Silhouette & dendrogram phân cấp) |
-| Thống kê bàn giao khách hàng (63 tỉnh) | `scripts/analysis/stakeholder_summary.py`, Mục 5 của `notebooks/Nhom15_STING_PAPI.ipynb`, Mục 5.8 báo cáo Word & Slide 8–9 |
+| Thống kê bàn giao khách hàng (63 tỉnh) | `scripts/analysis/stakeholder_summary.py`, Mục 5 của `notebooks/Nhom15_STING_PAPI.ipynb`, Mục 5.8 báo cáo Word & Slide 6–7 |
 | Q&A thi / vấn đáp theo slide | `reports/on-tap/qa_course_concepts.md`, `reports/on-tap/qa_midterm.md`, `reports/on-tap/qa_final.md` |
 
 Tái tạo audit và bảng classifier (nếu artifact cũ):
@@ -184,7 +188,7 @@ python scripts/analysis/stakeholder_summary.py --with-excel
 python scripts/figures/forecast_papi_grid.py
 python scripts/notebooks/gen_final_analysis.py
 
-# Báo cáo Word, cập nhật mục lục/danh mục và slide 15 trang
+# Báo cáo Word, cập nhật mục lục/danh mục và slide 12 trang
 python scripts/deliverables/build_report.py
 python scripts/deliverables/update_report_fields.py
 python scripts/deliverables/build_slides.py
@@ -197,7 +201,7 @@ python scripts/deliverables/build_submission_packages.py --verify
 Lệnh dựng slide mặc định tái tạo bản đã duyệt sau khi kiểm tra lại dữ liệu. Khi đổi dữ liệu hoặc bố cục, xem [hướng dẫn tái sinh slide](slides/README.md). Trình cập nhật trường Word hỗ trợ Word trên Windows và đường LibreOffice trên Linux; không cần tự điền số trang.
 
 ZIP lấy các bản gốc trong `notebooks/`, `slides/` và `reports/`, đồng thời đồng bộ 1-1 ra thư mục `submissions/Nhom15_STING_PAPI/`.
-Slide 7–9 và mục 4–5 của `Nhom15_STING_PAPI.ipynb` cùng đọc kết quả quan sát 2024, ví dụ Lạng Sơn và thống kê 63 tỉnh; slide 15 dành để cảm ơn. Khi cập nhật panel, chạy `python scripts/analysis/predict_demo.py` và `python scripts/analysis/stakeholder_summary.py --with-excel` trước khi tạo lại notebook, báo cáo và slide.
+Slide 6–7 và mục 4–5 của `Nhom15_STING_PAPI.ipynb` cùng đọc kết quả quan sát 2024, ví dụ Lạng Sơn và thống kê 63 tỉnh; slide 12 gộp kết luận, lời cảm ơn và hỏi đáp. Khi cập nhật panel, chạy `python scripts/analysis/predict_demo.py` và `python scripts/analysis/stakeholder_summary.py --with-excel` trước khi tạo lại notebook, báo cáo và slide.
 
 Gói mặc định có đủ Word, slide, hai notebook, mã nguồn, 14 workbook PAPI và dữ liệu để chạy lại. ZIP Mendeley được kèm nếu có sẵn. [PDF báo cáo PAPI gốc](data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf) vẫn được giữ trong repo; để giảm dung lượng nộp bài, tài liệu tham khảo này chỉ được đưa vào ZIP khi chọn:
 
@@ -314,7 +318,7 @@ khi học xuyên năm trên panel.
 
 ## Khai báo sử dụng công cụ hỗ trợ
 
-Nhóm sử dụng trợ lý AI lập trình cho một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, rà soát nội dung và bố cục Word/PowerPoint, kiểm thử và chạy thử kỹ thuật chuẩn bị demo (`reports/on-tap/rehearsal_log.md` mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Hai thành viên chịu trách nhiệm rà soát nguồn, chạy lại kết quả và giải thích phương pháp, lựa chọn cấu hình cùng giới hạn của đồ án. Nhóm ghi nhận việc sử dụng công cụ hỗ trợ và chịu trách nhiệm về nội dung bài nộp.
+Nhóm sử dụng trợ lý AI lập trình cho một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, rà soát nội dung và bố cục Word/PowerPoint, kiểm thử và chạy thử kỹ thuật chuẩn bị demo. Mục A của `reports/on-tap/rehearsal_log.md` mô tả các lệnh kiểm tra và nơi đối chiếu kết quả; không xác nhận hai thành viên đã luyện thuyết trình hoặc hỏi đáp. Hai thành viên chịu trách nhiệm rà soát nguồn, chạy lại kết quả và giải thích phương pháp, lựa chọn cấu hình cùng giới hạn của đồ án. Nhóm ghi nhận việc sử dụng công cụ hỗ trợ và chịu trách nhiệm về nội dung bài nộp.
 
 ## Giấy phép
 

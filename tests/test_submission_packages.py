@@ -101,6 +101,8 @@ def test_unified_archive_includes_all_dependencies_and_excludes_private_material
         "results/future_work_trajectory.csv",
         "results/figs/future_work_overview.png",
         "reports/external_data_expansion.md",
+        "reports/customer_guide.md",
+        "reports/ban-giao-khach-hang-2024.md",
         "data/processed/papi_panel_v1_LOCKED.csv",
         "results/figs/stakeholder_quadrants_2024.png",
         "results/figs/00_synthetic_sting.png",
@@ -142,6 +144,7 @@ def test_unified_archive_includes_all_dependencies_and_excludes_private_material
         assert f"--execute {PREPROCESSING_NOTEBOOK}" in guide
         assert "Kính gửi Thầy Lê Minh Tân" in guide
         assert "streamlit run app.py" in guide
+        assert "reports/customer_guide.md" in guide
         assert archive.read(f"{PACKAGE_NAME}/{REPORT_NAME}") == (ROOT / "reports" / REPORT_NAME).read_bytes()
         assert archive.read(f"{PACKAGE_NAME}/{SLIDES_NAME}") == (ROOT / "slides" / SLIDES_NAME).read_bytes()
         assert archive.read(f"{PACKAGE_NAME}/{ANALYSIS_NOTEBOOK}") == (ROOT / "notebooks" / ANALYSIS_NOTEBOOK).read_bytes()
@@ -166,7 +169,7 @@ def test_demo_command_runs_from_extracted_zip_and_detects_changed_evidence(unifi
     result = run_demo()
     assert result.returncode == 0, result.stdout + result.stderr
     assert "[PASS] checksum goi giai nen" in result.stdout
-    assert "[PASS] Nhom15_STING_PAPI.pptx mo duoc 15 trang" in result.stdout
+    assert "[PASS] Nhom15_STING_PAPI.pptx mo duoc 12 trang" in result.stdout
     evidence = package / "results/future_work_rank.csv"
     evidence.write_bytes(evidence.read_bytes() + b"\nchanged evidence\n")
     result = run_demo()

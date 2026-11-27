@@ -16,7 +16,7 @@
 
 4. **Notebook đang dùng dữ liệu nào?** Có ba ví dụ. Lưới 3 × 3 được dựng từ 15 điểm để thấy từng bước tạo cụm. Bộ 240 điểm giả lập có hai nhóm tham chiếu. Phần ứng dụng dùng dữ liệu PAPI thật (gắn kèm bảng thống kê 63 tỉnh). (nguồn: scripts/notebooks/gen_final_analysis.py)
 
-5. **Đã có dữ liệu thật thì trình bày ra sao?** Dùng ví dụ nhỏ 3×3 để giải thích cơ chế thuật toán, giới thiệu PAPI thật (869 quan sát) và chốt lại bằng bảng thống kê bàn giao 63 tỉnh cho khách hàng (Slide 8–9). (nguồn: reports/course_requirements.md)
+5. **Đã có dữ liệu thật thì trình bày ra sao?** Dùng ví dụ nhỏ 3×3 để giải thích cơ chế thuật toán, giới thiệu PAPI thật (869 quan sát) và chốt lại bằng bảng thống kê bàn giao 63 tỉnh cho khách hàng (slide 6–7). (nguồn: reports/course_requirements.md)
 
 ## Giải thích ví dụ lưới 3 × 3
 
@@ -67,7 +67,7 @@
 
 22. **Đổi kề 8 hướng (`connectivity=2`) có giảm được điểm nhiễu không?** Không. `connectivity=2` nối qua góc chỉ gộp `56` ô dày từ `3` cụm thành `1` cụm duy nhất, còn số điểm nhiễu vẫn giữ nguyên `171/869` (`19,7%`) vì quy tắc đếm `count ≥ 5` của từng ô không đổi. Nhiễu chỉ đổi khi thay ngưỡng `min_count` (`3 → 9,8%`, `8 → 31,2%`) hoặc thay mức lưới (`4 × 4 → 0,7%`). (nguồn: src/sting.py; scripts/notebooks/gen_final_analysis.py)
 
-23. **Khi thầy hỏi chỉ nhanh các sơ đồ từng bước trên đồ thị 2D thì mở ở đâu?** Mở trực tiếp **Slide 4–9** (`slides/Nhom15_STING_PAPI.pptx`) và notebook thống nhất `Nhom15_STING_PAPI.ipynb`: (1) **Mục 1** — tiến trình 4 bước STING trên lưới `3 × 3` & `240` điểm Gauss; (2) **Mục 3.1** — lưới phân cấp 3 mức (`1×1 → 4×4 → 16×16`) + biểu đồ 3 panel bẫy nhiễu `−1`; (3) **Mục 3.2** — Elbow K-Means, đối chiếu K-Means/DBSCAN, bất biến z-score & 4 panel độ nhạy tham số; (4) **Mục 5 & Slide 8–9** — biểu đồ 4 vùng hành động bàn giao 63 tỉnh (`stakeholder_quadrants_2024.png`). [Notebook thống nhất](../../notebooks/Nhom15_STING_PAPI.ipynb)
+23. **Khi thầy hỏi chỉ nhanh các sơ đồ từng bước trên đồ thị 2D thì mở ở đâu?** Mở trực tiếp **slide 3–7** (`slides/Nhom15_STING_PAPI.pptx`) và notebook thống nhất `Nhom15_STING_PAPI.ipynb`: (1) **Mục 1** — tiến trình 4 bước STING trên lưới `3 × 3` & `240` điểm Gauss; (2) **Mục 3.1** — lưới phân cấp 3 mức (`1×1 → 4×4 → 16×16`) + biểu đồ 3 panel bẫy nhiễu `−1`; (3) **Mục 3.2** — Elbow K-Means, đối chiếu K-Means/DBSCAN, bất biến z-score & 4 panel độ nhạy tham số; (4) **Mục 5 & slide 6–7** — biểu đồ 4 vùng hành động bàn giao 63 tỉnh (`stakeholder_quadrants_2024.png`). [Notebook thống nhất](../../notebooks/Nhom15_STING_PAPI.ipynb)
 
 ## Mở tài liệu thống nhất
 

@@ -1,8 +1,9 @@
 """Apply the measured user reference style without recomputing report content.
 
 The shared formatter is used by build_report.py and can update the existing
-DOCX while retaining populated Word fields. Reference measurements are in
-reports/report_format_notes.md; the other course's DOCX is not a dependency.
+DOCX while retaining populated Word fields. The cover follows the teacher's
+Report-proj.pdf.docx; measured body styles remain in reports/report_format_notes.md.
+The original template is not required to rebuild the report.
 """
 from __future__ import annotations
 
@@ -63,7 +64,7 @@ def _format_table(table):
         if item is None:
             item = OxmlElement(f"w:{edge}")
             borders.append(item)
-        for attribute, value in {"val": "single", "sz": "4", "color": "D9D9D9"}.items():
+        for attribute, value in {"val": "single", "sz": "4", "color": "000000"}.items():
             item.set(qn(f"w:{attribute}"), value)
     for row_index, row in enumerate(table.rows):
         row.height = None
@@ -90,11 +91,13 @@ def _format_table(table):
                     margins.append(item)
                 item.set(qn("w:w"), str(value))
                 item.set(qn("w:type"), "dxa")
-            if row_index == 0:
-                shade = OxmlElement("w:shd")
-                shade.set(qn("w:val"), "clear")
-                shade.set(qn("w:fill"), "D9E2F3")
-                props.insert_element_before(shade, "w:tcMar", "w:vAlign")
+            # Explicit white cells prevent table-style or theme banding from
+            # restoring colored fills when the report is opened in Word.
+            shade = OxmlElement("w:shd")
+            shade.set(qn("w:val"), "clear")
+            shade.set(qn("w:color"), "auto")
+            shade.set(qn("w:fill"), "FFFFFF")
+            props.insert_element_before(shade, "w:tcMar", "w:vAlign")
             for paragraph in cell.paragraphs:
                 fmt = paragraph.paragraph_format
                 fmt.space_before = fmt.space_after = Pt(1)
@@ -119,7 +122,7 @@ def _set_page(section, *, cover=False):
 
 
 def replace_cover(document):
-    """Insert the actual reference blocks with their report-specific text."""
+    """Insert the teacher's cover layout with the project's verified metadata."""
     cover = parse_xml(COVER_XML.read_bytes())
     border = cover.find(qn("w:pgBorders"))
     blip = cover.find(".//" + qn("a:blip"))
@@ -131,6 +134,14 @@ def replace_cover(document):
         raise ValueError("Missing cover section boundary; refusing to replace report body.")
     _set_page(document.sections[0], cover=True)
     section_properties = marker._p.pPr.find(qn("w:sectPr"))
+    # The teacher's cover has its own margins; do not change the report body.
+    for name in ("pgSz", "pgMar"):
+        source = cover.find(qn(f"w:{name}"))
+        target = section_properties.find(qn(f"w:{name}"))
+        if source is None or target is None:
+            raise ValueError(f"Missing {name} in the cover template or section.")
+        target.attrib.clear()
+        target.attrib.update(source.attrib)
     old_border = section_properties.find(qn("w:pgBorders"))
     if old_border is not None:
         section_properties.remove(old_border)
@@ -139,6 +150,13 @@ def replace_cover(document):
     blip.set(qn("r:embed"), relationship)
     drawing = cover.find(".//" + qn("wp:docPr"))
     drawing.set("id", str(document.part.next_id))
+    # Keep the empty section-break paragraph from adding a visible blank line.
+    spacing = marker._p.pPr.find(qn("w:spacing"))
+    if spacing is None:
+        spacing = OxmlElement("w:spacing")
+        marker._p.pPr.insert_element_before(spacing, "w:ind", "w:jc", "w:sectPr")
+    for name, value in {"before": "0", "after": "0", "line": "20", "lineRule": "exact"}.items():
+        spacing.set(qn(f"w:{name}"), value)
     parent = document._element.body
     while parent[0] is not marker._p:
         parent.remove(parent[0])

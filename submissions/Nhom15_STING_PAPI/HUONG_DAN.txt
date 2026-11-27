@@ -16,7 +16,7 @@ Sinh viên thực hiện:
 --------------------------------------------------------------------------------
 Nhom15_STING_PAPI/
 ├── Nhom15_BaoCao_STING_PAPI.docx       Báo cáo đồ án (Word có mục lục và danh mục tự động)
-├── Nhom15_STING_PAPI.pptx              Slide thuyết trình 15 trang 16:9 kèm ghi chú
+├── Nhom15_STING_PAPI.pptx              Slide thuyết trình 12 trang 16:9 kèm ghi chú
 ├── Nhom15_STING_PAPI.ipynb             Notebook phân tích STING × PAPI & Thống kê khách hàng
 ├── Nhom15_TienXuLy_PAPI.ipynb          Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc
 ├── app.py                              Dashboard Streamlit (chạy: streamlit run app.py)
@@ -24,7 +24,7 @@ Nhom15_STING_PAPI/
 ├── HUONG_DAN.txt                       Tệp hướng dẫn này
 ├── src/                                Mã nguồn lõi STING & tiền xử lý
 ├── scripts/                            Script tái lập panel, phân tích, dự báo & khách hàng
-├── reports/                            Tài liệu phụ (panel_lock, crosscheck_mendeley, model_deep_dive)
+├── reports/                            Hướng dẫn khách hàng, nguồn dữ liệu và phân tích bổ sung
 ├── data/                               14 workbook PAPI gốc, Mendeley & nguồn đối chiếu ngoài
 ├── models/                             Cấu hình, scaler & model đã khóa
 └── results/                            Bảng CSV/MD/Excel (KetQua_STING_PAPI.xlsx) & hình PNG
@@ -38,13 +38,21 @@ Tùy chọn --include-reference-pdf của script đóng gói trong repo tạo g�
 
 2. CHẠY LẠI ĐỘC LẬP TRÊN MÁY KHÁC
 --------------------------------------------------------------------------------
-Giải nén toàn bộ ZIP và mở terminal tại thư mục Nhom15_STING_PAPI/:
+Giải nén toàn bộ ZIP và mở terminal tại thư mục Nhom15_STING_PAPI/.
+Dùng Python 3.14; kiểm tra bằng python --version. Tạo môi trường riêng với
+python -m venv .venv, kích hoạt môi trường hoặc dùng trực tiếp trình thông dịch
+trong .venv. Hướng dẫn theo Windows/Linux/macOS: reports/customer_guide.md.
+Sau đó chạy:
 
 python -m pip install -r requirements.txt
 python scripts/deliverables/demo_smoke.py
 python -m nbconvert --to notebook --execute Nhom15_TienXuLy_PAPI.ipynb --output Nhom15_TienXuLy_PAPI_chay_lai
 python -m nbconvert --to notebook --execute Nhom15_STING_PAPI.ipynb --output Nhom15_STING_PAPI_chay_lai
 python -m streamlit run app.py
+
+Hướng dẫn sử dụng dashboard: reports/customer_guide.md.
+Ý nghĩa các nhóm, mẫu số và giới hạn: reports/ban-giao-khach-hang-2024.md.
+Hai tài liệu này đi kèm trong ZIP; có thể đọc trước khi mở ứng dụng.
 
 3. TÁI LẬP SỐ LIỆU & THỐNG KÊ KHÁCH HÀNG TỪ DỮ LIỆU GỐC
 --------------------------------------------------------------------------------

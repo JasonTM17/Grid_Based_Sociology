@@ -1,4 +1,4 @@
-"""Build the editable 15-slide Vietnamese STING–PAPI defense deck.
+"""Build the editable 12-slide Vietnamese STING–PAPI defense deck.
 
 Python reads the committed evidence and recomputes the shared-sample comparison.
 The companion ES module authors native PowerPoint tables/charts with
@@ -44,7 +44,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from sting import STING  # noqa: E402
 
 OUT = ROOT / "slides" / "Nhom15_STING_PAPI.pptx"
-SLIDE_COUNT = 15
+SLIDE_COUNT = 12
 
 
 def _records(frame: pd.DataFrame) -> list[dict]:
@@ -156,10 +156,12 @@ def build_evidence() -> dict:
         "results/papi_forecast_2024.json", "results/robustness.csv", "results/protocol_sensitivity.md",
         "results/external_validation.csv", "results/external_validation.md", "results/poverty_validation.csv",
         "results/preprocessing_audit.csv", "results/metrics.csv", "results/predict_summary.md",
+        "results/course_supervised_baselines.csv", "results/course_supervised_baselines.md",
         "reports/crosscheck_mendeley.md", "data/processed/papi_panel_scale_metadata.csv",
         "data/processed/external_gso_grdp_63.csv", "data/processed/external_gso_population_63_full.csv",
         "data/processed/external_odm_health_63.csv", "scripts/common/midterm_clustering.py",
         "scripts/common/papi_forecast.py", "scripts/analysis/predict_sweep.py",
+        "app.py", "scripts/analysis/client_product.py", "reports/customer_guide.md",
     ]
     source_sha256 = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in source_paths}
     payload = {"slide_count": SLIDE_COUNT, "config": config, "external_checks": external_checks,
@@ -177,7 +179,8 @@ def build_evidence() -> dict:
                "core_lower_n": int(core.sd_6_1.lt(lower).sum()),
                "stable_names": stake.loc[stake.years_cluster2_2011_2024.eq(14), "province_vi"].tolist(),
                "forecast": json.loads((ROOT / "results/papi_forecast_2024.json").read_text(encoding="utf-8")),
-               "robustness": _records(pd.read_csv(ROOT / "results/robustness.csv"))}
+               "robustness": _records(pd.read_csv(ROOT / "results/robustness.csv")),
+               "course_baselines": _records(pd.read_csv(ROOT / "results/course_supervised_baselines.csv"))}
     if sum(g["n"] for g in groups) != 63 or len(observed) != 63:
         raise ValueError("The provincial reporting universe must contain 63 rows")
     return payload
