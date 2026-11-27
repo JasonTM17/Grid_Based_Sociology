@@ -943,3 +943,16 @@ def load_stakeholder_summary(root: Path = ROOT) -> dict:
         return build_stakeholder_tables(root)
     except Exception as exc:
         raise DashboardDataError(f"Không thể tổng hợp bảng thống kê khách hàng: {exc}") from exc
+
+
+def load_regression_deep_assets(root: Path = ROOT) -> dict[str, pd.DataFrame] | None:
+    """Load optional deep regression diagnostics CSVs strictly read-only."""
+    root = Path(root)
+    deep_path = root / "results" / "regression_deep_analysis.csv"
+    conf_path = root / "results" / "regression_conformal_2024.csv"
+    if not deep_path.is_file() or not conf_path.is_file():
+        return None
+    return {
+        "summary": pd.read_csv(deep_path, encoding="utf-8-sig"),
+        "conformal": pd.read_csv(conf_path, encoding="utf-8-sig"),
+    }

@@ -79,6 +79,7 @@ PACKAGE_SCRIPTS = (
     "analysis/stakeholder_summary",
     "supervised/course_supervised_baselines",
     "supervised/predict_supervised",
+    "supervised/regression_deep_analysis",
     "supervised/supervised_depth",
     "figures/fig_grid_levels_and_elbow",
     "figures/forecast_papi_grid",
@@ -119,6 +120,9 @@ PACKAGE_RESULTS = (
     "preprocessing_sensitivity.md",
     "protocol_sensitivity.csv",
     "protocol_sensitivity.md",
+    "regression_conformal_2024.csv",
+    "regression_deep_analysis.csv",
+    "regression_deep_analysis.md",
     "robustness.csv",
     "stakeholder_province_summary_2024.csv",
     "stakeholder_summary.md",
@@ -147,6 +151,7 @@ PACKAGE_FIGURES = (
     "papi_zscore_comparison",
     "predict_2024",
     "protocol_sensitivity_grid",
+    "regression_diagnostics_deep",
     "stakeholder_quadrants_2024",
     "sting_first_real",
     "sting_grid_levels",
@@ -369,7 +374,7 @@ bốn tài liệu chính được chuyển lên cấp đầu để mở thuận 
 results/future_work.md, bốn CSV future_work_*, hình tổng hợp và mã
 scripts/analysis/future_work.py được kèm để đối chiếu Mục 6.7 và kết luận slide.
 Đây là thực nghiệm thăm dò, không thay thế kết quả chính hay kiểm chứng độc lập.
-Các ứng viên mô hình chưa duyệt, tài liệu ôn tập và phiếu rà soát chuyên viên
+Các bản thử nghiệm ứng viên lẻ (`candidates_*.md`), tài liệu ôn tập và phiếu rà soát chuyên viên
 không thuộc gói nộp. Các liên kết tới chúng mở trên repo khi cần đối chiếu.
 
 Lệnh sinh lại Word/PowerPoint trong phụ lục báo cáo phải chạy từ repo đầy đủ:
@@ -399,7 +404,7 @@ def verify_report_fields(data: bytes) -> None:
             content = "".join(t.text or "" for t in paragraph.findall(".//w:t", word))
             entries[name].append(content)
     chapters = {m.group(1) for line in entries["TOC1"] if (m := re.match(r"CHƯƠNG (\d+)\.", line))}
-    expected_catalog = (("Hình", 13), ("Bảng", 15))
+    expected_catalog = (("Hình", 13), ("Bảng", 16))
     if chapters != set("1234567") or any(
         sum(line.startswith(label + " ") for line in entries["TableofFigures"]) != count
         for label, count in expected_catalog

@@ -1,8 +1,8 @@
 {
   "package": "Nhom15_STING_PAPI",
   "status": "PASS",
-  "sha256": "506cca77f92e3bd6897ddeb726fe5afaf9a2e79ee874933fdbc9c41feba02f3d",
-  "code_cells": 19,
+  "sha256": "7944b0f4d2d667d2f40574f76c85dfe3a5f40b349357d8ddf5a0cfdd4df76ef2",
+  "code_cells": 20,
   "preprocessing_code_cells": 9,
   "isolation_guard": true,
   "python": "3.14.2",
@@ -12,7 +12,7 @@
   "external_jupyter_kernel_replay": true,
   "fresh_subprocess_per_notebook": true,
   "input_outputs_cleared": true,
-  "manifest_files": 158,
-  "archive_bytes": 25320097,
-  "checked_at": "2026-11-27T15:40:04.343138+00:00"
+  "manifest_files": 163,
+  "archive_bytes": 26874157,
+  "checked_at": "2026-11-27T16:25:38.336328+00:00"
 }

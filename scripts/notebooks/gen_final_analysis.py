@@ -766,6 +766,24 @@ top_bot = pd.concat([fw_tr.nlargest(3, "slope_6_1"), fw_tr.nsmallest(3, "slope_6
 show_md(top_bot[["province_vi", "n_years", "slope_4_2", "slope_6_1", "sting_label", "kmeans_label"]].round(4).to_markdown(index=False))
 display(Image(filename=str(ROOT / "results/figs/future_work_overview.png")))"""))
 
+    md(nbf.v4.new_markdown_cell("""## Phụ lục E. Phân tích hồi quy chuyên sâu (17 cấu hình, AR(1) vs Δ6.1, VIF & Conformal 90%)
+
+Tổng hợp nghiên cứu mở rộng nhánh hồi quy `6.1` trên cùng `740` cặp train (`2011–2022`), `6` fold expanding origin (`2017–2022`) và `59` tỉnh holdout (`2023→2024`) từ `scripts/supervised/regression_deep_analysis.py`: (i) đối chiếu OLS, Ridge, Lasso, ElasticNet, Decision Tree, RF, KNN, SVR, HistGB, Panel FE (`OneHot 63 tỉnh`) và cơ chế `AR(1)` vs mô hình sai phân `Δ6.1 = y_{t+1} - y_t`; (ii) hệ số chuẩn hóa Z-score & đa cộng tuyến VIF; (iii) kiểm định cặp Wilcoxon & Bootstrap CI 95%; và (iv) khoảng dự báo Conformal 80%/90% hiệu chỉnh thuần trên CV `≤ 2022`."""))
+
+    cd(nbf.v4.new_code_cell("""reg_deep = pd.read_csv(ROOT / "results/regression_deep_analysis.csv")
+reg_conf = pd.read_csv(ROOT / "results/regression_conformal_2024.csv")
+print("So sánh các cấu hình hồi quy (CV R2, CV MAE, Holdout MAE/RMSE/R2):")
+show_md(reg_deep[reg_deep["section"].str.startswith("model_")].drop(columns=["section"]).to_markdown(index=False))
+print("Hệ số chuẩn hóa (beta_ridge, beta_elasticnet, beta_lasso, beta_ols) & VIF:")
+show_md(reg_deep[reg_deep["section"] == "coef_and_vif"][["item", "metric_primary", "metric_secondary", "holdout_mae", "holdout_rmse", "holdout_r2"]].rename(columns={
+    "item": "Chỉ tiêu", "metric_primary": "β Ridge", "metric_secondary": "β ElasticNet",
+    "holdout_mae": "β Lasso", "holdout_rmse": "β OLS", "holdout_r2": "VIF"
+}).to_markdown(index=False))
+print("Kiểm định cặp Wilcoxon + Bootstrap CI95 và hiệu chỉnh Conformal 80%/90%:")
+show_md(reg_deep[reg_deep["section"].isin(["paired_test", "conformal"])].to_markdown(index=False))
+print(f"Độ phủ Conformal 90% trên 59 tỉnh holdout 2024: {reg_conf['covered_conformal_90'].mean():.1%}")
+display(Image(filename=str(ROOT / "results/figs/regression_diagnostics_deep.png")))"""))
+
     nb["cells"] = cells
     nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}
     return nb

@@ -78,7 +78,7 @@ bốn tài liệu chính được chuyển lên cấp đầu để mở thuận 
 results/future_work.md, bốn CSV future_work_*, hình tổng hợp và mã
 scripts/analysis/future_work.py được kèm để đối chiếu Mục 6.7 và kết luận slide.
 Đây là thực nghiệm thăm dò, không thay thế kết quả chính hay kiểm chứng độc lập.
-Các ứng viên mô hình chưa duyệt, tài liệu ôn tập và phiếu rà soát chuyên viên
+Các bản thử nghiệm ứng viên lẻ (`candidates_*.md`), tài liệu ôn tập và phiếu rà soát chuyên viên
 không thuộc gói nộp. Các liên kết tới chúng mở trên repo khi cần đối chiếu.
 
 Lệnh sinh lại Word/PowerPoint trong phụ lục báo cáo phải chạy từ repo đầy đủ:

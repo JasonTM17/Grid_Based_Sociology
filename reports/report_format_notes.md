@@ -56,11 +56,10 @@ LibreOffice là ứng dụng hệ thống cài riêng khi dùng nhánh Linux/mac
 
 ## Kiểm tra bản nộp
 
-Bộ đóng gói yêu cầu đủ bảy chương trong mục lục, 13 mục hình và 15 mục bảng,
-bao gồm mục 5.8 về thống kê và nhận xét kết quả trên 63 tỉnh. Hai bảng mở đầu
+Bộ đóng gói yêu cầu đủ bảy chương trong mục lục, 13 mục hình và 16 mục bảng,
+bao gồm phần mở rộng hồi quy chuyên sâu ở mục 5.5 và mục 5.8 về thống kê trên 63 tỉnh. Hai bảng mở đầu
 (nhóm thực hiện và chữ viết tắt) không đánh số. Bản cập nhật ngày 27/11/2026
-xuất thành 49 trang A4 trong Microsoft Word. Đã đối chiếu trang đích của cả
-82 mục điều hướng với bản xuất.
+đã cập nhật toàn bộ trường bằng Microsoft Word với đủ 83 mục điều hướng.
 
 Đối chiếu mục lục với trang nội dung sau mỗi lần thay đổi bố cục. Số trang có
 thể thay đổi giữa các trình soạn thảo hoặc khi máy thiếu phông chữ; khi chỉnh

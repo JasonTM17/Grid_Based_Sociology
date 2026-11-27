@@ -44,6 +44,43 @@ ROBUSTNESS = _read_results_csv("robustness.csv")
 PREPROC_AUDIT = _read_results_csv("preprocessing_audit.csv")
 COURSE_SUP_ROWS = _read_results_csv("course_supervised_baselines.csv")
 PREPROC_SENS_ROWS = _read_results_csv("preprocessing_sensitivity.csv")
+REG_DEEP_ROWS = _read_results_csv("regression_deep_analysis.csv")
+REG_CONF_ROWS = _read_results_csv("regression_conformal_2024.csv")
+
+
+def _deep_reg_summary():
+    by_section = {}
+    for row in REG_DEEP_ROWS:
+        by_section[(row["section"], row["item"])] = row
+    keys = (
+        ("model_baseline", "Giữ nguyên năm trước (carry-forward)"),
+        ("model_mechanism", "AR(1) OLS (chỉ 6.1)"),
+        ("model_linear", "Ridge (8 đặc trưng, chính thức)"),
+        ("model_linear", "Lasso L1 (8 đặc trưng)"),
+        ("model_linear", "ElasticNet L1+L2 (8 đặc trưng)"),
+        ("model_nonlinear", "Random Forest (8 đặc trưng, chính thức)"),
+        ("model_nonlinear", "HistGradientBoosting (8 đặc trưng)"),
+        ("model_mechanism", "Ablation Ridge (7 đặc trưng, bỏ 6.1)"),
+        ("model_mechanism", "Mô hình sai phân Δ6.1 = y(t+1)-y(t) (Ridge)"),
+        ("model_panel_fe", "Panel FE: Ridge + OneHot 63 tỉnh"),
+    )
+    table_rows = []
+    for sec, item in keys:
+        r = by_section[(sec, item)]
+        table_rows.append([
+            item,
+            _dec(float(r["metric_primary"]), 4),
+            _dec(float(r["metric_secondary"]), 4),
+            _dec(float(r["holdout_mae"]), 4),
+            _dec(float(r["holdout_r2"]), 3),
+        ])
+    cov90 = sum(1 for r in REG_CONF_ROWS if str(r["covered_conformal_90"]).lower() == "true") / len(REG_CONF_ROWS)
+    return {
+        "rows": table_rows,
+        "by_section": by_section,
+        "cov90": cov90,
+        "n_conf": len(REG_CONF_ROWS),
+    }
 
 
 def _preprocessing_audit_table():
@@ -108,6 +145,9 @@ FORECAST_ZONES = {row["method"]: row for row in FORECAST["grid"]}
 
 def _dec(value, digits=4):
     return _vn(f"{value:.{digits}f}".replace(".", ","))
+
+
+REG_DEEP = _deep_reg_summary()
 
 
 def _rob(branch_sub):
@@ -892,6 +932,39 @@ table(["Năm 2023 / năm 2024", "Nhiễu (−1)", "Cụm lớn (2)", "Tổng"], 
 ], widths=[6.4, 2.4, 2.4, 2.4],
       caption=tbl_caption("Chuyển trạng thái của 59 tỉnh đủ dữ liệu trong cả hai năm 2023 và 2024"))
 
+_rd_by_sec = REG_DEEP["by_section"]
+_rd_oof_w = _rd_by_sec[("paired_test", "OOF CV 2017–2022: Ridge vs Carry-Forward")]
+_rd_ho_w = _rd_by_sec[("paired_test", "Holdout 2023→2024: Ridge vs Carry-Forward")]
+_rd_conf90 = _rd_by_sec[("conformal", "Conformal 90% (OOF 2017–2022)")]
+body(
+    "Mở rộng đối chiếu phần hồi quy đơn chỉ tiêu 6.1 trên cùng 740 cặp huấn luyện (2011–2022), "
+    "6 lượt CV mở rộng (2017–2022) và 59 cặp holdout (2023→2024) cho thấy dự báo điểm phần lớn đến từ "
+    f"tự tương quan AR(1) của chính sd_6_1 (CV R² = {_dec(float(_rd_by_sec[('model_mechanism', 'AR(1) OLS (chỉ 6.1)')]['metric_primary']), 4)}; "
+    f"bỏ sd_6_1 giảm xuống {_dec(float(_rd_by_sec[('model_mechanism', 'Ablation Ridge (7 đặc trưng, bỏ 6.1)')]['metric_primary']), 4)}). "
+    f"Khi mô hình hóa trực tiếp sai phân Δ6.1 = y(t+1) − y(t) với phạt L2 chặt (Ridge α = 50), CV R² đạt "
+    f"{_dec(float(_rd_by_sec[('model_mechanism', 'Mô hình sai phân Δ6.1 = y(t+1)-y(t) (Ridge)')]['metric_primary']), 4)}; "
+    f"Lasso và ElasticNet nhỉnh hơn Ridge do giảm nhiễu từ nhóm chỉ tiêu tham nhũng có đa cộng tuyến vừa phải "
+    "(VIF từ 3,76 đến 5,00; chỉ số điều kiện 5,09), nhưng kiểm định Wilcoxon trên CV cho thấy chênh lệch ElasticNet vs Ridge không có ý nghĩa (p = 0,8945)."
+)
+table(
+    ["Cấu hình hồi quy / cơ chế", "CV R²", "CV MAE", "MAE 2024", "R² 2024"],
+    REG_DEEP["rows"],
+    widths=[6.8, 2.0, 2.1, 2.2, 2.1],
+    caption=tbl_caption(
+        "Đối chiếu mở rộng mô hình hồi quy 6.1 và phân rã cơ chế — nguồn: results/regression_deep_analysis.csv"
+    ),
+)
+body(
+    f"Kiểm định cặp Wilcoxon trên sai số tuyệt đối của Ridge so với giữ nguyên năm trước đạt ý nghĩa thống kê trên "
+    f"toàn bộ mẫu ngoài fold CV 2017–2022 (n = 366; ΔMAE = {_dec(float(_rd_oof_w['metric_primary']), 5)}; "
+    f"p = {_dec(float(_rd_oof_w['metric_secondary']), 5)}), nhưng chưa đạt ý nghĩa riêng trên một năm holdout 2024 "
+    f"(n = 59; ΔMAE = {_dec(float(_rd_ho_w['metric_primary']), 5)}; p = {_dec(float(_rd_ho_w['metric_secondary']), 4)}). "
+    f"Hiệu chỉnh khoảng dự báo Conformal 90% hoàn toàn từ sai số ngoài fold giai đoạn ≤ 2022 "
+    f"(bán kính ±{_dec(float(_rd_conf90['metric_secondary']), 4)}) đạt độ phủ thực tế "
+    f"{_pct(REG_DEEP['cov90']).replace('.', ',')} trên {REG_DEEP['n_conf']} tỉnh năm 2024 "
+    "(nguồn: results/regression_deep_analysis.md, results/regression_conformal_2024.csv)."
+)
+
 h2("5.6. So sánh các bộ phân loại học trong môn")
 body(
     "Bổ sung các baseline theo nội dung học phần (Naive Bayes, k-NN, SVM tuyến tính/RBF, "
@@ -1119,7 +1192,7 @@ bullets([
     ("Nhiều mốc đánh giá.", "Kiểm định cuốn chiếu để đối chiếu độ ổn định của sai số qua nhiều mốc thời gian."),
     ("Spatial.", "thêm tự tương quan không gian (láng giềng) — GeoJSON CC-BY-SA 4.0 đã có."),
     ("Định tính.", "phỏng vấn và đối chiếu hồ sơ tại 3–5 tỉnh ngoài vùng dày để tìm hiểu vì sao hai chỉ tiêu khác vùng tham chiếu."),
-    ("Mở rộng đã tích hợp (future_work & phân loại cân bằng lớp).", "Script scripts/analysis/future_work.py (results/future_work.md) đã chạy trên dữ liệu hiện hành và tích hợp nhánh E2–E4 vào app.py cùng Phụ lục D của notebook: E1 chuẩn hóa hạng theo năm ra 25 cụm, 54,1% nhiễu, ARI non-noise = 0,0085 (giữ đối chiếu, không thay STING 3/4/5/2); E2 quỹ đạo OLS 63 tỉnh cho STING 1 cụm / 2 nhiễu (K-Means k=3 silhouette = 0,3430); E3 backtest cuốn chiếu 6 mốc 2019–2024 Ridge có MAE thấp hơn mốc giữ điểm năm trước ở 4/6 năm nhưng out_recall TB 0,063 vs 0,247; E4 Moran's I năm 2024 đạt I = 0,1834 (p = 0,0240) ở sd_6_1. Đồng thời hai ứng viên phân loại cân bằng lớp C3 (random forest balanced, CV macro-F1 0,524, holdout Acc 0,712 / Macro-F1 0,569) và C1 (logistic balanced, CV 0,486, holdout 0,746 / 0,595) đã được áp dụng chính thức vào scripts/supervised/predict_supervised.py (models/sup_classifier.joblib). Các mô hình E3 được fit theo từng mốc nhưng cặp đặc trưng và lưới chọn tới 2021–2022, còn p-value E4 mang tính thăm dò chưa hiệu chỉnh nhiều phép thử."),
+    ("Mở rộng đã tích hợp (future_work, hồi quy chuyên sâu & phân loại cân bằng lớp).", "Script scripts/analysis/future_work.py (results/future_work.md) đã chạy trên dữ liệu hiện hành và tích hợp nhánh E2–E4 vào app.py cùng Phụ lục D của notebook: E1 chuẩn hóa hạng theo năm ra 25 cụm, 54,1% nhiễu, ARI non-noise = 0,0085 (giữ đối chiếu, không thay STING 3/4/5/2); E2 quỹ đạo OLS 63 tỉnh cho STING 1 cụm / 2 nhiễu (K-Means k=3 silhouette = 0,3430); E3 backtest cuốn chiếu 6 mốc 2019–2024 Ridge có MAE thấp hơn mốc giữ điểm năm trước ở 4/6 năm nhưng out_recall TB 0,063 vs 0,247; E4 Moran's I năm 2024 đạt I = 0,1834 (p = 0,0240) ở sd_6_1. Song song đó, scripts/supervised/regression_deep_analysis.py (tích hợp app.py Tab 2, Phụ lục E notebook và sheet 'Hồi quy chuyên sâu' Excel) đã đối chiếu 17 cấu hình hồi quy 6.1, chỉ ra tín hiệu chính đến từ AR(1) / sai phân Δ6.1 (CV R² đạt 0,2732 với Ridge α = 50), VIF 1,34–5,00, kiểm định Wilcoxon p = 0,01939 trên OOF CV (p = 0,3937 trên holdout 2024) và hiệu chỉnh khoảng dự báo Conformal 90% đạt độ phủ thực tế 94,9%. Về phân loại, hai ứng viên C3 (random forest balanced, CV macro-F1 0,524, holdout Acc 0,712 / Macro-F1 0,569) và C1 (logistic balanced, CV 0,486, holdout 0,746 / 0,595) đã được áp dụng chính thức vào scripts/supervised/predict_supervised.py (models/sup_classifier.joblib). Các mô hình E3 được fit theo từng mốc nhưng cặp đặc trưng và lưới chọn tới 2021–2022, còn p-value E4 mang tính thăm dò chưa hiệu chỉnh nhiều phép thử."),
 ])
 
 
@@ -1483,8 +1556,10 @@ bullets([
 ])
 body("Số liệu đầy đủ: results/supervised_depth.md (kèm supervised_depth.csv, "
      "results/figs/supervised_learning_curve.png, "
-     "results/figs/supervised_importance.png). Tái lập: "
-     "python -E scripts/supervised/supervised_depth.py.", italic=True)
+     "results/figs/supervised_importance.png) và phần mở rộng 17 mô hình hồi quy / Conformal 90% "
+     "tại results/regression_deep_analysis.md (kèm regression_deep_analysis.csv, "
+     "regression_conformal_2024.csv, results/figs/regression_diagnostics_deep.png). Tái lập: "
+     "python -E scripts/supervised/supervised_depth.py và python -E scripts/supervised/regression_deep_analysis.py.", italic=True)
 body("Các kiểm tra bổ sung cần được đọc riêng cho từng nhóm: tỷ lệ giữ nhãn toàn bộ chịu ảnh hưởng lớn từ cụm chiếm ưu thế, còn hai cụm nhỏ và các đặc trưng ngoài giá trị y tế năm trước kém ổn định hơn. Những nhận xét này mô tả phạm vi thử nghiệm hiện có và không xác nhận một phân hoạch xã hội tổng quát.")
 
 

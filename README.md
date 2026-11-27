@@ -256,6 +256,15 @@ python scripts/supervised/predict_supervised.py   # 3) model ML có giám sát (
      Lưu `models/sup_ridge.joblib`, `models/sup_rf.joblib` (hồi quy) và
      `models/sup_classifier.joblib` (classifier được CV chọn); kết quả
      `results/supervised_metrics.csv` + `results/supervised_summary.md`.
+   - **Phân tích hồi quy chuyên sâu (`regression_deep_analysis.py`):** đối chiếu `17` cấu hình
+     trên cùng `6` fold expanding origin `2017–2022` (`OLS`, `Ridge`, `Lasso`, `ElasticNet`,
+     `Decision Tree`, `RF`, `KNN`, `SVR`, `HistGB`, `Panel FE 63 tỉnh`), phân rã cơ chế `AR(1)` (`0.2679`)
+     vs sai phân `Δ6.1` (`0.2732` cho Ridge α=50) vs bỏ `sd_6_1` (`-0.2637`), hệ số chuẩn hóa β và
+     VIF (`1.34–5.00`, κ `5.09`), kiểm định cặp Wilcoxon (`p = 0.01939` trên `366` cặp OOF CV `Ridge vs carry-forward`,
+     `p = 0.3937` trên `59` cặp holdout `2024`) và hiệu chỉnh Conformal `90%` thuần `≤ 2022` (`±0.1403` cho độ
+     phủ thực tế `94.9%` năm `2024`). Nguồn: `results/regression_deep_analysis.{csv,md}`,
+     `results/regression_conformal_2024.csv`, `results/figs/regression_diagnostics_deep.png` và sheet
+     `Hồi quy chuyên sâu` trong Excel.
    - **Phân loại phụ:** dự báo pseudo-label STING cutoff-local cho năm sau, với expanding
      CV theo origin 2017–2022 (warm-up 2011–2016). CV chọn **`random forest (balanced)`**
      (`macro-F1 0.524`, so với `logistic regression (balanced)` `0.486`, `logistic regression` `0.434`,

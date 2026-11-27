@@ -20,6 +20,7 @@ from scripts.analysis.dashboard_data import (
     load_dashboard_assets,
     load_external_validation_assets,
     load_poverty_assets,
+    load_regression_deep_assets,
     load_regression_models,
     load_stakeholder_summary,
     poverty_cluster_tests,
@@ -98,6 +99,10 @@ _EXTERNAL_FILES = (
 )
 _POVERTY_FILES = ("data/processed/external_poverty_63.csv",)
 _GEOJSON_FILES = ("data/raw/boundaries/diaphantinh.geojson",)
+_REGRESSION_DEEP_FILES = (
+    "results/regression_deep_analysis.csv",
+    "results/regression_conformal_2024.csv",
+)
 
 
 def artifact_identity(relative_paths: tuple[str, ...]) -> tuple[tuple[str, int | None, int | None], ...]:
@@ -147,6 +152,14 @@ def get_poverty_assets(artifact_identity: tuple[tuple[str, int | None, int | Non
 def get_vietnam_geojson(artifact_identity: tuple[tuple[str, int | None, int | None], ...]) -> dict:
     del artifact_identity
     return load_vietnam_geojson(ROOT / "data" / "raw" / "boundaries" / "diaphantinh.geojson")
+
+
+@st.cache_resource(show_spinner="Đang đọc phân tích hồi quy chuyên sâu…")
+def get_regression_deep_assets(
+    artifact_identity: tuple[tuple[str, int | None, int | None], ...],
+) -> dict[str, pd.DataFrame] | None:
+    del artifact_identity
+    return load_regression_deep_assets()
 
 
 def feature_label(feature: str, config: dict) -> str:
@@ -638,6 +651,125 @@ if regression_tab.open:
                     "prediction_random_forest": "Dự báo Random Forest",
                 })
                 st.dataframe(table, hide_index=True, width="stretch")
+
+                deep_reg = get_regression_deep_assets(artifact_identity(_REGRESSION_DEEP_FILES))
+                if deep_reg is not None:
+                    deep_sum = deep_reg["summary"]
+                    conf_2024 = deep_reg["conformal"]
+                    with st.expander(
+                        "Phân tích hồi quy chuyên sâu: Đa mô hình, AR(1) vs Δy, Hệ số β/VIF & Conformal 90%",
+                        expanded=False,
+                    ):
+                        st.caption(
+                            "Chạy đồng nhất trên 740 cặp train 2011–2022 (6 fold expanding origin 2017–2022); "
+                            "holdout 59 tỉnh (2023→2024) và bán kính Conformal KHÔNG tham gia hiệu chỉnh trước."
+                        )
+                        model_rows = deep_sum.loc[deep_sum["section"].str.startswith("model_")].copy()
+                        model_rows = model_rows.loc[model_rows["item"] != "Trung bình tập huấn luyện"].sort_values(
+                            "metric_primary", ascending=True
+                        )
+                        fig_cv = go.Figure(
+                            go.Bar(
+                                x=model_rows["metric_primary"],
+                                y=model_rows["item"],
+                                orientation="h",
+                                marker_color=[
+                                    "#009E73" if "Sai phân" in m or "ElasticNet" in m else (
+                                        "#2563eb" if "Ridge (8" in m else (
+                                            "#94a3b8" if "carry-forward" in m else "#d97706"
+                                        )
+                                    )
+                                    for m in model_rows["item"]
+                                ],
+                                text=[f"{v:.3f}" for v in model_rows["metric_primary"]],
+                                textposition="outside",
+                            )
+                        )
+                        fig_cv.update_layout(
+                            template="plotly_white",
+                            height=430,
+                            title="So sánh R² CV (2017–2022) giữa 16 cấu hình hồi quy & cơ chế",
+                            xaxis_title="R² CV (expanding origin 2017–2022)",
+                            yaxis_title="",
+                            margin={"t": 42, "r": 45, "b": 30, "l": 10},
+                        )
+                        st.plotly_chart(fig_cv, width="stretch")
+
+                        conf_view = conf_2024.loc[
+                            conf_2024["province_code"].isin(regression_view["province_code"])
+                        ].sort_values("pred_ridge")
+                        if not conf_view.empty:
+                            fig_conf = go.Figure()
+                            fig_conf.add_trace(
+                                go.Scatter(
+                                    x=conf_view["province_vi"],
+                                    y=conf_view["pred_ridge"],
+                                    mode="lines+markers",
+                                    name="Dự báo Ridge ± Conformal 90%",
+                                    line={"color": "#2563eb"},
+                                    error_y={
+                                        "type": "data",
+                                        "symmetric": False,
+                                        "array": (conf_view["conformal_hi90"] - conf_view["pred_ridge"]).tolist(),
+                                        "arrayminus": (conf_view["pred_ridge"] - conf_view["conformal_lo90"]).tolist(),
+                                        "color": "#93c5fd",
+                                        "thickness": 1.6,
+                                    },
+                                )
+                            )
+                            fig_conf.add_trace(
+                                go.Scatter(
+                                    x=conf_view["province_vi"],
+                                    y=conf_view["actual_2024"],
+                                    mode="markers",
+                                    name="Thực tế 2024",
+                                    marker={"color": "#059669", "size": 7},
+                                )
+                            )
+                            fig_conf.update_layout(
+                                template="plotly_white",
+                                height=380,
+                                title="Khoảng dự báo Conformal 90% (CV 2017–2022) so với thực tế 2024",
+                                xaxis_title="Tỉnh sắp theo dự báo Ridge",
+                                yaxis_title="Điểm 6.1 (2024)",
+                                margin={"t": 42, "r": 20, "b": 40, "l": 20},
+                            )
+                            st.plotly_chart(fig_conf, width="stretch")
+
+                        coef_tbl = deep_sum.loc[deep_sum["section"] == "coef_and_vif", [
+                            "item", "metric_primary", "metric_secondary", "holdout_mae", "holdout_rmse", "holdout_r2"
+                        ]].rename(columns={
+                            "item": "Chỉ tiêu",
+                            "metric_primary": "β Ridge",
+                            "metric_secondary": "β ElasticNet",
+                            "holdout_mae": "β Lasso",
+                            "holdout_rmse": "β OLS",
+                            "holdout_r2": "VIF",
+                        })
+                        test_tbl = deep_sum.loc[deep_sum["section"] == "paired_test", [
+                            "item", "metric_primary", "metric_secondary", "holdout_r2", "note"
+                        ]].rename(columns={
+                            "item": "Kiểm định cặp",
+                            "metric_primary": "ΔMAE",
+                            "metric_secondary": "Wilcoxon p",
+                            "holdout_r2": "Tỷ lệ cải thiện",
+                            "note": "CI 95% & số cặp",
+                        })
+                        conf_tbl = deep_sum.loc[deep_sum["section"] == "conformal", [
+                            "item", "metric_primary", "metric_secondary", "holdout_mae", "note"
+                        ]].rename(columns={
+                            "item": "Khoảng dự báo",
+                            "metric_primary": "Phủ thực tế 2024",
+                            "metric_secondary": "Bán kính (±)",
+                            "holdout_mae": "Độ rộng TB",
+                            "note": "Chi tiết hiệu chỉnh",
+                        })
+                        st.markdown("**1. Hệ số hồi quy chuẩn hóa (Z-score train) & VIF**")
+                        st.markdown(coef_tbl.to_markdown(index=False))
+                        st.markdown("**2. Kiểm định cặp Wilcoxon & Bootstrap CI 95% trên ΔMAE**")
+                        st.markdown(test_tbl.to_markdown(index=False))
+                        st.markdown("**3. Hiệu chỉnh Conformal & Quantile Regression (<=2022 → holdout 2024)**")
+                        st.markdown(conf_tbl.to_markdown(index=False))
 
 if external_tab.open:
     with external_tab:
