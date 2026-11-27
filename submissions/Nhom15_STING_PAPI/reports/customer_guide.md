@@ -55,7 +55,7 @@ Mở địa chỉ `Local URL` do Streamlit in trong terminal, thường là `htt
 3. Xem bản đồ hoặc chuyển sang biểu đồ hai trục. Các đường phân vị là mốc đối sánh nội bộ. Các tỉnh thiếu điểm vẫn nằm trong danh sách và bản đồ hành chính; không đặt vào biểu đồ hai trục khi thiếu tọa độ.
 4. Chuyển bảng chi tiết giữa **Phân nhóm & chỉ số chính**, **Khuyến nghị & dịch chuyển** và **Đầy đủ 10 cột**. Đối chiếu gợi ý rà soát với thông tin địa phương trước khi đề xuất can thiệp.
 5. Chọn **Tải CSV bàn giao** để tải đúng các tỉnh đang lọc. CSV dùng UTF-8 có BOM để Excel đọc được tiếng Việt. Giá trị thiếu là ô trống; các cột số giữ giá trị để tiếp tục phân tích.
-6. Chọn tỉnh ở mục **Phiếu rà soát tỉnh**, tải HTML rồi mở bằng trình duyệt. Chọn In, khổ A4 và lưu thành PDF. Tệp tải trực tiếp là HTML; PDF được tạo bằng chức năng in của trình duyệt.
+6. Chọn tỉnh ở mục **Phiếu rà soát tỉnh** và tải HTML. Phiếu ghi ô lưới, số điểm tham chiếu và lịch sử 14 năm. Mở bằng trình duyệt, chọn In, khổ A4 và lưu thành PDF. Bố cục in trình bày dữ liệu trên một trang A4.
 
 Thẻ và bảng tổng hợp ở đầu tab luôn phản ánh 63 tỉnh. Bản đồ giữ đủ ranh giới để nhìn bối cảnh, làm mờ các tỉnh ngoài bộ lọc. Bảng chi tiết, CSV và danh sách chọn phiếu đi theo bộ lọc.
 
@@ -82,7 +82,7 @@ Thẻ và bảng tổng hợp ở đầu tab luôn phản ánh 63 tỉnh. Bản 
 
 Mốc rà soát `6.1 = 1,8791` tính từ `Q25 − 0,5×IQR` của 48 tỉnh trong vùng dày năm 2024. Mốc này được chọn hồi cứu, không phải chuẩn chất lượng quốc gia hay ngưỡng đã được kiểm chứng trước năm 2024. Năm tỉnh giữ nhãn Cụm 2 cả 14 năm là các ca tham chiếu để nghiên cứu thêm.
 
-Giao diện, CSV tải từ giao diện và phiếu dùng tên mô tả. Các CSV nguồn và Excel giữ tên lịch sử để đối chiếu với mã nguồn:
+Giao diện, CSV tải từ giao diện, phiếu và sheet Excel **Thống kê khách hàng 2024** dùng tên mô tả. CSV nguồn giữ tên lịch sử để đối chiếu với mã nguồn.
 
 | Tên trong tệp nguồn | Tên hiển thị cho người nhận |
 |---|---|

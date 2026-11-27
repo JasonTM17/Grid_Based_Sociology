@@ -138,7 +138,7 @@ SUITE_OK = "toàn bộ kiểm thử đạt"
 # Keep the persisted product labels intact while using descriptive wording in
 # the academic report. These labels are heuristics, not official PAPI ratings.
 GROUP_LABELS = {
-    "Biên bứt phá vượt chuẩn": "Ngoài vùng dày, điểm 4.2 cao",
+    "Biên bứt phá vượt chuẩn": "Ngoài vùng dày, phía điểm cao",
     "Vùng lõi ổn định (Cụm 2)": "Trong vùng dày (Cụm 2)",
     "Ưu tiên cải thiện Y tế 6.1": "Ngoài vùng dày, điểm 6.1 thấp",
     "Thiếu dữ liệu 2024": "Thiếu dữ liệu 2024",
@@ -540,7 +540,7 @@ topic_line.paragraph_format.space_before = Pt(8)
 
 front_title("TÓM TẮT")
 body("Đồ án nghiên cứu phân cụm dựa trên lưới, chọn một biến thể STING rút gọn theo ngưỡng số điểm và áp dụng lên dữ liệu PAPI cấp tỉnh [1,2]. Từ 14 workbook giai đoạn 2011–2024, nhóm xây dựng bảng 882 quan sát tỉnh–năm và 41 cột, đáp ứng quy mô dữ liệu của học phần [8]. Các bước tiền xử lý gồm kiểm tra trùng khóa, giữ giá trị thiếu có cấu trúc, đối chiếu thang đo và chuẩn hóa bằng dữ liệu huấn luyện trong các nhánh dự báo. Phân tích chính sử dụng hai chỉ tiêu: kiểm soát tham nhũng trong cung ứng dịch vụ công và y tế công lập.")
-body("Trên 240 điểm giả lập có hai nhóm tham chiếu, cài đặt cho ARI 0,950 và 2,5% nhiễu. Với hai chỉ tiêu PAPI giai đoạn 2011–2023, cấu hình chính tạo một cụm 629 điểm, hai cụm nhỏ 16 và 5 điểm, cùng 19,6% nhiễu. Lưới 2011–2023 gán 48/61 tỉnh có hai điểm PAPI 2024 quan sát vào cụm lớn. Để hỗ trợ rà soát dữ liệu ở cấp địa phương, 63 tỉnh năm 2024 được phân tách thành 48 tỉnh trong vùng dày (gồm 5 tỉnh có nhãn Cụm 2 ở cả 14 năm), 8 tỉnh ngoài vùng dày có điểm 4.2 cao, 5 tỉnh ngoài vùng dày có điểm 6.1 thấp và 2 tỉnh thiếu dữ liệu. Đây là các nhóm mô tả theo quy tắc của đồ án, dùng để gợi ý rà soát. Thử nghiệm hồi cứu tiếp theo dùng hồi quy để dự báo cả hai điểm 2024 từ tám chỉ tiêu 2023. Trên 59 tỉnh đối chiếu được, Ridge có MAE thấp hơn cách giữ điểm năm trước ở cả hai chỉ tiêu, trong khi RMSE của 4.2 tăng nhẹ. Khi đưa các dự báo điểm vào lưới, cả 59 tỉnh vào cụm lớn và bỏ sót 11 tỉnh có quan sát ngoài vùng dày; ghép các cặp phần dư CV lịch sử cho AUC xếp hạng 0,816 trên cùng mẫu hồi cứu, chưa xác lập xác suất hay khả năng dự báo tiền cứu. Phân tích giới hạn ở hai chỉ tiêu và một năm đối chiếu.")
+body("Trên 240 điểm giả lập có hai nhóm tham chiếu, cài đặt cho ARI 0,950 và 2,5% nhiễu. Với hai chỉ tiêu PAPI giai đoạn 2011–2023, cấu hình chính tạo một cụm 629 điểm, hai cụm nhỏ 16 và 5 điểm, cùng 19,6% nhiễu. Lưới 2011–2023 gán 48/61 tỉnh có hai điểm PAPI 2024 quan sát vào cụm lớn. Bảng rà soát 63 tỉnh gồm 48 tỉnh trong vùng dày (5 tỉnh ở Cụm 2 cả 14 năm), 8 tỉnh ô thưa có 4.2 từ trung vị vùng dày trở lên và 6.1 đạt ngưỡng rà soát, 5 tỉnh ô thưa có 6.1 dưới ngưỡng và 2 tỉnh thiếu dữ liệu. Thử nghiệm hồi cứu tiếp theo dùng hồi quy để dự báo cả hai điểm 2024 từ tám chỉ tiêu 2023. Trên 59 tỉnh đối chiếu được, Ridge có MAE thấp hơn cách giữ điểm năm trước ở cả hai chỉ tiêu, trong khi RMSE của 4.2 tăng nhẹ. Khi đưa các dự báo điểm vào lưới, cả 59 tỉnh vào cụm lớn và bỏ sót 11 tỉnh quan sát ngoài vùng dày. Các cặp phần dư từ kiểm định theo thời gian cho AUC xếp hạng 0,816 trên cùng mẫu hồi cứu. Xác suất và khả năng dự báo tiền cứu cần được kiểm định thêm. Phân tích giới hạn ở hai chỉ tiêu và một năm đối chiếu.")
 body("Từ khóa: STING, phân cụm dựa trên lưới, PAPI, dữ liệu tỉnh–năm.", italic=True)
 
 
@@ -584,7 +584,7 @@ doc.add_section(WD_SECTION_START.NEW_PAGE)
 h1("CHƯƠNG 1. TỔNG QUAN ĐỀ TÀI")
 h2("1.1. Bối cảnh và vấn đề đặt ra")
 body("Chỉ số PAPI (Vietnam Provincial Governance and Public Administration Performance Index) được CECODES, VFF-CRT, RTA & UNDP công bố hàng năm từ 2011, đo lường chất lượng quản trị và cung ứng dịch vụ công ở cấp tỉnh trên 8 yếu tố (từ 2018): Tham gia ở cấp cơ sở (d1), Minh bạch (d2), Trách nhiệm giải trình (d3), Kiểm soát tham nhũng (d4), Thủ tục hành chính công (d5), Cung ứng dịch vụ công (d6), Quản trị môi trường (d7), Quản trị điện tử (d8). Đề bài môn Học máy (Topic 6 — Grid-based clustering) yêu cầu một thuật toán phân cụm dựa trên lưới, dataset thật ≥ 500 dòng × ≥ 10 cột, và nhóm chọn PAPI vì hai lý do: (i) dữ liệu công khai, có chuỗi thời gian dài (14 năm × 63 tỉnh); (ii) cơ sở dữ liệu đủ chiều để thử thách grid-based clustering ở chiều thấp.")
-body("Bài toán thực tiễn: muốn phân loại các tỉnh theo nhóm cung ứng dịch vụ công/kiểm soát tham nhũng để hỗ trợ hoạch định chính sách. Câu hỏi nghiên cứu: (1) dữ liệu PAPI có cấu trúc cụm tách biệt không; (2) cấu trúc đó ổn định qua thời gian không; (3) mô hình hồi quy từ dữ liệu đến 2023 dự báo hai điểm PAPI 2024 với sai số ra sao và nhận diện vùng trên lưới STING đến mức nào.")
+body("Đồ án trả lời bốn câu hỏi. STING chia lưới và tạo cụm như thế nào trên hai chỉ tiêu PAPI? Vị trí các tỉnh thay đổi ra sao qua thời gian? Cơ quan quản lý hoặc đơn vị tư vấn có thể dùng nhãn, điểm quan sát và dữ liệu thiếu để chọn tỉnh nào cần đối sánh, rà soát hoặc bổ sung dữ liệu? Khi dùng dữ liệu đến 2023 để dự báo hai điểm PAPI năm 2024, sai số và khả năng nhận diện các tỉnh ngoài vùng dày ra sao?")
 h2("1.2. Mục tiêu và phạm vi")
 bullets([
     ("Mục tiêu 1.", "Hiện thực từ đầu các ý tưởng cốt lõi của STING (Wang–Yang–Muntz, VLDB 1997) và nêu rõ phần đơn giản hóa ở Chương 2: lưới phân cấp, thống kê ô, gom cụm, nhãn nhiễu −1."),
@@ -599,6 +599,7 @@ bullets([
     ("Kỹ thuật.", f"Cài đặt STING (src/sting.py) và bộ kiểm thử tương ứng (tests/test_sting.py) ({SUITE_OK}); quy trình gán cụm và dự báo bổ trợ; quy trình chọn cấu hình không dùng dữ liệu đánh giá năm 2024."),
     ("Dữ liệu.", "Bảng tỉnh–năm 882×41; rà soát thang đo xuyên năm, đánh dấu sơ bộ 23/37 chỉ tiêu có chênh lệch trung bình giữa hai năm liền kề vượt 0,25 điểm; lưu hồ sơ nguồn và mã băm để đối chiếu."),
     ("Thực nghiệm.", "Trên hai chỉ tiêu và cấu hình chính, một cụm lớn chiếm ưu thế so với hai cụm nhỏ. Các thử nghiệm PCA và 8 chiều cho thấy kết quả nhạy với đặc trưng, mức lưới và ngưỡng số điểm; chưa đủ cơ sở để suy ra cấu trúc chung của toàn bộ dữ liệu PAPI."),
+    ("Báo cáo kết quả.", "Bảng 63 tỉnh trình bày số lượng, tỷ lệ, trung vị và tình trạng dữ liệu. Phiếu theo tỉnh cho phép đối chiếu nhãn và vị trí ô."),
 ])
 
 
@@ -612,6 +613,7 @@ h2("2.3. Cài đặt trong đồ án (src/sting.py)")
 bullets([
     ("fit(X).", "Dựng L mức trên n điểm d chiều. Mỗi mức tính tọa độ ô và sắp xếp khóa bằng np.argsort(kind=stable). Chi phí bảo thủ là O(L·(n·d + n·log n)); thuật toán sắp xếp cụ thể phụ thuộc phiên bản NumPy và kiểu dữ liệu [14]. Refit hủy nhãn cũ, cần cluster lại trước predict."),
     ("cluster(level).", "Chọn ô có count ≥ min_count. DFS dùng ngăn xếp để nối các ô dày chung cạnh. Mỗi vùng nhận một nhãn, điểm trong ô thưa nhận −1. Cấu hình PAPI dùng lưới 16 × 16 và ngưỡng 5 điểm mỗi ô."),
+    ("Chỉ số ô.", "Trên mỗi trục, lấy phần nguyên của (điểm − biên dưới) chia cho bề rộng ô. Chỉ số bắt đầu từ 0. Điểm đúng biên trên được gán vào ô cuối; tại tầng phân cụm PAPI, chỉ số tối đa là 15."),
     ("predict(X).", "Điểm mới: tìm ô chứa nó ở mức đã dùng → cụm của ô đó; nếu ô không dày hoặc điểm ngoài vùng huấn luyện → −1."),
     ("query_rect(rect).", "Quét M ô có dữ liệu ở một mức và gộp các ô nằm trọn trong vùng. Phương sai gộp tính cả độ phân tán trong từng ô và chênh lệch giữa trung bình các ô, với trọng số là số điểm. Chi phí truy vấn là O(M·d). Khi phân cụm, mỗi ô có tối đa 2d láng giềng nếu nối qua mặt và 3^d−1 nếu tính cả góc. Chi phí chung còn gồm bước sắp xếp các ô dày."),
     ("query_top_down(rect).", "Duyệt từ gốc đến mức đích. Với ô cha giao một phần vùng truy vấn, chương trình có thể dừng nhánh nếu xác suất ước lượng có ít nhất một điểm trong vùng thấp hơn 1 − confidence. Kết quả gộp thống kê của các ô nằm trọn trong vùng tại mức đích. confidence là tham số điều khiển nhánh mô phỏng, không bảo đảm một khoảng tin cậy 95% đã hiệu chỉnh hay phép đếm chính xác ở biên vùng."),
@@ -923,7 +925,7 @@ body("Hình 6 vẽ nhãn lưới toàn cục cho mọi tỉnh-năm (xám = nhi�
 figure("evolution.png", "Dịch chuyển cụm STING 2011–2024 (lưới toàn cục; xám = nhiễu; trắng = thiếu dữ liệu)", 14.5)
 figure("map_2024.png", "Bản đồ centroid tô màu theo cụm — 2024 (nhãn chú thích các tỉnh nhiễu)", 10.0)
 
-h2("5.8. Thống kê mô tả và gợi ý rà soát 63 tỉnh")
+h2("5.8. Thống kê và nhận xét kết quả trên 63 tỉnh")
 body(
     f"Để hỗ trợ cơ quan quản lý rà soát các trường hợp khác vùng tham chiếu, "
     f"mô-đun scripts/analysis/stakeholder_summary.py lấy các mốc phân vị thực nghiệm của Cụm 2 năm 2024 "
@@ -932,6 +934,16 @@ body(
     f"{_dec(STAKE_BENCH['lower_61_fence'], 4)}) để chia toàn bộ 63 tỉnh thành bốn nhóm mô tả."
 )
 body("Bốn nhóm này là quy tắc hậu xử lý do nhóm đề xuất. Ngưỡng Q25 − 0,5 × IQR không phải chuẩn đánh giá chính thức và cũng không phải quy tắc ngoại lai Tukey 1,5 × IQR. Các mốc được tính từ quan sát 2024, vì vậy chỉ dùng mô tả năm 2024. Trong CSV, tên ‘Vùng lõi ổn định’ chỉ trạng thái trong Cụm 2 ở năm đang xét; tên ‘Biên bứt phá vượt chuẩn’ chỉ nhánh ngoài vùng dày có điểm 4.2 từ trung vị lõi trở lên và 6.1 không thấp hơn ngưỡng dưới. Các tên này không xác nhận ổn định dài hạn, tiến bộ qua năm hay chất lượng quản trị tốt. Bảng dưới dùng nhãn mô tả để tránh nhầm với đánh giá chính sách.")
+_core_lower = int((STAKE_SUMMARY["cluster"].eq(2) & STAKE_SUMMARY["sd_6_1"].lt(STAKE_BENCH["lower_61_fence"])).sum())
+_hanoi = STAKE_SUMMARY.loc[STAKE_SUMMARY["province_code"].eq(1)].iloc[0]
+body(
+    f"Có {_core_lower} trong 48 tỉnh thuộc Cụm 2 có điểm 6.1 dưới mốc nội bộ. Hai nhóm ô thưa cùng mang nhãn −1 "
+    "nhưng có điểm khác nhau. Nhóm phía điểm cao có trung vị 4.2 cao hơn vùng dày, còn nhóm dưới mốc 6.1 "
+    "có trung vị 6.1 thấp hơn vùng dày (Bảng 11). "
+    f"Ví dụ trên phiếu Hà Nội năm 2024, ô {_hanoi['grid_cell']} có {int(_hanoi['reference_count'])} điểm "
+    f"tham chiếu, dưới ngưỡng 5 của STING nên nhận nhãn −1. Điểm y tế công lập "
+    f"{_dec(float(_hanoi['sd_6_1']), 3)} thấp hơn mốc nội bộ {_dec(STAKE_BENCH['lower_61_fence'], 4)}."
+)
 figure(
     "stakeholder_quadrants_2024.png",
     "Bốn nhóm mô tả năm 2024 theo quy tắc hậu xử lý và bối cảnh GRDP",
@@ -1016,7 +1028,7 @@ bullets([
     (f"{len(STAKE_14Y)} tỉnh có nhãn Cụm 2 ở cả 14 năm.",
      f"{', '.join(STAKE_14Y['province_vi'].tolist())} (không nhận nhãn nhiễu trong 2011–2024 trên cùng lưới lịch sử). Kết quả không đồng nghĩa hai điểm số bất biến qua năm."),
     ("Bảy tỉnh rời Cụm 2 giai đoạn 2023 → 2024.",
-     f"{STAKE_TRANS.get('Rời Cụm 2 lên biên bứt phá', 0)} tỉnh sang nhóm ngoài vùng dày có điểm 4.2 cao "
+     f"{STAKE_TRANS.get('Rời Cụm 2 lên biên bứt phá', 0)} tỉnh sang nhóm ngoài vùng dày phía điểm cao "
      f"({_up_list}); "
      f"{STAKE_TRANS.get('Rời Cụm 2 xuống rìa Y tế 6.1', 0)} tỉnh sang nhóm có điểm 6.1 thấp ({_down_list}). Đây là thay đổi trạng thái lưới, chưa phải kết luận về tác động chính sách."),
     ("Kịch bản ngoài vùng 2024 và đối chiếu GRDP–y tế.",
@@ -1029,6 +1041,7 @@ bullets([
 h2("5.9. Kiểm thử & tái lập")
 bullets([
     ("Unit tests.", "python -m pytest tests -q để kiểm tra các trường hợp được mô tả ở mục 4.2."),
+    ("Quy ước mã và cảnh báo.", "Mã tiền xử lý, mô hình và bàn giao được tách theo chức năng. Chạy python -m ruff check . để kiểm tra quy ước mã. Xem cờ dữ liệu thiếu, cực trị và đổi thang trong bảng kiểm tra tiền xử lý."),
     ("Dữ liệu.", "python scripts/data/check_data.py → PASS (882×41) + danh sách audit thang đo."),
     ("Tái lập.", "Hai notebook lưu kết quả và có lệnh thực thi lại; các số liệu được đối chiếu với results/*.csv, *.json và bảng kiểm tra kèm theo. Seed cố định và hồ sơ nguồn giúp kiểm tra lại quy trình."),
     ("Nguồn ngoài.", "python scripts/analysis/external_validation.py → results/external_validation.md + results/external_validation.csv + 4 hình external_* (từ data/processed/external_*.csv; provenance: data/processed/external_provenance.md, data/raw/*/PROVENANCE.md)."),
@@ -1119,7 +1132,7 @@ bullets([
     ("Rà soát thang đo.", "Bước sàng lọc đánh dấu 23/37 chỉ tiêu để đối chiếu với workbook. Việc đối chiếu giúp chọn đầu vào và giới hạn cách diễn giải các thay đổi theo thời gian."),
 ])
 h2("7.2. Hướng phát triển")
-body("Xem 6.7 — trọng tâm: (1) rank-normalization xuyên năm; (2) quỹ đạo tỉnh; (3) backtest cuốn chiếu; (4) tự tương quan không gian & phân cụm có ràng buộc láng giềng; (5) nghiên cứu định tính bổ trợ (kết quả thực nghiệm thăm dò chi tiết ghi ở results/future_work.md). Bản đồ Choropleth 63 tỉnh và Phiếu rà soát tỉnh đã được tích hợp trên app.py (tab Thống kê khách hàng).")
+body("Xem 6.7 — trọng tâm: (1) rank-normalization xuyên năm; (2) quỹ đạo tỉnh; (3) backtest cuốn chiếu; (4) tự tương quan không gian & phân cụm có ràng buộc láng giềng; (5) nghiên cứu định tính bổ trợ (kết quả thực nghiệm thăm dò chi tiết ghi ở results/future_work.md). Mở ứng dụng để xem bản đồ 63 tỉnh và xuất phiếu theo tỉnh.")
 h2("7.3. Lời cuối")
 body("Đồ án cung cấp một biến thể STING có kiểm thử, quy trình dữ liệu có rà soát thang đo và thí nghiệm tái lập được. Các kết quả mở rộng cho thấy độ nhạy với cấu hình và giới hạn khi diễn giải nhãn cụm. Kết quả hỗ trợ mô tả dữ liệu, chưa chứng minh cấu trúc xã hội hay quan hệ nhân quả.")
 h2("7.4. Khai báo sử dụng công cụ hỗ trợ")

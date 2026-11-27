@@ -13,7 +13,7 @@ _Cập nhật ngày 27/11/2026 · Nhóm 15._
 
 ## Đối chiếu môn học & Thống kê khách hàng
 
-- [x] **Thống kê bàn giao cho khách hàng (63 tỉnh)** — `scripts/analysis/stakeholder_summary.py --with-excel`, tạo `results/stakeholder_province_summary_2024.csv`, `results/stakeholder_summary.md`, `results/figs/stakeholder_quadrants_2024.png`, sheet thứ 24 trong `results/KetQua_STING_PAPI.xlsx` và tab **Thống kê khách hàng** trên `app.py`.
+- [x] **Thống kê bàn giao cho khách hàng (63 tỉnh)** — `scripts/analysis/stakeholder_summary.py --with-excel`, tạo `results/stakeholder_province_summary_2024.csv`, `results/stakeholder_summary.md`, `results/figs/stakeholder_quadrants_2024.png`, sheet **Thống kê khách hàng 2024** trong `results/KetQua_STING_PAPI.xlsx` và tab **Thống kê khách hàng** trên `app.py`.
 - [x] **Bộ tiền xử lý PAPI** — gói `submissions/Nhom15_STING_PAPI.zip` chứa cả `Nhom15_TienXuLy_PAPI.ipynb` ở cấp đầu cùng `src/preprocessing.py` và 14 workbook gốc; báo cáo Word dùng kết quả `results/preprocessing_audit.csv` và `results/preprocessing_sensitivity.csv`.
 - [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/supervised/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
 - [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/supervised/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).

@@ -58,29 +58,29 @@ Tài liệu tổng hợp kết quả chạy thực nghiệm 4 hướng mở rộ
 
 ## Hướng 5: Gợi ý đối chiếu định tính (ngoài phạm vi code tự động)
 
-- Đối chiếu danh sách **8 tỉnh Biên bứt phá** trong [`results/stakeholder_summary.md`](stakeholder_summary.md) và quy trình chấm phiếu độc lập tại [`reports/quy-trinh-tham-dinh-danh-sach-papi.md`](https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/reports/quy-trinh-tham-dinh-danh-sach-papi.md) (tuyệt đối không dùng điểm/nhãn STING để tự xác nhận).
+- Đối chiếu danh sách **8 tỉnh ngoài vùng dày phía điểm cao** (nhãn CSV lịch sử: `Biên bứt phá vượt chuẩn`) trong [`results/stakeholder_summary.md`](stakeholder_summary.md) và quy trình chấm phiếu độc lập tại [`reports/quy-trinh-tham-dinh-danh-sach-papi.md`](https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/reports/quy-trinh-tham-dinh-danh-sach-papi.md) (tuyệt đối không dùng điểm/nhãn STING để tự xác nhận).
 - Dưới đây là hợp của các tỉnh có độ dốc `6.1` cực trị (`E2`) và các tỉnh ô thưa năm 2024 (`-1`) làm **bảng ứng viên tham khảo** cho bước phỏng vấn / rà soát hồ sơ địa phương (không kết luận đúng/sai hay nhân quả):
 
 | Tỉnh | Tiêu chí gợi ý | Nhóm hành động 2024 | Độ dốc `4.2` | Độ dốc `6.1` | Điểm `6.1` (2024) |
 |---|---|---|---:|---:|---:|
-| An Giang | Ô thưa (-1) 2024 | Biên bứt phá vượt chuẩn | +0.0280 | +0.0105 | 1.911 |
-| Bà Rịa - Vũng Tàu | Ô thưa (-1) 2024 | Biên bứt phá vượt chuẩn | +0.0226 | +0.0150 | 2.002 |
-| Bình Dương | Ô thưa (-1) 2024 | Ưu tiên cải thiện Y tế 6.1 | +0.0246 | +0.0130 | 1.808 |
-| Bình Thuận | Ô thưa (-1) 2024 | Biên bứt phá vượt chuẩn | +0.0282 | +0.0269 | 2.112 |
-| Bắc Ninh | Top-3 tăng nhanh 6.1 | Vùng lõi ổn định (Cụm 2) | +0.0454 | +0.0332 | 2.016 |
-| Cà Mau | Ô thưa (-1) 2024 | Biên bứt phá vượt chuẩn | +0.0179 | +0.0117 | 1.888 |
-| Cần Thơ | Ô thưa (-1) 2024 | Ưu tiên cải thiện Y tế 6.1 | +0.0064 | -0.0009 | 1.698 |
-| Gia Lai | Ô thưa (-1) 2024 | Ưu tiên cải thiện Y tế 6.1 | +0.0166 | +0.0255 | 1.787 |
-| Hà Nội | Ô thưa (-1) 2024 | Ưu tiên cải thiện Y tế 6.1 | +0.0402 | +0.0125 | 1.686 |
-| Hà Tĩnh | Ô thưa (-1) 2024 | Biên bứt phá vượt chuẩn | +0.0269 | +0.0190 | 2.191 |
-| Long An | Ô thưa (-1) 2024 | Ưu tiên cải thiện Y tế 6.1 | +0.0013 | +0.0013 | 1.807 |
-| Lào Cai | Top-3 giảm nhanh 6.1 | Vùng lõi ổn định (Cụm 2) | +0.0320 | -0.0133 | 1.896 |
-| Ninh Bình | Top-3 tăng nhanh 6.1 | Vùng lõi ổn định (Cụm 2) | +0.0302 | +0.0350 | 1.966 |
-| Quảng Nam | Top-3 giảm nhanh 6.1 | Vùng lõi ổn định (Cụm 2) | +0.0143 | -0.0114 | 2.009 |
-| Quảng Ninh | Ô thưa (-1) 2024 | Biên bứt phá vượt chuẩn | +0.0705 | +0.0131 | 1.889 |
-| Sóc Trăng | Ô thưa (-1) 2024 | Biên bứt phá vượt chuẩn | +0.0092 | +0.0123 | 2.048 |
-| Trà Vinh | Top-3 giảm nhanh 6.1 | Vùng lõi ổn định (Cụm 2) | +0.0190 | -0.0058 | 1.856 |
-| Tây Ninh | Ô thưa (-1) 2024 | Biên bứt phá vượt chuẩn | +0.0275 | +0.0139 | 1.924 |
+| An Giang | Ô thưa (-1) 2024 | Ngoài vùng dày phía điểm cao | +0.0280 | +0.0105 | 1.911 |
+| Bà Rịa - Vũng Tàu | Ô thưa (-1) 2024 | Ngoài vùng dày phía điểm cao | +0.0226 | +0.0150 | 2.002 |
+| Bình Dương | Ô thưa (-1) 2024 | Ngoài vùng dày, 6.1 thấp | +0.0246 | +0.0130 | 1.808 |
+| Bình Thuận | Ô thưa (-1) 2024 | Ngoài vùng dày phía điểm cao | +0.0282 | +0.0269 | 2.112 |
+| Bắc Ninh | Top-3 tăng nhanh 6.1 | Trong vùng dày (Cụm 2) | +0.0454 | +0.0332 | 2.016 |
+| Cà Mau | Ô thưa (-1) 2024 | Ngoài vùng dày phía điểm cao | +0.0179 | +0.0117 | 1.888 |
+| Cần Thơ | Ô thưa (-1) 2024 | Ngoài vùng dày, 6.1 thấp | +0.0064 | -0.0009 | 1.698 |
+| Gia Lai | Ô thưa (-1) 2024 | Ngoài vùng dày, 6.1 thấp | +0.0166 | +0.0255 | 1.787 |
+| Hà Nội | Ô thưa (-1) 2024 | Ngoài vùng dày, 6.1 thấp | +0.0402 | +0.0125 | 1.686 |
+| Hà Tĩnh | Ô thưa (-1) 2024 | Ngoài vùng dày phía điểm cao | +0.0269 | +0.0190 | 2.191 |
+| Long An | Ô thưa (-1) 2024 | Ngoài vùng dày, 6.1 thấp | +0.0013 | +0.0013 | 1.807 |
+| Lào Cai | Top-3 giảm nhanh 6.1 | Trong vùng dày (Cụm 2) | +0.0320 | -0.0133 | 1.896 |
+| Ninh Bình | Top-3 tăng nhanh 6.1 | Trong vùng dày (Cụm 2) | +0.0302 | +0.0350 | 1.966 |
+| Quảng Nam | Top-3 giảm nhanh 6.1 | Trong vùng dày (Cụm 2) | +0.0143 | -0.0114 | 2.009 |
+| Quảng Ninh | Ô thưa (-1) 2024 | Ngoài vùng dày phía điểm cao | +0.0705 | +0.0131 | 1.889 |
+| Sóc Trăng | Ô thưa (-1) 2024 | Ngoài vùng dày phía điểm cao | +0.0092 | +0.0123 | 2.048 |
+| Trà Vinh | Top-3 giảm nhanh 6.1 | Trong vùng dày (Cụm 2) | +0.0190 | -0.0058 | 1.856 |
+| Tây Ninh | Ô thưa (-1) 2024 | Ngoài vùng dày phía điểm cao | +0.0275 | +0.0139 | 1.924 |
 | Vĩnh Phúc | Top-3 tăng nhanh 6.1 | Thiếu dữ liệu 2024 | +0.0341 | +0.0336 | — |
 
 ## Lệnh tái lập & Tệp đầu ra

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import Counter
+
 import pandas as pd
 import pytest
 
@@ -99,6 +101,13 @@ def test_stakeholder_excel_sheet_and_toc_table_are_consistent():
     assert ws.views.sheetView[0].showGridLines is False
     assert "PapiStakeholder2024" in ws.tables
     assert ws.tables["PapiStakeholder2024"].ref == "A5:P68"
+    assert "1,8791" in ws["A4"].value
+    assert Counter(cell.value for cell in ws["C"][5:68]) == {
+        "Trong vùng dày (Cụm 2)": 48,
+        "Ngoài vùng dày phía điểm cao": 8,
+        "Ngoài vùng dày, 6.1 thấp": 5,
+        "Thiếu dữ liệu 2024": 2,
+    }
 
     ws_toc = wb["Mục lục"]
     assert ws_toc.cell(6, 6).value == "stakeholder_province_summary_2024.csv"

@@ -41,6 +41,8 @@ def _literal_copy(path):
         elif "/charts/chart" in name and name.endswith(".xml"):
             root = ET.fromstring(parts[name])
             root.remove(root.find(f"{{{C}}}externalData"))
+            for number_format in root.findall(f".//{{{C}}}valAx/{{{C}}}numFmt"):
+                number_format.attrib.pop("sourceLinked", None)
             for series in root.iter(f"{{{C}}}ser"):
                 for role in ("cat", "val", "xVal", "yVal"):
                     data = series.find(f"{{{C}}}{role}")
@@ -78,6 +80,12 @@ def test_packages_all_real_chart_values_and_preserves_slide_bytes(tmp_path):
     # Independently compare workbook numbers with the input chart's literals.
     for report in reports:
         root = ET.fromstring(before[report["chart"]])
+        if report["type"] == "scatterChart":
+            packed_chart = ET.fromstring(after[report["chart"]])
+            formats = packed_chart.findall(f".//{{{C}}}valAx/{{{C}}}numFmt")
+            assert [(fmt.get("formatCode"), fmt.get("sourceLinked")) for fmt in formats] == [
+                ("0.00", "0"), ("0.00", "0"),
+            ]
         expected = [Decimal(p.findtext(f"{{{C}}}v"))
                     for cache in root.iter(f"{{{C}}}numLit")
                     for p in cache.findall(f"{{{C}}}pt")]

@@ -49,7 +49,7 @@ Trang 17 của bài giảng về tiền xử lý yêu cầu bài nhóm chạy pi
 
 ### Mẫu bìa báo cáo của giảng viên
 
-Bìa dùng mẫu `Report-proj.pdf.docx` được cung cấp ngày 27/11/2026: khung đen một nét, ba dòng tên trường/khoa/bộ môn, logo, sinh viên, đề tài, tên môn và giảng viên hướng dẫn. Thông tin mẫu được thay bằng thông tin Nhóm 15; các vùng tô vàng được bỏ sau khi điền.
+Bìa dùng mẫu `Report-proj.pdf.docx` được cung cấp ngày 27/11/2026, với khung đen một nét, ba dòng tên trường/khoa/bộ môn, logo, sinh viên, đề tài, tên môn, giảng viên hướng dẫn và niên khóa 2024–2028. Thông tin của Nhóm 15 thay cho các vùng tô vàng trong mẫu.
 
 Thân báo cáo giữ bảy chương để trình bày phương pháp, dữ liệu, kết quả và giới hạn, kèm các phụ lục tái lập. [Ghi chú định dạng](report_format_notes.md) lưu thông số bìa và cách dựng lại tài liệu.
 
@@ -57,14 +57,14 @@ Thân báo cáo giữ bảy chương để trình bày phương pháp, dữ li�
 
 | Mốc | Yêu cầu đề | Tệp bàn giao | Trạng thái |
 |---|---|---|---|
-| Đồ án thống nhất (gộp Giữa kỳ + Cuối kỳ + Thống kê khách hàng) | Báo cáo DOCX tiếng Việt, Slide PPTX, Notebook thực thi sạch (Jupyter), Dataset ≥500×10, kiểm chứng & thống kê bàn giao 63 tỉnh | `reports/Nhom15_BaoCao_STING_PAPI.docx` + `slides/Nhom15_STING_PAPI.pptx` (12 slide) + `notebooks/Nhom15_STING_PAPI.ipynb` + `notebooks/Nhom15_TienXuLy_PAPI.ipynb` trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip) | Hoàn thiện, đồng bộ 1-1 (`submissions/Nhom15_STING_PAPI/`). [Kết quả chạy lại](../submissions/verification.json) |
+| Đồ án thống nhất (giữa kỳ, cuối kỳ và báo cáo kết quả) | Báo cáo DOCX tiếng Việt, slide PPTX, notebook thực thi sạch (Jupyter), dataset ≥500×10, kiểm chứng và thống kê trên 63 tỉnh | `reports/Nhom15_BaoCao_STING_PAPI.docx` + `slides/Nhom15_STING_PAPI.pptx` (12 slide) + `notebooks/Nhom15_STING_PAPI.ipynb` + `notebooks/Nhom15_TienXuLy_PAPI.ipynb` trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip) | Hoàn thiện, đồng bộ 1-1 (`submissions/Nhom15_STING_PAPI/`). [Kết quả chạy lại](../submissions/verification.json) |
 
 ## Thông tin đã chốt và mục cần xác nhận
 
-- [x] **Định dạng `.docx`** đã áp dụng theo file mẫu người dùng chọn (`reports/report_format_notes.md`), cấu trúc **7 chương** (có Chương 5.8 **Thống kê bàn giao cho khách hàng trên 63 tỉnh**).
+- [x] **Định dạng `.docx`** đã áp dụng theo file mẫu người dùng chọn (`reports/report_format_notes.md`), cấu trúc **7 chương** (mục 5.8 **Thống kê và nhận xét kết quả trên 63 tỉnh**).
 - [x] **Số slide.** 12 slide thống nhất (`slides/Nhom15_STING_PAPI.pptx`), gồm cơ chế giữa kỳ (3×3, 240 điểm, z-score), quan sát 2024, **phần quan sát, thống kê 63 tỉnh và dịch chuyển**, dự báo bổ trợ, đối chứng ngoại lai và kết luận.
 - [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051).
-- [x] **Phản hồi giữa kỳ đã xử lý** — đã báo cáo xong giữa kỳ, bổ sung thống kê bàn giao khách hàng (`scripts/analysis/stakeholder_summary.py`) và gộp hoàn chỉnh toàn đồ án.
+- [x] **Phản hồi giữa kỳ đã xử lý** — đã trình bày giữa kỳ và bổ sung thống kê, nhận xét từ kết quả phân cụm (`scripts/analysis/stakeholder_summary.py`).
 - [x] **Trọng số cuối kỳ** — bài giảng nhập môn học máy, trang 10 ghi 8 điểm nhóm và 2 điểm vấn đáp cá nhân.
 - [ ] **Hạn và cổng nộp cuối kỳ chính thức** — theo thông báo của giảng viên trên LMS.
 - [ ] **Phân công vấn đáp cuối kỳ** — nhóm rà soát trước buổi vấn đáp bằng `reports/on-tap/qa_final.md`.

@@ -6,7 +6,9 @@
 |---|---|
 | `Nhom15_BaoCao_STING_PAPI.docx` | Báo cáo đồ án thống nhất (gộp giữa kỳ, cuối kỳ & thống kê bàn giao 63 tỉnh), có mục lục và danh mục hình, bảng tự động |
 | [Bàn giao phân tích STING × PAPI 2024](ban-giao-khach-hang-2024.md) | Tóm tắt cho khách hàng: bốn nhóm hành động, cách dùng kết quả và giới hạn hồi kiểm |
+| [Hướng dẫn sử dụng dashboard & phiếu tỉnh](customer_guide.md) | Cách cài đặt, lọc 63 tỉnh, đọc nhãn hiển thị, xuất CSV và in HTML Phiếu rà soát tỉnh |
 | [Ứng dụng và phát triển STING–PAPI](ung-dung-va-phat-trien-sting-papi.md) | Hồi kiểm ba cách chọn ca, độ ổn định theo năm và quy trình thẩm định độc lập |
+| [Thẩm định độc lập danh sách rà soát PAPI](quy-trinh-tham-dinh-danh-sach-papi.md) | Hướng dẫn mù đôi hai chuyên viên chấm phiếu ca rà soát 6.1 từ bằng chứng địa phương |
 | `course_requirements.md` | Đối chiếu yêu cầu môn học, tiêu chí chấm và tài liệu bài giảng |
 | `crosscheck_mendeley.md` | Bằng chứng đối chiếu 756 dòng giao PAPI–Mendeley (độ lệch 0.0) |
 | `external_data_expansion.md` | Tổng hợp nguồn dữ liệu ngoại lai (PCI, GSO GRDP/dân số/nghèo/rác, ODM, WDI) |

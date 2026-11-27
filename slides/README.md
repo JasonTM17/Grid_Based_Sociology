@@ -15,17 +15,17 @@ hỏi đáp. Xem [kịch bản theo từng slide](../reports/on-tap/presentation
 | 4 | Phân bố cụm trên 808 quan sát lịch sử và giới hạn cụm lớn chiếm ưu thế |
 | 5 | Đối chứng STING, K-means, DBSCAN trên cùng mẫu và bất biến z-score |
 | 6 | Đồ thị quan sát 2024 cùng bảng mô tả đủ 63 tỉnh |
-| 7 | Dịch chuyển trên 59 tỉnh và truy vết ca Lạng Sơn |
+| 7 | Dịch chuyển trên 59 tỉnh và phép tính chỉ số ô của Lạng Sơn |
 | 8 | Dự báo Ridge, baseline, 0/11 trường hợp ngoài vùng và phạm vi phân loại nhãn STING |
 | 9 | Đối chiếu PCI, GRDP, ODM và nghèo; giới hạn suy luận thống kê |
 | 10 | Độ bền PCA/8D khi thay biểu diễn hoặc tham số |
-| 11 | Sản phẩm bàn giao và một ca demo có thể truy vết |
+| 11 | Số lượng, tỷ lệ và nhận xét về bốn nhóm mô tả năm 2024 |
 | 12 | Kết luận, giới hạn, bước tiếp theo và hỏi đáp |
 
 Bản 12 trang gộp dữ liệu với tiền xử lý, đặt đồ thị 2024 cạnh bảng 63 tỉnh và
 đưa lời cảm ơn vào trang kết luận. Các số liệu, mẫu số và giới hạn chính vẫn
 hiển thị. Chi tiết kiểm định, tham số, nguồn và các classifier theo học phần
-nằm trong ghi chú của từng trang để dùng khi bảo vệ. Hai biểu đồ và mười bảng
+nằm trong ghi chú của từng trang để dùng khi bảo vệ. Hai biểu đồ và mười một bảng
 đều là đối tượng PowerPoint có thể chỉnh sửa; hai biểu đồ có workbook dữ liệu
 nhúng.
 

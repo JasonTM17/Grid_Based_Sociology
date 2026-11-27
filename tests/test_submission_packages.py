@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -248,6 +249,10 @@ def test_delivered_zip_matches_sources_notebooks_and_loose_mirror():
             assert archive.read(f"{PACKAGE_NAME}/{pkg_rel}") == (ROOT / src_rel).read_bytes(), (
                 f"{pkg_rel} trong ZIP lệch bản gốc {src_rel}"
             )
+        lock_notes = archive.read(f"{PACKAGE_NAME}/reports/panel_lock.md").decode("utf-8")
+        locked_hash = re.search(r"^- SHA-256: `([a-fA-F0-9]{64})`", lock_notes, re.MULTILINE)
+        locked_panel = archive.read(f"{PACKAGE_NAME}/data/processed/papi_panel_v1_LOCKED.csv")
+        assert locked_hash and hashlib.sha256(locked_panel).hexdigest() == locked_hash.group(1).lower()
         for row in manifest["files"]:
             p = row["path"]
             assert (loose_dir / p).is_file(), f"Thiếu {p} trong loose mirror"

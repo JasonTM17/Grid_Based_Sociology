@@ -46,9 +46,9 @@ outputs đã lưu và checksum; dùng `nbconvert --execute` để thực thi l�
 - **Thiếu dữ liệu 2024 (2 tỉnh):** Vĩnh Phúc, Tiền Giang (cần kiểm toán thu thập dữ liệu, không nội suy).
 - **Phân tách 7 tỉnh rời Cụm 2 (2023→2024):** 5 tỉnh chuyển tới nhóm ngoài vùng dày phía điểm cao và 2 tỉnh (Gia Lai, Long An) tới nhóm rà soát `6.1`. Rời cụm không mặc nhiên là suy giảm. Xếp hạng từ kịch bản sai số đạt AUC thăm dò `0.816` trong hồi kiểm 2024; chưa xác nhận khả năng cảnh báo vận hành.
 
-Tên nhóm lưu trong CSV/Excel hiện gồm “Biên bứt phá vượt chuẩn”, “Vùng lõi ổn định (Cụm 2)” và “Ưu tiên cải thiện Y tế 6.1”. Đây là nhãn diễn giải của sản phẩm; cách hiểu đúng là các nhóm mô tả ở trên. Mốc `6.1 = 1.8791` tính từ 48 tỉnh trong vùng dày năm 2024, là quy tắc rà soát hồi cứu, không phải ngưỡng đã được kiểm chứng trước năm 2024.
+CSV nguồn giữ các tên nhóm lịch sử để tái lập. Sheet Excel **Thống kê khách hàng 2024**, dashboard và phiếu dùng cùng tên mô tả ở trên. Mốc `6.1 = 1.8791` phục vụ rà soát hồi cứu và được tính từ 48 tỉnh trong vùng dày năm 2024.
 
-Bộ trình bày gồm **12 slide**: đề tài và mục tiêu (1), dữ liệu và tiền xử lý (2), cơ chế STING và kiểm chứng giả lập (3), kết quả lịch sử (4), đối chứng thuật toán và z-score (5), quan sát 2024 và bảng bàn giao 63 tỉnh (6), dịch chuyển và Lạng Sơn (7), dự báo và bài toán có giám sát (8), đối chiếu nguồn ngoài (9), độ bền và giới hạn (10), demo bàn giao (11), kết luận và hỏi đáp (12). Kịch bản dự kiến 15 phút trình bày, thêm 5 phút hỏi đáp.
+Bộ trình bày gồm **12 slide**: đề tài và mục tiêu (1), dữ liệu và tiền xử lý (2), cơ chế STING và kiểm chứng giả lập (3), kết quả lịch sử (4), đối chứng thuật toán và z-score (5), quan sát 2024 (6), dịch chuyển và phép tính ô cho Lạng Sơn (7), dự báo và bài toán có giám sát (8), đối chiếu nguồn ngoài (9), độ bền và giới hạn (10), thống kê và nhận xét 63 tỉnh (11), kết luận và hỏi đáp (12). Kịch bản dự kiến 15 phút trình bày, thêm 5 phút hỏi đáp.
 
 ### Hướng dẫn cho người nhận bàn giao
 

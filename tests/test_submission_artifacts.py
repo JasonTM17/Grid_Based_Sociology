@@ -98,6 +98,9 @@ def test_report_uses_the_user_final_template_geometry():
     assert front._sectPr.find(qn("w:pgBorders")) is None
     assert body._sectPr.find(qn("w:pgNumType")).get(qn("w:start")) == "1"
     assert report.styles["Body Text"].paragraph_format.line_spacing == 1.5
+    cover_lines = [paragraph.text for paragraph in report.paragraphs[:16]]
+    assert cover_lines.index("ThS. Lê Minh Tân") < cover_lines.index("KHÓA 2024–2028")
+    assert cover_lines.index("KHÓA 2024–2028") < cover_lines.index("NHÓM 15 · MÃ HỌC PHẦN MALE431984")
 
 
 def check_pptx_submission(prs: Presentation) -> list[str]:
@@ -270,6 +273,10 @@ def test_unified_pptx_exists_notes_and_content():
     assert "Nhiễu¹" not in full_text
     assert "(kèm Bạc Liêu, Huế" not in full_text
     assert "bứt phá vượt chuẩn" not in full_text.lower()
+    for required in ("Nhận xét", "76,2%", "12,7%", "7,9%", "3,2%", "2,235", "1,787"):
+        assert required in visible[10], f"Slide 11 thiếu thống kê hoặc nhận xét: {required}"
+    assert all(term in visible[6] for term in ("0,0738", "0,0488", "12 ≥ 5"))
+    assert "khách hàng" not in full_text.lower()
     assert THANK_YOU in visible[-1]
     assert "kết luận" in visible[-1].lower()
 
@@ -281,6 +288,7 @@ def test_unified_pptx_exists_notes_and_content():
     assert all(chart.part.chart_workbook.xlsx_part is not None for chart in charts)
 
     notes = "\n".join(slide.notes_slide.notes_text_frame.text for slide in presentation.slides)
+    assert "khách hàng" not in notes.lower()
     for name in ("Nhom15_BaoCao_STING_PAPI.docx", "Nhom15_STING_PAPI.ipynb", "Nhom15_TienXuLy_PAPI.ipynb"):
         assert name in notes
 

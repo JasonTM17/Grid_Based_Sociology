@@ -22,7 +22,7 @@ Kiểm tra toàn bộ tệp nộp, slide, báo cáo và notebook hiện tại ch
 ## C. Tự đối chiếu sau mỗi lượt
 
 - Nhóm giải thích mạch lạc Grid-based clustering, STING (`3×3` & `240` điểm giả lập), tiền xử lý 6 bước PAPI (`882×41`) và ý nghĩa nhãn nhiễu `−1` (slide 2–6).
-- Trình bày rõ **thống kê bàn giao 63 tỉnh cho khách hàng** (slide 6–7: 4 nhóm mô tả, 5 tỉnh giữ nhãn 14/14 năm trên cùng lưới và 7 tỉnh rời Cụm 2). Nêu rõ các nhóm là gợi ý rà soát, chưa xác nhận chất lượng hay nguyên nhân.
+- Nối công thức chỉ số ô ở slide 3 với cách tính cho Lạng Sơn ở slide 7. Dùng bảng slide 6 và 11 để nói tỉ lệ từng nhóm cùng kết quả đối chiếu trung vị.
 - Giải thích được dự báo bổ trợ (AUC hồi cứu thăm dò `0,816`, chưa phải xác suất được hiệu chỉnh), đối chiếu với nguồn ngoài (PCI, GRDP, y tế ODM, nghèo GSO) và giới hạn độ bền đa chiều (slide 8–10).
 - Thời lượng bài nói 12 slide nằm trong 15 phút, dành 5 phút cho hỏi đáp.
 - Mỗi thành viên trả lời được bộ câu hỏi bảo vệ cuối kỳ trong [qa_final.md](qa_final.md), [qa_course_concepts.md](qa_course_concepts.md) và [qa_midterm.md](qa_midterm.md).

@@ -1,8 +1,8 @@
 """Embed Excel data for the bar/scatter charts exported by build_slides.mjs.
 
-This postprocessor changes chart data references and package relationships only.
-It preserves all slide/layout bytes. Workbook cells must round-trip to the exact
-cached decimal values; unsupported charts or incomplete data fail explicitly.
+This postprocessor packages chart data and keeps scatter tick labels independent
+of workbook cell precision. It preserves all slide/layout bytes. Workbook cells
+must round-trip to the exact cached decimal values.
 """
 from __future__ import annotations
 
@@ -147,7 +147,10 @@ def embed_chart_workbooks(pptx: Path) -> list[dict]:
         root = ET.fromstring(parts[chart])
         if root.find(f"{{{C}}}externalData") is not None:
             continue
-        _, series, roles = _series(root)
+        kind, series, roles = _series(root)
+        if kind == "scatterChart":
+            for number_format in root.findall(f".//{{{C}}}valAx/{{{C}}}numFmt"):
+                number_format.set("sourceLinked", "0")
         wb = Workbook()
         sheet = wb.active
         sheet.title = SHEET

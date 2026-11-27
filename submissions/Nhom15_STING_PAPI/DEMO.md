@@ -73,7 +73,7 @@ Từ thư mục repo, có thể kiểm tra riêng ZIP thống nhất bằng
 
 ## 2. Kịch bản 15 phút
 
-Xem [kịch bản theo 12 slide](https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/reports/on-tap/presentation_script.md) trong kho mã nguồn. Slide 2 trình bày dữ liệu và tiền xử lý; slide 3–5 giải thích lưới 3×3, 240 điểm giả lập, kết quả lịch sử, đối chứng K-Means/DBSCAN và bất biến z-score. Slide 6 dùng 61/63 tỉnh có hai điểm quan sát năm 2024 và giữ đủ 63 tỉnh trong bảng bàn giao. Slide 7 đối chiếu 59 tỉnh ghép được hai năm và truy vết Lạng Sơn. Slide 8–10 trình bày dự báo hồi cứu, đối chiếu nguồn ngoài và độ bền. Slide 11 dành cho demo bàn giao; slide 12 gộp kết luận, cảm ơn và hỏi đáp.
+Xem [kịch bản theo 12 slide](https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/reports/on-tap/presentation_script.md) trong kho mã nguồn. Slide 2 trình bày dữ liệu và tiền xử lý. Slide 3–5 giải thích lưới 3×3, thí nghiệm giả lập, kết quả lịch sử và các đối chứng. Slide 6 gán nhãn cho 61 tỉnh đủ điểm năm 2024. Slide 7 đối chiếu 59 tỉnh ghép được hai năm và tính chỉ số ô cho Lạng Sơn. Slide 8–10 trình bày các kiểm tra bổ trợ. Slide 11 thống kê tỷ lệ trên 63 tỉnh và nhận xét từ các trung vị. Slide 12 kết luận và hỏi đáp.
 
 Khi cần minh họa trực quan cho khách hàng hoặc đối chiếu PCI, mở dashboard bằng
 `python -m streamlit run app.py` rồi chọn tab **Thống kê khách hàng** để xem bản đồ 63 tỉnh, lọc nhóm mô tả và tải **Phiếu rà soát tỉnh** dạng HTML; mở HTML trong trình duyệt để in hoặc lưu PDF. Tab **Kiểm chứng ngoại lai** trình bày các nguồn đối chiếu.
@@ -87,7 +87,7 @@ Người nhận có thể làm theo [hướng dẫn dashboard](reports/customer_
 | Máy chiếu thiếu Python hoặc thư viện | Mở slide PPTX 12 trang, báo cáo Word và notebook đã lưu sẵn kết quả. |
 | Chạy nbconvert báo lỗi | Mở notebook đã lưu; chạy `python scripts/deliverables/demo_smoke.py` để xác định tệp hoặc đầu ra chưa đạt kiểm tra. |
 | Hình phân cụm không hiện trong notebook | Mở hình cùng số liệu tương ứng trên slide 3–6 hoặc `results/figs/`. |
-| Font hiển thị lạ | `chcp 65001` rồi mở lại terminal; notebook/slides dùng DejaVu/Calibri (Unicode OK) |
+| Chữ tiếng Việt hiển thị lạ | Đặt terminal ở UTF-8. PowerPoint dùng phông Arial và notebook dùng DejaVu. |
 | Mất mạng | Sau khi cài đủ thư viện, có thể trình diễn bằng dữ liệu, mô hình và hình đã lưu trong repo. |
 | Hỏi về nguồn dữ liệu | Chỉ vào `data/raw/*/PROVENANCE.md` (URL + hash SHA-256) |
 

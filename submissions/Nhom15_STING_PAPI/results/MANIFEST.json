@@ -5,8 +5,8 @@
   "files": [
     {
       "path": "DEMO.md",
-      "bytes": 11346,
-      "sha256": "b86230f738ae523f12466a05221397181ca70b16293ed1d36ba25055f79abe98",
+      "bytes": 11275,
+      "sha256": "4aee49977bf7be8a9e4f62664adc2c24c7728254a86f5397282b79f7559f3953",
       "role": "Kịch bản demo và cách đọc kết quả; đường dẫn tài liệu gốc được đối chiếu trong HUONG_DAN.txt"
     },
     {
@@ -17,8 +17,8 @@
     },
     {
       "path": "Nhom15_BaoCao_STING_PAPI.docx",
-      "bytes": 3075127,
-      "sha256": "3b66283bc570df9e4939d4ec8038a09e3bfeda1bd659e38c3fb69161b8e79e67",
+      "bytes": 3328035,
+      "sha256": "d406b61c2166eee781cb8ff2ab75771b410963fcf5239ee08d9a9e861002a287",
       "role": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)"
     },
     {
@@ -29,8 +29,8 @@
     },
     {
       "path": "Nhom15_STING_PAPI.pptx",
-      "bytes": 90210,
-      "sha256": "2aee921f3ff58c765fd73a3195b4fb8a37460553a3904b5a89c56c839c3f6f9d",
+      "bytes": 92425,
+      "sha256": "f64e51dfdc7a5ed7a6cdb9a026d6cfa67fe00c77330fe1ffe68e090bc5994c88",
       "role": "Slide trình bày thống nhất (12 trang 16:9 kèm ghi chú)"
     },
     {
@@ -329,8 +329,8 @@
     },
     {
       "path": "reports/ban-giao-khach-hang-2024.md",
-      "bytes": 7586,
-      "sha256": "ce96b3d825448d4fc9fa3d81588db9fabb49d5614d7c231969f32313246dfc12",
+      "bytes": 7703,
+      "sha256": "c79ac47773cb41d82cfc518005133344bb3c5c546c07c1f4ec4a855a6cd967a2",
       "role": "Phạm vi, ý nghĩa và giới hạn của bảng bàn giao 63 tỉnh"
     },
     {
@@ -341,8 +341,8 @@
     },
     {
       "path": "reports/customer_guide.md",
-      "bytes": 13043,
-      "sha256": "bc9750ed6245922c91c0843535aef1b55b874f6b9ff87306de4b0e96509131b9",
+      "bytes": 13108,
+      "sha256": "e79c1a3950f35b4a39bdc0e38426d6e8f0b74fdd4f6a68b2cc3908b5b7de7077",
       "role": "Hướng dẫn khách hàng mở dashboard, đọc nhóm tỉnh và xuất kết quả"
     },
     {
@@ -359,8 +359,8 @@
     },
     {
       "path": "reports/panel_lock.md",
-      "bytes": 485,
-      "sha256": "ee2376d4ced66cc16c7c2d61af2fc0e068df0ff40c9e9b731c94f67a58c0d060",
+      "bytes": 758,
+      "sha256": "064dc3c867cd6a330cfa1eeb687aa1b5046f5d55a8a79def8c2ea82917aca2b9",
       "role": "Phiên bản và mã kiểm tra bảng PAPI"
     },
     {
@@ -371,8 +371,8 @@
     },
     {
       "path": "results/KetQua_STING_PAPI.xlsx",
-      "bytes": 195342,
-      "sha256": "0f0d9a5a32252d82eaa81e490906128e4d5d2ddbc6f4c84714a9adbe08f99872",
+      "bytes": 191110,
+      "sha256": "208d89d631a3ce5121bfc7580289856285e44e175b95aec67ad2f21afde6d2eb",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -587,8 +587,8 @@
     },
     {
       "path": "results/future_work.md",
-      "bytes": 10625,
-      "sha256": "5e7bf56b011fc42d88a4980ba6634d98090bc9ca50bce5fc849b66052846f586",
+      "bytes": 10668,
+      "sha256": "95ad5f26050857e78005e77f8aa24e00cebf00ee1af45085d30b2b695c159347",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -761,8 +761,8 @@
     },
     {
       "path": "scripts/analysis/client_product.py",
-      "bytes": 24377,
-      "sha256": "7b55ad84cf51ca7f72dd8021de6e54b28a532054765c2aae9dcd895ad92abe51",
+      "bytes": 21303,
+      "sha256": "37a237cec502b4fad13acfe9a6695f289c194dd8e6fc82771f75bc9a12436c52",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -791,8 +791,8 @@
     },
     {
       "path": "scripts/analysis/future_work.py",
-      "bytes": 36167,
-      "sha256": "d26241750ee5395daafecbea0bd9ef8ad243909275838402ffb942308536d311",
+      "bytes": 36468,
+      "sha256": "bbe81b206aaaecdb5dd0a55fdbc048ae0c5ac8f934ab20959ee02b415884b3a4",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -827,8 +827,8 @@
     },
     {
       "path": "scripts/analysis/stakeholder_summary.py",
-      "bytes": 42811,
-      "sha256": "659cd4a35dd15a617ebe653046f88de168481e7659353994db05c8afc438bff6",
+      "bytes": 46815,
+      "sha256": "cecf0853ef768d53f999f9bbbc81adccf93e6776c647380b61ff754171c7f2cd",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {

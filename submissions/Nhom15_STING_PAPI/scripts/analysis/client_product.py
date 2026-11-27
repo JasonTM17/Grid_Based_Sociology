@@ -16,67 +16,20 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from scripts.analysis.stakeholder_summary import ACTION_GROUP_COLORS, ACTION_GROUP_ORDER
+from scripts.analysis.stakeholder_summary import (
+    ACTION_GROUP_COLORS,
+    ACTION_GROUP_ORDER,
+    CUSTOMER_GROUP_LABELS,
+    customer_display_frame,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_GEOJSON_PATH = ROOT / "data" / "raw" / "boundaries" / "diaphantinh.geojson"
 
-# Saved result files retain their historical labels for reproducibility.
-# Customer views describe the measured position without claiming a validated
-# quality rating, temporal stability or an effective policy intervention.
-CUSTOMER_GROUP_LABELS = {
-    "Biên bứt phá vượt chuẩn": "Ngoài vùng dày phía điểm cao",
-    "Vùng lõi ổn định (Cụm 2)": "Trong vùng dày (Cụm 2)",
-    "Ưu tiên cải thiện Y tế 6.1": "Ngoài vùng dày, 6.1 thấp",
-    "Ngoại vi biến động khác": "Ngoài vùng dày, trường hợp khác",
-    "Thiếu dữ liệu 2024": "Thiếu dữ liệu 2024",
-}
 CUSTOMER_GROUP_COLORS = {
     CUSTOMER_GROUP_LABELS[name]: color for name, color in ACTION_GROUP_COLORS.items()
 }
 CUSTOMER_GROUP_ORDER = [CUSTOMER_GROUP_LABELS[name] for name in ACTION_GROUP_ORDER]
-_CUSTOMER_TEXT = {
-    "action_group": CUSTOMER_GROUP_LABELS,
-    "action_subtier": {
-        "Dẫn đầu trục 4.2 (6.1 quanh vùng cụm)": "4.2 từ trung vị trở lên; 6.1 quanh vùng dày",
-        "Vượt trội kép (4.2 & 6.1 > trung vị lõi)": "Cả hai điểm từ trung vị vùng dày trở lên",
-        "Trong cụm nhưng rìa dưới Y tế 6.1": "Trong vùng dày; 6.1 dưới mốc rà soát",
-        "Lõi ổn định chuẩn": "Trong vùng dày; 6.1 từ mốc rà soát trở lên",
-        "Chuẩn tham chiếu 14/14 năm": "Giữ nhãn Cụm 2 trong 14/14 năm",
-        "Thấp hơn lõi trên cả 2 trục (đặc biệt 6.1)": "4.2 dưới trung vị; 6.1 dưới mốc rà soát",
-        "Lệch pha: 4.2 đạt/vượt chuẩn, 6.1 tụt sâu": "4.2 từ trung vị trở lên; 6.1 dưới mốc rà soát",
-    },
-    "transition_2023_2024": {
-        "Rời Cụm 2 lên biên bứt phá": "Rời Cụm 2 về phía điểm cao",
-        "Duy trì ngoài lõi (−1)": "Ngoài vùng dày ở cả hai năm (−1)",
-        "Giữ vững Cụm 2": "Giữ nhãn Cụm 2",
-        "Vào Cụm 2 từ ngoài lõi": "Vào Cụm 2 từ ngoài vùng dày",
-        "Rời Cụm 2 xuống rìa Y tế 6.1": "Rời Cụm 2; 6.1 dưới mốc rà soát",
-    },
-    "client_recommendation": {
-        "Nhân rộng thực hành tốt về kiểm soát tham nhũng trong dịch vụ công 4.2 và giữ ổn định y tế 6.1.":
-            "Đối chiếu các thành phần 4.2 và khảo sát tại địa phương trước khi đề xuất áp dụng kinh nghiệm.",
-        "Khảo sát điển hình quản trị tốt trên cả hai trục để chia sẻ kinh nghiệm liên tỉnh.":
-            "Chọn ca đối sánh hai chỉ tiêu và xác minh bối cảnh trước khi rút ra bài học quản lý.",
-        "Theo dõi sát y tế công lập 6.1 vì điểm nằm dưới ngưỡng phân vị lõi dù vẫn ở ô dày.":
-            "Rà soát các thành phần 6.1 với dữ liệu địa phương; điểm dưới mốc nội bộ dù vẫn thuộc ô dày.",
-        "Duy trì cân bằng giữa kiểm soát tham nhũng (4.2) và y tế công lập (6.1).":
-            "Theo dõi hai chỉ tiêu và đối chiếu với các địa phương có bối cảnh tương đồng.",
-        "Duy trì ổn định dài hạn và dùng làm điểm chuẩn đối sánh (benchmark).":
-            "Xem xét làm ca tham chiếu sau khi đối chiếu điểm số và bối cảnh; giữ nhãn chưa chứng minh chất lượng ổn định.",
-        "Ưu tiên rà soát toàn diện chất lượng y tế công lập 6.1 và kiểm soát tham nhũng 4.2.":
-            "Đối chiếu các thành phần 4.2 và 6.1 với dữ liệu địa phương để xác định nội dung cần rà soát.",
-    },
-}
-
-
-def customer_display_frame(frame: pd.DataFrame) -> pd.DataFrame:
-    """Return descriptive customer text without changing source rows or numbers."""
-    display = frame.copy()
-    for column, mapping in _CUSTOMER_TEXT.items():
-        if column in display:
-            display[column] = display[column].map(lambda value: mapping.get(value, value))
-    return display
 
 GEOJSON_PROVINCE_ALIAS: dict[str, str] = {
     "Bà Rịa -Vũng Tàu": "Bà Rịa - Vũng Tàu",
@@ -355,6 +308,7 @@ def build_province_scorecard_html(
     action_group = _fmt_str(row["action_group"])
     action_subtier = _fmt_str(row["action_subtier"])
     grid_cell = _fmt_str(row["grid_cell"])
+    reference_count = _fmt_int(row.get("reference_count"))
     transition = _fmt_str(row["transition_2023_2024"])
     recommendation = _fmt_str(row["client_recommendation"])
     badge_color = CUSTOMER_GROUP_COLORS.get(action_group, "#1B6E77")
@@ -374,10 +328,12 @@ def build_province_scorecard_html(
 
     bench_list = ", ".join(str(x) for x in benchmarks_14y["province_vi"].tolist()) or "—"
 
-    traj = all_years_df.loc[all_years_df["province_code"].eq(int(province_code))].sort_values("year")
+    traj = all_years_df.loc[all_years_df["province_code"].eq(int(province_code))].set_index("year")
+    if not traj.empty:
+        traj = traj.reindex(range(2011, 2025))
     traj_rows_html: list[str] = []
-    for _, tr in traj.iterrows():
-        yr = _fmt_int(tr["year"])
+    for year, tr in traj.iterrows():
+        yr = str(year)
         v42 = _fmt_num(tr["sd_4_2"], ".3f")
         v61 = _fmt_num(tr["sd_6_1"], ".3f")
         lbl = _format_cluster_label(tr["pred_cluster"])
@@ -550,10 +506,22 @@ def build_province_scorecard_html(
     }}
     @page {{ size: A4; margin: 10mm; }}
     @media print {{
-      body {{ background: #ffffff; padding: 0; }}
-      .sheet {{ border: none; border-radius: 0; padding: 10px 12px; max-width: none; }}
+      body {{
+        background: #ffffff;
+        padding: 0;
+        line-height: 1.32;
+        print-color-adjust: exact;
+      }}
+      .sheet {{ border: none; border-radius: 0; padding: 0; max-width: none; }}
+      .header {{ gap: 8px; padding-bottom: 8px; margin-bottom: 10px; }}
+      .kpi-grid {{ margin-bottom: 8px; }}
+      .kpi {{ padding: 7px 9px; }}
+      .box {{ padding: 8px 10px; margin-bottom: 8px; }}
+      th, td {{ padding: 3px 7px; }}
+      tr {{ break-inside: avoid; }}
+      .footer {{ margin-top: 6px; }}
     }}
-    @media (max-width: 720px) {{
+    @media screen and (max-width: 720px) {{
       .kpi-grid, .socio-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
     }}
   </style>
@@ -564,7 +532,8 @@ def build_province_scorecard_html(
       <div>
         <div class="kicker">Phiếu rà soát tỉnh · STING × PAPI 2024</div>
         <h1>{e(prov_name)} <span style="font-size:15px;font-weight:500;color:#64748b;">(Mã tỉnh: {e(int(province_code))})</span></h1>
-        <div class="meta">Phân tầng: <strong>{e(action_subtier)}</strong> · Ô lưới 2024: <code>{e(grid_cell)}</code> · Dịch chuyển 2023→2024: <strong>{e(transition)}</strong></div>
+        <div class="meta">Phân tầng: <strong>{e(action_subtier)}</strong> · Dịch chuyển 2023→2024: <strong>{e(transition)}</strong></div>
+        <div class="meta">Ô lưới 2024: <code>{e(grid_cell)}</code> · Số điểm tham chiếu trong ô: <strong>{e(reference_count)}</strong></div>
       </div>
       <div>
         <span class="badge">{e(action_group)}</span>
@@ -603,9 +572,9 @@ def build_province_scorecard_html(
     <section class="box">
       <div class="box-title">Mốc đối sánh nội bộ Cụm 2 năm 2024 (n = {e(int(bench['n_core']))} tỉnh)</div>
       <div style="font-size:13px;">
-        Trung vị lõi: <strong>4.2 = {e(f"{bench['med_42']:.3f}")}</strong> ·
+        Trung vị lõi: <strong>4.2 = {e(f"{bench['med_42']:.4f}")}</strong> ·
         <strong>6.1 = {e(f"{bench['med_61']:.3f}")}</strong> ·
-        Ngưỡng rìa dưới 6.1 (Q25 − 0,5×IQR) = <strong>{e(f"{bench['lower_61_fence']:.3f}")}</strong>.
+        Ngưỡng rìa dưới 6.1 (Q25 − 0,5×IQR) = <strong>{e(f"{bench['lower_61_fence']:.4f}")}</strong>.
       </div>
       <div class="note">{e(len(benchmarks_14y))} tỉnh giữ nhãn Cụm 2 trong 14/14 năm: {e(bench_list)}. Giữ nhãn không có nghĩa điểm số ổn định. Mốc 6.1 là quy tắc hồi cứu, không phải chuẩn chất lượng quốc gia.</div>
     </section>
@@ -623,6 +592,7 @@ def build_province_scorecard_html(
 
     <section class="box">
       <div class="box-title">Quỹ đạo PAPI & nhãn STING giai đoạn 2011–2024</div>
+      <div class="note">Dấu — đánh dấu năm thiếu điểm để gán nhãn.</div>
       <table>
         <thead>
           <tr><th>Năm</th><th class="num">4.2 Kiểm soát tham nhũng</th><th class="num">6.1 Y tế công lập</th><th>Nhãn lưới STING</th></tr>

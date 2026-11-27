@@ -16,7 +16,7 @@ Bảng phân tích gồm 882 dòng tỉnh–năm, 41 cột, giai đoạn 2011–
 | Ngoài vùng dày và 6.1 thấp theo quy tắc rà soát | 5 (7,9%) | 2,050 | 1,787 | Rà soát từng thành phần của chỉ tiêu 6.1 bằng dữ liệu và phản hồi tại địa phương. |
 | Thiếu dữ liệu 2024 | 2 (3,2%) | — | — | Xác minh dữ liệu nguồn; chưa xếp nhóm theo kết quả quan sát. |
 
-Các CSV nguồn và Excel giữ tên nhóm lịch sử ở cột `action_group` để tái lập và đối chiếu. Giao diện, CSV tải từ giao diện và phiếu HTML dùng tên mô tả như bảng trên. Các từ “vượt chuẩn” hay “ổn định” trong tên lưu trữ không có nghĩa đạt chuẩn quốc gia hoặc đã được kiểm chứng về chất lượng. Việc đổi tên hiển thị không thay số liệu hay nhãn mô hình.
+Các CSV nguồn giữ tên nhóm lịch sử ở cột `action_group` để tái lập. Sheet Excel **Thống kê khách hàng 2024**, dashboard, CSV tải từ dashboard và phiếu HTML dùng tên mô tả như bảng trên. Các tên hiển thị dẫn về cùng nhãn lưới và số liệu theo tỉnh.
 
 Mốc đối sánh là trung vị của 48 tỉnh vùng lõi; ngưỡng rà soát 6.1 là **1,8791** (`Q25 − 0,5 × IQR` của vùng lõi). Đây là quy tắc mô tả nội bộ, không phải chuẩn quốc gia hoặc ngưỡng có ý nghĩa thống kê. Nhãn kỹ thuật `−1` chỉ ô thưa: 8 tỉnh ngoài vùng dày phía điểm cao và 5 tỉnh có 6.1 thấp đều nhận nhãn này, nhưng cần các hành động khác nhau.
 
@@ -27,6 +27,8 @@ Mốc đối sánh là trung vị của 48 tỉnh vùng lõi; ngưỡng rà soá
 - **Chọn điểm tham chiếu:** Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận và Vĩnh Long đều có đủ 14 năm và nằm trong Cụm 2 ở cả 14 năm trên cùng lưới dựng từ 2011–2023. Đây là mô tả hồi cứu của nhãn, chưa xác nhận ổn định điểm số hay chất lượng dịch vụ.
 - **Đối soát dữ liệu thiếu:** Vĩnh Phúc và Tiền Giang không có đủ hai chỉ tiêu quan sát cho năm 2024. Không dùng giá trị dự báo để thay vào bảng phân nhóm quan sát.
 - **Theo dõi dịch chuyển 2023→2024:** 43 tỉnh giữ Cụm 2, 5 tỉnh vào Cụm 2 và 7 tỉnh rời Cụm 2. Trong 7 tỉnh rời cụm, 5 chuyển ra nhóm ngoài vùng dày phía điểm cao, 2 chuyển xuống rìa ưu tiên 6.1. Rời cụm không mặc nhiên là suy giảm.
+
+**Ví dụ Hà Nội.** Ô `(10, 5)` có 3 điểm tham chiếu, dưới ngưỡng 5 của STING nên nhận nhãn `−1`. Điểm 6.1 là 1,686, dưới mốc rà soát nội bộ 1,8791. Người nhận có thể dùng phiếu để đối chiếu các thành phần của 6.1 với dữ liệu địa phương.
 
 ## 3. Giới hạn của thí nghiệm dự báo
 
@@ -45,7 +47,7 @@ Dự báo điểm nhận ra **0/11** tỉnh thực tế ngoài vùng dày trong 
 |---|---|
 | Lọc 63 tỉnh và chọn nhóm mô tả | [CSV cấp tỉnh](../results/stakeholder_province_summary_2024.csv) hoặc sheet **Thống kê khách hàng 2024** trong [Excel](../results/KetQua_STING_PAPI.xlsx). |
 | Xem mốc đối sánh, dịch chuyển, danh sách chi tiết và hình | [Bảng phân tích](../results/stakeholder_summary.md), [biểu đồ](../results/figs/stakeholder_quadrants_2024.png), [dự báo theo tỉnh](../results/papi_forecast_provinces_2024.csv). |
-| Xuất Phiếu rà soát tỉnh | Khởi động ứng dụng theo [hướng dẫn sử dụng](customer_guide.md), vào tab **Thống kê khách hàng** và tải Phiếu rà soát tỉnh dạng HTML. |
+| Xuất Phiếu rà soát tỉnh | Vào tab **Thống kê khách hàng**, tải phiếu HTML và in một trang A4. [Hướng dẫn sử dụng](customer_guide.md) |
 | Xem phương pháp, báo cáo và cách chạy lại | Mở `Nhom15_BaoCao_STING_PAPI.docx`, `Nhom15_STING_PAPI.pptx` và `HUONG_DAN.txt` ở cấp đầu gói ZIP. Trong kho mã nguồn, xem bảng đường dẫn tương ứng tại [hướng dẫn sử dụng](customer_guide.md). |
 
 ## 5. Nghiệm thu trước khi gửi

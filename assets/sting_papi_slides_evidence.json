@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "slide_count": 12,
-  "evidence_sha256": "117ec28788052302fe3238f6b012b40607045cbf673c7f8eb4def4aac16cf832",
-  "template_sha256": "2aee921f3ff58c765fd73a3195b4fb8a37460553a3904b5a89c56c839c3f6f9d",
-  "authoring_source_sha256": "b5500726748e526430b99143d3dced976cc47dfb629b1d6bd1366e7e4f6adecb",
+  "evidence_sha256": "656d9326acf998bf971a75c57be79805d6fc57db65c03b5a08641e09d806d22d",
+  "template_sha256": "f64e51dfdc7a5ed7a6cdb9a026d6cfa67fe00c77330fe1ffe68e090bc5994c88",
+  "authoring_source_sha256": "9649170bd729886faa515d11ab069a969c10771ebccbd6a68f9c86c71556eeac",
   "evidence": {
     "slide_count": 12,
     "config": {
@@ -47,8 +47,8 @@
       "poverty_eta_note": "eta² = 0.0124 (SS giữa / SS tổng)"
     },
     "source_sha256": {
-      "scripts/deliverables/build_slides.py": "17a45c85871c4bd25620ee15ead0cf76475d3a13d375b232bb44a92265bdbb35",
-      "scripts/deliverables/slides_chart_workbooks.py": "c31db3d2c92448c893d6ad436e9704c2a9f5593f440a88308943c7e38b7aa9cf",
+      "scripts/deliverables/build_slides.py": "32da232494efd201101e72ca46091b9ac2768bc4f67fae84cf8997ed57955cdc",
+      "scripts/deliverables/slides_chart_workbooks.py": "d2fc944e416fbdd8997475f2d09e5e62097f11378ef4e56cf19175d63a533aa6",
       "src/sting.py": "b8f6f09fb73de4d682036461c13b0fdd86e46170b065fc55b0c9c788ee8fb1f2",
       "src/preprocessing.py": "a34fbc55410393a2a48a012d25fc595bccd5ea53ceab076f2c2107765cc2b2e3",
       "models/predict_config.json": "079e31096207acb5fade158ad9315e6f8a3385124a26b77094780a8054f7fa84",
@@ -77,8 +77,8 @@
       "scripts/common/papi_forecast.py": "3267b5744e0cdd036a46a260e10483515561648abfb950ad8ec4d6a246412983",
       "scripts/analysis/predict_sweep.py": "3a382984b9321f6505ee63aebb965dc71a3268a4a191dcdd82a3055dea761090",
       "app.py": "1c36068975b955a8523b36c2e9f68e0ff1836a0911cd5b7b14ad75f7195dfa4d",
-      "scripts/analysis/client_product.py": "7b55ad84cf51ca7f72dd8021de6e54b28a532054765c2aae9dcd895ad92abe51",
-      "reports/customer_guide.md": "bc9750ed6245922c91c0843535aef1b55b874f6b9ff87306de4b0e96509131b9"
+      "scripts/analysis/client_product.py": "37a237cec502b4fad13acfe9a6695f289c194dd8e6fc82771f75bc9a12436c52",
+      "reports/customer_guide.md": "e79c1a3950f35b4a39bdc0e38426d6e8f0b74fdd4f6a68b2cc3908b5b7de7077"
     },
     "panel_rows": 882,
     "panel_columns": 41,
@@ -105,7 +105,7 @@
         "silhouette": 0.4565339991
       },
       {
-        "method": "DBSCAN (ε = 0,2)",
+        "method": "DBSCAN (ε = 0,2, MinPts = 5)",
         "clusters": 5,
         "noise_pct": 14.2326732673,
         "silhouette": 0.2575416121
@@ -2935,6 +2935,15 @@
       }
     ],
     "threshold_61": 1.8791150898,
+    "core_median_42": 2.0316814184,
+    "grid_raw_lo": [
+      1.1753091812,
+      1.4348328114
+    ],
+    "grid_raw_step": [
+      0.0737764537,
+      0.0487807618
+    ],
     "transitions": [
       [
         43,
@@ -2951,7 +2960,10 @@
         "year": 2023,
         "x": 2.1399650574,
         "y": 1.8921980858,
-        "cell": "(13, 9)",
+        "cell": [
+          13,
+          9
+        ],
         "count": 2,
         "label": -1
       },
@@ -2959,7 +2971,10 @@
         "year": 2024,
         "x": 2.0727024078,
         "y": 1.9595654011,
-        "cell": "(12, 10)",
+        "cell": [
+          12,
+          10
+        ],
         "count": 12,
         "label": 2
       }

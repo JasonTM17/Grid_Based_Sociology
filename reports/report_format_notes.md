@@ -3,10 +3,10 @@
 Trang bìa theo mẫu giảng viên `Report-proj.pdf.docx` do người dùng gửi ngày
 27/11/2026, SHA-256
 `1d5ccf67b3a5abd3b9876b2367cb2671852a69dac72bb64fbe23d2957c9ec67d`.
-Bìa giữ thứ tự trường, khoa, bộ môn, logo FIT HCM-UTE, sinh viên, đề tài, tên
-môn và giảng viên hướng dẫn của mẫu; thay phần tô vàng bằng thông tin đã xác
-nhận của Nhóm 15. Dòng cuối ghi nhóm, mã học phần và thời điểm báo cáo; không
-sao chép niên khóa minh họa của hai sinh viên trong mẫu.
+Bìa giữ thứ tự trường, khoa, bộ môn, logo FIT HCM-UTE, sinh viên, đề tài, tên môn
+và giảng viên hướng dẫn của mẫu. Dòng niên khóa ghi **KHÓA 2024–2028**, bên dưới
+là nhóm, mã học phần và thời điểm báo cáo. Thông tin của Nhóm 15 thay cho các
+vùng tô vàng trong mẫu.
 
 Thân bài tiếp tục dùng thể thức đã áp dụng từ `Báo cáo cuối kì .docx` do người
 dùng gửi ngày 18/11/2026, SHA-256
@@ -57,9 +57,10 @@ LibreOffice là ứng dụng hệ thống cài riêng khi dùng nhánh Linux/mac
 ## Kiểm tra bản nộp
 
 Bộ đóng gói yêu cầu đủ bảy chương trong mục lục, 13 mục hình và 15 mục bảng,
-bao gồm mục 5.8 về thống kê mô tả và gợi ý rà soát 63 tỉnh. Hai bảng mở đầu
-(nhóm thực hiện và chữ viết tắt) không đánh số. Bản cập nhật ngày 27/11/2026 có
-82 mục điều hướng và render thành 49 trang A4 bằng LibreOffice.
+bao gồm mục 5.8 về thống kê và nhận xét kết quả trên 63 tỉnh. Hai bảng mở đầu
+(nhóm thực hiện và chữ viết tắt) không đánh số. Bản cập nhật ngày 27/11/2026
+xuất thành 49 trang A4 trong Microsoft Word. Đã đối chiếu trang đích của cả
+82 mục điều hướng với bản xuất.
 
 Đối chiếu mục lục với trang nội dung sau mỗi lần thay đổi bố cục. Số trang có
 thể thay đổi giữa các trình soạn thảo hoặc khi máy thiếu phông chữ; khi chỉnh

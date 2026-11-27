@@ -423,6 +423,7 @@ def build_package(
 ) -> Path:
     sources = package_files(root, milestone, include_reference_pdf=include_reference_pdf)
     files = {archive_path(p, milestone): role for p, role in sources.items()}
+    # Archive source bytes so provenance and the loose mirror use the same hashes.
     payload = {archive_path(p, milestone): (root / p).read_bytes() for p in sources}
     now_dt = time.localtime()[:6]
     mtimes = {
@@ -554,6 +555,10 @@ def replay_notebook(path: Path, guard: str, log: Path) -> tuple[int, bool]:
             "MPLBACKEND",
         }
     }
+    # Pin the worker count strictly below os.cpu_count() so joblib/loky skips
+    # its physical-core probe (`wmic`, absent on some Windows builds); that
+    # probe's warning traceback would land in a cell's stderr.
+    env.setdefault("LOKY_MAX_CPU_COUNT", str(max((os.cpu_count() or 2) - 1, 1)))
     proc = subprocess.run(
         [
             sys.executable,

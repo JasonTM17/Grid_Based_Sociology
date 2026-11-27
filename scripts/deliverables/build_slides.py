@@ -57,11 +57,14 @@ def build_evidence() -> dict:
     panel = pd.read_csv(ROOT / "data/processed/papi_panel_v1_LOCKED.csv")
     features = config["features"]
     pars = config["sting"]
+    resolution = pars["factor"] ** pars["cluster_level"]
     ref = panel.loc[panel.year.le(2023)].dropna(subset=features).copy()
     scaler = StandardScaler().fit(ref[features])
     z = scaler.transform(ref[features])
     grid = STING(n_levels=pars["n_levels"], factor=pars["factor"], min_count=pars["min_count"]).fit(z)
     labels = grid.cluster(level=pars["cluster_level"], connectivity=pars["connectivity"])
+    raw_lo, raw_hi = scaler.inverse_transform([grid.bounds_min_, grid.bounds_max_])
+    raw_step = (raw_hi - raw_lo) / resolution
     km = KMeans(n_clusters=2, n_init=10, random_state=42).fit_predict(z)
     db = DBSCAN(eps=0.2, min_samples=5).fit_predict(z)
     common = (labels >= 0) & (db >= 0)
@@ -69,7 +72,7 @@ def build_evidence() -> dict:
         {"method": name, "clusters": len(set(lab[lab >= 0])),
          "noise_pct": float(100 * np.mean(lab == -1)),
          "silhouette": float(silhouette_score(z[common], lab[common]))}
-        for name, lab in [("STING", labels), ("K-means (k = 2)", km), ("DBSCAN (ε = 0,2)", db)]
+        for name, lab in [("STING", labels), ("K-means (k = 2)", km), ("DBSCAN (ε = 0,2, MinPts = 5)", db)]
     ]
     recorded = pd.read_csv(ROOT / "results/predict_all_years.csv")
     joined = ref.assign(rebuilt=labels).merge(
@@ -94,9 +97,11 @@ def build_evidence() -> dict:
     core = stake.loc[stake.cluster.eq(2)]
     q1, q3 = core.sd_6_1.quantile([0.25, 0.75])
     lower = float(q1 - 0.5 * (q3 - q1))
+    core_median_42 = float(core.sd_4_2.median())
     # Use numeric labels and values rather than wording as the grouping contract.
-    masks = [stake.cluster.eq(2), stake.cluster.eq(-1) & stake.sd_6_1.ge(lower),
-             stake.cluster.eq(-1) & stake.sd_6_1.lt(lower), stake.cluster.isna()]
+    sparse = stake.cluster.eq(-1)
+    high_side = sparse & stake.sd_4_2.ge(core_median_42) & stake.sd_6_1.ge(lower)
+    masks = [stake.cluster.eq(2), high_side, sparse & stake.sd_6_1.lt(lower), stake.cluster.isna()]
     groups = []
     for key, mask in zip(["core", "high_side", "low_61", "missing"], masks, strict=True):
         frame = stake.loc[mask]
@@ -114,11 +119,11 @@ def build_evidence() -> dict:
     for year in [2023, 2024]:
         row = panel.loc[panel.year.eq(year) & panel.province_vi.eq("Lạng Sơn")].iloc[0]
         point = scaler.transform(pd.DataFrame([row[features]], columns=features))
-        cell = tuple(int(v) for v in grid._assign(point, pars["factor"] ** pars["cluster_level"])[0][0])
+        cell = tuple(int(v) for v in grid._assign(point, resolution)[0][0])
         count = grid.cells_[pars["cluster_level"]].get(cell)
         label = int(grid.predict(point)[0])
         trace.append({"year": year, "x": float(row.sd_4_2), "y": float(row.sd_6_1),
-                      "cell": str(cell), "count": count.count if count else 0, "label": label})
+                      "cell": list(cell), "count": count.count if count else 0, "label": label})
     external = pd.read_csv(ROOT / "results/external_validation.csv")
     poverty = pd.read_csv(ROOT / "results/poverty_validation.csv")
     pci_row = external.loc[external.section.eq("pci_2011_2022") & external.group.eq("Kruskal–Wallis")].iloc[0]
@@ -163,7 +168,13 @@ def build_evidence() -> dict:
         "scripts/common/papi_forecast.py", "scripts/analysis/predict_sweep.py",
         "app.py", "scripts/analysis/client_product.py", "reports/customer_guide.md",
     ]
-    source_sha256 = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in source_paths}
+    def _source_digest(name: str) -> str:
+        # .gitattributes chuẩn hóa xuống LF trong index; hash nội dung đã chuẩn
+        # hóa để kết quả không lệch chỉ vì checkout CRLF trên Windows.
+        raw = (ROOT / name).read_bytes()
+        return hashlib.sha256(raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")).hexdigest()
+
+    source_sha256 = {name: _source_digest(name) for name in source_paths}
     payload = {"slide_count": SLIDE_COUNT, "config": config, "external_checks": external_checks,
                "source_sha256": source_sha256,
                "panel_rows": len(panel), "panel_columns": len(panel.columns),
@@ -174,7 +185,8 @@ def build_evidence() -> dict:
                "synthetic_ari": float(adjusted_rand_score(syn_true, syn_labels)),
                "synthetic_clusters": len(set(syn_labels[syn_labels >= 0])), "synthetic_noise": int((syn_labels == -1).sum()),
                "observed": _records(observed), "stakeholders": _records(stake),
-               "groups": groups, "threshold_61": lower,
+               "groups": groups, "threshold_61": lower, "core_median_42": core_median_42,
+               "grid_raw_lo": raw_lo.tolist(), "grid_raw_step": raw_step.tolist(),
                "transitions": transitions, "transition_n": len(codes), "trace": trace,
                "core_lower_n": int(core.sd_6_1.lt(lower).sum()),
                "stable_names": stake.loc[stake.years_cluster2_2011_2024.eq(14), "province_vi"].tolist(),
@@ -227,4 +239,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # Keep Vietnamese diagnostics readable when Windows redirects CLI output.
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
     main()

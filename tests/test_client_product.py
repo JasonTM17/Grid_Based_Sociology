@@ -119,6 +119,11 @@ def test_build_province_scorecard_html_covers_groups_missing_and_escaping():
         assert "năm tới" not in out
         assert "Chỉ mô tả bối cảnh kinh tế–xã hội độc lập" in out
         assert "Mốc 6.1 là quy tắc hồi cứu" in out
+        assert "Ngưỡng rìa dưới 6.1 (Q25 − 0,5×IQR) = <strong>1.8791</strong>" in out
+        if prov_code == 1:
+            assert "<code>(10, 5)</code> · Số điểm tham chiếu trong ô: <strong>3</strong>" in out
+        if prov_code == 22:
+            assert "<td>2018</td><td class='num'>—</td><td class='num'>—</td><td>—</td>" in out
         assert "chuẩn tham chiếu bền vững" not in out
         assert "vượt chuẩn" not in out
         assert "<script>" not in out
@@ -128,6 +133,7 @@ def test_build_province_scorecard_html_covers_groups_missing_and_escaping():
         26, summary, all_years, data["bench"], data["benchmarks_14y"]
     )
     assert "Vĩnh Phúc" in missing_html
+    assert "<code>—</code> · Số điểm tham chiếu trong ô: <strong>—</strong>" in missing_html
     assert "—" in missing_html
     assert "NaN" not in missing_html
     assert ">None<" not in missing_html

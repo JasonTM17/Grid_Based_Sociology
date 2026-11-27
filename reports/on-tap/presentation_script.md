@@ -2,6 +2,10 @@
 
 Bộ slide chính là [`slides/Nhom15_STING_PAPI.pptx`](../../slides/Nhom15_STING_PAPI.pptx). Nội dung đi từ bài toán và cơ chế thuật toán đến kết quả PAPI, dự báo bổ trợ và giới hạn ứng dụng. Bộ trình chiếu có **12 slide**, dành khoảng **15 phút trình bày và 5 phút hỏi đáp**. Bảng thời gian dưới đây là kế hoạch luyện tập, chưa phải thời gian đã đo. Nội dung trên màn hình giữ các kết quả và giới hạn cần thiết; ghi chú slide cung cấp chi tiết để trả lời phản biện, không cần đọc nguyên văn.
 
+Mạch bài nói đi từ **phân cụm**, qua **thống kê**, đến **nhận xét từ kết quả**.
+Slide 3–5 giải thích cách dựng lưới, tạo cụm và đối chứng. Slide 6–7 đọc số liệu
+quan sát và tính thử một ô thật. Slide 11 tổng hợp số lượng, tỷ lệ và trung vị.
+
 Các kết quả chính cần phân biệt xuyên suốt bài nói:
 
 | Phạm vi | Mẫu số | Ý nghĩa |
@@ -15,24 +19,24 @@ Các kết quả chính cần phân biệt xuyên suốt bài nói:
 
 ## Lời mở đầu
 
-> Thưa thầy và các bạn, nhóm 15 trình bày cài đặt thuật toán phân cụm dựa trên lưới STING và ứng dụng trên dữ liệu PAPI giai đoạn 2011–2024. Nhóm tập trung giải thích cơ chế gán cụm, kiểm tra kết quả trên cùng phạm vi dữ liệu và tạo bảng mô tả để hỗ trợ rà soát từng tỉnh. Phần gán điểm PAPI đã quan sát năm 2024 được trình bày riêng với thí nghiệm dự báo điểm năm 2024.
+> Thưa thầy và các bạn, nhóm 15 áp dụng STING lên hai chỉ tiêu PAPI giai đoạn 2011–2024. Nhóm sẽ giải thích cách STING gán một tỉnh vào ô lưới, thống kê vị trí của các tỉnh năm 2024, rồi đối chiếu số liệu để nhận xét các nhóm.
 
 ## Thời lượng và trọng tâm từng slide
 
 | Slide | Thời gian | Nội dung cần nói |
 |---|---|---|
-| 1 | 0:00–0:50 | Giới thiệu đề tài, Nhóm 15, hai thành viên và giảng viên. Nêu câu hỏi các tỉnh tập trung ở đâu trong không gian chỉ tiêu và thay đổi thế nào; mục tiêu là kiểm chứng STING, truy vết kết quả và tạo bảng rà soát 63 tỉnh. |
-| 2 | 0:50–2:20 | Giải thích 4.2 và 6.1; panel 882 × 41, 13 dòng thiếu nên còn 869 dòng đầy đủ. Một dòng là một tỉnh–năm. Nêu kiểm tra khóa, quy ước 0 thành thiếu, giữ NaN và gắn cờ cực trị. Kiểm tra thang đo theo giai đoạn. Chọn cấu hình qua fit đến 2020 và kiểm định 2021–2022, sau đó fit lại 808 dòng 2011–2023. Scaler chỉ fit trên train; 2024 chỉ transform và gán nhãn. |
-| 3 | 2:20–3:55 | Đọc bảng đếm 3 × 3: hai cặp ô dày tạo hai cụm 7 điểm, một điểm ô thưa nhận −1. Kề góc không nối. Phân biệt biến thể gom ô tại một tầng với truy vấn vùng top-down của STING gốc. Giả lập 240 điểm đạt ARI 0,950, không phải accuracy trên PAPI. |
-| 4 | 3:55–4:40 | Lưới 808 dòng có các cụm 629, 16, 5 và 158 điểm −1. Cụm 2 chiếm 96,8% số điểm đã vào cụm; ba nhãn không đồng nghĩa ba phân khúc quản trị cân bằng. |
-| 5 | 4:40–5:40 | So silhouette trên cùng 631 điểm giao: STING 0,366; K-means 0,457; DBSCAN 0,258. Số cụm và nhiễu vẫn dùng mẫu 808. Kết quả hình học chưa xác nhận ý nghĩa quản trị. Thí nghiệm toàn kỳ giữ nguyên 869/869 chỉ số ô sau z-score vì dựng lại lưới đều trên cùng mẫu. |
-| 6 | 5:40–7:10 | Kết hợp đồ thị 61 điểm quan sát và bảng đủ 63 tỉnh: 48 trong vùng dày, 8 ngoài vùng phía điểm cao, 5 ngoài vùng có 6.1 thấp, 2 thiếu dữ liệu. Ngưỡng 1,8791 là quy tắc mô tả hậu nghiệm; 7 tỉnh trong vùng dày cũng dưới ngưỡng. Không coi −1 là yếu kém hay bảng này là bốn cụm do STING học. |
-| 7 | 7:10–8:25 | Ma trận 59 tỉnh: 43 giữ vùng dày, 7 rời vùng, 5 đi vào, 4 vẫn ngoài. Nêu 5/7 tỉnh rời vùng nằm phía điểm cao. Truy vết Lạng Sơn từ ô (13,9), count 2 sang ô (12,10), count 12. Count là số điểm lịch sử trong ô, không phải dân số hoặc lượng khảo sát của tỉnh. |
-| 8 | 8:25–10:05 | Phân biệt dự báo giá trị liên tục và gán nhãn từ điểm đã quan sát. Ridge cải thiện MAE nhẹ, nhưng RMSE 4.2 xấu hơn giữ điểm 2023. Dự báo điểm phát hiện 0/11 tỉnh ngoài vùng; balanced accuracy 0,500. AUC 0,816 từ 364 cặp phần dư là thăm dò hồi cứu, chưa phải xác suất hiệu chỉnh. Giới thiệu nhánh phân loại học phần dùng pseudo-label STING, đánh giá macro-F1; chi tiết CV và từng mô hình dùng khi hỏi đáp. |
-| 9 | 10:05–11:15 | Đối chiếu PCI, GRDP, ODM và nghèo. P-value chỉ tham khảo do quan sát lặp theo tỉnh và khác biệt năm. ODM không ghi nhận điểm cơ sở ở 10 tỉnh không có nghĩa các tỉnh đó không có cơ sở y tế. P-value lớn chưa chứng minh không có khác biệt. |
-| 10 | 11:15–12:20 | PCA/8D cho thấy độ nhạy với biểu diễn và tham số. Hạ min_count xuống 2 giảm nhiễu nhưng silhouette âm −0,089; giảm nhiễu chưa đủ để gọi cấu trúc tốt. Đây là các thử nghiệm mô tả, không dùng làm kết quả dự báo. |
-| 11 | 12:20–13:45 | Demo tab “Thống kê khách hàng” luôn hiển thị 2024: chọn Lạng Sơn, đọc hai chỉ tiêu, ô lưới và count. Lọc nhóm, tải CSV hoặc phiếu HTML; mở phiếu và in thành PDF khổ A4. Chỉ thực hiện một ca đã chuẩn bị sẵn, nêu giới hạn ngay khi giải thích kết quả. |
-| 12 | 13:45–15:00 | Tổng kết phần cài đặt, tái lập, truy vết và bảng 63 tỉnh. Nhắc ba giới hạn chính: cụm lớn chiếm ưu thế, nhạy tham số, quy tắc và AUC mang tính hồi cứu. Hướng tiếp theo là kiểm định độc lập, đánh giá cuốn chiếu và thẩm định với người dùng. Cảm ơn và mời câu hỏi. |
+| 1 | 0:00–0:50 | Giới thiệu nhóm, đề tài và mạch phân cụm, thống kê, nhận xét. |
+| 2 | 0:50–2:10 | Giải thích hai chỉ tiêu và đơn vị tỉnh–năm. Panel 882 × 41 có 13 dòng thiếu hai chỉ tiêu. Nêu kiểm tra khóa, cách xử lý điểm 0, cờ cực trị và thang đo. Chọn cấu hình với 2021–2022, dựng lưới tham chiếu trên 808 dòng 2011–2023, giữ nguyên khi gán điểm 2024. |
+| 3 | 2:10–4:15 | Đi theo fit → cluster → predict và đọc bảng 3 × 3. Hai cặp ô chung cạnh tạo hai cụm, mỗi cụm 7 điểm. Một điểm ô thưa nhận −1. Giải thích công thức tra ô và ngưỡng 5 trên lưới PAPI 16 × 16. ARI 0,950 đo trên 240 điểm giả lập. |
+| 4 | 4:15–5:05 | Lưới 808 dòng có các cụm 629, 16, 5 và 158 điểm −1. Cụm 2 chiếm 96,8% số điểm đã vào cụm. Hai cụm còn lại có rất ít quan sát. |
+| 5 | 5:05–6:00 | Trên 631 điểm chung, silhouette lần lượt là 0,366, 0,457 và 0,258. Mẫu 808 dùng để đếm cụm và nhiễu. Khi dựng lại lưới đều trên cùng 869 điểm, z-score giữ nguyên 869 chỉ số ô. |
+| 6 | 6:00–7:50 | Chỉ bốn nhóm trong bảng. STING gán nhãn trên 61 tỉnh đủ điểm. Hai mốc từ Cụm 2 chia tiếp 13 điểm ô thưa theo hai chỉ tiêu, còn 2 tỉnh thiếu vẫn có dòng trong báo cáo. |
+| 7 | 7:50–9:30 | Đọc ma trận trên 59 tỉnh, sau đó tính từng trục cho Lạng Sơn năm 2024. Lấy phần nguyên được ô (12, 10) với 12 điểm tham chiếu nên vào Cụm 2. Ô năm 2023 có 2 điểm nên nhãn −1. Trong 7 tỉnh rời vùng dày, 5 nằm phía điểm cao. |
+| 8 | 9:30–10:40 | Ridge giảm MAE nhẹ, còn RMSE của 4.2 tăng. Dự báo điểm phát hiện 0/11 tỉnh ngoài vùng. AUC 0,816 là kết quả hồi cứu; macro-F1 của Naive Bayes đo độ khớp nhãn STING. |
+| 9 | 10:40–11:30 | Nêu một ví dụ đối chiếu PCI và giới hạn của kiểm định khi nhiều quan sát thuộc cùng tỉnh. Các nguồn ngoài bổ sung bối cảnh cho thống kê PAPI. |
+| 10 | 11:30–12:15 | PCA và nhánh tám chiều cho thấy kết quả nhạy với biểu diễn. Hạ ngưỡng số điểm làm tỷ lệ nhiễu giảm trong thử nghiệm 8D, silhouette vẫn âm −0,089. |
+| 11 | 12:15–14:10 | Đọc tỷ lệ 76,2%, 12,7%, 7,9% và 3,2% trên 63 tỉnh. Đối chiếu 2,235 với 2,032 ở trục 4.2 và 1,787 với 1,963 ở trục 6.1. Nhóm cùng nhãn −1 có thể nằm ở hai phía của phân bố. Trong Cụm 2 vẫn có 7 tỉnh dưới mốc 6.1. |
+| 12 | 14:10–15:00 | Chốt STING truy vết được nhãn theo ô. Báo cáo nhận diện một vùng dày lớn cùng các trường hợp ở ô thưa. Nêu phạm vi hai chỉ tiêu và hướng kiểm tra với dữ liệu mới. |
 
 ## Chuẩn bị demo
 
@@ -43,7 +47,7 @@ python scripts/deliverables/demo_smoke.py
 python -m streamlit run app.py
 ```
 
-Trước khi vào phần nói, mở sẵn tab **Thống kê khách hàng**, luôn hiển thị dữ liệu năm 2024. Dùng bộ lọc tỉnh và nhóm trong tab; tải CSV theo đúng bộ lọc. Phiếu tải trực tiếp là HTML, mở trong trình duyệt rồi in khổ A4 để lưu PDF. Xem [hướng dẫn sử dụng](../customer_guide.md). Tên nhóm trong ứng dụng và CSV là nhãn quy tắc của sản phẩm; khi diễn giải, dùng ý nghĩa mô tả trên slide 6. Không gọi các nhóm là chứng nhận chất lượng hay bốn cụm do STING tự tìm được.
+Nếu cần kiểm tra một dòng khi hỏi đáp, mở sẵn bảng năm 2024 trên dashboard. Lọc Hà Nội để đối chiếu ô (10, 5), 3 điểm tham chiếu và điểm 6.1 = 1,686. Phiếu HTML có thể in thành một trang A4. [Hướng dẫn sử dụng](../customer_guide.md)
 
 Nếu không chạy được ứng dụng tại phòng trình chiếu, mở [`results/stakeholder_province_summary_2024.csv`](../../results/stakeholder_province_summary_2024.csv) và [`notebooks/Nhom15_STING_PAPI.ipynb`](../../notebooks/Nhom15_STING_PAPI.ipynb) với outputs đã lưu. Không chạy lại toàn bộ pipeline khi đang thuyết trình. Xem thêm [hướng dẫn demo](../../DEMO.md).
 

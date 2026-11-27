@@ -29,6 +29,7 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
 from scripts.analysis.client_product import load_vietnam_geojson  # noqa: E402
+from scripts.analysis.stakeholder_summary import CUSTOMER_GROUP_LABELS  # noqa: E402
 from scripts.common.fig_style import CLUSTER_COLORS, PALETTE, style_context  # noqa: E402
 from scripts.common.midterm_clustering import FEATURES, fit_grid  # noqa: E402
 from scripts.common.papi_forecast import forecast_from_history, score_forecast  # noqa: E402
@@ -503,7 +504,10 @@ def _qualitative_candidates(panel: pd.DataFrame, traj_df: pd.DataFrame) -> pd.Da
     action_map: dict[str, str] = {}
     if STAKEHOLDER_2024_CSV.is_file():
         sh = pd.read_csv(STAKEHOLDER_2024_CSV)
-        action_map = dict(zip(sh["province_vi"], sh["action_group"]))
+        action_map = {
+            str(prov): CUSTOMER_GROUP_LABELS.get(str(group), str(group))
+            for prov, group in zip(sh["province_vi"], sh["action_group"], strict=True)
+        }
 
     ord_61 = traj_df.sort_values("slope_6_1", ascending=False)
     top3 = set(ord_61.head(3)["province_vi"])
@@ -618,7 +622,7 @@ def render_markdown(
             "",
             "## Hướng 5: Gợi ý đối chiếu định tính (ngoài phạm vi code tự động)",
             "",
-            "- Đối chiếu danh sách **8 tỉnh Biên bứt phá** trong [`results/stakeholder_summary.md`](stakeholder_summary.md) và quy trình chấm phiếu độc lập tại [`reports/quy-trinh-tham-dinh-danh-sach-papi.md`](https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/reports/quy-trinh-tham-dinh-danh-sach-papi.md) (tuyệt đối không dùng điểm/nhãn STING để tự xác nhận).",
+            "- Đối chiếu danh sách **8 tỉnh ngoài vùng dày phía điểm cao** (nhãn CSV lịch sử: `Biên bứt phá vượt chuẩn`) trong [`results/stakeholder_summary.md`](stakeholder_summary.md) và quy trình chấm phiếu độc lập tại [`reports/quy-trinh-tham-dinh-danh-sach-papi.md`](https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/reports/quy-trinh-tham-dinh-danh-sach-papi.md) (tuyệt đối không dùng điểm/nhãn STING để tự xác nhận).",
             "- Dưới đây là hợp của các tỉnh có độ dốc `6.1` cực trị (`E2`) và các tỉnh ô thưa năm 2024 (`-1`) làm **bảng ứng viên tham khảo** cho bước phỏng vấn / rà soát hồ sơ địa phương (không kết luận đúng/sai hay nhân quả):",
             "",
             "| Tỉnh | Tiêu chí gợi ý | Nhóm hành động 2024 | Độ dốc `4.2` | Độ dốc `6.1` | Điểm `6.1` (2024) |",
@@ -671,7 +675,7 @@ def main() -> int:
     plt.close(fig)
 
     md_text = render_markdown(e1_sum, e2_sum, e3_sum, e4_sum, bt_df, sp_df, qual_df)
-    (RESULTS_DIR / "future_work.md").write_text(md_text, encoding="utf-8")
+    (RESULTS_DIR / "future_work.md").write_text(md_text, encoding="utf-8", newline="\n")
 
     print("=== E1 RANK ===", json.dumps(e1_sum, ensure_ascii=False))
     print("=== E2 TRAJECTORY ===", json.dumps(e2_sum, ensure_ascii=False))

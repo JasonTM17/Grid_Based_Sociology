@@ -81,6 +81,60 @@ ACTION_GROUP_COLORS = {
 }
 
 
+# Saved result files retain their historical labels for reproducibility.
+# Customer views describe the measured position without claiming a validated
+# quality rating, temporal stability or an effective policy intervention.
+CUSTOMER_GROUP_LABELS = {
+    "Biên bứt phá vượt chuẩn": "Ngoài vùng dày phía điểm cao",
+    "Vùng lõi ổn định (Cụm 2)": "Trong vùng dày (Cụm 2)",
+    "Ưu tiên cải thiện Y tế 6.1": "Ngoài vùng dày, 6.1 thấp",
+    "Ngoại vi biến động khác": "Ngoài vùng dày, trường hợp khác",
+    "Thiếu dữ liệu 2024": "Thiếu dữ liệu 2024",
+}
+_CUSTOMER_TEXT = {
+    "action_group": CUSTOMER_GROUP_LABELS,
+    "action_subtier": {
+        "Dẫn đầu trục 4.2 (6.1 quanh vùng cụm)": "4.2 từ trung vị trở lên; 6.1 quanh vùng dày",
+        "Vượt trội kép (4.2 & 6.1 > trung vị lõi)": "Cả hai điểm từ trung vị vùng dày trở lên",
+        "Trong cụm nhưng rìa dưới Y tế 6.1": "Trong vùng dày; 6.1 dưới mốc rà soát",
+        "Lõi ổn định chuẩn": "Trong vùng dày; 6.1 từ mốc rà soát trở lên",
+        "Chuẩn tham chiếu 14/14 năm": "Giữ nhãn Cụm 2 trong 14/14 năm",
+        "Thấp hơn lõi trên cả 2 trục (đặc biệt 6.1)": "4.2 dưới trung vị; 6.1 dưới mốc rà soát",
+        "Lệch pha: 4.2 đạt/vượt chuẩn, 6.1 tụt sâu": "4.2 từ trung vị trở lên; 6.1 dưới mốc rà soát",
+    },
+    "transition_2023_2024": {
+        "Rời Cụm 2 lên biên bứt phá": "Rời Cụm 2 về phía điểm cao",
+        "Duy trì ngoài lõi (−1)": "Ngoài vùng dày ở cả hai năm (−1)",
+        "Giữ vững Cụm 2": "Giữ nhãn Cụm 2",
+        "Vào Cụm 2 từ ngoài lõi": "Vào Cụm 2 từ ngoài vùng dày",
+        "Rời Cụm 2 xuống rìa Y tế 6.1": "Rời Cụm 2; 6.1 dưới mốc rà soát",
+    },
+    "client_recommendation": {
+        "Nhân rộng thực hành tốt về kiểm soát tham nhũng trong dịch vụ công 4.2 và giữ ổn định y tế 6.1.":
+            "Đối chiếu các thành phần 4.2 và khảo sát tại địa phương trước khi đề xuất áp dụng kinh nghiệm.",
+        "Khảo sát điển hình quản trị tốt trên cả hai trục để chia sẻ kinh nghiệm liên tỉnh.":
+            "Chọn ca đối sánh hai chỉ tiêu và xác minh bối cảnh trước khi rút ra bài học quản lý.",
+        "Theo dõi sát y tế công lập 6.1 vì điểm nằm dưới ngưỡng phân vị lõi dù vẫn ở ô dày.":
+            "Rà soát các thành phần 6.1 với dữ liệu địa phương; điểm dưới mốc nội bộ dù vẫn thuộc ô dày.",
+        "Duy trì cân bằng giữa kiểm soát tham nhũng (4.2) và y tế công lập (6.1).":
+            "Theo dõi hai chỉ tiêu và đối chiếu với các địa phương có bối cảnh tương đồng.",
+        "Duy trì ổn định dài hạn và dùng làm điểm chuẩn đối sánh (benchmark).":
+            "Xem xét làm ca tham chiếu sau khi đối chiếu điểm số và bối cảnh; giữ nhãn chưa chứng minh chất lượng ổn định.",
+        "Ưu tiên rà soát toàn diện chất lượng y tế công lập 6.1 và kiểm soát tham nhũng 4.2.":
+            "Đối chiếu các thành phần 4.2 và 6.1 với dữ liệu địa phương để xác định nội dung cần rà soát.",
+    },
+}
+
+
+def customer_display_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    """Return descriptive customer text without changing source rows or numbers."""
+    display = frame.copy()
+    for column, mapping in _CUSTOMER_TEXT.items():
+        if column in display:
+            display[column] = display[column].map(lambda value: mapping.get(value, value))
+    return display
+
+
 def compute_core_benchmarks(observed_2024: pd.DataFrame) -> dict[str, float]:
     """Tính các mốc phân vị thực nghiệm của Cụm 2 năm 2024 (không hardcode)."""
     core = observed_2024.loc[observed_2024["grid_status"].eq("in_cluster")]
@@ -774,42 +828,48 @@ def update_excel_workbook(
     col_specs = [
         ("province_code", "Mã tỉnh", 9.5, "0", "right"),
         ("province_vi", "Tỉnh / thành phố", 20.0, "General", "left"),
-        ("action_group", "Nhóm hành động 2024", 26.0, "General", "left"),
+        ("action_group", "Nhóm mô tả 2024", 27.0, "General", "left"),
         ("action_subtier", "Phân tầng chi tiết", 34.0, "General", "left"),
         ("sd_4_2", "Điểm 4.2 (2024)", 13.0, "0.000", "right"),
         ("sd_6_1", "Điểm 6.1 (2024)", 13.0, "0.000", "right"),
         ("grid_cell", "Ô lưới 2024", 12.0, "General", "center"),
         ("reference_count", "Điểm tham chiếu ô", 15.0, "#,##0", "right"),
         ("years_cluster2_2011_2024", "Số năm Cụm 2 (2011–2024)", 17.0, "#,##0", "right"),
-        ("years_noise_2011_2024", "Số năm ngoài lõi", 15.0, "#,##0", "right"),
+        ("years_noise_2011_2024", "Số năm nhãn −1", 15.0, "#,##0", "right"),
         ("transition_2023_2024", "Dịch chuyển 2023→2024", 27.0, "General", "left"),
         ("risk_outside_scenario_share", "Kịch bản ngoài vùng 2024", 19.0, "0.0%", "right"),
         ("grdp_2024_mil_vnd", "GRDP/người 2024 (tr.đ)", 17.0, "0.00", "right"),
         ("pci_2022", "PCI 2022", 11.0, "0.00", "right"),
         ("poverty_2024_pct", "Tỉ lệ nghèo 2024 (%)", 15.0, "0.0", "right"),
-        ("client_recommendation", "Khuyến nghị bàn giao", 46.0, "General", "left"),
+        ("client_recommendation", "Gợi ý rà soát", 49.0, "General", "left"),
     ]
     last_col_letter = openpyxl.utils.get_column_letter(len(col_specs))
 
-    ws["A2"] = "Thống kê bàn giao cho khách hàng — 63 tỉnh năm 2024"
+    ws["A2"] = "Báo cáo tổng hợp 63 tỉnh năm 2024"
     ws["A2"].font = Font(name="Arial", size=15, bold=True, color="000000")
     ws["A2"].fill = copy(white_fill)
     ws["A2"].alignment = Alignment(vertical="center", wrap_text=True)
     ws.merge_cells(f"A2:{last_col_letter}2")
     ws.row_dimensions[2].height = 24.0
 
-    counts_map = summary["action_group"].value_counts().to_dict()
-    ws["A3"] = (
-        f"Phân nhóm hành động từ nhãn STING cố định ({counts_map.get('Vùng lõi ổn định (Cụm 2)', 0)} Vùng lõi ổn định, "
-        f"{counts_map.get('Biên bứt phá vượt chuẩn', 0)} Biên bứt phá vượt chuẩn, "
-        f"{counts_map.get('Ưu tiên cải thiện Y tế 6.1', 0)} Ưu tiên Y tế 6.1, "
-        f"{counts_map.get('Thiếu dữ liệu 2024', 0)} Thiếu dữ liệu 2024), kèm dịch chuyển 2023→2024, kịch bản ngoài vùng năm 2024 và GRDP/PCI."
-    )
+    display = customer_display_frame(summary)
+    counts = display["action_group"].value_counts()
+    ws["A3"] = " · ".join(f"{count} {group.lower()}" for group, count in counts.items())
     ws["A3"].font = Font(name="Arial", size=10, italic=True, color="000000")
     ws["A3"].fill = copy(white_fill)
     ws["A3"].alignment = Alignment(vertical="center", wrap_text=True)
     ws.merge_cells(f"A3:{last_col_letter}3")
     ws.row_dimensions[3].height = 21.75
+    bench = compute_core_benchmarks(summary)
+    fence = f"{bench['lower_61_fence']:.4f}".replace(".", ",")
+    ws["A4"] = (
+        f"Mốc rà soát nội bộ 6.1 = {fence}, tính từ {bench['n_core']} tỉnh trong vùng dày năm 2024. "
+        "Tỉ lệ kịch bản ngoài vùng phản ánh hồi kiểm 2023→2024."
+    )
+    ws["A4"].font = copy(ws["A3"].font)
+    ws["A4"].alignment = copy(ws["A3"].alignment)
+    ws.merge_cells(f"A4:{last_col_letter}4")
+    ws.row_dimensions[4].height = 20
 
     ws.row_dimensions[5].height = 32.25
     for col_idx, (_, title, width, _, _) in enumerate(col_specs, start=1):
@@ -826,10 +886,11 @@ def update_excel_workbook(
         col_letter = openpyxl.utils.get_column_letter(col_idx)
         ws.column_dimensions[col_letter].width = width
 
-    export_df = summary[[k for k, *_ in col_specs]]
+    export_df = display[[k for k, *_ in col_specs]]
+    wrapped_columns = {"action_group", "action_subtier", "transition_2023_2024", "client_recommendation"}
     for row_offset, (_, row) in enumerate(export_df.iterrows(), start=6):
         rec_text = str(row["client_recommendation"] or "")
-        ws.row_dimensions[row_offset].height = 28.5 if len(rec_text) > 46 else 18.0
+        ws.row_dimensions[row_offset].height = 39 if len(rec_text) > 75 else 30
         for col_idx, (key, _, _, num_fmt, h_align) in enumerate(col_specs, start=1):
             val = row[key]
             if pd.isna(val):
@@ -843,7 +904,7 @@ def update_excel_workbook(
             cell.alignment = Alignment(
                 horizontal=h_align if h_align != "left" else None,
                 vertical="center",
-                wrap_text=(key == "client_recommendation"),
+                wrap_text=key in wrapped_columns,
             )
 
     last_row = 5 + len(export_df)
@@ -871,7 +932,7 @@ def update_excel_workbook(
     ws_toc.row_dimensions[target_row].height = 19.5
     ws_toc.cell(target_row, 1, "Bàn giao khách hàng")
     ws_toc.cell(target_row, 2, f"=HYPERLINK(\"#'{sheet_name}'!A2\",\"{sheet_name}\")")
-    ws_toc.cell(target_row, 3, "Phân loại hành động & khuyến nghị 63 tỉnh năm 2024")
+    ws_toc.cell(target_row, 3, "Nhóm mô tả và gợi ý rà soát 63 tỉnh năm 2024")
     ws_toc.cell(target_row, 4, len(export_df))
     ws_toc.cell(target_row, 5, len(col_specs))
     ws_toc.cell(target_row, 6, "stakeholder_province_summary_2024.csv")
