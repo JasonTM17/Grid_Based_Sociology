@@ -1,0 +1,751 @@
+{
+  "years": [
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "budgets": [
+    5,
+    10
+  ],
+  "annual": [
+    {
+      "year": 2018,
+      "period": "retrospective",
+      "fit_through": 2017,
+      "history_rows": 439,
+      "known_provinces": 63,
+      "eligible": 61,
+      "status_counts": {
+        "in_cluster": 34,
+        "sparse_cell": 27
+      },
+      "comparisons": {
+        "5": {
+          "health_only__sting_only": {
+            "intersection": 0,
+            "union": 10
+          },
+          "health_only__combined": {
+            "intersection": 3,
+            "union": 7
+          },
+          "sting_only__combined": {
+            "intersection": 0,
+            "union": 10
+          }
+        },
+        "10": {
+          "health_only__sting_only": {
+            "intersection": 3,
+            "union": 17
+          },
+          "health_only__combined": {
+            "intersection": 4,
+            "union": 16
+          },
+          "sting_only__combined": {
+            "intersection": 6,
+            "union": 14
+          }
+        }
+      }
+    },
+    {
+      "year": 2019,
+      "period": "retrospective",
+      "fit_through": 2018,
+      "history_rows": 500,
+      "known_provinces": 63,
+      "eligible": 63,
+      "status_counts": {
+        "sparse_cell": 35,
+        "in_cluster": 27,
+        "outside_grid": 1
+      },
+      "comparisons": {
+        "5": {
+          "health_only__sting_only": {
+            "intersection": 0,
+            "union": 10
+          },
+          "health_only__combined": {
+            "intersection": 2,
+            "union": 8
+          },
+          "sting_only__combined": {
+            "intersection": 1,
+            "union": 9
+          }
+        },
+        "10": {
+          "health_only__sting_only": {
+            "intersection": 1,
+            "union": 19
+          },
+          "health_only__combined": {
+            "intersection": 4,
+            "union": 16
+          },
+          "sting_only__combined": {
+            "intersection": 2,
+            "union": 18
+          }
+        }
+      }
+    },
+    {
+      "year": 2020,
+      "period": "retrospective",
+      "fit_through": 2019,
+      "history_rows": 563,
+      "known_provinces": 63,
+      "eligible": 63,
+      "status_counts": {
+        "in_cluster": 37,
+        "sparse_cell": 25,
+        "outside_grid": 1
+      },
+      "comparisons": {
+        "5": {
+          "health_only__sting_only": {
+            "intersection": 0,
+            "union": 10
+          },
+          "health_only__combined": {
+            "intersection": 1,
+            "union": 9
+          },
+          "sting_only__combined": {
+            "intersection": 1,
+            "union": 9
+          }
+        },
+        "10": {
+          "health_only__sting_only": {
+            "intersection": 0,
+            "union": 20
+          },
+          "health_only__combined": {
+            "intersection": 3,
+            "union": 17
+          },
+          "sting_only__combined": {
+            "intersection": 2,
+            "union": 18
+          }
+        }
+      }
+    },
+    {
+      "year": 2021,
+      "period": "retrospective",
+      "fit_through": 2020,
+      "history_rows": 626,
+      "known_provinces": 63,
+      "eligible": 60,
+      "status_counts": {
+        "in_cluster": 49,
+        "sparse_cell": 11
+      },
+      "comparisons": {
+        "5": {
+          "health_only__sting_only": {
+            "intersection": 0,
+            "union": 10
+          },
+          "health_only__combined": {
+            "intersection": 1,
+            "union": 9
+          },
+          "sting_only__combined": {
+            "intersection": 2,
+            "union": 8
+          }
+        },
+        "10": {
+          "health_only__sting_only": {
+            "intersection": 1,
+            "union": 19
+          },
+          "health_only__combined": {
+            "intersection": 2,
+            "union": 18
+          },
+          "sting_only__combined": {
+            "intersection": 9,
+            "union": 11
+          }
+        }
+      }
+    },
+    {
+      "year": 2022,
+      "period": "retrospective",
+      "fit_through": 2021,
+      "history_rows": 686,
+      "known_provinces": 63,
+      "eligible": 61,
+      "status_counts": {
+        "in_cluster": 55,
+        "sparse_cell": 6
+      },
+      "comparisons": {
+        "5": {
+          "health_only__sting_only": {
+            "intersection": 2,
+            "union": 8
+          },
+          "health_only__combined": {
+            "intersection": 2,
+            "union": 8
+          },
+          "sting_only__combined": {
+            "intersection": 4,
+            "union": 6
+          }
+        },
+        "10": {
+          "health_only__sting_only": {
+            "intersection": 5,
+            "union": 15
+          },
+          "health_only__combined": {
+            "intersection": 7,
+            "union": 13
+          },
+          "sting_only__combined": {
+            "intersection": 8,
+            "union": 12
+          }
+        }
+      }
+    },
+    {
+      "year": 2023,
+      "period": "post_configuration_selection",
+      "fit_through": 2022,
+      "history_rows": 747,
+      "known_provinces": 63,
+      "eligible": 61,
+      "status_counts": {
+        "in_cluster": 47,
+        "sparse_cell": 14
+      },
+      "comparisons": {
+        "5": {
+          "health_only__sting_only": {
+            "intersection": 2,
+            "union": 8
+          },
+          "health_only__combined": {
+            "intersection": 5,
+            "union": 5
+          },
+          "sting_only__combined": {
+            "intersection": 2,
+            "union": 8
+          }
+        },
+        "10": {
+          "health_only__sting_only": {
+            "intersection": 4,
+            "union": 16
+          },
+          "health_only__combined": {
+            "intersection": 7,
+            "union": 13
+          },
+          "sting_only__combined": {
+            "intersection": 7,
+            "union": 13
+          }
+        }
+      }
+    },
+    {
+      "year": 2024,
+      "period": "post_configuration_selection",
+      "fit_through": 2023,
+      "history_rows": 808,
+      "known_provinces": 63,
+      "eligible": 61,
+      "status_counts": {
+        "in_cluster": 48,
+        "sparse_cell": 13
+      },
+      "comparisons": {
+        "5": {
+          "health_only__sting_only": {
+            "intersection": 0,
+            "union": 10
+          },
+          "health_only__combined": {
+            "intersection": 3,
+            "union": 7
+          },
+          "sting_only__combined": {
+            "intersection": 1,
+            "union": 9
+          }
+        },
+        "10": {
+          "health_only__sting_only": {
+            "intersection": 3,
+            "union": 17
+          },
+          "health_only__combined": {
+            "intersection": 5,
+            "union": 15
+          },
+          "sting_only__combined": {
+            "intersection": 7,
+            "union": 13
+          }
+        }
+      }
+    }
+  ],
+  "across_years_common_cohort": [
+    {
+      "from": 2018,
+      "to": 2019,
+      "common_provinces": 61,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 3,
+            "union": 7
+          },
+          "sting_only": {
+            "intersection": 3,
+            "union": 7
+          },
+          "combined": {
+            "intersection": 1,
+            "union": 9
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 7,
+            "union": 13
+          },
+          "sting_only": {
+            "intersection": 6,
+            "union": 14
+          },
+          "combined": {
+            "intersection": 3,
+            "union": 17
+          }
+        }
+      }
+    },
+    {
+      "from": 2019,
+      "to": 2020,
+      "common_provinces": 63,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 3,
+            "union": 7
+          },
+          "sting_only": {
+            "intersection": 0,
+            "union": 10
+          },
+          "combined": {
+            "intersection": 1,
+            "union": 9
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 7,
+            "union": 13
+          },
+          "sting_only": {
+            "intersection": 2,
+            "union": 18
+          },
+          "combined": {
+            "intersection": 3,
+            "union": 17
+          }
+        }
+      }
+    },
+    {
+      "from": 2020,
+      "to": 2021,
+      "common_provinces": 60,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 2,
+            "union": 8
+          },
+          "sting_only": {
+            "intersection": 0,
+            "union": 10
+          },
+          "combined": {
+            "intersection": 1,
+            "union": 9
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 3,
+            "union": 17
+          },
+          "sting_only": {
+            "intersection": 2,
+            "union": 18
+          },
+          "combined": {
+            "intersection": 2,
+            "union": 18
+          }
+        }
+      }
+    },
+    {
+      "from": 2021,
+      "to": 2022,
+      "common_provinces": 60,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 2,
+            "union": 8
+          },
+          "sting_only": {
+            "intersection": 0,
+            "union": 10
+          },
+          "combined": {
+            "intersection": 1,
+            "union": 9
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 5,
+            "union": 15
+          },
+          "sting_only": {
+            "intersection": 2,
+            "union": 18
+          },
+          "combined": {
+            "intersection": 2,
+            "union": 18
+          }
+        }
+      }
+    },
+    {
+      "from": 2022,
+      "to": 2023,
+      "common_provinces": 59,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 3,
+            "union": 7
+          },
+          "sting_only": {
+            "intersection": 1,
+            "union": 9
+          },
+          "combined": {
+            "intersection": 1,
+            "union": 9
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 6,
+            "union": 14
+          },
+          "sting_only": {
+            "intersection": 6,
+            "union": 14
+          },
+          "combined": {
+            "intersection": 5,
+            "union": 15
+          }
+        }
+      }
+    },
+    {
+      "from": 2023,
+      "to": 2024,
+      "common_provinces": 59,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 2,
+            "union": 8
+          },
+          "sting_only": {
+            "intersection": 1,
+            "union": 9
+          },
+          "combined": {
+            "intersection": 2,
+            "union": 8
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 7,
+            "union": 13
+          },
+          "sting_only": {
+            "intersection": 3,
+            "union": 17
+          },
+          "combined": {
+            "intersection": 4,
+            "union": 16
+          }
+        }
+      }
+    }
+  ],
+  "same_year_grid_refresh": [
+    {
+      "year": 2019,
+      "earlier_fit_through": 2017,
+      "updated_fit_through": 2018,
+      "eligible": 63,
+      "status_changes": 8,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 5,
+            "union": 5
+          },
+          "sting_only": {
+            "intersection": 3,
+            "union": 7
+          },
+          "combined": {
+            "intersection": 5,
+            "union": 5
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 10,
+            "union": 10
+          },
+          "sting_only": {
+            "intersection": 7,
+            "union": 13
+          },
+          "combined": {
+            "intersection": 8,
+            "union": 12
+          }
+        }
+      }
+    },
+    {
+      "year": 2020,
+      "earlier_fit_through": 2018,
+      "updated_fit_through": 2019,
+      "eligible": 63,
+      "status_changes": 13,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 5,
+            "union": 5
+          },
+          "sting_only": {
+            "intersection": 3,
+            "union": 7
+          },
+          "combined": {
+            "intersection": 3,
+            "union": 7
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 10,
+            "union": 10
+          },
+          "sting_only": {
+            "intersection": 5,
+            "union": 15
+          },
+          "combined": {
+            "intersection": 8,
+            "union": 12
+          }
+        }
+      }
+    },
+    {
+      "year": 2021,
+      "earlier_fit_through": 2019,
+      "updated_fit_through": 2020,
+      "eligible": 60,
+      "status_changes": 8,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 5,
+            "union": 5
+          },
+          "sting_only": {
+            "intersection": 5,
+            "union": 5
+          },
+          "combined": {
+            "intersection": 3,
+            "union": 7
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 10,
+            "union": 10
+          },
+          "sting_only": {
+            "intersection": 7,
+            "union": 13
+          },
+          "combined": {
+            "intersection": 5,
+            "union": 15
+          }
+        }
+      }
+    },
+    {
+      "year": 2022,
+      "earlier_fit_through": 2020,
+      "updated_fit_through": 2021,
+      "eligible": 61,
+      "status_changes": 1,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 5,
+            "union": 5
+          },
+          "sting_only": {
+            "intersection": 5,
+            "union": 5
+          },
+          "combined": {
+            "intersection": 4,
+            "union": 6
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 10,
+            "union": 10
+          },
+          "sting_only": {
+            "intersection": 9,
+            "union": 11
+          },
+          "combined": {
+            "intersection": 10,
+            "union": 10
+          }
+        }
+      }
+    },
+    {
+      "year": 2023,
+      "earlier_fit_through": 2021,
+      "updated_fit_through": 2022,
+      "eligible": 61,
+      "status_changes": 0,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 5,
+            "union": 5
+          },
+          "sting_only": {
+            "intersection": 5,
+            "union": 5
+          },
+          "combined": {
+            "intersection": 5,
+            "union": 5
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 10,
+            "union": 10
+          },
+          "sting_only": {
+            "intersection": 10,
+            "union": 10
+          },
+          "combined": {
+            "intersection": 10,
+            "union": 10
+          }
+        }
+      }
+    },
+    {
+      "year": 2024,
+      "earlier_fit_through": 2022,
+      "updated_fit_through": 2023,
+      "eligible": 61,
+      "status_changes": 5,
+      "comparisons": {
+        "5": {
+          "health_only": {
+            "intersection": 5,
+            "union": 5
+          },
+          "sting_only": {
+            "intersection": 4,
+            "union": 6
+          },
+          "combined": {
+            "intersection": 3,
+            "union": 7
+          }
+        },
+        "10": {
+          "health_only": {
+            "intersection": 10,
+            "union": 10
+          },
+          "sting_only": {
+            "intersection": 8,
+            "union": 12
+          },
+          "combined": {
+            "intersection": 8,
+            "union": 12
+          }
+        }
+      }
+    }
+  ],
+  "panel_sha256": "35d3476b5ca3c2bb1a6d244933e40b4fa22b176759de6c5a4e28d4329d11f7c2",
+  "config_sha256": "08f8b05236863b385c81e296d8a136ed5703e2c7f52add641f7ab6c5a41aef57"
+}
