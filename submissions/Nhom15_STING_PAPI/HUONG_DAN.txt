@@ -41,6 +41,7 @@ Tùy chọn --include-reference-pdf của script đóng gói trong repo tạo g�
 Giải nén toàn bộ ZIP và mở terminal tại thư mục Nhom15_STING_PAPI/:
 
 python -m pip install -r requirements.txt
+python scripts/deliverables/demo_smoke.py
 python -m nbconvert --to notebook --execute Nhom15_TienXuLy_PAPI.ipynb --output Nhom15_TienXuLy_PAPI_chay_lai
 python -m nbconvert --to notebook --execute Nhom15_STING_PAPI.ipynb --output Nhom15_STING_PAPI_chay_lai
 python -m streamlit run app.py
@@ -56,6 +57,30 @@ python scripts/data/preprocessing_sensitivity.py
 python scripts/data/crosscheck_mendeley.py
 python -E scripts/analysis/stakeholder_summary.py --with-excel
 python scripts/figures/forecast_papi_grid.py
+
+4. ĐỐI CHIẾU NGUỒN TRONG WORD VÀ GHI CHÚ SLIDE
+--------------------------------------------------------------------------------
+Đường dẫn trích dẫn trong báo cáo và slide dùng cấu trúc repo gốc. Trong ZIP,
+bốn tài liệu chính được chuyển lên cấp đầu để mở thuận tiện:
+  reports/Nhom15_BaoCao_STING_PAPI.docx -> Nhom15_BaoCao_STING_PAPI.docx
+  slides/Nhom15_STING_PAPI.pptx -> Nhom15_STING_PAPI.pptx
+  notebooks/Nhom15_STING_PAPI.ipynb -> Nhom15_STING_PAPI.ipynb
+  notebooks/Nhom15_TienXuLy_PAPI.ipynb -> Nhom15_TienXuLy_PAPI.ipynb
+
+results/future_work.md, bốn CSV future_work_*, hình tổng hợp và mã
+scripts/analysis/future_work.py được kèm để đối chiếu Mục 6.7 và kết luận slide.
+Đây là thực nghiệm thăm dò, không thay thế kết quả chính hay kiểm chứng độc lập.
+Các ứng viên mô hình chưa duyệt, tài liệu ôn tập và phiếu rà soát chuyên viên
+không thuộc gói nộp. Các liên kết tới chúng mở trên repo khi cần đối chiếu.
+
+Lệnh sinh lại Word/PowerPoint trong phụ lục báo cáo phải chạy từ repo đầy đủ:
+https://github.com/JasonTM17/Grid_Based_Sociology
+Repo chứa scripts/deliverables/build_report.py, build_slides.py, mẫu và công cụ
+định dạng; ZIP tập trung vào mở tài liệu đã hoàn thiện và chạy lại phân tích.
+Lệnh demo_smoke.py ở trên hỗ trợ cả cấu trúc repo và thư mục ZIP giải nén.
+Nó kiểm tra tài liệu đã lưu và checksum; để thực thi lại hai notebook, dùng
+hai lệnh nbconvert ở Mục 2. Nếu chủ động tái tạo dữ liệu trong bản giải nén,
+checksum sẽ đổi; giữ một bản giải nén mới để đối chiếu với gói đã bàn giao.
 
 Trân trọng,
 Nhóm 15

@@ -22,6 +22,7 @@ import sys
 import tempfile
 import time
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from xml.etree import ElementTree
 
@@ -54,6 +55,7 @@ VISIBLE = {
 PACKAGE_SCRIPTS = (
     "common/fig_style",
     "common/midterm_clustering",
+    "common/notebook_checks",
     "common/papi_forecast",
     "common/papi_pred_common",
     "data/build_external_master",
@@ -68,6 +70,7 @@ PACKAGE_SCRIPTS = (
     "analysis/dashboard_data",
     "analysis/external_validation",
     "analysis/first_real_cluster",
+    "analysis/future_work",
     "analysis/poverty_validation",
     "analysis/predict_demo",
     "analysis/predict_sweep",
@@ -79,6 +82,7 @@ PACKAGE_SCRIPTS = (
     "supervised/supervised_depth",
     "figures/fig_grid_levels_and_elbow",
     "figures/forecast_papi_grid",
+    "deliverables/demo_smoke",
 )
 
 PACKAGE_RESULTS = (
@@ -93,6 +97,11 @@ PACKAGE_RESULTS = (
     "external_master_summary.md",
     "external_validation.csv",
     "external_validation.md",
+    "future_work.md",
+    "future_work_backtest.csv",
+    "future_work_rank.csv",
+    "future_work_spatial.csv",
+    "future_work_trajectory.csv",
     "metrics.csv",
     "papi_forecast_2024.json",
     "papi_forecast_cv.csv",
@@ -129,6 +138,7 @@ PACKAGE_FIGURES = (
     "external_pci_by_cluster",
     "external_poverty_by_cluster",
     "external_wdi_panel",
+    "future_work_overview",
     "kmeans_elbow",
     "map_2020",
     "map_2024",
@@ -142,6 +152,8 @@ PACKAGE_FIGURES = (
     "sting_grid_levels",
     "supervised_importance",
     "supervised_learning_curve",
+    "supervised_regression",
+    "supervised_confusion",
 )
 
 PACKAGE_FILES_CATALOG = {
@@ -150,6 +162,7 @@ PACKAGE_FILES_CATALOG = {
     f"notebooks/{PREPROCESSING_NOTEBOOK}": "Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc đã lưu kết quả",
     "slides/Nhom15_STING_PAPI.pptx": "Slide trình bày thống nhất (15 trang 16:9 kèm ghi chú)",
     "app.py": "Ứng dụng dashboard Streamlit tương tác (6 tab, gồm Thống kê khách hàng)",
+    "DEMO.md": "Kịch bản demo và cách đọc kết quả; đường dẫn tài liệu gốc được đối chiếu trong HUONG_DAN.txt",
     "src/sting.py": "Mã nguồn thuật toán STING cài đặt từ đầu",
     "src/preprocessing.py": "Mã nguồn pipeline tiền xử lý dữ liệu PAPI 6 bước",
     "requirements.txt": "Danh mục thư viện Python cố định để chạy lại",
@@ -169,6 +182,7 @@ PACKAGE_FILES_CATALOG = {
         )
     },
     "data/raw/mendeley/PROVENANCE.md": "Nguồn và giấy phép dữ liệu đối chiếu Mendeley",
+    "data/raw/mendeley/README.md": "Hướng dẫn sử dụng gói đối chiếu Mendeley đã kèm theo",
     "data/raw/boundaries/diaphantinh.geojson": "Ranh giới hành chính cấp tỉnh Việt Nam",
     **{
         f"data/raw/{source}/PROVENANCE.md": "Nguồn và giấy phép dữ liệu ngoài"
@@ -179,6 +193,7 @@ PACKAGE_FILES_CATALOG = {
         f"data/processed/{name}.csv": "Dữ liệu đã chuẩn hóa để chạy lại"
         for name in (
             "papi_panel_63_2011_2024",
+            "papi_panel_v1_LOCKED",
             "papi_panel_scale_metadata",
             "external_master_63_2011_2024",
             "external_poverty_63",
@@ -207,6 +222,7 @@ PACKAGE_FILES_CATALOG = {
     "reports/panel_lock.md": "Phiên bản và mã kiểm tra bảng PAPI",
     "reports/crosscheck_mendeley.md": "Kết quả đối chiếu PAPI với Mendeley",
     "reports/model_deep_dive.md": "Minh chứng các phép phân tích bổ sung trong báo cáo",
+    "reports/external_data_expansion.md": "Phạm vi và nguồn dữ liệu đối chiếu được dẫn trong ghi chú slide",
 }
 
 PAPI_REFERENCE_PDF = "data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf"
@@ -314,6 +330,7 @@ Sinh viên thực hiện:
 Giải nén toàn bộ ZIP và mở terminal tại thư mục {PACKAGE_NAME}/:
 
 python -m pip install -r requirements.txt
+python scripts/deliverables/demo_smoke.py
 python -m nbconvert --to notebook --execute {PREPROCESSING_NOTEBOOK} --output {Path(PREPROCESSING_NOTEBOOK).stem}_chay_lai
 python -m nbconvert --to notebook --execute {ANALYSIS_NOTEBOOK} --output {Path(ANALYSIS_NOTEBOOK).stem}_chay_lai
 python -m streamlit run app.py
@@ -329,6 +346,30 @@ python scripts/data/preprocessing_sensitivity.py
 python scripts/data/crosscheck_mendeley.py
 python -E scripts/analysis/stakeholder_summary.py --with-excel
 python scripts/figures/forecast_papi_grid.py
+
+4. ĐỐI CHIẾU NGUỒN TRONG WORD VÀ GHI CHÚ SLIDE
+--------------------------------------------------------------------------------
+Đường dẫn trích dẫn trong báo cáo và slide dùng cấu trúc repo gốc. Trong ZIP,
+bốn tài liệu chính được chuyển lên cấp đầu để mở thuận tiện:
+  reports/{REPORT_NAME} -> {REPORT_NAME}
+  slides/{SLIDES_NAME} -> {SLIDES_NAME}
+  notebooks/{ANALYSIS_NOTEBOOK} -> {ANALYSIS_NOTEBOOK}
+  notebooks/{PREPROCESSING_NOTEBOOK} -> {PREPROCESSING_NOTEBOOK}
+
+results/future_work.md, bốn CSV future_work_*, hình tổng hợp và mã
+scripts/analysis/future_work.py được kèm để đối chiếu Mục 6.7 và kết luận slide.
+Đây là thực nghiệm thăm dò, không thay thế kết quả chính hay kiểm chứng độc lập.
+Các ứng viên mô hình chưa duyệt, tài liệu ôn tập và phiếu rà soát chuyên viên
+không thuộc gói nộp. Các liên kết tới chúng mở trên repo khi cần đối chiếu.
+
+Lệnh sinh lại Word/PowerPoint trong phụ lục báo cáo phải chạy từ repo đầy đủ:
+https://github.com/JasonTM17/Grid_Based_Sociology
+Repo chứa scripts/deliverables/build_report.py, build_slides.py, mẫu và công cụ
+định dạng; ZIP tập trung vào mở tài liệu đã hoàn thiện và chạy lại phân tích.
+Lệnh demo_smoke.py ở trên hỗ trợ cả cấu trúc repo và thư mục ZIP giải nén.
+Nó kiểm tra tài liệu đã lưu và checksum; để thực thi lại hai notebook, dùng
+hai lệnh nbconvert ở Mục 2. Nếu chủ động tái tạo dữ liệu trong bản giải nén,
+checksum sẽ đổi; giữ một bản giải nén mới để đối chiếu với gói đã bàn giao.
 
 Trân trọng,
 Nhóm 15
@@ -549,7 +590,7 @@ def replay_notebook(path: Path, guard: str, log: Path) -> tuple[int, bool]:
 
 def replay_package(archive: Path, output: Path) -> dict:
     """Extract unified ZIP cleanly and replay both notebooks with audit isolation guard."""
-    verify_package(archive)
+    manifest = verify_package(archive)
     scratch = Path(tempfile.gettempdir()).resolve()
     with tempfile.TemporaryDirectory(prefix="kiểm tra gói ", dir=scratch) as temporary:
         temporary_path = Path(temporary).resolve()
@@ -594,6 +635,13 @@ print("Isolation guard enabled")
             "python": sys.version.split()[0],
             "system": platform.system(),
             "launcher_messages": messages or preprocessing_messages,
+            "engine": "nbconvert.ExecutePreprocessor",
+            "external_jupyter_kernel_replay": True,
+            "fresh_subprocess_per_notebook": True,
+            "input_outputs_cleared": True,
+            "manifest_files": len(manifest["files"]),
+            "archive_bytes": archive.stat().st_size,
+            "checked_at": datetime.now(timezone.utc).isoformat(),
         }
 
 
@@ -655,6 +703,8 @@ def main() -> int:
     archive = args.output_dir / f"{PACKAGE_NAME}.zip"
 
     if args.verify:
+        # Never leave an earlier PASS receipt after a failed replay attempt.
+        (args.output_dir / "verification.json").unlink(missing_ok=True)
         receipt = replay_package(archive, args.output_dir)
         (args.output_dir / "verification.json").write_text(
             json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

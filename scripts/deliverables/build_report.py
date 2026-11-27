@@ -630,7 +630,7 @@ h1("CHƯƠNG 3. DỮ LIỆU VÀ TIỀN XỬ LÝ")
 h2("3.1. Nguồn dữ liệu và PROVENANCE")
 bullets([
     ("PAPI 2011–2024.", "14 workbook chính thức từ papi.org.vn; manifest tên file + bytes + SHA-256: data/raw/papi/PROVENANCE.md. 3 file (2020/2021/2023) khớp tuyệt đối SHA-256 với gói replication Mendeley."),
-    ("Mendeley replication.", "Le et al., Mendeley Data, DOI 10.17632/wbk42j9wc8.1, CC BY 4.0. 4 file nhỏ dùng trực tiếp (crosswalk, centroids, panel đối chiếu, ledger hash) đã commit kèm PROVENANCE.md; phần còn lại tải theo DOI."),
+    ("Mendeley replication.", "Le et al., Mendeley Data, DOI 10.17632/wbk42j9wc8.1, CC BY 4.0. Repo lưu gói gốc mendeley_replication.zip và bốn tệp dùng trực tiếp: crosswalk, centroids, panel đối chiếu, ledger hash. Nguồn và SHA-256: PROVENANCE.md."),
     ("GeoJSON tỉnh.", "Open Development Vietnam (OD Mekong), CC-BY-SA 4.0 [4]. Lưu ý: cột code có hằng 'AD01' — join bản đồ qua centroids theo province_code; 6 tên tỉnh lệch có bảng alias."),
     ("PCI 2011–2024.", "Chỉ số Năng lực cạnh tranh cấp tỉnh — VCCI – USAID: workbook + trang xếp hạng từ pcivietnam.vn (dữ liệu công khai, ghi nguồn VCCI–USAID) [9]. Đủ 63 tỉnh × 12 năm 2011–2022 = 756 ô; 2023–2024 chỉ công bố Top-30 (chỉ dùng kiểm tra phụ, cảnh báo chọn mẫu). raw: data/raw/pci/PROVENANCE.md; chuẩn hóa: data/processed/external_provenance.md."),
     ("GSO/NSO — dân số & GRDP.", "PX-Web chính thức pxweb.nso.gov.vn (“Bản quyền: Không”) + Niên giám Thống kê [10]: dân số theo tỉnh đủ 882 tỉnh-năm (2 vintage — 378 dòng pxweb + 504 dòng Niên giám — giữ nguyên từng vintage, không trộn bình quân); GRDP/người 441 ô 2018–2024 (2024 = Sơ bộ). raw: data/raw/gso/PROVENANCE.md."),
@@ -1137,7 +1137,7 @@ table(["Lệnh", "Kỳ vọng"], [
     ["python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_STING_PAPI.ipynb", f"execute sạch, {NB_CELLS} cells, {NB_IMGS} hình nhúng (đếm từ notebook đã execute)"],
     ["python scripts/deliverables/build_report.py", "reports/Nhom15_BaoCao_STING_PAPI.docx"],
 ], widths=[9.8, 6.0], caption=tbl_caption("Danh sách lệnh tái lập và kết quả kỳ vọng"))
-body("Dùng python -m pytest và python -m nbconvert để gọi đúng môi trường Python đang cài thư viện. Dữ liệu gốc data/raw/ bất biến; panel tái tạo từ raw bằng build_panel.py; Mendeley đầy đủ tải theo DOI 10.17632/wbk42j9wc8.1 (chỉ commit 4 file nhỏ dùng trực tiếp).")
+body("Dùng python -m pytest và python -m nbconvert để gọi đúng môi trường Python đang cài thư viện. Dữ liệu gốc data/raw/ bất biến; panel tái tạo từ raw bằng build_panel.py. Gói Mendeley gốc lưu ở data/raw/mendeley/mendeley_replication.zip (DOI 10.17632/wbk42j9wc8.1); bốn tệp đã giải nén được dùng trực tiếp.")
 
 
 

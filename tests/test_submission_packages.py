@@ -13,6 +13,7 @@ import nbformat as nbf
 import pytest
 
 from scripts.common.notebook_checks import notebook_issues
+from scripts.deliverables import build_submission_packages as packaging
 from scripts.deliverables.build_submission_packages import (
     ANALYSIS_NOTEBOOK,
     MANIFEST_REL,
@@ -85,11 +86,22 @@ def test_unified_archive_includes_all_dependencies_and_excludes_private_material
         "scripts/common/papi_pred_common.py",
         "scripts/common/papi_forecast.py",
         "scripts/common/fig_style.py",
+        "scripts/common/notebook_checks.py",
+        "scripts/deliverables/demo_smoke.py",
+        "scripts/analysis/future_work.py",
         "scripts/analysis/stakeholder_summary.py",
         "scripts/analysis/dashboard_data.py",
         "results/stakeholder_province_summary_2024.csv",
         "results/stakeholder_summary.md",
         "results/KetQua_STING_PAPI.xlsx",
+        "results/future_work.md",
+        "results/future_work_backtest.csv",
+        "results/future_work_rank.csv",
+        "results/future_work_spatial.csv",
+        "results/future_work_trajectory.csv",
+        "results/figs/future_work_overview.png",
+        "reports/external_data_expansion.md",
+        "data/processed/papi_panel_v1_LOCKED.csv",
         "results/figs/stakeholder_quadrants_2024.png",
         "results/figs/00_synthetic_sting.png",
         "results/figs/papi_zscore_comparison.png",
@@ -104,12 +116,15 @@ def test_unified_archive_includes_all_dependencies_and_excludes_private_material
         "data/processed/external_master_63_2011_2024.csv",
     } <= files
 
-    visible = {REPORT_NAME, SLIDES_NAME, ANALYSIS_NOTEBOOK, PREPROCESSING_NOTEBOOK, "app.py", "HUONG_DAN.txt", "requirements.txt"}
+    visible = {REPORT_NAME, SLIDES_NAME, ANALYSIS_NOTEBOOK, PREPROCESSING_NOTEBOOK, "app.py", "DEMO.md", "HUONG_DAN.txt", "requirements.txt"}
     assert {p for p in files if "/" not in p} == visible
     assert not any(
-        p.startswith((".git", ".codex", ".agentkit", "plans/", "study/", "reports/on-tap/", "data/raw/course/", "tests/", "scripts/deliverables/", "assets/", "results/candidates_"))
+        p.startswith((".git", ".codex", ".agentkit", "plans/", "study/", "reports/on-tap/", "data/raw/course/", "tests/", "assets/", "results/candidates_"))
         for p in files
     )
+    assert {p for p in files if p.startswith("scripts/deliverables/")} == {
+        "scripts/deliverables/demo_smoke.py"
+    }
     assert "results/model_improvement_candidates.md" not in files
     assert "pytest.ini" not in files
     assert not any("__pycache__" in p or "probe" in p for p in files)
@@ -134,6 +149,44 @@ def test_unified_archive_includes_all_dependencies_and_excludes_private_material
         assert archive.read(f"{PACKAGE_NAME}/app.py") == (ROOT / "app.py").read_bytes()
         assert b"tabulate==" in archive.read(f"{PACKAGE_NAME}/requirements.txt")
         assert b"streamlit==" in archive.read(f"{PACKAGE_NAME}/requirements.txt")
+
+
+def test_demo_command_runs_from_extracted_zip_and_detects_changed_evidence(unified_package, tmp_path):
+    with zipfile.ZipFile(unified_package) as archive:
+        archive.extractall(tmp_path)
+    package = tmp_path / PACKAGE_NAME
+    env = {key: value for key, value in os.environ.items() if key not in {"PYTHONPATH", "MPLBACKEND"}}
+
+    def run_demo():
+        return subprocess.run(
+            [sys.executable, "-B", "-X", "utf8", "scripts/deliverables/demo_smoke.py"],
+            cwd=package, env=env, capture_output=True, text=True, encoding="utf-8", timeout=60,
+        )
+
+    result = run_demo()
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "[PASS] checksum goi giai nen" in result.stdout
+    assert "[PASS] Nhom15_STING_PAPI.pptx mo duoc 15 trang" in result.stdout
+    evidence = package / "results/future_work_rank.csv"
+    evidence.write_bytes(evidence.read_bytes() + b"\nchanged evidence\n")
+    result = run_demo()
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "[FAIL] checksum goi giai nen" in result.stdout
+    assert "results/future_work_rank.csv" in result.stdout
+
+
+def test_failed_reverification_removes_previous_pass_receipt(tmp_path, monkeypatch):
+    receipt = tmp_path / "verification.json"
+    receipt.write_text('{"status": "PASS", "sha256": "old-archive"}', encoding="utf-8")
+
+    def fail_replay(*args):
+        raise RuntimeError("notebook replay failed")
+
+    monkeypatch.setattr(packaging, "replay_package", fail_replay)
+    monkeypatch.setattr(sys, "argv", ["build_submission_packages.py", "--verify", "--output-dir", str(tmp_path)])
+    with pytest.raises(RuntimeError, match="notebook replay failed"):
+        packaging.main()
+    assert not receipt.exists()
 
 
 def test_default_package_omits_reference_pdf_and_keeps_replication_zip(unified_package):

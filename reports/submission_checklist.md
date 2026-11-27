@@ -30,13 +30,23 @@ _Cập nhật ngày 27/11/2026 · Nhóm 15._
 - [x] Model lưu local `models/` (STING pkl + scaler JSON + joblib Ridge/RF)
 - [x] Panel v1 khóa với hash (`reports/panel_lock.md`)
 
-## Phạm vi kiểm tra ngày 27/11/2026
+## Phạm vi kiểm tra đợt hoàn thiện đầu ngày 27/11/2026
 
 - Đã duyệt toàn bộ 49 trang báo cáo và 15 slide qua bản render; mục lục Word có 82 mục điều hướng. Hình nhóm tỉnh, bảng, ghi chú slide và phần diễn giải notebook dùng cùng cách gọi mô tả.
 - Môi trường cục bộ dùng Python 3.14.2 và đúng các phiên bản trong `requirements-dev.txt`: **252 test đạt**, độ bao phủ `src/` **95%**. Một test mở kernel Jupyter tiêu chuẩn được để lại cho CI vì môi trường cục bộ từ chối bind socket; không sửa hoặc nới điều kiện test đó.
 - **41/41 mục smoke demo đạt**, Ruff đạt, 239 tham chiếu Q&A không có đường dẫn lỗi. Excel giữ nguyên 25 sheet, 17.598 ô số và 24 công thức; chỉ đồng bộ chú thích.
 - ZIP mặc định có 141 file được kê trong manifest, đủ các đầu vào để chạy. PDF báo cáo PAPI gốc được giữ trong repo và có thể kèm thêm bằng `--include-reference-pdf`. Đã giải nén vào thư mục riêng và thực thi lại **9 + 18 ô mã** bằng `InProcessKernelManager`, mỗi notebook trong một subprocess mới; xóa outputs cũ, bật guard chặn đọc repo gốc/Downloads, không có error hoặc stderr trong ô. [Biên bản](../submissions/verification.json) ghi rõ engine và phạm vi này, không coi đó là lượt replay bằng kernel ngoài tiến trình.
 - [GitHub Actions](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml) chạy toàn bộ 254 test (gồm test bổ sung về PDF tham khảo tùy chọn) và replay bằng kernel Jupyter tiêu chuẩn trên Ubuntu, Windows, macOS. ZIP/mirror giữ nguyên byte qua checkout; cache font được tạo trước khi chạy kernel để thông báo thiết lập lần đầu không lọt vào ô notebook. Gate lỗi/stderr vẫn được giữ nguyên.
+
+## Rà soát bổ sung ngày 27/11/2026
+
+- Sửa hai đoạn nguồn Mendeley tại Mục 3.1 và Phụ lục A trong Word, đồng bộ với generator. Repo có ZIP nguồn đầy đủ và bốn tệp giải nén dùng trực tiếp. Tài liệu nguồn ghi đúng 5.118 cặp giá trị hợp lệ trên 756 khóa tỉnh–năm, độ lệch tối đa 0.0.
+- Render lại toàn bộ Word: vẫn 49 trang, 82 mục điều hướng; 47 trang giống từng pixel, hai trang còn lại chỉ thay đúng đoạn nguồn. Duyệt lại 15 slide và các workbook biểu đồ. Số liệu slide giữ nguyên; evidence cập nhật theo mã STING đã sửa.
+- STING từ chối tham số lưới không nguyên, giá trị kiểm định không hữu hạn, ma trận không có đặc trưng và vùng truy vấn không hợp lệ. Gate tái lập giữ nguyên 869/869 nhãn đã công bố.
+- Đồng bộ diễn giải `future_work.md` với Word: phân biệt hồi cứu với kiểm chứng độc lập, ghi đúng thắng 4/6 năm theo MAE, và ghi rõ p-value Moran chưa hiệu chỉnh nhiều phép thử. Không thay số liệu hoặc cấu hình thực nghiệm.
+- ZIP hiện có **156 tệp được kê trong manifest**, bổ sung đúng bằng chứng được dẫn trong báo cáo/slide, panel khóa, hướng dẫn nguồn và lệnh smoke chạy được ngay trong bản giải nén. Word, slide, notebook và các bản sao đóng gói vẫn được đối chiếu từng byte.
+- Smoke kiểm tra outputs đã lưu, không thực thi lại notebook. Trong ZIP, smoke kiểm tra thêm checksum; sửa một tệp bằng chứng phải làm kiểm tra thất bại. Khi chạy lại notebook thất bại, verifier xóa biên nhận PASS cũ để không gây hiểu nhầm.
+- Kết quả thực thi lại bản hiện hành nằm tại [verification.json](../submissions/verification.json), gắn với SHA-256 của đúng ZIP. Bộ kiểm thử và replay ba hệ điều hành tiếp tục chạy trên [GitHub Actions](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml).
 
 ## Đã xong giữa kỳ & Còn lại cuối kỳ (CON NGƯỜI thực hiện)
 

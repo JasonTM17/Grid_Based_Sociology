@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "slide_count": 15,
-  "evidence_sha256": "d909da97e7df739112399399498896e7cb5cba10a9ce7eada6f8cc692df3902a",
+  "evidence_sha256": "1742fb25d0fa579461641c2c0fce688eb510c51c49e4a37610f6f4ae52cb38fe",
   "template_sha256": "9dee36e264b026c93308bf6a98fcf36eee6c715acee0d86fa65b6b760c899473",
   "authoring_source_sha256": "3a1629b594b65c9ba471ff7917f0ad4aa994a966d91aa48d2edeb4585d9b570d",
   "evidence": {
@@ -49,7 +49,7 @@
     "source_sha256": {
       "scripts/deliverables/build_slides.py": "8e62ed5fc957df4ffb381edc8115952467a4f00afc8b671b39128c45e2002739",
       "scripts/deliverables/slides_chart_workbooks.py": "c31db3d2c92448c893d6ad436e9704c2a9f5593f440a88308943c7e38b7aa9cf",
-      "src/sting.py": "0b4ab80ce8afd7ab9cfcc851b3edd2338e394c94a09d3793235510431dad93bc",
+      "src/sting.py": "b8f6f09fb73de4d682036461c13b0fdd86e46170b065fc55b0c9c788ee8fb1f2",
       "src/preprocessing.py": "a34fbc55410393a2a48a012d25fc595bccd5ea53ceab076f2c2107765cc2b2e3",
       "models/predict_config.json": "079e31096207acb5fade158ad9315e6f8a3385124a26b77094780a8054f7fa84",
       "data/processed/papi_panel_v1_LOCKED.csv": "35d3476b5ca3c2bb1a6d244933e40b4fa22b176759de6c5a4e28d4329d11f7c2",

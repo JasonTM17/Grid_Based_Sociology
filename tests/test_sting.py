@@ -205,6 +205,30 @@ def test_invalid_init_params_raise():
         STING(n_levels=2, factor=1)
 
 
+@pytest.mark.parametrize("name,value", [
+    ("n_levels", 1.5),
+    ("factor", 2.5),
+    ("min_count", 0.9),
+    ("n_levels", True),
+    ("factor", "4"),
+    ("min_count", np.nan),
+    ("significance_z", np.nan),
+    ("significance_z", np.inf),
+    ("significance_z", -1.0),
+])
+def test_invalid_grid_settings_do_not_silently_change_clustering(name, value):
+    """A typo must fail before it can change cell resolution or return all noise."""
+    with pytest.raises(ValueError, match=name):
+        STING(**{name: value})
+
+
+def test_numpy_integer_settings_preserve_valid_grid():
+    points = np.array([[0.0, 0.0], [1.0, 1.0]])
+    model = STING(n_levels=np.int64(2), factor=np.int32(2), min_count=np.int64(1)).fit(points)
+    labels = model.cluster(level=np.int64(1), connectivity=np.int32(1))
+    np.testing.assert_array_equal(labels, [0, 1])
+
+
 def test_fit_rejects_non_2d_input():
     """fit() với mảng 1 chiều phải báo lỗi rõ ràng."""
     model = STING(n_levels=2, factor=4, min_count=2)
@@ -491,6 +515,16 @@ def test_fit_rejects_empty_samples():
         model.fit(np.empty((0, 2)))
 
 
+def test_fit_rejects_no_features_without_invalidating_a_fitted_model():
+    """An empty feature selection must raise a clear error, not an IndexError."""
+    points = np.array([[0.0, 0.0], [1.0, 1.0]])
+    model = STING(n_levels=2, factor=2, min_count=1).fit(points)
+    labels = model.cluster()
+    with pytest.raises(ValueError, match="không rỗng"):
+        model.fit(np.empty((3, 0)))
+    np.testing.assert_array_equal(model.predict(points), labels)
+
+
 def test_predict_non_finite_returns_noise_without_warning():
     """predict(): hàng NaN/inf nhận -1, không gọi _assign (không RuntimeWarning)."""
     X, _ = make_blobs(
@@ -598,3 +632,29 @@ def test_query_top_down_guards():
         model.query_top_down([(0, 1), (0, 1)], level=5)
     with pytest.raises(ValueError, match="rect"):
         model.query_top_down([(0, 1)], level=1)
+
+
+@pytest.mark.parametrize("method", ["query_rect", "query_top_down"])
+def test_invalid_query_cannot_masquerade_as_an_empty_region(method):
+    points = np.array([[0.0, 0.0], [1.0, 1.0]])
+    model = STING(n_levels=2, factor=2, min_count=1).fit(points)
+    query = getattr(model, method)
+    for rect in ([(np.nan, 1), (0, 1)], [(1, 0), (0, 1)]):
+        with pytest.raises(ValueError, match="rect"):
+            query(rect)
+    assert query([(-np.inf, np.inf), (-np.inf, np.inf)])["count"] == len(points)
+
+
+def test_fractional_level_and_connectivity_raise_before_state_changes():
+    points = np.array([[0.0, 0.0], [1.0, 1.0]])
+    model = STING(n_levels=2, factor=2, min_count=1).fit(points)
+    labels = model.cluster()
+    with pytest.raises(ValueError, match="connectivity"):
+        model.cluster(connectivity=1.5)
+    for method in (model.cluster, model.point_cell_index, model.cell_stats):
+        with pytest.raises(ValueError, match="level"):
+            method(level=0.5)
+    for query in (model.query_rect, model.query_top_down):
+        with pytest.raises(ValueError, match="level"):
+            query([(0, 1), (0, 1)], level=0.5)
+    np.testing.assert_array_equal(model.predict(points), labels)

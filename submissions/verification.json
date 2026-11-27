@@ -1,51 +1,18 @@
 {
   "package": "Nhom15_STING_PAPI",
   "status": "PASS",
-  "sha256": "8aaf58fea2c22a291aec61daeed03ab9eea572c97b531bf373add48fab06a506",
+  "sha256": "323314917bc8d2088bb4692ddbd4bdef893b518939b2eb3e8cd3eba9fa010810",
   "code_cells": 18,
   "preprocessing_code_cells": 9,
   "isolation_guard": true,
-  "python": "3.14.2",
+  "python": "3.14.10",
   "system": "Linux",
   "launcher_messages": true,
-  "engine": "ipykernel.inprocess.manager.InProcessKernelManager",
-  "external_jupyter_kernel_replay": false,
+  "engine": "nbconvert.ExecutePreprocessor",
+  "external_jupyter_kernel_replay": true,
   "fresh_subprocess_per_notebook": true,
   "input_outputs_cleared": true,
-  "verification_scope": "Local execution with native in-process IPykernel messages; standard external-kernel replay remains a separate CI job.",
-  "environment_note": "The local container denies socket binding. Startup debugger/interface messages were retained; notebook cells produced no stderr.",
-  "checked_at": "2026-11-27T03:32:32.232678+00:00",
-  "notebooks": [
-    {
-      "notebook": "Nhom15_TienXuLy_PAPI.ipynb",
-      "status": "PASS",
-      "source_sha256": "6f0c8094c320f9ffcfac7e2fe2d0041bc605a3a2089ff76d561824b8919dd0e1",
-      "code_cells_excluding_guard": 9,
-      "guard_code_cells": 1,
-      "errors": 0,
-      "notebook_stderr_outputs": 0,
-      "png_outputs": 3,
-      "guard_read_probes_blocked": 2,
-      "package_read_probe_allowed": true
-    },
-    {
-      "notebook": "Nhom15_STING_PAPI.ipynb",
-      "status": "PASS",
-      "source_sha256": "cb2e9f99d829c09259d54bf59de8af2d1b6d6b86153b2e943293578ba404bc18",
-      "code_cells_excluding_guard": 18,
-      "guard_code_cells": 1,
-      "errors": 0,
-      "notebook_stderr_outputs": 0,
-      "png_outputs": 22,
-      "guard_read_probes_blocked": 2,
-      "package_read_probe_allowed": true
-    }
-  ],
-  "manifest_files": 141,
-  "archive_bytes": 23327731,
-  "external_standard": false,
-  "package_options": {
-    "include_reference_pdf": false,
-    "mendeley_replication_included": true
-  }
+  "manifest_files": 156,
+  "archive_bytes": 24463534,
+  "checked_at": "2026-11-27T04:23:55.836785+00:00"
 }

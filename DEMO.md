@@ -1,6 +1,9 @@
 # DEMO.md — Hướng dẫn trình diễn trước khi thi (15′ + 5′ Q&A)
 
-_Mục tiêu: bạn mở repo ra và demo được ngay — không cần mạng, không cần chuẩn bị tinh thần nhiều._
+Hướng dẫn trình bày kết quả đã lưu và chạy dashboard sau khi cài đủ thư viện.
+Các đường dẫn trong Mục 1 dùng cấu trúc repo đầy đủ. Khi dùng ZIP giải nén,
+Word, PowerPoint và hai notebook nằm ngay ở thư mục gốc; xem bảng đối chiếu
+trong `HUONG_DAN.txt`. Tài liệu ôn tập và các ứng viên mô hình vẫn nằm trên repo.
 
 ## 0. Một lệnh kiểm tra sẵn sàng (làm trước giờ thi 15′)
 
@@ -8,9 +11,14 @@ _Mục tiêu: bạn mở repo ra và demo được ngay — không cần mạng,
 python scripts/deliverables/demo_smoke.py
 ```
 
-Lệnh in **KET LUAN: SAN SANG DEMO (N/N muc dat)** khi mọi mục đạt, kiểm chứng đủ gói thống nhất gồm 15 slide trình bày, báo cáo Word, bảng thống kê khách hàng 63 tỉnh và bộ đôi notebook chạy đầy đủ. Sửa các mục FAIL rồi kiểm tra lại.
+Lệnh hỗ trợ cả repo và ZIP giải nén, in **KET LUAN: SAN SANG DEMO (N/N muc dat)**
+khi tài liệu, 15 slide, bảng kết quả và outputs notebook đã lưu đều đạt kiểm tra.
+Trong bản giải nén, lệnh còn đối chiếu checksum với manifest. Lệnh này không
+thực thi lại các ô mã; dùng các lệnh `nbconvert` bên dưới để kiểm tra chạy lại.
+Sửa các mục FAIL rồi kiểm tra lại; nếu đã chủ động tái tạo dữ liệu làm đổi
+checksum, dùng một bản giải nén mới để kiểm tra gói bàn giao ban đầu.
 
-## 1. Lắp ráp máy demo
+## 1. Lắp ráp máy demo từ repo đầy đủ
 
 ```powershell
 # máy lạ: cài môi trường
@@ -46,6 +54,7 @@ này để cài thư viện và chạy notebook.
 
 ```sh
 python -m pip install -r requirements.txt
+python scripts/deliverables/demo_smoke.py
 python -m nbconvert --to notebook --execute Nhom15_TienXuLy_PAPI.ipynb --output TienXuLy_chay_lai
 python -m nbconvert --to notebook --execute Nhom15_STING_PAPI.ipynb --output STING_PAPI_chay_lai
 ```

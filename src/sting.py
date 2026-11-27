@@ -19,6 +19,7 @@ import pickle
 import warnings
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
+from numbers import Integral, Real
 from os import PathLike
 
 import numpy as np
@@ -26,6 +27,13 @@ import numpy as np
 __all__ = ["Cell", "STING"]
 
 _MAX_GRID_CELLS = 2**62
+
+
+def _integer_parameter(value: int, name: str, minimum: int) -> int:
+    """Reject invalid settings instead of silently truncating the grid definition."""
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral) or value < minimum:
+        raise ValueError(f"{name} phải là số nguyên >= {minimum}, nhận {value!r}")
+    return int(value)
 
 
 @dataclass
@@ -54,21 +62,26 @@ class STING:
         significance_z: float | None = None,
     ) -> None:
         """``min_count=None`` -> ``max(1, round(0.02 * n))``; ``significance_z=None`` tắt kiểm định z."""
-        if n_levels < 1:
-            raise ValueError("n_levels phải >= 1")
-        if factor < 2:
-            raise ValueError("factor phải >= 2")
-        if min_count is not None and min_count < 0:
-            raise ValueError("min_count phải >= 0")
-        self.n_levels = int(n_levels)
-        self.factor = int(factor)
-        self.min_count = min_count
+        self.n_levels = _integer_parameter(n_levels, "n_levels", 1)
+        self.factor = _integer_parameter(factor, "factor", 2)
+        self.min_count = (
+            None if min_count is None else _integer_parameter(min_count, "min_count", 0)
+        )
+        if significance_z is not None:
+            if (
+                isinstance(significance_z, (bool, np.bool_))
+                or not isinstance(significance_z, Real)
+                or not np.isfinite(significance_z)
+                or significance_z < 0
+            ):
+                raise ValueError("significance_z phải là số hữu hạn >= 0 hoặc None")
+            significance_z = float(significance_z)
         self.significance_z = significance_z
 
     def fit(self, X: np.ndarray) -> STING:
         """Xây lưới và thống kê từng ô; gọi lại cluster() trước predict()."""
         X = np.asarray(X, dtype=float)
-        if X.ndim != 2 or X.shape[0] == 0:
+        if X.ndim != 2 or X.shape[0] == 0 or X.shape[1] == 0:
             raise ValueError("X phải là mảng 2 chiều (n_samples, n_dims) không rỗng")
         if not np.all(np.isfinite(X)):
             raise ValueError("X chứa NaN/inf; xử lý trước khi fit")
@@ -120,14 +133,12 @@ class STING:
             raise RuntimeError("Hãy gọi fit(X) trước khi cluster()")
         if level is None:
             level = self.n_levels - 1
+        level = _integer_parameter(level, "level", 0)
         if not (0 <= level < self.n_levels):
             raise ValueError(
                 f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
             )
-        if connectivity < 1:
-            raise ValueError(
-                "connectivity phải >= 1 (1 = kề mặt/4 hướng; số chiều = kề cả góc/8 hướng)"
-            )
+        connectivity = _integer_parameter(connectivity, "connectivity", 1)
         res = self.factor ** level
 
         dense_set = {
@@ -287,6 +298,7 @@ class STING:
             raise RuntimeError(f"Hãy gọi fit(X) trước khi {caller}")
         if level is None:
             level = self.n_levels - 1
+        level = _integer_parameter(level, "level", 0)
         if not (0 <= level < self.n_levels):
             raise ValueError(
                 f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
@@ -296,6 +308,8 @@ class STING:
             raise ValueError(
                 f"rect cần shape ({self.n_dims_}, 2), nhận {rect_arr.shape}"
             )
+        if np.isnan(rect_arr).any() or np.any(rect_arr[:, 0] > rect_arr[:, 1]):
+            raise ValueError("rect không được chứa NaN và phải có cận dưới <= cận trên")
         return rect_arr[:, 0], rect_arr[:, 1], level
 
     def _merge_cells(self, cells: Sequence[Cell]) -> dict[str, int | np.ndarray | None]:
@@ -350,6 +364,7 @@ class STING:
         """Chỉ số ô của mỗi điểm tại ``level``, shape (n, d)."""
         if not hasattr(self, "_point_idx_"):
             raise RuntimeError("Hãy gọi fit(X) trước khi point_cell_index()")
+        level = _integer_parameter(level, "level", 0)
         if not (0 <= level < self.n_levels):
             raise ValueError(
                 f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"
@@ -360,6 +375,7 @@ class STING:
         """Các ô có dữ liệu tại ``level``, sắp theo chỉ số."""
         if not hasattr(self, "cells_"):
             raise RuntimeError("Hãy gọi fit(X) trước khi cell_stats()")
+        level = _integer_parameter(level, "level", 0)
         if not (0 <= level < self.n_levels):
             raise ValueError(
                 f"level phải thuộc [0, {self.n_levels - 1}], nhận {level}"

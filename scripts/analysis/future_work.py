@@ -592,8 +592,8 @@ def render_markdown(
         [
             "",
             f"- **Tổng hợp 6 mốc:** `sd_4_2` có MAE dự báo TB **{b42['mean_mae_forecast']:.4f}** vs giữ năm trước **{b42['mean_mae_carry']:.4f}** (thắng **{b42['n_years_forecast_wins']}/{b42['n_years_total']}** năm); `sd_6_1` đạt **{b61['mean_mae_forecast']:.4f}** vs **{b61['mean_mae_carry']:.4f}** (thắng **{b61['n_years_forecast_wins']}/{b61['n_years_total']}** năm).",
-            f"- **Nhận diện vùng ngoài lưới (`out_recall` TB 6 mốc):** Dự báo = **{e3_sum['mean_out_recall_forecast']:.3f}** vs Giữ năm trước = **{e3_sum['mean_out_recall_carry']:.3f}** (`balanced_zone_accuracy` TB: **{e3_sum['mean_balanced_acc_forecast']:.3f}** vs **{e3_sum['mean_balanced_acc_carry']:.3f}**).",
-            "- **Đọc kết quả trung thực:** Mốc `2023→2024` là holdout đã công bố từ trước, không dùng dữ liệu 2024 để chỉnh sửa mô hình. Backtest cuốn chiếu xác nhận nhất quán hiện tượng: hồi quy điểm giảm nhẹ MAE liên tục nhưng co dự báo về tâm nên bỏ sót hầu hết các ca rơi ra ô thưa `-1`.",
+            f"- **Nhận diện ngoài vùng dày (`out_recall` TB 6 mốc):** Dự báo = **{e3_sum['mean_out_recall_forecast']:.3f}** vs Giữ năm trước = **{e3_sum['mean_out_recall_carry']:.3f}** (`balanced_zone_accuracy` TB: **{e3_sum['mean_balanced_acc_forecast']:.3f}** vs **{e3_sum['mean_balanced_acc_carry']:.3f}**).",
+            "- **Phạm vi đánh giá:** Tại mỗi mốc, mô hình và scaler chỉ fit từ lịch sử đến năm xuất phát; bước chọn mô hình không dùng năm mục tiêu. Tuy nhiên, cặp chỉ tiêu và thiết kế lưới được chọn bằng thông tin tới 2021–2022. Các mốc mục tiêu 2019–2022 vì vậy là hồi cứu theo thiết kế cố định, chưa đánh giá độc lập toàn bộ quy trình lựa chọn. Mốc `2023→2024` tái lập kết quả holdout đã công bố, không tạo thêm một phép kiểm định độc lập. Tổng hợp 6 mốc chỉ cho thấy MAE trung bình giảm nhẹ và thắng 4/6 năm ở mỗi chỉ tiêu; dự báo vẫn bỏ sót phần lớn quan sát ngoài vùng dày. Cần chọn lại cả đặc trưng và cấu hình bên trong từng cửa sổ huấn luyện hoặc đánh giá trên giai đoạn mới để đo khả năng tổng quát hóa của toàn quy trình.",
             "",
             "## Hướng 4 (`E4`): Tự tương quan không gian (Moran's I) & Cân bằng lớp (`class_weight`)",
             "",
@@ -611,14 +611,14 @@ def render_markdown(
     lines.extend(
         [
             "",
-            "- **Cân bằng lớp (`class_weight='balanced'`) — Trích kết quả đã đánh giá tại `results/candidates_classification.md` (`CLF` CV `2017–2022`, CHƯA DUYỆT GV & KHÔNG chạm holdout 2024):**",
+            "- **Cân bằng lớp (`class_weight='balanced'`) — Trích kết quả đã đánh giá tại [results/candidates_classification.md](https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/results/candidates_classification.md) (`CLF` CV `2017–2022`, CHƯA DUYỆT GV & KHÔNG chạm holdout 2024):**",
             "  - `C3`: Random Forest + `class_weight='balanced'` đạt `macro-F1 CV = 0.5238` (so với LR gốc `0.434`, thắng `6/6` fold).",
             "  - `C1`: Logistic Regression + `class_weight='balanced'` đạt `macro-F1 CV = 0.4861` (thắng `4/6` fold).",
-            "- **Đọc kết quả trung thực:** Moran's I chỉ đo tương quan không gian mô tả ở lát cắt năm 2024 theo kề ranh giới hành chính, không chứng minh hiệu ứng lan tỏa nhân quả giữa các tỉnh; `C1`/`C3` vẫn là ứng viên [CHƯA DUYỆT GV] trên pseudo-label STING.",
+            "- **Đọc kết quả trung thực:** Moran's I chỉ đo tương quan không gian mô tả ở lát cắt năm 2024 theo kề ranh giới hành chính, không chứng minh hiệu ứng lan tỏa nhân quả giữa các tỉnh. Các p-value hoán vị mang tính thăm dò, chưa hiệu chỉnh nhiều phép thử; `C1`/`C3` vẫn là ứng viên [CHƯA DUYỆT GV] trên pseudo-label STING.",
             "",
             "## Hướng 5: Gợi ý đối chiếu định tính (ngoài phạm vi code tự động)",
             "",
-            "- Đối chiếu danh sách **8 tỉnh Biên bứt phá** trong [`results/stakeholder_summary.md`](stakeholder_summary.md) và quy trình chấm phiếu độc lập tại [`reports/quy-trinh-tham-dinh-danh-sach-papi.md`](../reports/quy-trinh-tham-dinh-danh-sach-papi.md) (tuyệt đối không dùng điểm/nhãn STING để tự xác nhận).",
+            "- Đối chiếu danh sách **8 tỉnh Biên bứt phá** trong [`results/stakeholder_summary.md`](stakeholder_summary.md) và quy trình chấm phiếu độc lập tại [`reports/quy-trinh-tham-dinh-danh-sach-papi.md`](https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/reports/quy-trinh-tham-dinh-danh-sach-papi.md) (tuyệt đối không dùng điểm/nhãn STING để tự xác nhận).",
             "- Dưới đây là hợp của các tỉnh có độ dốc `6.1` cực trị (`E2`) và các tỉnh ô thưa năm 2024 (`-1`) làm **bảng ứng viên tham khảo** cho bước phỏng vấn / rà soát hồ sơ địa phương (không kết luận đúng/sai hay nhân quả):",
             "",
             "| Tỉnh | Tiêu chí gợi ý | Nhóm hành động 2024 | Độ dốc `4.2` | Độ dốc `6.1` | Điểm `6.1` (2024) |",

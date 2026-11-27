@@ -27,6 +27,17 @@ Toàn bộ sản phẩm giữa kỳ và cuối kỳ đã được gộp thành *
 | Notebook tiền xử lý PAPI | [`notebooks/Nhom15_TienXuLy_PAPI.ipynb`](notebooks/Nhom15_TienXuLy_PAPI.ipynb) | [`submissions/Nhom15_STING_PAPI/Nhom15_TienXuLy_PAPI.ipynb`](submissions/Nhom15_STING_PAPI/Nhom15_TienXuLy_PAPI.ipynb) |
 | Gói ZIP tự chứa toàn đồ án | [`submissions/Nhom15_STING_PAPI.zip`](submissions/Nhom15_STING_PAPI.zip) | [`HUONG-DAN.txt`](submissions/HUONG-DAN.txt) · [`SHA256SUMS.txt`](submissions/SHA256SUMS.txt) |
 
+Gói nộp kèm bằng chứng cho phần mở rộng được dẫn trong Word/slide: bốn bảng
+`future_work_*.csv`, bản diễn giải, hình tổng hợp và mã tái lập. Đây vẫn là
+thực nghiệm thăm dò; các mốc sớm chưa đánh giá độc lập toàn bộ quá trình chọn
+đặc trưng và cấu hình. `HUONG_DAN.txt` đối chiếu đường dẫn repo với bốn tài liệu
+được đưa lên cấp đầu ZIP và phân biệt lệnh chạy phân tích với lệnh dựng lại
+Word/PowerPoint từ repo đầy đủ.
+
+Sau khi giải nén và cài thư viện, có thể chạy
+`python scripts/deliverables/demo_smoke.py` ngay trong gói. Lệnh kiểm tra tệp,
+outputs đã lưu và checksum; dùng `nbconvert --execute` để thực thi lại notebook.
+
 **Thống kê bàn giao (63 tỉnh theo địa giới của dữ liệu năm 2024):** `scripts/analysis/stakeholder_summary.py` kết hợp nhãn lưới với mức điểm để tạo 4 nhóm mô tả và gợi ý rà soát ([bảng CSV 63 tỉnh](results/stakeholder_province_summary_2024.csv), [báo cáo tổng hợp](results/stakeholder_summary.md), sheet `Thống kê khách hàng 2024` trong [Excel](results/KetQua_STING_PAPI.xlsx) và tab **Thống kê khách hàng** trên Streamlit):
 
 - **Ngoài vùng dày phía điểm cao (8 tỉnh):** Hà Tĩnh, Quảng Ninh, Bình Thuận, Bà Rịa – Vũng Tàu, Sóc Trăng, Tây Ninh, Cà Mau, An Giang (trung vị `4.2 = 2.235`, `6.1 = 1.963`, GRDP `87.38` tr.đ/người). Đây là các ca để đối sánh sâu hơn, chưa có căn cứ gọi là vượt một chuẩn quốc gia hay khẳng định tăng trưởng theo thời gian.

@@ -4,15 +4,21 @@
   "root": "Nhom15_STING_PAPI",
   "files": [
     {
+      "path": "DEMO.md",
+      "bytes": 10266,
+      "sha256": "730629a85f5995f60434fbd76def556047ad883e573e7d9771da08b73771eaf1",
+      "role": "Kịch bản demo và cách đọc kết quả; đường dẫn tài liệu gốc được đối chiếu trong HUONG_DAN.txt"
+    },
+    {
       "path": "HUONG_DAN.txt",
-      "bytes": 3896,
-      "sha256": "ee9b7ad58c02f901fcf5e7f0da366a00a74a6a98950ba8160b68ae693547c87f",
+      "bytes": 5747,
+      "sha256": "09087dfa82e445402b092027db078f26035d9cde75abde7f5556b970f0d60d5a",
       "role": "Hướng dẫn mở và chạy lại đồ án"
     },
     {
       "path": "Nhom15_BaoCao_STING_PAPI.docx",
-      "bytes": 3015798,
-      "sha256": "024bfae53c0c3683b3a1fc88ea9c4278bf28a30412544c1702add931cf8a9d41",
+      "bytes": 3015815,
+      "sha256": "3e07d7372e58f85505aac350556e60010c4cfdeb11e612e9e0454d9240210314",
       "role": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)"
     },
     {
@@ -106,6 +112,12 @@
       "role": "Dữ liệu đã chuẩn hóa để chạy lại"
     },
     {
+      "path": "data/processed/papi_panel_v1_LOCKED.csv",
+      "bytes": 484183,
+      "sha256": "35d3476b5ca3c2bb1a6d244933e40b4fa22b176759de6c5a4e28d4329d11f7c2",
+      "role": "Dữ liệu đã chuẩn hóa để chạy lại"
+    },
+    {
       "path": "data/raw/boundaries/PROVENANCE.md",
       "bytes": 1182,
       "sha256": "3a5e7027ff5bc54fa0895a2fad02a2eec1da3a7342292b9ce1eb04767adb6799",
@@ -125,9 +137,15 @@
     },
     {
       "path": "data/raw/mendeley/PROVENANCE.md",
-      "bytes": 2266,
-      "sha256": "2408072da3240c92501be096394d7995ef91686669c1bbda1995a438c06837f6",
+      "bytes": 3193,
+      "sha256": "608a37b1fc7a6f411669c40a3a43bffefac53a437fd2f874123c657f09532e24",
       "role": "Nguồn và giấy phép dữ liệu đối chiếu Mendeley"
+    },
+    {
+      "path": "data/raw/mendeley/README.md",
+      "bytes": 7408,
+      "sha256": "8ac9c6bd6e10ee34ecedb80bc131373d69b6bb7f509405d89e4aaac37cdf3b82",
+      "role": "Hướng dẫn sử dụng gói đối chiếu Mendeley đã kèm theo"
     },
     {
       "path": "data/raw/mendeley/Replication_package/data/SHA256_PAPI_ORIGINALS.txt",
@@ -316,6 +334,12 @@
       "role": "Kết quả đối chiếu PAPI với Mendeley"
     },
     {
+      "path": "reports/external_data_expansion.md",
+      "bytes": 76188,
+      "sha256": "09e1865a4b7758e9ef1ce4ef3f9e34af107465e180cb2224ce2035d07916ac09",
+      "role": "Phạm vi và nguồn dữ liệu đối chiếu được dẫn trong ghi chú slide"
+    },
+    {
       "path": "reports/model_deep_dive.md",
       "bytes": 58186,
       "sha256": "2514e211105b653d73e402529a58324a484b118236bf778b02a12c8273a554ab",
@@ -454,6 +478,12 @@
       "role": "Hình minh họa trong báo cáo, slide và notebook"
     },
     {
+      "path": "results/figs/future_work_overview.png",
+      "bytes": 402202,
+      "sha256": "f71e6eefb2157b156f0e634dbc7abaffd42b3f2707d00666754ce15cb038effb",
+      "role": "Hình minh họa trong báo cáo, slide và notebook"
+    },
+    {
       "path": "results/figs/kmeans_elbow.png",
       "bytes": 117271,
       "sha256": "42f13d680286b3598beffa0422170f9ece8ae8a72cf59dc0e8c4a28a096d58cc",
@@ -520,6 +550,12 @@
       "role": "Hình minh họa trong báo cáo, slide và notebook"
     },
     {
+      "path": "results/figs/supervised_confusion.png",
+      "bytes": 134800,
+      "sha256": "9a30b7f5e56666bd461cad2ba16b52e44970885e6ad120ee3f8a211396d7b66b",
+      "role": "Hình minh họa trong báo cáo, slide và notebook"
+    },
+    {
       "path": "results/figs/supervised_importance.png",
       "bytes": 354496,
       "sha256": "5147bf1cd74de824644bfc82e7726b1ca7756cd20be1c91f67948437dc5483e7",
@@ -530,6 +566,42 @@
       "bytes": 338422,
       "sha256": "71c333c686bb759a578e1bc2428245139440a2414dc1f243a88c4e9e1d7c57cc",
       "role": "Hình minh họa trong báo cáo, slide và notebook"
+    },
+    {
+      "path": "results/figs/supervised_regression.png",
+      "bytes": 384687,
+      "sha256": "8d62e5138169441336e4df41b430a35c706b9fae8ae08aacc8e932706b6ac9a6",
+      "role": "Hình minh họa trong báo cáo, slide và notebook"
+    },
+    {
+      "path": "results/future_work.md",
+      "bytes": 10625,
+      "sha256": "5e7bf56b011fc42d88a4980ba6634d98090bc9ca50bce5fc849b66052846f586",
+      "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
+    },
+    {
+      "path": "results/future_work_backtest.csv",
+      "bytes": 1372,
+      "sha256": "82c926f9cbbed17f50a1e78b5c2c487097a9dab41ea68e361bcd1038beecd83c",
+      "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
+    },
+    {
+      "path": "results/future_work_rank.csv",
+      "bytes": 37348,
+      "sha256": "24e1e92df862afd5d1c76d2149710918f47df64b84b1c5a82630ea9ddce8444f",
+      "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
+    },
+    {
+      "path": "results/future_work_spatial.csv",
+      "bytes": 176,
+      "sha256": "a502ceafe6ec7a5c7500384444c654722d96169c8774ceb674f5e3aec3e406ed",
+      "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
+    },
+    {
+      "path": "results/future_work_trajectory.csv",
+      "bytes": 3756,
+      "sha256": "dcccf68b0931a60769d2060199736af3a073e9860e56b04726b082df266373ab",
+      "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/metrics.csv",
@@ -706,6 +778,12 @@
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
+      "path": "scripts/analysis/future_work.py",
+      "bytes": 36167,
+      "sha256": "d26241750ee5395daafecbea0bd9ef8ad243909275838402ffb942308536d311",
+      "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
+    },
+    {
       "path": "scripts/analysis/poverty_validation.py",
       "bytes": 28487,
       "sha256": "08b48643c73968d88b1185348f3fd15c30f1fb0773c5770f89394fe0102956c1",
@@ -751,6 +829,12 @@
       "path": "scripts/common/midterm_clustering.py",
       "bytes": 36947,
       "sha256": "2ef94c5a991007796597fb43ec7877352131f27e2f78ac0b1c1fc11749a2e602",
+      "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
+    },
+    {
+      "path": "scripts/common/notebook_checks.py",
+      "bytes": 1369,
+      "sha256": "ed8a68387195fe43c1f66c4c405b61fd4915c649899cd7949b13513af94e972e",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -808,6 +892,12 @@
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
+      "path": "scripts/deliverables/demo_smoke.py",
+      "bytes": 6704,
+      "sha256": "e1106f980283ce4ab682decd78c2538a4d1a5fe160e8648cdeab5abdcfb13e67",
+      "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
+    },
+    {
       "path": "scripts/figures/fig_grid_levels_and_elbow.py",
       "bytes": 6440,
       "sha256": "8d8fa57b85f10b7f95d901c3181cc9b99a0e2f0ddba731311777a944c64839ea",
@@ -845,8 +935,8 @@
     },
     {
       "path": "src/sting.py",
-      "bytes": 18078,
-      "sha256": "0b4ab80ce8afd7ab9cfcc851b3edd2338e394c94a09d3793235510431dad93bc",
+      "bytes": 19107,
+      "sha256": "b8f6f09fb73de4d682036461c13b0fdd86e46170b065fc55b0c9c788ee8fb1f2",
       "role": "Mã nguồn thuật toán STING cài đặt từ đầu"
     }
   ]
