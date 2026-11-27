@@ -104,7 +104,7 @@ try:
 
     p = Presentation(ROOT / "slides" / "Nhom15_STING_PAPI.pptx")
     n = len(p.slides._sldIdLst)
-    check("Nhom15_STING_PAPI.pptx mo duoc 11 trang", n == 11, f"{n} trang")
+    check("Nhom15_STING_PAPI.pptx mo duoc 15 trang", n == 15, f"{n} trang")
 except Exception as e:
     check("Nhom15_STING_PAPI.pptx mo duoc", False, str(e))
 

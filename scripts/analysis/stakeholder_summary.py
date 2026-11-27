@@ -391,7 +391,7 @@ def build_stakeholder_tables(root: Path = ROOT) -> dict[str, object]:
 
 
 def make_stakeholder_figure(data: dict[str, object], out_path: Path = OUT_FIG) -> None:
-    """Vẽ hình 2 panel: Phân nhóm hành động 63 tỉnh 2024 & So sánh KPI giữa 3 nhóm có điểm."""
+    """Vẽ nhóm mô tả 63 tỉnh 2024 và chỉ tiêu giữa 3 nhóm có điểm."""
     summary: pd.DataFrame = data["summary"]  # type: ignore[assignment]
     group_stats: pd.DataFrame = data["group_stats"]  # type: ignore[assignment]
     bench: dict[str, float] = data["bench"]  # type: ignore[assignment]
@@ -447,7 +447,7 @@ def make_stakeholder_figure(data: dict[str, object], out_path: Path = OUT_FIG) -
             alpha=0.72,
             edgecolors="white",
             linewidths=0.6,
-            label=f"Vùng lõi ổn định — Cụm 2 (n = {len(core)})",
+            label=f"Trong vùng dày (n = {len(core)})",
             zorder=3,
         )
         ax_left.scatter(
@@ -458,7 +458,7 @@ def make_stakeholder_figure(data: dict[str, object], out_path: Path = OUT_FIG) -
             edgecolors="#004D38",
             linewidths=1.6,
             marker="o",
-            label=f"Chuẩn 14/14 năm trong Cụm 2 (n = {len(bench_14)})",
+            label=f"Giữ nhãn 14/14 năm (n = {len(bench_14)})",
             zorder=4,
         )
         ax_left.scatter(
@@ -469,7 +469,7 @@ def make_stakeholder_figure(data: dict[str, object], out_path: Path = OUT_FIG) -
             marker="D",
             edgecolors="white",
             linewidths=0.8,
-            label=f"Biên bứt phá vượt chuẩn (n = {len(frontier)})",
+            label=f"Ngoài vùng dày, phía điểm cao (n = {len(frontier)})",
             zorder=5,
         )
         ax_left.scatter(
@@ -480,7 +480,7 @@ def make_stakeholder_figure(data: dict[str, object], out_path: Path = OUT_FIG) -
             marker="s",
             edgecolors="white",
             linewidths=0.8,
-            label=f"Ưu tiên cải thiện Y tế 6.1 (n = {len(priority)})",
+            label=f"Ngoài vùng dày, 6.1 thấp (n = {len(priority)})",
             zorder=5,
         )
 
@@ -554,7 +554,7 @@ def make_stakeholder_figure(data: dict[str, object], out_path: Path = OUT_FIG) -
 
         ax_left.set_xlim(1.78, 2.40)
         ax_left.set_ylim(1.635, 2.265)
-        ax_left.set_title("(a) Phân nhóm hành động 63 tỉnh năm 2024 (tách vùng −1)", fontsize=10.5, fontweight="bold")
+        ax_left.set_title("(a) Phân nhóm mô tả 63 tỉnh năm 2024 (tách vùng −1)", fontsize=10.5, fontweight="bold")
         ax_left.set_xlabel("4.2 Kiểm soát tham nhũng dịch vụ công (2024)")
         ax_left.set_ylabel("6.1 Y tế công lập (2024)")
         ax_left.legend(loc="upper left", fontsize=6.7, frameon=True, framealpha=0.94, borderpad=0.3)
@@ -566,15 +566,18 @@ def make_stakeholder_figure(data: dict[str, object], out_path: Path = OUT_FIG) -
             "Ưu tiên cải thiện Y tế 6.1",
         ])].copy()
         short_names = {
-            "Biên bứt phá vượt chuẩn": "Biên bứt phá",
-            "Vùng lõi ổn định (Cụm 2)": "Vùng lõi Cụm 2",
-            "Ưu tiên cải thiện Y tế 6.1": "Ưu tiên Y tế 6.1",
+            "Biên bứt phá vượt chuẩn": "Ngoài vùng dày,\nphía điểm cao",
+            "Vùng lõi ổn định (Cụm 2)": "Trong vùng dày",
+            "Ưu tiên cải thiện Y tế 6.1": "Ngoài vùng dày,\n6.1 thấp",
         }
         x_tick_labels = [
             f"{short_names[g]}\n(n={int(n)})"
             for g, n in zip(scored_groups["action_group"], scored_groups["n_provinces"], strict=True)
         ]
-        y_tick_labels = [lbl.replace("\n", " ") for lbl in x_tick_labels]
+        y_tick_labels = [
+            f"{short_names[g]} (n={int(n)})"
+            for g, n in zip(scored_groups["action_group"], scored_groups["n_provinces"], strict=True)
+        ]
         x = np.arange(len(scored_groups))
         w = 0.34
         vals_42 = scored_groups["median_sd_4_2"].astype(float).to_numpy()

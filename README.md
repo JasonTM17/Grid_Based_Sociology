@@ -9,11 +9,11 @@
 
 Nhóm 15 · Môn Học máy · Chủ đề 6 — Grid-based clustering · Sociology / History
 
-Luồng chính của STING gồm ba bước. `fit()` dựng lưới nhiều mức và đếm điểm theo ô.
+Luồng chính của cài đặt dựa trên STING gồm ba bước. `fit()` dựng lưới nhiều mức và đếm điểm theo ô.
 `cluster()` giữ các ô đủ điểm ở mức được chọn, rồi dùng DFS nối các ô dày chung cạnh.
 `predict()` tra ô và nhãn trên lưới đã học. Trong cấu hình PAPI, hai trục là chỉ tiêu 4.2
 và 6.1, lưới có 16 × 16 ô và ngưỡng là 5 quan sát mỗi ô. Bài báo gốc trình bày
-cấu trúc lưới thống kê và phép truy vấn phân cấp. [STING, Wang, Yang và Muntz (1997)](https://www.vldb.org/conf/1997/P186.PDF)
+cấu trúc lưới thống kê và phép truy vấn phân cấp. Đồ án dùng biến thể phân cụm các ô đủ mật độ ở một mức lưới; không xem toàn bộ cài đặt là bản sao đầy đủ của thuật toán gốc. [STING, Wang, Yang và Muntz (1997)](https://www.vldb.org/conf/1997/P186.PDF)
 
 ## Hồ sơ nộp & Thống kê bàn giao khách hàng
 
@@ -22,20 +22,34 @@ Toàn bộ sản phẩm giữa kỳ và cuối kỳ đã được gộp thành *
 | Thành phần | Tệp chuẩn trong repo | Bản đồng bộ đóng gói & chạy lại |
 |---|---|---|
 | Báo cáo Word (DOCX) | [`reports/Nhom15_BaoCao_STING_PAPI.docx`](reports/Nhom15_BaoCao_STING_PAPI.docx) | [`submissions/Nhom15_STING_PAPI/Nhom15_BaoCao_STING_PAPI.docx`](submissions/Nhom15_STING_PAPI/Nhom15_BaoCao_STING_PAPI.docx) |
-| Slide trình bày (11 trang) | [`slides/Nhom15_STING_PAPI.pptx`](slides/Nhom15_STING_PAPI.pptx) | [`submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx`](submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx) |
+| Slide trình bày (15 trang) | [`slides/Nhom15_STING_PAPI.pptx`](slides/Nhom15_STING_PAPI.pptx) | [`submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx`](submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx) |
 | Notebook phân tích chính | [`notebooks/Nhom15_STING_PAPI.ipynb`](notebooks/Nhom15_STING_PAPI.ipynb) | [`submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.ipynb`](submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.ipynb) |
 | Notebook tiền xử lý PAPI | [`notebooks/Nhom15_TienXuLy_PAPI.ipynb`](notebooks/Nhom15_TienXuLy_PAPI.ipynb) | [`submissions/Nhom15_STING_PAPI/Nhom15_TienXuLy_PAPI.ipynb`](submissions/Nhom15_STING_PAPI/Nhom15_TienXuLy_PAPI.ipynb) |
 | Gói ZIP tự chứa toàn đồ án | [`submissions/Nhom15_STING_PAPI.zip`](submissions/Nhom15_STING_PAPI.zip) | [`HUONG-DAN.txt`](submissions/HUONG-DAN.txt) · [`SHA256SUMS.txt`](submissions/SHA256SUMS.txt) |
 
-**Thống kê bàn giao cho khách hàng (63 tỉnh năm 2024):** Thay vì giao mã kỹ thuật thô (`−1`, `2`), `scripts/analysis/stakeholder_summary.py` chuyển hóa kết quả lưới STING thành 4 nhóm hành động trực diện trên 63 tỉnh ([bảng CSV 63 tỉnh](results/stakeholder_province_summary_2024.csv), [báo cáo tổng hợp](results/stakeholder_summary.md), sheet `Thống kê khách hàng 2024` trong [Excel](results/KetQua_STING_PAPI.xlsx) và tab **Thống kê khách hàng** trên Streamlit):
+**Thống kê bàn giao (63 tỉnh theo địa giới của dữ liệu năm 2024):** `scripts/analysis/stakeholder_summary.py` kết hợp nhãn lưới với mức điểm để tạo 4 nhóm mô tả và gợi ý rà soát ([bảng CSV 63 tỉnh](results/stakeholder_province_summary_2024.csv), [báo cáo tổng hợp](results/stakeholder_summary.md), sheet `Thống kê khách hàng 2024` trong [Excel](results/KetQua_STING_PAPI.xlsx) và tab **Thống kê khách hàng** trên Streamlit):
 
-- **Biên bứt phá vượt chuẩn (8 tỉnh):** Hà Tĩnh, Quảng Ninh, Bình Thuận, Bà Rịa – Vũng Tàu, Sóc Trăng, Tây Ninh, Cà Mau, An Giang (trung vị `4.2 = 2.235`, `6.1 = 1.963`, GRDP `87.38` tr.đ/người) — không đánh đồng là "yếu" dù mang mã `−1`, cần khảo sát chia sẻ điển hình tốt.
-- **Vùng lõi ổn định — Cụm 2 (48 tỉnh):** Gồm **5 tỉnh chuẩn tham chiếu 14/14 năm** (`0` năm nhiễu 2011–2024: Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long) và 7 tỉnh vùng rìa dưới `6.1` cần giữ nhịp đầu tư.
-- **Ưu tiên cải thiện Y tế công lập 6.1 (5 tỉnh):** Hà Nội (`1.686`), Cần Thơ (`1.698`), Gia Lai (`1.787`), Long An (`1.807`), Bình Dương (`1.808`) — GRDP/người trung vị đạt `104.26` triệu đồng (vùng lõi `80.97` triệu đồng), nhưng điểm PAPI Y tế công lập `6.1` thấp. Đây là đối chiếu mô tả, không chứng minh quá tải.
+- **Ngoài vùng dày phía điểm cao (8 tỉnh):** Hà Tĩnh, Quảng Ninh, Bình Thuận, Bà Rịa – Vũng Tàu, Sóc Trăng, Tây Ninh, Cà Mau, An Giang (trung vị `4.2 = 2.235`, `6.1 = 1.963`, GRDP `87.38` tr.đ/người). Đây là các ca để đối sánh sâu hơn, chưa có căn cứ gọi là vượt một chuẩn quốc gia hay khẳng định tăng trưởng theo thời gian.
+- **Trong vùng dày — Cụm 2 (48 tỉnh):** Có **5 tỉnh được gán Cụm 2 ở 14/14 năm** trên cùng lưới tham chiếu (Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long) và 7 tỉnh có `6.1` dưới mốc rà soát nội bộ. Giữ nhãn cụm không có nghĩa điểm số hay chất lượng dịch vụ ổn định.
+- **Ngoài vùng dày, 6.1 thấp theo quy tắc rà soát (5 tỉnh):** Hà Nội (`1.686`), Cần Thơ (`1.698`), Gia Lai (`1.787`), Long An (`1.807`), Bình Dương (`1.808`). GRDP/người trung vị là `104.26` triệu đồng, so với `80.97` triệu đồng trong vùng dày. Đây là đối chiếu mô tả, không chứng minh quá tải y tế hoặc quan hệ nhân quả.
 - **Thiếu dữ liệu 2024 (2 tỉnh):** Vĩnh Phúc, Tiền Giang (cần kiểm toán thu thập dữ liệu, không nội suy).
-- **Phân tách 7 tỉnh rời Cụm 2 (2023→2024):** 5 tỉnh đi lên Biên bứt phá; chỉ 2 tỉnh (Gia Lai, Long An) tụt xuống rìa `6.1`, kèm Top cảnh báo trượt vùng theo kịch bản sai số (AUC `0.816`).
+- **Phân tách 7 tỉnh rời Cụm 2 (2023→2024):** 5 tỉnh chuyển tới nhóm ngoài vùng dày phía điểm cao và 2 tỉnh (Gia Lai, Long An) tới nhóm rà soát `6.1`. Rời cụm không mặc nhiên là suy giảm. Xếp hạng từ kịch bản sai số đạt AUC thăm dò `0.816` trong hồi kiểm 2024; chưa xác nhận khả năng cảnh báo vận hành.
 
-Slide trình bày có **11 trang**: trang 2 bài toán & tiền xử lý; trang 3–4 cơ chế lưới 3×3, giả lập 240 điểm (`ARI = 0,950`), đối chứng K-Means/DBSCAN & bất biến z-score; trang 5 quan sát 2024 & truy vết Lạng Sơn; **trang 6–7 thống kê bàn giao 63 tỉnh cho khách hàng**; trang 8–10 dự báo bổ trợ, kiểm chứng ngoại lai/độ bền đa chiều và kết luận; trang 11 cảm ơn.
+Tên nhóm lưu trong CSV/Excel hiện gồm “Biên bứt phá vượt chuẩn”, “Vùng lõi ổn định (Cụm 2)” và “Ưu tiên cải thiện Y tế 6.1”. Đây là nhãn diễn giải của sản phẩm; cách hiểu đúng là các nhóm mô tả ở trên. Mốc `6.1 = 1.8791` tính từ 48 tỉnh trong vùng dày năm 2024, là quy tắc rà soát hồi cứu, không phải ngưỡng đã được kiểm chứng trước năm 2024.
+
+Slide trình bày có **15 trang**: bài toán và tiền xử lý (2–3), cơ chế STING và cụm lịch sử (4–5), đối chứng trên cùng tập điểm (6), quan sát 2024 và bảng 63 tỉnh (7–8), dịch chuyển và Lạng Sơn (9), dự báo bổ trợ (10), đối chiếu nguồn ngoài và độ bền (11–12), demo (13), kết luận (14) và cảm ơn (15). Kịch bản dự kiến 15 phút trình bày, thêm 5 phút hỏi đáp.
+
+### Đọc đúng mẫu số và loại thực nghiệm
+
+| Phạm vi | Số quan sát | Ý nghĩa |
+|---|---:|---|
+| Panel đầy đủ | 882 dòng, 41 cột | 63 tỉnh × 14 năm; giữ cả dòng thiếu dữ liệu. |
+| Đủ hai chỉ tiêu trong 2011–2024 | 869 | Dùng cho các minh họa mô tả trên toàn giai đoạn, không phải tập huấn luyện dự báo. |
+| Lưới tham chiếu 2011–2023 | 808 | Fit scaler và STING trước khi gán quan sát 2024. |
+| Quan sát 2024 đủ hai chỉ tiêu | 61 | 48 tỉnh vào vùng dày, 13 tỉnh vào ô thưa; hai tỉnh thiếu vẫn nằm trong bảng bàn giao 63 tỉnh. |
+| Ghép được 2023 với 2024 | 59 | Mẫu đối chiếu dịch chuyển và sai số dự báo; không dùng mẫu số 61 hoặc 63 cho các metric này. |
+
+Nguồn: [panel đã kiểm tra](data/processed/papi_panel_63_2011_2024.csv), [gán lưới quan sát 2024](results/papi_observed_grid_2024.csv), [kết quả dự báo](results/papi_forecast_2024.json). Nhãn do STING sinh là nhãn tham chiếu của mô hình, chưa phải nhãn xã hội do chuyên gia xác nhận. Các phân tích bổ sung trên năm 2024 mang tính hồi cứu; một năm đánh giá không đủ kết luận khả năng tổng quát hóa.
 
 Tài liệu ôn tập hỏi đáp, kịch bản thuyết trình và ghi nhận phản biện nằm trong `reports/on-tap/`: [`qa_midterm.md`](reports/on-tap/qa_midterm.md), [`qa_final.md`](reports/on-tap/qa_final.md), [`qa_course_concepts.md`](reports/on-tap/qa_course_concepts.md) và [`presentation_script.md`](reports/on-tap/presentation_script.md). Có thể mở [Hướng dẫn demo](DEMO.md) để chạy kiểm tra trước khi trình bày.
 
@@ -51,10 +65,10 @@ Grid_Based_Sociology/
 │   ├── supervised/            #   Hồi quy & phân loại đối chứng theo nội dung môn học
 │   ├── figures/               #   Sinh hình phân tích & sơ đồ lưới
 │   ├── notebooks/             #   Sinh bộ đôi notebook thống nhất
-│   ├── deliverables/          #   Sinh báo cáo Word, slide PPTX 11 trang, ZIP thống nhất & smoke test
+│   ├── deliverables/          #   Sinh báo cáo Word, slide PPTX 15 trang, ZIP thống nhất & smoke test
 │   └── common/                #   Hàm dùng chung (fig_style, midterm_clustering, ...)
 ├── notebooks/                 # Hai notebook thống nhất (Nhom15_STING_PAPI & Nhom15_TienXuLy_PAPI)
-├── slides/                    # Slide PowerPoint thống nhất (Nhom15_STING_PAPI.pptx — 11 trang)
+├── slides/                    # Slide PowerPoint thống nhất (Nhom15_STING_PAPI.pptx — 15 trang)
 ├── reports/                   # Báo cáo Word thống nhất (Nhom15_BaoCao_STING_PAPI.docx) & hồ sơ kỹ thuật
 │   └── on-tap/                #   Hỏi đáp, phản hồi giữa kỳ và kịch bản thuyết trình
 ├── submissions/               # Sản phẩm đóng gói thống nhất
@@ -64,7 +78,7 @@ Grid_Based_Sociology/
 │   ├── raw/                   #   Dữ liệu gốc & PROVENANCE.md từng nguồn (course/ lưu local)
 │   └── processed/             #   Panel PAPI 882×41 & các bảng dữ liệu ngoài đã làm sạch
 ├── models/                    # Model STING (.pkl), scaler JSON và joblib hồi quy/phân loại
-├── results/                   # Kết quả CSV/MD/JSON, KetQua_STING_PAPI.xlsx (24 sheet) & figs/
+├── results/                   # Kết quả CSV/MD/JSON, KetQua_STING_PAPI.xlsx (25 sheet) & figs/
 ├── tests/                     # Bộ kiểm thử pytest toàn dự án
 └── assets/                    # Ảnh bìa repo & mẫu XML trang bìa báo cáo
 ```
@@ -98,7 +112,12 @@ Tư liệu bài giảng của giảng viên được lưu cục bộ trong `data
 
 ## Chạy nhanh
 
+Chạy từ thư mục gốc repo với **Python 3.14**. Cài các phiên bản đã khóa trước khi chạy:
+
 ```powershell
+# Cài thư viện
+python -m pip install -r requirements.txt
+
 # Kiểm tra môi trường
 python -c "import pandas, openpyxl, plotly, sklearn, streamlit; print('ok')"
 
@@ -116,7 +135,7 @@ Ghi chú: `jupyter` CLI chưa vào PATH — dùng `python -m jupyter` / `python 
 
 ## Đối chiếu nội dung môn học
 
-Bảng liên kết các nội dung học máy với mã nguồn, kết quả và notebook của đồ án. Số liệu classifier là **mức khớp với pseudo-label STING**, holdout **một lần** 2023→2024 — không có kết luận “vượt trội” so với ground truth xã hội.
+Bảng liên kết các nội dung học máy với mã nguồn, kết quả và notebook của đồ án. Số liệu classifier là **mức khớp với pseudo-label STING**, đối chiếu tại **một mốc** 2023→2024 — không có kết luận “vượt trội” so với ground truth xã hội.
 
 | Nội dung học máy | Trong repo |
 |---|---|
@@ -129,7 +148,7 @@ Bảng liên kết các nội dung học máy với mã nguồn, kết quả và
 | Tiền xử lý PAPI (làm sạch, tích hợp và chuẩn hóa) | Mô-đun `src/preprocessing.py` (`PREPROCESSING_PIPELINE` 6 bước, đọc trực tiếp 14 workbook PAPI + thử nghiệm Cleaning/Transformation) được nhập trực tiếp vào `notebooks/Nhom15_TienXuLy_PAPI.ipynb` và `notebooks/Nhom15_STING_PAPI.ipynb` (§2). `scripts/data/preprocessing_audit.py` và `scripts/data/preprocessing_sensitivity.py` tạo bảng kiểm tra và đối chiếu độ nhạy. |
 | Linear, Polynomial & Logistic Regression | Phụ lục B của `notebooks/Nhom15_STING_PAPI.ipynb` (OLS residual $\varepsilon_i$, đa thức $m \le n$, Sigmoid & Binary Cross-Entropy) |
 | K-Means, TRAP, Linkage & Dendrogram vs STING | Mục 1–3 & Phụ lục C của `notebooks/Nhom15_STING_PAPI.ipynb` (sơ đồ lưới 3×3, phản biện nhiễu `−1`, đối chứng K-Means/DBSCAN, Elbow/Silhouette & dendrogram phân cấp) |
-| Thống kê bàn giao khách hàng (63 tỉnh) | `scripts/analysis/stakeholder_summary.py`, Mục 5 của `notebooks/Nhom15_STING_PAPI.ipynb`, Mục 5.8 báo cáo Word & Slide 6–7 |
+| Thống kê bàn giao khách hàng (63 tỉnh) | `scripts/analysis/stakeholder_summary.py`, Mục 5 của `notebooks/Nhom15_STING_PAPI.ipynb`, Mục 5.8 báo cáo Word & Slide 8–9 |
 | Q&A thi / vấn đáp theo slide | `reports/on-tap/qa_course_concepts.md`, `reports/on-tap/qa_midterm.md`, `reports/on-tap/qa_final.md` |
 
 Tái tạo audit và bảng classifier (nếu artifact cũ):
@@ -142,6 +161,11 @@ python scripts/supervised/classifier_label_baselines.py   # tùy chọn — sàn
 
 ## Tái tạo bộ hồ sơ nộp và ZIP thống nhất
 
+Cài thêm công cụ phát triển bằng `python -m pip install -r requirements-dev.txt`.
+Để cập nhật phân trang và mục lục Word, máy cần Microsoft Word trên Windows hoặc
+LibreOffice trên Linux/macOS; xem [hướng dẫn dựng báo cáo](reports/report_format_notes.md).
+Các tệp Word và slide đã có sẵn trong repo để mở trực tiếp.
+
 ```powershell
 # Tiền xử lý, phân tích khách hàng & dự báo lưới
 python scripts/notebooks/gen_preprocessing_notebook.py
@@ -149,7 +173,7 @@ python scripts/analysis/stakeholder_summary.py --with-excel
 python scripts/figures/forecast_papi_grid.py
 python scripts/notebooks/gen_final_analysis.py
 
-# Báo cáo Word (kèm cập nhật TOC/danh mục hình-bảng qua Word COM) & Slide 11 trang
+# Báo cáo Word, cập nhật mục lục/danh mục và slide 15 trang
 python scripts/deliverables/build_report.py
 python scripts/deliverables/update_report_fields.py
 python scripts/deliverables/build_slides.py
@@ -159,8 +183,19 @@ python scripts/deliverables/build_submission_packages.py
 python scripts/deliverables/build_submission_packages.py --verify
 ```
 
+Lệnh dựng slide mặc định tái tạo bản đã duyệt sau khi kiểm tra lại dữ liệu. Khi đổi dữ liệu hoặc bố cục, xem [hướng dẫn tái sinh slide](slides/README.md). Trình cập nhật trường Word hỗ trợ Word trên Windows và đường LibreOffice trên Linux; không cần tự điền số trang.
+
 ZIP lấy các bản gốc trong `notebooks/`, `slides/` và `reports/`, đồng thời đồng bộ 1-1 ra thư mục `submissions/Nhom15_STING_PAPI/`.
-Slide 5 và mục 4 của `Nhom15_STING_PAPI.ipynb` cùng tính kết quả gán năm 2024 từ panel PAPI và trình bày ví dụ Lạng Sơn; Slide 6–7 và mục 5 trình bày thống kê bàn giao 63 tỉnh cho khách hàng; Slide 11 dành để cảm ơn. Khi cập nhật panel, chạy `python scripts/analysis/predict_demo.py` và `python scripts/analysis/stakeholder_summary.py --with-excel` trước khi tạo lại notebook, báo cáo và slide. Trình đóng gói kiểm tra riêng PDF báo cáo PAPI và ZIP Mendeley; tệp nào có sẵn sẽ được đưa vào gói và liệt kê trong `HUONG-DAN.txt`.
+Slide 7–9 và mục 4–5 của `Nhom15_STING_PAPI.ipynb` cùng đọc kết quả quan sát 2024, ví dụ Lạng Sơn và thống kê 63 tỉnh; slide 15 dành để cảm ơn. Khi cập nhật panel, chạy `python scripts/analysis/predict_demo.py` và `python scripts/analysis/stakeholder_summary.py --with-excel` trước khi tạo lại notebook, báo cáo và slide.
+
+Gói mặc định có đủ Word, slide, hai notebook, mã nguồn, 14 workbook PAPI và dữ liệu để chạy lại. ZIP Mendeley được kèm nếu có sẵn. [PDF báo cáo PAPI gốc](data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf) vẫn được giữ trong repo; để giảm dung lượng nộp bài, tài liệu tham khảo này chỉ được đưa vào ZIP khi chọn:
+
+```powershell
+python scripts/deliverables/build_submission_packages.py --include-reference-pdf
+python scripts/deliverables/build_submission_packages.py --verify
+```
+
+`HUONG_DAN.txt` trong gói liệt kê đúng các tài liệu tham khảo thực sự được kèm theo. PDF nguồn không phải đầu vào thực thi của hai notebook.
 
 ## Dự báo hai chỉ tiêu và đối chiếu trên lưới STING
 
@@ -268,7 +303,7 @@ khi học xuyên năm trên panel.
 
 ## Khai báo sử dụng công cụ hỗ trợ
 
-Nhóm sử dụng trợ lý AI lập trình cho một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, và dry-run đo thời gian chuẩn bị demo (`reports/on-tap/rehearsal_log.md` mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Hai thành viên chịu trách nhiệm rà soát nguồn, chạy lại kết quả và giải thích phương pháp, lựa chọn cấu hình cùng giới hạn của đồ án. Nhóm ghi nhận việc sử dụng công cụ hỗ trợ và chịu trách nhiệm về nội dung bài nộp.
+Nhóm sử dụng trợ lý AI lập trình cho một số phần của đồ án: khung code ban đầu cho một số script dữ liệu/trực quan, gỡ lỗi, rà soát nội dung và bố cục Word/PowerPoint, kiểm thử và chạy thử kỹ thuật chuẩn bị demo (`reports/on-tap/rehearsal_log.md` mục A ghi rõ phần dry-run do AI/từng cá nhân tự chạy). Hai thành viên chịu trách nhiệm rà soát nguồn, chạy lại kết quả và giải thích phương pháp, lựa chọn cấu hình cùng giới hạn của đồ án. Nhóm ghi nhận việc sử dụng công cụ hỗ trợ và chịu trách nhiệm về nội dung bài nộp.
 
 ## Giấy phép
 

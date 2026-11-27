@@ -1,6 +1,6 @@
 # Kiểm định bổ trợ — tỷ lệ hộ nghèo GSO theo nhãn cụm STING (cửa sổ giao 2012–2024)
 
-Sinh bởi `scripts/analysis/poverty_validation.py`. Kiểm chứng ngoại lai thứ hai của cụm STING sau PCI (nguồn độc lập với PAPI): nghèo GSO là số liệu thống kê chính thức, không phải khảo sát hộ dân. Nhãn cụm lấy từ `results/predict_all_years.csv` (model đóng băng, gate bởi `tests/test_artifact_reproduction.py`); join khóa (year, province_code) `validate="one_to_one"` đúng protocol `scripts/analysis/external_validation.py`. Thống kê bằng scipy 1.16.3 (Python 3.14.2), helper tái dùng nguyên xi (`group_table`, `anova_kruskal`, `source_note`, `place_n_labels`). Mọi số tự tính lại từ CSV — không hardcode, không nội suy.
+Sinh bởi `scripts/analysis/poverty_validation.py`. Kiểm chứng ngoại lai thứ hai của cụm STING sau PCI (nguồn độc lập với PAPI): nghèo GSO là số liệu thống kê chính thức từ nguồn khác với PAPI. Nhãn cụm lấy từ `results/predict_all_years.csv` (model đóng băng, gate bởi `tests/test_artifact_reproduction.py`); join khóa (year, province_code) `validate="one_to_one"` đúng protocol `scripts/analysis/external_validation.py`. Thống kê bằng scipy 1.16.3 (Python 3.14.2), helper tái dùng nguyên xi (`group_table`, `anova_kruskal`, `source_note`, `place_n_labels`). Mọi số tự tính lại từ CSV — không hardcode, không nội suy.
 
 ## 1) Dữ liệu và join — cửa sổ giao 2012–2024
 
@@ -25,16 +25,16 @@ Sinh bởi `scripts/analysis/poverty_validation.py`. Kiểm chứng ngoại lai 
 |              1 | cụm 1      |  10 | -6.035 |    -6.2  | 2.848 |  -9   |   0.2 |
 |              2 | cụm 2      | 649 |  2.444 |     0    | 8.378 | -12.8 |  42.3 |
 
-- **Gộp thô** (poverty gốc, nhiễm xu hướng năm): Kruskal–Wallis H = 4.6670, p = 0.198; One-way ANOVA F(3,801) = 1.5376, p = 0.203; eta² = 0.0057 — KHÔNG đáng kể thống kê.
-- **Đã trừ median trong năm** (tách hiệu ứng năm): Kruskal–Wallis H = 20.6285, p = 0.000126; ANOVA F(3,801) = 3.3629, p = 0.0183; eta² = 0.0124 — đáng kể.
+- **Gộp thô** (poverty gốc, nhiễm xu hướng năm): Kruskal–Wallis H = 4.6670, p = 0.198; One-way ANOVA F(3,801) = 1.5376, p = 0.203; eta² = 0.0057.
+- **Đã trừ median trong năm** (điều chỉnh mức vị trí từng năm): Kruskal–Wallis H = 20.6285, p = 0.000126; ANOVA F(3,801) = 3.3629, p = 0.0183; eta² = 0.0124.
 - Median nghèo toàn panel giảm rất mạnh xuyên năm: 12.9% (2012) → 2.3% (2024); tỷ trọng cụm cũng trôi theo năm (nhiễu 17/63 năm 2012 → 2–27/63 trong các năm của cửa sổ). Test gộp thô phối trộn hiệu ứng năm với khác biệt cụm — hai số trên PHẢI đọc cùng nhau, không chọn trình bày một kết quả.
-- Diễn giải thận trọng: cụm 0 (n=2) và cụm 1 (n=10) quá nhỏ để tự kết luận; cặp tương phản đáng tin duy nhất là **nhiễu vs cụm 2** (đối xứng cảnh báo PCI — external_validation.py:608-610). Đọc eta²/ANOVA chỉ như mô tả bổ sung.
+- Diễn giải thận trọng: cụm 0 (n=2) và cụm 1 (n=10) quá nhỏ để tự kết luận. Nhiễu và cụm 2 có cỡ mẫu lớn hơn nhưng vẫn gồm các quan sát lặp theo tỉnh. P-value chưa xử lý phụ thuộc tỉnh-năm và nhiều phép so sánh; đọc các kiểm định như thăm dò, eta² như mô tả. Trừ median năm không loại bỏ phụ thuộc này hoặc khôi phục tính tương đương giữa các chuẩn nghèo.
 
 ## 3) Mann–Whitney nhiễu vs cụm 2 (hai phía)
 
-- Thô: U = 47464, p = 0.767 — không khác biệt.
-- Đã trừ median trong năm: U = 43978, p = 0.269 — không khác biệt.
-- Kết luận an toàn: ở mức gộp, Mann–Whitney nhiễu vs cụm 2 không khác biệt (thô) và không khác biệt (đã trừ median năm) — nghèo GSO đọc như kiểm chứng bổ trợ, không phải bằng chứng độc lập mạnh như PCI; tín hiệu cụm (nếu có) nằm trong kiểm định đã-trừ-median-năm ở mục 2, so phân phối toàn bộ các nhóm.
+- Thô: U = 47464, p = 0.767 — chưa đủ bằng chứng khác biệt ở ngưỡng 0.05.
+- Đã trừ median trong năm: U = 43978, p = 0.269 — chưa đủ bằng chứng khác biệt ở ngưỡng 0.05.
+- Kết luận an toàn: ở mức gộp, Mann–Whitney nhiễu vs cụm 2 chưa đủ bằng chứng khác biệt ở ngưỡng 0.05 (thô) và chưa đủ bằng chứng khác biệt ở ngưỡng 0.05 (đã trừ median năm). Đây là đối chiếu bổ trợ; không bác bỏ giả thuyết không không chứng minh hai nhóm tương đương. Kết quả của kiểm định toàn bộ nhóm ở mục 2 cũng không xác định cặp nhóm nào khác nhau.
 
 ## 4) Thống kê từng nhóm — RIÊNG TỪNG năm giao và pooled
 
@@ -116,22 +116,22 @@ Sinh bởi `scripts/analysis/poverty_validation.py`. Kiểm chứng ngoại lai 
 
 |   year |   n | note                                                                                       |
 |-------:|----:|:-------------------------------------------------------------------------------------------|
-|   2012 |  63 | k = 4 nhóm, min n = 1; H = 3.1067; p = 0.375; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
-|   2013 |  63 | k = 3 nhóm, min n = 4; H = 2.3814; p = 0.304                                               |
-|   2014 |  61 | k = 3 nhóm, min n = 2; H = 4.8289; p = 0.0894                                              |
-|   2015 |  63 | k = 3 nhóm, min n = 1; H = 1.4569; p = 0.483; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
-|   2016 |  62 | k = 3 nhóm, min n = 1; H = 3.9493; p = 0.139; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
-|   2017 |  63 | k = 2 nhóm, min n = 8; H = 0.7881; p = 0.375; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
-|   2018 |  61 | k = 3 nhóm, min n = 1; H = 2.8373; p = 0.242; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
-|   2019 |  63 | k = 2 nhóm, min n = 7; H = 0.5054; p = 0.477; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
-|   2020 |  63 | k = 2 nhóm, min n = 6; H = 1.8778; p = 0.171; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
-|   2021 |  60 | k = 2 nhóm, min n = 7; H = 1.0506; p = 0.305; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
-|   2022 |  61 | k = 2 nhóm, min n = 4; H = 2.1229; p = 0.145; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả   |
-|   2023 |  61 | k = 2 nhóm, min n = 9; H = 3.4654; p = 0.0627; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả  |
-|   2024 |  61 | k = 2 nhóm, min n = 13; H = 5.5328; p = 0.0187; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả |
+|   2012 |  63 | k = 4 nhóm, min n = 1; H = 3.1067; p = 0.375; có nhóm n<5, xấp xỉ chi-square cần thận trọng — CHỈ mô tả |
+|   2013 |  63 | k = 3 nhóm, min n = 4; H = 2.3814; p = 0.304; có nhóm n<5, xấp xỉ chi-square cần thận trọng — CHỈ mô tả |
+|   2014 |  61 | k = 3 nhóm, min n = 2; H = 4.8289; p = 0.0894; có nhóm n<5, xấp xỉ chi-square cần thận trọng — CHỈ mô tả |
+|   2015 |  63 | k = 3 nhóm, min n = 1; H = 1.4569; p = 0.483; có nhóm n<5, xấp xỉ chi-square cần thận trọng — CHỈ mô tả |
+|   2016 |  62 | k = 3 nhóm, min n = 1; H = 3.9493; p = 0.139; có nhóm n<5, xấp xỉ chi-square cần thận trọng — CHỈ mô tả |
+|   2017 |  63 | k = 2 nhóm, min n = 8; H = 0.7881; p = 0.375; 2 nhóm hợp lệ cho KW — CHỈ mô tả |
+|   2018 |  61 | k = 3 nhóm, min n = 1; H = 2.8373; p = 0.242; có nhóm n<5, xấp xỉ chi-square cần thận trọng — CHỈ mô tả |
+|   2019 |  63 | k = 2 nhóm, min n = 7; H = 0.5054; p = 0.477; 2 nhóm hợp lệ cho KW — CHỈ mô tả |
+|   2020 |  63 | k = 2 nhóm, min n = 6; H = 1.8778; p = 0.171; 2 nhóm hợp lệ cho KW — CHỈ mô tả |
+|   2021 |  60 | k = 2 nhóm, min n = 7; H = 1.0506; p = 0.305; 2 nhóm hợp lệ cho KW — CHỈ mô tả |
+|   2022 |  61 | k = 2 nhóm, min n = 4; H = 2.1229; p = 0.145; có nhóm n<5, xấp xỉ chi-square cần thận trọng — CHỈ mô tả |
+|   2023 |  61 | k = 2 nhóm, min n = 9; H = 3.4654; p = 0.0627; 2 nhóm hợp lệ cho KW — CHỈ mô tả |
+|   2024 |  61 | k = 2 nhóm, min n = 13; H = 5.5328; p = 0.0187; 2 nhóm hợp lệ cho KW — CHỈ mô tả |
 
 - Trừ median trong năm là HẰNG SỐ trong năm nên không đổi so sánh giữa cụm trong từng năm — thống kê theo năm chỉ cần trình bày trên giá trị thô.
-- Năm 2013, 2014 có test ≥3 nhóm không suy biến; năm 2012, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024 suy biến (n<2 hoặc chỉ 2 nhóm — cụm 0/1 rỗng) → KW từng năm không phải bằng chứng độc lập.
+- Các năm 2012, 2013, 2014, 2015, 2016, 2018, 2022 có nhóm dưới 5 quan sát, nên xấp xỉ chi-square cần thận trọng. KW cho phép từ 2 nhóm, vì vậy chỉ còn 2 nhóm không làm kiểm định suy biến. Các p-value theo năm chưa điều chỉnh cho nhiều phép thử và chỉ dùng thăm dò.
 
 ## 5) Caveats
 
@@ -143,13 +143,13 @@ Sinh bởi `scripts/analysis/poverty_validation.py`. Kiểm chứng ngoại lai 
 
 4. 13 ô tỉnh-năm trong cửa sổ giao có poverty nhưng không có nhãn (panel PAPI thiếu sd_4_2/sd_6_1): Bắc Giang 2014; Đồng Tháp 2014; Quảng Ninh 2018; Đồng Tháp 2018; Quảng Ninh 2021; Bắc Giang 2021; Bắc Ninh 2021; Bắc Giang 2022; Bắc Ninh 2022; Quảng Ninh 2023; Bình Dương 2023; Vĩnh Phúc 2024; Tiền Giang 2024 — mask tường minh, không vẽ không test.
 
-5. Chuẩn nghèo ĐỔI theo giai đoạn (thu nhập 2011–2015 vs đa chiều từ ~2020 — data/raw/gso/PROVENANCE.md:48-58); các năm 2017–2019 điền thêm là ĐA CHIỀU theo footnote (*) của bảng Niên giám — cùng chuẩn với phần pxweb từ 2020, khớp 124/124 ở cột giao 2020/2021 (scripts/data/build_poverty_gap.py): so MỨC tuyệt đối xuyên năm không like-for-like; chỉ so GIỮA CỤM trong cùng một năm là hợp lệ — lý do bắt buộc phải có test đã-trừ-median-năm song song với test gộp.
+5. Chuẩn nghèo ĐỔI theo giai đoạn (thu nhập 2011–2015 vs đa chiều từ ~2020 — data/raw/gso/PROVENANCE.md:48-58); các năm 2017–2019 điền thêm là ĐA CHIỀU theo footnote (*) của bảng Niên giám — cùng chuẩn với phần pxweb từ 2020, khớp 124/124 ở cột giao 2020/2021 (scripts/data/build_poverty_gap.py): so MỨC tuyệt đối xuyên năm không like-for-like. Ưu tiên so GIỮA CỤM trong cùng một năm; trừ median năm chỉ đổi mức vị trí, không khắc phục toàn bộ thay đổi định nghĩa.
 
-6. KW gộp thô KHÔNG đáng kể (p = 0.198) trong khi đã-trừ-median-năm đáng kể (p = 0.000126): hai kết quả phải báo cáo cùng nhau; không được chọn trình bày một kết quả duy nhất (nguyên tắc trung thực của repo, build_report.py:628).
+6. KW gộp thô (p = 0.198) và đã-trừ-median-năm (p = 0.000126) cho hai kết quả khác nhau; cả hai phải báo cáo cùng nhau; không được chọn trình bày một kết quả duy nhất (nguyên tắc trung thực của repo, build_report.py:628).
 
-7. Cụm 0 (n=2) và cụm 1 (n=10) quá nhỏ để tự kết luận — cặp tương phản đáng tin duy nhất là nhiễu vs cụm 2; đọc eta²/ANOVA chỉ như mô tả.
+7. Cụm 0 (n=2) và cụm 1 (n=10) quá nhỏ để tự kết luận. Nhiễu và cụm 2 có cỡ mẫu lớn hơn; tất cả kiểm định gộp vẫn cần xử lý phụ thuộc trong tỉnh trước khi suy luận.
 
-8. KW theo từng năm không khả thi ở 2012/2015/2016 (nhóm n<2) và suy biến 2 nhóm ở 2020–2024 — chỉ dạng bảng mô tả, không làm kiểm định chính.
+8. KW hỗ trợ từ 2 nhóm. Nhóm dưới 5 quan sát làm xấp xỉ chi-square kém tin cậy; nhiều kiểm định theo năm chưa được hiệu chỉnh. Xem bảng 4e và [hướng dẫn SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kruskal.html).
 
 9. Tỷ trọng cụm trôi mạnh theo năm (nhiễu 17/63 năm 2012 → 2–27/63 trong các năm của cửa sổ) — test gộp phối trộn năm với cụm; limitation khai báo, không phải lỗi dữ liệu.
 

@@ -485,7 +485,7 @@ def _write_markdown(
         f"- Huấn luyện/CV: expanding origin {min(range(2017, HOLDOUT_YEAR))}–"
         f"{HOLDOUT_YEAR - 1}, warm-up 2011–2016; scaler trong Pipeline, fit chỉ "
         "trên phần train từng fold.",
-        f"- Holdout: một lần duy nhất cặp {HOLDOUT_YEAR}→{HOLDOUT_YEAR + 1} "
+        f"- Holdout: một giai đoạn {HOLDOUT_YEAR}→{HOLDOUT_YEAR + 1} "
         f"({n_holdout} tỉnh); **không** dùng để chọn model.",
         "- Chọn model theo macro-F1 CV (cột `value_cv`); so sánh với majority và "
         "logistic regression có sẵn trong repo.",

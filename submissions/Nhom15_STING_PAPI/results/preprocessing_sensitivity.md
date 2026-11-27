@@ -5,18 +5,18 @@ So sánh biến thể A (dropna như công bố), B (impute median trong Pipelin
 | task           | model                | variant   | metric_cv                             |   value_cv |   cv_std |   n_train_pairs |   delta_vs_A | verdict         |   holdout_value |
 |:---------------|:---------------------|:----------|:--------------------------------------|-----------:|---------:|----------------:|-------------:|:----------------|----------------:|
 | regression     | ridge                | A         | r2 (expanding origin 2017–2022)       |      0.265 |    0.13  |             740 |        0     | —               |           0.381 |
-| regression     | ridge                | B         | r2 (expanding origin 2017–2022)       |      0.25  |    0.104 |             749 |       -0.015 | không khác biệt |           0.381 |
-| regression     | ridge                | C         | r2 (expanding origin 2017–2022)       |      0.264 |    0.133 |             740 |       -0.001 | không khác biệt |           0.382 |
+| regression     | ridge                | B         | r2 (expanding origin 2017–2022)       |      0.25  |    0.104 |             749 |       -0.015 | Chênh lệch nhỏ |           0.381 |
+| regression     | ridge                | C         | r2 (expanding origin 2017–2022)       |      0.264 |    0.133 |             740 |       -0.001 | Chênh lệch nhỏ |           0.382 |
 | classification | logistic regression  | A         | f1_macro (expanding origin 2017–2022) |      0.434 |    0.056 |             738 |        0     | —               |           0.541 |
-| classification | logistic regression  | B         | f1_macro (expanding origin 2017–2022) |      0.434 |    0.058 |             745 |        0     | không khác biệt |           0.579 |
-| classification | logistic regression  | C         | f1_macro (expanding origin 2017–2022) |      0.42  |    0.074 |             738 |       -0.014 | không khác biệt |           0.541 |
+| classification | logistic regression  | B         | f1_macro (expanding origin 2017–2022) |      0.434 |    0.058 |             745 |        0     | Chênh lệch nhỏ |           0.579 |
+| classification | logistic regression  | C         | f1_macro (expanding origin 2017–2022) |      0.42  |    0.074 |             738 |       -0.014 | Chênh lệch nhỏ |           0.541 |
 | classification | gaussian naive bayes | A         | f1_macro (expanding origin 2017–2022) |      0.514 |    0.12  |             738 |        0     | —               |           0.566 |
-| classification | gaussian naive bayes | B         | f1_macro (expanding origin 2017–2022) |      0.512 |    0.127 |             745 |       -0.002 | không khác biệt |           0.585 |
-| classification | gaussian naive bayes | C         | f1_macro (expanding origin 2017–2022) |      0.513 |    0.117 |             738 |       -0.001 | không khác biệt |           0.566 |
+| classification | gaussian naive bayes | B         | f1_macro (expanding origin 2017–2022) |      0.512 |    0.127 |             745 |       -0.002 | Chênh lệch nhỏ |           0.585 |
+| classification | gaussian naive bayes | C         | f1_macro (expanding origin 2017–2022) |      0.513 |    0.117 |             738 |       -0.001 | Chênh lệch nhỏ |           0.566 |
 
 ## Cách đọc
 - `value_cv` / `cv_std`: metric CV và độ lệch fold-to-fold của cấu hình được chọn.
-- `delta_vs_A` so với biến thể A; `verdict` mô tả: «không khác biệt» khi |delta| < cv_std của A, ngược lại «khác biệt đáng kể».
+- `delta_vs_A` so với biến thể A; `verdict` mô tả: «Chênh lệch nhỏ» khi |delta| < cv_std của A, ngược lại «Chênh lệch ≥ SD». Đây là quy tắc mô tả so với độ phân tán giữa các fold, không phải kiểm định tương đương hay ý nghĩa thống kê; thiếu delta hoặc cv_std thì ghi «Chưa đủ số liệu».
 - `holdout_value`: R² holdout (hồi quy) hoặc macro-F1 holdout (phân loại); không dùng để chọn biến thể.
 
 ## Lưu ý (bốn điểm)

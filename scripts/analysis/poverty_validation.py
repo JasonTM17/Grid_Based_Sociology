@@ -33,11 +33,11 @@ Hai kiểm định CHÍNH, bắt buộc báo cáo CÙNG nhau (nguyên tắc trun
      98-114, 604-607). Test gộp thô NHIỄM hiệu ứng năm (median nghèo giảm rất
      mạnh xuyên năm) vì tỷ trọng cụm trôi theo năm.
   2. Kruskal–Wallis trên poverty ĐÃ TRỪ median trong từng năm (demean trong
-     panel phân tích n ô) — tách hiệu ứng năm. So GIỮA CỤM trong cùng một năm
-     là so sánh hợp lệ duy nhất vì chuẩn nghèo đổi theo giai đoạn
+     panel phân tích n ô) — điều chỉnh mức vị trí trong năm, không xử lý mọi hiệu ứng năm.
+     Ưu tiên so GIỮA CỤM trong cùng một năm vì chuẩn nghèo đổi theo giai đoạn
      (data/raw/gso/PROVENANCE.md:48-58).
-Kèm Mann–Whitney nhiễu vs cụm 2 — cặp tương phản đáng tin duy nhất (đối xứng
-với cảnh báo PCI, external_validation.py:608-610). KW theo từng năm CHỈ mô tả.
+Kèm Mann–Whitney nhiễu vs cụm 2 — hai nhóm có nhiều quan sát hơn các cụm nhỏ.
+Mọi p-value chỉ mang tính thăm dò vì chưa xử lý phụ thuộc tỉnh-năm và nhiều so sánh.
 
 Helper thống kê và trình bày TÁI DỤNG NGUYÊN XI từ scripts/external_validation
 (group_table, anova_kruskal, test_rows, stats_rows, source_note,
@@ -150,14 +150,17 @@ def kw_by_year_rows(d: pd.DataFrame) -> list[dict]:
     for yr, sub in d.groupby("year"):
         gy = [g.poverty_rate_pct.to_numpy() for _, g in sub.groupby("pred_cluster")]
         k, min_n = len(gy), min(len(g) for g in gy)
-        degenerate = k < 3 or min_n < 2
         try:
             h, p = stats.kruskal(*gy)
         except ValueError:
             h, p = float("nan"), float("nan")
         note = f"k = {k} nhóm, min n = {min_n}; H = {h:.4f}; {fmt_p(p)}"
-        if degenerate:
-            note += "; suy biến (n<2 hoặc chỉ 2 nhóm) — CHỈ mô tả"
+        if k < 2 or not np.isfinite(h):
+            note += "; không xác định — CHỈ mô tả"
+        elif min_n < 5:
+            note += "; có nhóm n<5, xấp xỉ chi-square cần thận trọng — CHỈ mô tả"
+        elif k == 2:
+            note += "; 2 nhóm hợp lệ cho KW — CHỈ mô tả"
         rows.append({
             "section": "kw_by_year_descriptive", "group": "Kruskal–Wallis",
             "year": int(yr), "n": len(sub), "mean": "", "median": "", "std": "",
@@ -167,7 +170,7 @@ def kw_by_year_rows(d: pd.DataFrame) -> list[dict]:
 
 
 def mw_noise_vs_c2(d: pd.DataFrame, value_col: str) -> dict:
-    """Mann–Whitney nhiễu (−1) vs cụm 2 — cặp tương phản đáng tin duy nhất."""
+    """Mann–Whitney nhiễu (−1) vs cụm 2, chỉ dùng thăm dò trên panel."""
     a = d.loc[d.pred_cluster == -1, value_col].to_numpy()
     b = d.loc[d.pred_cluster == 2, value_col].to_numpy()
     u, p = stats.mannwhitneyu(a, b)
@@ -177,10 +180,10 @@ def mw_noise_vs_c2(d: pd.DataFrame, value_col: str) -> dict:
 def mw_verdict(p: float) -> str:
     """Cụm từ kết luận theo p — ngưỡng 0.05/0.10, KHÔNG chỉnh cho nhiều so sánh."""
     if p < 0.05:
-        return "khác biệt đáng kể"
+        return "p < 0.05 trước điều chỉnh, chỉ dùng thăm dò"
     if p < 0.10:
         return "biên (cận ngưỡng 0.05, không chỉnh sửa cho nhiều so sánh)"
-    return "không khác biệt"
+    return "chưa đủ bằng chứng khác biệt ở ngưỡng 0.05"
 
 
 def make_figure(d: pd.DataFrame, window: list[int], t_raw: dict, t_dm: dict,
@@ -398,7 +401,7 @@ def main() -> int:
     md.append(
         "Sinh bởi `scripts/analysis/poverty_validation.py`. Kiểm chứng ngoại lai thứ hai "
         "của cụm STING sau PCI (nguồn độc lập với PAPI): nghèo GSO là số liệu "
-        "thống kê chính thức, không phải khảo sát hộ dân. Nhãn cụm lấy từ "
+        "thống kê chính thức từ nguồn khác với PAPI. Nhãn cụm lấy từ "
         "`results/predict_all_years.csv` (model đóng băng, gate bởi "
         "`tests/test_artifact_reproduction.py`); join khóa (year, "
         "province_code) `validate=\"one_to_one\"` đúng protocol "
@@ -434,12 +437,11 @@ def main() -> int:
         f"- **Gộp thô** (poverty gốc, nhiễm xu hướng năm): Kruskal–Wallis "
         f"H = {t_raw['h']:.4f}, {fmt_p(t_raw['p_kw'])}; One-way ANOVA "
         f"F({t_raw['df1']},{t_raw['df2']}) = {t_raw['f']:.4f}, "
-        f"{fmt_p(t_raw['p_anova'])}; eta² = {t_raw['eta_sq']:.4f} — KHÔNG đáng "
-        "kể thống kê.\n"
-        f"- **Đã trừ median trong năm** (tách hiệu ứng năm): Kruskal–Wallis "
+        f"{fmt_p(t_raw['p_anova'])}; eta² = {t_raw['eta_sq']:.4f}.\n"
+        f"- **Đã trừ median trong năm** (điều chỉnh mức vị trí từng năm): Kruskal–Wallis "
         f"H = {t_dm['h']:.4f}, {fmt_p(t_dm['p_kw'])}; ANOVA "
         f"F({t_dm['df1']},{t_dm['df2']}) = {t_dm['f']:.4f}, "
-        f"{fmt_p(t_dm['p_anova'])}; eta² = {t_dm['eta_sq']:.4f} — đáng kể.\n"
+        f"{fmt_p(t_dm['p_anova'])}; eta² = {t_dm['eta_sq']:.4f}.\n"
         f"- Median nghèo toàn panel giảm rất mạnh xuyên năm: "
         f"{med_year.iloc[0]:.1f}% ({int(med_year.index[0])}) → "
         f"{med_year.iloc[-1]:.1f}% ({int(med_year.index[-1])}); tỷ trọng cụm "
@@ -449,10 +451,11 @@ def main() -> int:
         "năm của cửa sổ). Test gộp thô phối trộn hiệu ứng năm với khác biệt cụm — "
         "hai số trên PHẢI đọc cùng nhau, không chọn trình bày một kết quả.\n"
         f"- Diễn giải thận trọng: cụm 0 (n={int(cnt.get(0, 0))}) và cụm 1 "
-        f"(n={int(cnt.get(1, 0))}) quá nhỏ để tự kết luận; cặp tương phản đáng "
-        "tin duy nhất là **nhiễu vs cụm 2** (đối xứng cảnh báo PCI — "
-        "external_validation.py:608-610). Đọc eta²/ANOVA chỉ như mô tả bổ "
-        "sung.\n"
+        f"(n={int(cnt.get(1, 0))}) quá nhỏ để tự kết luận. Nhiễu và cụm 2 có cỡ mẫu "
+        "lớn hơn nhưng vẫn gồm các quan sát lặp theo tỉnh. P-value chưa xử lý "
+        "phụ thuộc tỉnh-năm và nhiều phép so sánh; đọc các kiểm định như thăm dò, "
+        "eta² như mô tả. Trừ median năm không loại bỏ phụ thuộc này hoặc khôi phục "
+        "tính tương đương giữa các chuẩn nghèo.\n"
     )
     md.append("## 3) Mann–Whitney nhiễu vs cụm 2 (hai phía)\n")
     md.append(
@@ -462,9 +465,9 @@ def main() -> int:
         f"{fmt_p(mw_dm['p'])} — {mw_verdict(mw_dm['p'])}.\n"
         f"- Kết luận an toàn: ở mức gộp, Mann–Whitney nhiễu vs cụm 2 "
         f"{mw_verdict(mw_raw['p'])} (thô) và {mw_verdict(mw_dm['p'])} (đã trừ "
-        "median năm) — nghèo GSO đọc như kiểm chứng bổ trợ, không phải bằng "
-        "chứng độc lập mạnh như PCI; tín hiệu cụm (nếu có) nằm trong kiểm "
-        "định đã-trừ-median-năm ở mục 2, so phân phối toàn bộ các nhóm.\n"
+        "median năm). Đây là đối chiếu bổ trợ; không bác bỏ giả thuyết không "
+        "không chứng minh hai nhóm tương đương. Kết quả của kiểm định toàn bộ "
+        "nhóm ở mục 2 cũng không xác định cặp nhóm nào khác nhau.\n"
     )
     md.append("## 4) Thống kê từng nhóm — RIÊNG TỪNG năm giao và pooled\n")
     md.append(f"### 4a) Pooled gộp thô (n={n_panel})\n")
@@ -483,15 +486,15 @@ def main() -> int:
               "định chính\n")
     md.append(kw_tab.to_markdown(index=False))
     md.append("")
-    kw_degen = [int(r["year"]) for r in kw_year if "suy biến" in r["note"]]
-    kw_valid = [int(r["year"]) for r in kw_year if "suy biến" not in r["note"]]
+    kw_small = [int(r["year"]) for r in kw_year if "n<5" in r["note"]]
     md.append(
         "- Trừ median trong năm là HẰNG SỐ trong năm nên không đổi so sánh "
         "giữa cụm trong từng năm — thống kê theo năm chỉ cần trình bày trên "
         "giá trị thô.\n"
-        f"- Năm {', '.join(map(str, kw_valid))} có test ≥3 nhóm không suy "
-        f"biến; năm {', '.join(map(str, kw_degen))} suy biến (n<2 hoặc chỉ 2 "
-        "nhóm — cụm 0/1 rỗng) → KW từng năm không phải bằng chứng độc lập.\n"
+        f"- Các năm {', '.join(map(str, kw_small))} có nhóm dưới 5 quan sát, nên "
+        "xấp xỉ chi-square cần thận trọng. KW cho phép từ 2 nhóm, vì vậy chỉ còn "
+        "2 nhóm không làm kiểm định suy biến. Các p-value theo năm chưa điều chỉnh "
+        "cho nhiều phép thử và chỉ dùng thăm dò.\n"
     )
     md.append("## 5) Caveats\n")
     md.append(f"1. {missing_src_txt} thiếu `poverty_rate_pct` phía nguồn "
@@ -516,22 +519,21 @@ def main() -> int:
         "thêm là ĐA CHIỀU theo footnote (*) của bảng Niên giám — cùng chuẩn với "
         "phần pxweb từ 2020, khớp 124/124 ở cột giao 2020/2021 "
         "(scripts/data/build_poverty_gap.py): so MỨC tuyệt đối xuyên "
-        "năm không like-for-like; chỉ so GIỮA CỤM trong cùng một năm là hợp "
-        "lệ — lý do bắt buộc phải có test đã-trừ-median-năm song song với "
-        "test gộp.\n")
+        "năm không like-for-like. Ưu tiên so GIỮA CỤM trong cùng một năm; trừ "
+        "median năm chỉ đổi mức vị trí, không khắc phục toàn bộ thay đổi định nghĩa.\n")
     md.append(
-        f"6. KW gộp thô KHÔNG đáng kể ({fmt_p(t_raw['p_kw'])}) trong khi "
-        f"đã-trừ-median-năm đáng kể ({fmt_p(t_dm['p_kw'])}): hai kết quả phải "
+        f"6. KW gộp thô ({fmt_p(t_raw['p_kw'])}) và đã-trừ-median-năm "
+        f"({fmt_p(t_dm['p_kw'])}) cho hai kết quả khác nhau; cả hai phải "
         "báo cáo cùng nhau; không được chọn trình bày một kết quả duy nhất "
         "(nguyên tắc trung thực của repo, build_report.py:628).\n")
     md.append(
         f"7. Cụm 0 (n={int(cnt.get(0, 0))}) và cụm 1 (n={int(cnt.get(1, 0))}) "
-        "quá nhỏ để tự kết luận — cặp tương phản đáng tin duy nhất là nhiễu "
-        "vs cụm 2; đọc eta²/ANOVA chỉ như mô tả.\n")
+        "quá nhỏ để tự kết luận. Nhiễu và cụm 2 có cỡ mẫu lớn hơn; tất cả "
+        "kiểm định gộp vẫn cần xử lý phụ thuộc trong tỉnh trước khi suy luận.\n")
     md.append(
-        "8. KW theo từng năm không khả thi ở 2012/2015/2016 (nhóm n<2) và suy "
-        "biến 2 nhóm ở 2020–2024 — chỉ dạng bảng mô tả, không làm kiểm định "
-        "chính.\n")
+        "8. KW hỗ trợ từ 2 nhóm. Nhóm dưới 5 quan sát làm xấp xỉ chi-square "
+        "kém tin cậy; nhiều kiểm định theo năm chưa được hiệu chỉnh. Xem bảng "
+        "4e và [hướng dẫn SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kruskal.html).\n")
     md.append(
         f"9. Tỷ trọng cụm trôi mạnh theo năm (nhiễu {int(noise_by_year.iloc[0])}"
         f"/63 năm {int(noise_by_year.index[0])} → "

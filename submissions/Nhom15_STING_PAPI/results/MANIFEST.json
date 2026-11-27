@@ -5,27 +5,27 @@
   "files": [
     {
       "path": "HUONG_DAN.txt",
-      "bytes": 3601,
-      "sha256": "062c9aaf2c01cd72d59c8d32b2c685dddc0bbf69fafbfb642aabec0c5be93b13",
+      "bytes": 3896,
+      "sha256": "ee9b7ad58c02f901fcf5e7f0da366a00a74a6a98950ba8160b68ae693547c87f",
       "role": "Hướng dẫn mở và chạy lại đồ án"
     },
     {
       "path": "Nhom15_BaoCao_STING_PAPI.docx",
-      "bytes": 3267586,
-      "sha256": "ad3b6787ecdca95e2209173d146872d12b8679461e7a1358b9d52820254987c9",
+      "bytes": 3015798,
+      "sha256": "024bfae53c0c3683b3a1fc88ea9c4278bf28a30412544c1702add931cf8a9d41",
       "role": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)"
     },
     {
       "path": "Nhom15_STING_PAPI.ipynb",
-      "bytes": 6862654,
-      "sha256": "fd16e1bd6e239a5cf7af71883a3eb377ab3b4ecfb05a798a7047df1f4e86eecb",
+      "bytes": 7171044,
+      "sha256": "cb2e9f99d829c09259d54bf59de8af2d1b6d6b86153b2e943293578ba404bc18",
       "role": "Notebook phân tích STING × PAPI & Thống kê khách hàng đã lưu kết quả"
     },
     {
       "path": "Nhom15_STING_PAPI.pptx",
-      "bytes": 1064927,
-      "sha256": "55187687c3c11c1cf9b633ca6533e861c102aa192dd5c4fe917158ffbe0ca4ee",
-      "role": "Slide trình bày thống nhất (11 trang 16:9 kèm ghi chú)"
+      "bytes": 91296,
+      "sha256": "9dee36e264b026c93308bf6a98fcf36eee6c715acee0d86fa65b6b760c899473",
+      "role": "Slide trình bày thống nhất (15 trang 16:9 kèm ghi chú)"
     },
     {
       "path": "Nhom15_TienXuLy_PAPI.ipynb",
@@ -41,44 +41,44 @@
     },
     {
       "path": "data/processed/external_gso_grdp_63.csv",
-      "bytes": 26474,
-      "sha256": "d43b0d7876a2f111aa43e243681ba491437bb2c4c396bc5035878015366c509e",
+      "bytes": 26032,
+      "sha256": "1b5d186740be9f6d8d59bc4c0d72823dceecdfdde12b544b37256fd14b2a67b3",
       "role": "Dữ liệu đã chuẩn hóa để chạy lại"
     },
     {
       "path": "data/processed/external_gso_population_63_full.csv",
-      "bytes": 86163,
-      "sha256": "66dde17c97df32dc7fac83158c46a0967674125552e4ba25b09f7b758819d971",
+      "bytes": 85280,
+      "sha256": "73c75594c3100e17b6246d9c3a852295ca1a30e5e736581c6bdfdd22c5f42215",
       "role": "Dữ liệu đã chuẩn hóa để chạy lại"
     },
     {
       "path": "data/processed/external_gso_waste_63.csv",
-      "bytes": 20799,
-      "sha256": "f5c8f272013ffe0e23a0448752452da99b7e411de71eee2e5ed3372affc1af5d",
+      "bytes": 20493,
+      "sha256": "0169f7ad0227951587b72e7494633e2ae24986b5e10590eb636f08c715565d8a",
       "role": "Dữ liệu đã chuẩn hóa để chạy lại"
     },
     {
       "path": "data/processed/external_master_63_2011_2024.csv",
-      "bytes": 618443,
-      "sha256": "db6172c217e92dd57de630bdb7ddd5a2333088a0966cb976d9e1cee386e19d4f",
+      "bytes": 617560,
+      "sha256": "1c9a4f5ca75611b673cefce53936c23d045c2beaf129356b7ae6278ad9d2d0fe",
       "role": "Dữ liệu đã chuẩn hóa để chạy lại"
     },
     {
       "path": "data/processed/external_odm_health_63.csv",
-      "bytes": 2335,
-      "sha256": "9251b2b439fcd0f1e9b442ee0a784b4ce07fabe3daf380e2bac74e4faecabaf3",
+      "bytes": 2271,
+      "sha256": "06a439a68d4e4d1feeb2df63751e1c8544f95d7efc21496314702f188ccc9d6e",
       "role": "Dữ liệu đã chuẩn hóa để chạy lại"
     },
     {
       "path": "data/processed/external_pci_63_full.csv",
-      "bytes": 51522,
-      "sha256": "c3b0c7c3f87b3929c6b932341136944c31839de136e3d4082a6780069df1ebf4",
+      "bytes": 50639,
+      "sha256": "9681154c0aa48a6fb91e8f2398949a660e1cc0a2847b625ebf152ef67e75a51c",
       "role": "Dữ liệu đã chuẩn hóa để chạy lại"
     },
     {
       "path": "data/processed/external_poverty_63.csv",
-      "bytes": 65808,
-      "sha256": "73277c0b6fe600a95bcb1815a1897ed97d63be77c960bd8cde61ecc22ba18d6f",
+      "bytes": 64736,
+      "sha256": "6fb979f3219dda4867b07cd7f914c52aa7393b76063a0059f6f5bebdf11d5689",
       "role": "Dữ liệu đã chuẩn hóa để chạy lại"
     },
     {
@@ -101,8 +101,8 @@
     },
     {
       "path": "data/processed/papi_panel_scale_metadata.csv",
-      "bytes": 4586,
-      "sha256": "15c879ee7541122ed584e44c1a30ef76f971e60261ea1e5d734aa3e2ae000b4a",
+      "bytes": 4548,
+      "sha256": "f52835a3c8cee130de6d9fa65cb14c8e142a391f959195bc9bfbfcc551c8bcc3",
       "role": "Dữ liệu đã chuẩn hóa để chạy lại"
     },
     {
@@ -137,20 +137,20 @@
     },
     {
       "path": "data/raw/mendeley/Replication_package/data/centroids_63_naturalearth.csv",
-      "bytes": 14358,
-      "sha256": "37de31a904d3924a00b3f492aa39b20ef55c24d56b59c0c6d043e6d1778692db",
+      "bytes": 14294,
+      "sha256": "4232bb3608f89a4f53a2dbf3e1ae896e24417aa3a1ac443d181bd4c699087d31",
       "role": "Bảng tra mã tỉnh và dữ liệu đối chiếu Mendeley"
     },
     {
       "path": "data/raw/mendeley/Replication_package/data/papi_panel_63_2011_2022.csv",
-      "bytes": 135580,
-      "sha256": "09100e3280c758ad23f26fc41be05dcb39560c544963e2189d487e7dfbaad2b4",
+      "bytes": 134823,
+      "sha256": "5a90512526b6be1263f4f83e65af0da55fa7f9b6ff9ce6f89274a3f4ee89cea0",
       "role": "Bảng tra mã tỉnh và dữ liệu đối chiếu Mendeley"
     },
     {
       "path": "data/raw/mendeley/Replication_package/data/province_crosswalk_63.csv",
-      "bytes": 2296,
-      "sha256": "9b9a851bc6c20d916fa8ca0480025fc091160b3ed78e353fd415f8d0965eaa7c",
+      "bytes": 2232,
+      "sha256": "e463049c2ae843cc878b83def3f02b5781523bdae4f4122891fc672826518e8e",
       "role": "Bảng tra mã tỉnh và dữ liệu đối chiếu Mendeley"
     },
     {
@@ -250,12 +250,6 @@
       "role": "Bảng tính PAPI gốc"
     },
     {
-      "path": "data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf",
-      "bytes": 22974723,
-      "sha256": "7809a7379eda7a9737a17fbd3bc1220cb985e5506b708d7b51cc52a337a13fc6",
-      "role": "Báo cáo PAPI 2024 (bản tiếng Việt)"
-    },
-    {
       "path": "data/raw/papi/PROVENANCE.md",
       "bytes": 3746,
       "sha256": "55a433914c62012a6c0f8cce9028f0679a38e9ae1308d5e37d55097b968fa282",
@@ -281,8 +275,8 @@
     },
     {
       "path": "models/predict_config.json",
-      "bytes": 999,
-      "sha256": "08f8b05236863b385c81e296d8a136ed5703e2c7f52add641f7ab6c5a41aef57",
+      "bytes": 973,
+      "sha256": "079e31096207acb5fade158ad9315e6f8a3385124a26b77094780a8054f7fa84",
       "role": "Mô hình, scaler, cấu hình đóng băng và hướng dẫn"
     },
     {
@@ -317,8 +311,8 @@
     },
     {
       "path": "reports/crosscheck_mendeley.md",
-      "bytes": 588,
-      "sha256": "315b8489f87cf563c8b523e9faad6bc534af557248dc739c19482fb93ad7c562",
+      "bytes": 571,
+      "sha256": "deccebdf869ec76af3a1465063298dae0abf353b746b71e56bd89ae7a351275e",
       "role": "Kết quả đối chiếu PAPI với Mendeley"
     },
     {
@@ -341,26 +335,26 @@
     },
     {
       "path": "results/KetQua_STING_PAPI.xlsx",
-      "bytes": 191051,
-      "sha256": "c6ba7419315e23d1bc9cae3e75941b955cba9e8aef38170d1e3b4a0bb4ed9699",
+      "bytes": 195342,
+      "sha256": "0f0d9a5a32252d82eaa81e490906128e4d5d2ddbc6f4c84714a9adbe08f99872",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/analysis_summary.md",
-      "bytes": 5732,
-      "sha256": "ad0bb5968616c801670103a68e1f2189bca45d863f7570de1237e4d3b92300a9",
+      "bytes": 5681,
+      "sha256": "b2b94dc52dcd78579a297723be44d95d5ef5920ade214c24e81b813631e44e41",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/cluster_labels.csv",
-      "bytes": 19961,
-      "sha256": "8d62459cbd014dad350431188eba36aeba2647d045a68adc0a8e8a93da101a3b",
+      "bytes": 19091,
+      "sha256": "b425fefd0da75db0c1c195a3efdaf555242f1f007ec7527d420265c8eb84c68c",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/cluster_profile.csv",
-      "bytes": 6073,
-      "sha256": "1d2eb62dfdbcf395d52761757cac94c26cc49f55f0aba91c67aecf178fdb13bb",
+      "bytes": 6025,
+      "sha256": "e4893bfddef74679925256a51daed5f2147ab73557ed1c15649f342e3bbaa2f6",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -377,8 +371,8 @@
     },
     {
       "path": "results/course_supervised_baselines.md",
-      "bytes": 5337,
-      "sha256": "46bfd7b67cf7dbd91a7a992978d960cb8090c12aaa224479d06e84253460fdc6",
+      "bytes": 5328,
+      "sha256": "6428ece15634ca71c7792d5c91d2a361a52fd09f2323b46ae8efbb7f9f9942fb",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -395,14 +389,14 @@
     },
     {
       "path": "results/external_validation.csv",
-      "bytes": 2845,
-      "sha256": "461f48a34dc8ecd2bf4ecddb09aa377067594b0d28e51121e4caeaa660ea63d3",
+      "bytes": 2811,
+      "sha256": "f343d427a5c8e42ff4f3da74521368ffaaac377d99a6ddae68e03ddfadab00b0",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/external_validation.md",
-      "bytes": 9053,
-      "sha256": "d974b4f28a8de78921f42cf87433e3c13f8c70df228b80c83334fe6724e6e65f",
+      "bytes": 9340,
+      "sha256": "f90ea573ad90442f775b4452d32ab83e189dd268c4ace43a47df08e4903e98fd",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -491,8 +485,8 @@
     },
     {
       "path": "results/figs/papi_zscore_comparison.png",
-      "bytes": 335495,
-      "sha256": "708f79af2586be48f7abbe55c3e399af331710023bd6570c0852c8afe3caa49a",
+      "bytes": 370169,
+      "sha256": "b15c33635ebfea1c439abf99d5f38412e5149e0843b9b7799cea61d7ceb14e0c",
       "role": "Hình minh họa trong báo cáo, slide và notebook"
     },
     {
@@ -509,8 +503,8 @@
     },
     {
       "path": "results/figs/stakeholder_quadrants_2024.png",
-      "bytes": 263487,
-      "sha256": "d97d2f72cf654f9d980ee6caab39c1504f7920c4fc01b26884cd4c7b32d7fc91",
+      "bytes": 312041,
+      "sha256": "d872830a1af6cc12f829d2637d2502e6a02f8493db56e1cb00210e737dc6c1e5",
       "role": "Hình minh họa trong báo cáo, slide và notebook"
     },
     {
@@ -539,8 +533,8 @@
     },
     {
       "path": "results/metrics.csv",
-      "bytes": 964,
-      "sha256": "238975fd37efbf110fb09ed20cc90a19dd22cda22480e21d4e023e0881b952d6",
+      "bytes": 953,
+      "sha256": "5b98555ee83d477f64bc47c85a827520a2f81ba122223b92f5da0919492f479f",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -569,32 +563,32 @@
     },
     {
       "path": "results/per_year.csv",
-      "bytes": 343,
-      "sha256": "cc3529ff29eebf60c3b9400282981455c822032b8ed2ad1a2d45e2540fe2ea99",
+      "bytes": 328,
+      "sha256": "26658209b8320c0d7107237c8c3b03b5418ba05b41a84960b8ca2a5c85c56077",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/poverty_validation.csv",
-      "bytes": 5333,
-      "sha256": "67885b5a09ee296ea701c801c81c325c73e70f0a8e7f8bedcf92c59315035a49",
+      "bytes": 5454,
+      "sha256": "a8f370617c0267e73dfe4d28d9b20de71264d151198afddb7b80c766be7ec255",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/poverty_validation.md",
-      "bytes": 16303,
-      "sha256": "18a973d30aced7b778d9a57bd51d77bb2858b9e0eb78f441ef0d002a6e4b27a8",
+      "bytes": 16890,
+      "sha256": "7e502fa4510a3b864d6b262976753e8617b4f189b2f053aaa7d7decf936e5ab7",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/predict_all_years.csv",
-      "bytes": 35536,
-      "sha256": "d2b90b19f70ee6d9f78daba7ff786a1031ec7b2bbc80b4deb8eeb7359083c1eb",
+      "bytes": 34666,
+      "sha256": "91cb9fd5220db27d578f37bcc2a5f99dc6dbf4f9f93ace1749272d30a8174f59",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/predict_config_search.csv",
-      "bytes": 15721,
-      "sha256": "919679f1c9b0386ec5ea9e2da4da35c882a20c6c098ea303a40d1024a943b7a2",
+      "bytes": 15496,
+      "sha256": "b7fe1d2422f7bed9cf94970064c681c49f9cdd4e14c80cc9c4c1f3e67aa7fc15",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -605,26 +599,26 @@
     },
     {
       "path": "results/preprocessing_audit.csv",
-      "bytes": 5105,
-      "sha256": "f68c1c5536998e57691d7318092f00886e7d272eb22b4b0611cf4784e8e8389d",
+      "bytes": 5090,
+      "sha256": "2356f56f0010db95910428dbe21036f75359d9665f6a96d8903b7344169cbab5",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/preprocessing_audit.md",
-      "bytes": 9612,
-      "sha256": "ee04e8affc0da9fb1a8e967b0bd16a210c6aa979d64c91e150f54e7c98e1db08",
+      "bytes": 9496,
+      "sha256": "39c0cf8007a137be1a142328e356aa5c853a0f308764e15b53715062e21c27e0",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/preprocessing_sensitivity.csv",
       "bytes": 1096,
-      "sha256": "3f2801a2210085022f8f3671f281450ba7c78eede9011838fd0dfd47c338745c",
+      "sha256": "9045a8bb778702ade5cdd75e682d92fb9ae1e1325a9b22e877073ee6f448707e",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/preprocessing_sensitivity.md",
-      "bytes": 3286,
-      "sha256": "a63640f96654951561ae8fc50517c831d327c570791036c6233a35ff559b0799",
+      "bytes": 3494,
+      "sha256": "b3571e9c87d673ada583a28e2c0e47523afa3240d51be21dc234ae446f113428",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -641,8 +635,8 @@
     },
     {
       "path": "results/robustness.csv",
-      "bytes": 747,
-      "sha256": "4d2b173e6a9cd332d99e42e2a1b646643c2486e2dd196cf3aa2b65838f3e6cb4",
+      "bytes": 741,
+      "sha256": "5b5f5bc707bcbb883382c7817ec025b941330e5fe5eb6572f703a5a7c4873a92",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -671,14 +665,14 @@
     },
     {
       "path": "results/supervised_metrics.csv",
-      "bytes": 764,
-      "sha256": "8892c7a8fc107dac2471dc71e039cf59370b82cc3257bc2a16fa657d72aa81b4",
+      "bytes": 756,
+      "sha256": "e45b2c42b8f8f1f75092d8198618ca3757a0ce2ca735be37870a8c9d9565de5d",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/supervised_summary.md",
-      "bytes": 5304,
-      "sha256": "c11176d8bb9c56fbc8f485acdf84c610d6bbb933653d0e065480550427707569",
+      "bytes": 5629,
+      "sha256": "79cabdc6c7badac45bcb8882fee8442cc831b6ee21c4dd21a289cd7aaed67927",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -701,8 +695,8 @@
     },
     {
       "path": "scripts/analysis/external_validation.py",
-      "bytes": 32788,
-      "sha256": "0615399d300de3de4b481c63e8d2d094173176494919d4e4d49d3cfd68127c90",
+      "bytes": 33125,
+      "sha256": "b4dff84779d812a742e34b09c4f17b6675fb245dedc081e2a47d24e98fc9466a",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -713,8 +707,8 @@
     },
     {
       "path": "scripts/analysis/poverty_validation.py",
-      "bytes": 27937,
-      "sha256": "9ba03a5bbab418bd71231214ea603a50a6c84f2ec432029862c65516545f6214",
+      "bytes": 28487,
+      "sha256": "08b48643c73968d88b1185348f3fd15c30f1fb0773c5770f89394fe0102956c1",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -743,8 +737,8 @@
     },
     {
       "path": "scripts/analysis/stakeholder_summary.py",
-      "bytes": 42733,
-      "sha256": "9a40df1528c68f378a871c59f8bbd6a276ddbc06017d6f4b9c104df237c4b8f8",
+      "bytes": 42811,
+      "sha256": "659cd4a35dd15a617ebe653046f88de168481e7659353994db05c8afc438bff6",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -809,8 +803,8 @@
     },
     {
       "path": "scripts/data/preprocessing_sensitivity.py",
-      "bytes": 15027,
-      "sha256": "ad54f6cd64e7eadc7de371996fbec49a73a1243489d279f28b4cf7cf4ba63e48",
+      "bytes": 15355,
+      "sha256": "7383b5719cba0428f47445946f015514d6f06bfa32c245ad01120f823fcd90b9",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -827,14 +821,14 @@
     },
     {
       "path": "scripts/supervised/course_supervised_baselines.py",
-      "bytes": 21625,
-      "sha256": "550372edd0e9d8de6cf3a5330385f03dda7db02d12f6ca1cbfa4722cad1ba6b5",
+      "bytes": 21615,
+      "sha256": "db561464b6941b9a13226d6aa6fffbd819ae94381445649a0d3bb5210146d8e3",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
       "path": "scripts/supervised/predict_supervised.py",
-      "bytes": 25516,
-      "sha256": "bda0864d8ac817b004bacbf31938b54b7debf511979c24bf75092be310449302",
+      "bytes": 25965,
+      "sha256": "00b54bfb3bc7c04980ef242f8660e229b58da90ecbb0159cbd3f27e60b80155e",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {

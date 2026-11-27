@@ -33,6 +33,7 @@ AGENTS.md
 data/raw/mendeley/*
 !data/raw/mendeley/PROVENANCE.md
 !data/raw/mendeley/README.md
+!data/raw/mendeley/mendeley_replication.zip
 !data/raw/mendeley/Replication_package
 data/raw/mendeley/Replication_package/*
 !data/raw/mendeley/Replication_package/data

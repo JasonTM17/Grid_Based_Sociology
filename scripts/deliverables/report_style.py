@@ -63,7 +63,7 @@ def _format_table(table):
         if item is None:
             item = OxmlElement(f"w:{edge}")
             borders.append(item)
-        for attribute, value in {"val": "single", "sz": "4", "color": "000000"}.items():
+        for attribute, value in {"val": "single", "sz": "4", "color": "D9D9D9"}.items():
             item.set(qn(f"w:{attribute}"), value)
     for row_index, row in enumerate(table.rows):
         row.height = None
@@ -83,7 +83,7 @@ def _format_table(table):
             if margins is None:
                 margins = OxmlElement("w:tcMar")
                 props.append(margins)
-            for edge, value in {"top": 30, "bottom": 30, "left": 60, "right": 60}.items():
+            for edge, value in {"top": 65, "bottom": 65, "left": 85, "right": 85}.items():
                 item = margins.find(qn(f"w:{edge}"))
                 if item is None:
                     item = OxmlElement(f"w:{edge}")
@@ -93,17 +93,21 @@ def _format_table(table):
             if row_index == 0:
                 shade = OxmlElement("w:shd")
                 shade.set(qn("w:val"), "clear")
-                shade.set(qn("w:fill"), "A6A6A6")
+                shade.set(qn("w:fill"), "D9E2F3")
                 props.insert_element_before(shade, "w:tcMar", "w:vAlign")
             for paragraph in cell.paragraphs:
                 fmt = paragraph.paragraph_format
                 fmt.space_before = fmt.space_after = Pt(1)
                 fmt.line_spacing = 1.05
+                fmt.first_line_indent = Twips(0)
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
                 if row_index == 0:
                     paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     fmt.keep_with_next = True
+                elif len(cell.text) <= 14 and any(c.isdigit() for c in cell.text):
+                    paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 for run in paragraph.runs:
-                    _font(run, 12)
+                    _font(run, 11 if len(table.columns) >= 4 else 12)
 
 
 def _set_page(section, *, cover=False):
@@ -209,6 +213,7 @@ def apply_reference_style(document):
             fmt.alignment = WD_ALIGN_PARAGRAPH.CENTER
         if name == "Caption":
             fmt.keep_with_next = False
+            fmt.keep_together = True
 
         properties = style.element.get_or_add_pPr()
         for border in list(properties.findall(qn("w:pBdr"))):

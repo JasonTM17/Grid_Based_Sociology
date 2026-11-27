@@ -1,4 +1,4 @@
-# Nhật ký luyện thuyết trình thống nhất (11 slide)
+# Nhật ký luyện thuyết trình thống nhất (15 slide)
 
 Bộ trình chiếu thống nhất hiện nằm trong `slides/Nhom15_STING_PAPI.pptx` (đồng bộ tại `submissions/Nhom15_STING_PAPI/`). Phân bổ 15 phút ở [kịch bản thuyết trình](presentation_script.md). Bảng dưới dùng để ghi thời gian đo trực tiếp khi nhóm tập vấn đáp cuối kỳ.
 
@@ -21,10 +21,10 @@ Kiểm tra toàn bộ tệp nộp, slide, báo cáo và notebook hiện tại ch
 
 ## C. Tự đối chiếu sau mỗi lượt
 
-- Nhóm giải thích mạch lạc Grid-based clustering, STING (`3×3` & `240` điểm giả lập), tiền xử lý 6 bước PAPI (`882×41`) và ý nghĩa nhãn nhiễu `−1` (Slide 2–5).
-- Trình bày rõ **thống kê bàn giao 63 tỉnh cho khách hàng** (Slide 6–7: 4 nhóm hành động, 5 chuẩn tham chiếu 14/14 năm, tách 7 tỉnh rời Cụm 2, watchlist trượt vùng và nghịch lý đô thị–y tế).
-- Giải thích được dự báo bổ trợ (`AUC = 0,816`), kiểm chứng ngoại lai độc lập (PCI, GRDP, y tế ODM, nghèo GSO) và giới hạn độ bền đa chiều (Slide 8–10).
-- Thời lượng bài nói 11 slide nằm trong 15 phút, dành 5 phút cho hỏi đáp.
+- Nhóm giải thích mạch lạc Grid-based clustering, STING (`3×3` & `240` điểm giả lập), tiền xử lý 6 bước PAPI (`882×41`) và ý nghĩa nhãn nhiễu `−1` (Slide 2–7).
+- Trình bày rõ **thống kê bàn giao 63 tỉnh cho khách hàng** (Slide 8–9: 4 nhóm mô tả, 5 tỉnh giữ nhãn 14/14 năm trên cùng lưới và 7 tỉnh rời Cụm 2). Nêu rõ các nhóm là gợi ý rà soát, chưa xác nhận chất lượng hay nguyên nhân.
+- Giải thích được dự báo bổ trợ (AUC hồi cứu thăm dò `0,816`, chưa phải xác suất được hiệu chỉnh), đối chiếu với nguồn ngoài (PCI, GRDP, y tế ODM, nghèo GSO) và giới hạn độ bền đa chiều (Slide 10–12).
+- Thời lượng bài nói 15 slide nằm trong 15 phút, dành 5 phút cho hỏi đáp.
 - Mỗi thành viên trả lời được bộ câu hỏi bảo vệ cuối kỳ trong [qa_final.md](qa_final.md), [qa_course_concepts.md](qa_course_concepts.md) và [qa_midterm.md](qa_midterm.md).
 
 Ghi câu hỏi yếu và biên bản luyện tập bảo vệ cuối kỳ vào [mock_defense_log.md](mock_defense_log.md) (ghi nhận phản hồi giữa kỳ đã xử lý lưu đối chiếu tại [midterm_feedback.md](midterm_feedback.md)).

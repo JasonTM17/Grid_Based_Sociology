@@ -148,7 +148,7 @@ PACKAGE_FILES_CATALOG = {
     "reports/Nhom15_BaoCao_STING_PAPI.docx": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)",
     f"notebooks/{ANALYSIS_NOTEBOOK}": "Notebook phân tích STING × PAPI & Thống kê khách hàng đã lưu kết quả",
     f"notebooks/{PREPROCESSING_NOTEBOOK}": "Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc đã lưu kết quả",
-    "slides/Nhom15_STING_PAPI.pptx": "Slide trình bày thống nhất (11 trang 16:9 kèm ghi chú)",
+    "slides/Nhom15_STING_PAPI.pptx": "Slide trình bày thống nhất (15 trang 16:9 kèm ghi chú)",
     "app.py": "Ứng dụng dashboard Streamlit tương tác (6 tab, gồm Thống kê khách hàng)",
     "src/sting.py": "Mã nguồn thuật toán STING cài đặt từ đầu",
     "src/preprocessing.py": "Mã nguồn pipeline tiền xử lý dữ liệu PAPI 6 bước",
@@ -209,8 +209,10 @@ PACKAGE_FILES_CATALOG = {
     "reports/model_deep_dive.md": "Minh chứng các phép phân tích bổ sung trong báo cáo",
 }
 
+PAPI_REFERENCE_PDF = "data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf"
+
 RAW_REFERENCES = {
-    "data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf": "Báo cáo PAPI 2024 (bản tiếng Việt)",
+    PAPI_REFERENCE_PDF: "Báo cáo PAPI 2024 (bản tiếng Việt)",
     "data/raw/mendeley/mendeley_replication.zip": (
         "Dữ liệu và mã đối chiếu của Le và cộng sự (2026), Mendeley Data, DOI 10.17632/wbk42j9wc8.1, CC BY 4.0"
     ),
@@ -244,14 +246,17 @@ def archive_path(relative: str, milestone: str = "final") -> str:
     return VISIBLE.get(relative, relative)
 
 
-def package_files(root: Path, milestone: str = "final") -> dict[str, str]:
-    """Verify every required source file exists in the repository before packaging."""
+def package_files(
+    root: Path, milestone: str = "final", *, include_reference_pdf: bool = False
+) -> dict[str, str]:
+    """Collect required files; the large reference PDF is an explicit opt-in."""
     files = PACKAGE_FILES_CATALOG.copy()
     files.update(
         {
             relative: description
             for relative, description in RAW_REFERENCES.items()
             if (root / relative).is_file()
+            and (include_reference_pdf or relative != PAPI_REFERENCE_PDF)
         }
     )
     for relative in files:
@@ -265,6 +270,14 @@ def instructions(*, source_references: tuple[str, ...] = ()) -> str:
     if source_references:
         listed = "\n".join(f"├── {relative}  {RAW_REFERENCES[relative]}" for relative in source_references)
         reference_lines = f"\nTài liệu đối chiếu kèm theo:\n{listed}\n"
+    reference_pdf_note = ""
+    if PAPI_REFERENCE_PDF not in source_references:
+        reference_pdf_note = (
+            "\nGói mặc định không kèm PDF báo cáo PAPI 2024. Đây là tài liệu tham khảo, "
+            "không phải dependency để chạy hai notebook. Bản nguồn vẫn được giữ trong repo:\n"
+            f"https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/{PAPI_REFERENCE_PDF}\n"
+            "Tùy chọn --include-reference-pdf của script đóng gói trong repo tạo gói kèm PDF này.\n"
+        )
     return f"""================================================================================
 HỒ SƠ ĐỒ ÁN MÔN HỌC MÁY — BẢN THỐNG NHẤT HOÀN CHỈNH
 Nhóm 15 · Chủ đề 6 · Phân cụm dựa trên lưới (Grid-based Clustering — STING)
@@ -283,7 +296,7 @@ Sinh viên thực hiện:
 --------------------------------------------------------------------------------
 {PACKAGE_NAME}/
 ├── {REPORT_NAME}       Báo cáo đồ án (Word có mục lục và danh mục tự động)
-├── {SLIDES_NAME}              Slide thuyết trình 11 trang 16:9 kèm ghi chú
+├── {SLIDES_NAME}              Slide thuyết trình 15 trang 16:9 kèm ghi chú
 ├── {ANALYSIS_NOTEBOOK}             Notebook phân tích STING × PAPI & Thống kê khách hàng
 ├── {PREPROCESSING_NOTEBOOK}          Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc
 ├── app.py                              Dashboard Streamlit (chạy: streamlit run app.py)
@@ -295,7 +308,7 @@ Sinh viên thực hiện:
 ├── data/                               14 workbook PAPI gốc, Mendeley & nguồn đối chiếu ngoài
 ├── models/                             Cấu hình, scaler & model đã khóa
 └── results/                            Bảng CSV/MD/Excel (KetQua_STING_PAPI.xlsx) & hình PNG
-{reference_lines}
+{reference_lines}{reference_pdf_note}
 2. CHẠY LẠI ĐỘC LẬP TRÊN MÁY KHÁC
 --------------------------------------------------------------------------------
 Giải nén toàn bộ ZIP và mở terminal tại thư mục {PACKAGE_NAME}/:
@@ -340,7 +353,7 @@ def verify_report_fields(data: bytes) -> None:
         sum(line.startswith(label + " ") for line in entries["TableofFigures"]) != count
         for label, count in expected_catalog
     ):
-        raise ValueError("Mục lục hoặc danh mục Word chưa đầy đủ; chạy update_report_fields.py bằng Word.")
+        raise ValueError("Mục lục hoặc danh mục Word chưa đầy đủ; chạy update_report_fields.py để cập nhật trường và số trang.")
 
 
 def _trimmed_requirements(root: Path) -> bytes:
@@ -349,8 +362,15 @@ def _trimmed_requirements(root: Path) -> bytes:
     return ("\n".join(pins[pkg] for pkg in PACKAGED_REQUIREMENTS) + "\n").encode("utf-8")
 
 
-def build_package(root: Path, output: Path, milestone: str = "final", *, report_source: Path | None = None) -> Path:
-    sources = package_files(root, milestone)
+def build_package(
+    root: Path,
+    output: Path,
+    milestone: str = "final",
+    *,
+    report_source: Path | None = None,
+    include_reference_pdf: bool = False,
+) -> Path:
+    sources = package_files(root, milestone, include_reference_pdf=include_reference_pdf)
     files = {archive_path(p, milestone): role for p, role in sources.items()}
     payload = {archive_path(p, milestone): (root / p).read_bytes() for p in sources}
     now_dt = time.localtime()[:6]
@@ -457,6 +477,10 @@ def verify_package(archive: Path, milestone: str = "final") -> dict:
 
 def replay_notebook(path: Path, guard: str, log: Path) -> tuple[int, bool]:
     import nbformat
+    # Populate the real font cache before the fresh kernel starts. On a first
+    # macOS run the cache-build notice otherwise lands in a notebook cell's
+    # stderr. Keep the strict stderr gate; do not suppress or remove warnings.
+    import matplotlib.font_manager  # noqa: F401
 
     nb = nbformat.read(path, as_version=4)
     nb.cells.insert(0, nbformat.v4.new_code_cell(guard))
@@ -583,7 +607,12 @@ def sync_loose_deliverable(archive: Path, output: Path) -> Path:
     return target_dir
 
 
-def write_submissions_guide(output: Path) -> None:
+def write_submissions_guide(output: Path, *, include_reference_pdf: bool = False) -> None:
+    reference_pdf_note = (
+        "PDF báo cáo PAPI 2024 được kèm theo tùy chọn --include-reference-pdf."
+        if include_reference_pdf else
+        "Gói mặc định không kèm PDF báo cáo PAPI 2024 để giảm dung lượng."
+    )
     guide = f"""HƯỚNG DẪN BÀI NỘP THỐNG NHẤT — NHÓM 15 (STING × PAPI 2011–2024)
 
 Thư mục này chứa 1 gói hoàn thiện duy nhất (gộp đầy đủ phần giữa kỳ, cuối kỳ,
@@ -597,10 +626,17 @@ tiền xử lý 6 bước từ Excel gốc và thống kê bàn giao 63 tỉnh c
 2. {PACKAGE_NAME}/
    - Bản giải nén đồng nhất 1-1 với {PACKAGE_NAME}.zip để xem hoặc mở trực tiếp:
      + {REPORT_NAME}  (Báo cáo Word đầy đủ có mục lục & danh mục)
-     + {SLIDES_NAME}           (Bộ slide bảo vệ 11 trang 16:9)
+     + {SLIDES_NAME}           (Bộ slide bảo vệ 15 trang 16:9)
      + {ANALYSIS_NOTEBOOK}          (Notebook đồ án hoàn chỉnh)
      + {PREPROCESSING_NOTEBOOK}    (Notebook tiền xử lý PAPI 6 bước)
      + app.py                          (Dashboard tương tác Streamlit)
+
+3. PDF THAM KHẢO PAPI 2024
+   - {reference_pdf_note}
+   - PDF là tài liệu tham khảo, không phải dependency để chạy hai notebook.
+   - Bản nguồn được giữ tại:
+     https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/{PAPI_REFERENCE_PDF}
+   - Trong repo đầy đủ, dùng --include-reference-pdf khi chạy script đóng gói để kèm thêm PDF.
 """
     (output / "HUONG-DAN.txt").write_text(guide, encoding="utf-8", newline="\n")
 
@@ -609,6 +645,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=OUTPUT)
     parser.add_argument("--report-source", type=Path, help="Báo cáo DOCX tùy chọn đóng gói theo tên chuẩn")
+    parser.add_argument(
+        "--include-reference-pdf", action="store_true",
+        help="Kèm PDF báo cáo PAPI 2024 tham khảo trong ZIP (mặc định giữ PDF ở repo)",
+    )
     parser.add_argument("--verify", action="store_true", help="Kiểm tra ZIP và chạy lại cả 2 notebook trong môi trường cách ly")
     args = parser.parse_args()
     args.output_dir = args.output_dir.resolve()
@@ -626,14 +666,17 @@ def main() -> int:
         return 0
 
     (args.output_dir / "verification.json").unlink(missing_ok=True)
-    archive = build_package(ROOT, args.output_dir, "final", report_source=args.report_source)
+    archive = build_package(
+        ROOT, args.output_dir, "final", report_source=args.report_source,
+        include_reference_pdf=args.include_reference_pdf,
+    )
     manifest = verify_package(archive, "final")
     (args.output_dir / "SHA256SUMS.txt").write_text(
         f"{sha256(archive.read_bytes())}  {archive.name}\n", encoding="utf-8"
     )
     if args.output_dir == OUTPUT.resolve():
         sync_loose_deliverable(archive, args.output_dir)
-        write_submissions_guide(args.output_dir)
+        write_submissions_guide(args.output_dir, include_reference_pdf=args.include_reference_pdf)
     print(f"{archive.name}: {len(manifest['files'])} files, {archive.stat().st_size / 1e6:.2f} MB")
     return 0
 

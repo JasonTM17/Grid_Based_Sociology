@@ -142,8 +142,8 @@ def test_per_year_summary_matches_published_clusters(final_notebook: dict):
     summary = f"{single_cluster_years}/{len(rows)} năm có một cụm"
     out = notebook_output_text(final_notebook)
     assert summary in out
-    assert "Biên bứt phá vượt chuẩn" in out
-    assert "Ưu tiên cải thiện Y tế 6.1" in out
+    assert "Ngoài vùng dày, phía điểm cao" in out
+    assert "Ngoài vùng dày, điểm 6.1 thấp" in out
     assert "Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long" in out
 
 

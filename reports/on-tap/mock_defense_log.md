@@ -23,9 +23,9 @@ _Trạng thái: **chưa chạy live** — cần có mặt cả nhóm (hoặc nh�
 1. STING tự cài như thế nào; khác DBSCAN/k-means ra sao. (qa_final #2, #8, #10)
 2. Phân biệt cờ biến động thang đo và bằng chứng từ workbook, giải thích cách chọn chỉ tiêu. (#3, #4)
 3. Giải thích một cụm lớn và hai cụm nhỏ trên hai chỉ tiêu đang xét, cùng giới hạn khi liên hệ thực tế. (#10–11, report Ch.6)
-4. Pipeline train-only chống selection-on-test — nói được "2024 không tham gia chọn cấu hình". (#9)
+4. Phân biệt cấu hình không dùng năm 2024 trong script chọn mẫu với phân tích hồi cứu trên năm 2024 đã được xem; nêu rõ phần kiến thức thang đo 2021 và nguy cơ lạc quan của CV. (#16–17)
 5. Kết quả âm tính là kết quả — không giấu, không tô vẽ. (#5, #13)
-6. Thống kê bàn giao 63 tỉnh cho khách hàng — tách 13 tỉnh nhãn `-1` thành `8` Biên bứt phá & `5` Ưu tiên Y tế 6.1, giải thích 5 chuẩn 14/14 năm, tách 7 tỉnh rời Cụm 2 và nghịch lý Đô thị–Y tế. (#45, Slide 6–7)
+6. Thống kê bàn giao 63 tỉnh cho khách hàng — tách 13 tỉnh nhãn `-1` thành 8 ca phía điểm cao và 5 ca rà soát 6.1; giải thích vì sao giữ nhãn 14/14 năm chưa chứng minh ổn định chất lượng, và vì sao rời cụm chưa chắc là giảm điểm. (#45, Slide 8–9)
 
 ## Biên bản (điền khi chạy xong)
 

@@ -18,6 +18,7 @@ from scripts.deliverables.build_submission_packages import (
     MANIFEST_REL,
     PACKAGE_FILES_CATALOG,
     PACKAGE_NAME,
+    PAPI_REFERENCE_PDF,
     PREPROCESSING_NOTEBOOK,
     PREPROCESSING_SOURCE,
     RAW_REFERENCES,
@@ -114,7 +115,9 @@ def test_unified_archive_includes_all_dependencies_and_excludes_private_material
     assert not any("__pycache__" in p or "probe" in p for p in files)
 
     bundled_references = {p for p in files if p.endswith((".pdf", ".zip", ".rar"))}
-    assert bundled_references == {path for path in RAW_REFERENCES if (ROOT / path).is_file()}
+    assert bundled_references == {
+        path for path in RAW_REFERENCES if path != PAPI_REFERENCE_PDF and (ROOT / path).is_file()
+    }
 
     with zipfile.ZipFile(unified_package) as archive:
         for info in archive.infolist():
@@ -133,21 +136,38 @@ def test_unified_archive_includes_all_dependencies_and_excludes_private_material
         assert b"streamlit==" in archive.read(f"{PACKAGE_NAME}/requirements.txt")
 
 
-def test_package_keeps_available_papi_pdf_when_replication_zip_is_absent(tmp_path):
-    present = "data/raw/papi/PAPI_2024_REPORT_VIE_final.pdf"
+def test_default_package_omits_reference_pdf_and_keeps_replication_zip(unified_package):
+    replication_zip = "data/raw/mendeley/mendeley_replication.zip"
+    assert (ROOT / PAPI_REFERENCE_PDF).is_file(), "Canonical reference PDF must remain in the repository"
+    sources = package_files(ROOT)
+    assert PAPI_REFERENCE_PDF not in sources
+    assert replication_zip in sources
+    assert PAPI_REFERENCE_PDF in package_files(ROOT, include_reference_pdf=True)
+    with zipfile.ZipFile(unified_package) as archive:
+        assert f"{PACKAGE_NAME}/{PAPI_REFERENCE_PDF}" not in archive.namelist()
+        assert archive.read(f"{PACKAGE_NAME}/{replication_zip}") == (ROOT / replication_zip).read_bytes()
+        guide = archive.read(f"{PACKAGE_NAME}/HUONG_DAN.txt").decode("utf-8")
+        assert "Gói mặc định không kèm PDF báo cáo PAPI 2024" in guide
+        assert "--include-reference-pdf" in guide
+        assert f"blob/main/{PAPI_REFERENCE_PDF}" in guide
+
+
+def test_reference_pdf_can_be_explicitly_included_without_replication_zip(tmp_path):
+    present = PAPI_REFERENCE_PDF
     checkout = tmp_path / "checkout"
     for relative in (*PACKAGE_FILES_CATALOG, present):
         destination = checkout / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / relative, destination)
 
-    path = build_package(checkout, tmp_path / "submissions", "final")
+    path = build_package(checkout, tmp_path / "submissions", "final", include_reference_pdf=True)
     manifest = verify_package(path)
     sources = {row["path"] for row in manifest["files"]}
     assert sources.intersection(RAW_REFERENCES) == {present}
     with zipfile.ZipFile(path) as archive:
         guide = archive.read(f"{PACKAGE_NAME}/HUONG_DAN.txt").decode("utf-8")
         assert present in guide and "mendeley_replication.zip" not in guide
+        assert "Gói mặc định không kèm PDF báo cáo PAPI 2024" not in guide
 
 
 def test_delivered_zip_matches_sources_notebooks_and_loose_mirror():

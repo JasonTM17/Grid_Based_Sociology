@@ -161,7 +161,7 @@ STING gốc ([Wang, Yang & Muntz, VLDB 1997](https://www.vldb.org/conf/1997/P186
 2. `cluster(level, connectivity=1)` giữ các ô đạt ngưỡng `min_count` rồi dùng duyệt sâu (DFS) theo kề 4 hướng chung cạnh để gán nhãn cụm; điểm thuộc ô thưa hoặc ngoài biên mang nhãn `−1`.
 3. `predict(X_moi)` ánh xạ dữ liệu mới vào cùng khung lưới đã khóa.
 
-Ví dụ tối thiểu 15 điểm trên lưới `3 × 3` với ngưỡng `min_count = 3` minh họa rõ cơ chế: hai nhóm `7` điểm chỉ chạm góc tại `(1, 1)` nên tách thành **2 cụm riêng**, còn `1` điểm lẻ ở `(0, 1)` mang nhãn nhiễu `−1`."""))
+Ví dụ tối thiểu 15 điểm trên lưới `3 × 3` với ngưỡng `min_count = 3` minh họa cơ chế: các ô dày của hai nhóm `7` điểm chỉ kề góc nên tách thành **2 cụm riêng**, còn `1` điểm lẻ ở `(0, 1)` mang nhãn nhiễu `−1`."""))
 
     cd(nbf.v4.new_code_cell("""counts_3x3 = np.array([[4, 3, 0], [1, 0, 4], [0, 0, 3]])
 positions_3x3 = [(col, 2 - row) for row in range(3) for col in range(3)]
@@ -439,7 +439,7 @@ plt.show()"""))
 1. **Chọn `k = 2` cho K-Means** qua cực đại silhouette (`k = 2: 0,4472` trên 869 điểm; `0,445` trên 808 điểm train).
 2. **So sánh công bằng trên cùng tập giao không nhiễu** (cả mẫu toàn kỳ `680/869` lẫn mẫu train `631/808`): đọc silhouette kèm tỉ lệ nhiễu và số cụm.
 3. **Vai trò z-score (`StandardScaler`):** Vì lưới chia đều theo biên `[min, max]` từng trục, biến đổi tuyến tính giữ nguyên **869/869 chỉ số ô** của STING, trong khi K-Means `k = 2` làm **68/869 điểm đổi nhóm** (`ARI = 0,7103`) và DBSCAN có bán kính tương đương làm **8/869 điểm đổi trạng thái nhiễu**.
-4. **Độ nhạy cấu hình STING** theo ngưỡng `min_count` (3 / 5 / 8), mức lưới (0 / 1 / 2), quy tắc kề 8 hướng (`connectivity = 2`) và kiểm định ô con–ô cha `significance_z = 2,0`."""))
+4. **Độ nhạy cấu hình STING** theo ngưỡng `min_count` (3 / 5 / 8), mức lưới (0 / 1 / 2), quy tắc kề 8 hướng (`connectivity = 2`) và bộ lọc heuristic ô con–ô cha `significance_z = 2,0`. Bộ lọc này không phải kiểm định z độc lập ở mức tin cậy 95%, vì ô con nằm trong ô cha; cấu hình chính không bật bộ lọc."""))
 
     cd(nbf.v4.new_code_cell("""models_km = {}
 sil_by_k = {}
@@ -560,10 +560,12 @@ for fig_name in ("map_2020.png", "map_2024.png", "evolution.png", "predict_2024.
 
 Trả lời trực tiếp yêu cầu thực tiễn từ phía giảng viên và khách hàng sử dụng báo cáo: **sau khi chạy phân cụm ra các nhãn kỹ thuật (`-1, 0, 1, 2`) và ô lưới `(i, j)`, nhóm thống kê và bàn giao những giá trị gì cụ thể cho cơ quan quản lý địa phương?**
 
-1. **Tách hai cực đối lập bên trong 13 tỉnh mang mã `-1`:** dùng mốc phân vị của Cụm 2 năm 2024 (`trung vị 4.2 = 2,032`, `trung vị 6.1 = 1,963`, ngưỡng rìa dưới `Q25 − 0,5 × IQR = 1,879` trên `6.1`) để phân loại toàn bộ 63 tỉnh thành **4 nhóm hành động vận hành rõ ràng**, không gom chung các tỉnh dẫn đầu xuất sắc với các tỉnh đang tụt điểm y tế công lập.
-2. **Xác định 5 tỉnh chuẩn tham chiếu bền vững 14/14 năm (2011–2024)** trong Cụm 2 (`Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long`) và 7 tỉnh trong Cụm 2 nằm sát biên dưới Y tế `6.1` cần giữ nhịp (`TP. Hồ Chí Minh, Đồng Nai...`).
-3. **Phân tách hướng dịch chuyển 2023 → 2024** (`5` tỉnh rời Cụm 2 lên *biên bứt phá* vs `2` tỉnh rời Cụm 2 xuống *rìa ưu tiên Y tế 6.1*).
-4. **Kịch bản ngoài vùng năm 2024** (`outside_scenario_share`) là chỉ số xếp hạng hồi kiểm 2023→2024, không phải xác suất hay dự báo sau 2024. Chênh lệch GRDP/người và điểm 6.1 chỉ mang tính mô tả."""))
+1. **Mô tả 63 tỉnh bằng bốn nhóm:** 48 tỉnh trong vùng dày, 8 tỉnh ngoài vùng dày về phía điểm cao, 5 tỉnh ngoài vùng dày có điểm `6.1` thấp và 2 tỉnh thiếu dữ liệu. Ngưỡng `6.1 = Q25 − 0,5 × IQR = 1,8791` tính từ 48 tỉnh trong Cụm 2 năm 2024, nên là quy tắc mô tả hồi cứu, không phải chuẩn chất lượng hay bốn cụm học được.
+2. **Theo dõi việc giữ nhãn:** 5 tỉnh thuộc Cụm 2 ở cả 14 năm (`Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long`) trên cùng lưới tham chiếu. Giữ nhãn không chứng minh chất lượng dịch vụ ổn định. Có 7 tỉnh trong Cụm 2 cũng thấp hơn ngưỡng `6.1` trên.
+3. **Mô tả dịch chuyển 2023 → 2024:** trong 59 tỉnh đủ dữ liệu cả hai năm, 7 tỉnh rời vùng dày và 5 tỉnh đi vào. Trong 7 tỉnh rời vùng dày, 5 thuộc phía điểm cao và 2 có `6.1` thấp theo quy tắc 2024; nhãn không xác định nguyên nhân thay đổi.
+4. **Kịch bản ngoài vùng năm 2024** (`outside_scenario_share`) là chỉ số xếp hạng hồi kiểm 2023→2024, chưa phải xác suất hiệu chỉnh hoặc bằng chứng dự báo tiền cứu. Chênh lệch GRDP/người và điểm `6.1` chỉ mang tính mô tả.
+
+Các khóa nhóm cũ được giữ trong CSV để tương thích mã nguồn; bảng hiển thị dưới đây dùng tên mô tả thống nhất với Word và slide."""))
 
     cd(nbf.v4.new_code_cell("""from scripts.analysis.stakeholder_summary import build_stakeholder_tables
 
@@ -575,30 +577,48 @@ transitions_df = stake["transitions"]
 benchmarks_14y = stake["benchmarks_14y"]
 watchlist_df = stake["watchlist"]
 
+DISPLAY_LABELS = {
+    "Vùng lõi ổn định (Cụm 2)": "Trong vùng dày (Cụm 2)",
+    "Biên bứt phá vượt chuẩn": "Ngoài vùng dày, phía điểm cao",
+    "Ưu tiên cải thiện Y tế 6.1": "Ngoài vùng dày, điểm 6.1 thấp",
+    "Giữ vững Cụm 2": "Giữ nhãn Cụm 2",
+    "Rời Cụm 2 lên biên bứt phá": "Rời vùng dày, phía điểm cao",
+    "Rời Cụm 2 xuống rìa Y tế 6.1": "Rời vùng dày, điểm 6.1 thấp",
+}
+
+
+def descriptive_table(frame):
+    view = frame.copy()
+    for column in ("action_group", "transition_2023_2024"):
+        if column in view:
+            view[column] = view[column].replace(DISPLAY_LABELS)
+    return view
+
+
 print(
     f"Tổng hợp 63 tỉnh năm 2024 | Trung vị Cụm 2: 4.2 = {bench['med_42']:.4f}, "
     f"6.1 = {bench['med_61']:.4f} | Ngưỡng tách dưới 6.1 = {bench['lower_61_fence']:.4f}."
 )
-show_md(g_df[[
+show_md(descriptive_table(g_df[[
     "action_group", "n_provinces", "share_63_pct", "median_sd_4_2", "median_sd_6_1",
     "median_years_c2", "median_risk_outside_pct", "median_grdp_2024_mil", "median_pci_2022",
-]].to_markdown(index=False))
+]]).to_markdown(index=False))
 
-print("5 tỉnh chuẩn tham chiếu 14/14 năm trong Cụm 2:", ", ".join(benchmarks_14y["province_vi"].tolist()))
-display(s_df.loc[
+print("5 tỉnh giữ nhãn Cụm 2 ở 14/14 năm:", ", ".join(benchmarks_14y["province_vi"].tolist()))
+display(descriptive_table(s_df.loc[
     s_df["action_group"].isin(["Biên bứt phá vượt chuẩn", "Ưu tiên cải thiện Y tế 6.1", "Thiếu dữ liệu 2024"]),
-    ["province_vi", "action_group", "action_subtier", "sd_4_2", "sd_6_1", "grid_cell", "grdp_2024_mil_vnd", "client_recommendation"],
-].round(4).reset_index(drop=True))
-show_md(transitions_df.to_markdown(index=False))
-show_md(watchlist_df.round(4).to_markdown(index=False))
+    ["province_vi", "action_group", "sd_4_2", "sd_6_1", "grid_cell", "grdp_2024_mil_vnd"],
+]).round(4).reset_index(drop=True))
+show_md(descriptive_table(transitions_df).to_markdown(index=False))
+show_md(descriptive_table(watchlist_df).round(4).to_markdown(index=False))
 display(Image(filename=str(ROOT / "results/figs/stakeholder_quadrants_2024.png")))"""))
 
-    md(nbf.v4.new_markdown_cell("""## Phần 6. Thí nghiệm dự báo 2024 (thăm dò) & Kiểm chứng ngoại lai độc lập
+    md(nbf.v4.new_markdown_cell("""## Phần 6. Thí nghiệm dự báo 2024 (thăm dò) & Đối chiếu nguồn ngoài PAPI
 
 ### 6.1 Dự báo hai chỉ tiêu 2024 bằng Ridge & xếp hạng kịch bản rời vùng dày
 
-- Ridge giảm MAE nhẹ hơn giữ nguyên điểm 2023 trên 59 tỉnh (`4.2`: `0,0736` vs `0,0763`; `6.1`: `0,0641` vs `0,0683`), nhưng **dự báo điểm nhận ra `0/11` tỉnh ngoài vùng dày** do xu hướng hồi quy co về trung bình.
-- Do đó, nhóm ghép `364` cặp phần dư CV lịch sử vào dự báo điểm để đo tỉ lệ kịch bản rời vùng (`outside_scenario_share`), đạt `AUC = 0,816` mang tính thăm dò cảnh báo sớm."""))
+- Ridge giảm MAE nhẹ hơn giữ nguyên điểm 2023 trên 59 tỉnh (`4.2`: `0,0736` vs `0,0763`; `6.1`: `0,0641` vs `0,0683`), nhưng RMSE của `4.2` cao hơn (`0,0972` vs `0,0953`). Tất cả dự báo điểm vào vùng dày, nên chỉ nhận ra **`0/11` tỉnh ngoài vùng dày** trong mẫu đối chiếu.
+- Nhóm ghép `364` cặp phần dư CV lịch sử vào dự báo điểm để đo tỉ lệ kịch bản rời vùng (`outside_scenario_share`). `AUC = 0,816` là kết quả hồi cứu thăm dò, chưa phải xác suất hiệu chỉnh hay kiểm chứng tiền cứu; không dùng năm 2024 để chọn cấu hình trong mã nguồn không chứng minh rằng năm này chưa từng được xem trong quá trình làm đồ án."""))
 
     cd(nbf.v4.new_code_cell("""from scripts.common.papi_forecast import (
     ORIGIN_YEAR, TARGETS, forecast_from_history, scenario_auc, score_forecast,
@@ -621,9 +641,9 @@ print(f"Kịch bản sai số lịch sử ({run_fc.scenario_count} kịch bản/
 display(Image(filename=str(ROOT / "results/figs/papi_forecast_values.png")))
 display(Image(filename=str(ROOT / "results/figs/papi_forecast_grid.png")))"""))
 
-    md(nbf.v4.new_markdown_cell("""### 6.2 Kiểm chứng ngoại lai độc lập với PAPI (PCI, Y tế ODM 2020, GRDP & WDI)
+    md(nbf.v4.new_markdown_cell("""### 6.2 Đối chiếu nguồn ngoài PAPI (PCI, Y tế ODM 2020, GRDP & WDI)
 
-Đối chiếu nhãn STING đóng băng với các nguồn dữ liệu độc lập hoàn toàn với bộ khảo sát PAPI để mô tả đặc trưng kinh tế–xã hội của vùng lõi và vùng ngoại vi (chỉ mô tả/tương quan, không suy diễn nhân quả)."""))
+Đối chiếu nhãn STING đóng băng với nguồn thu thập bên ngoài PAPI để mô tả đặc trưng kinh tế–xã hội. Nguồn ngoài không cung cấp nhãn đúng cho các cụm. Quan sát lặp theo tỉnh, khác biệt năm và nhiều phép thử hạn chế ý nghĩa suy luận của p-value gộp. Số điểm cơ sở y tế ODM bằng 0 là nguồn không ghi nhận điểm, không chứng minh địa phương không có cơ sở y tế."""))
 
     cd(nbf.v4.new_code_cell("""ext_val = pd.read_csv(ROOT / "results/external_validation.csv")
 show_md(ext_val[["section", "group", "n", "median", "mean", "note"]].fillna("").to_markdown(index=False))
@@ -637,9 +657,9 @@ for fig_name in (
 
     md(nbf.v4.new_markdown_cell("""## Phần 7. Kết luận tổng hợp và giới hạn diễn giải
 
-1. **Ý nghĩa thuật toán:** STING rút gọn (`16 × 16`, `min_count = 5`, kề 4 hướng) tách rõ vùng lõi đa số ổn định (`Cụm 2`) khỏi các ô biên mật độ thưa (`-1`), giữ nguyên hoàn toàn cấu trúc ô dưới chuẩn hóa tuyến tính (`869/869` ô bất biến).
-2. **Giá trị bàn giao cho khách hàng:** Thay vì chỉ trả về các mã cụm thô, hệ thống thống kê phân tách 63 tỉnh năm 2024 thành 4 nhóm hành động cụ thể (**48 Vùng lõi ổn định** với 5 chuẩn 14/14 năm, **8 Biên bứt phá vượt chuẩn**, **5 Cần ưu tiên Y tế công lập 6.1**, **2 Thiếu dữ liệu**), gắn kèm quỹ đạo 2023→2024, xếp hạng kịch bản ngoài vùng năm 2024 (`outside_scenario_share`) và đối chiếu GRDP/PCI độc lập.
-3. **Giới hạn trung thực:** Số cụm phụ thuộc tham số lưới/ngưỡng; `Cụm 0` (`n=5`) và `Cụm 1` (`n=16`) quá nhỏ nên chỉ mang tính mô tả; dữ liệu đối chiếu và một năm holdout `2023→2024` chưa đủ để kết luận quan hệ nhân quả hay khả năng tổng quát hóa dài hạn.
+1. **Ý nghĩa thuật toán:** Biến thể STING (`16 × 16`, `min_count = 5`, kề 4 hướng) mô tả vùng dày chiếm ưu thế và các ô thưa. Khi dựng lại lưới đều trên cùng mẫu toàn kỳ, `869/869` điểm giữ nguyên chỉ số ô sau z-score; kết quả này không áp dụng cho mọi phép biến đổi hoặc mọi thuật toán.
+2. **Giá trị bàn giao:** Bảng mô tả 63 tỉnh gồm **48 trong vùng dày, 8 ngoài vùng dày về phía điểm cao, 5 ngoài vùng dày có điểm 6.1 thấp và 2 thiếu dữ liệu**. Bảng đi kèm dịch chuyển 2023→2024, chỉ số kịch bản hồi cứu và đối chiếu GRDP/PCI để gợi ý rà soát; chưa xếp hạng chất lượng hoặc xác định nguyên nhân.
+3. **Giới hạn:** Trên 808 quan sát lịch sử, 629/650 điểm đã vào cụm thuộc Cụm 2; các cụm 0 (`n=5`) và 1 (`n=16`) nhỏ. Kết quả nhạy với tham số và biểu diễn, còn một giai đoạn đối chiếu `2023→2024` chưa xác lập khả năng dự báo dài hạn. Cần dữ liệu độc lập và đánh giá cuốn chiếu trước khi dùng để ra quyết định.
 
 **Nguồn:** Wang, Yang & Muntz (VLDB 1997), PAPI (CECODES/VFF-CRT/RTA/UNDP), Mendeley DOI `10.17632/wbk42j9wc8.1`, VCCI–USAID PCI, GSO PX-Web & OD Mekong."""))
 
@@ -649,14 +669,15 @@ for fig_name in (
     md(nbf.v4.new_markdown_cell(f"""## Phụ lục A. Kiểm tra bổ sung trên nhiều chỉ tiêu (PCA & 8D OFAT)
 
 - Hai thành phần PCA từ 6 chiều 2011–2024 giữ `{pca_row.explained_var_total:.1%}` phương sai và chỉ cho `{pca_row.k:.0f}` cụm.
-- Không gian 8 chiều giai đoạn 2018–2024 tại cấu hình gốc cho `{goc_row.k:.0f}` cụm với `{goc_row.noise_ratio:.1%}` nhiễu."""))
+- Không gian 8 chiều giai đoạn 2018–2024 tại cấu hình gốc cho `{goc_row.k:.0f}` cụm với `{goc_row.noise_ratio:.1%}` nhiễu.
+- Nhãn verdict trong bảng là quy tắc lọc theo số cụm và nhiễu, chưa xác nhận chất lượng phân cụm. Ví dụ `min_count = 2` giảm nhiễu nhưng silhouette âm (`−0,089`), cho thấy độ tách yếu."""))
 
     cd(nbf.v4.new_code_cell("""rob_tbl = pd.read_csv(ROOT / "results/robustness.csv")
 show_md(rob_tbl.to_markdown(index=False))"""))
 
     md(nbf.v4.new_markdown_cell("""## Phụ lục B. Thí nghiệm học phần có giám sát trên 6.1, nhãn lưới và cân bằng lớp
 
-Thí nghiệm đơn chỉ tiêu chọn mô hình hồi quy `6.1` theo CV R², bài toán phân loại đo mức khớp pseudo-label vùng dày STING (kèm `class_weight='balanced'` trên 6 fold expanding-origin 2017–2022) và đối chiếu 6 bộ phân loại chuẩn của học phần."""))
+Thí nghiệm đơn chỉ tiêu chọn mô hình hồi quy `6.1` theo CV R², bài toán phân loại đo mức khớp pseudo-label vùng dày STING (kèm `class_weight='balanced'` trên 6 fold expanding-origin 2017–2022) và đối chiếu 6 bộ phân loại chuẩn của học phần. Đây không phải nhãn chất lượng quản trị do chuyên gia cung cấp. Việc chọn tham số và báo cáo điểm trên cùng các fold có thể lạc quan; thông tin 2021–2022 từng dùng để chọn cấu hình STING còn chồng lấn các fold sau. Chưa định lượng độ lớn thiên lệch này."""))
 
     cd(nbf.v4.new_code_cell(r"""import joblib
 from sklearn.ensemble import RandomForestClassifier
@@ -719,7 +740,7 @@ display(Image(filename=str(ROOT / "results/figs/course_confusion_matrix.png")))"
 
     md(nbf.v4.new_markdown_cell("""## Phụ lục C. Đối chiếu tỷ lệ hộ nghèo cấp tỉnh GSO (2012–2024)
 
-Kiểm định trên cả dữ liệu gộp thô và dữ liệu đã trừ trung vị theo năm để kiểm soát hiệu ứng đổi chuẩn nghèo qua từng giai đoạn."""))
+Đối chiếu cả dữ liệu gộp thô và dữ liệu đã trừ trung vị theo năm. Phép trừ chỉ loại vị trí trung tâm chung của từng năm; không bảo đảm khử thay đổi chuẩn nghèo, phụ thuộc theo tỉnh hay các yếu tố gây nhiễu. Các kiểm định gộp mang tính thăm dò và không cung cấp nhãn đúng cho STING."""))
 
     cd(nbf.v4.new_code_cell("""pov = pd.read_csv(ROOT / "results/poverty_validation.csv")
 pov_pool = pov[pov.section.isin(["poverty_pooled_raw", "poverty_pooled_demeaned", "test_mw_noise_vs_c2"])].copy()
@@ -735,6 +756,10 @@ display(Image(filename=str(ROOT / "results/figs/external_poverty_by_cluster.png"
 
 
 def main() -> int:
+    # Prepare the font cache before execution so first-run setup messages do
+    # not become notebook stderr; actual cell warnings remain visible.
+    import matplotlib.font_manager  # noqa: F401
+
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")

@@ -16,7 +16,7 @@ Sinh bởi `scripts/analysis/external_validation.py` (gaps [2], [8], [9] + phầ
 
 - **One-way ANOVA:** F(3,743) = 9.0426, p = 6.93e-06.
 - **Kruskal–Wallis** (phi tham số, có sửa tie): H = 31.7751, p = 5.84e-07; eta² = 0.0352.
-- Diễn giải thận trọng: cụm 0 (n=5) và cụm 1 (n=16) quá nhỏ để tự kết luận; cặp tương phản đáng tin là **nhiễu vs cụm 2**. PCI khác biệt có ý nghĩa thống kê giữa các nhóm → cấu trúc cụm STING tương ứng với một thước đo ĐỘC LẬP chưa từng dùng khi học — kiểm chứng bên ngoài độc lập, không chứng minh nhân quả.
+- Diễn giải thận trọng: cụm 0 (n=5) và cụm 1 (n=16) quá nhỏ để tự kết luận. Nhiễu và cụm 2 có cỡ mẫu lớn hơn, nhưng vẫn gồm các quan sát lặp theo tỉnh qua nhiều năm. Các p-value gộp chưa xử lý phụ thuộc trong tỉnh, xu hướng năm và nhiều phép so sánh, nên chỉ dùng thăm dò. Eta² mô tả tỷ lệ biến thiên giữa nhóm trong mẫu. PCI là nguồn khác với PAPI và không dùng để học lưới; điều này không làm các quan sát độc lập thống kê, không xác nhận nhãn cụm là đúng và không chứng minh nhân quả.
 - Hình: `results/figs/external_pci_by_cluster.png`.
 
 ## 2) Kiểm tra PHỤ: Top-30 2023–2024 — có cảnh báo chọn mẫu
@@ -40,7 +40,7 @@ Sinh bởi `scripts/analysis/external_validation.py` (gaps [2], [8], [9] + phầ
 | nhiễu (–1) |   2020 |   6 | 0.00174  | 0.000748 | 0.002313 |     0 | 0.005625 | tổng 16 cơ sở / 6.19 triệu người → 0.002585 cơ sở/1.000 dân (theo quy mô nhóm)   |
 | cụm 2      |   2020 |  57 | 0.003924 | 0.002203 | 0.005773 |     0 | 0.034658 | tổng 407 cơ sở / 91.39 triệu người → 0.004453 cơ sở/1.000 dân (theo quy mô nhóm) |
 
-- **10 tỉnh `count = 0` là 0-thật** (nguồn điểm không phủ tỉnh đó, KHÔNG phải lỗi map tên — dump 2.169 điểm đã point-in-polygon với bộ alias tên tỉnh đã kiểm tra): Bắc Kạn, Tuyên Quang, Điện Biên, Lai Châu, Sơn La, Bắc Giang, Quảng Trị, Ninh Thuận, Bình Phước, Bến Tre.
+- **10 tỉnh `count = 0` không có điểm ghi nhận trong nguồn** (dump 2.169 điểm đã point-in-polygon với bộ alias tên tỉnh đã kiểm tra): Bắc Kạn, Tuyên Quang, Điện Biên, Lai Châu, Sơn La, Bắc Giang, Quảng Trị, Ninh Thuận, Bình Phước, Bến Tre. Đây là số đếm của bộ dữ liệu, không chứng minh các tỉnh không có cơ sở y tế.
 - Snapshot một năm duy nhất (2020), đếm số ĐIỂM không phải số giường → chỉ dùng làm external check một lần, không đưa vào feature.
 - Hình: `results/figs/external_health_density_2020.png`.
 

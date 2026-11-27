@@ -219,11 +219,12 @@ def _holdout_classification(y: np.ndarray, yp: np.ndarray) -> float:
 
 
 def _verdict(delta: float, cv_std_a: float) -> str:
+    """Quy tắc mô tả độ lớn chênh lệch, không phải kiểm định thống kê."""
     if np.isnan(delta) or np.isnan(cv_std_a):
-        return "không khác biệt"
+        return "Chưa đủ số liệu"
     if abs(delta) < cv_std_a:
-        return "không khác biệt"
-    return "khác biệt đáng kể"
+        return "Chênh lệch nhỏ"
+    return "Chênh lệch ≥ SD"
 
 
 def run_sensitivity() -> pd.DataFrame:
@@ -359,7 +360,9 @@ def write_markdown(frame: pd.DataFrame) -> None:
         "## Cách đọc",
         "- `value_cv` / `cv_std`: metric CV và độ lệch fold-to-fold của cấu hình được chọn.",
         "- `delta_vs_A` so với biến thể A; `verdict` mô tả: "
-        "«không khác biệt» khi |delta| < cv_std của A, ngược lại «khác biệt đáng kể».",
+        "«Chênh lệch nhỏ» khi |delta| < cv_std của A, ngược lại «Chênh lệch ≥ SD». "
+        "Đây là quy tắc mô tả so với độ phân tán giữa các fold, không phải kiểm định "
+        "tương đương hay ý nghĩa thống kê; thiếu delta hoặc cv_std thì ghi «Chưa đủ số liệu».",
         "- `holdout_value`: R² holdout (hồi quy) hoặc macro-F1 holdout (phân loại); "
         "không dùng để chọn biến thể.",
         "",

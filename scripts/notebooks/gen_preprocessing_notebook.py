@@ -437,6 +437,10 @@ def _execute_and_check(path: Path) -> int:
 
 
 def main() -> int:
+    # Build the real font cache before notebook execution; keep cell stderr
+    # intact so errors and warnings still fail the publication gate.
+    import matplotlib.font_manager  # noqa: F401
+
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")

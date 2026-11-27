@@ -1,4 +1,4 @@
-"""Gate artifact nộp bài thống nhất: báo cáo DOCX, slide 11 trang, notebook và provenance PAPI."""
+"""Gate artifact nộp bài thống nhất: báo cáo DOCX, slide 15 trang, notebook và provenance PAPI."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ SUBMISSION_NB = ROOT / "notebooks" / "Nhom15_STING_PAPI.ipynb"
 PROVENANCE = ROOT / "data" / "raw" / "papi" / "PROVENANCE.md"
 PAPI_PDF = ROOT / "data" / "raw" / "papi" / "PAPI_2024_REPORT_VIE_final.pdf"
 EXPECTED_ARI_STR = "0.950"
-SLIDE_COUNT = 11
+SLIDE_COUNT = 15
 THANK_YOU = "Cảm ơn thầy và các bạn đã lắng nghe"
 
 _IGNORE_PATTERNS = (
@@ -100,7 +100,7 @@ def test_report_uses_the_user_final_template_geometry():
 
 
 def check_pptx_submission(prs: Presentation) -> list[str]:
-    """Kiểm tra 11 slide, slide cảm ơn cuối và ghi chú thuyết trình mọi trang."""
+    """Kiểm tra 15 slide, slide cảm ơn cuối và ghi chú thuyết trình mọi trang."""
     violations: list[str] = []
     count = len(prs.slides)
     if count != SLIDE_COUNT:
@@ -243,22 +243,37 @@ def test_unified_pptx_exists_notes_and_content():
     for required in (
         "Phân cụm dựa trên lưới STING",
         "ARI = 0,950",
-        "869/869 ô",
-        "48/61 tỉnh đủ điểm vào cụm lớn",
-        "Biến mã kỹ thuật (−1, 2) thành 4 nhóm hành động",
-        "Biên bứt phá vượt chuẩn",
-        "Ưu tiên cải thiện Y tế 6.1",
+        "869/869 điểm giữ nguyên ô STING",
+        "631 điểm",
+        "48 / 61",
+        "Bảng mô tả 63 tỉnh",
+        "Ngoài vùng dày, phía điểm cao",
+        "Ngoài vùng dày, điểm 6.1 thấp",
+        "Thiếu dữ liệu 2024",
+        "1,787",
+        "1,8791",
         "Lạng Sơn",
         "(13, 9)",
         "(12, 10)",
         "0,0736",
         "0,0641",
+        "0 / 11",
+        "AUC 0,816",
+        "Kết quả hồi cứu",
         "Wang, Yang & Muntz (VLDB 1997)",
     ):
         assert required in full_text, f"Thiếu nội dung slide: {required}"
     assert "Nhiễu¹" not in full_text
     assert "(kèm Bạc Liêu, Huế" not in full_text
+    assert "bứt phá vượt chuẩn" not in full_text.lower()
     assert visible[-1] == THANK_YOU
+
+    # Core evidence must remain editable, with data embedded in both charts.
+    tables = [shape.table for slide in presentation.slides for shape in slide.shapes if shape.has_table]
+    charts = [shape.chart for slide in presentation.slides for shape in slide.shapes if shape.has_chart]
+    assert len(tables) >= 8, "Các bảng bằng chứng phải là bảng PowerPoint có thể chỉnh sửa"
+    assert len(charts) == 2
+    assert all(chart.part.chart_workbook.xlsx_part is not None for chart in charts)
 
     notes = "\n".join(slide.notes_slide.notes_text_frame.text for slide in presentation.slides)
     for name in ("Nhom15_BaoCao_STING_PAPI.docx", "Nhom15_STING_PAPI.ipynb", "Nhom15_TienXuLy_PAPI.ipynb"):
@@ -328,8 +343,8 @@ def test_submission_notebook_sections_and_key_numbers(submission_notebook: dict)
         "Nhiễu: 171/869 quan sát (19.7%).",
         "STING: 869/869 điểm cùng chỉ số ô, 869/869 nhãn trùng.",
         "K-means k=2: 68/869 điểm đổi nhóm sau ghép tên cụm.",
-        "Biên bứt phá vượt chuẩn",
-        "Ưu tiên cải thiện Y tế 6.1",
+        "Ngoài vùng dày, phía điểm cao",
+        "Ngoài vùng dày, điểm 6.1 thấp",
         "Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long",
     ):
         assert expected in output
@@ -346,15 +361,15 @@ def test_unified_notebook_contains_zscore_and_stakeholder_figures(submission_not
     assert b64decode("".join(png_s)) == (ROOT / "results/figs/stakeholder_quadrants_2024.png").read_bytes()
 
 
-def test_unified_slide_uses_current_panel_for_2024_coverage(tmp_path):
+def test_unified_slide_rejects_changed_panel_without_overwriting_reviewed_output(tmp_path):
     panel_path = Path("data/processed/papi_panel_63_2011_2024.csv")
     slide_builder = Path("scripts/deliverables/build_slides.py")
-    copy_dirs = ("src", "scripts/common", "scripts/analysis", "data/processed", "models", "results")
+    copy_dirs = (
+        "src", "scripts/common", "scripts/analysis", "scripts/deliverables",
+        "data/processed", "models", "results", "reports", "assets",
+    )
     for rel_dir in copy_dirs:
         shutil.copytree(ROOT / rel_dir, tmp_path / rel_dir)
-    (tmp_path / slide_builder.parent).mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(ROOT / slide_builder, tmp_path / slide_builder)
-
     panel = pd.read_csv(tmp_path / panel_path)
     year = panel.year.eq(2024)
     features = ["sd_4_2", "sd_6_1"]
@@ -362,16 +377,20 @@ def test_unified_slide_uses_current_panel_for_2024_coverage(tmp_path):
         panel.loc[year & panel.province_vi.eq("Lạng Sơn"), features].to_numpy()
     )
     panel.to_csv(tmp_path / panel_path, index=False)
+    reviewed = tmp_path / "slides/Nhom15_STING_PAPI.pptx"
+    reviewed.parent.mkdir()
+    reviewed.write_bytes(b"previous reviewed presentation")
     completed = subprocess.run(
         [sys.executable, str(slide_builder)],
         cwd=tmp_path,
         capture_output=True,
+        text=True,
+        encoding="utf-8",
         timeout=120,
     )
-    assert completed.returncode == 0, completed.stderr.decode(errors="replace")
-    slide = Presentation(str(tmp_path / "slides/Nhom15_STING_PAPI.pptx")).slides[4]
-    text = "\n".join(shape.text for shape in slide.shapes if shape.has_text_frame)
-    assert "49/61 tỉnh đủ điểm vào cụm lớn" in text
+    assert completed.returncode != 0
+    assert "Dữ liệu slide đã thay đổi" in completed.stderr
+    assert reviewed.read_bytes() == b"previous reviewed presentation"
 
 
 def test_papi_pdf_provenance_chain():
@@ -379,13 +398,13 @@ def test_papi_pdf_provenance_chain():
     assert not violations, "\n".join(violations)
 
 
-def test_gate_detects_twelfth_slide_in_memory():
+def test_gate_detects_extra_slide_in_memory():
     presentation = Presentation(str(SUBMISSION_PPTX))
     layout_index = 6 if len(presentation.slide_layouts) > 6 else 0
     presentation.slides.add_slide(presentation.slide_layouts[layout_index])
-    assert len(presentation.slides) == 12
+    assert len(presentation.slides) == SLIDE_COUNT + 1
     violations = check_pptx_submission(presentation)
-    assert any("cần đúng 11" in message for message in violations)
+    assert any(f"cần đúng {SLIDE_COUNT}" in message for message in violations)
 
 
 def test_gate_rejects_content_on_thank_you_slide():

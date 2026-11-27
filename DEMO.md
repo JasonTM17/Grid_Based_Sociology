@@ -8,7 +8,7 @@ _Mục tiêu: bạn mở repo ra và demo được ngay — không cần mạng,
 python scripts/deliverables/demo_smoke.py
 ```
 
-Lệnh in **KET LUAN: SAN SANG DEMO (N/N muc dat)** khi mọi mục đạt, kiểm chứng đủ gói thống nhất gồm 11 slide trình bày, báo cáo Word, bảng thống kê khách hàng 63 tỉnh và bộ đôi notebook chạy đầy đủ. Sửa các mục FAIL rồi kiểm tra lại.
+Lệnh in **KET LUAN: SAN SANG DEMO (N/N muc dat)** khi mọi mục đạt, kiểm chứng đủ gói thống nhất gồm 15 slide trình bày, báo cáo Word, bảng thống kê khách hàng 63 tỉnh và bộ đôi notebook chạy đầy đủ. Sửa các mục FAIL rồi kiểm tra lại.
 
 ## 1. Lắp ráp máy demo
 
@@ -60,9 +60,9 @@ Từ thư mục repo, có thể kiểm tra riêng ZIP thống nhất bằng
 
 ## 2. Kịch bản 15 phút
 
-Xem [kịch bản theo 11 slide](reports/on-tap/presentation_script.md). Slide 3–4
+Xem [kịch bản theo 15 slide](reports/on-tap/presentation_script.md). Slide 4–6
 giải thích cơ chế lưới 3×3, 240 điểm giả lập, đối chứng K-Means/DBSCAN và bất biến z-score.
-Slide 5 chiếu 61/63 tỉnh năm 2024 và ca Lạng Sơn. **Slide 6–7** trả lời trực tiếp câu hỏi của giảng viên về **thống kê bàn giao 63 tỉnh cho khách hàng**. Slide 8–10 tổng hợp dự báo bổ trợ, kiểm chứng ngoại lai, độ bền đa chiều và kết luận.
+Slide 7 trình bày 61/63 tỉnh có hai điểm quan sát năm 2024. Slide 8 giữ toàn bộ 63 tỉnh trong bảng gợi ý rà soát; slide 9 dùng 59 tỉnh ghép được hai năm và truy vết Lạng Sơn. Slide 10–12 trình bày dự báo hồi cứu, đối chiếu nguồn ngoài và độ bền. Slide 13 dành cho demo, slide 14 kết luận và slide 15 cảm ơn.
 
 Khi cần minh họa trực quan cho khách hàng hoặc đối chiếu PCI, mở dashboard bằng
 `python -m streamlit run app.py` rồi chọn tab **Thống kê khách hàng** (có bản đồ Choropleth 63 tỉnh tương tác, lọc nhóm hành động và xuất Phiếu chẩn đoán 1 trang/tỉnh để in PDF) hoặc **Kiểm chứng ngoại lai**.
@@ -71,7 +71,7 @@ Khi cần minh họa trực quan cho khách hàng hoặc đối chiếu PCI, m�
 
 | Sự cố | Xử lý |
 |---|---|
-| Máy chiếu thiếu Python hoặc thư viện | Mở slide PPTX 11 trang, báo cáo Word và notebook đã lưu sẵn kết quả. |
+| Máy chiếu thiếu Python hoặc thư viện | Mở slide PPTX 15 trang, báo cáo Word và notebook đã lưu sẵn kết quả. |
 | Chạy nbconvert báo lỗi | Mở notebook đã lưu (không cần chạy lại); chạy `python scripts/deliverables/demo_smoke.py` để biết hỏng gì |
 | Hình phân cụm không hiện trong notebook | Mở hình cùng số liệu tương ứng trên slide 4–7 hoặc `results/figs/`. |
 | Font hiển thị lạ | `chcp 65001` rồi mở lại terminal; notebook/slides dùng DejaVu/Calibri (Unicode OK) |
@@ -88,11 +88,11 @@ Khi cần minh họa trực quan cho khách hàng hoặc đối chiếu PCI, m�
 | Phân cụm STING PAPI | 869 quan sát đủ hai chỉ tiêu (`808` train 2011–2023 + `61` năm 2024). Trên 2011–2023: 3 cụm `629 / 16 / 5` và `158` điểm nhiễu (`19,6%`); toàn kỳ 869: `677 / 16 / 5` và `171` nhiễu (`19,7%`). |
 | Tiền xử lý PAPI | `results/preprocessing_audit.md` — 0 trùng khóa / 882 dòng; không nội suy; outlier giữ + đánh dấu |
 | Thống kê bàn giao 63 tỉnh (2024) | `Biên bứt phá vượt chuẩn`: 8 tỉnh (`4.2` med 2,235, `6.1` med 1,963, GRDP 87,38 tr); `Vùng lõi ổn định (Cụm 2)`: 48 tỉnh (gồm 5 chuẩn 14/14 năm: Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long & 7 tỉnh rìa dưới `6.1`); `Ưu tiên Y tế 6.1`: 5 tỉnh (Hà Nội, Cần Thơ, Gia Lai, Long An, Bình Dương — GRDP med 104,26 tr); `Thiếu dữ liệu 2024`: 2 tỉnh (Vĩnh Phúc, Tiền Giang). (`results/stakeholder_summary.md`) |
-| Classifier học phần | `results/course_supervised_baselines.csv` — CV macro-F1; holdout 2023→2024 **một lần**; so **khớp pseudo-label STING**, không ground truth xã hội (NB CV cao nhất ≠ “tốt nhất” tổng quát — xem `qa_course_concepts.md` câu 7) |
+| Classifier học phần | `results/course_supervised_baselines.csv` — CV macro-F1; đối chiếu tại **một mốc** 2023→2024; so **khớp pseudo-label STING**, không ground truth xã hội (NB CV cao nhất ≠ “tốt nhất” tổng quát — xem `qa_course_concepts.md` câu 7) |
 | Panel | 0.0→NaN (khớp Mendeley) · d7/d8 chỉ có từ 2018 · 23/37 cột bị cờ heuristic audit (`check_data.py`; chưa chứng minh đổi thang) |
-| Gán quan sát 2024 bằng lưới cố định | Slide 5 & mục 4 notebook dùng lưới dựng từ 2011–2023. Trong 61 tỉnh có đủ hai chỉ tiêu năm 2024, 48 nằm ở 21 ô dày thuộc Cụm 2 và 13 nằm trong ô thưa (tách riêng 7 tỉnh rời Cụm 2: 5 lên Biên bứt phá, 2 xuống rìa `6.1`). |
+| Gán quan sát 2024 bằng lưới cố định | Slide 7 & mục 4 notebook dùng lưới dựng từ 2011–2023. Trong 61 tỉnh có đủ hai chỉ tiêu năm 2024, 48 nằm ở 21 ô dày thuộc Cụm 2 và 13 nằm trong ô thưa (tách riêng 7 tỉnh rời Cụm 2: 5 tới nhóm phía điểm cao, 2 tới nhóm rà soát `6.1`). |
 | Kiểm chứng bên ngoài | PCI theo cụm STING: ANOVA F(3,743)=9.04, p=6.9e-06 · Kruskal–Wallis H=31.78, p=5.8e-07 · nhóm {nhiễu: 149, cụm 0: 5, cụm 1: 16, cụm 2: 577} · không chứng minh nhân quả (`results/external_validation.md`) |
-| Thí nghiệm dự báo hai điểm | Chọn Ridge theo MAE kiểm định trước 2024. Đối chiếu 59 tỉnh, MAE của 4.2 là 0,0736 vs 0,0763 và của 6.1 là 0,0641 vs 0,0683 khi giữ điểm 2023. Dự báo điểm nhận ra 0/11 tỉnh ngoài vùng dày → bổ sung kịch bản sai số (AUC = 0,816). Xem Slide 8 và mục 6.1 notebook. |
+| Thí nghiệm dự báo hai điểm | Chọn Ridge theo MAE kiểm định trước 2024. Đối chiếu 59 tỉnh, MAE của 4.2 là 0,0736 vs 0,0763 và của 6.1 là 0,0641 vs 0,0683 khi giữ điểm 2023. Dự báo điểm nhận ra 0/11 tỉnh ngoài vùng dày → phân tích bổ sung kịch bản sai số với AUC hồi cứu thăm dò 0,816, chưa phải xác suất cảnh báo. Xem Slide 10 và mục 6.1 notebook. |
 | Robustness | PCA d1–d6 (63.2% phương sai, k=1) → không nhận diện · 8 chiều 2018–2024 OFAT so với gốc (k=3, nhiễu 60.5%): f=3 → k=1/91.9%, lv=2 → k=0/100% → không nhận diện; mc=2 → k=2/10.9% vượt ngưỡng k/noise NHƯNG silhouette −0.089 (âm — tách yếu) (`results/robustness.csv`) |
 | Đối chứng thuật toán | Trên cùng 680 điểm giao (869): silhouette 0,380 (STING), 0,461 (K-means k=2), 0,274 (DBSCAN); trên 631 điểm giao (808): 0,366 vs 0,457 vs 0,258. |
 | Vai trò z-score | Dựng lại lưới theo biên từng trục giữ nguyên 869/869 chỉ số ô STING. Cùng k = 2, có 68 điểm đổi cụm K-means sau khi ghép tên cụm. |

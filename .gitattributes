@@ -4,6 +4,7 @@
 
 *.sh text eol=lf
 *.py text eol=lf
+*.mjs text eol=lf
 *.md text eol=lf
 *.yml text eol=lf
 *.txt text eol=lf
@@ -17,6 +18,7 @@
 *.jpg binary
 *.jpeg binary
 *.gif binary
+*.pdf binary
 *.pptx binary
 *.docx binary
 *.xlsx binary
@@ -27,4 +29,8 @@
 
 # Dữ liệu raw tải từ web: giữ nguyên byte (không chuẩn hóa line-ending) để
 # SHA-256 ghi trong PROVENANCE.md của từng nguồn khớp với bản trên git.
-data/raw/** -text
+data/raw/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Bản giải nén phải khớp từng byte với ZIP/MANIFEST, kể cả nguồn raw dùng CRLF.
+submissions/Nhom15_STING_PAPI/** -text
+submissions/Nhom15_STING_PAPI/data/raw/** whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

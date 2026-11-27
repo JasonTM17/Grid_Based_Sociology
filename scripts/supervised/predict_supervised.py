@@ -7,7 +7,7 @@ Hai bài toán minh hoạ (khác với `predict_demo.py` — STING.predict khôn
     Model: Ridge + RandomForest; đối chứng: carry-forward (giữ nguyên giá trị
     năm nay) và trung bình năm. Chọn model bằng CV train-only expanding origin
     2017–2022, warm-up 2011–2016; metric `r2 (expanding origin 2017–2022)`.
-    Holdout 2023 → 2024 chỉ đánh giá MỘT LẦN và không dùng để chọn model.
+    Holdout 2023 → 2024 được tách khỏi bước chọn model trong quy trình này.
 
 (2) PHỤ — PHÂN LOẠI pseudo-label: dự báo target năm t+1 có được STING fit
     đến cutoff t gán vào vùng dày hay không. Nhãn cho từng origin được dựng
@@ -487,9 +487,10 @@ def main() -> int:
     lines.append("## 1) Hồi quy — dự báo 6.1 Y tế công lập năm t+1 (bài toán chính)\n")
     lines.append(f"- Đặc trưng: 8 chỉ số năm t (sub-dim sạch thang đo: {', '.join(FEATURES[:4])}, …)")
     lines.append(
-        "- Hồi quy: chọn model bằng CV expanding origin 2017–2022 thuần train; holdout 2023→2024 đánh giá "
-        "một lần. Phân loại: đặc trưng (2 cột) và tham số STING của nhãn do predict_sweep.py chọn bằng cách "
-        "chấm coverage trên 2021–2022 — trùng 2 fold CV cuối của phân loại, nên CV score phân loại hơi lạc quan."
+        "- Hồi quy: chọn model bằng CV expanding origin 2017–2022 trên tập train; holdout 2023→2024 được tách "
+        "khỏi bước chọn model. Phân loại: hai chỉ tiêu tạo nhãn và tham số STING do predict_sweep.py chọn bằng cách "
+        "chấm coverage trên 2021–2022, có phần dữ liệu trùng với các fold CV cuối. Vì vậy CV phân loại là "
+        "kết quả phục vụ lựa chọn và khám phá, chưa phải ước lượng tổng quát hóa độc lập."
     )
     lines.append(f"- Train: {len(tr)} cặp (2011–2022) · Holdout: {len(te)} cặp")
     lines.append("")
@@ -518,6 +519,7 @@ def main() -> int:
 
     _prev = C.groupby("year_t")["y"].mean()
     _val_prev = _prev.loc[list(CLASSIFICATION_CV_YEARS)]
+    _n_val_majority_one = int((_val_prev > 0.5).sum())
     _train_majority: list[int] = []
     _always_one: list[float] = []
     for _tr_idx, _va_idx in clf_cv:
@@ -561,16 +563,18 @@ def main() -> int:
         f"accuracy {_acc_delta:+.1f} điểm % và macro-F1 {_f1_delta:+.1f} điểm %; CV dùng expanding origins "
         "2017–2022, warm-up origins 2011–2016. Đây là nhãn do STING fit tại từng cutoff sinh, không phải ground truth.\n"
         "- Nhãn phân loại phụ thuộc allowlist + tham số STING do predict_sweep.py chọn bằng cách chấm coverage "
-        f"trên đúng 2021–2022 — trùng 2 fold CV cuối, nên macro-F1 CV {_selected_clf['value_cv']:.3f} hơi lạc quan.\n"
+        f"trên 2021–2022; các fold CV cuối dùng lại một phần dữ liệu này. Macro-F1 CV "
+        f"{_selected_clf['value_cv']:.3f} có thể chịu thiên lệch lựa chọn; độ lớn thiên lệch chưa được đo.\n"
         f"- Prevalence nhãn 1 trôi mạnh theo năm: {_prev.min():.3f} ({_prev.idxmin()}) → {_prev.max():.3f} "
         f"({_prev.idxmax()}); trong mọi fold CV ({min(CLASSIFICATION_CV_YEARS)}–{max(CLASSIFICATION_CV_YEARS)}) "
-        f"lớp đa số train là {_tm_txt} còn validation luôn đa số 1 (prevalence {_val_prev.min():.0%}–"
-        f"{_val_prev.max():.0%}), nên macro-F1 CV phần lớn phản ánh việc model học drift độ phủ; baseline mù "
+        f"lớp đa số train là {_tm_txt}; lớp 1 chiếm đa số ở {_n_val_majority_one}/{len(_val_prev)} fold validation "
+        f"(prevalence {_val_prev.min():.0%}–{_val_prev.max():.0%}). Biến động tỷ lệ nhãn ảnh hưởng đến so sánh "
+        f"với baseline đa số train; baseline mù "
         f"thời gian “always dự đoán 1” đạt macro-F1 {_always1_f1:.3f} (chỉ thấp hơn LR "
         f"{_selected_clf['value_cv'] - _always1_f1:.3f}).\n"
-        f"- value_cv là best_score_ của GridSearchCV — hiệu năng CV trung bình của combo TỐT NHẤT được chọn trên "
-        f"chính các fold đó (không nested CV), nên hơi lạc quan; bias nhỏ vì lưới thô (spread điểm trong lưới "
-        f"Ridge alpha {{0.1, 1, 10}} ≈ {_ridge_spread:.3f}).\n"
+        f"- value_cv là best_score_ của GridSearchCV: hiệu năng CV trung bình của cấu hình được chọn trên "
+        f"chính các fold đó (không nested CV), nên có thể lạc quan. Chênh lệch điểm giữa các alpha Ridge "
+        f"{{0.1, 1, 10}} xấp xỉ {_ridge_spread:.3f} chỉ mô tả độ nhạy trong lưới thử, không đo được thiên lệch lựa chọn.\n"
         f"- REGRESSION_TARGET (sd_6_1) nằm trong REGRESSION_FEATURES (scripts/common/papi_pred_common.py:19-23): không "
         f"leakage thời gian (target lấy từ năm t+1) nhưng lợi thế {_impr:.1f}% so với carry-forward chủ yếu là "
         f"thông tin lag-1 của chính target — bỏ sd_6_1 khỏi features, CV R² {_selected_reg['value_cv']:.3f} → "

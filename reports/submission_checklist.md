@@ -1,13 +1,13 @@
 # Checklist nộp bài thống nhất cuối kỳ — Topic 6 · STING × PAPI
 
-_Cập nhật ngày 26/11/2026 · Nhóm 15._
+_Cập nhật ngày 27/11/2026 · Nhóm 15._
 
 ## Deliverable thống nhất của đồ án
 
-- [x] **Báo cáo DOCX tiếng Việt** — `reports/Nhom15_BaoCao_STING_PAPI.docx` (bảy chương, có Mục 5.8 **Thống kê bàn giao cho khách hàng trên 63 tỉnh**, mục lục + 13 hình + 15 bảng cập nhật bằng Word COM), đồng bộ trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip).
+- [x] **Báo cáo DOCX tiếng Việt** — `reports/Nhom15_BaoCao_STING_PAPI.docx` (49 trang khi render bằng LibreOffice, bảy chương, có Mục 5.8 **Thống kê mô tả và gợi ý rà soát 63 tỉnh**, mục lục và danh mục 13 hình, 15 bảng có số trang đã cập nhật), đồng bộ trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip).
 - [x] **Notebook phân tích thống nhất** — `notebooks/Nhom15_STING_PAPI.ipynb` chạy sạch 18 code cell từ gói giải nén (gộp demo 3×3 giữa kỳ, 240 điểm giả lập, phân cụm PAPI, thống kê bàn giao 63 tỉnh, dự báo, kiểm chứng ngoại lai & phụ lục học phần). [Kết quả chạy lại](../submissions/verification.json)
 - [x] **Notebook tiền xử lý PAPI** — `notebooks/Nhom15_TienXuLy_PAPI.ipynb` chạy sạch 9 code cell trực tiếp từ 14 workbook PAPI gốc qua `PREPROCESSING_PIPELINE` 6 bước.
-- [x] **Slide trình bày thống nhất (11 trang)** — `slides/Nhom15_STING_PAPI.pptx` (gồm Slide 6–7 thống kê bàn giao 63 tỉnh cho khách hàng và Slide 11 cảm ơn; sinh bằng `python scripts/deliverables/build_slides.py`).
+- [x] **Slide trình bày thống nhất (15 trang)** — `slides/Nhom15_STING_PAPI.pptx` (10 bảng, hai biểu đồ với workbook dữ liệu nhúng; Slide 7–9 quan sát 2024, thống kê 63 tỉnh và dịch chuyển; Slide 15 cảm ơn; sinh bằng `python scripts/deliverables/build_slides.py`).
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/data/check_data.py` → PASS.
 - [x] **Gỡ bỏ phân mảnh & thư mục `study/`** — bỏ các bản tách giữa kỳ/cuối kỳ rời, thư mục `study/` và `notebooks/exploratory/` để giữ 1 cấu trúc đồ án hoàn thiện duy nhất.
 
@@ -30,6 +30,14 @@ _Cập nhật ngày 26/11/2026 · Nhóm 15._
 - [x] Model lưu local `models/` (STING pkl + scaler JSON + joblib Ridge/RF)
 - [x] Panel v1 khóa với hash (`reports/panel_lock.md`)
 
+## Phạm vi kiểm tra ngày 27/11/2026
+
+- Đã duyệt toàn bộ 49 trang báo cáo và 15 slide qua bản render; mục lục Word có 82 mục điều hướng. Hình nhóm tỉnh, bảng, ghi chú slide và phần diễn giải notebook dùng cùng cách gọi mô tả.
+- Môi trường cục bộ dùng Python 3.14.2 và đúng các phiên bản trong `requirements-dev.txt`: **252 test đạt**, độ bao phủ `src/` **95%**. Một test mở kernel Jupyter tiêu chuẩn được để lại cho CI vì môi trường cục bộ từ chối bind socket; không sửa hoặc nới điều kiện test đó.
+- **41/41 mục smoke demo đạt**, Ruff đạt, 239 tham chiếu Q&A không có đường dẫn lỗi. Excel giữ nguyên 25 sheet, 17.598 ô số và 24 công thức; chỉ đồng bộ chú thích.
+- ZIP mặc định có 141 file được kê trong manifest, đủ các đầu vào để chạy. PDF báo cáo PAPI gốc được giữ trong repo và có thể kèm thêm bằng `--include-reference-pdf`. Đã giải nén vào thư mục riêng và thực thi lại **9 + 18 ô mã** bằng `InProcessKernelManager`, mỗi notebook trong một subprocess mới; xóa outputs cũ, bật guard chặn đọc repo gốc/Downloads, không có error hoặc stderr trong ô. [Biên bản](../submissions/verification.json) ghi rõ engine và phạm vi này, không coi đó là lượt replay bằng kernel ngoài tiến trình.
+- [GitHub Actions](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml) chạy toàn bộ 254 test (gồm test bổ sung về PDF tham khảo tùy chọn) và replay bằng kernel Jupyter tiêu chuẩn trên Ubuntu, Windows, macOS. ZIP/mirror giữ nguyên byte qua checkout; cache font được tạo trước khi chạy kernel để thông báo thiết lập lần đầu không lọt vào ô notebook. Gate lỗi/stderr vẫn được giữ nguyên.
+
 ## Đã xong giữa kỳ & Còn lại cuối kỳ (CON NGƯỜI thực hiện)
 
 - [x] Báo cáo xong giữa kỳ + ghi nhận phản hồi thầy tại `reports/on-tap/midterm_feedback.md` (*"em phân cụm vậy nhưng cuối cùng thống kê với khách hàng cái gì á"*) → đã bổ sung đầy đủ trước khi chốt bản thống nhất.
@@ -48,13 +56,13 @@ python scripts/deliverables/build_submission_packages.py --verify
 
 Đầu ra tại `submissions/`:
 
-- `Nhom15_STING_PAPI.zip` (và thư mục giải nén sẵn `Nhom15_STING_PAPI/`) đặt báo cáo `Nhom15_BaoCao_STING_PAPI.docx`, slide `Nhom15_STING_PAPI.pptx`, bộ đôi notebook `Nhom15_STING_PAPI.ipynb` & `Nhom15_TienXuLy_PAPI.ipynb`, `HUONG-DAN.txt`, `requirements.txt` cùng `src/`, `data/`, `scripts/`, `models/`, `results/`, `reports/` ở cấp đầu.
-- `SHA256SUMS.txt`: hash gói ZIP; trong thư mục giải nén có `MANIFEST.json` ghi hash/vai trò từng file.
+- `Nhom15_STING_PAPI.zip` (và thư mục giải nén sẵn `Nhom15_STING_PAPI/`) đặt báo cáo `Nhom15_BaoCao_STING_PAPI.docx`, slide `Nhom15_STING_PAPI.pptx`, bộ đôi notebook `Nhom15_STING_PAPI.ipynb` & `Nhom15_TienXuLy_PAPI.ipynb`, `HUONG_DAN.txt`, `requirements.txt` cùng `src/`, `data/`, `scripts/`, `models/`, `results/`, `reports/` ở cấp đầu.
+- `SHA256SUMS.txt`: hash gói ZIP; trong thư mục giải nén có `results/MANIFEST.json` ghi hash/vai trò từng file.
 - `verification.json` ghi kết quả chạy lại cả hai notebook từ gói giải nén.
 
 Verifier xóa output cũ ở bản sao notebook, dùng kernel mới, kiểm tra đếm lần chạy
 và chặn đọc kho mã gốc. Cách mở tệp và chạy lại được ghi trong [hướng dẫn nộp bài](../submissions/HUONG-DAN.txt).
-Kịch bản 11 slide: `reports/on-tap/presentation_script.md`.
+Kịch bản 15 slide: `reports/on-tap/presentation_script.md`.
 
 ## Git tag
 

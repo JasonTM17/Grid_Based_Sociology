@@ -13,7 +13,7 @@ Bốn phần:
   2. Kiểm tra PHỤ Top-30 2023–2024 (60 ô) — cảnh báo chọn mẫu: nhà xuất bản
      chỉ công bố tỉnh tốt; tập Top-30 hai năm không cùng tập.
   3. Mật độ cơ sở y tế/1.000 dân theo cụm năm 2020 (ODM health + dân số GSO),
-     ghi chú bắt buộc "10 tỉnh count=0 là 0-thật (nguồn điểm không phủ)".
+     ghi chú "10 tỉnh count=0 không có điểm ghi nhận trong nguồn, không suy ra không có cơ sở y tế".
   4. Bối cảnh vĩ mô WDI 2010–2024 (panel 2×2) — chuỗi không đều phía nguồn,
      KHÔNG nội suy; và GRDP/người theo cụm cửa sổ 2018–2024 (2024 = Sơ bộ).
 
@@ -603,10 +603,12 @@ def main() -> int:
         f"- **Kruskal–Wallis** (phi tham số, có sửa tie): H = {t_main['h']:.4f}, "
         f"{fmt_p(t_main['p_kw'])}; eta² = {t_main['eta_sq']:.4f}.\n"
         "- Diễn giải thận trọng: cụm 0 (n=5) và cụm 1 (n=16) quá nhỏ để tự kết "
-        "luận; cặp tương phản đáng tin là **nhiễu vs cụm 2**. PCI khác biệt có ý "
-        "nghĩa thống kê giữa các nhóm → cấu trúc cụm STING tương ứng với một thước "
-        "đo ĐỘC LẬP chưa từng dùng khi học — kiểm chứng bên ngoài độc lập, không "
-        "chứng minh nhân quả.\n"
+        "luận. Nhiễu và cụm 2 có cỡ mẫu lớn hơn, nhưng vẫn gồm các quan sát lặp "
+        "theo tỉnh qua nhiều năm. Các p-value gộp chưa xử lý phụ thuộc trong tỉnh, "
+        "xu hướng năm và nhiều phép so sánh, nên chỉ dùng thăm dò. Eta² mô tả tỷ lệ "
+        "biến thiên giữa nhóm trong mẫu. PCI là nguồn khác với PAPI và không dùng "
+        "để học lưới; điều này không làm các quan sát độc lập thống kê, không xác nhận "
+        "nhãn cụm là đúng và không chứng minh nhân quả.\n"
         f"- Hình: `results/figs/external_pci_by_cluster.png`.\n"
     )
     md.append("## 2) Kiểm tra PHỤ: Top-30 2023–2024 — có cảnh báo chọn mẫu\n")
@@ -637,9 +639,9 @@ def main() -> int:
     ].to_markdown(index=False))
     md.append("")
     md.append(
-        f"- **10 tỉnh `count = 0` là 0-thật** (nguồn điểm không phủ tỉnh đó, KHÔNG "
-        f"phải lỗi map tên — dump 2.169 điểm đã point-in-polygon với bộ alias tên "
-        f"tỉnh đã kiểm tra): {', '.join(zero10)}.\n"
+        f"- **10 tỉnh `count = 0` không có điểm ghi nhận trong nguồn** (dump 2.169 "
+        f"điểm đã point-in-polygon với bộ alias tên tỉnh đã kiểm tra): {', '.join(zero10)}. "
+        "Đây là số đếm của bộ dữ liệu, không chứng minh các tỉnh không có cơ sở y tế.\n"
         "- Snapshot một năm duy nhất (2020), đếm số ĐIỂM không phải số giường → "
         "chỉ dùng làm external check một lần, không đưa vào feature.\n"
         f"- Hình: `results/figs/external_health_density_2020.png`.\n"

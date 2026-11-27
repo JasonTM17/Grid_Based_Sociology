@@ -19,7 +19,7 @@ So sánh ba quy tắc trên **cùng 61 tỉnh đủ hai chỉ tiêu quan sát n�
 ## Quy trình đề xuất cho khách hàng
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["Đối chiếu địa giới và quan sát"] --> B{"Đủ dữ liệu so sánh?"}
     B -->|Không| C["Xác minh nguồn; chưa xếp nhóm"]
     B -->|Có| D["Xem vị trí lưới, điểm 6.1 và lịch sử"]
