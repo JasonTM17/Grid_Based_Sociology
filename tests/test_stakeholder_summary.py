@@ -73,6 +73,8 @@ def test_stakeholder_published_artifacts_match_current_data():
         "| Vĩnh Phúc | — | — |",
         "| Tiền Giang | — | — |",
         "rủi ro biến động",
+        "Kịch bản ngoài vùng năm 2024",
+        "không phải xác suất đã hiệu chỉnh hay dự báo cho năm sau 2024",
     ):
         assert required in md_text
     assert "NaN" not in md_text

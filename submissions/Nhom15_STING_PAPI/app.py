@@ -1359,7 +1359,7 @@ with client_tab:
                             "Năm C2", width=72, alignment="right"
                         ),
                         "risk_outside_scenario_share": st.column_config.TextColumn(
-                            "Rủi ro trượt", width=92, alignment="right"
+                            "Kịch bản 2024", width=92, alignment="right"
                         ),
                         "grdp_2024_mil_vnd": st.column_config.TextColumn(
                             "GRDP 24 (tr.đ)", width=112, alignment="right"
@@ -1416,7 +1416,7 @@ with client_tab:
                         ),
                         "transition_2023_2024": st.column_config.TextColumn("Dịch chuyển", width=195),
                         "risk_outside_scenario_share": st.column_config.TextColumn(
-                            "Rủi ro trượt", width=92, alignment="right"
+                            "Kịch bản 2024", width=92, alignment="right"
                         ),
                         "grdp_2024_mil_vnd": st.column_config.TextColumn(
                             "GRDP 24 (tr.đ)", width=112, alignment="right"
@@ -1435,14 +1435,14 @@ with client_tab:
             st.caption(
                 f"Top 5 chuẩn tham chiếu 14/14 năm trong Cụm 2: "
                 f"{', '.join(benchmarks_14y['province_vi'].tolist())}. "
-                f"Top 3 cảnh báo biến động vùng: "
+                f"Top 3 tỉ lệ kịch bản ngoài vùng (hồi kiểm 2023→2024): "
                 + ", ".join(
                     f"{r['province_vi']} ({100.0 * r['risk_outside_scenario_share']:.1f}%)"
                     if pd.notna(r["risk_outside_scenario_share"])
                     else f"{r['province_vi']} (—)"
                     for _, r in watchlist.head(3).iterrows()
                 )
-                + "."
+                + ". Tỉ lệ kịch bản không phải xác suất dự báo."
             )
 
             st.markdown("#### Phiếu chẩn đoán từng tỉnh (In PDF / Bàn giao địa phương)")

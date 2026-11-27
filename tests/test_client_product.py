@@ -91,6 +91,9 @@ def test_build_province_scorecard_html_covers_groups_missing_and_escaping():
         )
         assert expected_name in out
         assert "2024" in out
+        assert "Kịch bản ngoài vùng 2024" in out
+        assert "Hồi kiểm 2023→2024; không phải xác suất" in out
+        assert "năm tới" not in out
         assert "Chỉ mô tả bối cảnh kinh tế–xã hội độc lập" in out
         assert "<script>" not in out
         assert "https://" not in out

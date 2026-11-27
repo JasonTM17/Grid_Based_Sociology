@@ -563,7 +563,7 @@ Trả lời trực tiếp yêu cầu thực tiễn từ phía giảng viên và 
 1. **Tách hai cực đối lập bên trong 13 tỉnh mang mã `-1`:** dùng mốc phân vị của Cụm 2 năm 2024 (`trung vị 4.2 = 2,032`, `trung vị 6.1 = 1,963`, ngưỡng rìa dưới `Q25 − 0,5 × IQR = 1,879` trên `6.1`) để phân loại toàn bộ 63 tỉnh thành **4 nhóm hành động vận hành rõ ràng**, không gom chung các tỉnh dẫn đầu xuất sắc với các tỉnh đang tụt điểm y tế công lập.
 2. **Xác định 5 tỉnh chuẩn tham chiếu bền vững 14/14 năm (2011–2024)** trong Cụm 2 (`Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long`) và 7 tỉnh trong Cụm 2 nằm sát biên dưới Y tế `6.1` cần giữ nhịp (`TP. Hồ Chí Minh, Đồng Nai...`).
 3. **Phân tách hướng dịch chuyển 2023 → 2024** (`5` tỉnh rời Cụm 2 lên *biên bứt phá* vs `2` tỉnh rời Cụm 2 xuống *rìa ưu tiên Y tế 6.1*).
-4. **Danh sách cảnh báo sớm biến động vùng** (`outside_scenario_share`) kết hợp **bối cảnh GRDP/người 2024** — cho thấy rõ nghịch lý đô thị–công nghiệp (nhiều đầu tàu GRDP cao nhưng hài lòng y tế công `6.1` giảm sâu)."""))
+4. **Kịch bản ngoài vùng năm 2024** (`outside_scenario_share`) là chỉ số xếp hạng hồi kiểm 2023→2024, không phải xác suất hay dự báo sau 2024. Chênh lệch GRDP/người và điểm 6.1 chỉ mang tính mô tả."""))
 
     cd(nbf.v4.new_code_cell("""from scripts.analysis.stakeholder_summary import build_stakeholder_tables
 
@@ -638,7 +638,7 @@ for fig_name in (
     md(nbf.v4.new_markdown_cell("""## Phần 7. Kết luận tổng hợp và giới hạn diễn giải
 
 1. **Ý nghĩa thuật toán:** STING rút gọn (`16 × 16`, `min_count = 5`, kề 4 hướng) tách rõ vùng lõi đa số ổn định (`Cụm 2`) khỏi các ô biên mật độ thưa (`-1`), giữ nguyên hoàn toàn cấu trúc ô dưới chuẩn hóa tuyến tính (`869/869` ô bất biến).
-2. **Giá trị bàn giao cho khách hàng:** Thay vì chỉ trả về các mã cụm thô, hệ thống thống kê phân tách 63 tỉnh năm 2024 thành 4 nhóm hành động cụ thể (**48 Vùng lõi ổn định** với 5 chuẩn 14/14 năm, **8 Biên bứt phá vượt chuẩn**, **5 Cần ưu tiên Y tế công lập 6.1**, **2 Thiếu dữ liệu**), gắn kèm quỹ đạo 2023→2024, cảnh báo `outside_scenario_share` và đối chiếu GRDP/PCI độc lập.
+2. **Giá trị bàn giao cho khách hàng:** Thay vì chỉ trả về các mã cụm thô, hệ thống thống kê phân tách 63 tỉnh năm 2024 thành 4 nhóm hành động cụ thể (**48 Vùng lõi ổn định** với 5 chuẩn 14/14 năm, **8 Biên bứt phá vượt chuẩn**, **5 Cần ưu tiên Y tế công lập 6.1**, **2 Thiếu dữ liệu**), gắn kèm quỹ đạo 2023→2024, xếp hạng kịch bản ngoài vùng năm 2024 (`outside_scenario_share`) và đối chiếu GRDP/PCI độc lập.
 3. **Giới hạn trung thực:** Số cụm phụ thuộc tham số lưới/ngưỡng; `Cụm 0` (`n=5`) và `Cụm 1` (`n=16`) quá nhỏ nên chỉ mang tính mô tả; dữ liệu đối chiếu và một năm holdout `2023→2024` chưa đủ để kết luận quan hệ nhân quả hay khả năng tổng quát hóa dài hạn.
 
 **Nguồn:** Wang, Yang & Muntz (VLDB 1997), PAPI (CECODES/VFF-CRT/RTA/UNDP), Mendeley DOI `10.17632/wbk42j9wc8.1`, VCCI–USAID PCI, GSO PX-Web & OD Mekong."""))

@@ -31,7 +31,7 @@ Toàn bộ sản phẩm giữa kỳ và cuối kỳ đã được gộp thành *
 
 - **Biên bứt phá vượt chuẩn (8 tỉnh):** Hà Tĩnh, Quảng Ninh, Bình Thuận, Bà Rịa – Vũng Tàu, Sóc Trăng, Tây Ninh, Cà Mau, An Giang (trung vị `4.2 = 2.235`, `6.1 = 1.963`, GRDP `87.38` tr.đ/người) — không đánh đồng là "yếu" dù mang mã `−1`, cần khảo sát chia sẻ điển hình tốt.
 - **Vùng lõi ổn định — Cụm 2 (48 tỉnh):** Gồm **5 tỉnh chuẩn tham chiếu 14/14 năm** (`0` năm nhiễu 2011–2024: Phú Thọ, Đà Nẵng, Bình Định, Ninh Thuận, Vĩnh Long) và 7 tỉnh vùng rìa dưới `6.1` cần giữ nhịp đầu tư.
-- **Ưu tiên cải thiện Y tế công lập 6.1 (5 tỉnh):** Hà Nội (`1.686`), Cần Thơ (`1.698`), Gia Lai (`1.787`), Long An (`1.807`), Bình Dương (`1.808`) — vạch rõ **nghịch lý đô thị–y tế**: GRDP/người trung vị đạt `104.26` tr.đ (cao hơn vùng lõi `80.97` tr.đ) nhưng điểm hài lòng Y tế `6.1` tụt sâu.
+- **Ưu tiên cải thiện Y tế công lập 6.1 (5 tỉnh):** Hà Nội (`1.686`), Cần Thơ (`1.698`), Gia Lai (`1.787`), Long An (`1.807`), Bình Dương (`1.808`) — GRDP/người trung vị đạt `104.26` triệu đồng (vùng lõi `80.97` triệu đồng), nhưng điểm PAPI Y tế công lập `6.1` thấp. Đây là đối chiếu mô tả, không chứng minh quá tải.
 - **Thiếu dữ liệu 2024 (2 tỉnh):** Vĩnh Phúc, Tiền Giang (cần kiểm toán thu thập dữ liệu, không nội suy).
 - **Phân tách 7 tỉnh rời Cụm 2 (2023→2024):** 5 tỉnh đi lên Biên bứt phá; chỉ 2 tỉnh (Gia Lai, Long An) tụt xuống rìa `6.1`, kèm Top cảnh báo trượt vùng theo kịch bản sai số (AUC `0.816`).
 

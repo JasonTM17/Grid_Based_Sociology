@@ -16,10 +16,10 @@ Bản thuyết trình hợp nhất phần cơ chế STING (giữa kỳ), kết q
 | 4 | 3:25–5:20 | Phân cụm PAPI 808 train / 869 toàn kỳ (1 cụm lớn `629` hoặc `677` điểm), phản biện 162/171 nhiễu nằm trong `|z| ≤ 3`, so silhouette cùng 680 điểm giao (0,380 vs 0,461 vs 0,274) và bất biến 869/869 ô dưới z-score. |
 | 5 | 5:20–6:45 | Quan sát năm 2024 trên lưới cố định 2011–2023: `48/61` tỉnh vào Cụm 2, `13` ô thưa, `2` thiếu điểm; truy vết ca Lạng Sơn từ `(13,9)` sang `(12,10)`. |
 | 6 | 6:45–8:45 | **Thống kê bàn giao khách hàng (1/2):** Biểu đồ 4 vùng hành động trên 63 tỉnh 2024 (`stakeholder_quadrants_2024.png`), chứng minh không đánh đồng `13` tỉnh mã `−1` là kém. |
-| 7 | 8:45–11:15 | **Thống kê bàn giao khách hàng (2/2):** Bảng tổng hợp 4 nhóm (`8` Biên bứt phá / `48` Vùng lõi gồm `5` chuẩn 14/14 năm / `5` Ưu tiên Y tế `6.1` / `2` Thiếu DL), tách 7 tỉnh rời Cụm 2 (5 lên biên, 2 xuống rìa `6.1`), watchlist trượt vùng và nghịch lý GRDP cao (`104,3` tr) – Y tế `6.1` thấp (`1,69–1,81`). |
-| 8 | 11:15–12:35 | Thí nghiệm dự báo bổ trợ Ridge + kịch bản sai số CV 2024 (`AUC = 0,816` xếp hạng tỉnh trượt vùng khi dự báo điểm bị co về trung bình). |
+| 7 | 8:45–11:15 | **Thống kê bàn giao khách hàng (2/2):** Bảng tổng hợp 4 nhóm (`8` Biên bứt phá / `48` Vùng lõi gồm `5` chuẩn 14/14 năm / `5` Ưu tiên Y tế `6.1` / `2` Thiếu DL), tách 7 tỉnh rời Cụm 2 (5 lên biên, 2 xuống rìa `6.1`), xếp hạng kịch bản ngoài vùng 2024 (`AUC = 0,816`) và đối chiếu mô tả GRDP cao (`104,3` tr) – Y tế `6.1` thấp (`1,69–1,81`). |
+| 8 | 11:15–12:35 | Thí nghiệm dự báo bổ trợ Ridge + kịch bản sai số CV 2024 (`AUC = 0,816` xếp hạng tỉnh ngoài vùng khi dự báo điểm bị co về trung bình). |
 | 9 | 12:35–13:55 | Đối chứng dữ liệu độc lập (PCI, GRDP, Y tế ODM, Nghèo GSO) & kiểm tra độ bền đa chiều PCA/8D OFAT. |
-| 10 | 13:55–14:45 | Kết luận giá trị thuật toán, giá trị khách hàng, giới hạn trung thực & 2 nhánh đề xuất cải thiện tiếp theo (cân bằng lớp CV `0,524`, Conformal, bản đồ Choropleth & PAPI 2025). |
+| 10 | 13:55–14:45 | Kết luận giá trị thuật toán, giá trị khách hàng, giới hạn trung thực & các hướng thăm dò mở rộng (`results/future_work.md`, chưa duyệt GV: backtest cuốn chiếu `2019–2024`, Moran's I `6.1 = 0,183`, quỹ đạo 63 tỉnh, cân bằng lớp CV `0,524`), bản đồ Choropleth 63 tỉnh trên Streamlit & PAPI 2025. |
 | 11 | 14:45–15:00 | Cảm ơn thầy và các bạn, chuyển sang hỏi đáp. |
 
 Ghi người trình bày và thời gian đo được vào [nhật ký luyện tập](rehearsal_log.md).

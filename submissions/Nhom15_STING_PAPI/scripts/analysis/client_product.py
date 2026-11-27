@@ -221,7 +221,7 @@ def build_action_choropleth_figure(
         "Nhóm: %{customdata[1]}<br>"
         "Phân tầng: %{customdata[2]}<br>"
         "4.2 Tham nhũng: %{customdata[3]} · 6.1 Y tế: %{customdata[4]}<br>"
-        "Số năm Cụm 2: %{customdata[5]}/14 · Rủi ro trượt: %{customdata[6]}<br>"
+        "Số năm Cụm 2: %{customdata[5]}/14 · Kịch bản ngoài vùng 2024: %{customdata[6]}<br>"
         "GRDP 24: %{customdata[7]} · Dịch chuyển: %{customdata[8]}"
         "<extra></extra>"
     )
@@ -530,9 +530,9 @@ def build_province_scorecard_html(
         <div class="kpi-sub">{e(years_scored_str)}</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">Rủi ro trượt vùng năm tới</div>
+        <div class="kpi-label">Kịch bản ngoài vùng 2024</div>
         <div class="kpi-val">{e(risk_str)}</div>
-        <div class="kpi-sub">Tỉ lệ kịch bản ngoài vùng dày</div>
+        <div class="kpi-sub">Hồi kiểm 2023→2024; không phải xác suất</div>
       </div>
     </section>
 

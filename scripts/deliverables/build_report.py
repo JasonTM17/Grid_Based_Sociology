@@ -972,11 +972,11 @@ bullets([
      f"{STAKE_TRANS.get('Rời Cụm 2 lên biên bứt phá', 0)} tỉnh dịch chuyển theo hướng tích cực lên "
      f"Biên bứt phá vượt chuẩn ({_up_list}), chỉ "
      f"{STAKE_TRANS.get('Rời Cụm 2 xuống rìa Y tế 6.1', 0)} tỉnh rơi xuống rìa ưu tiên Y tế 6.1 ({_down_list})."),
-    ("Cảnh báo sớm biến động vùng & nghịch lý đô thị–y tế.",
+    ("Kịch bản ngoài vùng 2024 và đối chiếu GRDP–y tế.",
      f"Top 5 tỉnh có tỉ lệ kịch bản rời vùng dày cao nhất năm 2024: {_watch_top5}. Đáng chú ý, "
      f"nhóm {len(_prio_df)} tỉnh ưu tiên Y tế 6.1 ({_prio_list}) có trung vị "
      f"GRDP/người 2024 đạt {_dec(_prio_grdp, 2)} triệu đồng (cao hơn vùng lõi Cụm 2: {_dec(_core_grdp, 2)} triệu đồng) nhưng điểm "
-     f"y tế công lập 6.1 tụt xuống {_prio_61_range} — phản ánh áp lực quá tải dịch vụ y tế tại các đô thị–công nghiệp."),
+     f"y tế công lập 6.1 tụt xuống {_prio_61_range} — đây là chênh lệch mô tả, không chứng minh quá tải hay quan hệ nhân quả. Tỉ lệ kịch bản là kết quả hồi kiểm 2023→2024, không phải xác suất hay dự báo sau 2024."),
 ])
 
 h2("5.9. Kiểm thử & tái lập")
@@ -1061,6 +1061,7 @@ bullets([
     ("Nhiều holdout.", "backtest cuốn chiếu 2015→2024 — độ tin cậy dự báo cao hơn."),
     ("Spatial.", "thêm tự tương quan không gian (láng giềng) — GeoJSON CC-BY-SA 4.0 đã có."),
     ("Định tính.", "phỏng vấn sâu 3–5 tỉnh ngoại vi để kiểm tra giả thuyết “hai tốc độ” quản trị."),
+    ("Thực nghiệm thăm dò bước đầu (chưa duyệt GV).", "Kịch bản độc lập `scripts/analysis/future_work.py` (`results/future_work.md`) đã chạy thử trên dữ liệu đóng băng: E1 chuẩn hóa hạng theo năm ra 25 cụm, 54,1% nhiễu, ARI non-noise = 0,0085; E2 quỹ đạo OLS 63 tỉnh cho STING 1 cụm / 2 nhiễu (K-Means k=3 silhouette = 0,3430); E3 backtest cuốn chiếu 6 mốc 2019–2024 Ridge thắng MAE 4/6 năm nhưng out_recall TB 0,063 vs 0,247; E4 Moran's I năm 2024 đạt I = 0,1834 (p = 0,0240) ở sd_6_1."),
 ])
 
 
@@ -1073,7 +1074,7 @@ bullets([
     ("Rà soát thang đo.", "Bước sàng lọc đánh dấu 23/37 chỉ tiêu để đối chiếu với workbook. Việc đối chiếu giúp chọn đầu vào và giới hạn cách diễn giải các thay đổi theo thời gian."),
 ])
 h2("7.2. Hướng phát triển")
-body("Xem 6.7 — trọng tâm: (1) rank-normalization xuyên năm; (2) quỹ đạo tỉnh; (3) backtest cuốn chiếu; (4) phân cụm có ràng buộc không gian; (5) nghiên cứu định tính bổ trợ. Ngoài ra, bản đồ choropleth đầy đủ (plotly + GeoJSON) và dashboard tương tác là bước trực quan tiếp theo.")
+body("Xem 6.7 — trọng tâm: (1) rank-normalization xuyên năm; (2) quỹ đạo tỉnh; (3) backtest cuốn chiếu; (4) tự tương quan không gian & phân cụm có ràng buộc láng giềng; (5) nghiên cứu định tính bổ trợ (kết quả thực nghiệm thăm dò chi tiết ghi ở results/future_work.md, trạng thái chưa duyệt GV). Bản đồ Choropleth 63 tỉnh và Phiếu chẩn đoán đã được tích hợp trên app.py (tab Thống kê khách hàng).")
 h2("7.3. Lời cuối")
 body("Đồ án không “tạo ra” một cấu trúc cụm đẹp nếu dữ liệu không có nó; đồ án cung cấp: (i) một biến thể grid-based dựa trên STING, đã kiểm thử trong phạm vi cài đặt công bố; (ii) quy trình dữ liệu có audit thang đo và lựa chọn không dùng holdout 2024; (iii) báo cáo trung thực cả robustness mở rộng chiều (PCA âm tính; nhánh 8 chiều OFAT — mc=2 vượt ngưỡng k/noise với silhouette âm, các nhánh còn lại không nhận diện) lẫn kết quả dương tính. Kết quả không chứng minh cấu trúc xã hội hay quan hệ nhân quả.")
 h2("7.4. Khai báo sử dụng công cụ hỗ trợ")

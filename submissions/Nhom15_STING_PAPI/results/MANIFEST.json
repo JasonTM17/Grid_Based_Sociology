@@ -11,20 +11,20 @@
     },
     {
       "path": "Nhom15_BaoCao_STING_PAPI.docx",
-      "bytes": 3267111,
-      "sha256": "be8a1244df234842737219eab15a9ab4d27eaffb12bbab2a0f550597eff5e84c",
+      "bytes": 3267586,
+      "sha256": "ad3b6787ecdca95e2209173d146872d12b8679461e7a1358b9d52820254987c9",
       "role": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)"
     },
     {
       "path": "Nhom15_STING_PAPI.ipynb",
-      "bytes": 6862659,
-      "sha256": "b0d3db87ebf7a485498726b39c7b5df0555400e83aa788eb415b69fd61881bfd",
+      "bytes": 6862654,
+      "sha256": "fd16e1bd6e239a5cf7af71883a3eb377ab3b4ecfb05a798a7047df1f4e86eecb",
       "role": "Notebook phân tích STING × PAPI & Thống kê khách hàng đã lưu kết quả"
     },
     {
       "path": "Nhom15_STING_PAPI.pptx",
-      "bytes": 1064958,
-      "sha256": "095469d5ba2856fb023926e5a8b4eb7c0e83c689550129742a2d17c7a392dac3",
+      "bytes": 1064927,
+      "sha256": "55187687c3c11c1cf9b633ca6533e861c102aa192dd5c4fe917158ffbe0ca4ee",
       "role": "Slide trình bày thống nhất (11 trang 16:9 kèm ghi chú)"
     },
     {
@@ -35,8 +35,8 @@
     },
     {
       "path": "app.py",
-      "bytes": 74321,
-      "sha256": "a82a37a0430602810524b71deedf13a191084286bdebe72ee0d31ecb9cde58c2",
+      "bytes": 74411,
+      "sha256": "2a59e6b4c9d0f164798a06623599d1da90dc6b4a9cddef71ccae5dff42cd9017",
       "role": "Ứng dụng dashboard Streamlit tương tác (6 tab, gồm Thống kê khách hàng)"
     },
     {
@@ -341,8 +341,8 @@
     },
     {
       "path": "results/KetQua_STING_PAPI.xlsx",
-      "bytes": 191048,
-      "sha256": "8b6f0a3b6c45c055f3582e749aa56ab5b2c57097d20ee6df5aae1090eb65b4a9",
+      "bytes": 191051,
+      "sha256": "c6ba7419315e23d1bc9cae3e75941b955cba9e8aef38170d1e3b4a0bb4ed9699",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -647,14 +647,14 @@
     },
     {
       "path": "results/stakeholder_province_summary_2024.csv",
-      "bytes": 26001,
-      "sha256": "16b5061d2ef8f8deda3e29fe0ebf34865610d30da4fa517848b753a0ad5de824",
+      "bytes": 26055,
+      "sha256": "3634f79eae16bb06c4747a3f2559e3dfddc7c1d207172251eab2962bb10e6ddf",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/stakeholder_summary.md",
-      "bytes": 9867,
-      "sha256": "9ae06bee7ce1b0750d2e209dc6e13d1748f9a53889ec26cb8cddd2b218980229",
+      "bytes": 9959,
+      "sha256": "1f705206e0efa0dc939d67c98551e6e9ccb7ad0835769b301852df1a743d032d",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -683,8 +683,8 @@
     },
     {
       "path": "scripts/analysis/client_product.py",
-      "bytes": 19977,
-      "sha256": "c716410e00244430871face3ac5cd2703b92e8d813950d6b10d58a29c39311e5",
+      "bytes": 19997,
+      "sha256": "a6cbf16237592b33c31db9273f2cb2bff9212a72bd30ba02ef1c7daa606893b9",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -743,8 +743,8 @@
     },
     {
       "path": "scripts/analysis/stakeholder_summary.py",
-      "bytes": 42636,
-      "sha256": "99e9e1587bc987aaeffda9966825040de750cfa560bfdffa1773efa1e569ec30",
+      "bytes": 42733,
+      "sha256": "9a40df1528c68f378a871c59f8bbd6a276ddbc06017d6f4b9c104df237c4b8f8",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {

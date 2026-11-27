@@ -599,7 +599,7 @@ header(s, "THỐNG KÊ BÀN GIAO KHÁCH HÀNG (1/2)", "Biến mã kỹ thuật (
 kpi_specs = [
     ("Biên bứt phá vượt chuẩn", "Biên bứt phá vượt chuẩn", "4.2 > med lõi · khảo sát nhân rộng", BLUE, SOFT_BLUE),
     ("Vùng lõi ổn định (Cụm 2)", "Vùng lõi ổn định (Cụm 2)", f"Gồm {len(STAKE_14Y)} tỉnh chuẩn 14/14 năm", GREEN, SOFT_GREEN),
-    ("Ưu tiên cải thiện Y tế 6.1", "Ưu tiên cải thiện Y tế 6.1", f"6.1 < {_dec(STAKE_BENCH['lower_61_fence'], 3)} · quá tải đô thị", CORAL, SOFT_CORAL),
+    ("Ưu tiên cải thiện Y tế 6.1", "Ưu tiên cải thiện Y tế 6.1", f"6.1 < {_dec(STAKE_BENCH['lower_61_fence'], 3)}", CORAL, SOFT_CORAL),
     ("Thiếu dữ liệu 2024", "Thiếu dữ liệu 2024", "Kiểm toán thu thập · không nội suy", GREY, LIGHT),
 ]
 for idx, (grp_key, title_txt, sub_txt, acc_col, fill_col) in enumerate(kpi_specs):
@@ -628,14 +628,14 @@ note(s, "Slide 6 trả lời trực diện câu hỏi của giảng viên: phân
 
 # --- SLIDE 7: THỐNG KÊ BÀN GIAO CHO KHÁCH HÀNG (2/2) ---
 s = slide_new()
-header(s, "THỐNG KÊ BÀN GIAO KHÁCH HÀNG (2/2)", "Bảng chỉ tiêu bàn giao, phân tách dịch chuyển & nghịch lý đô thị–y tế", 7,
+header(s, "THỐNG KÊ BÀN GIAO KHÁCH HÀNG (2/2)", "Bảng chỉ tiêu bàn giao, phân tách dịch chuyển & đối chiếu GRDP–y tế", 7,
        "results/stakeholder_province_summary_2024.csv · 63 tỉnh năm 2024")
 stake_df = STAKE["summary"]
 stake_rows = [("Nhóm hành động (63 tỉnh 2024)", "Tỉnh", "Med 4.2 / 6.1", "GRDP 24", "Khuyến nghị hành động cho khách hàng")]
 rec_short = {
     "Biên bứt phá vượt chuẩn": "Khảo sát điển hình tốt để chia sẻ kinh nghiệm (không gộp là 'yếu').",
     "Vùng lõi ổn định (Cụm 2)": f"Duy trì cân bằng; theo dõi {len(stake_df.loc[stake_df['action_subtier'].eq('Trong cụm nhưng rìa dưới Y tế 6.1')])} tỉnh rìa dưới 6.1 & {len(STAKE_14Y)} chuẩn 14/14 năm.",
-    "Ưu tiên cải thiện Y tế 6.1": "Chẩn đoán lệch pha quá tải y tế công 6.1 dù 4.2 & GRDP cao.",
+    "Ưu tiên cải thiện Y tế 6.1": "Rà soát chỉ tiêu 6.1 bằng dữ liệu địa phương.",
     "Thiếu dữ liệu 2024": "Kiểm tra, bổ sung thu thập mẫu PAPI 2024 trước khi xếp loại.",
 }
 for grp in ("Biên bứt phá vượt chuẩn", "Vùng lõi ổn định (Cụm 2)", "Ưu tiên cải thiện Y tế 6.1", "Thiếu dữ liệu 2024"):
@@ -671,11 +671,11 @@ bullets(s, 0.72, 4.64, 5.70, 2.08, [
 
 card(s, 6.77, 4.52, 6.00, 2.30, fill=SOFT_CORAL, border=BORDER, accent=CORAL, accent_side="left")
 bullets(s, 6.94, 4.64, 5.70, 2.08, [
-    (f"Top cảnh báo trượt vùng (AUC={_dec(FORECAST['scenario_auc'], 3)}).", f"{watch_top4} (kế tiếp: {watch_next3})."),
-    ("Nghịch lý Đô thị – Y tế 6.1.", f"Nhóm ưu tiên Y tế ({prio_names}) có GRDP/người trung vị {_dec(float(STAKE_GROUPS.loc['Ưu tiên cải thiện Y tế 6.1', 'median_grdp_2024_mil']), 1)} triệu đ (vượt vùng lõi {_dec(float(STAKE_GROUPS.loc['Vùng lõi ổn định (Cụm 2)', 'median_grdp_2024_mil']), 1)}), nhưng 6.1 tụt sâu ({prio_61_range})."),
+    (f"Xếp hạng kịch bản ngoài vùng 2024 (AUC={_dec(FORECAST['scenario_auc'], 3)}).", f"{watch_top4} (kế tiếp: {watch_next3})."),
+    ("Đối chiếu GRDP – Y tế 6.1 (mô tả).", f"Nhóm ưu tiên Y tế ({prio_names}) có GRDP/người trung vị {_dec(float(STAKE_GROUPS.loc['Ưu tiên cải thiện Y tế 6.1', 'median_grdp_2024_mil']), 1)} triệu đ (cao hơn vùng lõi {_dec(float(STAKE_GROUPS.loc['Vùng lõi ổn định (Cụm 2)', 'median_grdp_2024_mil']), 1)}), nhưng 6.1 thấp ({prio_61_range})."),
 ], size=13.2, gap_pt=10, lead_color=CORAL)
 note(s, "Bảng thống kê 63 tỉnh là đầu ra bàn giao trực tiếp cho cơ quan quản lý địa phương / khách hàng: "
-     "gồm phân nhóm hành động, top 5 chuẩn 14/14 năm, hướng dịch chuyển 2023-2024 và watchlist cảnh báo sớm.")
+     "gồm phân nhóm hành động, top 5 chuẩn 14/14 năm, hướng dịch chuyển 2023-2024 và xếp hạng kịch bản ngoài vùng năm 2024.")
 
 
 # --- SLIDE 8: THÍ NGHIỆM DỰ BÁO BỔ TRỢ ---
@@ -753,7 +753,7 @@ quad_cards = [
         6.78, 1.24, BLUE, SOFT_BLUE,
         "2. Giá trị bàn giao khách hàng",
         "• Phân loại 63 tỉnh 2024 thành 4 nhóm hành động: 48 Vùng lõi (5 chuẩn 14/14 năm), 8 Biên bứt phá, 5 Ưu tiên Y tế 6.1, 2 Thiếu dữ liệu.\n"
-        "• Vạch rõ nghịch lý GRDP cao (104,3 tr) – Y tế 6.1 thấp & watchlist cảnh báo sớm (AUC = 0,816).",
+        "• GRDP cao (104,3 tr) đi cùng điểm 6.1 thấp; kịch bản ngoài vùng 2024 có AUC thăm dò 0,816.",
     ),
     (
         0.55, 3.44, CORAL, SOFT_CORAL,
@@ -764,8 +764,8 @@ quad_cards = [
     (
         6.78, 3.44, GOLD_DEEP, SOFT_GOLD,
         "4. Đề xuất cải thiện tiếp theo",
-        "• Mô hình: Cân bằng lớp (class_weight='balanced') nâng macro-F1 CV lên 0,524 (chờ GV duyệt holdout); lưới phân vị thích nghi & Conformal.\n"
-        "• Sản phẩm: Bản đồ 63 tỉnh theo 4 nhóm trên Tab 6 Streamlit, xuất Phiếu chẩn đoán PDF từng tỉnh & cập nhật PAPI 2025.",
+        "• Thăm dò (chưa duyệt GV): backtest cuốn chiếu 2019–2024 (Ridge thắng MAE 4/6 năm, out_recall 0,063); Moran's I 6.1 = 0,183 (p=0,024); quỹ đạo 63 tỉnh.\n"
+        "• Cải tiến tiếp: cân bằng lớp CV 0,524 (chờ duyệt holdout), bản đồ Choropleth 63 tỉnh trên Streamlit & cập nhật PAPI 2025.",
     ),
 ]
 for qx, qy, qacc, qfill, qtitle, qbody in quad_cards:

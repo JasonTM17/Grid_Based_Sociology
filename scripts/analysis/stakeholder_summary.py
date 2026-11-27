@@ -11,7 +11,7 @@ Nhiệm vụ của module là biến đầu ra kỹ thuật (cụm -1, 0, 1, 2 v
      - Ưu tiên cải thiện Y tế công lập 6.1 (ô thưa dưới ngưỡng Q25 − 0.5×IQR của Cụm 2)
      - Thiếu dữ liệu kiểm toán 2024 (chỉ định thu thập bổ sung)
   2. Quỹ đạo dài hạn 2011–2024 & phân tách hướng dịch chuyển 2023 → 2024.
-  3. Danh sách cảnh báo sớm biến động vùng năm tới (`outside_scenario_share`).
+  3. Danh sách xếp hạng kịch bản ngoài vùng trong hồi kiểm 2023→2024
   4. Hồ sơ đối chiếu kinh tế–xã hội độc lập theo nhóm hành động (GRDP/người 2024,
      tỷ lệ nghèo GSO 2024, PCI mới nhất 2022, dân số GSO 2024) — chỉ mô tả tương quan.
 
@@ -148,7 +148,7 @@ def _classify_row(row: pd.Series, bench: dict[str, float]) -> tuple[str, str, st
             return (
                 "Ưu tiên cải thiện Y tế 6.1",
                 "Lệch pha: 4.2 đạt/vượt chuẩn, 6.1 tụt sâu",
-                "Chẩn đoán nguyên nhân quá tải hoặc suy giảm hài lòng y tế công lập 6.1 dù 4.2 tốt.",
+                "Rà soát các thành phần của chỉ tiêu y tế công lập 6.1 và xác minh bằng dữ liệu địa phương.",
             )
         return (
             "Ưu tiên cải thiện Y tế 6.1",
@@ -166,7 +166,7 @@ def _classify_row(row: pd.Series, bench: dict[str, float]) -> tuple[str, str, st
         return (
             "Biên bứt phá vượt chuẩn",
             "Dẫn đầu trục 4.2 (6.1 quanh vùng cụm)",
-            "Nhân rộng thực hành tốt về minh bạch dịch vụ công 4.2 và giữ ổn định y tế 6.1.",
+            "Nhân rộng thực hành tốt về kiểm soát tham nhũng trong dịch vụ công 4.2 và giữ ổn định y tế 6.1.",
         )
 
     return (
@@ -652,7 +652,7 @@ def write_stakeholder_markdown(data: dict[str, object], out_path: Path = OUT_MD)
         f"- **Ngưỡng tách hai cực bên trong 13 tỉnh ô thưa (`-1`):** `sd_6_1 < Q25 − 0.5 × IQR = {bench['lower_61_fence']:.4f}` "
         "phân tách rạch ròi 5 tỉnh tụt sâu về y tế công lập (thực tế đều `≤ 1.808`) khỏi 8 tỉnh biên tăng trưởng vượt chuẩn (`4.2 > trung vị lõi`, `6.1 ≥ 1.888`).",
         "",
-        "| Nhóm hành động bàn giao | Số tỉnh | Tỉ lệ /63 | Trung vị 4.2 | Trung vị 6.1 | Trung vị số năm Cụm 2 | Trung vị rủi ro trượt (%) | Trung vị GRDP 2024 (tr.đ) | Trung vị PCI 2022 |",
+        "| Nhóm hành động bàn giao | Số tỉnh | Tỉ lệ /63 | Trung vị 4.2 | Trung vị 6.1 | Trung vị số năm Cụm 2 | Trung vị kịch bản ngoài vùng 2024 (%) | Trung vị GRDP 2024 (tr.đ) | Trung vị PCI 2022 |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for _, r in group_stats.iterrows():
@@ -717,9 +717,9 @@ def write_stakeholder_markdown(data: dict[str, object], out_path: Path = OUT_MD)
 
     lines.extend([
         "",
-        "## 3. Danh sách cảnh báo sớm biến động vùng năm tiếp theo (Top 10 `outside_scenario_share`)",
+        "## 3. Kịch bản ngoài vùng năm 2024 (Top 10 `outside_scenario_share`)",
         "",
-        "Thay cho dự báo điểm (vốn chỉ báo `0/11` tỉnh rời vùng dày), tỉ lệ kịch bản lệch khỏi vùng dày dùng phân phối phần dư lịch sử để xếp hạng rủi ro biến động (AUC thăm dò = `0.816` trên năm 2024).",
+        "Trong hồi kiểm 2023→2024, dự báo điểm phát hiện 0/11 tỉnh ngoài vùng dày trên 59 tỉnh đối chiếu được. Tỉ lệ kịch bản dùng phần dư lịch sử để xếp hạng rủi ro biến động (AUC thăm dò = `0.816` trên năm 2024). Đây không phải xác suất đã hiệu chỉnh hay dự báo cho năm sau 2024.",
         "",
         "| Hạng | Tỉnh | Nhóm 2024 | 4.2 | 6.1 | Tỉ lệ kịch bản ngoài vùng (%) |",
         "|---:|---|---|---:|---:|---:|",
@@ -738,7 +738,7 @@ def write_stakeholder_markdown(data: dict[str, object], out_path: Path = OUT_MD)
         f"{group_stats.loc[group_stats['action_group'].eq('Biên bứt phá vượt chuẩn'), 'median_sd_4_2'].iloc[0]:.3f}` (cao hơn hẳn vùng lõi), trong khi 5 tỉnh ưu tiên Y tế `6.1` có trung vị GRDP 2024 tới "
         f"`{group_stats.loc[group_stats['action_group'].eq('Ưu tiên cải thiện Y tế 6.1'), 'median_grdp_2024_mil'].iloc[0]:.2f}` triệu/người (cao hơn vùng lõi `"
         f"{group_stats.loc[group_stats['action_group'].eq('Vùng lõi ổn định (Cụm 2)'), 'median_grdp_2024_mil'].iloc[0]:.2f}` triệu/người) nhưng `6.1 = "
-        f"{group_stats.loc[group_stats['action_group'].eq('Ưu tiên cải thiện Y tế 6.1'), 'median_sd_6_1'].iloc[0]:.3f}` — phản ánh rõ áp lực quá tải y tế công tại các đầu tàu đô thị–công nghiệp.",
+        f"{group_stats.loc[group_stats['action_group'].eq('Ưu tiên cải thiện Y tế 6.1'), 'median_sd_6_1'].iloc[0]:.3f}` — chênh lệch mô tả, không chứng minh quá tải hay quan hệ nhân quả.",
         "- Toàn bộ bảng chi tiết 63 tỉnh nằm tại `results/stakeholder_province_summary_2024.csv` và hình minh họa tại `results/figs/stakeholder_quadrants_2024.png`.",
         "",
     ])
@@ -780,7 +780,7 @@ def update_excel_workbook(
         ("years_cluster2_2011_2024", "Số năm Cụm 2 (2011–2024)", 17.0, "#,##0", "right"),
         ("years_noise_2011_2024", "Số năm ngoài lõi", 15.0, "#,##0", "right"),
         ("transition_2023_2024", "Dịch chuyển 2023→2024", 27.0, "General", "left"),
-        ("risk_outside_scenario_share", "Tỉ lệ kịch bản ngoài vùng", 16.0, "0.0%", "right"),
+        ("risk_outside_scenario_share", "Kịch bản ngoài vùng 2024", 19.0, "0.0%", "right"),
         ("grdp_2024_mil_vnd", "GRDP/người 2024 (tr.đ)", 17.0, "0.00", "right"),
         ("pci_2022", "PCI 2022", 11.0, "0.00", "right"),
         ("poverty_2024_pct", "Tỉ lệ nghèo 2024 (%)", 15.0, "0.0", "right"),
@@ -800,7 +800,7 @@ def update_excel_workbook(
         f"Phân nhóm hành động từ nhãn STING cố định ({counts_map.get('Vùng lõi ổn định (Cụm 2)', 0)} Vùng lõi ổn định, "
         f"{counts_map.get('Biên bứt phá vượt chuẩn', 0)} Biên bứt phá vượt chuẩn, "
         f"{counts_map.get('Ưu tiên cải thiện Y tế 6.1', 0)} Ưu tiên Y tế 6.1, "
-        f"{counts_map.get('Thiếu dữ liệu 2024', 0)} Thiếu dữ liệu 2024), kèm dịch chuyển 2023→2024, rủi ro trượt vùng và GRDP/PCI."
+        f"{counts_map.get('Thiếu dữ liệu 2024', 0)} Thiếu dữ liệu 2024), kèm dịch chuyển 2023→2024, kịch bản ngoài vùng năm 2024 và GRDP/PCI."
     )
     ws["A3"].font = Font(name="Arial", size=10, italic=True, color="000000")
     ws["A3"].fill = copy(white_fill)
