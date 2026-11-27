@@ -16,7 +16,7 @@ Mở [Bảng kết quả STING–PAPI trong Excel](KetQua_STING_PAPI.xlsx) để
 | Kiểm chứng bên ngoài | `external_validation.{csv,md}`, `external_master_summary.md`, `poverty_validation.{csv,md}` | Đối chiếu ANOVA/Kruskal–Wallis cụm STING với PCI, nghèo GSO V14.47, GRDP & y tế |
 | Khảo sát ứng viên | `model_improvement_candidates.md`, `candidates_clustering.{csv,md}`, `candidates_regression.{csv,md}`, `candidates_classification.{csv,md}` | Kết quả thử nghiệm tham khảo các ứng viên mở rộng mô hình |
 | Hồi kiểm danh sách rà soát | `review_shortlist_backtest.json`, `review_shortlist_ranks.csv` | Hồi kiểm lịch sử ba cách chọn ca rà soát 6.1 và khung chuẩn bị phiếu thẩm định độc lập |
-| Hướng phát triển `[THAM KHẢO]` | `future_work.md`, `future_work_rank.csv`, `future_work_trajectory.csv`, `future_work_backtest.csv`, `future_work_spatial.csv` | Thử nghiệm thăm dò `[CHƯA DUYỆT GV]`: chuẩn hóa hạng trong năm (`E1`), quỹ đạo OLS 63 tỉnh (`E2`), backtest cuốn chiếu `2018–2023` (`E3`), Moran's I & cân bằng lớp `C1/C3` (`E4`) |
+| Hướng phát triển (đã tích hợp `E2–E4`) | `future_work.md`, `future_work_rank.csv`, `future_work_trajectory.csv`, `future_work_backtest.csv`, `future_work_spatial.csv` | Các nhánh mở rộng: chuẩn hóa hạng trong năm (`E1`, giữ đối chiếu vì phân mảnh `25` cụm / `54,1%` nhiễu), quỹ đạo OLS 63 tỉnh (`E2`), backtest cuốn chiếu `2018–2023` (`E3`), Moran's I (`E4`) & đã áp dụng cân bằng lớp `C3/C1` vào `supervised_metrics.csv` |
 
 ## Biểu đồ đã xuất (`results/figs/`)
 

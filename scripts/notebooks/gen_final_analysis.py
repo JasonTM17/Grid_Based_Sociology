@@ -705,11 +705,14 @@ print(
 )
 
 clf_m = joblib.load(ROOT / "models/sup_classifier.joblib")
+from scripts.analysis.dashboard_data import select_classification_model
+clf_name = select_classification_model(sup_tbl)
 clf_pairs = build_classification_pairs(panel, feats, params)
 clf_hold = clf_pairs[clf_pairs.year_t == 2023]
 Xc_te, yc_te = clf_hold[REGRESSION_FEATURES].to_numpy(), clf_hold["y"].to_numpy()
 print(
-    f"Logistic holdout 2023→2024 ({len(yc_te)} cặp): LogLoss = {log_loss(yc_te, clf_m.predict_proba(Xc_te)[:, 1]):.4f}, "
+    f"Classifier chính ({clf_name}) holdout 2023→2024 ({len(yc_te)} cặp): "
+    f"LogLoss = {log_loss(yc_te, clf_m.predict_proba(Xc_te)[:, 1]):.4f}, "
     f"Acc = {accuracy_score(yc_te, clf_m.predict(Xc_te)):.3f}, "
     f"Macro-F1 = {f1_score(yc_te, clf_m.predict(Xc_te), average='macro', labels=[0, 1], zero_division=0):.3f}."
 )
@@ -749,6 +752,19 @@ show_md(pov_pool[has_stats].to_markdown(index=False))
 for _, r in pov[pov.section == "test_mw_noise_vs_c2"].iterrows():
     print(f"{r['group']}: {r['note']}")
 display(Image(filename=str(ROOT / "results/figs/external_poverty_by_cluster.png")))"""))
+
+    md(nbf.v4.new_markdown_cell("""## Phụ lục D. Thực nghiệm mở rộng tích hợp (E2–E4 & Hướng 5)
+
+Tổng hợp các nhánh mở rộng định lượng đã được tích hợp từ `scripts/analysis/future_work.py`: (i) phân cụm quỹ đạo tuyến tính OLS 63 tỉnh 2011–2024 (`E2`); (ii) backtest cuốn chiếu 6 mốc `2018→2023` (`E3`); và (iii) tự tương quan không gian Queen năm 2024 (`E4`, Moran's I). Nhánh `E1` (chuẩn hóa hạng trong năm) được giữ làm đối chiếu tham khảo do phân mảnh thành `25` cụm với `54,1%` nhiễu."""))
+
+    cd(nbf.v4.new_code_cell("""fw_bt = pd.read_csv(ROOT / "results/future_work_backtest.csv")
+fw_sp = pd.read_csv(ROOT / "results/future_work_spatial.csv")
+fw_tr = pd.read_csv(ROOT / "results/future_work_trajectory.csv")
+show_md(fw_bt[["origin_year", "target_year", "target", "selected_method", "mae_forecast", "mae_carry", "mae_gain", "out_recall_forecast", "out_recall_carry"]].round(4).to_markdown(index=False))
+show_md(fw_sp.round(4).to_markdown(index=False))
+top_bot = pd.concat([fw_tr.nlargest(3, "slope_6_1"), fw_tr.nsmallest(3, "slope_6_1")])
+show_md(top_bot[["province_vi", "n_years", "slope_4_2", "slope_6_1", "sting_label", "kmeans_label"]].round(4).to_markdown(index=False))
+display(Image(filename=str(ROOT / "results/figs/future_work_overview.png")))"""))
 
     nb["cells"] = cells
     nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}

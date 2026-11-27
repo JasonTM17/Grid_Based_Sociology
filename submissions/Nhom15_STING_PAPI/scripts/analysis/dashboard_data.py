@@ -344,11 +344,19 @@ def select_regression_model(metrics: pd.DataFrame) -> str:
     return select_model_by_cv(candidates)
 
 
+TUNED_CLASSIFIERS = (
+    "logistic regression",
+    "random forest",
+    "logistic regression (balanced)",
+    "random forest (balanced)",
+)
+
+
 def select_classification_model(metrics: pd.DataFrame) -> str:
     """Select only tuned classifier families; keep the majority baseline as a baseline."""
     candidates = metrics.loc[
         metrics.task.eq("classification")
-        & metrics.model.isin(["logistic regression", "random forest"])
+        & metrics.model.isin(TUNED_CLASSIFIERS)
     ]
     return select_model_by_cv(candidates)
 

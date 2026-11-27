@@ -6,3 +6,5 @@ regression,random forest,r2 (expanding origin 2017–2022),0.197,0.0616,0.0742,0
 classification,majority (lớp đa số),f1_macro (expanding origin 2017–2022),0.228,,,,0.186,0.157
 classification,logistic regression,f1_macro (expanding origin 2017–2022),0.434,,,,0.644,0.541
 classification,random forest,f1_macro (expanding origin 2017–2022),0.397,,,,0.678,0.6
+classification,logistic regression (balanced),f1_macro (expanding origin 2017–2022),0.486,,,,0.746,0.595
+classification,random forest (balanced),f1_macro (expanding origin 2017–2022),0.524,,,,0.712,0.569

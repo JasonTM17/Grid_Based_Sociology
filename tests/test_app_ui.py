@@ -30,6 +30,7 @@ from scripts.analysis.client_product import CUSTOMER_GROUP_LABELS
 from scripts.data.check_data import scale_audit
 from scripts.analysis.dashboard_data import (
     PCI_TOP30_WINDOW,
+    TUNED_CLASSIFIERS as APP_TUNED_CLASSIFIERS,
     ensure_external_pci_consistency,
     external_pci_group_stats,
     external_section_frame,
@@ -67,7 +68,6 @@ APP_HOLDOUT_TABLE_MODELS = (
     "ridge",
     "random forest",
 )
-APP_TUNED_CLASSIFIERS = ("logistic regression", "random forest")
 NO_CV_SCORE_MESSAGE = "Không có CV score để chọn model."
 
 APP_PATH = ROOT / "app.py"

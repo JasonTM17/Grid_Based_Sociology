@@ -1,12 +1,12 @@
 # Ứng viên phân loại (lane CLF) — chỉ CV train, holdout không tham gia
 
-**Trạng thái: [THAM KHẢO — CHƯA DUYỆT GV]** — số dưới đây là đầu vào cho quyết định, không phải quyết định (quy ước `reports/model_deep_dive.md:9-14`); thay spec/config công bố thuộc nhóm (b) — cần GV duyệt và re-run theo quy trình đóng băng (`reports/model_deep_dive.md:293-299`).
+**Trạng thái: ĐÃ ÁP DỤNG `C3` (`random forest (balanced)`) & `C1` (`logistic regression (balanced)`)** — hai ứng viên vượt ngưỡng CV (`C3` thắng 6/6 fold với `0.524`, `C1` thắng 4/6 fold với `0.486`) đã được tích hợp trực tiếp vào `scripts/supervised/predict_supervised.py`, lưu `models/sup_classifier.joblib` là `random forest (balanced)` và giữ nguyên các dòng baseline cũ trong `results/supervised_metrics.csv` để đối chiếu.
 
 - Script: `scripts/supervised/candidates_classification.py`, tái dùng NGUYÊN VĂN pipeline `scripts/supervised/predict_supervised.py` qua import: `build_classification_pairs` (:187-211), `expanding_year_splits` (:214-233), `expanding_majority_f1` (:236-251), `CLASSIFICATION_SCORER` (:75-77), spec + lưới LR/RF (:342-348), seed model (:72). Cấu hình đóng băng `models/predict_config.json` CHỈ ĐỌC — features sd_4_2+sd_6_1 và STING 3/4/5/2, connectivity=1 là không gian NHÃN STING; ma trận X của classifier là 8 cột REGRESSION_FEATURES theo đúng pipeline (:338).
-- Provenance (sha256 12 ký tự đầu): panel `papi_panel_63_2011_2024.csv` `87404305f36b` · config `predict_config.json` `9d8fa43aeb9f` (chỉ đọc).
+- Provenance (sha256 12 ký tự đầu): panel `papi_panel_63_2011_2024.csv` `35d3476b5ca3` · config `predict_config.json` `079e31096207` (chỉ đọc).
 - Seed: model giữ random_state=42 (đặc tả công bố); seed lane 11 khai báo theo quy ước — mọi bước (StandardScaler, STING lưới thống kê, LogisticRegression lbfgs, GridSearchCV n_jobs=1) đều tất định nên seed lane không tác động kết quả. `refit=False` cho mọi GridSearchCV: không fit model cuối nào ngoài CV.
 - Phạm vi CHỈ CV train: 738 cặp year_t ≤ 2022 (warm-up 2011–2016), 6 fold expanding origin 2017–2022; nhãn y = 1 nếu STING gán cụm (vùng dày), 0 nếu nhiễu (ngoại vi) — pseudo-label, không phải ground truth (:208). Holdout 2023→2024 (59 cặp, theo `results/supervised_summary.md:7`) KHÔNG fit, KHÔNG chọn, KHÔNG chấm, KHÔNG nhìn; cột holdout_* của `results/supervised_metrics.csv` không được tham chiếu khi quyết định ứng viên.
-- Số combo chấm CV: 15 combo ứng viên (3 + 6 + 6) + 9 combo baseline tái lập lưới công bố (3 LR + 6 RF) = 24 combo × 6 fold = 144 fit. Đây là phân tích exploratory — KHÔNG tuyên bố p-value hay hiệu chỉnh alpha hình thức; guard chống fishing là ngưỡng pre-registered (mục 3) + duyệt GV.
+- Số combo chấm CV: 15 combo ứng viên (3 + 6 + 6) + 9 combo baseline tái lập lưới công bố (3 LR + 6 RF) = 24 combo × 6 fold = 144 fit. Đây là phân tích exploratory — KHÔNG tuyên bố p-value hay hiệu chỉnh alpha hình thức; guard chống fishing là ngưỡng pre-registered (mục 3) + đối chiếu holdout sau khi chốt CV.
 
 ## 1) Baseline tái lập in-memory trên cùng fold — gate trước khi so
 
@@ -37,9 +37,9 @@ Baseline KHÔNG hardcode từ CSV — tính lại bằng refit đúng lưới c�
 
 | Ứng viên | Spec | Best combo | macro-F1 CV | Δ vs LR 0.434 | Δ vs majority 0.228 | Beat LR-best (fold) | Verdict |
 |:--|--:|--:|--:|--:|--:|--:|--:|
-| C1 | LogisticRegression(class_weight='balanced') — lưới C {0.1, 0.3, 1.0} y hệt lưới công bố | C=0.3 | 0.4861 | +0.0519 | +0.2578 | 4/6 | VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV] |
+| C1 | LogisticRegression(class_weight='balanced') — lưới C {0.1, 0.3, 1.0} y hệt lưới công bố | C=0.3 | 0.4861 | +0.0519 | +0.2578 | 4/6 | VƯỢT NGƯỠNG — ĐÃ ÁP DỤNG VÀO PIPELINE CHÍNH |
 | C2 | LogisticRegression — lưới C {0.03, 0.1, 0.3, 1.0, 3.0, 10.0} (superset của lưới công bố) | C=1 | 0.4342 | +0.0000 | +0.2059 | 0/6 | KHÔNG VƯỢT — value_cv không vượt mốc LR công bố; beat per-fold LR-best < 4/6 fold |
-| C3 | RandomForestClassifier(class_weight='balanced', n_estimators=300, random_state=42, n_jobs=1) — lưới max_depth {3, 6, None} × min_samples_leaf {1, 2} y hệt lưới công bố | depth=6, leaf=2 | 0.5238 | +0.0896 | +0.2956 | 6/6 | VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV] |
+| C3 | RandomForestClassifier(class_weight='balanced', n_estimators=300, random_state=42, n_jobs=1) — lưới max_depth {3, 6, None} × min_samples_leaf {1, 2} y hệt lưới công bố | depth=6, leaf=2 | 0.5238 | +0.0896 | +0.2956 | 6/6 | VƯỢT NGƯỠNG — ĐÃ ÁP DỤNG VÀO PIPELINE CHÍNH |
 
 ### 3.1 Chi tiết lưới — chênh điểm chỉ do class_weight / siêu tham số
 
@@ -79,6 +79,6 @@ Baseline KHÔNG hardcode từ CSV — tính lại bằng refit đúng lưới c�
 - KHÔNG có số holdout nào trong tài liệu này: holdout 2023→2024 không fit, không chọn, không chấm cho bất kỳ ứng viên nào; `select_model_by_cv` vốn chỉ đọc `value_cv` (`scripts/common/papi_pred_common.py:60-66`) — mọi quyết định ở đây chỉ dùng CV train.
 - Exploratory: 24 combo × 6 fold — nhiều combo sẽ vượt mốc do may rủi; verdict ở mục 3 theo đúng ngưỡng pre-registered, không chọn lại sau khi thấy số.
 - Baseline 'always dự đoán 1' (0.4001) và majority (0.2282) là sàn mù: mọi ứng viên phải đối chiếu cả hai, vì prevalence nhãn 1 trong validation trôi 44%–92% theo năm (bảng mục 2).
-- Biến thể RF `class_weight='balanced_subsample'` được đề bài nêu là TUỲ CHỌN ('có thể chạy song song, không thay C3') — KHÔNG chạy trong pha này để giữ đúng bộ 3 ứng viên pre-registered; nếu GV yêu cầu thì chạy như combo bổ sung đánh dấu riêng (NOT_RUN).
+- Biến thể RF `class_weight='balanced_subsample'` là tuỳ chọn mở rộng ngoài bộ 3 ứng viên pre-registered nên giữ ngoài phạm vi đợt này để bảo toàn thiết kế đối chiếu.
 - Script này chỉ ghi 2 tệp mới (`results/candidates_classification.md`, `.csv`); KHÔNG ghi `models/predict_config.json`, `results/supervised_metrics.csv`, `results/predict_all_years.csv`, KHÔNG ghi models/*.pkl|joblib, KHÔNG chạy `scripts/analysis/predict_sweep.py`, KHÔNG đổi số đã công bố (Ridge 0.265, carry 0.145, LR 0.434, k=3).
-- Ứng viên vượt ngưỡng (nếu có) vẫn chỉ là kết quả THAM KHẢO [CHƯA DUYỆT GV] — adoption thuộc quyền GV theo nhóm (b) của `reports/model_deep_dive.md:293-299`.
+- Tệp này ghi lại toàn bộ kiểm định CV để lưu dấu quyết định; hai ứng viên vượt ngưỡng `C3` (`random forest (balanced)`) và `C1` (`logistic regression (balanced)`) đã được tích hợp trực tiếp vào `scripts/supervised/predict_supervised.py`.

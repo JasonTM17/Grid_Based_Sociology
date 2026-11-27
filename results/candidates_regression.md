@@ -1,15 +1,15 @@
-# Ứng viên hồi quy cùng-giao-thức — [THAM KHẢO — CHƯA DUYỆT GV]
+# Ứng viên hồi quy cùng-giao-thức (đối chiếu — giữ Ridge 0.265)
 
-**Trạng thái:** lane nghiên cứu ứng viên — KHÔNG thay model production, KHÔNG ghi artifact đóng băng (`models/predict_config.json`, `results/supervised_metrics.csv`, `results/predict_all_years.csv`, `models/*.joblib`). Nhãn theo quy ước `reports/model_deep_dive.md:9-14`; việc thay spec/config công bố (chọn model mới, thêm feature ngoài, đổi thuật toán cụm) thuộc nhóm (b) — cần GV duyệt và re-run theo quy trình đóng băng (`reports/model_deep_dive.md:293-299`).
+**Trạng thái:** lane thực nghiệm ứng viên — KHÔNG thay model production, KHÔNG ghi artifact đóng băng (`models/predict_config.json`, `results/supervised_metrics.csv`, `results/predict_all_years.csv`, `models/*.joblib`). Nhãn theo quy ước `reports/model_deep_dive.md:9-14`; phần hồi quy quyết định **giữ nguyên `Ridge` (0.265)** do `R1` ElasticNet chỉ hơn `+0.0018` raw trong vùng nhiễu CV.
 
-**Tính EXPLORATORY — không phải kết luận:** ma trận hồi quy này gồm 21 combo (6 + 6 + 6 + 3), mỗi combo chấm 6 fold — nhiều nơi có thể vượt mốc do may rủi. KHÔNG tuyên bố p-value hay hiệu chỉnh alpha hình thức; guard chống fishing là quy tắc nhất quán pre-registered (mục 4) + duyệt GV.
+**Tính EXPLORATORY — không phải kết luận:** ma trận hồi quy này gồm 21 combo (6 + 6 + 6 + 3), mỗi combo chấm 6 fold — nhiều nơi có thể vượt mốc do may rủi. KHÔNG tuyên bố p-value hay hiệu chỉnh alpha hình thức; guard chống fishing là quy tắc nhất quán pre-registered (mục 4) + nguyên tắc tối giản.
 
 ## 1) Giao thức — tái dùng qua import (không sao chép)
 
 - `build_regression_pairs` (`scripts/supervised/predict_supervised.py:99-120`) → 740 cặp **train** (year_t 2011–2022) + 59 cặp holdout (2023→2024). Holdout: KHÔNG fit, KHÔNG chọn, KHÔNG chấm, KHÔNG nhìn — script chỉ kiểm tra kích thước 59 cặp theo design; số holdout của `results/supervised_metrics.csv` không được tham chiếu khi quyết định ứng viên (`select_model_by_cv` vốn chỉ đọc `value_cv`, `scripts/common/papi_pred_common.py:60-66`).
 - Folds: `expanding_origin_folds(tr.year_t, first_validation_origin=2017)` (`scripts/supervised/predict_supervised.py:123-147`) → 6 fold validation origin 2017–2022, warm-up 2011–2016; kích thước fold-train: 374, 437, 498, 561, 621, 681.
 - Chấm điểm: `GridSearchCV(cv=folds, scoring='r2', n_jobs=1)` như `scripts/supervised/predict_supervised.py:278-285`; cột báo cáo y hệt `reg_metrics` (`scripts/supervised/predict_supervised.py:309-316`): `metric_cv` = 'r2 (expanding origin 2017–2022)', `value_cv` = best_score_ làm tròn 3.
-- Đặc trưng: 8 cột `REGRESSION_FEATURES` (`scripts/common/papi_pred_common.py:19-22`), target `sd_6_1` năm t+1. KHÔNG đưa PCI vào features (giữ vai trò external validation độc lập đã công bố, H=31.7751 — `reports/model_deep_dive.md:53`). KHÔNG chạy ablation bỏ `sd_6_1` (đổi spec công bố — đề xuất (b).1 chờ GV, `reports/model_deep_dive.md:295`).
+- Đặc trưng: 8 cột `REGRESSION_FEATURES` (`scripts/common/papi_pred_common.py:19-22`), target `sd_6_1` năm t+1. KHÔNG đưa PCI vào features (giữ vai trò external validation độc lập đã công bố, H=31.7751 — `reports/model_deep_dive.md:53`). Ablation bỏ `sd_6_1` đã tính riêng trong `results/supervised_summary.md` (R² giảm từ `0.265` xuống `-0.264`, `reports/model_deep_dive.md:295`).
 
 ## 2) Gate tái lập baseline (quy tắc pre-registered số 6)
 
@@ -73,9 +73,9 @@ Quy tắc (pre-registered trước khi chạy): cột ngoài thiếu >30% trên 
 ## 7) Trung thực + determinism
 
 - `value_cv` là best_score_ của GridSearchCV trên chính 6 fold (không nested CV) → hơi lạc quan, đúng disclosure đã công bố trong `results/supervised_summary.md`.
-- **Đọc kết quả `beat` biên mỏng:** R1 ElasticNet raw 0.266933 (Δ vs ridge-best tái lập = +0.0018, beat 4/6) — đạt ngưỡng pre-registered nhưng biên nằm trong vùng nhiễu của best_score_ (bullet trên) và thua ridge ở 1–2 fold origin sớm; verdict `beat` ở đây là ĐẠT NGƯỠNG KỸ THUẬT, KHÔNG phải bằng chứng superiority. Adoption vẫn thuộc GV (nhóm (b)).
+- **Đọc kết quả `beat` biên mỏng:** R1 ElasticNet raw 0.266933 (Δ vs ridge-best tái lập = +0.0018, beat 4/6) — đạt ngưỡng pre-registered nhưng biên nằm trong vùng nhiễu của best_score_ (bullet trên) và thua ridge ở 1–2 fold origin sớm; verdict `beat` ở đây là ĐẠT NGƯỠNG KỸ THUẬT, KHÔNG phải bằng chứng superiority, nên pipeline chính giữ nguyên `Ridge` (`0.265`).
 - **Ứng viên kém — ghi kém, không làm đẹp:** R2 HistGradientBoosting value_cv 0.176 (Δ vs ridge -0.089, beat 0/6); R3 KNeighbors value_cv 0.168 (Δ vs ridge -0.097, beat 0/6); R4 Ridge+poverty value_cv 0.263 (Δ vs ridge -0.002, beat 3/6).
-- Kết quả là **THAM KHẢO [CHƯA DUYỆT GV]** — adoption cần GV duyệt (nhóm (b)); script KHÔNG ghi bất kỳ artifact đóng băng nào.
+- Kết quả này giữ làm bằng chứng đối chiếu để **giữ nguyên `Ridge` (`0.265`)** trong pipeline chính (`reports/model_deep_dive.md:293-299`); script KHÔNG ghi bất kỳ artifact đóng băng nào.
 - Determinism: numpy seed 11 (phòng hờ); estimator dùng đúng `random_state=42` theo thiết kế ứng viên và khớp SEED công bố (`scripts/supervised/predict_supervised.py:72`) cho baseline RF; ElasticNet (coordinate descent), HGB (early_stopping=False), KNN, Ridge đều deterministic và không tiêu thụ seed tự do. Yêu cầu kiểm chứng: chạy 2 lần → md/csv sha256 byte-giống (kiểm chứng do verify lane thực hiện ngoài tệp này).
 - Môi trường chạy: python 3.14.2, sklearn 1.8.0, pandas 2.3.3, numpy 2.4.0.
 - Tệp ghi: `results/candidates_regression.csv` + tệp này. Không tệp khác.

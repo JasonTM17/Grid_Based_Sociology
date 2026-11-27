@@ -372,6 +372,47 @@ with overview_tab:
         "Không dùng các chỉ số này để khẳng định năng lực dự báo xã hội tổng quát."
     )
 
+    fw_bt_path = ROOT / "results" / "future_work_backtest.csv"
+    fw_sp_path = ROOT / "results" / "future_work_spatial.csv"
+    fw_tr_path = ROOT / "results" / "future_work_trajectory.csv"
+    if fw_bt_path.is_file() and fw_sp_path.is_file() and fw_tr_path.is_file():
+        with st.expander(
+            "Mở rộng đã tích hợp: Quỹ đạo 2011–2024, Backtest cuốn chiếu & Không gian 2024",
+            expanded=False,
+        ):
+            fw_bt = pd.read_csv(fw_bt_path)
+            fw_sp = pd.read_csv(fw_sp_path)
+            fw_tr = pd.read_csv(fw_tr_path)
+            r42 = fw_bt.loc[fw_bt.target.eq("sd_4_2")]
+            r61 = fw_bt.loc[fw_bt.target.eq("sd_6_1")]
+            top_up = ", ".join(
+                f"{r.province_vi} ({r.slope_6_1:+.4f})"
+                for r in fw_tr.nlargest(3, "slope_6_1").itertuples()
+            )
+            top_dn = ", ".join(
+                f"{r.province_vi} ({r.slope_6_1:+.4f})"
+                for r in fw_tr.nsmallest(3, "slope_6_1").itertuples()
+            )
+            sp_61 = fw_sp.loc[fw_sp.variable.eq("sd_6_1")].iloc[0]
+            sp_42 = fw_sp.loc[fw_sp.variable.eq("sd_4_2")].iloc[0]
+            st.markdown(
+                f"- **Backtest cuốn chiếu 2018→2023 (6 mốc):** Ridge thắng carry-forward về MAE ở "
+                f"**{int((r42.mae_gain > 0).sum())}/{len(r42)}** năm với `sd_4_2` "
+                f"(TB `{r42.mae_forecast.mean():.4f}` vs `{r42.mae_carry.mean():.4f}`) và "
+                f"**{int((r61.mae_gain > 0).sum())}/{len(r61)}** năm với `sd_6_1` "
+                f"(TB `{r61.mae_forecast.mean():.4f}` vs `{r61.mae_carry.mean():.4f}`); "
+                f"`out_recall` TB `{fw_bt.out_recall_forecast.mean():.3f}` vs `{fw_bt.out_recall_carry.mean():.3f}`.\n"
+                f"- **Quỹ đạo OLS 2011–2024 ({len(fw_tr)} tỉnh):** Top-3 tăng `6.1`: {top_up}; "
+                f"Top-3 giảm/chậm: {top_dn}.\n"
+                f"- **Tự tương quan không gian Queen 2024:** `sd_6_1` Moran's I = `{sp_61.moran_I:.4f}` "
+                f"(`p_perm = {sp_61.p_perm:.4f}`), `sd_4_2` Moran's I = `{sp_42.moran_I:.4f}` "
+                f"(`p_perm = {sp_42.p_perm:.4f}`). Chi tiết: `results/future_work.md`."
+            )
+            st.caption(
+                "Nhánh rank-normalization trong từng năm (`E1`) giữ ở mức đối chiếu vì chia lưới "
+                "thành 25 cụm và 54,1% nhiễu; cấu hình STING `3/4/5/2` giữ làm chuẩn chính."
+            )
+
 with sting_tab:
     st.subheader(f"Phân bố assignment STING · {selected_year}")
     if len(features) < 2:

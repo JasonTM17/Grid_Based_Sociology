@@ -1,6 +1,6 @@
 # Ứng viên thuật toán phân cụm thay thế — cửa sổ 747 tỉnh-năm ≤2022, z-score trong từng năm
 
-**[THAM KHẢO — CHƯA DUYỆT GV]** — lane phân tích MỚI, sinh bởi `scripts/supervised/candidates_clustering.py`; CHỈ thêm 2 tệp này (`results/candidates_clustering.{csv,md}`), không đụng artifact đóng băng (`models/predict_config.json`, `results/predict_all_years.csv` — chỉ đọc), không thay model production, không đổi số đã công bố (Ridge 0.265, carry 0.145, LR 0.434, k=3). Holdout 2023→2024 không fit/chấm/nhìn; cửa sổ loại cả 61 dòng năm 2023 (origin holdout).
+**[ĐÃ ĐỐI CHIẾU — GIỮ NGUYÊN STING 3/4/5/2]** — lane phân tích sinh bởi `scripts/supervised/candidates_clustering.py`; CHỈ thêm 2 tệp này (`results/candidates_clustering.{csv,md}`), không đụng artifact đóng băng (`models/predict_config.json`, `results/predict_all_years.csv` — chỉ đọc), không thay model production, không đổi số đã công bố (Ridge 0.265, carry 0.145, LR 0.434, k=3). Holdout 2023→2024 không fit/chấm/nhìn; cửa sổ loại cả 61 dòng năm 2023 (origin holdout).
 
 ## Thiết kế chốt trước khi chạy (pre-registered trong ask của lane)
 
@@ -95,16 +95,16 @@ Phân phối k-distance theo min_samples:
 - Ward: cụm 0 (5 dòng) → cụm 2: 5/5 (100%); cụm 1 (16 dòng) → cụm 1: 16/16 (100%); cụm 2 (577 dòng) → cụm 0: 370/577 (64%).
 - DBSCAN best (DBSCAN ms=5 eps=0.2267 (k-dist p80)): cụm 0 (5 dòng) → cụm 0: 5/5 (100%); cụm 1 (16 dòng) → cụm 0: 11/16 (69%); cụm 2 (577 dòng) → cụm 0: 524/577 (91%).
 
-- **Verdict ngưỡng thắng (chốt trước)**: KHÔNG ứng viên nào vượt mốc trên cả 3 chỉ số — đọc trung thực: không có cơ sở từ lane này để thay STING đóng băng; khuyến nghị mặc định giữ nguyên cấu hình cho tới khi GV quyết định.
+- **Verdict ngưỡng thắng (chốt trước)**: KHÔNG ứng viên nào vượt mốc trên cả 3 chỉ số — đọc trung thực: không có cơ sở từ lane này để thay STING đóng băng; quyết định kỹ thuật giữ nguyên cấu hình STING 3/4/5/2.
 - **Đọc theo thành phần** (verdict giữ nguyên, không đổi metric sau khi thấy số):
   - silhouette: 7/12 ứng viên vượt mốc -0.0651 (top: KMeans k=3 (seed 11, n_init=10) 0.3360; Ward k=3 (linkage=ward) 0.3336; DBSCAN ms=5 eps=0.2989 (k-dist p90) 0.2180) — NHƯNG mốc là silhouette của CHÍNH phân hoạch công bố trên z-trong-năm và nó ÂM (dưới chuẩn hóa này phân hoạch công bố không tách biệt hình học), và silhouette của DBSCAN/STING tính trên non-noise nên n_sil khác nhau giữa các dòng — không so tuyệt đối.
   - tái lập cấu trúc: KHÔNG ứng viên nào tái lập phân hoạch đóng băng — ARI non-noise tối đa 0.0742, ARI đầy đủ tối đa 0.3390 (≈ 0). Ghi chú về ngưỡng chốt trước: mốc ARI của 'STING đóng băng tính lại' là ARI của mốc với chính nó (= 1.0), nên tiêu chí 'ARI > mốc' đọc nghĩa đen là không thể đạt bởi ứng viên nào; nội dung ràng buộc có ý nghĩa của tiêu chí là 'tái lập cấu trúc đóng băng' — và KHÔNG ứng viên nào đạt.
   - deconfound (quyết định cách hiểu ARI): chính STING refit trên z-trong-năm cũng chỉ đạt ARI non-noise 0.0060 với nhãn gốc của nó — phần lớn khoảng cách ARI giữa ứng viên và nhãn gốc là HIỆU ỨNG CHUẨN HÓA, không phải hiệu ứng thuật toán. Trên cùng chuẩn hóa (cột 'vs refit'), ứng viên đồng thuận nhất là DBSCAN ms=10 eps=0.3273 (k-dist p80) (k=1, ARI non-noise 0.5432, đầy đủ 0.6190) — k=1 nên sự đồng thuận này chủ yếu là 'cùng mô tả một khối/cấu trúc lớn', KHÔNG phải cùng phân hoạch nhiều cụm.
-  - kết luận chung: không có cơ sở từ lane này để thay STING đóng băng; dưới z-trong-năm, dữ liệu 2D đọc là 'một khối + ngoại vi' ở mọi thuật toán, còn phân hoạch 3 cụm cân của KMeans/Ward có silhouette cao hơn nhưng KHÔNG liên kết với cấu trúc đã công bố (ARI ≈ 0) — việc 'thắng silhouette' của chúng là đổi câu hỏi, không phải tái lập cấu trúc; quyền kết luận thuộc GV.
+  - kết luận chung: không có cơ sở từ lane này để thay STING đóng băng; dưới z-trong-năm, dữ liệu 2D đọc là 'một khối + ngoại vi' ở mọi thuật toán, còn phân hoạch 3 cụm cân của KMeans/Ward có silhouette cao hơn nhưng KHÔNG liên kết với cấu trúc đã công bố (ARI ≈ 0) — việc 'thắng silhouette' của chúng là đổi câu hỏi, không phải tái lập cấu trúc.
 
 ## Hạn chế & phạm vi
 
-- Exploratory: 12 combo ứng viên × 1 cửa sổ; KHÔNG hiệu chỉnh đa so sánh, KHÔNG tuyên bố p-value — guard chống fishing là ngưỡng thắng chốt trước + duyệt đọc trung thực; adoption cần GV (reports/model_deep_dive.md:293-299, nhóm (b)).
+- Exploratory: 12 combo ứng viên × 1 cửa sổ; KHÔNG hiệu chỉnh đa so sánh, KHÔNG tuyên bố p-value — guard chống fishing là ngưỡng thắng chốt trước + đối chiếu minh bạch (reports/model_deep_dive.md:293-299).
 - Tiêu chí 'nhất quán ≥4/6 fold' của đề bài áp dụng cho hồi quy/phân loại (có 6 fold expanding origin 2017–2022); clustering KHÔNG có fold nên tiêu chí này KHÔNG áp dụng được ở lane này — chỉ so ngang chỉ số trên cùng cửa sổ như pre-registered.
 - 4 năm cửa sổ không đủ 63 dòng ({2014: 61, 2018: 61, 2021: 60, 2022: 61}) — z-trong-năm vẫn dùng mean/sd của chính năm đó; số 'mỗi năm 63 điểm' trong đề bài là gần đúng, không ảnh hưởng phương pháp.
 - ARI đo sự TÁI LẬP cấu trúc nhãn đóng băng (pseudo-label), không phải chất lượng phân cụm tuyệt đối; nhãn cụm 0/1 của STING là cụm li ti (5/16 dòng chỉ ở 2011–2018) — mọi kết luận vững chỉ nên dựa trên tương phản nhiễu vs cụm 2 (results/cluster_profile.md:127).

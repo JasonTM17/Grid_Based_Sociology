@@ -1,4 +1,4 @@
-"""Ứng viên hồi quy CÙNG-GIAO-THỨC cho model đã đóng băng — [THAM KHẢO — CHƯA DUYỆT GV].
+"""Ứng viên hồi quy CÙNG-GIAO-THỨC cho model đã đóng băng (đối chiếu — giữ Ridge).
 
 Lane nghiên cứu (KHÔNG production): tái dùng ĐÚNG protocol của
 `scripts/supervised/predict_supervised.py` qua IMPORT (không sao chép):
@@ -27,8 +27,7 @@ CHỈ ghi tệp phân tích MỚI: results/candidates_regression.{md,csv}. CẤM
 models/predict_config.json, models/*.joblib, results/supervised_metrics.csv,
 results/predict_all_years.csv và mọi artifact đóng băng. KHÔNG đưa PCI vào
 features (giữ vai trò external validation độc lập đã công bố,
-reports/model_deep_dive.md:53); KHÔNG chạy ablation bỏ sd_6_1 (đổi spec công bố
-— đề xuất (b).1 chờ GV, reports/model_deep_dive.md:295).
+reports/model_deep_dive.md:53); KHÔNG chạy ablation bỏ sd_6_1 trực tiếp trong lane này (đã tính ở supervised_summary.md, reports/model_deep_dive.md:295).
 
 Chạy: python -E scripts/supervised/candidates_regression.py   (từ thư mục gốc repo)
 """
@@ -562,14 +561,13 @@ def build_markdown(
     ran_rows = [r for r in rows if r["candidate"].startswith("R") and r["verdict"] != "EXCLUDED"]
     n_combos_total = sum(int(r["n_combos"]) for r in ran_rows)
     lines: list[str] = []
-    lines.append("# Ứng viên hồi quy cùng-giao-thức — [THAM KHẢO — CHƯA DUYỆT GV]\n")
+    lines.append("# Ứng viên hồi quy cùng-giao-thức (đối chiếu — giữ Ridge 0.265)\n")
     lines.append(
-        "**Trạng thái:** lane nghiên cứu ứng viên — KHÔNG thay model production, KHÔNG ghi "
+        "**Trạng thái:** lane thực nghiệm ứng viên — KHÔNG thay model production, KHÔNG ghi "
         "artifact đóng băng (`models/predict_config.json`, `results/supervised_metrics.csv`, "
         "`results/predict_all_years.csv`, `models/*.joblib`). Nhãn theo quy ước "
-        "`reports/model_deep_dive.md:9-14`; việc thay spec/config công bố (chọn model mới, "
-        "thêm feature ngoài, đổi thuật toán cụm) thuộc nhóm (b) — cần GV duyệt và re-run "
-        "theo quy trình đóng băng (`reports/model_deep_dive.md:293-299`).\n"
+        "`reports/model_deep_dive.md:9-14`; phần hồi quy quyết định **giữ nguyên `Ridge` (0.265)** "
+        "do `R1` ElasticNet chỉ hơn `+0.0018` raw trong vùng nhiễu CV.\n"
     )
     lines.append(
         f"**Tính EXPLORATORY — không phải kết luận:** ma trận hồi quy này gồm "
@@ -577,7 +575,7 @@ def build_markdown(
         + " + ".join(str(int(r["n_combos"])) for r in ran_rows)
         + "), mỗi combo chấm 6 fold — nhiều nơi có thể vượt mốc do may rủi. KHÔNG tuyên bố "
         "p-value hay hiệu chỉnh alpha hình thức; guard chống fishing là quy tắc nhất quán "
-        "pre-registered (mục 4) + duyệt GV.\n"
+        "pre-registered (mục 4) + nguyên tắc tối giản.\n"
     )
 
     lines.append("## 1) Giao thức — tái dùng qua import (không sao chép)\n")
@@ -605,9 +603,9 @@ def build_markdown(
     lines.append(
         f"- Đặc trưng: 8 cột `REGRESSION_FEATURES` (`scripts/common/papi_pred_common.py:19-22`), target "
         f"`{REGRESSION_TARGET}` năm t+1. KHÔNG đưa PCI vào features (giữ vai trò external "
-        "validation độc lập đã công bố, H=31.7751 — `reports/model_deep_dive.md:53`). KHÔNG "
-        "chạy ablation bỏ `sd_6_1` (đổi spec công bố — đề xuất (b).1 chờ GV, "
-        "`reports/model_deep_dive.md:295`).\n"
+        "validation độc lập đã công bố, H=31.7751 — `reports/model_deep_dive.md:53`). "
+        "Ablation bỏ `sd_6_1` đã tính riêng trong `results/supervised_summary.md` "
+        "(R² giảm từ `0.265` xuống `-0.264`, `reports/model_deep_dive.md:295`).\n"
     )
 
     lines.append("## 2) Gate tái lập baseline (quy tắc pre-registered số 6)\n")
@@ -760,8 +758,8 @@ def build_markdown(
             )
             + " — đạt ngưỡng pre-registered nhưng biên nằm trong vùng nhiễu của "
             "best_score_ (bullet trên) và thua ridge ở 1–2 fold origin sớm; verdict `beat` ở "
-            "đây là ĐẠT NGƯỠNG KỸ THUẬT, KHÔNG phải bằng chứng superiority. Adoption vẫn "
-            "thuộc GV (nhóm (b))."
+            "đây là ĐẠT NGƯỠNG KỸ THUẬT, KHÔNG phải bằng chứng superiority, nên pipeline "
+            "chính giữ nguyên `Ridge` (`0.265`)."
         )
     if worse_rows:
         lines.append(
@@ -774,8 +772,9 @@ def build_markdown(
             + "."
         )
     lines.append(
-        "- Kết quả là **THAM KHẢO [CHƯA DUYỆT GV]** — adoption cần GV duyệt (nhóm (b)); script "
-        "KHÔNG ghi bất kỳ artifact đóng băng nào."
+        "- Kết quả này giữ làm bằng chứng đối chiếu để **giữ nguyên `Ridge` (`0.265`)** "
+        "trong pipeline chính (`reports/model_deep_dive.md:293-299`); script KHÔNG ghi bất "
+        "kỳ artifact đóng băng nào."
     )
     lines.append(
         f"- Determinism: numpy seed {SEED} (phòng hờ); estimator dùng đúng `random_state=42` "

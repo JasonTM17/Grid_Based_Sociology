@@ -5,7 +5,7 @@ _Cập nhật ngày 27/11/2026 · Nhóm 15._
 ## Hồ sơ của đồ án
 
 - [x] **Báo cáo DOCX tiếng Việt** — `reports/Nhom15_BaoCao_STING_PAPI.docx` (49 trang khi render bằng LibreOffice, bảy chương, có Mục 5.8 **Thống kê mô tả và gợi ý rà soát 63 tỉnh**, mục lục và danh mục 13 hình, 15 bảng có số trang đã cập nhật), đồng bộ trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip).
-- [x] **Notebook phân tích thống nhất** — `notebooks/Nhom15_STING_PAPI.ipynb` chạy sạch 18 code cell từ gói giải nén (gộp demo 3×3 giữa kỳ, 240 điểm giả lập, phân cụm PAPI, thống kê bàn giao 63 tỉnh, dự báo, kiểm chứng ngoại lai & phụ lục học phần). [Kết quả chạy lại](../submissions/verification.json)
+- [x] **Notebook phân tích thống nhất** — `notebooks/Nhom15_STING_PAPI.ipynb` chạy sạch 19 code cell từ gói giải nén (gộp demo 3×3 giữa kỳ, 240 điểm giả lập, phân cụm PAPI, thống kê bàn giao 63 tỉnh, dự báo, kiểm chứng ngoại lai & phụ lục học phần/mở rộng `E2–E4`). [Kết quả chạy lại](../submissions/verification.json)
 - [x] **Notebook tiền xử lý PAPI** — `notebooks/Nhom15_TienXuLy_PAPI.ipynb` chạy sạch 9 code cell trực tiếp từ 14 workbook PAPI gốc qua `PREPROCESSING_PIPELINE` 6 bước.
 - [x] **Slide trình bày thống nhất (12 trang)** — `slides/Nhom15_STING_PAPI.pptx` (bảng có thể chỉnh sửa, hai biểu đồ với workbook dữ liệu nhúng; slide 6–7 quan sát 2024, thống kê 63 tỉnh và dịch chuyển; slide 12 kết luận và cảm ơn; sinh bằng `python scripts/deliverables/build_slides.py`).
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/data/check_data.py` → PASS.

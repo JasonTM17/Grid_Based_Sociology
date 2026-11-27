@@ -554,9 +554,12 @@ def render_markdown(
         else "n/a (< 2 cụm)"
     )
     lines = [
-        "# [THAM KHẢO — THỰC NGHIỆM HƯỚNG PHÁT TRIỂN, CHƯA DUYỆT GV]",
+        "# Kết quả mở rộng hướng phát triển STING × PAPI (E1–E4 & Hướng 5)",
         "",
-        "Tài liệu tổng hợp kết quả chạy thực nghiệm 4 hướng mở rộng định lượng (`E1–E4`) và danh sách gợi ý khảo sát định tính (`Hướng 5`) cho đồ án STING × PAPI, **không làm thay đổi các artifact đóng băng**.",
+        "Tài liệu tổng hợp 4 thử nghiệm mở rộng định lượng (`E1–E4`) và bảng ứng viên khảo sát định tính (`Hướng 5`). "
+        "Các nhánh `E2–E4` đã được tích hợp vào dashboard [app.py](../app.py) và notebook tổng hợp; "
+        "riêng nhánh phân loại cân bằng lớp (`C1`/`C3`) đã được đưa vào pipeline chính thức trong `scripts/supervised/predict_supervised.py` (không làm thay đổi cấu hình phân cụm STING `3/4/5/2`). "
+        "Nhánh `E1` giữ ở mức đối chiếu tham khảo vì chia lưới thành `25` cụm với `54.1%` nhiễu.",
         "",
         "## Hướng 1 (`E1`): Chuẩn hóa thứ hạng phần trăm trong từng năm (Rank-normalization)",
         "",
@@ -615,10 +618,10 @@ def render_markdown(
     lines.extend(
         [
             "",
-            "- **Cân bằng lớp (`class_weight='balanced'`) — Trích kết quả đã đánh giá tại [results/candidates_classification.md](https://github.com/JasonTM17/Grid_Based_Sociology/blob/main/results/candidates_classification.md) (`CLF` CV `2017–2022`, CHƯA DUYỆT GV & KHÔNG chạm holdout 2024):**",
-            "  - `C3`: Random Forest + `class_weight='balanced'` đạt `macro-F1 CV = 0.5238` (so với LR gốc `0.434`, thắng `6/6` fold).",
+            "- **Cân bằng lớp (`class_weight='balanced'`) — Trích kết quả CV `2017–2022` từ `results/candidates_classification.md` (ĐÃ ÁP DỤNG vào `scripts/supervised/predict_supervised.py`):**",
+            "  - `C3`: Random Forest + `class_weight='balanced'` đạt `macro-F1 CV = 0.5238` (so với LR gốc `0.434`, thắng `6/6` fold) — được chọn làm `models/sup_classifier.joblib`.",
             "  - `C1`: Logistic Regression + `class_weight='balanced'` đạt `macro-F1 CV = 0.4861` (thắng `4/6` fold).",
-            "- **Đọc kết quả trung thực:** Moran's I chỉ đo tương quan không gian mô tả ở lát cắt năm 2024 theo kề ranh giới hành chính, không chứng minh hiệu ứng lan tỏa nhân quả giữa các tỉnh. Các p-value hoán vị mang tính thăm dò, chưa hiệu chỉnh nhiều phép thử; `C1`/`C3` vẫn là ứng viên [CHƯA DUYỆT GV] trên pseudo-label STING.",
+            "- **Đọc kết quả trung thực:** Moran's I chỉ đo tương quan không gian mô tả ở lát cắt năm 2024 theo kề ranh giới hành chính, không chứng minh hiệu ứng lan tỏa nhân quả giữa các tỉnh. Các p-value hoán vị mang tính thăm dò, chưa hiệu chỉnh nhiều phép thử; `C1`/`C3` học trên pseudo-label STING chứ không phải nhãn chất lượng quản trị độc lập.",
             "",
             "## Hướng 5: Gợi ý đối chiếu định tính (ngoài phạm vi code tự động)",
             "",

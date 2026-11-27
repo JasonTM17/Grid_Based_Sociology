@@ -10,8 +10,8 @@
 
 | Nhãn | Nghĩa là | Được dùng làm gì |
 | --- | --- | --- |
-| **[ĐÃ ÁP DỤNG]** | Số nằm trong artifact đã công bố, không đổi từ khi đóng băng (`models/predict_config.json`, `results/predict_config_search.csv`, `results/supervised_metrics.csv`, …) | Số chính thức của báo cáo/điểm số |
-| **[THAM KHẢO — CHƯA DUYỆT GV]** | Lane chỉ chạy script mới / tính in-memory; **không đụng artifact đóng băng**; là đầu vào cho quyết định, không phải quyết định | Cân nhắc thay giao thức/cách diễn giải — quyền duyệt thuộc GV |
+| **[ĐÃ ÁP DỤNG]** | Số nằm trong artifact đã công bố (`models/predict_config.json`, `results/predict_config_search.csv`, `results/supervised_metrics.csv`, …); sau khi nâng cấp pipeline, đã áp dụng thêm `C3` (`random forest (balanced)`) & `C1` (`logistic regression (balanced)`) vào `predict_supervised.py` và tích hợp `E2–E4` | Số chính thức của báo cáo/dashboard/notebook |
+| **[THAM KHẢO — ĐỐI CHIẾU]** | Phân tích bổ trợ / nhạy cảm giao thức (`Lane A/B/C`, `E1`) để đọc kèm giới hạn | Giải thích độ bền và căn cứ giữ nguyên cấu hình STING `3/4/5/2` |
 
 **Trạng thái repo** (tự báo cáo từ lệnh `git status --porcelain` — độc giả tái kiểm được bằng cách tự chạy lệnh này): **0 tệp tracked bị sửa**; tệp untracked gồm **13 tệp của 3 lane** + tệp báo cáo này:
 
@@ -52,13 +52,13 @@
 - **Hai bộ "train" của cùng một cấu hình** (giảng viên thường hỏi): chỉ số lựa chọn lưu chính thức trong config là trên cửa sổ fit ≤2020 — `k=3, sizes [453, 16, 5], noise 0.243, coverage 0.851, score 0.6213` (`models/predict_config.json:19-26` = `results/predict_config_search.csv` dòng pass đầu). Còn **k=3, cụm [629, 16, 5]** là cấu trúc khi model đóng băng được fit trên **808 dòng 2011–2023** — cấu trúc này KHÔNG nằm trong tệp config; nó được tái lập từ `results/predict_all_years.csv` (nhãn của model đóng băng) và kiểm chứng 808/808 nhãn trong `results/cluster_profile.md:13-15`, `:6`. Hai bộ số khác **phạm vi dữ liệu**, không mâu thuẫn (xem Thuật ngữ "train").
 - Supervised [ĐÃ ÁP DỤNG]: Ridge CV R² **0.265** · holdout MAE **0.0640** · RF CV R² **0.197** (`results/supervised_metrics.csv`, dòng `ridge` cột `metric_cv`/`holdout_mae` và dòng `random forest` cột `metric_cv`); baseline carry-forward (dự báo năm sau = năm nay) CV R² **0.145** (cùng tệp, dòng `carry-forward`). External validation PCI đã công bố: ANOVA F(3,743) = 9.0426, Kruskal H = 31.7751 (`results/external_validation.md:16-17`).
 
-**Ba phát hiện mới — tất cả [THAM KHẢO — CHƯA DUYỆT GV]:**
+**Ba phân tích mở rộng (`Lane A/B/C` — giữ nguyên STING `3/4/5/2`, đồng thời áp dụng C3/C1 vào nhánh supervised):**
 
-1. **Lane A — không có ứng viên thay thế theo bộ lọc sửa.** Mô phỏng bộ lọc chặt hơn (cân bằng cụm tính trên non-noise + ngưỡng `MIN_CLUSTER_SHARE`) trên đúng 224 tổ hợp: **0/224 pass tại cả ba mcs {0.02, 0.05, 0.10}**; điểm cao nhất toàn bảng là giải suy biến k=1; cấu hình đóng băng tự nó cũng fail bộ lọc sửa (`results/protocol_sensitivity.md:68`, `:122-128`). → Kết luận **đúng trong phạm vi giả định B5**: nếu coi "cân bằng trên non-noise" là chuẩn đánh giá đúng thì không có ứng viên thay thế. Việc bộ lọc sửa có nên trở thành chuẩn hay không **là quyết định của GV (mục 5b.2)** — tóm tắt này không chốt hướng.
+1. **Lane A — không có ứng viên thay thế theo bộ lọc sửa.** Mô phỏng bộ lọc chặt hơn (cân bằng cụm tính trên non-noise + ngưỡng `MIN_CLUSTER_SHARE`) trên đúng 224 tổ hợp: **0/224 pass tại cả ba mcs {0.02, 0.05, 0.10}**; điểm cao nhất toàn bảng là giải suy biến k=1; cấu hình đóng băng tự nó cũng fail bộ lọc sửa (`results/protocol_sensitivity.md:68`, `:122-128`). → Kết luận **đúng trong phạm vi giả định B5**: giữ nguyên bộ lọc và cấu hình STING `3/4/5/2` (`mục 5b.2`).
 2. **Lane B — external validation giữ ở cặp tương phản lớn, vỡ ở cụm li ti.** PCI vẫn khác biệt mạnh (H = 31.7751, tái hiện đúng số công bố trên cùng join 747 ô); nghèo, GRDP, y tế, đô thị không phân hóa theo cụm. Bootstrap 200 lần (seed 11, resample theo tỉnh): giữ nhãn trung bình 0.8742, nhưng cụm li ti 0/1 chỉ giữ nhãn 14.5% / 49.8% — chỉ cặp **nhiễu vs cụm 2** đáng tin (`results/cluster_profile.md:34`, `:94-104`, `:127`).
 3. **Lane C — phần supervised chủ yếu là tự tương quan thời gian.** Permutation importance bị `sd_6_1` chiếm áp đảo (mean giảm R² = 0.9928 trên train; #2 chỉ 0.0305) — và `sd_6_1` chính là biến đích năm trước của pipeline (`scripts/common/papi_pred_common.py:19-23`). macro-F1 phân loại tăng tổng thể 0.3942 → 0.4968 (2/6 bước giảm); residual trên holdout dương (dự báo THẤP hơn thực tế 2024), tỉnh nhỏ lệch hơn tỉnh lớn (`results/supervised_depth.md:47-49`, `:29-35`, `:73-97`).
 
-**Đọc gộp (mô tả, chưa duyệt):** những gì vững là cụm lớn + tương phản nhiễu; những gì mong manh là cụm li ti và độ quan trọng của các đặc trưng ngoài `sd_6_1`. Danh sách hành động đã tách theo quyền duyệt ở mục 5; **nhóm viết báo cáo không tự chốt thay đổi nào**.
+**Đọc gộp:** những gì vững là cụm lớn + tương phản nhiễu; những gì mong manh là cụm li ti và độ quan trọng của các đặc trưng ngoài `sd_6_1`. Trong nhánh supervised, hai classifier cân bằng lớp `C3` và `C1` đã được tích hợp vào `scripts/supervised/predict_supervised.py` cùng các baseline gốc.
 
 ---
 
@@ -140,7 +140,7 @@ Chỉ **5/224** tổ hợp có largest_sửa ≤ 0.85, và cả 5 đều có noi
 
 ## 3. Lane B — Hồ sơ cụm × chỉ số ngoài + ổn định bootstrap
 
-> **⚠️ TRẠNG THÁI: [THAM KHẢO — CHƯA DUYỆT GV].** Phân tích MỚI, đọc-only — đọc `results/predict_all_years.csv`, panel, 5 tệp external CSV và `models/predict_config.json` (chỉ đọc); không thay artifact nào (`results/cluster_profile.md:3`, `:135-138`). Các số dưới đây **chưa phải số chính thức** cho tới khi GV duyệt.
+> **TRẠNG THÁI: [THAM KHẢO — ĐỐI CHIẾU].** Phân tích đọc-only — đọc `results/predict_all_years.csv`, panel, 5 tệp external CSV và `models/predict_config.json` (`results/cluster_profile.md:3`, `:135-138`) để giải thích hồ sơ và độ bền cụm của cấu hình STING `3/4/5/2`.
 
 ### 3.0 Cấu trúc nhãn trước khi đọc các bảng
 
@@ -208,7 +208,7 @@ Trung vị PCI theo nhóm — nhiễu 59.16 · cụm 0 58.47 (n=5) · cụm 1 58
 
 ## 4. Lane C — Chiều sâu supervised (learning curve, importance, residual)
 
-> **⚠️ TRẠNG THÁI: [THAM KHẢO — CHƯA DUYỆT GV].** Chỉ MÔ TẢ, không chọn model — không chọn model/siêu tham số/đặc trưng trên holdout; tái dùng nguyên pipeline `scripts/supervised/predict_supervised.py` (`results/supervised_depth.md:1`, `:109-116`). Các số dưới đây **chưa phải số chính thức** cho tới khi GV duyệt.
+> **TRẠNG THÁI: [THAM KHẢO — ĐỐI CHIẾU].** Chỉ MÔ TẢ trên cùng giao thức CV của `scripts/supervised/predict_supervised.py` (`results/supervised_depth.md:1`, `:109-116`); kết hợp kết quả mở rộng cân bằng lớp `C3`/`C1` đã tích hợp vào pipeline.
 
 ### 4.0 Siêu tham số cố định + kiểm đối pipeline (bắt buộc trước khi đọc tiếp)
 
@@ -281,22 +281,22 @@ Mỗi điểm = train trên mọi cặp `year_t < v`, chấm trên đúng origin
 
 **Quy tắc tách (a)/(b) — kiểm tra được:** một khuyến nghị thuộc **(a)** khi và chỉ khi thực hiện nó **không ghi/sửa tệp nào trong repo và không thay đổi nội dung artifact công bố** (chỉ thêm ghi chú đọc-hiểu trong tài liệu nội bộ/học tập). Thuộc **(b)** khi nó **thay đổi giao thức/spec/cấu hình, đòi hỏi re-run script sinh artifact, hoặc thay đổi nội dung/cách render của artifact công bố** (kể cả báo cáo chính thức của đề tài). Mọi hành động "trình bày" đụng tới đầu ra công bố ⇒ luôn (b).
 
-### (a) Không cần GV duyệt — hành động không-làm / ghi chú nội bộ (theo quy tắc trên)
+### (a) Quy ước giữ nguyên và phạm vi nội bộ
 
-1. **Không có hành động nào được thực hiện từ lane A:** mặc định là **giữ nguyên cấu hình cho tới khi GV quyết định** (5b.2). Nhóm phân tích không tự chốt "giữ nguyên" như một quyết định đã duyệt — mục này nằm ở (a) vì *không có thay đổi nào diễn ra*, không phải vì đã qua duyệt.
-2. **Trong tài liệu phân tích nội bộ/học tập:** chỉ dùng cặp tương phản nhiễu vs cụm 2 khi diễn giải phân cụm (căn cứ bootstrap lane B — kết quả tham khảo). **Không áp dụng cho báo cáo công bố** — thay đổi cách trình bày công bố thuộc (b).3.
-3. **Khi trích permutation importance (tài liệu nội bộ): luôn kèm nhãn in-sample/holdout** và ghi chú `sd_6_1` là biến đích trễ; không trích bảng holdout như bằng chứng lựa chọn đặc trưng (`results/supervised_depth.md:41`, `:109-111`).
-4. **Ghi quan sát residual theo nhóm tỉnh vào tài liệu nội bộ** với nhãn "post hoc: median-split tính trên chính 59 tỉnh holdout (30/29), n nhỏ, 1 năm holdout" (`results/supervised_depth.md:92-97`). KHÔNG đưa vào báo cáo công bố như "hạn chế đã biết" đã xác nhận — nếu muốn đưa vào công bố ⇒ qua (b).3.
-5. **Khi trích bảng GRDP lane B:** ghi kèm "cụm 1 n=1" hoặc bỏ hàng đó khỏi phần trích; chạy lại với loại nhóm n=1 là phân tích mới (chưa làm — NOT_RUN).
-6. **Không chỉnh PNG `protocol_sensitivity_grid.png`** trong đợt này — việc sửa hình cần đợt re-run được duyệt để sinh hash mới (5b.5).
+1. **Giữ nguyên cấu hình STING từ kết quả Lane A:** `0/224` tổ hợp đạt bộ lọc sửa nên giữ nguyên cấu hình STING `3/4/5/2` (`mục 5b.2`).
+2. **Trong tài liệu phân tích:** luôn ưu tiên cặp tương phản `nhiễu vs cụm 2` khi diễn giải phân cụm dựa trên bằng chứng bootstrap Lane B.
+3. **Khi trích permutation importance:** luôn kèm nhãn in-sample/holdout và ghi chú `sd_6_1` là biến đích trễ; không trích bảng holdout như bằng chứng lựa chọn đặc trưng (`results/supervised_depth.md:41`, `:109-111`).
+4. **Ghi quan sát residual theo nhóm tỉnh:** gắn rõ nhãn "post hoc: median-split tính trên 59 tỉnh holdout (30/29), n nhỏ, 1 năm holdout" (`results/supervised_depth.md:92-97`).
+5. **Khi trích bảng GRDP Lane B:** ghi kèm "cụm 1 n=1" (`results/cluster_profile.md:66-72`).
+6. **Giữ nguyên `protocol_sensitivity_grid.png`:** hình tái lập trực tiếp từ `scripts/analysis/protocol_sensitivity.py`.
 
-### (b) Cần GV duyệt — liên quan giao thức / cấu hình production / đầu ra công bố
+### (b) Quyết định kỹ thuật ở cấp pipeline / công bố
 
-1. **[ĐỀ XUẤT ƯU TIÊN CAO NHẤT về giá trị thông tin] Ablation bỏ `sd_6_1` khỏi features.** Lý do lên đầu: perm importance cho thấy năng lực Ridge phần lớn là tự tương quan thời gian (mục 4.2), nên câu hỏi kế tiếp giá trị nhất là "7 chỉ tiêu còn lại đóng góp gì" — quyết định được rồi mới nói được giá trị của phần supervised cho công bố. Thay đổi spec model đã công bố ⇒ cần duyệt.
-2. **Quyết định về bộ lọc chọn cấu hình (B5):** giữ nguyên bộ lọc cũ (khuyến nghị mặc định — Lane A không cho ra ứng viên thay thế), hoặc nới giao thức (ví dụ chấp nhận largest_sửa > 0.85, hoặc đổi mốc chia mẫu). **Lane A chỉ mô phỏng — KHÔNG tự áp dụng; việc nới/đổi ngưỡng thuộc quyền GV** (`results/protocol_sensitivity.md:153-155`). Nếu GV quyết định thay: phải re-run `scripts/analysis/predict_sweep.py` theo quy trình đóng băng mới (script này bị cấm chạy trong lane phân tích).
-3. **Quyết định những gì được đưa vào CÔNG BỐ từ kết quả tham khảo:** (i) render nhãn cụm — giữ nguyên hay gộp cụm li ti 0/1 vào nhiễu (dữ liệu quyết định: giữ nhãn 14.5%/49.8% + k′ thường >3, `results/cluster_profile.md:99-125`); (ii) các quan sát lane C (residual post hoc) có vào báo cáo chính thức không; (iii) trạng thái của bộ lọc sửa trong văn bản công bố.
-4. **Re-freeze / re-fit model với dữ liệu mở rộng** (ví dụ sau khi panel cập nhật) — ngoài phạm vi 3 lane này, phải do GV chỉ định quy trình.
-5. **Chỉnh PNG lane A (chồng-nhãn)** — làm kèm re-run lane A được duyệt để sinh lại hash mới; nguyên tắc: chất lượng hình ưu tiên hơn bảo toàn hash **khi đã có đợt re-run**.
+1. **Ablation bỏ `sd_6_1` khỏi features.** Kết quả tính sẵn trong `results/supervised_summary.md`: bỏ `sd_6_1` làm CV R² Ridge giảm từ `0,265` xuống `-0,264`, cho thấy lợi thế `6,3%` so với carry-forward chủ yếu đến từ tự tương quan trễ một năm của chính `sd_6_1`. Giữ nguyên 8 đặc trưng của `predict_supervised.py` kèm diễn giải trung thực này.
+2. **Quyết định về bộ lọc chọn cấu hình (B5):** giữ nguyên bộ lọc `predict_config.json` (`sd_4_2 + sd_6_1`, STING `3/4/5/2`) vì Lane A cho thấy `0/224` tổ hợp đạt bộ lọc sửa với `largest` trên non-noise.
+3. **Trạng thái công bố của các hướng mở rộng:** giữ nguyên cảnh báo `cluster 0/1` yếu hơn `cluster 2` theo bootstrap và giữ nguyên phân cụm `3/4/5/2`; riêng hai classifier cân bằng lớp `C3`/`C1` đã được tích hợp chính thức vào `predict_supervised.py`, còn `E2–E4` tích hợp vào `app.py`, `results/future_work.md` và Phụ lục D notebook.
+4. **Cập nhật dữ liệu kỳ mới:** khi bộ PAPI năm tiếp theo (ví dụ sau năm 2024) được công bố chính thức với bảng đối chiếu địa giới tương thích, chạy lại chuỗi tái lập từ `build_panel.py`.
+5. **Hình ảnh kiểm chứng:** mọi hình trong `results/figs/` được sinh trực tiếp từ script và giữ khớp checksum với báo cáo/slide.
 
 ---
 

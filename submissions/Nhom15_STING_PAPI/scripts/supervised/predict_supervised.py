@@ -251,6 +251,65 @@ def expanding_majority_f1(y, splits) -> float:
     return float(np.mean(scores))
 
 
+def _sync_supervised_excel(
+    met: pd.DataFrame, xlsx_path: Path = ROOT / "results" / "KetQua_STING_PAPI.xlsx"
+) -> None:
+    """Keep Excel sheet 'Mô hình có giám sát' and 'Mục lục' synced when workbook exists."""
+    if not xlsx_path.is_file():
+        return
+    from copy import copy
+
+    import openpyxl
+
+    wb = openpyxl.load_workbook(xlsx_path)
+    sheet_name = "Mô hình có giám sát"
+    if sheet_name not in wb.sheetnames:
+        return
+    ws = wb[sheet_name]
+    col_order = (
+        "task",
+        "model",
+        "metric_cv",
+        "value_cv",
+        "holdout_mae",
+        "holdout_rmse",
+        "holdout_r2",
+        "holdout_acc",
+        "holdout_macro_f1",
+    )
+    reg_style_row = [ws.cell(8, col) for col in range(1, 10)]
+    clf_style_row = [ws.cell(12, col) for col in range(1, 10)]
+    start_row = 6
+    prev_max = ws.max_row
+    for row_idx, (_, rec) in enumerate(met[list(col_order)].iterrows(), start=start_row):
+        tmpl = reg_style_row if rec["task"] == "regression" else clf_style_row
+        ws.row_dimensions[row_idx].height = ws.row_dimensions[
+            8 if rec["task"] == "regression" else 12
+        ].height
+        for col_idx, key in enumerate(col_order, start=1):
+            val = rec[key]
+            val = None if pd.isna(val) else (val.item() if hasattr(val, "item") else val)
+            cell = ws.cell(row_idx, col_idx, val)
+            src = tmpl[col_idx - 1]
+            if src.has_style:
+                cell.font = copy(src.font)
+                cell.fill = copy(src.fill)
+                cell.border = copy(src.border)
+                cell.alignment = copy(src.alignment)
+                cell.number_format = src.number_format
+    end_row = start_row + len(met) - 1
+    if prev_max > end_row:
+        ws.delete_rows(end_row + 1, prev_max - end_row)
+    if "PapiResults16" in ws.tables:
+        ws.tables["PapiResults16"].ref = f"A5:I{end_row}"
+    if "Mục lục" in wb.sheetnames:
+        ws_toc = wb["Mục lục"]
+        for row_idx in range(6, ws_toc.max_row + 1):
+            if ws_toc.cell(row_idx, 6).value == "supervised_metrics.csv":
+                ws_toc.cell(row_idx, 4, len(met))
+    wb.save(xlsx_path)
+
+
 def main() -> int:
     for d in (MODELS, RESULTS, FIGS):
         d.mkdir(parents=True, exist_ok=True)
@@ -338,12 +397,23 @@ def main() -> int:
     lr = Pipeline([("sc", StandardScaler()),
                    ("clf", LogisticRegression(max_iter=3000, random_state=SEED))])
     rf_clf = RandomForestClassifier(n_estimators=300, random_state=SEED, n_jobs=1)
+    lr_bal = Pipeline([("sc", StandardScaler()),
+                       ("clf", LogisticRegression(max_iter=3000, random_state=SEED, class_weight="balanced"))])
+    rf_clf_bal = RandomForestClassifier(
+        n_estimators=300, random_state=SEED, n_jobs=1, class_weight="balanced"
+    )
     grid_lr = GridSearchCV(lr, {"clf__C": [0.1, 0.3, 1.0]}, cv=clf_cv,
                            scoring=CLASSIFICATION_SCORER, n_jobs=1)
     grid_rfc = GridSearchCV(rf_clf, {"max_depth": [3, 6, None], "min_samples_leaf": [1, 2]},
                             cv=clf_cv, scoring=CLASSIFICATION_SCORER, n_jobs=1)
+    grid_lr_bal = GridSearchCV(lr_bal, {"clf__C": [0.1, 0.3, 1.0]}, cv=clf_cv,
+                               scoring=CLASSIFICATION_SCORER, n_jobs=1)
+    grid_rfc_bal = GridSearchCV(rf_clf_bal, {"max_depth": [3, 6, None], "min_samples_leaf": [1, 2]},
+                                cv=clf_cv, scoring=CLASSIFICATION_SCORER, n_jobs=1)
     grid_lr.fit(Xc_tr, yc_tr)
     grid_rfc.fit(Xc_tr, yc_tr)
+    grid_lr_bal.fit(Xc_tr, yc_tr)
+    grid_rfc_bal.fit(Xc_tr, yc_tr)
     maj = int(pd.Series(yc_tr).mode().iloc[0])
 
     def clf_metrics(y, yp, cv_score):
@@ -364,8 +434,14 @@ def main() -> int:
     met_rows.append({"task": "classification", "model": "random forest",
                      **clf_metrics(yc_te, grid_rfc.best_estimator_.predict(Xc_te),
                                    grid_rfc.best_score_)})
+    met_rows.append({"task": "classification", "model": "logistic regression (balanced)",
+                     **clf_metrics(yc_te, grid_lr_bal.best_estimator_.predict(Xc_te),
+                                   grid_lr_bal.best_score_)})
+    met_rows.append({"task": "classification", "model": "random forest (balanced)",
+                     **clf_metrics(yc_te, grid_rfc_bal.best_estimator_.predict(Xc_te),
+                                   grid_rfc_bal.best_score_)})
     met = pd.DataFrame(met_rows)
-    met.to_csv(RESULTS / "supervised_metrics.csv", index=False, encoding="utf-8-sig")
+    met.to_csv(RESULTS / "supervised_metrics.csv", index=False, encoding="utf-8-sig", lineterminator="\n")
     print("\n" + met.to_string(index=False))
 
 
@@ -448,6 +524,8 @@ def main() -> int:
     _clf_grids = {
         "logistic regression": grid_lr,
         "random forest": grid_rfc,
+        "logistic regression (balanced)": grid_lr_bal,
+        "random forest (balanced)": grid_rfc_bal,
     }
     _selected_clf_grid = _clf_grids[_selected_clf_name]
     joblib.dump(_selected_clf_grid.best_estimator_, MODELS / "sup_classifier.joblib")
@@ -570,7 +648,7 @@ def main() -> int:
         f"lớp đa số train là {_tm_txt}; lớp 1 chiếm đa số ở {_n_val_majority_one}/{len(_val_prev)} fold validation "
         f"(prevalence {_val_prev.min():.0%}–{_val_prev.max():.0%}). Biến động tỷ lệ nhãn ảnh hưởng đến so sánh "
         f"với baseline đa số train; baseline mù "
-        f"thời gian “always dự đoán 1” đạt macro-F1 {_always1_f1:.3f} (chỉ thấp hơn LR "
+        f"thời gian “always dự đoán 1” đạt macro-F1 {_always1_f1:.3f} (chỉ thấp hơn {_selected_clf_name} "
         f"{_selected_clf['value_cv'] - _always1_f1:.3f}).\n"
         f"- value_cv là best_score_ của GridSearchCV: hiệu năng CV trung bình của cấu hình được chọn trên "
         f"chính các fold đó (không nested CV), nên có thể lạc quan. Chênh lệch điểm giữa các alpha Ridge "
@@ -585,11 +663,12 @@ def main() -> int:
         f"classifier tương tự qua `models/sup_classifier.joblib` ({_selected_clf_name}, nhãn 0/1)."
     )
     lines.append("")
-    (RESULTS / "supervised_summary.md").write_text("\n".join(lines), encoding="utf-8")
+    (RESULTS / "supervised_summary.md").write_text("\n".join(lines), encoding="utf-8", newline="\n")
+    _sync_supervised_excel(met)
 
     print("\nđã lưu: sup_ridge.joblib, sup_rf.joblib, sup_classifier.joblib, "
           "supervised_metrics.csv, supervised_summary.md, supervised_regression.png, "
-          "supervised_confusion.png")
+          "supervised_confusion.png (va cap nhat KetQua_STING_PAPI.xlsx)")
     return 0
 
 

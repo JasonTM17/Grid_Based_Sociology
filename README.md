@@ -156,8 +156,8 @@ Bảng liên kết các nội dung học máy với mã nguồn, kết quả và
 |---|---|
 | Ý tưởng ML, học có/không giám sát, clustering grid-based | `src/sting.py`; demo synthetic + PAPI + test: `notebooks/Nhom15_STING_PAPI.ipynb`, `tests/test_sting.py`; PAPI thật: `scripts/analysis/predict_demo.py`, `results/predict_summary.md` |
 | Regression vs classification | Hồi quy: `scripts/supervised/predict_supervised.py` → `results/supervised_metrics.csv`; phân loại pseudo-label: cùng script + `results/supervised_summary.md` |
-| Naive Bayes, KNN, đánh giá accuracy / F1 | `scripts/supervised/course_supervised_baselines.py` → `results/course_supervised_baselines.{csv,md}`; sàn chance/drift: `scripts/supervised/classifier_label_baselines.py` → `results/classifier_label_baselines.{csv,md}`; pipeline chọn LR: `scripts/supervised/predict_supervised.py` |
-| Confusion matrix, precision/recall | Ma trận 6 model học phần: `results/figs/course_confusion_matrix.png`; LR đã chọn (một model): `results/figs/supervised_confusion.png` |
+| Naive Bayes, KNN, đánh giá accuracy / F1 | `scripts/supervised/course_supervised_baselines.py` → `results/course_supervised_baselines.{csv,md}`; sàn chance/drift: `scripts/supervised/classifier_label_baselines.py` → `results/classifier_label_baselines.{csv,md}`; pipeline chọn `random forest (balanced)` theo CV: `scripts/supervised/predict_supervised.py` |
+| Confusion matrix, precision/recall | Ma trận 6 model học phần: `results/figs/course_confusion_matrix.png`; classifier CV-chọn `random forest (balanced)` (một model): `results/figs/supervised_confusion.png` |
 | SVM tuyến tính + kernel RBF | Trong run `course_supervised_baselines` (cùng bảng CSV/MD và hình confusion gộp) |
 | Decision Tree, Random Forest | Cùng `scripts/supervised/course_supervised_baselines.py`; RF hồi quy thử trong `scripts/supervised/predict_supervised.py` (chọn model theo CV, không theo holdout) |
 | Tiền xử lý PAPI (làm sạch, tích hợp và chuẩn hóa) | Mô-đun `src/preprocessing.py` (`PREPROCESSING_PIPELINE` 6 bước, đọc trực tiếp 14 workbook PAPI + thử nghiệm Cleaning/Transformation) được nhập trực tiếp vào `notebooks/Nhom15_TienXuLy_PAPI.ipynb` và `notebooks/Nhom15_STING_PAPI.ipynb` (§2). `scripts/data/preprocessing_audit.py` và `scripts/data/preprocessing_sensitivity.py` tạo bảng kiểm tra và đối chiếu độ nhạy. |
@@ -257,10 +257,11 @@ python scripts/supervised/predict_supervised.py   # 3) model ML có giám sát (
      `models/sup_classifier.joblib` (classifier được CV chọn); kết quả
      `results/supervised_metrics.csv` + `results/supervised_summary.md`.
    - **Phân loại phụ:** dự báo pseudo-label STING cutoff-local cho năm sau, với expanding
-     CV theo origin 2017–2022 (warm-up 2011–2016). CV chọn Logistic Regression
-     (macro-F1 0.434; majority baseline 0.228). Trên holdout 2023→2024, macro-F1 là
-     0.541 so với baseline 0.157. Đây là mức khớp với nhãn do STING sinh, không phải
-     accuracy so với ground truth xã hội; một holdout không chứng minh tổng quát hóa.
+     CV theo origin 2017–2022 (warm-up 2011–2016). CV chọn **`random forest (balanced)`**
+     (`macro-F1 0.524`, so với `logistic regression (balanced)` `0.486`, `logistic regression` `0.434`,
+     `random forest` `0.397` và majority baseline `0.228`). Trên holdout 2023→2024, `random forest (balanced)`
+     đạt Acc `0.712` / macro-F1 `0.569` (`logistic regression (balanced)` đạt `0.746` / `0.595`) so với baseline `0.186` / `0.157`.
+     Đây là mức khớp với nhãn do STING sinh, không phải accuracy so với ground truth xã hội; một holdout không chứng minh tổng quát hóa.
 
 ## Dashboard phân tích local
 

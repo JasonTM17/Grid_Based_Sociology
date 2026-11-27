@@ -1119,7 +1119,7 @@ bullets([
     ("Nhiều mốc đánh giá.", "Kiểm định cuốn chiếu để đối chiếu độ ổn định của sai số qua nhiều mốc thời gian."),
     ("Spatial.", "thêm tự tương quan không gian (láng giềng) — GeoJSON CC-BY-SA 4.0 đã có."),
     ("Định tính.", "phỏng vấn và đối chiếu hồ sơ tại 3–5 tỉnh ngoài vùng dày để tìm hiểu vì sao hai chỉ tiêu khác vùng tham chiếu."),
-    ("Thực nghiệm thăm dò.", "Script scripts/analysis/future_work.py (results/future_work.md) đã chạy thử trên dữ liệu đóng băng: E1 chuẩn hóa hạng theo năm ra 25 cụm, 54,1% nhiễu, ARI non-noise = 0,0085; E2 quỹ đạo OLS 63 tỉnh cho STING 1 cụm / 2 nhiễu (K-Means k=3 silhouette = 0,3430); E3 backtest cuốn chiếu 6 mốc 2019–2024 Ridge có MAE thấp hơn mốc giữ điểm năm trước ở 4/6 năm nhưng out_recall TB 0,063 vs 0,247; E4 Moran's I năm 2024 đạt I = 0,1834 (p = 0,0240) ở sd_6_1. Các mô hình E3 được fit theo từng mốc, nhưng tập đặc trưng và thiết kế lưới được chọn bằng thông tin tới 2021–2022. Vì vậy, các mốc sớm là hồi cứu theo thiết kế cố định, chưa đánh giá độc lập toàn bộ quy trình lựa chọn. P-value E4 mang tính thăm dò và chưa hiệu chỉnh nhiều phép thử."),
+    ("Mở rộng đã tích hợp (future_work & phân loại cân bằng lớp).", "Script scripts/analysis/future_work.py (results/future_work.md) đã chạy trên dữ liệu hiện hành và tích hợp nhánh E2–E4 vào app.py cùng Phụ lục D của notebook: E1 chuẩn hóa hạng theo năm ra 25 cụm, 54,1% nhiễu, ARI non-noise = 0,0085 (giữ đối chiếu, không thay STING 3/4/5/2); E2 quỹ đạo OLS 63 tỉnh cho STING 1 cụm / 2 nhiễu (K-Means k=3 silhouette = 0,3430); E3 backtest cuốn chiếu 6 mốc 2019–2024 Ridge có MAE thấp hơn mốc giữ điểm năm trước ở 4/6 năm nhưng out_recall TB 0,063 vs 0,247; E4 Moran's I năm 2024 đạt I = 0,1834 (p = 0,0240) ở sd_6_1. Đồng thời hai ứng viên phân loại cân bằng lớp C3 (random forest balanced, CV macro-F1 0,524, holdout Acc 0,712 / Macro-F1 0,569) và C1 (logistic balanced, CV 0,486, holdout 0,746 / 0,595) đã được áp dụng chính thức vào scripts/supervised/predict_supervised.py (models/sup_classifier.joblib). Các mô hình E3 được fit theo từng mốc nhưng cặp đặc trưng và lưới chọn tới 2021–2022, còn p-value E4 mang tính thăm dò chưa hiệu chỉnh nhiều phép thử."),
 ])
 
 
@@ -1132,7 +1132,7 @@ bullets([
     ("Rà soát thang đo.", "Bước sàng lọc đánh dấu 23/37 chỉ tiêu để đối chiếu với workbook. Việc đối chiếu giúp chọn đầu vào và giới hạn cách diễn giải các thay đổi theo thời gian."),
 ])
 h2("7.2. Hướng phát triển")
-body("Xem 6.7 — trọng tâm: (1) rank-normalization xuyên năm; (2) quỹ đạo tỉnh; (3) backtest cuốn chiếu; (4) tự tương quan không gian & phân cụm có ràng buộc láng giềng; (5) nghiên cứu định tính bổ trợ (kết quả thực nghiệm thăm dò chi tiết ghi ở results/future_work.md). Mở ứng dụng để xem bản đồ 63 tỉnh và xuất phiếu theo tỉnh.")
+body("Xem 6.7 — trọng tâm: (1) rank-normalization xuyên năm (E1 giữ làm đối chiếu vì phân mảnh 25 cụm / 54,1% nhiễu); (2) quỹ đạo tỉnh (E2); (3) backtest cuốn chiếu (E3); (4) tự tương quan không gian & phân loại cân bằng lớp (`C3`/`C1` đã áp dụng vào pipeline chính); (5) nghiên cứu định tính bổ trợ (kết quả chi tiết ghi ở results/future_work.md, Phụ lục D notebook và app.py). Mở ứng dụng để xem bản đồ 63 tỉnh và xuất phiếu theo tỉnh.")
 h2("7.3. Lời cuối")
 body("Đồ án cung cấp một biến thể STING có kiểm thử, quy trình dữ liệu có rà soát thang đo và thí nghiệm tái lập được. Các kết quả mở rộng cho thấy độ nhạy với cấu hình và giới hạn khi diễn giải nhãn cụm. Kết quả hỗ trợ mô tả dữ liệu, chưa chứng minh cấu trúc xã hội hay quan hệ nhân quả.")
 h2("7.4. Khai báo sử dụng công cụ hỗ trợ")
@@ -1456,7 +1456,10 @@ bullets([
      "chỉ cho alpha. Siêu "
      "tham số cố định (CV train-only 2017–2022 của pipeline): Ridge alpha = "
      f"{_C_HYPER.group(1)}, LR C = {_C_HYPER.group(2)}, RF max_depth = "
-     f"{_C_HYPER.group(3)} / min_samples_leaf = {_C_HYPER.group(4)}."),
+     f"{_C_HYPER.group(3)} / min_samples_leaf = {_C_HYPER.group(4)}; sau đó "
+     "predict_supervised.py đã tích hợp thêm hai biến thể cân bằng lớp C3 "
+     "(random forest balanced, CV 0,524, được chọn làm sup_classifier.joblib) "
+     "và C1 (logistic regression balanced, CV 0,486)."),
     (f"Permutation importance (RF hồi quy, seed {_C_SEED.group(1)}, n_repeats = "
      f"{_C_SEED.group(2)}): sd_6_1 có mức giảm R² lớn nhất khi bị hoán vị.",
      f"train 2011–2022 (in-sample, mean giảm R²): 1. {_C_IMP_TR[0][0]} = "

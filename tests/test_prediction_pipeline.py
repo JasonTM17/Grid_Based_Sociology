@@ -236,18 +236,20 @@ def test_model_family_selection_uses_cv_not_holdout_metrics():
         [
             {"model": "logistic regression", "value_cv": 0.434, "holdout_macro_f1": 0.541},
             {"model": "random forest", "value_cv": 0.397, "holdout_macro_f1": 0.600},
+            {"model": "logistic regression (balanced)", "value_cv": 0.486, "holdout_macro_f1": 0.595},
+            {"model": "random forest (balanced)", "value_cv": 0.524, "holdout_macro_f1": 0.569},
         ]
     )
 
     assert select_model_by_cv(regression) == "ridge"
-    assert select_model_by_cv(classification) == "logistic regression"
+    assert select_model_by_cv(classification) == "random forest (balanced)"
 
     regression.loc[regression.model == "ridge", "holdout_mae"] = 0.09
     regression.loc[regression.model == "random forest", "holdout_mae"] = 0.01
-    classification.loc[classification.model == "logistic regression", "holdout_macro_f1"] = 0.1
+    classification.loc[classification.model == "random forest (balanced)", "holdout_macro_f1"] = 0.1
     classification.loc[classification.model == "random forest", "holdout_macro_f1"] = 0.99
     assert select_model_by_cv(regression) == "ridge"
-    assert select_model_by_cv(classification) == "logistic regression"
+    assert select_model_by_cv(classification) == "random forest (balanced)"
 
 
 def test_pair_builders_reject_duplicate_province_year_rows():

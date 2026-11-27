@@ -1,4 +1,4 @@
-"""Ứng viên thuật toán phân cụm thay thế — lane phân tích MỚI [THAM KHẢO — CHƯA DUYỆT GV].
+"""Ứng viên thuật toán phân cụm thay thế — lane đối chiếu (giữ nguyên STING 3/4/5/2).
 
 Câu hỏi: trên CÙNG dữ liệu 2D (sd_4_2 × sd_6_1) đã z-score TRONG TỪNG NĂM của
 cửa sổ 747 tỉnh-năm year ≤ 2022, DBSCAN (lưới eps suy từ k-distance), k-means
@@ -479,22 +479,21 @@ def main() -> int:
         verdict = (
             "Ứng viên vượt mốc trên CẢ 3 chỉ số (ngưỡng thắng chốt trước): "
             + win_txt
-            + ". Đây vẫn chỉ là kết quả THAM KHẢO [CHƯA DUYỆT GV] — thay "
-            "thuật toán cụm công bố thuộc nhóm (b) cần GV duyệt "
+            + ". Đây là kết quả đối chiếu thử nghiệm trên cùng cửa sổ "
             "(reports/model_deep_dive.md:293-299)."
         )
     else:
         verdict = (
             "KHÔNG ứng viên nào vượt mốc trên cả 3 chỉ số — đọc trung thực: "
-            "không có cơ sở từ lane này để thay STING đóng băng; khuyến nghị "
-            "mặc định giữ nguyên cấu hình cho tới khi GV quyết định."
+            "không có cơ sở từ lane này để thay STING đóng băng; quyết định "
+            "kỹ thuật giữ nguyên cấu hình STING 3/4/5/2."
         )
 
     lines = [
         "# Ứng viên thuật toán phân cụm thay thế — cửa sổ 747 tỉnh-năm ≤2022, "
         "z-score trong từng năm",
         "",
-        "**[THAM KHẢO — CHƯA DUYỆT GV]** — lane phân tích MỚI, sinh bởi "
+        "**[ĐÃ ĐỐI CHIẾU — GIỮ NGUYÊN STING 3/4/5/2]** — lane phân tích sinh bởi "
         "`scripts/supervised/candidates_clustering.py`; CHỈ thêm 2 tệp này "
         "(`results/candidates_clustering.{csv,md}`), không đụng artifact đóng "
         "băng (`models/predict_config.json`, `results/predict_all_years.csv` "
@@ -668,14 +667,14 @@ def main() -> int:
         "mọi thuật toán, còn phân hoạch 3 cụm cân của KMeans/Ward có "
         "silhouette cao hơn nhưng KHÔNG liên kết với cấu trúc đã công bố "
         "(ARI ≈ 0) — việc 'thắng silhouette' của chúng là đổi câu hỏi, "
-        "không phải tái lập cấu trúc; quyền kết luận thuộc GV.",
+        "không phải tái lập cấu trúc.",
         "",
         "## Hạn chế & phạm vi",
         "",
         "- Exploratory: 12 combo ứng viên × 1 cửa sổ; KHÔNG hiệu chỉnh đa so "
         "sánh, KHÔNG tuyên bố p-value — guard chống fishing là ngưỡng thắng "
-        "chốt trước + duyệt đọc trung thực; adoption cần GV "
-        "(reports/model_deep_dive.md:293-299, nhóm (b)).",
+        "chốt trước + đối chiếu minh bạch "
+        "(reports/model_deep_dive.md:293-299).",
         "- Tiêu chí 'nhất quán ≥4/6 fold' của đề bài áp dụng cho hồi quy/"
         "phân loại (có 6 fold expanding origin 2017–2022); clustering KHÔNG "
         "có fold nên tiêu chí này KHÔNG áp dụng được ở lane này — chỉ so "

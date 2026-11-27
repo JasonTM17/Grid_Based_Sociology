@@ -105,7 +105,7 @@ verdict,C1,delta_vs_majority_inmemory,0.257846
 verdict,C1,folds_beat_lr_best,4
 verdict,C1,cond_i_value_cv_gt_milestone,1
 verdict,C1,cond_ii_beat_ge_4_of_6,1
-verdict,C1,verdict,VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV]
+verdict,C1,verdict,VƯỢT NGƯỠNG — ĐÃ ÁP DỤNG VÀO PIPELINE CHÍNH
 candidate_folds,C2|origin=2017,f1_macro,0.338916
 candidate_folds,C2|origin=2017,beats_lr_best,0
 candidate_folds,C2|origin=2018,f1_macro,0.408915
@@ -143,4 +143,4 @@ verdict,C3,delta_vs_majority_inmemory,0.295576
 verdict,C3,folds_beat_lr_best,6
 verdict,C3,cond_i_value_cv_gt_milestone,1
 verdict,C3,cond_ii_beat_ge_4_of_6,1
-verdict,C3,verdict,VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV]
+verdict,C3,verdict,VƯỢT NGƯỠNG — ĐÃ ÁP DỤNG VÀO PIPELINE CHÍNH

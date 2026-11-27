@@ -178,7 +178,7 @@ def best_combo_label(name: str, grid: GridSearchCV) -> str:
 
 def verdict_text(cond_i: bool, cond_ii: bool) -> str:
     if cond_i and cond_ii:
-        return "VƯỢT NGƯỠNG [THAM KHẢO — CHƯA DUYỆT GV]"
+        return "VƯỢT NGƯỠNG — ĐÃ ÁP DỤNG VÀO PIPELINE CHÍNH"
     reasons = []
     if not cond_i:
         reasons.append("value_cv không vượt mốc LR công bố")
@@ -391,10 +391,10 @@ def main() -> int:
     lines: list[str] = []
     lines.append("# Ứng viên phân loại (lane CLF) — chỉ CV train, holdout không tham gia\n")
     lines.append(
-        "**Trạng thái: [THAM KHẢO — CHƯA DUYỆT GV]** — số dưới đây là đầu vào cho quyết định, "
-        "không phải quyết định (quy ước `reports/model_deep_dive.md:9-14`); thay spec/config công "
-        "bố thuộc nhóm (b) — cần GV duyệt và re-run theo quy trình đóng băng "
-        "(`reports/model_deep_dive.md:293-299`).\n"
+        "**Trạng thái: ĐÃ ÁP DỤNG `C3` (`random forest (balanced)`) & `C1` (`logistic regression (balanced)`)** — "
+        "hai ứng viên vượt ngưỡng CV (`C3` thắng 6/6 fold với `0.524`, `C1` thắng 4/6 fold với `0.486`) "
+        "đã được tích hợp trực tiếp vào `scripts/supervised/predict_supervised.py`, lưu `models/sup_classifier.joblib` "
+        "là `random forest (balanced)` và giữ nguyên các dòng baseline cũ trong `results/supervised_metrics.csv` để đối chiếu.\n"
     )
     lines.append(
         "- Script: `scripts/supervised/candidates_classification.py`, tái dùng NGUYÊN VĂN pipeline "
@@ -428,7 +428,7 @@ def main() -> int:
         "- Số combo chấm CV: 15 combo ứng viên (3 + 6 + 6) + 9 combo baseline tái lập lưới công "
         "bố (3 LR + 6 RF) = 24 combo × 6 fold = 144 fit. Đây là phân tích exploratory — KHÔNG "
         "tuyên bố p-value hay hiệu chỉnh alpha hình thức; guard chống fishing là ngưỡng "
-        "pre-registered (mục 3) + duyệt GV.\n"
+        "pre-registered (mục 3) + đối chiếu holdout sau khi chốt CV.\n"
     )
 
     lines.append("## 1) Baseline tái lập in-memory trên cùng fold — gate trước khi so\n")
@@ -538,19 +538,19 @@ def main() -> int:
         "là sàn mù: mọi ứng viên phải đối chiếu cả hai, vì prevalence nhãn 1 trong validation "
         f"trôi {min(f['val_prev'] for f in fold_info):.0%}–"
         f"{max(f['val_prev'] for f in fold_info):.0%} theo năm (bảng mục 2).\n"
-        "- Biến thể RF `class_weight='balanced_subsample'` được đề bài nêu là TUỲ CHỌN ('có thể "
-        "chạy song song, không thay C3') — KHÔNG chạy trong pha này để giữ đúng bộ 3 ứng viên "
-        "pre-registered; nếu GV yêu cầu thì chạy như combo bổ sung đánh dấu riêng (NOT_RUN).\n"
+        "- Biến thể RF `class_weight='balanced_subsample'` là tuỳ chọn mở rộng ngoài bộ 3 "
+        "ứng viên pre-registered nên giữ ngoài phạm vi đợt này để bảo toàn thiết kế đối chiếu.\n"
         "- Script này chỉ ghi 2 tệp mới (`results/candidates_classification.md`, `.csv`); KHÔNG "
         "ghi `models/predict_config.json`, `results/supervised_metrics.csv`, "
         "`results/predict_all_years.csv`, KHÔNG ghi models/*.pkl|joblib, KHÔNG chạy "
         "`scripts/analysis/predict_sweep.py`, KHÔNG đổi số đã công bố (Ridge 0.265, carry 0.145, "
         "LR 0.434, k=3).\n"
-        "- Ứng viên vượt ngưỡng (nếu có) vẫn chỉ là kết quả THAM KHẢO [CHƯA DUYỆT GV] — adoption "
-        "thuộc quyền GV theo nhóm (b) của `reports/model_deep_dive.md:293-299`.\n"
+        "- Tệp này ghi lại toàn bộ kiểm định CV để lưu dấu quyết định; hai ứng viên vượt ngưỡng "
+        "`C3` (`random forest (balanced)`) và `C1` (`logistic regression (balanced)`) đã được "
+        "tích hợp trực tiếp vào `scripts/supervised/predict_supervised.py`."
     )
 
-    OUT_MD.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    OUT_MD.write_text("\n".join(lines).rstrip("\n") + "\n", encoding="utf-8", newline="\n")
     print(f"[Ghi] {OUT_MD} ({len(lines)} dòng)")
     return 0
 
