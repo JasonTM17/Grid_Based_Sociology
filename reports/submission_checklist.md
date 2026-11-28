@@ -7,7 +7,7 @@ _Cập nhật ngày 28/11/2026 · Nhóm 15._
 - [x] **Báo cáo DOCX tiếng Việt** — `reports/Nhom15_BaoCao_STING_PAPI.docx` (bảy chương, có Mục 5.4 mở rộng STING đa chiều, Mục 5.5 mở rộng hồi quy 17 cấu hình / Conformal 90%, Mục 5.8 **Thống kê mô tả và gợi ý rà soát 63 tỉnh** và Mục 6.5.2 **Suy luận bảng CR1/TWFE, FDR & Moran's I**, mục lục và danh mục 13 hình, 18 bảng có số trang đã cập nhật), đồng bộ trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip).
 - [x] **Notebook phân tích thống nhất** — `notebooks/Nhom15_STING_PAPI.ipynb` chạy sạch 22 code cell từ gói giải nén (gộp demo 3×3 giữa kỳ, 240 điểm giả lập, phân cụm PAPI, thống kê bàn giao 63 tỉnh, dự báo, kiểm chứng ngoại lai & phụ lục học phần/mở rộng `E2–E4`, hồi quy chuyên sâu, STING đa chiều và suy luận bảng CR1/FDR/không gian). [Kết quả chạy lại](../submissions/verification.json)
 - [x] **Notebook tiền xử lý PAPI** — `notebooks/Nhom15_TienXuLy_PAPI.ipynb` chạy sạch 9 code cell trực tiếp từ 14 workbook PAPI gốc qua `PREPROCESSING_PIPELINE` 6 bước.
-- [x] **Slide trình bày thống nhất (12 trang)** — `slides/Nhom15_STING_PAPI.pptx` (bảng có thể chỉnh sửa, hai biểu đồ với workbook dữ liệu nhúng; slide 6–7 quan sát 2024, thống kê 63 tỉnh và dịch chuyển; slide 12 kết luận và cảm ơn; sinh bằng `python scripts/deliverables/build_slides.py`).
+- [x] **Slide trình bày thống nhất (15 trang)** — `slides/Nhom15_STING_PAPI.pptx` (bảng có thể chỉnh sửa, hai biểu đồ với workbook dữ liệu nhúng + 4 hình chẩn đoán nhúng; Slide 6–7 quan sát 2024 & dịch chuyển; Slide 8–12 dự báo/hồi quy 17 cấu hình/STING đa chiều/CR1-FDR-Moran's I; Slide 13 thống kê 63 tỉnh; Slide 14–15 hệ thống tích hợp & kết luận; sinh bằng `python scripts/deliverables/slides_author.py` / `build_slides.py`).
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/data/check_data.py` → PASS.
 - [x] **Gỡ bỏ phân mảnh & thư mục `study/`** — bỏ các bản tách giữa kỳ/cuối kỳ rời, thư mục `study/` và `notebooks/exploratory/` để giữ 1 cấu trúc đồ án hoàn thiện duy nhất.
 
@@ -37,7 +37,7 @@ _Cập nhật ngày 28/11/2026 · Nhóm 15._
 
 - Bìa theo mẫu giảng viên cung cấp ngày 27/11/2026; giữ thông tin hai thành viên và đề tài. Các bảng Word dùng nền trắng, chữ và đường viền đen; mục lục và danh mục có 86 mục điều hướng.
 - Báo cáo dùng cách diễn đạt học thuật, giải thích CV, MAE, RMSE, AUC và OFAT; giữ khai báo công cụ AI và phân biệt kết quả mô tả với kết luận đã được kiểm chứng.
-- Bộ slide gồm 12 trang với ghi chú, số liệu có nguồn và giới hạn đi cùng kết quả; trang cuối gộp kết luận và hỏi đáp. Kịch bản thuyết trình và tài liệu ôn tập dùng cùng số thứ tự slide.
+- Bộ slide gồm 15 trang với ghi chú, số liệu có nguồn và giới hạn đi cùng kết quả; trang cuối gộp kết luận và hỏi đáp. Kịch bản thuyết trình và tài liệu ôn tập dùng cùng số thứ tự slide.
 - Người nhận có [hướng dẫn sử dụng dashboard](customer_guide.md) và [giải thích bảng bàn giao 2024](ban-giao-khach-hang-2024.md), cùng nằm trong ZIP. Nhóm mô tả và chỉ số thăm dò không được trình bày như xếp hạng chất lượng chính thức.
 - Word, PowerPoint, notebook và các bản sao trong gói được đối chiếu từng byte. `results/MANIFEST.json` trong ZIP liệt kê tệp, vai trò và mã kiểm tra; [verification.json](../submissions/verification.json) gắn kết quả chạy lại với SHA-256 của đúng ZIP.
 - Bộ kiểm thử, Ruff, kiểm tra dữ liệu và thực thi lại hai notebook bằng kernel Jupyter tiêu chuẩn trên Ubuntu, Windows, macOS được chạy trong [GitHub Actions](https://github.com/JasonTM17/Grid_Based_Sociology/actions/workflows/ci.yml).
@@ -66,7 +66,7 @@ python scripts/deliverables/build_submission_packages.py --verify
 
 Verifier xóa output cũ ở bản sao notebook, dùng kernel mới, kiểm tra đếm lần chạy
 và chặn đọc kho mã gốc. Cách mở tệp và chạy lại được ghi trong [hướng dẫn nộp bài](../submissions/HUONG-DAN.txt).
-Kịch bản 12 slide: `reports/on-tap/presentation_script.md`.
+Kịch bản 15 slide: `reports/on-tap/presentation_script.md`.
 
 ## Git tag
 

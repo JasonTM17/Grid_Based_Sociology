@@ -17,12 +17,12 @@ cấu trúc lưới thống kê và phép truy vấn phân cấp. Đồ án dùn
 
 ## Hồ sơ nộp & Thống kê bàn giao khách hàng
 
-Bộ hồ sơ trong [`submissions/`](submissions/) gồm báo cáo Word, 12 slide, hai notebook và các tệp dữ liệu, mã nguồn cần để chạy lại. Các notebook đã lưu kết quả để mở xem và đối chiếu với báo cáo.
+Bộ hồ sơ trong [`submissions/`](submissions/) gồm báo cáo Word, 15 slide, hai notebook và các tệp dữ liệu, mã nguồn cần để chạy lại. Các notebook đã lưu kết quả để mở xem và đối chiếu với báo cáo.
 
 | Thành phần | Tệp chuẩn trong repo | Bản đồng bộ đóng gói & chạy lại |
 |---|---|---|
 | Báo cáo Word (DOCX) | [`reports/Nhom15_BaoCao_STING_PAPI.docx`](reports/Nhom15_BaoCao_STING_PAPI.docx) | [`submissions/Nhom15_STING_PAPI/Nhom15_BaoCao_STING_PAPI.docx`](submissions/Nhom15_STING_PAPI/Nhom15_BaoCao_STING_PAPI.docx) |
-| Slide trình bày (12 trang) | [`slides/Nhom15_STING_PAPI.pptx`](slides/Nhom15_STING_PAPI.pptx) | [`submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx`](submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx) |
+| Slide trình bày (15 trang) | [`slides/Nhom15_STING_PAPI.pptx`](slides/Nhom15_STING_PAPI.pptx) | [`submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx`](submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.pptx) |
 | Notebook phân tích chính | [`notebooks/Nhom15_STING_PAPI.ipynb`](notebooks/Nhom15_STING_PAPI.ipynb) | [`submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.ipynb`](submissions/Nhom15_STING_PAPI/Nhom15_STING_PAPI.ipynb) |
 | Notebook tiền xử lý PAPI | [`notebooks/Nhom15_TienXuLy_PAPI.ipynb`](notebooks/Nhom15_TienXuLy_PAPI.ipynb) | [`submissions/Nhom15_STING_PAPI/Nhom15_TienXuLy_PAPI.ipynb`](submissions/Nhom15_STING_PAPI/Nhom15_TienXuLy_PAPI.ipynb) |
 | Gói ZIP tự chứa toàn đồ án | [`submissions/Nhom15_STING_PAPI.zip`](submissions/Nhom15_STING_PAPI.zip) | [`HUONG-DAN.txt`](submissions/HUONG-DAN.txt) · [`SHA256SUMS.txt`](submissions/SHA256SUMS.txt) |
@@ -48,7 +48,7 @@ outputs đã lưu và checksum; dùng `nbconvert --execute` để thực thi l�
 
 CSV nguồn giữ các tên nhóm lịch sử để tái lập. Sheet Excel **Thống kê khách hàng 2024**, dashboard và phiếu dùng cùng tên mô tả ở trên. Mốc `6.1 = 1.8791` phục vụ rà soát hồi cứu và được tính từ 48 tỉnh trong vùng dày năm 2024.
 
-Bộ trình bày gồm **12 slide**: đề tài và mục tiêu (1), dữ liệu và tiền xử lý (2), cơ chế STING và kiểm chứng giả lập (3), kết quả lịch sử (4), đối chứng thuật toán và z-score (5), quan sát 2024 (6), dịch chuyển và phép tính ô cho Lạng Sơn (7), dự báo và bài toán có giám sát (8), đối chiếu nguồn ngoài (9), độ bền và giới hạn (10), thống kê và nhận xét 63 tỉnh (11), kết luận và hỏi đáp (12). Kịch bản dự kiến 15 phút trình bày, thêm 5 phút hỏi đáp.
+Bộ trình bày gồm **15 slide**: đề tài và mục tiêu (1), dữ liệu và tiền xử lý 6 bước/độ nhạy (2), cơ chế STING và kiểm chứng giả lập (3), kết quả lịch sử (4), đối chứng thuật toán và z-score (5), quan sát 2024 (6), dịch chuyển và phép tính ô cho Lạng Sơn (7), dự báo và phân loại cân bằng `C3/C1` (8), hồi quy 17 cấu hình/`Conformal 90%`/`E3` (9), STING đa chiều `QuantileSTING`/`CLIQUE` (10), đối chiếu nguồn ngoài + cột `Year-FE CR1` (11), suy luận bảng `CR1/TWFE/FDR` + `Moran's I` (12), thống kê và nhận xét 63 tỉnh (13), hệ thống tích hợp 6 tab/DOCX/Excel/phiếu A4/CI (14), kết luận 4 trụ cột và hỏi đáp (15). Kịch bản dự kiến 15 phút trình bày, thêm 5 phút hỏi đáp.
 
 ### Hướng dẫn cho người nhận bàn giao
 
@@ -80,10 +80,10 @@ Grid_Based_Sociology/
 │   ├── supervised/            #   Hồi quy & phân loại đối chứng theo nội dung môn học
 │   ├── figures/               #   Sinh hình phân tích & sơ đồ lưới
 │   ├── notebooks/             #   Sinh bộ đôi notebook thống nhất
-│   ├── deliverables/          #   Sinh báo cáo Word, slide PPTX 12 trang, ZIP thống nhất & smoke test
+│   ├── deliverables/          #   Sinh báo cáo Word, slide PPTX 15 trang, ZIP thống nhất & smoke test
 │   └── common/                #   Hàm dùng chung (fig_style, midterm_clustering, ...)
 ├── notebooks/                 # Hai notebook thống nhất (Nhom15_STING_PAPI & Nhom15_TienXuLy_PAPI)
-├── slides/                    # Slide PowerPoint thống nhất (Nhom15_STING_PAPI.pptx — 12 trang)
+├── slides/                    # Slide PowerPoint thống nhất (Nhom15_STING_PAPI.pptx — 15 trang)
 ├── reports/                   # Báo cáo Word thống nhất (Nhom15_BaoCao_STING_PAPI.docx) & hồ sơ kỹ thuật
 │   └── on-tap/                #   Hỏi đáp, phản hồi giữa kỳ và kịch bản thuyết trình
 ├── submissions/               # Sản phẩm đóng gói thống nhất
@@ -188,7 +188,7 @@ python scripts/analysis/stakeholder_summary.py --with-excel
 python scripts/figures/forecast_papi_grid.py
 python scripts/notebooks/gen_final_analysis.py
 
-# Báo cáo Word, cập nhật mục lục/danh mục và slide 12 trang
+# Báo cáo Word, cập nhật mục lục/danh mục và slide 15 trang
 python scripts/deliverables/build_report.py
 python scripts/deliverables/update_report_fields.py
 python scripts/deliverables/build_slides.py

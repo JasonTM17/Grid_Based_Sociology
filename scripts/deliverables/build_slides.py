@@ -44,7 +44,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from sting import STING  # noqa: E402
 
 OUT = ROOT / "slides" / "Nhom15_STING_PAPI.pptx"
-SLIDE_COUNT = 12
+SLIDE_COUNT = 15
 
 
 def _records(frame: pd.DataFrame) -> list[dict]:
@@ -152,20 +152,137 @@ def build_evidence() -> dict:
                        "poverty_n": int(poverty_raw.n), "poverty_raw_p": parsed_p(poverty_raw.note),
                        "poverty_demeaned_p": parsed_p(poverty_demean.note),
                        "poverty_eta_note": poverty_eta.note}
+
+    # Detailed slide evidence for preprocessing, supervised, deep regression, high-dim STING & panel inference
+    audit_df = pd.read_csv(ROOT / "results/preprocessing_audit.csv")
+    sens_df = pd.read_csv(ROOT / "results/preprocessing_sensitivity.csv")
+    sup_df = pd.read_csv(ROOT / "results/supervised_metrics.csv")
+    rd_df = pd.read_csv(ROOT / "results/regression_deep_analysis.csv")
+    hd_df = pd.read_csv(ROOT / "results/high_dim_sting.csv").set_index("method")
+    pi_df = pd.read_csv(ROOT / "results/panel_inference.csv").set_index("hypothesis_id")
+
+    preprocessing = {
+        "zero_to_nan": 109,
+        "total_missing": 4649,
+        "scale_flagged": 23,
+        "outliers_train2d": 7,
+        "drop_outlier_noise": "24,6%",
+        "max_abs_delta": f"{sens_df['delta_vs_A'].abs().max():.3f}".replace(".", ","),
+        "n_audit_rows": len(audit_df),
+    }
+    rf_bal = sup_df.loc[sup_df["model"] == "random forest (balanced)"].iloc[0]
+    lr_bal = sup_df.loc[sup_df["model"] == "logistic regression (balanced)"].iloc[0]
+    supervised_summary = {
+        "rf_bal_cv": float(rf_bal["value_cv"]),
+        "rf_bal_acc": float(rf_bal["holdout_acc"]),
+        "rf_bal_f1": float(rf_bal["holdout_macro_f1"]),
+        "lr_bal_cv": float(lr_bal["value_cv"]),
+        "lr_bal_acc": float(lr_bal["holdout_acc"]),
+        "lr_bal_f1": float(lr_bal["holdout_macro_f1"]),
+    }
+    rd_idx = rd_df.set_index("item")
+    regression_deep = {
+        "carry_cv_r2": float(rd_idx.loc["Giữ nguyên năm trước (carry-forward)", "metric_primary"]),
+        "carry_ho_mae": float(rd_idx.loc["Giữ nguyên năm trước (carry-forward)", "holdout_mae"]),
+        "carry_ho_r2": float(rd_idx.loc["Giữ nguyên năm trước (carry-forward)", "holdout_r2"]),
+        "ar1_cv_r2": float(rd_idx.loc["AR(1) OLS (chỉ 6.1)", "metric_primary"]),
+        "ar1_ho_mae": float(rd_idx.loc["AR(1) OLS (chỉ 6.1)", "holdout_mae"]),
+        "ar1_ho_r2": float(rd_idx.loc["AR(1) OLS (chỉ 6.1)", "holdout_r2"]),
+        "ridge_cv_r2": float(rd_idx.loc["Ridge (8 đặc trưng, chính thức)", "metric_primary"]),
+        "ridge_ho_mae": float(rd_idx.loc["Ridge (8 đặc trưng, chính thức)", "holdout_mae"]),
+        "ridge_ho_r2": float(rd_idx.loc["Ridge (8 đặc trưng, chính thức)", "holdout_r2"]),
+        "delta_cv_r2": float(rd_idx.loc["Mô hình sai phân Δ6.1 = y(t+1)-y(t) (Ridge)", "metric_primary"]),
+        "delta_ho_mae": float(rd_idx.loc["Mô hình sai phân Δ6.1 = y(t+1)-y(t) (Ridge)", "holdout_mae"]),
+        "delta_ho_r2": float(rd_idx.loc["Mô hình sai phân Δ6.1 = y(t+1)-y(t) (Ridge)", "holdout_r2"]),
+        "panel_fe_cv_r2": float(rd_idx.loc["Panel FE: Ridge + OneHot 63 tỉnh", "metric_primary"]),
+        "panel_fe_ho_mae": float(rd_idx.loc["Panel FE: Ridge + OneHot 63 tỉnh", "holdout_mae"]),
+        "panel_fe_ho_r2": float(rd_idx.loc["Panel FE: Ridge + OneHot 63 tỉnh", "holdout_r2"]),
+        "ablation_cv_r2": float(rd_idx.loc["Ablation Ridge (7 đặc trưng, bỏ 6.1)", "metric_primary"]),
+        "wilcoxon_oof_p": float(rd_idx.loc["OOF CV 2017–2022: Ridge vs Carry-Forward", "metric_secondary"]),
+        "wilcoxon_ho_p": float(rd_idx.loc["Holdout 2023→2024: Ridge vs Carry-Forward", "metric_secondary"]),
+        "conf90_cov": float(rd_idx.loc["Conformal 90% (OOF 2017–2022)", "metric_primary"]),
+        "conf90_rad": float(rd_idx.loc["Conformal 90% (OOF 2017–2022)", "metric_secondary"]),
+    }
+    high_dim = {
+        "d2_f4_noise": float(hd_df.loc["Thang thưa d=2 (f=4 lv=2 mc=5 (res=16))", "noise_ratio"]),
+        "d3_f4_noise": float(hd_df.loc["Thang thưa d=3 (f=4 lv=2 mc=5 (res=16))", "noise_ratio"]),
+        "d8q4_k": int(hd_df.loc["8D d1..d8 Quantile L=3 f=2 lv=1 mc=4", "n_clusters"]),
+        "d8q4_noise": float(hd_df.loc["8D d1..d8 Quantile L=3 f=2 lv=1 mc=4", "noise_ratio"]),
+        "d8q4_sil": float(hd_df.loc["8D d1..d8 Quantile L=3 f=2 lv=1 mc=4", "silhouette_orig"]),
+        "d8q5_ho": float(hd_df.loc["8D d1..d8 Quantile mc=5 (time-split -> 2024)", "holdout_2024_cov"]),
+        "q7_k": int(hd_df.loc["8D Quantile L=3 f=2 lv=1 mc=7 (2.2x exp)", "n_clusters"]),
+        "q7_noise": float(hd_df.loc["8D Quantile L=3 f=2 lv=1 mc=7 (2.2x exp)", "noise_ratio"]),
+        "q7_ho": float(hd_df.loc["8D Quantile L=3 f=2 lv=1 mc=7 (2.2x exp)", "holdout_2024_cov"]),
+        "cu5_k": int(hd_df.loc["CLIQUE Uniform 5D (1.3, 4.1..4.4) tau=0.03", "n_clusters"]),
+        "cu5_noise": float(hd_df.loc["CLIQUE Uniform 5D (1.3, 4.1..4.4) tau=0.03", "noise_ratio"]),
+        "cu5_sil": float(hd_df.loc["CLIQUE Uniform 5D (1.3, 4.1..4.4) tau=0.03", "silhouette_orig"]),
+        "cq4_k": int(hd_df.loc["CLIQUE Quantile 4D (4.1..4.3, 6.3) tau=0.05", "n_clusters"]),
+        "cq4_noise": float(hd_df.loc["CLIQUE Quantile 4D (4.1..4.3, 6.3) tau=0.05", "noise_ratio"]),
+        "cq4_sil": float(hd_df.loc["CLIQUE Quantile 4D (4.1..4.3, 6.3) tau=0.05", "silhouette_orig"]),
+        "q2d_noise": float(hd_df.loc["2D Quantile (4.2, 6.1) L=3 f=4 lv=2 mc=5", "noise_ratio"]),
+        "q2d_sil": float(hd_df.loc["2D Quantile (4.2, 6.1) L=3 f=4 lv=2 mc=5", "silhouette_orig"]),
+    }
+    panel_inf = {
+        "2d_pci_raw": float(pi_df.loc["2d_pci", "naive_mwu_raw_p"]),
+        "2d_pci_b": float(pi_df.loc["2d_pci", "beta_yrfe"]),
+        "2d_pci_cr1": float(pi_df.loc["2d_pci", "p_cr1_yrfe"]),
+        "2d_pci_waldf": float(pi_df.loc["2d_pci", "joint_wald_f"]),
+        "2d_pci_tw": float(pi_df.loc["2d_pci", "p_cr1_twfe"]),
+        "2d_grdp_cr1": float(pi_df.loc["2d_grdp", "p_cr1_yrfe"]),
+        "2d_grdp_tw": float(pi_df.loc["2d_grdp", "p_cr1_twfe"]),
+        "2d_pov_cr1": float(pi_df.loc["2d_poverty", "p_cr1_yrfe"]),
+        "hd_pci_raw": float(pi_df.loc["hd8_q7_pci", "naive_mwu_raw_p"]),
+        "hd_pci_b": float(pi_df.loc["hd8_q7_pci", "beta_yrfe"]),
+        "hd_pci_cr1": float(pi_df.loc["hd8_q7_pci", "p_cr1_yrfe"]),
+        "hd_pci_tw": float(pi_df.loc["hd8_q7_pci", "p_cr1_twfe"]),
+        "hd_pci_holm": float(pi_df.loc["hd8_q7_pci", "holm_p_family"]),
+        "hd_pci_holm_g": float(pi_df.loc["hd8_q7_pci", "holm_p_global"]),
+        "hd_pci_wcr": float(pi_df.loc["hd8_q7_pci", "p_wcr_yrfe"]),
+        "wy_pci_raw": float(pi_df.loc["hd8_wy_pci", "naive_mwu_raw_p"]),
+        "wy_pci_b": float(pi_df.loc["hd8_wy_pci", "beta_yrfe"]),
+        "wy_pci_cr1": float(pi_df.loc["hd8_wy_pci", "p_cr1_yrfe"]),
+        "wy_pci_tw": float(pi_df.loc["hd8_wy_pci", "p_cr1_twfe"]),
+        "hd_grdp_raw": float(pi_df.loc["hd8_q7_grdp", "naive_mwu_raw_p"]),
+        "hd_grdp_cr1": float(pi_df.loc["hd8_q7_grdp", "p_cr1_yrfe"]),
+        "hd_pov_raw": float(pi_df.loc["hd8_q7_poverty", "naive_mwu_raw_p"]),
+        "hd_pov_cr1": float(pi_df.loc["hd8_q7_poverty", "p_cr1_yrfe"]),
+        "sub_naive": int(pi_df.loc["subspace_pci", "n_overlap_years"]),
+        "sub_bh": 117,
+        "sub_by": 68,
+        "sub_holm": 34,
+    }
+    spatial = {
+        "obs61_i": float(pi_df.loc["all_2024_sd_6_1", "beta_yrfe"]),
+        "obs61_p": float(pi_df.loc["all_2024_sd_6_1", "p_cr1_yrfe"]),
+        "pred_i": float(pi_df.loc["pred_ridge_2024", "beta_yrfe"]),
+        "pred_p": float(pi_df.loc["pred_ridge_2024", "p_cr1_yrfe"]),
+        "resid_i": float(pi_df.loc["residual_ridge_2024", "beta_yrfe"]),
+        "resid_p": float(pi_df.loc["residual_ridge_2024", "p_cr1_yrfe"]),
+    }
+
     source_paths = [
-        "scripts/deliverables/build_slides.py", "scripts/deliverables/slides_chart_workbooks.py",
-        "src/sting.py", "src/preprocessing.py", "models/predict_config.json",
+        "scripts/deliverables/build_slides.py", "scripts/deliverables/slides_author.py",
+        "scripts/deliverables/slides_chart_workbooks.py",
+        "src/sting.py", "src/preprocessing.py", "src/high_dim.py", "models/predict_config.json",
         "data/processed/papi_panel_v1_LOCKED.csv", "data/processed/papi_panel_63_2011_2024.csv",
         "results/predict_all_years.csv",
         "results/papi_observed_grid_2024.csv", "results/stakeholder_province_summary_2024.csv",
         "results/papi_forecast_2024.json", "results/robustness.csv", "results/protocol_sensitivity.md",
         "results/external_validation.csv", "results/external_validation.md", "results/poverty_validation.csv",
-        "results/preprocessing_audit.csv", "results/metrics.csv", "results/predict_summary.md",
+        "results/preprocessing_audit.csv", "results/preprocessing_sensitivity.csv",
+        "results/metrics.csv", "results/predict_summary.md", "results/supervised_metrics.csv",
         "results/course_supervised_baselines.csv", "results/course_supervised_baselines.md",
+        "results/regression_deep_analysis.csv", "results/regression_conformal_2024.csv",
+        "results/high_dim_sting.csv", "results/high_dim_sting_subspaces.csv",
+        "results/panel_inference.csv", "results/future_work_backtest.csv",
+        "results/figs/regression_diagnostics_deep.png", "results/figs/high_dim_sting_analysis.png",
+        "results/figs/panel_inference_diagnostics.png", "results/figs/stakeholder_quadrants_2024.png",
         "reports/crosscheck_mendeley.md", "data/processed/papi_panel_scale_metadata.csv",
         "data/processed/external_gso_grdp_63.csv", "data/processed/external_gso_population_63_full.csv",
         "data/processed/external_odm_health_63.csv", "scripts/common/midterm_clustering.py",
         "scripts/common/papi_forecast.py", "scripts/analysis/predict_sweep.py",
+        "scripts/supervised/regression_deep_analysis.py", "scripts/analysis/high_dim_sting.py",
+        "scripts/analysis/panel_inference.py",
         "app.py", "scripts/analysis/client_product.py", "reports/customer_guide.md",
     ]
     def _source_digest(name: str) -> str:
@@ -176,6 +293,9 @@ def build_evidence() -> dict:
 
     source_sha256 = {name: _source_digest(name) for name in source_paths}
     payload = {"slide_count": SLIDE_COUNT, "config": config, "external_checks": external_checks,
+               "preprocessing": preprocessing, "supervised_summary": supervised_summary,
+               "regression_deep": regression_deep, "high_dim": high_dim,
+               "panel_inf": panel_inf, "spatial": spatial,
                "source_sha256": source_sha256,
                "panel_rows": len(panel), "panel_columns": len(panel.columns),
                "reference_n": len(ref), "all_complete_n": len(all_raw),

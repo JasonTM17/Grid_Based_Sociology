@@ -944,7 +944,7 @@ def test_tab4_panel_inference_expander_renders():
     exp = external.expander[0]
     assert "Suy luận bảng chuẩn hóa năm (Year-FE CR1 / TWFE)" in exp.label
     assert len(exp.dataframe) == 2
-    assert any("Kiểm soát FDR 383 không gian con (PCI)" in el.value for el in external.info)
+    assert any("Sàng lọc thăm dò FDR (PCI, KW xếp chồng)" in el.value for el in external.info)
     assert any("Chẩn đoán tự tương quan không gian" in m.value for m in external.markdown)
     plotly_charts = [child for child in external.children.values() if child.type == "plotly_chart"]
     assert len(plotly_charts) == 3

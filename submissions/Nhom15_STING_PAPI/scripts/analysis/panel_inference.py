@@ -132,13 +132,15 @@ def fit_fe_cluster_ols(
 
     # SVD exact projection onto controls column space Z
     u_z, s_z, _ = np.linalg.svd(Z_arr, full_matrices=False)
-    r_z = int(np.sum(s_z > 1e-10 * (s_z[0] if len(s_z) else 1.0)))
+    z_scale = float(s_z[0]) if len(s_z) else 0.0
+    r_z = int(np.sum(s_z > 1e-10 * z_scale)) if z_scale > 0.0 else 0
     U_z = u_z[:, :r_z]
     y_t = y_arr - U_z @ (U_z.T @ y_arr)
     D_t = D_arr - U_z @ (U_z.T @ D_arr)
 
     _, s_d, _ = np.linalg.svd(D_t, full_matrices=False)
-    r_d = int(np.sum(s_d > 1e-10 * (s_d[0] if len(s_d) else 1.0)))
+    d_scale = float(np.linalg.norm(D_arr))
+    r_d = int(np.sum(s_d > 1e-10 * max(d_scale, 1.0))) if len(s_d) else 0
     dof_resid = n_obs - r_z - r_d
     if r_d == 0 or dof_resid <= 0:
         return None
@@ -172,20 +174,22 @@ def fit_fe_cluster_ols(
         p_cr1 = float(2.0 * stats.t.sf(abs(t_obs), df=n_clusters - 1)) if np.isfinite(t_obs) else float("nan")
         p_iid = float(2.0 * stats.t.sf(abs(t_iid), df=dof_resid)) if np.isfinite(t_iid) else float("nan")
 
-        # Wild Cluster Restricted Bootstrap (Rademacher weights under H0: beta = 0, so restricted resid = y_t)
+        # WCR-t (Cameron–Gelbach–Miller): Rademacher on restricted residual u=M_Z y,
+        # then re-absorb controls because cluster weights and Year/TWFE projection do not commute.
         p_wcr = float("nan")
-        if np.isfinite(t_obs) and float(dtd[0, 0]) > 0.0 and n_boot > 0:
-            rng = np.random.default_rng(seed)
-            signs = rng.choice((-1.0, 1.0), size=(n_boot, n_clusters))
-            y0_scores = D_t[:, 0] * y_t
-            d_g = np.bincount(cl_idx, weights=y0_scores, minlength=n_clusters)
-            a_g = np.bincount(cl_idx, weights=D_t[:, 0] ** 2, minlength=n_clusters)
-            dtd_scalar = float(dtd[0, 0])
-            beta_b = (signs @ d_g) / dtd_scalar
-            score_bg = signs * d_g[None, :] - beta_b[:, None] * a_g[None, :]
-            var_b = c_cr1 * (np.sum(score_bg ** 2, axis=1) / (dtd_scalar ** 2))
-            t_b = beta_b / np.sqrt(np.maximum(var_b, 1e-18))
-            p_wcr = float((np.sum(np.abs(t_b) >= abs(t_obs)) + 1) / (n_boot + 1))
+        dtd_scalar = float(dtd[0, 0])
+        if np.isfinite(t_obs) and dtd_scalar > 1e-12 * max(d_scale ** 2, 1.0) and n_boot > 0:
+            p_wcr = _wcr_t_pvalue(
+                y_t=y_t,
+                d_col=D_t[:, 0],
+                U_z=U_z,
+                cl_idx=cl_idx,
+                t_obs=t_obs,
+                dtd_scalar=dtd_scalar,
+                c_cr1=c_cr1,
+                n_boot=n_boot,
+                seed=seed,
+            )
 
         return {
             "n": int(n_obs),
@@ -202,21 +206,56 @@ def fit_fe_cluster_ols(
             "p_wcr": p_wcr,
         }
 
-    # Joint Wald F-test for multiple group dummies
-    wald_f = float((beta @ np.linalg.pinv(V_cr1) @ beta) / r_d)
-    p_wald = float(stats.f.sf(wald_f, dfn=r_d, dfd=n_clusters - 1))
+    # Joint Wald F-test for multiple group dummies, using the effective rank of V_cr1
+    v_scale = float(np.linalg.norm(V_cr1))
+    rank_v = int(np.linalg.matrix_rank(V_cr1, tol=1e-10 * max(v_scale, 1.0))) if v_scale > 0.0 else 0
+    if rank_v == 0:
+        wald_f = float("nan")
+        p_wald = float("nan")
+    else:
+        wald_f = float((beta @ np.linalg.pinv(V_cr1) @ beta) / rank_v)
+        p_wald = float(stats.f.sf(wald_f, dfn=rank_v, dfd=n_clusters - 1))
     return {
         "n": int(n_obs),
         "g_clusters": int(n_clusters),
         "r_controls": int(r_z),
         "dof_resid": int(dof_resid),
         "wald_f": wald_f,
-        "df1": int(r_d),
+        "df1": int(rank_v),
         "df2": int(n_clusters - 1),
         "p_cr1": p_wald,
         "betas": [float(v) for v in beta],
         "ses_cr1": [float(v) for v in se_cr1],
     }
+
+
+def _wcr_t_pvalue(
+    *,
+    y_t: np.ndarray,
+    d_col: np.ndarray,
+    U_z: np.ndarray,
+    cl_idx: np.ndarray,
+    t_obs: float,
+    dtd_scalar: float,
+    c_cr1: float,
+    n_boot: int,
+    seed: int,
+) -> float:
+    """Wild cluster restricted t bootstrap with control re-absorption on each draw."""
+    n_clusters = int(cl_idx.max() + 1)
+    rng = np.random.default_rng(seed)
+    signs = rng.choice((-1.0, 1.0), size=(n_boot, n_clusters))
+    ystar = y_t[None, :] * signs[:, cl_idx]
+    if U_z.size:
+        ystar = ystar - (ystar @ U_z) @ U_z.T
+    beta_b = (ystar @ d_col) / dtd_scalar
+    resid_b = ystar - beta_b[:, None] * d_col
+    score = resid_b * d_col
+    cluster_scores = np.zeros((n_boot, n_clusters), dtype=float)
+    np.add.at(cluster_scores, (np.arange(n_boot)[:, None], cl_idx[None, :]), score)
+    var_b = c_cr1 * np.sum(cluster_scores ** 2, axis=1) / (dtd_scalar ** 2)
+    t_b = beta_b / np.sqrt(np.maximum(var_b, 1e-18))
+    return float((np.sum(np.abs(t_b) >= abs(t_obs)) + 1) / (n_boot + 1))
 
 
 def paired_switcher_within_province(
@@ -309,8 +348,13 @@ def evaluate_hypothesis_panel(
                 n_boot=0,
             )
             if res_multi is not None:
-                wald_f_val = float(res_multi["wald_f"])
-                wald_p_val = float(res_multi["p_cr1"])
+                if "wald_f" in res_multi:
+                    wald_f_val = float(res_multi["wald_f"])
+                    wald_p_val = float(res_multi["p_cr1"])
+                else:
+                    t_multi = float(res_multi["t_cr1"])
+                    wald_f_val = t_multi * t_multi if np.isfinite(t_multi) else float("nan")
+                    wald_p_val = float(res_multi["p_cr1"])
 
     yrs_pos = set(int(y) for y in pair_df.loc[pair_df[group_col] == pos_group, "year"])
     yrs_neg = set(int(y) for y in pair_df.loc[pair_df[group_col] == neg_group, "year"])
@@ -400,20 +444,29 @@ def compute_spatial_morans_i(
     moran_i = float((n / s0) * (z @ wn @ z) / denom)
     expected_i = -1.0 / (n - 1)
 
-    # Normal approximation under randomization / normality for reference + exact permutation p
-    w_sym = wn + wn.T
-    s1 = 0.5 * float(np.sum(w_sym ** 2))
-    s2 = float(np.sum((wn.sum(axis=1) + wn.sum(axis=0)) ** 2))
-    var_i = max((n * ((n ** 2 - 3 * n + 3) * s1 - n * s2 + 3 * s0 ** 2) - (s1 * (n ** 2 - n) - 2 * n * s2 + 6 * s0 ** 2)) / ((n - 1) * (n - 2) * (n - 3) * (s0 ** 2)) - expected_i ** 2, 1e-18)
-    z_ana = (moran_i - expected_i) / float(np.sqrt(var_i))
-    p_ana = float(2.0 * stats.norm.sf(abs(z_ana)))
+    # Cliff–Ord analytical variance is undefined for n < 4 ((n-3) in the denominator).
+    if n < 4:
+        z_ana = float("nan")
+        p_ana = float("nan")
+    else:
+        w_sym = wn + wn.T
+        s1 = 0.5 * float(np.sum(w_sym ** 2))
+        s2 = float(np.sum((wn.sum(axis=1) + wn.sum(axis=0)) ** 2))
+        var_i = max(
+            (n * ((n ** 2 - 3 * n + 3) * s1 - n * s2 + 3 * s0 ** 2) - (s1 * (n ** 2 - n) - 2 * n * s2 + 6 * s0 ** 2))
+            / ((n - 1) * (n - 2) * (n - 3) * (s0 ** 2))
+            - expected_i ** 2,
+            1e-18,
+        )
+        z_ana = (moran_i - expected_i) / float(np.sqrt(var_i))
+        p_ana = float(2.0 * stats.norm.sf(abs(z_ana)))
 
     rng = np.random.default_rng(seed)
     perm_is = np.empty(n_perm, dtype=float)
     for b in range(n_perm):
         zp = rng.permutation(z)
         perm_is[b] = (n / s0) * (zp @ wn @ zp) / denom
-    p_perm_two = float((np.sum(np.abs(perm_is) >= abs(moran_i)) + 1) / (n_perm + 1))
+    p_perm_two = float((np.sum(np.abs(perm_is - expected_i) >= abs(moran_i - expected_i)) + 1) / (n_perm + 1))
 
     return {
         "n": n,
@@ -448,9 +501,12 @@ def evaluate_spatial_residuals(root: Path = ROOT, *, n_perm: int = N_BOOT, seed:
     rows = []
     for key, label, arr in specs:
         res = compute_spatial_morans_i(arr, w_raw, n_perm=n_perm, seed=seed)
-        verdict = "Hấp thụ sạch (white noise)" if "residual" in key and res["p_perm_two"] >= 0.05 else (
-            "Có tự tương quan không gian" if res["p_perm_two"] < 0.05 else "Không rõ / yếu ở ngưỡng 5%"
-        )
+        if res["p_perm_two"] < 0.05:
+            verdict = "Có tự tương quan không gian"
+        elif "residual" in key:
+            verdict = "Chưa phát hiện tự tương quan không gian ở ngưỡng 5%"
+        else:
+            verdict = "Không rõ / yếu ở ngưỡng 5%"
         rows.append(
             {
                 "section": "spatial_residual",
@@ -922,13 +978,17 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
         elif hid in {"2d_grdp", "2d_poverty"}:
             v = "Không đủ bằng chứng dưới Year-FE CR1 (ngưỡng 5%)"
         elif hid == "hd8_q7_pci":
-            v = "Sống sót Year-FE CR1, WCR & Holm/BH 5% (between-province, TWFE p=0,34)"
+            v = (
+                f"Year-FE CR1 đạt 5%; Holm nhánh 3 phép {_fmt_p(row['holm_p_family'])}; "
+                f"Holm 6 phép chính {_fmt_p(row['holm_p_global'])} (không đạt 5%); "
+                f"TWFE p={_fmt_p(row['p_cr1_twfe'])} không bác bỏ 0"
+            )
         elif hid in {"hd8_q7_grdp", "hd8_q7_poverty"}:
-            v = "Bị loại sau Year-FE CR1 & Holm/BH (naive MWU từng gây nhiễu dương giả)"
+            v = "Bị loại sau Year-FE CR1 & Holm nhánh (naive MWU từng gây nhiễu dương giả)"
         elif hid == "hd8_wy_pci":
-            v = "Bền vững ngay cả sau chuẩn hóa within-year z (khử xu hướng năm)"
+            v = "Độ nhạy, không nằm trong Holm xác nhận: within-year z"
         elif hid == "clq4_pci":
-            v = "Cực trị phân tách giai đoạn: C0 2011–17 vs C1 2018–22 (ít năm giao, cần thận trọng)"
+            v = "Thăm dò: phân tách giai đoạn, không nằm trong Holm xác nhận"
         else:
             v = "—"
         primary_df.loc[idx, "verdict"] = v
@@ -941,7 +1001,13 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
     sub_pci_summary["raw_sorted"] = np.sort(
         subspaces_df["ext_pci_dm_p"].dropna().to_numpy(dtype=float)
     )
+    sub_pci_summary["n_unique_features"] = int(
+        subspaces_df.loc[np.isfinite(subspaces_df["ext_pci_dm_p"].to_numpy(dtype=float)), "features"].nunique()
+    )
     sub_grdp_summary = {k: v for k, v in sub_grdp.items() if k != "adj"}
+    sub_grdp_summary["n_unique_features"] = int(
+        subspaces_df.loc[np.isfinite(subspaces_df["ext_grdp_dm_p"].to_numpy(dtype=float)), "features"].nunique()
+    )
 
     spatial_df = evaluate_spatial_residuals(root, n_perm=N_BOOT, seed=RANDOM_SEED)
 
@@ -962,7 +1028,8 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
                 "naive_mwu_raw_p": float(info["n_naive_05"] / max(info["m_tested"], 1)),
                 "naive_mwu_dm_p": float(info["n_bh_05"] / max(info["m_tested"], 1)),
                 "verdict": (
-                    f"{info['n_naive_05']} naive p<0,05 -> {info['n_bh_05']} sống sót BH-FDR, "
+                    f"Thăm dò (KW xếp chồng tỉnh–năm, {info.get('n_unique_features', info['m_tested'])} bộ đặc trưng): "
+                    f"{info['n_naive_05']} naive p<0,05 -> {info['n_bh_05']} BH-FDR, "
                     f"{info['n_by_05']} BY-FDR, {info['n_holm_05']} Holm FWER"
                 ),
             }
@@ -1005,12 +1072,12 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
             "",
             "## 1. So sánh Kiểm định Gộp (Naive MWU) vs Bảng chuẩn hóa Năm + Sai số Gộp theo Tỉnh (CR1) & TWFE",
             "",
-            "| Nhánh | Biến ngoài | n (G tỉnh) | Naive MWU p | β (Year-FE) | SE (CR1) | Hệ số nở SE | p CR1 | p WCR boot | p TWFE (Tỉnh+Năm) | Holm / BH (nhánh) | Kết luận |",
-            "|---|---|---|---|---|---|---|---|---|---|---|---|",
+            "| Nhánh | Biến ngoài | n (G tỉnh) | Naive MWU p | β (Year-FE) | SE (CR1) | Hệ số nở SE | p CR1 | p WCR boot | p TWFE (Tỉnh+Năm) | Holm/BH nhánh | Holm 6 phép | Kết luận |",
+            "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
         ]
         for _, r in primary_df.iterrows():
             md_lines.append(
-                "| {br} | {out} | {n} ({g}) | {np_p} | {b:+.4f} | {se:.4f} | {inf:.2f}× | {pc} | {pw} | {ptw} | {hb} | {vd} |".format(
+                "| {br} | {out} | {n} ({g}) | {np_p} | {b:+.4f} | {se:.4f} | {inf:.2f}× | {pc} | {pw} | {ptw} | {hb} | {hg} | {vd} |".format(
                     br=r["branch"],
                     out=r["outcome"],
                     n=int(r["n_obs"]),
@@ -1023,6 +1090,7 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
                     pw=_fmt_p(r["p_wcr_yrfe"]),
                     ptw=_fmt_p(r["p_cr1_twfe"]),
                     hb=(f"{_fmt_p(r['holm_p_family'])} / {_fmt_p(r['bh_fdr_family'])}" if np.isfinite(r["holm_p_family"]) else "—"),
+                    hg=_fmt_p(r["holm_p_global"]),
                     vd=r["verdict"],
                 )
             )
@@ -1040,15 +1108,17 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
                 "### Phát hiện suy luận trọng yếu",
                 "",
                 f"- **STING 2D chính thức trên PCI 2011–2022 (`2d_pci`)**: kiểm định gộp thô cho `p = {_fmt_p(r_2d_pci['naive_mwu_raw_p'])}`, nhưng khi đưa Fixed Effects theo năm + CR1 theo 63 tỉnh, chênh lệch Cụm 2 vs Nhiễu chỉ còn `β = {r_2d_pci['beta_yrfe']:+.3f}` (SE = {r_2d_pci['se_cr1_yrfe']:.3f}, `p_cr1 = {_fmt_p(r_2d_pci['p_cr1_yrfe'])}`, `p_wcr = {_fmt_p(r_2d_pci['p_wcr_yrfe'])}`; kiểm định đồng thời 4 nhóm Wald `F = {r_2d_pci['joint_wald_f']:.4f}, p = {_fmt_p(r_2d_pci['joint_wald_p'])}`). Bằng chứng này khẳng định tín hiệu PCI trên STING 2D chủ yếu là **nhiễu trộn theo năm (year composition confounding)**.",
-                f"- **8D QuantileSTING mc=7 trên PCI (`hd8_q7_pci`)**: **sống sót toàn bộ bộ lọc suy luận chặt** — sau Year-FE + CR1 (hệ số phình SE = {r_hd_pci['se_inflation']:.2f}×), nhóm Vùng cao đa chiều vẫn cao hơn Vùng thấp `β = {r_hd_pci['beta_yrfe']:+.3f}` điểm PCI (SE = {r_hd_pci['se_cr1_yrfe']:.3f}, `p_cr1 = {_fmt_p(r_hd_pci['p_cr1_yrfe'])}`, `p_wcr = {_fmt_p(r_hd_pci['p_wcr_yrfe'])}`, **Holm = {_fmt_p(r_hd_pci['holm_p_family'])} < 0,05**), và vẫn giữ ý nghĩa khi chuẩn hóa within-year z (`hd8_wy_pci`: `β = {r_wy_pci['beta_yrfe']:+.3f}`, `p_cr1 = {_fmt_p(r_wy_pci['p_cr1_yrfe'])}`). Ngược lại, TWFE (Tỉnh + Năm) cho `β = {r_hd_pci['beta_twfe']:+.3f}, p = {_fmt_p(r_hd_pci['p_cr1_twfe'])}` (switchers `n = {int(r_hd_pci['n_switchers'])}`, `p_t = {_fmt_p(r_hd_pci['p_switcher_t'])}`): cơ chế là **phân tầng cấu trúc giữa các tỉnh (between-province structural stratification)** chứ không phải dao động ngắn hạn nội tỉnh.",
+                f"- **8D QuantileSTING mc=7 trên PCI (`hd8_q7_pci`)**: sau Year-FE + CR1, vùng cao cao hơn vùng thấp `β = {r_hd_pci['beta_yrfe']:+.3f}` điểm PCI (SE = {r_hd_pci['se_cr1_yrfe']:.3f}, `p_cr1 = {_fmt_p(r_hd_pci['p_cr1_yrfe'])}`, `p_wcr = {_fmt_p(r_hd_pci['p_wcr_yrfe'])}`). **Holm nội họ 8D (3 phép) = {_fmt_p(r_hd_pci['holm_p_family'])}**; **Holm 6 phép chính = {_fmt_p(r_hd_pci['holm_p_global'])} (không đạt 5%)**. Chuẩn hóa within-year z là độ nhạy ngoài Holm (`hd8_wy_pci`: `β = {r_wy_pci['beta_yrfe']:+.3f}`, `p_cr1 = {_fmt_p(r_wy_pci['p_cr1_yrfe'])}`). TWFE cho `β = {r_hd_pci['beta_twfe']:+.3f}, p = {_fmt_p(r_hd_pci['p_cr1_twfe'])}` (switchers `n = {int(r_hd_pci['n_switchers'])}`, `p_t = {_fmt_p(r_hd_pci['p_switcher_t'])}`): **chưa đủ bằng chứng** cho dao động ngắn hạn nội tỉnh; không suy ra đã chứng minh phân tầng cấu trúc.",
                 f"- **Loại dương giả trên GRDP**: ngay cả trên 8D Quantile mc=7, `naive MWU` từng cho `p_thô = {_fmt_p(r_hd_grdp['naive_mwu_raw_p'])}` (`p_dm = {_fmt_p(r_hd_grdp['naive_mwu_dm_p'])}`) trên GRDP 2018–2023, nhưng khi hiệu chỉnh Year-FE CR1 biến mất (`p_cr1 = {_fmt_p(r_hd_grdp['p_cr1_yrfe'])}`, Holm = `{_fmt_p(r_hd_grdp['holm_p_family'])}`).",
                 "",
-                "## 2. Kiểm soát Đa kiểm định (Holm / BH / BY FDR) trên 383 Không gian con (`high_dim_sting_subspaces.csv`)",
+                f"## 2. Kiểm soát Đa kiểm định thăm dò (Holm / BH / BY) trên {sub_pci_summary['m_tested']} p-value Kruskal–Wallis xếp chồng (`high_dim_sting_subspaces.csv`; {sub_pci_summary['n_unique_features']} bộ đặc trưng PCI)",
                 "",
-                "| Biến ngoài | Số phép thử (m) | Naive p < 0,05 | Sống sót BH-FDR 5% | Sống sót BY-FDR 5% | Sống sót Holm FWER 5% |",
-                "|---|---|---|---|---|---|",
-                f"| PCI (khử trung vị năm) | {sub_pci_summary['m_tested']} | {sub_pci_summary['n_naive_05']} ({100*sub_pci_summary['n_naive_05']/sub_pci_summary['m_tested']:.1f}%) | **{sub_pci_summary['n_bh_05']}** ({100*sub_pci_summary['n_bh_05']/sub_pci_summary['m_tested']:.1f}%) | **{sub_pci_summary['n_by_05']}** ({100*sub_pci_summary['n_by_05']/sub_pci_summary['m_tested']:.1f}%) | **{sub_pci_summary['n_holm_05']}** ({100*sub_pci_summary['n_holm_05']/sub_pci_summary['m_tested']:.1f}%) |",
-                f"| GRDP (khử trung vị năm) | {sub_grdp_summary['m_tested']} | {sub_grdp_summary['n_naive_05']} ({100*sub_grdp_summary['n_naive_05']/sub_grdp_summary['m_tested']:.1f}%) | **{sub_grdp_summary['n_bh_05']}** | **{sub_grdp_summary['n_by_05']}** | **{sub_grdp_summary['n_holm_05']}** |",
+                "Đây là sàng lọc thăm dò: p-value KW tính trên dòng tỉnh–năm đã khử trung vị năm, chưa phải sai số gộp theo tỉnh. Không đưa vào Holm xác nhận của 6 phép Year-FE CR1.",
+                "",
+                "| Biến ngoài | Số phép thử (m) | Bộ đặc trưng | Naive p < 0,05 | BH-FDR 5% | BY-FDR 5% | Holm FWER 5% |",
+                "|---|---|---|---|---|---|---|",
+                f"| PCI (khử trung vị năm) | {sub_pci_summary['m_tested']} | {sub_pci_summary['n_unique_features']} | {sub_pci_summary['n_naive_05']} ({100*sub_pci_summary['n_naive_05']/sub_pci_summary['m_tested']:.1f}%) | **{sub_pci_summary['n_bh_05']}** ({100*sub_pci_summary['n_bh_05']/sub_pci_summary['m_tested']:.1f}%) | **{sub_pci_summary['n_by_05']}** ({100*sub_pci_summary['n_by_05']/sub_pci_summary['m_tested']:.1f}%) | **{sub_pci_summary['n_holm_05']}** ({100*sub_pci_summary['n_holm_05']/sub_pci_summary['m_tested']:.1f}%) |",
+                f"| GRDP (khử trung vị năm) | {sub_grdp_summary['m_tested']} | {sub_grdp_summary['n_unique_features']} | {sub_grdp_summary['n_naive_05']} ({100*sub_grdp_summary['n_naive_05']/sub_grdp_summary['m_tested']:.1f}%) | **{sub_grdp_summary['n_bh_05']}** | **{sub_grdp_summary['n_by_05']}** | **{sub_grdp_summary['n_holm_05']}** |",
                 "",
                 "## 3. Chẩn đoán Tự tương quan Không gian Phần dư Holdout 2024 (Moran's I, Queen Contiguity, 1.999 hoán vị)",
                 "",
@@ -1058,11 +1128,11 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
         )
         for _, sr in spatial_df.iterrows():
             md_lines.append(
-                "| {lbl} | {n} | {mi:+.4f} | {z:+.3f} | {pa} | {pp} | {vd} |".format(
+                "| {lbl} | {n} | {mi:+.4f} | {z} | {pa} | {pp} | {vd} |".format(
                     lbl=sr["label"],
                     n=int(sr["n"]),
                     mi=float(sr["moran_i"]),
-                    z=float(sr["z_analytical"]),
+                    z=("—" if not np.isfinite(sr["z_analytical"]) else f"{float(sr['z_analytical']):+.3f}"),
                     pa=_fmt_p(sr["p_analytical"]),
                     pp=_fmt_p(sr["p_perm_two"]),
                     vd=sr["verdict"],
@@ -1071,7 +1141,7 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
         md_lines.extend(
             [
                 "",
-                f"Dự báo điểm `pred_ridge` 2024 mang cấu trúc không gian rõ rệt (`I = {r_pred_r['moran_i']:+.4f}`, `p_perm = {_fmt_p(r_pred_r['p_perm_two'])}` vs quan sát `n=59`: `I = {r_obs_r['moran_i']:+.4f}`, `p_perm = {_fmt_p(r_obs_r['p_perm_two'])}`), giúp **phần dư `residual_ridge` trở nên trắng về mặt không gian** (`I = {r_res_r['moran_i']:+.4f}`, `p_perm = {_fmt_p(r_res_r['p_perm_two'])}`) — chứng tỏ tập 8 đặc trưng trễ đã hấp thụ tự tương quan không gian địa lý mà chưa cần biến trễ không gian riêng.",
+                f"Dự báo điểm `pred_ridge` 2024 mang cấu trúc không gian (`I = {r_pred_r['moran_i']:+.4f}`, `p_perm = {_fmt_p(r_pred_r['p_perm_two'])}` vs quan sát `n=59`: `I = {r_obs_r['moran_i']:+.4f}`, `p_perm = {_fmt_p(r_obs_r['p_perm_two'])}`). Phần dư `residual_ridge` **chưa phát hiện** tự tương quan không gian ở ngưỡng 5% (`I = {r_res_r['moran_i']:+.4f}`, `p_perm = {_fmt_p(r_res_r['p_perm_two'])}`) trên 59 tỉnh đối chiếu; hoán vị lấy tâm tại `E[I]=-1/(n-1)`. Không suy ra phần dư là nhiễu trắng mọi khía cạnh.",
                 "",
                 "## Đầu ra kèm theo",
                 "- Bảng đầy đủ: `results/panel_inference.csv`",

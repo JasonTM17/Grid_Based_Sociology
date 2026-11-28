@@ -33,7 +33,7 @@ Các **hạng mục** (tên category) đọc được từ text trích PDF bài 
 
 Trang 10 của tài liệu `data/raw/course/bai-giang-nhap-mon-hoc-may.pdf` ghi điểm tiền xử lý **1.5**, học model **1**, đánh giá & thảo luận **2**, quy ước code + cảnh báo **1**, báo cáo **2.5** (nhóm, tổng 8); thi vấn đáp **2** (cá nhân). Chia theo Group/Individual nên phần Q&A mỗi thành viên phải tự trả lời được.
 
-Bộ trình bày gồm 12 slide, kết hợp cơ chế STING, dữ liệu và tiền xử lý, kết quả thực nghiệm, thống kê 63 tỉnh, phần bàn giao và giới hạn. Slide cuối gộp kết luận, cảm ơn và hỏi đáp.
+Bộ trình bày gồm 15 slide, kết hợp cơ chế STING, dữ liệu và tiền xử lý 6 bước, kết quả thực nghiệm, hồi quy 17 cấu hình & Conformal 90%, STING đa chiều (`QuantileSTING`/`CLIQUE`), suy luận bảng `CR1/TWFE/FDR/Moran's I`, thống kê 63 tỉnh, hệ thống tích hợp 6 tab/phiếu A4 và giới hạn. Slide cuối tổng kết 4 trụ cột, cảm ơn và hỏi đáp.
 
 ### Bài thực hành tiền xử lý dữ liệu
 
@@ -57,12 +57,12 @@ Thân báo cáo giữ bảy chương để trình bày phương pháp, dữ li�
 
 | Mốc | Yêu cầu đề | Tệp bàn giao | Trạng thái |
 |---|---|---|---|
-| Đồ án thống nhất (giữa kỳ, cuối kỳ và báo cáo kết quả) | Báo cáo DOCX tiếng Việt, slide PPTX, notebook thực thi sạch (Jupyter), dataset ≥500×10, kiểm chứng và thống kê trên 63 tỉnh | `reports/Nhom15_BaoCao_STING_PAPI.docx` + `slides/Nhom15_STING_PAPI.pptx` (12 slide) + `notebooks/Nhom15_STING_PAPI.ipynb` + `notebooks/Nhom15_TienXuLy_PAPI.ipynb` trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip) | Hoàn thiện, đồng bộ 1-1 (`submissions/Nhom15_STING_PAPI/`). [Kết quả chạy lại](../submissions/verification.json) |
+| Đồ án thống nhất (giữa kỳ, cuối kỳ và báo cáo kết quả) | Báo cáo DOCX tiếng Việt, slide PPTX, notebook thực thi sạch (Jupyter), dataset ≥500×10, kiểm chứng và thống kê trên 63 tỉnh | `reports/Nhom15_BaoCao_STING_PAPI.docx` + `slides/Nhom15_STING_PAPI.pptx` (15 slide) + `notebooks/Nhom15_STING_PAPI.ipynb` + `notebooks/Nhom15_TienXuLy_PAPI.ipynb` trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip) | Hoàn thiện, đồng bộ 1-1 (`submissions/Nhom15_STING_PAPI/`). [Kết quả chạy lại](../submissions/verification.json) |
 
 ## Thông tin đã chốt và mục cần xác nhận
 
 - [x] **Định dạng `.docx`** đã áp dụng theo file mẫu người dùng chọn (`reports/report_format_notes.md`), cấu trúc **7 chương** (mục 5.8 **Thống kê và nhận xét kết quả trên 63 tỉnh**).
-- [x] **Số slide.** 12 slide thống nhất (`slides/Nhom15_STING_PAPI.pptx`), gồm cơ chế giữa kỳ (3×3, 240 điểm, z-score), quan sát 2024, **phần quan sát, thống kê 63 tỉnh và dịch chuyển**, dự báo bổ trợ, đối chứng ngoại lai và kết luận.
+- [x] **Số slide.** 15 slide thống nhất (`slides/Nhom15_STING_PAPI.pptx`), gồm cơ chế giữa kỳ (3×3, 240 điểm, z-score), quan sát 2024, **thống kê 63 tỉnh và dịch chuyển**, dự báo & cân bằng lớp `C3/C1`, hồi quy 17 cấu hình & Conformal 90%, STING đa chiều, suy luận bảng `CR1/TWFE/FDR/Moran's I`, hệ thống tích hợp 6 tab/DOCX/phiếu A4 và kết luận.
 - [x] **Nhóm: 2 người** — Nguyễn Tiến Sơn (24110054), Trần Thị Ngọc Quyên (24110051).
 - [x] **Phản hồi giữa kỳ đã xử lý** — đã trình bày giữa kỳ và bổ sung thống kê, nhận xét từ kết quả phân cụm (`scripts/analysis/stakeholder_summary.py`).
 - [x] **Trọng số cuối kỳ** — bài giảng nhập môn học máy, trang 10 ghi 8 điểm nhóm và 2 điểm vấn đáp cá nhân.
@@ -78,7 +78,7 @@ vào `submissions/Nhom15_STING_PAPI.zip` (kèm thư mục giải nén sẵn `sub
 - Thành phần trọng tâm: `reports/Nhom15_BaoCao_STING_PAPI.docx`, `slides/Nhom15_STING_PAPI.pptx`, `notebooks/Nhom15_STING_PAPI.ipynb` và `notebooks/Nhom15_TienXuLy_PAPI.ipynb`.
 - Mã nguồn, dữ liệu, model và kết quả đi kèm: `src/`, `data/`, `scripts/`, `models/`, `results/`, `reports/`.
 
-`submissions/Nhom15_STING_PAPI/HUONG_DAN.txt` chỉ cách chạy lại các notebook và phân tích. `submissions/Nhom15_STING_PAPI/results/MANIFEST.json` (bên trong gói ZIP) liệt kê tệp kèm theo và mã SHA-256. [Kịch bản thuyết trình 12 slide](on-tap/presentation_script.md)
+`submissions/Nhom15_STING_PAPI/HUONG_DAN.txt` chỉ cách chạy lại các notebook và phân tích. `submissions/Nhom15_STING_PAPI/results/MANIFEST.json` (bên trong gói ZIP) liệt kê tệp kèm theo và mã SHA-256. [Kịch bản thuyết trình 15 slide](on-tap/presentation_script.md)
 
 ## Liêm chính học thuật
 

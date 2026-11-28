@@ -1,4 +1,4 @@
-"""Gate artifact nộp bài thống nhất: báo cáo DOCX, slide 12 trang, notebook và provenance PAPI."""
+"""Gate artifact nộp bài thống nhất: báo cáo DOCX, slide 15 trang, notebook và provenance PAPI."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ SUBMISSION_NB = ROOT / "notebooks" / "Nhom15_STING_PAPI.ipynb"
 PROVENANCE = ROOT / "data" / "raw" / "papi" / "PROVENANCE.md"
 PAPI_PDF = ROOT / "data" / "raw" / "papi" / "PAPI_2024_REPORT_VIE_final.pdf"
 EXPECTED_ARI_STR = "0.950"
-SLIDE_COUNT = 12
+SLIDE_COUNT = 15
 THANK_YOU = "Cảm ơn thầy và các bạn."
 
 _IGNORE_PATTERNS = (
@@ -104,7 +104,7 @@ def test_report_uses_the_user_final_template_geometry():
 
 
 def check_pptx_submission(prs: Presentation) -> list[str]:
-    """Kiểm tra 12 slide, kết luận gộp cảm ơn và ghi chú ở mọi trang."""
+    """Kiểm tra 15 slide, kết luận gộp cảm ơn và ghi chú ở mọi trang."""
     violations: list[str] = []
     count = len(prs.slides)
     if count != SLIDE_COUNT:
@@ -274,8 +274,15 @@ def test_unified_pptx_exists_notes_and_content():
     assert "(kèm Bạc Liêu, Huế" not in full_text
     assert "bứt phá vượt chuẩn" not in full_text.lower()
     for required in ("Nhận xét", "76,2%", "12,7%", "7,9%", "3,2%", "2,235", "1,787"):
-        assert required in visible[10], f"Slide 11 thiếu thống kê hoặc nhận xét: {required}"
+        assert required in visible[12], f"Slide 13 thiếu thống kê hoặc nhận xét: {required}"
+    assert all(term in visible[1] for term in ("109 ô 0→NaN", "0,015"))
     assert all(term in visible[6] for term in ("0,0738", "0,0488", "12 ≥ 5"))
+    assert all(term in visible[7] for term in ("0,524", "74,6%"))
+    assert all(term in visible[8] for term in ("0,2732", "Conformal 90%", "94,9%", "4/28"))
+    assert all(term in visible[9] for term in ("Quantile", "CLIQUE", "49,0%"))
+    assert all(term in visible[10] for term in ("Year-FE CR1", "0,7007"))
+    assert all(term in visible[11] for term in ("0,0156", "0,047", "0,094", "117 BH-FDR", "0,7930"))
+    assert all(term in visible[13] for term in ("293 kiểm thử", "Streamlit 6 Tab", "28 sheet", "16 hồ sơ"))
     assert "khách hàng" not in full_text.lower()
     assert THANK_YOU in visible[-1]
     assert "kết luận" in visible[-1].lower()
@@ -283,7 +290,7 @@ def test_unified_pptx_exists_notes_and_content():
     # Core evidence must remain editable, with data embedded in both charts.
     tables = [shape.table for slide in presentation.slides for shape in slide.shapes if shape.has_table]
     charts = [shape.chart for slide in presentation.slides for shape in slide.shapes if shape.has_chart]
-    assert len(tables) >= 8, "Các bảng bằng chứng phải là bảng PowerPoint có thể chỉnh sửa"
+    assert len(tables) >= 12, "Các bảng bằng chứng phải là bảng PowerPoint có thể chỉnh sửa"
     assert len(charts) == 2
     assert all(chart.part.chart_workbook.xlsx_part is not None for chart in charts)
 
@@ -381,8 +388,9 @@ def test_unified_slide_rejects_changed_panel_without_overwriting_reviewed_output
     panel_path = Path("data/processed/papi_panel_63_2011_2024.csv")
     slide_builder = Path("scripts/deliverables/build_slides.py")
     copy_dirs = (
-        "src", "scripts/common", "scripts/analysis", "scripts/deliverables",
-        "data/processed", "models", "results", "reports", "assets",
+        "src", "scripts/common", "scripts/analysis", "scripts/supervised",
+        "scripts/deliverables", "data/processed", "models", "results",
+        "reports", "assets",
     )
     for rel_dir in copy_dirs:
         shutil.copytree(ROOT / rel_dir, tmp_path / rel_dir)

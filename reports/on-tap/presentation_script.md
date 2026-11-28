@@ -1,10 +1,10 @@
-# Kịch bản thuyết trình 12 slide STING và PAPI
+# Kịch bản thuyết trình 15 slide STING và PAPI
 
-Bộ slide chính là [`slides/Nhom15_STING_PAPI.pptx`](../../slides/Nhom15_STING_PAPI.pptx). Nội dung đi từ bài toán và cơ chế thuật toán đến kết quả PAPI, dự báo bổ trợ và giới hạn ứng dụng. Bộ trình chiếu có **12 slide**, dành khoảng **15 phút trình bày và 5 phút hỏi đáp**. Bảng thời gian dưới đây là kế hoạch luyện tập, chưa phải thời gian đã đo. Nội dung trên màn hình giữ các kết quả và giới hạn cần thiết; ghi chú slide cung cấp chi tiết để trả lời phản biện, không cần đọc nguyên văn.
+Bộ slide chính là [`slides/Nhom15_STING_PAPI.pptx`](../../slides/Nhom15_STING_PAPI.pptx). Nội dung đi từ bài toán và cơ chế thuật toán đến kết quả PAPI, mở rộng hồi quy/đa chiều/suy luận bảng, hệ thống bàn giao 63 tỉnh và giới hạn ứng dụng. Bộ trình chiếu có **15 slide**, dành khoảng **15 phút trình bày và 5 phút hỏi đáp**. Bảng thời gian dưới đây là kế hoạch luyện tập, chưa phải thời gian đã đo. Nội dung trên màn hình giữ các kết quả và giới hạn cần thiết; ghi chú slide cung cấp chi tiết để trả lời phản biện, không cần đọc nguyên văn.
 
-Mạch bài nói đi từ **phân cụm**, qua **thống kê**, đến **nhận xét từ kết quả**.
+Mạch bài nói đi từ **phân cụm**, qua **dự báo & mở rộng học thuật**, đến **suy luận thống kê & hệ thống bàn giao**.
 Slide 3–5 giải thích cách dựng lưới, tạo cụm và đối chứng. Slide 6–7 đọc số liệu
-quan sát và tính thử một ô thật. Slide 11 tổng hợp số lượng, tỷ lệ và trung vị.
+quan sát và tính thử một ô thật. Slide 8–12 trình bày dự báo 6.1, 17 cấu hình hồi quy + Conformal 90%, STING đa chiều (`QuantileSTING`/`CLIQUE`) và suy luận bảng CR1/TWFE/FDR/Moran's I. Slide 13–15 tổng hợp 63 tỉnh, sản phẩm tích hợp và kết luận.
 
 Các kết quả chính cần phân biệt xuyên suốt bài nói:
 
@@ -25,18 +25,21 @@ Các kết quả chính cần phân biệt xuyên suốt bài nói:
 
 | Slide | Thời gian | Nội dung cần nói |
 |---|---|---|
-| 1 | 0:00–0:50 | Giới thiệu nhóm, đề tài và mạch phân cụm, thống kê, nhận xét. |
-| 2 | 0:50–2:10 | Giải thích hai chỉ tiêu và đơn vị tỉnh–năm. Panel 882 × 41 có 13 dòng thiếu hai chỉ tiêu. Nêu kiểm tra khóa, cách xử lý điểm 0, cờ cực trị và thang đo. Chọn cấu hình với 2021–2022, dựng lưới tham chiếu trên 808 dòng 2011–2023, giữ nguyên khi gán điểm 2024. |
-| 3 | 2:10–4:15 | Đi theo fit → cluster → predict và đọc bảng 3 × 3. Hai cặp ô chung cạnh tạo hai cụm, mỗi cụm 7 điểm. Một điểm ô thưa nhận −1. Giải thích công thức tra ô và ngưỡng 5 trên lưới PAPI 16 × 16. ARI 0,950 đo trên 240 điểm giả lập. |
-| 4 | 4:15–5:05 | Lưới 808 dòng có các cụm 629, 16, 5 và 158 điểm −1. Cụm 2 chiếm 96,8% số điểm đã vào cụm. Hai cụm còn lại có rất ít quan sát. |
-| 5 | 5:05–6:00 | Trên 631 điểm chung, silhouette lần lượt là 0,366, 0,457 và 0,258. Mẫu 808 dùng để đếm cụm và nhiễu. Khi dựng lại lưới đều trên cùng 869 điểm, z-score giữ nguyên 869 chỉ số ô. |
-| 6 | 6:00–7:50 | Chỉ bốn nhóm trong bảng. STING gán nhãn trên 61 tỉnh đủ điểm. Hai mốc từ Cụm 2 chia tiếp 13 điểm ô thưa theo hai chỉ tiêu, còn 2 tỉnh thiếu vẫn có dòng trong báo cáo. |
-| 7 | 7:50–9:30 | Đọc ma trận trên 59 tỉnh, sau đó tính từng trục cho Lạng Sơn năm 2024. Lấy phần nguyên được ô (12, 10) với 12 điểm tham chiếu nên vào Cụm 2. Ô năm 2023 có 2 điểm nên nhãn −1. Trong 7 tỉnh rời vùng dày, 5 nằm phía điểm cao. |
-| 8 | 9:30–10:40 | Ridge giảm MAE nhẹ, còn RMSE của 4.2 tăng. Dự báo điểm phát hiện 0/11 tỉnh ngoài vùng. AUC 0,816 là kết quả hồi cứu; macro-F1 của Naive Bayes đo độ khớp nhãn STING. |
-| 9 | 10:40–11:30 | Nêu một ví dụ đối chiếu PCI và giới hạn của kiểm định khi nhiều quan sát thuộc cùng tỉnh. Các nguồn ngoài bổ sung bối cảnh cho thống kê PAPI. |
-| 10 | 11:30–12:15 | Lưới đều truyền thống (`PCA(2)` `k=1`; `8D d1–d8` `60,5%` nhiễu hoặc `mc=2` silhouette âm `−0,089`) cho thấy độ nhạy khi tăng số chiều. Mở rộng đa chiều (`QuantileSTING`, `Subspace CLIQUE`) hạ nhiễu `8D d1–d8` còn `44,7%` (Silh. `+0,161`) và tách `k=4` trên 8 tiểu chỉ tiêu (phủ `56,6%` train / `60,7%` 2024, `PCI_dm p=0,0005`), còn `2D 16×16` vẫn giữ lưới đều. |
-| 11 | 12:15–14:10 | Đọc tỷ lệ 76,2%, 12,7%, 7,9% và 3,2% trên 63 tỉnh. Đối chiếu 2,235 với 2,032 ở trục 4.2 và 1,787 với 1,963 ở trục 6.1. Nhóm cùng nhãn −1 có thể nằm ở hai phía của phân bố. Trong Cụm 2 vẫn có 7 tỉnh dưới mốc 6.1. |
-| 12 | 14:10–15:00 | Chốt STING 2D truy vết được nhãn theo ô, nhận diện một vùng dày lớn cùng hai nhóm ô thưa. Nêu các mở rộng thăm dò (`QuantileSTING`/`CLIQUE`, hồi quy 17 cấu hình/Conformal, backtest cuốn chiếu, Moran's I, cân bằng lớp) giữ chuẩn 2D `3/4/5/2` và hướng thẩm định trên dữ liệu mới. |
+| 1 | 0:00–0:40 | Giới thiệu nhóm, đề tài và mạch phân cụm → hồi quy/đa chiều → suy luận → bàn giao. |
+| 2 | 0:40–1:40 | Hai chỉ tiêu 4.2/6.1 trên panel 882 × 41; tiền xử lý 6 bước `Test → Decide` (0/882 trùng, 109 ô 0→NaN, giữ 7/808 `|z|>3`, `|Δ CV| ≤ 0,015 < cv_std(A)`). Phân tách thời gian fit đến 2023 và giữ nguyên khi gán 2024. |
+| 3 | 1:40–3:10 | Cơ chế `fit → cluster → predict` trên ví dụ 3 × 3 và lưới PAPI 16 × 16, ngưỡng 5; giả lập 240 điểm đạt ARI 0,950. |
+| 4 | 3:10–3:50 | Lưới 808 dòng: 629/650 điểm vào cụm thuộc Cụm 2 (96,8%) và 158 nhãn `−1`; nêu rõ hạn chế một cụm chi phối. |
+| 5 | 3:50–4:35 | Đối chứng STING/K-means/DBSCAN trên 631 điểm giao (0,366 / 0,457 / 0,258) và bất biến z-score 869/869 ô. |
+| 6 | 4:35–5:55 | Biểu đồ & bảng 63 tỉnh năm 2024: 48 Cụm 2, 8 rìa điểm cao, 5 rìa 6.1 thấp (`< 1,8791`), 2 thiếu dữ liệu. |
+| 7 | 5:55–7:15 | Dịch chuyển 59 tỉnh (7 rời, 5 vào) và truy vết phép chia ô cho Lạng Sơn năm 2023 `(13, 9)` → 2024 `(12, 10)` với 12 ≥ 5. |
+| 8 | 7:15–8:20 | Dự báo Ridge 2 đầu ra (bỏ sót 0/11 ca ngoài vùng, AUC 0,816) + phân loại cân bằng `C3 RF` (`CV 0,524`, `Acc 71,2%/F1 0,569`) và `C1 LR` (`74,6%/0,595`). |
+| 9 | 8:20–9:30 | Hồi quy 17 cấu hình `6.1`: cơ chế AR(1) (0,2679), sai phân `Δ6.1` Ridge (CV `0,2732`), `VIF = 3,76–5,00`, `Wilcoxon p = 0,01939`, `Conformal 90%` phủ `94,9%` (precision `4/28`, độ phủ ≠ độ chính xác cảnh báo), `E3` thắng 4/6 năm. |
+| 10 | 9:30–10:40 | Điểm nghẽn lưới đều (`PCA k=1`, `8D 60,5%`, `16^d` `24,1%→100%`, `0/28` cặp `≤90%`); `QuantileSTING` hạ nhiễu 8D còn `44,7%` (`Silh +0,161`), `8D sàng lọc mc=7` tách `k=4` phủ `60,7%` 2024, `CLIQUE 5D/4D`, và lý do giữ `2D 3/4/5/2`. |
+| 11 | 10:40–11:25 | Đối chiếu PCI/GRDP/ODM/Nghèo: chứng minh bằng cột `Year-FE CR1 (63 tỉnh)` rằng PCI gộp trên 2D (`5,84e-7`) tan biến thành `p = 0,7007`. |
+| 12 | 11:25–12:35 | Suy luận bảng `FWL + CR1 + WCR Bootstrap (B=1.999) + TWFE`: `8D Quantile mc=7` đạt CR1 trên PCI (`β=+1,561, p=0,0156, WCR=0,0185`), Holm nội họ `0,0468`, Holm 6 phép `0,0937` (chưa đạt 5%), TWFE `p=0,3420` chưa bác bỏ 0; thăm dò `117/383 BH-FDR`; `residual_ridge` chưa phát hiện tự tương quan 5% (`I = −0,0431, p = 0,7930`). |
+| 13 | 12:35–13:30 | Thống kê & nhận xét 63 tỉnh (76,2%, 12,7%, 7,9%, 3,2%), đối chiếu `2,235` vs `2,032` và `1,787` vs `1,963`, cùng `7` tỉnh trong Cụm 2 dưới mốc `6.1`. |
+| 14 | 13:30–14:20 | Trình diễn hệ thống tích hợp: Dashboard Streamlit 6 tab (fail-closed), Excel 28 sheet, DOCX 7 chương, 2 notebook, khung mù đôi 16 hồ sơ & CI 3 HĐH (`293` test, `94%`). |
+| 15 | 14:20–15:00 | Tổng kết 4 trụ cột, giới hạn phương pháp luận và 2 bước tiếp theo (chấm mù đôi 16 ca + kiểm định tiền cứu PAPI 2025). |
 
 ## Chuẩn bị demo
 
@@ -101,11 +104,11 @@ Chưa có cơ sở kết luận tổng quát. K-means k = 2 có silhouette cao h
 
 **Kiểm định nguồn ngoài có chứng minh quan hệ nhân quả không?**
 
-Không. Các nguồn ngoài hỗ trợ đối chiếu mô tả. Nhiều quan sát thuộc cùng tỉnh qua các năm nên giả định độc lập bị hạn chế — bổ sung suy luận bảng [`panel_inference.md`](../../results/panel_inference.md) (Year-FE + sai số gộp 63 tỉnh **CR1** và Wild Cluster Bootstrap `B=1.999`) xác nhận tín hiệu PCI của STING 2D (`p thô = 8,14e-7`) biến mất hoàn toàn sau kiểm soát năm (`p CR1 = 0,7007`), trong khi **8D Quantile mc=7** vẫn sống sót (`β = +1,561`, `p CR1 = 0,0156`, **Holm = 0,0468**) theo cơ chế phân tầng giữa các tỉnh (`TWFE p = 0,3420`) chứ không phải quan hệ nhân quả nội tỉnh.
+Không. Các nguồn ngoài hỗ trợ đối chiếu mô tả. Nhiều quan sát thuộc cùng tỉnh qua các năm nên giả định độc lập bị hạn chế — bổ sung suy luận bảng [`panel_inference.md`](../../results/panel_inference.md) (Year-FE + sai số gộp 63 tỉnh **CR1** và Wild Cluster Bootstrap `B=1.999`) xác nhận tín hiệu PCI của STING 2D (`p thô = 8,14e-7`) biến mất hoàn toàn sau kiểm soát năm (`p CR1 = 0,7007`), trong khi **8D Quantile mc=7** có tín hiệu Year-FE CR1 (`β = +1,561`, Holm nội họ 8D `0,0468`, Holm 6 phép chính `0,0937`); TWFE `p = 0,3420` chưa bác bỏ 0 và không chứng minh nhân quả nội tỉnh.
 
 **8D Quantile tách được 4 cụm và kiểm định FDR đa chiều kết luận gì thêm?**
 
-Trên `m = 383` không gian con khai phá được ở `high_dim_sting_subspaces.csv`, hiệu chỉnh đa kiểm định giữ lại **`117` không gian con đạt BH-FDR 5%** (`68` BY-FDR, `34` Holm FWER), đồng thời chẩn đoán không gian 2024 xác nhận phần dư Ridge trắng về mặt láng giềng (`Moran's I = -0,0431, p = 0,6600`). Tuy vậy, STING 2D `3/4/5/2` vẫn là cấu hình bàn giao chính vì chia quantile trên lưới mịn `2D 16×16` làm vỡ lõi lên `49,0%` nhiễu.
+Trên `m = 383` phép thử sàng lọc thăm dò từ `high_dim_sting_subspaces.csv` (`223` bộ đặc trưng PCI), hiệu chỉnh đa kiểm định giữ lại **`117` BH-FDR 5%** (`68` BY-FDR, `34` Holm FWER), đồng thời chẩn đoán không gian 2024 cho thấy phần dư Ridge chưa phát hiện tự tương quan không gian ở ngưỡng 5% (`Moran's I = -0,0431, p = 0,7930`, hoán vị quanh `E[I]`). Tuy vậy, STING 2D `3/4/5/2` vẫn là cấu hình bàn giao chính vì chia quantile trên lưới mịn `2D 16×16` làm vỡ lõi lên `49,0%` nhiễu.
 
 **Vì sao 8D lưới đều nhiễu 60,5% và PCA(2) chỉ còn 1 cụm; mở rộng STING đa chiều xử lý thế nào và có thay bản 2D không?**
 

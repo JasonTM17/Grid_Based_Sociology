@@ -183,7 +183,7 @@ def test_demo_command_runs_from_extracted_zip_and_detects_changed_evidence(unifi
     result = run_demo()
     assert result.returncode == 0, result.stdout + result.stderr
     assert "[PASS] checksum goi giai nen" in result.stdout
-    assert "[PASS] Nhom15_STING_PAPI.pptx mo duoc 12 trang" in result.stdout
+    assert "[PASS] Nhom15_STING_PAPI.pptx mo duoc 15 trang" in result.stdout
     evidence = package / "results/future_work_rank.csv"
     evidence.write_bytes(evidence.read_bytes() + b"\nchanged evidence\n")
     result = run_demo()

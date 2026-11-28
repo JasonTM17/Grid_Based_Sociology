@@ -1,4 +1,4 @@
-# Nhật ký luyện thuyết trình thống nhất (12 slide)
+# Nhật ký luyện thuyết trình thống nhất (15 slide)
 
 Bộ trình chiếu thống nhất hiện nằm trong `slides/Nhom15_STING_PAPI.pptx` (đồng bộ tại `submissions/Nhom15_STING_PAPI/`). Phân bổ 15 phút ở [kịch bản thuyết trình](presentation_script.md). Bảng dưới dùng để ghi thời gian đo trực tiếp khi nhóm tập vấn đáp cuối kỳ.
 
@@ -22,9 +22,9 @@ Kiểm tra toàn bộ tệp nộp, slide, báo cáo và notebook hiện tại ch
 ## C. Tự đối chiếu sau mỗi lượt
 
 - Nhóm giải thích mạch lạc Grid-based clustering, STING (`3×3` & `240` điểm giả lập), tiền xử lý 6 bước PAPI (`882×41`) và ý nghĩa nhãn nhiễu `−1` (slide 2–6).
-- Nối công thức chỉ số ô ở slide 3 với cách tính cho Lạng Sơn ở slide 7. Dùng bảng slide 6 và 11 để nói tỉ lệ từng nhóm cùng kết quả đối chiếu trung vị.
-- Giải thích được dự báo bổ trợ (AUC hồi cứu thăm dò `0,816`, chưa phải xác suất được hiệu chỉnh), đối chiếu với nguồn ngoài (PCI, GRDP, y tế ODM, nghèo GSO) và giới hạn độ bền đa chiều (slide 8–10).
-- Thời lượng bài nói 12 slide nằm trong 15 phút, dành 5 phút cho hỏi đáp.
+- Nối công thức chỉ số ô ở slide 3 với cách tính cho Lạng Sơn ở slide 7. Dùng bảng slide 6 và 13 để nói tỉ lệ từng nhóm cùng kết quả đối chiếu trung vị.
+- Giải thích được dự báo bổ trợ + phân loại C3/C1 (slide 8), hồi quy 17 cấu hình/Conformal 90%/E3 (slide 9), STING đa chiều QuantileSTING/CLIQUE (slide 10), đối chiếu nguồn ngoài + suy luận bảng CR1/TWFE/FDR/Moran's I (slide 11–12) và hệ thống tích hợp 6 tab/phiếu 63 tỉnh (slide 14).
+- Thời lượng bài nói 15 slide nằm trong 15 phút, dành 5 phút cho hỏi đáp.
 - Mỗi thành viên trả lời được bộ câu hỏi bảo vệ cuối kỳ trong [qa_final.md](qa_final.md), [qa_course_concepts.md](qa_course_concepts.md) và [qa_midterm.md](qa_midterm.md).
 
 Ghi câu hỏi yếu và biên bản luyện tập bảo vệ cuối kỳ vào [mock_defense_log.md](mock_defense_log.md) (ghi nhận phản hồi giữa kỳ đã xử lý lưu đối chiếu tại [midterm_feedback.md](midterm_feedback.md)).

@@ -143,7 +143,7 @@ try:
         presentation = ElementTree.fromstring(slides.read("ppt/presentation.xml"))
     ns = {"p": "http://schemas.openxmlformats.org/presentationml/2006/main"}
     n = len(presentation.findall("./p:sldIdLst/p:sldId", ns))
-    check("Nhom15_STING_PAPI.pptx mo duoc 12 trang", n == 12, f"{n} trang")
+    check("Nhom15_STING_PAPI.pptx mo duoc 15 trang", n == 15, f"{n} trang")
 except Exception as e:
     check("Nhom15_STING_PAPI.pptx mo duoc", False, str(e))
 

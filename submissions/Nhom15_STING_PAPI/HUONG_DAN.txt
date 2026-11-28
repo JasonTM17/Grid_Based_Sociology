@@ -16,7 +16,7 @@ Sinh viên thực hiện:
 --------------------------------------------------------------------------------
 Nhom15_STING_PAPI/
 ├── Nhom15_BaoCao_STING_PAPI.docx       Báo cáo đồ án (Word có mục lục và danh mục tự động)
-├── Nhom15_STING_PAPI.pptx              Slide thuyết trình 12 trang 16:9 kèm ghi chú
+├── Nhom15_STING_PAPI.pptx              Slide thuyết trình 15 trang 16:9 kèm ghi chú
 ├── Nhom15_STING_PAPI.ipynb             Notebook phân tích STING × PAPI & Thống kê khách hàng
 ├── Nhom15_TienXuLy_PAPI.ipynb          Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc
 ├── app.py                              Dashboard Streamlit (chạy: streamlit run app.py)

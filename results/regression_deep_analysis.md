@@ -61,7 +61,7 @@
 - **Conformal 90% (OOF `2017–2022`):** bán kính ±`0.1403` → độ phủ thực tế trên 59 tỉnh holdout 2024 = **`94.9%`**.
 - **Conformal 90% (gần nhất `2021–2022`):** bán kính ±`0.1219` → độ phủ thực tế 2024 = **`93.2%`**.
 - **Quantile GBR `[q10, q90]` (bề rộng danh nghĩa 80%):** bề rộng trung bình `0.1955` → độ phủ thực tế 2024 = **`83.1%`**.
-- **Ý nghĩa cảnh báo biên (mốc train `1.7848`):** Dự báo điểm thuần túy (`pred_ridge < 1.7848`) cảnh báo **`4`** tỉnh (bắt `1/4` ca nhóm 6.1 thấp 2024), còn dùng cận dưới Conformal 90% (`conformal_lo90 < 1.7848`) cảnh báo **`28`** tỉnh (bắt **`4/4`** ca thực tế nhóm 6.1 thấp nằm trong holdout).
+- **Ý nghĩa cảnh báo biên (mốc train `1.7848`, mẫu 59 tỉnh):** quy tắc điểm (`pred_ridge < 1.7848`) báo **`4`** tỉnh, bắt `1/4` ca thấp, độ chính xác cảnh báo `1/4` (FP `3`). Cận dưới Conformal 90% (`conformal_lo90 < 1.7848`) báo **`28`** tỉnh, bắt `4/4` ca thấp, độ chính xác cảnh báo `4/28` (FP `24`). Độ phủ khoảng 90% (`94.9%`) **không** phải độ chính xác cảnh báo.
 - **Giới hạn trung thực:** Conformal không biến hồi quy co tâm thành bộ phân loại chính xác từng ca ngoại lệ (`bias = +0.0304` năm 2024 làm khoảng lệch trên nhẹ về phía trên), mà định lượng rõ độ bất định ±`0.14–0.16` điểm quanh đường dự báo để tránh hiểu nhầm điểm dự báo đơn lẻ.
 
 ## Tệp sinh ra

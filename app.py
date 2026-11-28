@@ -1303,11 +1303,11 @@ if external_tab.open:
                     if not prim_inf.empty:
                         disp_inf = prim_inf[[
                             "branch", "outcome", "n_obs", "g_provinces", "naive_mwu_raw_p",
-                            "beta_yrfe", "se_cr1_yrfe", "p_cr1_yrfe", "p_wcr_yrfe", "p_cr1_twfe", "holm_p_family", "verdict"
+                            "beta_yrfe", "se_cr1_yrfe", "p_cr1_yrfe", "p_wcr_yrfe", "p_cr1_twfe", "holm_p_family", "holm_p_global", "verdict"
                         ]].copy()
                         disp_inf.columns = [
                             "Nhánh", "Biến ngoài", "n", "G tỉnh", "p gộp thô",
-                            "β Year-FE", "SE CR1", "p CR1", "p WCR", "p TWFE", "Holm (nhánh)", "Kết luận suy luận"
+                            "β Year-FE", "SE CR1", "p CR1", "p WCR", "p TWFE", "Holm nhánh", "Holm 6 phép", "Kết luận suy luận"
                         ]
                         st.dataframe(
                             disp_inf,
@@ -1322,7 +1322,8 @@ if external_tab.open:
                                 "p CR1": st.column_config.NumberColumn("p CR1", format="%.4f"),
                                 "p WCR": st.column_config.NumberColumn("p WCR", format="%.4f"),
                                 "p TWFE": st.column_config.NumberColumn("p TWFE", format="%.4f"),
-                                "Holm (nhánh)": st.column_config.NumberColumn("Holm (nhánh)", format="%.4f"),
+                                "Holm nhánh": st.column_config.NumberColumn("Holm nhánh", format="%.4f"),
+                                "Holm 6 phép": st.column_config.NumberColumn("Holm 6 phép", format="%.4f"),
                             },
                         )
                     fdr_inf = panel_inf_df.loc[panel_inf_df["section"] == "subspace_fdr"]
@@ -1331,7 +1332,7 @@ if external_tab.open:
                         fdr_pci = fdr_inf.loc[fdr_inf["hypothesis_id"] == "subspace_pci"]
                         if not fdr_pci.empty:
                             st.info(
-                                f"**Kiểm soát FDR 383 không gian con (PCI):** {fdr_pci.iloc[0]['verdict']} "
+                                f"**Sàng lọc thăm dò FDR (PCI, KW xếp chồng):** {fdr_pci.iloc[0]['verdict']} "
                                 f"(`{fdr_pci.iloc[0]['overlap_window']}`)."
                             )
                     if not spat_inf.empty:

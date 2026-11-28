@@ -979,6 +979,13 @@ def run_study(root: Path = ROOT, *, write_outputs: bool = True) -> dict[str, Any
         "point_catches_low61": int(
             (conformal_df["alert_point_below_train_fence"] & conformal_df["actual_low61_2024"]).sum()
         ),
+        "point_fp": int(
+            (conformal_df["alert_point_below_train_fence"] & ~conformal_df["actual_low61_2024"]).sum()
+        ),
+        "lo90_fp": int(
+            (conformal_df["alert_lo90_below_train_fence"] & ~conformal_df["actual_low61_2024"]).sum()
+        ),
+        "n_holdout": int(len(conformal_df)),
     }
 
     # Unified normalized summary table for CSV & Excel
@@ -1187,7 +1194,7 @@ def _write_markdown_report(
         f"- **Conformal 90% (OOF `2017–2022`):** bán kính ±`{conf['q90_oof_radius']:.4f}` → độ phủ thực tế trên 59 tỉnh holdout 2024 = **`{conf['emp_cov_90_oof']:.1%}`**.",
         f"- **Conformal 90% (gần nhất `2021–2022`):** bán kính ±`{conf['q90_recent_21_22_radius']:.4f}` → độ phủ thực tế 2024 = **`{conf['emp_cov_90_recent']:.1%}`**.",
         f"- **Quantile GBR `[q10, q90]` (bề rộng danh nghĩa 80%):** bề rộng trung bình `{conf['mean_width_quantile_80']:.4f}` → độ phủ thực tế 2024 = **`{conf['emp_cov_quantile_80']:.1%}`**.",
-        f"- **Ý nghĩa cảnh báo biên (mốc train `{conf['train_fence']:.4f}`):** Dự báo điểm thuần túy (`pred_ridge < {conf['train_fence']:.4f}`) cảnh báo **`{conf['point_alerts_n']}`** tỉnh (bắt `{conf['point_catches_low61']}/{conf['actual_low61_in_holdout_n']}` ca nhóm 6.1 thấp 2024), còn dùng cận dưới Conformal 90% (`conformal_lo90 < {conf['train_fence']:.4f}`) cảnh báo **`{conf['lo90_alerts_n']}`** tỉnh (bắt **`{conf['lo90_catches_low61']}/{conf['actual_low61_in_holdout_n']}`** ca thực tế nhóm 6.1 thấp nằm trong holdout).",
+        f"- **Ý nghĩa cảnh báo biên (mốc train `{conf['train_fence']:.4f}`, mẫu {conf['n_holdout']} tỉnh):** quy tắc điểm (`pred_ridge < {conf['train_fence']:.4f}`) báo **`{conf['point_alerts_n']}`** tỉnh, bắt `{conf['point_catches_low61']}/{conf['actual_low61_in_holdout_n']}` ca thấp, độ chính xác cảnh báo `{conf['point_catches_low61']}/{conf['point_alerts_n']}` (FP `{conf['point_fp']}`). Cận dưới Conformal 90% (`conformal_lo90 < {conf['train_fence']:.4f}`) báo **`{conf['lo90_alerts_n']}`** tỉnh, bắt `{conf['lo90_catches_low61']}/{conf['actual_low61_in_holdout_n']}` ca thấp, độ chính xác cảnh báo `{conf['lo90_catches_low61']}/{conf['lo90_alerts_n']}` (FP `{conf['lo90_fp']}`). Độ phủ khoảng 90% (`{conf['emp_cov_90_oof']:.1%}`) **không** phải độ chính xác cảnh báo.",
         "- **Giới hạn trung thực:** Conformal không biến hồi quy co tâm thành bộ phân loại chính xác từng ca ngoại lệ (`bias = +0.0304` năm 2024 làm khoảng lệch trên nhẹ về phía trên), mà định lượng rõ độ bất định ±`0.14–0.16` điểm quanh đường dự báo để tránh hiểu nhầm điểm dự báo đơn lẻ.",
         "",
         "## Tệp sinh ra",

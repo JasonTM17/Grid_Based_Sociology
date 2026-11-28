@@ -174,7 +174,7 @@ PACKAGE_FILES_CATALOG = {
     "reports/Nhom15_BaoCao_STING_PAPI.docx": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)",
     f"notebooks/{ANALYSIS_NOTEBOOK}": "Notebook phân tích STING × PAPI & Thống kê khách hàng đã lưu kết quả",
     f"notebooks/{PREPROCESSING_NOTEBOOK}": "Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc đã lưu kết quả",
-    "slides/Nhom15_STING_PAPI.pptx": "Slide trình bày thống nhất (12 trang 16:9 kèm ghi chú)",
+    "slides/Nhom15_STING_PAPI.pptx": "Slide trình bày thống nhất (15 trang 16:9 kèm ghi chú)",
     "app.py": "Ứng dụng dashboard Streamlit tương tác (6 tab, gồm Thống kê khách hàng)",
     "DEMO.md": "Kịch bản demo và cách đọc kết quả; đường dẫn tài liệu gốc được đối chiếu trong HUONG_DAN.txt",
     "src/sting.py": "Mã nguồn thuật toán STING cài đặt từ đầu",
@@ -329,7 +329,7 @@ Sinh viên thực hiện:
 --------------------------------------------------------------------------------
 {PACKAGE_NAME}/
 ├── {REPORT_NAME}       Báo cáo đồ án (Word có mục lục và danh mục tự động)
-├── {SLIDES_NAME}              Slide thuyết trình 12 trang 16:9 kèm ghi chú
+├── {SLIDES_NAME}              Slide thuyết trình 15 trang 16:9 kèm ghi chú
 ├── {ANALYSIS_NOTEBOOK}             Notebook phân tích STING × PAPI & Thống kê khách hàng
 ├── {PREPROCESSING_NOTEBOOK}          Notebook tiền xử lý PAPI 6 bước từ 14 Excel gốc
 ├── app.py                              Dashboard Streamlit (chạy: streamlit run app.py)
@@ -707,7 +707,7 @@ tiền xử lý 6 bước từ Excel gốc và thống kê bàn giao 63 tỉnh c
 2. {PACKAGE_NAME}/
    - Bản giải nén đồng nhất 1-1 với {PACKAGE_NAME}.zip để xem hoặc mở trực tiếp:
      + {REPORT_NAME}  (Báo cáo Word đầy đủ có mục lục & danh mục)
-     + {SLIDES_NAME}           (Bộ slide bảo vệ 12 trang 16:9)
+     + {SLIDES_NAME}           (Bộ slide bảo vệ 15 trang 16:9)
      + {ANALYSIS_NOTEBOOK}          (Notebook đồ án hoàn chỉnh)
      + {PREPROCESSING_NOTEBOOK}    (Notebook tiền xử lý PAPI 6 bước)
      + app.py                          (Dashboard tương tác Streamlit)
