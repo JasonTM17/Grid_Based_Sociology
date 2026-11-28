@@ -101,7 +101,11 @@ Chưa có cơ sở kết luận tổng quát. K-means k = 2 có silhouette cao h
 
 **Kiểm định nguồn ngoài có chứng minh quan hệ nhân quả không?**
 
-Không. Các nguồn ngoài hỗ trợ đối chiếu mô tả. Nhiều quan sát thuộc cùng tỉnh qua các năm nên giả định độc lập bị hạn chế. Cần thiết kế và mô hình phù hợp hơn trước khi suy luận tác động chính sách.
+Không. Các nguồn ngoài hỗ trợ đối chiếu mô tả. Nhiều quan sát thuộc cùng tỉnh qua các năm nên giả định độc lập bị hạn chế — bổ sung suy luận bảng [`panel_inference.md`](../../results/panel_inference.md) (Year-FE + sai số gộp 63 tỉnh **CR1** và Wild Cluster Bootstrap `B=1.999`) xác nhận tín hiệu PCI của STING 2D (`p thô = 8,14e-7`) biến mất hoàn toàn sau kiểm soát năm (`p CR1 = 0,7007`), trong khi **8D Quantile mc=7** vẫn sống sót (`β = +1,561`, `p CR1 = 0,0156`, **Holm = 0,0468**) theo cơ chế phân tầng giữa các tỉnh (`TWFE p = 0,3420`) chứ không phải quan hệ nhân quả nội tỉnh.
+
+**8D Quantile tách được 4 cụm và kiểm định FDR đa chiều kết luận gì thêm?**
+
+Trên `m = 383` không gian con khai phá được ở `high_dim_sting_subspaces.csv`, hiệu chỉnh đa kiểm định giữ lại **`117` không gian con đạt BH-FDR 5%** (`68` BY-FDR, `34` Holm FWER), đồng thời chẩn đoán không gian 2024 xác nhận phần dư Ridge trắng về mặt láng giềng (`Moran's I = -0,0431, p = 0,6600`). Tuy vậy, STING 2D `3/4/5/2` vẫn là cấu hình bàn giao chính vì chia quantile trên lưới mịn `2D 16×16` làm vỡ lõi lên `49,0%` nhiễu.
 
 **Vì sao 8D lưới đều nhiễu 60,5% và PCA(2) chỉ còn 1 cụm; mở rộng STING đa chiều xử lý thế nào và có thay bản 2D không?**
 

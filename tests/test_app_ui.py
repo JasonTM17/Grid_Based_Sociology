@@ -389,7 +389,7 @@ def test_tab4_kiem_ngoai_numbers_match_external_validation_csv(assets, external_
     assert values["Ô poverty trong cửa sổ giao"] == f"{pov['counts']['window_cells']}"
     assert values["Ô vào kiểm định theo cụm"] == f"{pov['counts']['panel_rows']}"
 
-    assert len(external.dataframe) == 5
+    assert len(external.dataframe) == 7
     tests_table = external.dataframe[0].value
     anova_row, kruskal_row, eta_row = (tests_table.iloc[index] for index in range(3))
     assert anova_row["Kiểm định"] == f"One-way ANOVA F({tests['df1']},{tests['df2']})"
@@ -933,3 +933,18 @@ def test_tab6_khach_hang_view_modes_filter_and_missing_formatting(monkeypatch):
     at_missing.radio(key="client_detail_view_mode").set_value("Khuyến nghị & dịch chuyển").run()
     assert at_missing.tabs[5].dataframe[1].value.iloc[0]["pci_2022"] == "—"
     assert at_missing.tabs[5].dataframe[1].value.iloc[0]["poverty_2024_pct"] == "—"
+
+
+def test_tab4_panel_inference_expander_renders():
+    at = run_app(TAB_EXTERNAL)
+    assert not at.exception
+    assert not at.error
+    external = at.tabs[3]
+    assert len(external.expander) == 1
+    exp = external.expander[0]
+    assert "Suy luận bảng chuẩn hóa năm (Year-FE CR1 / TWFE)" in exp.label
+    assert len(exp.dataframe) == 2
+    assert any("Kiểm soát FDR 383 không gian con (PCI)" in el.value for el in external.info)
+    assert any("Chẩn đoán tự tương quan không gian" in m.value for m in external.markdown)
+    plotly_charts = [child for child in external.children.values() if child.type == "plotly_chart"]
+    assert len(plotly_charts) == 3

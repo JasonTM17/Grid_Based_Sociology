@@ -969,3 +969,11 @@ def load_high_dim_sting_assets(root: Path = ROOT) -> dict[str, pd.DataFrame] | N
         "summary": pd.read_csv(main_path, encoding="utf-8-sig"),
         "subspaces": pd.read_csv(sub_path, encoding="utf-8-sig"),
     }
+
+
+def load_panel_inference_assets(root: Path = ROOT) -> pd.DataFrame | None:
+    """Load optional panel inference (Year-FE CR1, TWFE, FDR, Moran's I) CSV strictly read-only."""
+    path = Path(root) / "results" / "panel_inference.csv"
+    if not path.is_file():
+        return None
+    return pd.read_csv(path, encoding="utf-8-sig")

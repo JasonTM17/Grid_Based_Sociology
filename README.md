@@ -93,7 +93,7 @@ Grid_Based_Sociology/
 │   ├── raw/                   #   Dữ liệu gốc & PROVENANCE.md từng nguồn (course/ lưu local)
 │   └── processed/             #   Panel PAPI 882×41 & các bảng dữ liệu ngoài đã làm sạch
 ├── models/                    # Model STING (.pkl), scaler JSON và joblib hồi quy/phân loại
-├── results/                   # Kết quả CSV/MD/JSON, KetQua_STING_PAPI.xlsx (27 sheet) & figs/
+├── results/                   # Kết quả CSV/MD/JSON, KetQua_STING_PAPI.xlsx (28 sheet) & figs/
 ├── tests/                     # Bộ kiểm thử pytest toàn dự án
 └── assets/                    # Ảnh bìa repo & mẫu XML trang bìa báo cáo
 ```

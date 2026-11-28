@@ -812,6 +812,33 @@ print("Top 8 không gian con đa cụm nổi bật từ Subspace CLIQUE Apriori:
 show_md(top_clq[["dataset", "adaptive", "k_dim", "features", "coverage_train", "silhouette_orig", "holdout_2024_cov", "ext_pci_dm_p", "cluster_sizes"]].to_markdown(index=False))
 display(Image(filename=str(ROOT / "results/figs/high_dim_sting_analysis.png")))"""))
 
+    md(nbf.v4.new_markdown_cell("""## Phụ lục G. Suy luận Bảng (Year-FE CR1 / TWFE), Kiểm soát Đa kiểm định (Holm / BH / BY) & Chẩn đoán Không gian
+
+Xử lý trực diện hạn chế p-value gộp khi các quan sát lặp lại theo 63 tỉnh và chịu tác động xu hướng thời gian (`scripts/analysis/panel_inference.py`):
+1. **Year-FE + Sai số chuẩn Liang–Zeger CR1 (`63 tỉnh`) & Wild Cluster Bootstrap (`B = 1.999`):** chứng minh tín hiệu PCI ở STING 2D (`8.14e-7`) là nhiễu trộn theo năm (`p_cr1 = 0,7007`), trong khi **8D QuantileSTING mc=7** vẫn giữ khác biệt có ý nghĩa giữa vùng cao và vùng thấp (`β = +1,561`, `p_cr1 = 0,0156`, **Holm = 0,0468 < 0,05**), kể cả sau chuẩn hóa `within-year z` (`β = +1,199`, `p_cr1 = 0,0205`).
+2. **Phân tách Between vs Within (Two-Way FE Tỉnh + Năm):** `TWFE` cho `p = 0,3420` (49 tỉnh chuyển đổi cụm, paired `p = 0,6086`), xác nhận cơ chế là **phân tầng cấu trúc giữa các tỉnh**, đồng thời loại dương giả của GRDP (`p_cr1 = 0,0746`).
+3. **Kiểm soát đa kiểm định 383 không gian con (`high_dim_sting_subspaces.csv`):** `161` naive `< 0,05` → **`117` BH-FDR 5%**, **`68` BY-FDR 5%**, **`34` Holm FWER 5%**.
+4. **Chẩn đoán Moran's I phần dư Holdout 2024:** `pred_ridge` mang cấu trúc không gian (`I = +0,3155`, `p_perm = 0,0015`) nên phần dư `residual_ridge` trở nên trắng (`I = -0,0431`, `p_perm = 0,6600`)."""))
+
+    cd(nbf.v4.new_code_cell("""pi_df = pd.read_csv(ROOT / "results/panel_inference.csv")
+prim_pi = pi_df[pi_df["section"] == "primary_panel"][[
+    "branch", "outcome", "n_obs", "g_provinces", "naive_mwu_raw_p", "beta_yrfe", "se_cr1_yrfe", "p_cr1_yrfe", "p_wcr_yrfe", "p_cr1_twfe", "holm_p_family"
+]].copy()
+for c in ("naive_mwu_raw_p", "p_cr1_yrfe", "p_wcr_yrfe", "p_cr1_twfe", "holm_p_family"):
+    prim_pi[c] = prim_pi[c].map(lambda v: "—" if pd.isna(v) else (f"{v:.2e}" if v < 1e-4 else f"{v:.4f}"))
+prim_pi["beta_yrfe"] = prim_pi["beta_yrfe"].map(lambda v: f"{v:+.3f}")
+prim_pi["se_cr1_yrfe"] = prim_pi["se_cr1_yrfe"].map(lambda v: f"{v:.3f}")
+print("Bảng suy luận bảng chuẩn hóa năm (CR1 / WCR / TWFE / Holm):")
+show_md(prim_pi.to_markdown(index=False))
+
+spat_pi = pi_df[pi_df["section"] == "spatial_residual"][["outcome", "n_obs", "beta_yrfe", "p_cr1_yrfe", "verdict"]].copy()
+spat_pi.columns = ["Chuỗi 2024", "n", "Moran's I", "p hoán vị (2 phía)", "Kết luận"]
+spat_pi["Moran's I"] = spat_pi["Moran's I"].map(lambda v: f"{v:+.4f}")
+spat_pi["p hoán vị (2 phía)"] = spat_pi["p hoán vị (2 phía)"].map(lambda v: f"{v:.4f}")
+print("Chẩn đoán Moran's I phần dư Holdout 2024:")
+show_md(spat_pi.to_markdown(index=False))
+display(Image(filename=str(ROOT / "results/figs/panel_inference_diagnostics.png")))"""))
+
     nb["cells"] = cells
     nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}
     return nb

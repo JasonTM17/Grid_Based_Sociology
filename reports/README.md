@@ -20,8 +20,8 @@
 ## Ôn tập & Vấn đáp (`reports/on-tap/`)
 
 - `qa_midterm.md` — 24 câu hỏi đáp trọng tâm phần cơ chế thuật toán & nhiễu `−1` (đã hoàn thành giữa kỳ và hợp nhất mạch vào bộ thống nhất).
-- `qa_final.md` — 47 câu hỏi đáp cuối kỳ (+ 4 câu dự báo: STING, tiền xử lý 6 bước & độ nhạy, thống kê bàn giao 63 tỉnh, kiểm định ngoại lai, dự báo PAPI 2024, phụ lục hồi quy chuyên sâu & STING đa chiều).
-- `qa_course_concepts.md` — 61 câu hỏi đáp về các phương pháp học máy, 6 câu chuyên sâu về nhãn nhiễu STING và 3 câu mở rộng STING đa chiều (`QuantileSTING` / `Subspace CLIQUE`).
+- `qa_final.md` — 48 câu hỏi đáp cuối kỳ (+ mở rộng dự báo, STING đa chiều, hồi quy chuyên sâu & suy luận bảng CR1/FDR/Moran's I).
+- `qa_course_concepts.md` — 63 câu hỏi đáp về các phương pháp học máy, 6 câu chuyên sâu về nhãn nhiễu STING, mở rộng STING đa chiều (`QuantileSTING` / `Subspace CLIQUE`) & suy luận bảng CR1/TWFE/FDR.
 - `presentation_script.md` — Kịch bản trình bày 12 slide (15 phút nói + 5 phút Q&A).
 - `rehearsal_log.md`, `midterm_feedback.md`, `mock_defense_log.md` — Nhật ký luyện tập và ghi nhận góp ý.
 

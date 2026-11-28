@@ -54,6 +54,40 @@ PREPROC_SENS_ROWS = _read_results_csv("preprocessing_sensitivity.csv")
 REG_DEEP_ROWS = _read_results_csv("regression_deep_analysis.csv")
 REG_CONF_ROWS = _read_results_csv("regression_conformal_2024.csv")
 HIGH_DIM_ROWS = _read_results_csv("high_dim_sting.csv")
+PANEL_INF_ROWS = _read_results_csv("panel_inference.csv")
+
+
+def _panel_inf_summary():
+    by_id = {row["hypothesis_id"]: row for row in PANEL_INF_ROWS}
+    keys = (
+        "2d_pci",
+        "2d_grdp",
+        "2d_poverty",
+        "hd8_q7_pci",
+        "hd8_q7_grdp",
+        "hd8_q7_poverty",
+        "hd8_wy_pci",
+        "clq4_pci",
+    )
+    rows = []
+    for k in keys:
+        r = by_id[k]
+        p_raw = float(r["naive_mwu_raw_p"])
+        p_cr1 = float(r["p_cr1_yrfe"])
+        p_tw = float(r["p_cr1_twfe"])
+        holm = (r["holm_p_family"] or "").strip()
+        rows.append([
+            f"{r['branch']} · {r['outcome']}",
+            f"{r['n_obs']} ({r['g_provinces']})",
+            (f"{p_raw:.2e}" if p_raw < 1e-4 else f"{p_raw:.4f}").replace(".", ","),
+            f"{float(r['beta_yrfe']):+.3f}".replace(".", ","),
+            (f"{p_cr1:.2e}" if p_cr1 < 1e-4 else f"{p_cr1:.4f}").replace(".", ","),
+            (f"{p_tw:.2e}" if p_tw < 1e-4 else f"{p_tw:.4f}").replace(".", ","),
+            "—" if holm == "" or holm.lower() == "nan" else (
+                f"{float(holm):.4f}".replace(".", ",") if float(holm) >= 1e-4 else f"{float(holm):.2e}".replace(".", ",")
+            ),
+        ])
+    return {"rows": rows, "by_id": by_id}
 
 
 def _high_dim_summary():
@@ -199,8 +233,14 @@ def _dec(value, digits=4):
     return _vn(f"{value:.{digits}f}".replace(".", ","))
 
 
+def _fmt_p_vi(value):
+    v = float(value)
+    return (f"{v:.2e}" if v < 1e-4 else f"{v:.4f}").replace(".", ",")
+
+
 REG_DEEP = _deep_reg_summary()
 HIGH_DIM = _high_dim_summary()
+PANEL_INF = _panel_inf_summary()
 
 
 def _rob(branch_sub):
@@ -1249,7 +1289,7 @@ body(
     f"PCI khử năm p = {_dec(float(_hd_q7['ext_pci_dm_p']), 4)}) và vẫn giữ k = {_hd_q7_wy['n_clusters']} sau chuẩn hóa within-year z; "
     f"còn CLIQUE Quantile 4D tách 2 cực với silhouette {_f3(_hd_cq4['silhouette_orig']).replace('.', ',')}. "
     f"Dù vậy, kết quả phụ thuộc giao thức chia lưới (trên 2D 16×16, quantile làm vỡ lõi lên {_pct(_hd_2dq['noise_ratio']).replace('.', ',')} nhiễu nên vẫn giữ lưới đều) "
-    "và các p-value không gian con mang tính thăm dò, chưa hiệu chỉnh đa kiểm định."
+    "và kiểm định gộp trên từng không gian con riêng lẻ cần được đọc cùng hiệu chỉnh đa kiểm định & sai số gộp theo tỉnh ở mục 6.5.2."
 )
 h2("6.5. Đối chiếu với dữ liệu ngoài")
 body(
@@ -1297,7 +1337,49 @@ _pov_fig_no = figure("external_poverty_by_cluster.png",
 body(f"Kruskal–Wallis trên số liệu nghèo gộp thô cho H = {_note_val(POV_KW_RAW, 'H = ')}, p = {_note_val(POV_KW_RAW, 'p = ')}. ANOVA cho F = {_note_val(POV_ANOVA_RAW['note'], 'F = ')}, p = {_note_val(POV_ANOVA_RAW['note'], 'p = ')} và eta² = {_note_eta(_pov_note('poverty_pooled_raw', 'eta squared'))}. Các phép thử gộp này chưa cho bằng chứng rõ về khác biệt nhóm ở ngưỡng 0,05.")
 body(f"Sau khi trừ trung vị từng năm, Kruskal–Wallis cho H = {_note_val(POV_KW_DM, 'H = ')}, p = {_note_val(POV_KW_DM, 'p = ')}; ANOVA cho F = {_note_val(POV_ANOVA_DM['note'], 'F = ')}, p = {_note_val(POV_ANOVA_DM['note'], 'p = ')} và eta² = {_note_eta(_pov_note('poverty_pooled_demeaned', 'eta squared'))}. Tín hiệu trong mẫu thay đổi khi điều chỉnh mức trung tâm năm, nhưng cỡ hiệu ứng vẫn nhỏ. Trừ trung vị không loại bỏ mọi thay đổi về chuẩn nghèo và không xử lý sự phụ thuộc của các quan sát lặp theo tỉnh.")
 body(f"Hai cụm nhỏ chỉ có {_pov_group_n('cụm 0')} và {_pov_group_n('cụm 1')} quan sát. Với cặp nhóm có nhiều dữ liệu hơn là nhiễu và Cụm 2, Mann–Whitney cho U = {_note_val(POV_MW_RAW['note'], 'U = ')}, p = {_note_val(POV_MW_RAW['note'], 'p = ')} trên dữ liệu thô và U = {_note_val(POV_MW_DM['note'], 'U = ')}, p = {_note_val(POV_MW_DM['note'], 'p = ')} sau khi trừ trung vị năm. Cả hai chưa cho bằng chứng rõ về khác biệt trong phép thử gộp.")
-body("Các đối chiếu với PCI, nghèo và những nguồn khác bổ sung thông tin mô tả cho nhãn STING. P-value hiện chưa hiệu chỉnh đầy đủ quan sát lặp theo tỉnh, phụ thuộc giữa năm hay việc thử nhiều phép kiểm định. Vì vậy, chúng chỉ có ý nghĩa thăm dò trong mẫu này, không xác nhận một phân hoạch xã hội và không chứng minh quan hệ nhân quả. Mã tái lập: scripts/analysis/poverty_validation.py; bảng chi tiết: results/poverty_validation.md.")
+body("Các đối chiếu với PCI, nghèo và những nguồn khác bổ sung thông tin mô tả cho nhãn STING. Mục 6.5.2 dưới đây cung cấp lớp suy luận bảng chuẩn hóa theo năm và sai số gộp 63 tỉnh (CR1) để phân biệt nhiễu trộn theo thời gian với cấu trúc giữa các tỉnh; kể cả ở đó, kết quả vẫn không xác nhận một phân hoạch xã hội và không chứng minh quan hệ nhân quả. Mã tái lập: scripts/analysis/poverty_validation.py và scripts/analysis/panel_inference.py; bảng chi tiết: results/poverty_validation.md và results/panel_inference.md.")
+_pi_map = PANEL_INF["by_id"]
+_pi_2dp = _pi_map["2d_pci"]
+_pi_hd = _pi_map["hd8_q7_pci"]
+_pi_hd_gr = _pi_map["hd8_q7_grdp"]
+_pi_wy = _pi_map["hd8_wy_pci"]
+_pi_fdr_pci = _pi_map["subspace_pci"]
+_pi_sp_pred = _pi_map["pred_ridge_2024"]
+_pi_sp_res = _pi_map["residual_ridge_2024"]
+h3("6.5.2. Suy luận bảng chuẩn hóa năm (CR1), TWFE, FDR đa kiểm định & không gian phần dư")
+body(
+    "Để xử lý hạn chế của kiểm định gộp thô (vi phạm độc lập giữa các lần lặp cùng tỉnh và trộn lẫn xu hướng vĩ mô theo năm), "
+    "scripts/analysis/panel_inference.py thực hiện bốn kiểm chứng bổ trợ thông qua phép chiếu chính xác Frisch–Waugh–Lovell (FWL), "
+    "sai số chuẩn Liang–Zeger CR1 hiệu chỉnh theo 63 tỉnh, Wild Cluster Bootstrap (Rademacher, B = 1.999) và hiệu chỉnh đa kiểm định: "
+    f"(1) Với STING 2D chính thức trên PCI 2011–2022 (n = {_pi_2dp['n_obs']}, 63 tỉnh), p-value gộp thô ({_fmt_p_vi(_pi_2dp['naive_mwu_raw_p'])}) "
+    f"thu hẹp về β = {_dec(float(_pi_2dp['beta_yrfe']), 3)} điểm PCI (SE CR1 = {_dec(float(_pi_2dp['se_cr1_yrfe']), 3)}, "
+    f"p CR1 = {_fmt_p_vi(_pi_2dp['p_cr1_yrfe'])}, p WCR = {_fmt_p_vi(_pi_2dp['p_wcr_yrfe'])}; "
+    f"kiểm định Wald 4 nhóm F = {_dec(float(_pi_2dp['joint_wald_f']), 4)}, p = {_fmt_p_vi(_pi_2dp['joint_wald_p'])}) — xác nhận tín hiệu PCI trên nhánh 2D là nhiễu trộn theo năm; "
+    f"(2) Ngược lại, 8D QuantileSTING mc=7 (fit ≤ 2023) giữ được khác biệt có ý nghĩa giữa vùng cao và vùng thấp trên PCI 2011–2022 "
+    f"(β = {_dec(float(_pi_hd['beta_yrfe']), 3)}, SE CR1 = {_dec(float(_pi_hd['se_cr1_yrfe']), 3)}, hệ số nở SE {_dec(float(_pi_hd['se_inflation']), 2)}×, "
+    f"p CR1 = {_fmt_p_vi(_pi_hd['p_cr1_yrfe'])}, p WCR = {_fmt_p_vi(_pi_hd['p_wcr_yrfe'])}, Holm = {_fmt_p_vi(_pi_hd['holm_p_family'])} < 0,05), "
+    f"vẫn bền vững sau chuẩn hóa within-year z (β = {_dec(float(_pi_wy['beta_yrfe']), 3)}, p CR1 = {_fmt_p_vi(_pi_wy['p_cr1_yrfe'])}), đồng thời loại được dương giả trên GRDP "
+    f"(p thô = {_fmt_p_vi(_pi_hd_gr['naive_mwu_raw_p'])} → p CR1 = {_fmt_p_vi(_pi_hd_gr['p_cr1_yrfe'])}); "
+    f"tuy nhiên khi thêm cố định tỉnh (TWFE) thì p = {_fmt_p_vi(_pi_hd['p_cr1_twfe'])} (49 tỉnh đổi cụm), cho thấy cơ chế là phân tầng cấu trúc giữa các tỉnh (between-province) chứ không phải dao động ngắn hạn nội tỉnh; "
+    f"(3) Kiểm soát đa kiểm định trên toàn bộ {_pi_fdr_pci['n_obs']} không gian con khai phá được (results/high_dim_sting_subspaces.csv): "
+    f"{_pi_fdr_pci['verdict']}; và (4) Chẩn đoán tự tương quan không gian trên 59 tỉnh holdout 2024 cho thấy dự báo Ridge hấp thụ mạnh cấu trúc láng giềng "
+    f"(Moran's I = {_dec(float(_pi_sp_pred['beta_yrfe']), 4)}, p hoán vị = {_fmt_p_vi(_pi_sp_pred['p_cr1_yrfe'])}), giúp phần dư Ridge trắng về không gian "
+    f"(I = {_dec(float(_pi_sp_res['beta_yrfe']), 4)}, p = {_fmt_p_vi(_pi_sp_res['p_cr1_yrfe'])})."
+)
+_pi_table = table(
+    ["Nhánh & Biến ngoài", "n (G)", "p gộp thô", "β Year-FE", "p CR1", "p TWFE", "Holm (nhánh)"],
+    PANEL_INF["rows"],
+    widths=[4.8, 1.5, 1.8, 1.65, 1.65, 1.65, 2.05],
+    caption=tbl_caption(
+        "Suy luận bảng chuẩn hóa năm, sai số gộp 63 tỉnh (CR1), TWFE và Holm–Bonferroni (chi tiết FDR & Moran's I xem results/panel_inference.csv)"
+    ),
+)
+_PANEL_INF_TABLE_NO = TABLE_NO[0]
+for row in _pi_table.rows:
+    for cell in row.cells:
+        for paragraph in cell.paragraphs:
+            paragraph.paragraph_format.keep_with_next = True
+body("Số liệu & biểu đồ 4 khung kèm theo: results/panel_inference.{csv,md}, results/figs/panel_inference_diagnostics.png và sheet 'Suy luận bảng & FDR' trong KetQua_STING_PAPI.xlsx.", italic=True)
 h2("6.6. Các hạn chế còn lại")
 bullets([
     ("Một mốc hồi cứu cuối (2024).", "Dự báo điểm nghiêng về vùng dày. Kết quả xếp hạng từ kịch bản sai số dùng cùng mẫu 2024, cần đối chiếu trên thêm các mốc độc lập."),
@@ -1307,7 +1389,7 @@ bullets([
     ("Chỉ số hình học cần ít nhất hai cụm.", "Các cấu hình DBSCAN chỉ tạo một cụm được ghi n/a ở cột chỉ số không tính được."),
     ("Nguồn ngoài không đồng đều.", "PCI 2023–2024 chỉ Top-30 (chọn mẫu — tách khỏi lưới đủ 63 tỉnh); GRDP chỉ 2018–2024 (2024 = Sơ bộ); rác thải GSO trống hoàn toàn 2018 (305/882 ô); WDI chuỗi không đều (giường bệnh dừng 2017, chi y tế thiếu 2024) — mọi thống kê external khai báo số ô chạy/tổng ô và không nội suy."),
     ("Mật độ y tế snapshot 2020.", "một năm duy nhất, đếm số điểm không phải số giường; 10 tỉnh không có điểm trong nguồn; độ phủ nguồn hạn chế nên không coi đó là không có cơ sở y tế trên thực tế."),
-    ("Giới hạn kiểm định gộp.", "Các nguồn ngoài chỉ hỗ trợ đối chiếu mô tả. Quan sát lặp theo tỉnh và năm chưa được hiệu chỉnh trong các phép thử gộp; cỡ hai cụm nhỏ hạn chế và eta²=0,035, nên không diễn giải p-value thành bằng chứng nhân quả hay xác nhận cấu trúc xã hội."),
+    ("Giới hạn kiểm định gộp và suy luận bảng.", "Các nguồn ngoài chỉ hỗ trợ đối chiếu mô tả; kiểm định gộp bỏ qua phụ thuộc nội tỉnh nên sau khi hiệu chỉnh Year-FE CR1 (mục 6.5.2, Bảng " + str(_PANEL_INF_TABLE_NO) + "), tín hiệu PCI của nhánh 2D chính thức biến mất hoàn toàn (p = 0,70), còn các tín hiệu sống sót ở 8D Quantile mc=7 (Holm p = 0,0468) cũng chỉ phản ánh khác biệt giữa các tỉnh (between-province), không phải tác động nội tỉnh (TWFE p = 0,34) hay quan hệ nhân quả."),
 ])
 h2("6.7. Hướng phát triển")
 bullets([
@@ -1316,7 +1398,7 @@ bullets([
     ("Nhiều mốc đánh giá.", "Kiểm định cuốn chiếu để đối chiếu độ ổn định của sai số qua nhiều mốc thời gian."),
     ("Spatial.", "thêm tự tương quan không gian (láng giềng) — GeoJSON CC-BY-SA 4.0 đã có."),
     ("Định tính.", "phỏng vấn và đối chiếu hồ sơ tại 3–5 tỉnh ngoài vùng dày để tìm hiểu vì sao hai chỉ tiêu khác vùng tham chiếu."),
-    ("Mở rộng đã tích hợp (future_work, STING đa chiều, hồi quy chuyên sâu & phân loại cân bằng lớp).", "Script scripts/analysis/future_work.py (results/future_work.md) đã chạy trên dữ liệu hiện hành và tích hợp nhánh E2–E4 vào app.py cùng Phụ lục D của notebook: E1 chuẩn hóa hạng theo năm ra 25 cụm, 54,1% nhiễu, ARI non-noise = 0,0085 (giữ đối chiếu, không thay STING 3/4/5/2); E2 quỹ đạo OLS 63 tỉnh cho STING 1 cụm / 2 nhiễu (K-Means k=3 silhouette = 0,3430); E3 backtest cuốn chiếu 6 mốc 2019–2024 Ridge có MAE thấp hơn mốc giữ điểm năm trước ở 4/6 năm nhưng out_recall TB 0,063 vs 0,247; E4 Moran's I năm 2024 đạt I = 0,1834 (p = 0,0240) ở sd_6_1. Nhánh STING đa chiều (src/high_dim.py, scripts/analysis/high_dim_sting.py, tích hợp Tab 2 dashboard, Phụ lục F notebook và sheet 'STING đa chiều' Excel) khắc phục 60,5% nhiễu 8D và PCA(2) k=1 qua QuantileSTING (8D mc=7 cho k=4 [222, 219, 8, 8], phủ 56,6% train / 60,7% 2024, PCI khử năm p=0,0005 và giữ k=3 [232, 217, 7] sau chuẩn hóa within-year z; trên d1–d8 hạ nhiễu còn 44,7%, Silh. +0,161) và CLIQUE Apriori (4D Quantile đạt Silh. 0,772, 5D đều phủ 41,0%), đồng thời chứng minh 2D 16×16 vẫn cần giữ lưới đều. Song song đó, scripts/supervised/regression_deep_analysis.py (tích hợp app.py Tab 2, Phụ lục E notebook và sheet 'Hồi quy chuyên sâu' Excel) đã đối chiếu 17 cấu hình hồi quy 6.1, chỉ ra tín hiệu chính đến từ AR(1) / sai phân Δ6.1 (CV R² đạt 0,2732 với Ridge α = 50), VIF 1,34–5,00, kiểm định Wilcoxon p = 0,01939 trên OOF CV (p = 0,3937 trên holdout 2024) và hiệu chỉnh khoảng dự báo Conformal 90% đạt độ phủ thực tế 94,9%. Về phân loại, hai ứng viên C3 (random forest balanced, CV macro-F1 0,524, holdout Acc 0,712 / Macro-F1 0,569) và C1 (logistic balanced, CV 0,486, holdout 0,746 / 0,595) đã được áp dụng chính thức vào scripts/supervised/predict_supervised.py (models/sup_classifier.joblib). Các mô hình E3 được fit theo từng mốc nhưng cặp đặc trưng và lưới chọn tới 2021–2022, còn p-value E4 và các p-value không gian con mang tính thăm dò chưa hiệu chỉnh nhiều phép thử."),
+    ("Mở rộng đã tích hợp (future_work, STING đa chiều, hồi quy chuyên sâu, suy luận bảng CR1/FDR & cân bằng lớp).", "Script scripts/analysis/future_work.py (results/future_work.md) đã chạy trên dữ liệu hiện hành và tích hợp nhánh E2–E4 vào app.py cùng Phụ lục D của notebook: E1 chuẩn hóa hạng theo năm ra 25 cụm, 54,1% nhiễu, ARI non-noise = 0,0085 (giữ đối chiếu, không thay STING 3/4/5/2); E2 quỹ đạo OLS 63 tỉnh cho STING 1 cụm / 2 nhiễu (K-Means k=3 silhouette = 0,3430); E3 backtest cuốn chiếu 6 mốc 2019–2024 Ridge có MAE thấp hơn mốc giữ điểm năm trước ở 4/6 năm nhưng out_recall TB 0,063 vs 0,247; E4 Moran's I năm 2024 đạt I = 0,1834 (p = 0,0240) ở sd_6_1. Nhánh STING đa chiều (src/high_dim.py, scripts/analysis/high_dim_sting.py, tích hợp Tab 2 dashboard, Phụ lục F notebook và sheet 'STING đa chiều' Excel) khắc phục 60,5% nhiễu 8D và PCA(2) k=1 qua QuantileSTING (8D mc=7 cho k=4 [222, 219, 8, 8], phủ 56,6% train / 60,7% 2024, PCI khử năm p=0,0005 và giữ k=3 [232, 217, 7] sau chuẩn hóa within-year z; trên d1–d8 hạ nhiễu còn 44,7%, Silh. +0,161) và CLIQUE Apriori (4D Quantile đạt Silh. 0,772, 5D đều phủ 41,0%), đồng thời chứng minh 2D 16×16 vẫn cần giữ lưới đều. Song song đó, scripts/supervised/regression_deep_analysis.py (tích hợp app.py Tab 2, Phụ lục E notebook và sheet 'Hồi quy chuyên sâu' Excel) đã đối chiếu 17 cấu hình hồi quy 6.1, chỉ ra tín hiệu chính đến từ AR(1) / sai phân Δ6.1 (CV R² đạt 0,2732 với Ridge α = 50), VIF 1,34–5,00, kiểm định Wilcoxon p = 0,01939 trên OOF CV (p = 0,3937 trên holdout 2024) và hiệu chỉnh khoảng dự báo Conformal 90% đạt độ phủ thực tế 94,9%. Về phân loại, hai ứng viên C3 (random forest balanced, CV macro-F1 0,524, holdout Acc 0,712 / Macro-F1 0,569) và C1 (logistic balanced, CV 0,486, holdout 0,746 / 0,595) đã được áp dụng chính thức vào scripts/supervised/predict_supervised.py (models/sup_classifier.joblib). Bổ trợ trực tiếp cho các nhánh trên là lớp suy luận bảng chuẩn hóa năm (scripts/analysis/panel_inference.py, mục 6.5.2, Phụ lục G notebook, Tab 4 dashboard & sheet 'Suy luận bảng & FDR'): khẳng định nhánh 8D Quantile mc=7 sống sót Year-FE CR1 + WCR Bootstrap + Holm 5% trên PCI (p = 0,0156, Holm = 0,0468, cơ chế between-province) trong khi loại được nhiễu trộn theo năm ở 2D PCI (p = 0,7007) và dương giả trên GRDP (p = 0,0746), giữ 117/383 không gian con dưới BH-FDR 5% (68 BY-FDR), và xác nhận phần dư Ridge 2024 trắng về mặt không gian (Moran's I = -0,0431, p = 0,6600). Các mô hình E3 được fit theo từng mốc nhưng cặp đặc trưng và lưới chọn tới 2021–2022, còn p-value E4 chỉ mang tính thăm dò."),
 ])
 
 
@@ -1324,7 +1406,7 @@ h1("CHƯƠNG 7. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN")
 h2("7.1. Kết luận")
 bullets([
     ("Kiểm tra cài đặt STING.", "ARI 0.950 trên bộ dữ liệu giả lập. Toàn bộ kiểm thử trong tests/test_sting.py đạt. Truy vấn vùng có chi phí O(M·d) với M ô có dữ liệu và d chiều."),
-    ("Kết quả phụ thuộc phạm vi và cách chia lưới.", f"Trên hai chỉ tiêu chính (4.2, 6.1) với lưới đều 16×16, một cụm lớn chiếm ưu thế. Các thử nghiệm PCA(2) và 8D lưới đều nhạy với độ phân giải và ngưỡng số điểm, trong khi mở rộng đa chiều bằng QuantileSTING và Subspace CLIQUE (mục 5.4) hạ nhiễu 8D d1–d8 xuống {_pct(_hd_d8_q4['noise_ratio']).replace('.', ',')} (Silh. +{_f3(_hd_d8_q4['silhouette_orig']).replace('.', ',')}) và tách được chế độ đa cụm trên 8 tiểu chỉ tiêu (phủ {_pct(_hd_q7['coverage_train']).replace('.', ',')} train / {_pct(_hd_q7['holdout_2024_cov']).replace('.', ',')} năm 2024; 4D CLIQUE Quantile đạt Silh. {_f3(_hd_cq4['silhouette_orig']).replace('.', ',')}). Tuy nhiên các kết quả vẫn phụ thuộc giao thức chia lưới và chưa hiệu chỉnh đa kiểm định, nên không suy ra phân hoạch tuyệt đối cho toàn bộ PAPI hay các địa phương đồng nhất."),
+    ("Kết quả phụ thuộc phạm vi và cách chia lưới.", f"Trên hai chỉ tiêu chính (4.2, 6.1) với lưới đều 16×16, một cụm lớn chiếm ưu thế. Các thử nghiệm PCA(2) và 8D lưới đều nhạy với độ phân giải và ngưỡng số điểm, trong khi mở rộng đa chiều bằng QuantileSTING và Subspace CLIQUE (mục 5.4) hạ nhiễu 8D d1–d8 xuống {_pct(_hd_d8_q4['noise_ratio']).replace('.', ',')} (Silh. +{_f3(_hd_d8_q4['silhouette_orig']).replace('.', ',')}) và tách được chế độ đa cụm trên 8 tiểu chỉ tiêu (phủ {_pct(_hd_q7['coverage_train']).replace('.', ',')} train / {_pct(_hd_q7['holdout_2024_cov']).replace('.', ',')} năm 2024; 4D CLIQUE Quantile đạt Silh. {_f3(_hd_cq4['silhouette_orig']).replace('.', ',')}). Bổ sung suy luận bảng chuẩn hóa năm + CR1 63 tỉnh và kiểm soát đa kiểm định Holm/BH/BY (mục 6.5.2) xác nhận nhánh 8D Quantile mc=7 giữ ý nghĩa trên PCI (p CR1 = 0,0156, Holm = 0,0468, 117/383 không gian con đạt BH-FDR 5%) nhưng vẫn là phân tầng giữa các tỉnh (TWFE p = 0,342), không thay thế STING 2D hay chứng minh nhân quả."),
     ("Dự báo hai chỉ tiêu và đối chiếu vùng.", "Ridge có MAE thấp hơn giữ nguyên điểm 2023 ở cả hai chỉ tiêu trên mẫu 59 tỉnh. Dự báo điểm đưa cả 59 vào cụm lớn và bỏ sót 11 tỉnh có quan sát ngoài vùng dày. So sánh điểm liên tục và so sánh vùng cho hai loại kết quả cần diễn giải riêng."),
     ("Rà soát thang đo.", "Bước sàng lọc đánh dấu 23/37 chỉ tiêu để đối chiếu với workbook. Việc đối chiếu giúp chọn đầu vào và giới hạn cách diễn giải các thay đổi theo thời gian."),
 ])
@@ -1358,6 +1440,7 @@ table(["Lệnh", "Kỳ vọng"], [
     ["python -E scripts/analysis/stakeholder_summary.py --with-excel", "results/stakeholder_province_summary_2024.csv (63 tỉnh), stakeholder_summary.md, stakeholder_quadrants_2024.png + KetQua_STING_PAPI.xlsx"],
     ["python -E scripts/supervised/regression_deep_analysis.py", "results/regression_deep_analysis.{csv,md}, regression_conformal_2024.csv, results/figs/regression_diagnostics_deep.png + sheet Hồi quy chuyên sâu"],
     ["python -E scripts/analysis/high_dim_sting.py", "results/high_dim_sting.{csv,md}, high_dim_sting_subspaces.csv, results/figs/high_dim_sting_analysis.png + sheet STING đa chiều"],
+    ["python -E scripts/analysis/panel_inference.py", "results/panel_inference.{csv,md}, results/figs/panel_inference_diagnostics.png + sheet Suy luận bảng & FDR (Year-FE CR1, TWFE, Holm/BH/BY, Moran's I)"],
     ["python -m nbconvert --to notebook --execute --inplace notebooks/Nhom15_STING_PAPI.ipynb", f"thực thi thành công, {NB_CELLS} cells, {NB_IMGS} hình nhúng (đếm từ notebook đã execute)"],
     ["python scripts/deliverables/build_report.py", "reports/Nhom15_BaoCao_STING_PAPI.docx"],
 ], widths=[9.8, 6.0], caption=tbl_caption("Danh sách lệnh tái lập và kết quả kỳ vọng"))
@@ -1684,10 +1767,12 @@ body("Số liệu đầy đủ: results/supervised_depth.md (kèm supervised_dep
      "results/figs/supervised_learning_curve.png, "
      "results/figs/supervised_importance.png), phần mở rộng 17 mô hình hồi quy / Conformal 90% "
      "tại results/regression_deep_analysis.md (kèm regression_deep_analysis.csv, "
-     "regression_conformal_2024.csv, results/figs/regression_diagnostics_deep.png) và mở rộng STING đa chiều "
-     "tại results/high_dim_sting.md (kèm high_dim_sting.csv, high_dim_sting_subspaces.csv, "
-     "results/figs/high_dim_sting_analysis.png). Tái lập: "
-     "python -E scripts/supervised/supervised_depth.py, python -E scripts/supervised/regression_deep_analysis.py và python -E scripts/analysis/high_dim_sting.py.", italic=True)
+     "results/figs/regression_diagnostics_deep.png), mở rộng STING đa chiều tại results/high_dim_sting.md "
+     "(high_dim_sting.csv, high_dim_sting_subspaces.csv, results/figs/high_dim_sting_analysis.png) và "
+     "suy luận bảng chuẩn hóa năm CR1/TWFE, FDR 383 không gian con và Moran's I phần dư tại results/panel_inference.md "
+     "(panel_inference.csv, results/figs/panel_inference_diagnostics.png). Tái lập: "
+     "python -E scripts/supervised/supervised_depth.py, python -E scripts/supervised/regression_deep_analysis.py, "
+     "python -E scripts/analysis/high_dim_sting.py và python -E scripts/analysis/panel_inference.py.", italic=True)
 body("Các kiểm tra bổ sung cần được đọc riêng cho từng nhóm: tỷ lệ giữ nhãn toàn bộ chịu ảnh hưởng lớn từ cụm chiếm ưu thế, còn hai cụm nhỏ và các đặc trưng ngoài giá trị y tế năm trước kém ổn định hơn. Những nhận xét này mô tả phạm vi thử nghiệm hiện có và không xác nhận một phân hoạch xã hội tổng quát.")
 
 

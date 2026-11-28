@@ -76,9 +76,10 @@ bốn tài liệu chính được chuyển lên cấp đầu để mở thuận 
   notebooks/Nhom15_TienXuLy_PAPI.ipynb -> Nhom15_TienXuLy_PAPI.ipynb
 
 results/future_work.md, bốn CSV future_work_*, kết quả hồi quy chuyên sâu
-(regression_deep_analysis.*) và mở rộng STING đa chiều (high_dim_sting.*,
-src/high_dim.py, scripts/analysis/high_dim_sting.py) được kèm để đối chiếu
-Mục 5.4, 5.5, 6.7 và kết luận slide. Đây là thực nghiệm thăm dò, không thay
+(regression_deep_analysis.*), mở rộng STING đa chiều (high_dim_sting.*,
+src/high_dim.py, scripts/analysis/high_dim_sting.py) và suy luận bảng CR1/FDR
+(panel_inference.*, scripts/analysis/panel_inference.py) được kèm để đối chiếu
+Mục 5.4, 5.5, 6.5, 6.7 và kết luận slide. Đây là thực nghiệm thăm dò, không thay
 thế kết quả chính hay kiểm chứng độc lập.
 Các bản thử nghiệm ứng viên lẻ (`candidates_*.md`), tài liệu ôn tập và phiếu rà soát chuyên viên
 không thuộc gói nộp. Các liên kết tới chúng mở trên repo khi cần đối chiếu.

@@ -11,26 +11,26 @@
     },
     {
       "path": "HUONG_DAN.txt",
-      "bytes": 6450,
-      "sha256": "e9fc02e377113df5aa1a38ffc0818399c69bd8262af89f7a81a078e0dae8ce33",
+      "bytes": 6539,
+      "sha256": "a82bf583ca5858623b6e181a0474b1b3c4264afe3eb5f9e835054218f09fee58",
       "role": "Hướng dẫn mở và chạy lại đồ án"
     },
     {
       "path": "Nhom15_BaoCao_STING_PAPI.docx",
-      "bytes": 3336511,
-      "sha256": "8b3bca0f9f6199141911b64dcaab7cf5f2e012dde3b364f6be617c29c5256f76",
+      "bytes": 3340558,
+      "sha256": "0aa200b39fabe2cb6ffa24746fc84ff6f41d560ed24a22e951795afa98cedd18",
       "role": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)"
     },
     {
       "path": "Nhom15_STING_PAPI.ipynb",
-      "bytes": 9178980,
-      "sha256": "7b199fd850e45bf4f019d8e797cd8aa501e97cad52e90317e774faf68e640f05",
+      "bytes": 9785917,
+      "sha256": "d93827d7adb429d7d2d374c4e70e98bbcb3df729cc76098d17293a7a70dde340",
       "role": "Notebook phân tích STING × PAPI & Thống kê khách hàng đã lưu kết quả"
     },
     {
       "path": "Nhom15_STING_PAPI.pptx",
-      "bytes": 93732,
-      "sha256": "e0c0181dc1bf32c6b7ae5e408a55a2a7c577ad77d6871a3d92b9a0c86b541ed4",
+      "bytes": 94791,
+      "sha256": "15950d31f52c7018f28c57bf4f6989a09ca480ded833505bf96ca23c11067bc2",
       "role": "Slide trình bày thống nhất (12 trang 16:9 kèm ghi chú)"
     },
     {
@@ -41,8 +41,8 @@
     },
     {
       "path": "app.py",
-      "bytes": 92516,
-      "sha256": "97f3d1f38c54d2b881a7758c1b7dc0a881eb8b9750fef5c76cda738c5a5d1faa",
+      "bytes": 97404,
+      "sha256": "522471b068e48bb9684474a65f2f5c0c57d88f05acfbbadbd94e16a8b670d1ab",
       "role": "Ứng dụng dashboard Streamlit tương tác (6 tab, gồm Thống kê khách hàng)"
     },
     {
@@ -371,8 +371,8 @@
     },
     {
       "path": "results/KetQua_STING_PAPI.xlsx",
-      "bytes": 205376,
-      "sha256": "e1141e9832a5d2ab1a7b0e5e84cdbf6ecb1d8206b701afeb97f1efd8641e20ef",
+      "bytes": 210053,
+      "sha256": "c29b8ef7cf126e7b90c84b82575aa92153619b097d6fe3ee572aa07f02f6f227",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -520,6 +520,12 @@
       "role": "Hình minh họa trong báo cáo, slide và notebook"
     },
     {
+      "path": "results/figs/panel_inference_diagnostics.png",
+      "bytes": 449326,
+      "sha256": "828b5ced3fc5d731e0d64179a399c44a0845a675a607a73dd68d2eb4cf026267",
+      "role": "Hình minh họa trong báo cáo, slide và notebook"
+    },
+    {
       "path": "results/figs/papi_forecast_grid.png",
       "bytes": 169642,
       "sha256": "ed3cfa1983f7fe59b416e51010ce37815ed8af5da1cafbbde7ba90d61d833fe6",
@@ -649,6 +655,18 @@
       "path": "results/metrics.csv",
       "bytes": 953,
       "sha256": "5b98555ee83d477f64bc47c85a827520a2f81ba122223b92f5da0919492f479f",
+      "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
+    },
+    {
+      "path": "results/panel_inference.csv",
+      "bytes": 7553,
+      "sha256": "6af97f5c5fca4d75c6ed6bc1f1ffb06ffe1abb630957f840de7aad3148044937",
+      "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
+    },
+    {
+      "path": "results/panel_inference.md",
+      "bytes": 6258,
+      "sha256": "8bbdc807227c5de5ed81b29696a4206195bd0173a115f99e20f576018ce46d99",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -821,8 +839,8 @@
     },
     {
       "path": "scripts/analysis/dashboard_data.py",
-      "bytes": 41185,
-      "sha256": "84977ad93791da3c38220373292f9b9e4ee53ba6bf11e0cedfd8a31d9b28fd45",
+      "bytes": 41518,
+      "sha256": "5d8088b9b6d83a9776e6c7c1f0936fe2889b432aa49482e764ac11ab2bf5c2d4",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -847,6 +865,12 @@
       "path": "scripts/analysis/high_dim_sting.py",
       "bytes": 68736,
       "sha256": "17cfe3b29268ef5fe0cfedd8b1818c0e18d5573d9c8778858daa7e434f613515",
+      "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
+    },
+    {
+      "path": "scripts/analysis/panel_inference.py",
+      "bytes": 56798,
+      "sha256": "5335becabfe2b85bacc79fa6243ffcf31c0122dd4a6927e40fe1cc40617f668d",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -959,8 +983,8 @@
     },
     {
       "path": "scripts/deliverables/demo_smoke.py",
-      "bytes": 6971,
-      "sha256": "90c77bde0f5a174fb7f1ec3eebe155d8685e36c469180e1cd4873d5d4135ac18",
+      "bytes": 7058,
+      "sha256": "2b3e0db9cd6facb801f6ec402f8a8ff92697afd4efdb1ec939c17028cfca7a47",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {

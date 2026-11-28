@@ -72,6 +72,7 @@ PACKAGE_SCRIPTS = (
     "analysis/first_real_cluster",
     "analysis/future_work",
     "analysis/high_dim_sting",
+    "analysis/panel_inference",
     "analysis/poverty_validation",
     "analysis/predict_demo",
     "analysis/predict_sweep",
@@ -108,6 +109,8 @@ PACKAGE_RESULTS = (
     "high_dim_sting.md",
     "high_dim_sting_subspaces.csv",
     "metrics.csv",
+    "panel_inference.csv",
+    "panel_inference.md",
     "papi_forecast_2024.json",
     "papi_forecast_cv.csv",
     "papi_forecast_provinces_2024.csv",
@@ -151,6 +154,7 @@ PACKAGE_FIGURES = (
     "kmeans_elbow",
     "map_2020",
     "map_2024",
+    "panel_inference_diagnostics",
     "papi_forecast_grid",
     "papi_forecast_values",
     "papi_zscore_comparison",
@@ -378,9 +382,10 @@ bốn tài liệu chính được chuyển lên cấp đầu để mở thuận 
   notebooks/{PREPROCESSING_NOTEBOOK} -> {PREPROCESSING_NOTEBOOK}
 
 results/future_work.md, bốn CSV future_work_*, kết quả hồi quy chuyên sâu
-(regression_deep_analysis.*) và mở rộng STING đa chiều (high_dim_sting.*,
-src/high_dim.py, scripts/analysis/high_dim_sting.py) được kèm để đối chiếu
-Mục 5.4, 5.5, 6.7 và kết luận slide. Đây là thực nghiệm thăm dò, không thay
+(regression_deep_analysis.*), mở rộng STING đa chiều (high_dim_sting.*,
+src/high_dim.py, scripts/analysis/high_dim_sting.py) và suy luận bảng CR1/FDR
+(panel_inference.*, scripts/analysis/panel_inference.py) được kèm để đối chiếu
+Mục 5.4, 5.5, 6.5, 6.7 và kết luận slide. Đây là thực nghiệm thăm dò, không thay
 thế kết quả chính hay kiểm chứng độc lập.
 Các bản thử nghiệm ứng viên lẻ (`candidates_*.md`), tài liệu ôn tập và phiếu rà soát chuyên viên
 không thuộc gói nộp. Các liên kết tới chúng mở trên repo khi cần đối chiếu.
@@ -412,7 +417,7 @@ def verify_report_fields(data: bytes) -> None:
             content = "".join(t.text or "" for t in paragraph.findall(".//w:t", word))
             entries[name].append(content)
     chapters = {m.group(1) for line in entries["TOC1"] if (m := re.match(r"CHƯƠNG (\d+)\.", line))}
-    expected_catalog = (("Hình", 13), ("Bảng", 17))
+    expected_catalog = (("Hình", 13), ("Bảng", 18))
     if chapters != set("1234567") or any(
         sum(line.startswith(label + " ") for line in entries["TableofFigures"]) != count
         for label, count in expected_catalog

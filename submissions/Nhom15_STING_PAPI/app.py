@@ -20,6 +20,7 @@ from scripts.analysis.dashboard_data import (
     load_dashboard_assets,
     load_external_validation_assets,
     load_high_dim_sting_assets,
+    load_panel_inference_assets,
     load_poverty_assets,
     load_regression_deep_assets,
     load_regression_models,
@@ -108,6 +109,7 @@ _HIGH_DIM_FILES = (
     "results/high_dim_sting.csv",
     "results/high_dim_sting_subspaces.csv",
 )
+_PANEL_INFERENCE_FILES = ("results/panel_inference.csv",)
 
 
 def artifact_identity(relative_paths: tuple[str, ...]) -> tuple[tuple[str, int | None, int | None], ...]:
@@ -173,6 +175,14 @@ def get_high_dim_sting_assets(
 ) -> dict[str, pd.DataFrame] | None:
     del artifact_identity
     return load_high_dim_sting_assets()
+
+
+@st.cache_resource(show_spinner="Đang đọc kiểm định suy luận bảng & FDR…")
+def get_panel_inference_assets(
+    artifact_identity: tuple[tuple[str, int | None, int | None], ...],
+) -> pd.DataFrame | None:
+    del artifact_identity
+    return load_panel_inference_assets()
 
 
 def feature_label(feature: str, config: dict) -> str:
@@ -1276,6 +1286,74 @@ if external_tab.open:
                     f"poverty-only {poverty_counts['pov_only_years']} (không có nhãn cụm) và năm "
                     f"{poverty_counts['label_only_years']} (bảng pxweb V14.47 không có cột poverty)."
                 )
+
+            panel_inf_df = get_panel_inference_assets(
+                artifact_identity(_PANEL_INFERENCE_FILES)
+            )
+            if panel_inf_df is not None and not panel_inf_df.empty:
+                with st.expander(
+                    "Suy luận bảng chuẩn hóa năm (Year-FE CR1 / TWFE), Kiểm soát FDR 383 không gian con & Moran's I",
+                    expanded=False,
+                ):
+                    st.caption(
+                        "Xử lý phụ thuộc quan sát lặp theo 63 tỉnh và xu hướng vĩ mô theo năm qua phép chiếu FWL + "
+                        "sai số chuẩn Liang–Zeger CR1, Wild Cluster Bootstrap (B=1.999) và hiệu chỉnh đa kiểm định Holm/BH/BY."
+                    )
+                    prim_inf = panel_inf_df.loc[panel_inf_df["section"] == "primary_panel"].copy()
+                    if not prim_inf.empty:
+                        disp_inf = prim_inf[[
+                            "branch", "outcome", "n_obs", "g_provinces", "naive_mwu_raw_p",
+                            "beta_yrfe", "se_cr1_yrfe", "p_cr1_yrfe", "p_wcr_yrfe", "p_cr1_twfe", "holm_p_family", "verdict"
+                        ]].copy()
+                        disp_inf.columns = [
+                            "Nhánh", "Biến ngoài", "n", "G tỉnh", "p gộp thô",
+                            "β Year-FE", "SE CR1", "p CR1", "p WCR", "p TWFE", "Holm (nhánh)", "Kết luận suy luận"
+                        ]
+                        st.dataframe(
+                            disp_inf,
+                            hide_index=True,
+                            width="stretch",
+                            column_config={
+                                "n": st.column_config.NumberColumn("n", format="%d"),
+                                "G tỉnh": st.column_config.NumberColumn("G tỉnh", format="%d"),
+                                "β Year-FE": st.column_config.NumberColumn("β Year-FE", format="%.3f"),
+                                "SE CR1": st.column_config.NumberColumn("SE CR1", format="%.3f"),
+                                "p gộp thô": st.column_config.NumberColumn("p gộp thô", format="%.4g"),
+                                "p CR1": st.column_config.NumberColumn("p CR1", format="%.4f"),
+                                "p WCR": st.column_config.NumberColumn("p WCR", format="%.4f"),
+                                "p TWFE": st.column_config.NumberColumn("p TWFE", format="%.4f"),
+                                "Holm (nhánh)": st.column_config.NumberColumn("Holm (nhánh)", format="%.4f"),
+                            },
+                        )
+                    fdr_inf = panel_inf_df.loc[panel_inf_df["section"] == "subspace_fdr"]
+                    spat_inf = panel_inf_df.loc[panel_inf_df["section"] == "spatial_residual"]
+                    if not fdr_inf.empty:
+                        fdr_pci = fdr_inf.loc[fdr_inf["hypothesis_id"] == "subspace_pci"]
+                        if not fdr_pci.empty:
+                            st.info(
+                                f"**Kiểm soát FDR 383 không gian con (PCI):** {fdr_pci.iloc[0]['verdict']} "
+                                f"(`{fdr_pci.iloc[0]['overlap_window']}`)."
+                            )
+                    if not spat_inf.empty:
+                        st.markdown("**Chẩn đoán tự tương quan không gian phần dư Holdout 2024 (Moran's I, 1.999 hoán vị)**")
+                        st.dataframe(
+                            spat_inf[["outcome", "n_obs", "beta_yrfe", "p_cr1_yrfe", "verdict"]].rename(
+                                columns={
+                                    "outcome": "Chuỗi năm 2024",
+                                    "n_obs": "n",
+                                    "beta_yrfe": "Moran's I",
+                                    "p_cr1_yrfe": "p hoán vị",
+                                    "verdict": "Kết luận không gian",
+                                }
+                            ),
+                            hide_index=True,
+                            width="stretch",
+                            column_config={
+                                "n": st.column_config.NumberColumn("n", format="%d"),
+                                "Moran's I": st.column_config.NumberColumn("Moran's I", format="%+.4f"),
+                                "p hoán vị": st.column_config.NumberColumn("p hoán vị", format="%.4f"),
+                            },
+                        )
 
             st.caption(
                 "Nguồn local: `data/processed/external_pci_63_full.csv` (PCI VCCI–USAID — provenance "
