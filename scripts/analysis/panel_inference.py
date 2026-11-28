@@ -987,7 +987,7 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
     if write_outputs:
         res_dir.mkdir(parents=True, exist_ok=True)
         figs_dir.mkdir(parents=True, exist_ok=True)
-        export_df.to_csv(res_dir / "panel_inference.csv", index=False, encoding="utf-8-sig")
+        export_df.to_csv(res_dir / "panel_inference.csv", index=False, encoding="utf-8-sig", lineterminator="\n")
 
         plot_panel_inference_diagnostics(
             primary_df,
@@ -1079,7 +1079,8 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
                 "- Trang Excel: sheet `Suy luận bảng & FDR` trong `results/KetQua_STING_PAPI.xlsx`",
             ]
         )
-        (res_dir / "panel_inference.md").write_text("\n".join(md_lines) + "\n", encoding="utf-8")
+        with (res_dir / "panel_inference.md").open("w", encoding="utf-8", newline="\n") as fh:
+            fh.write("\n".join(md_lines) + "\n")
 
     return {
         "primary": primary_df,

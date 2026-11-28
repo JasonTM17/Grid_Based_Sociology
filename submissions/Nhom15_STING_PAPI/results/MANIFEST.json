@@ -371,8 +371,8 @@
     },
     {
       "path": "results/KetQua_STING_PAPI.xlsx",
-      "bytes": 210053,
-      "sha256": "c29b8ef7cf126e7b90c84b82575aa92153619b097d6fe3ee572aa07f02f6f227",
+      "bytes": 210063,
+      "sha256": "f2fe62675abd76122b87c13f2f5c1f92106b959d6de6c3c5e2ff292f26a3051a",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -659,14 +659,14 @@
     },
     {
       "path": "results/panel_inference.csv",
-      "bytes": 7553,
-      "sha256": "6af97f5c5fca4d75c6ed6bc1f1ffb06ffe1abb630957f840de7aad3148044937",
+      "bytes": 7536,
+      "sha256": "eff9a345694ce15274b15b7365d103be26b1c53063c2319c2941f538ac962bd6",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/panel_inference.md",
-      "bytes": 6258,
-      "sha256": "8bbdc807227c5de5ed81b29696a4206195bd0173a115f99e20f576018ce46d99",
+      "bytes": 6210,
+      "sha256": "e387ab94d9bd8bd3895c3e63403122f865c650d180c0f1c49ce68e4a345e4df0",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -869,8 +869,8 @@
     },
     {
       "path": "scripts/analysis/panel_inference.py",
-      "bytes": 56798,
-      "sha256": "5335becabfe2b85bacc79fa6243ffcf31c0122dd4a6927e40fe1cc40617f668d",
+      "bytes": 56865,
+      "sha256": "b280ec9e29ca230f709b91b89ab057c5a55b1cd4303ed25ad2af70e3a73f1223",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
