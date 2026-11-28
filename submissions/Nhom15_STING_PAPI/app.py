@@ -19,6 +19,7 @@ from scripts.analysis.dashboard_data import (
     load_classifier_model,
     load_dashboard_assets,
     load_external_validation_assets,
+    load_high_dim_sting_assets,
     load_poverty_assets,
     load_regression_deep_assets,
     load_regression_models,
@@ -103,6 +104,10 @@ _REGRESSION_DEEP_FILES = (
     "results/regression_deep_analysis.csv",
     "results/regression_conformal_2024.csv",
 )
+_HIGH_DIM_FILES = (
+    "results/high_dim_sting.csv",
+    "results/high_dim_sting_subspaces.csv",
+)
 
 
 def artifact_identity(relative_paths: tuple[str, ...]) -> tuple[tuple[str, int | None, int | None], ...]:
@@ -160,6 +165,14 @@ def get_regression_deep_assets(
 ) -> dict[str, pd.DataFrame] | None:
     del artifact_identity
     return load_regression_deep_assets()
+
+
+@st.cache_resource(show_spinner="Đang đọc phân tích STING đa chiều…")
+def get_high_dim_sting_assets(
+    artifact_identity: tuple[tuple[str, int | None, int | None], ...],
+) -> dict[str, pd.DataFrame] | None:
+    del artifact_identity
+    return load_high_dim_sting_assets()
 
 
 def feature_label(feature: str, config: dict) -> str:
@@ -495,6 +508,80 @@ with sting_tab:
                 "split": "Tập STING",
             },
         )
+
+        high_dim = get_high_dim_sting_assets(artifact_identity(_HIGH_DIM_FILES))
+        if high_dim is not None:
+            hd_sum = high_dim["summary"]
+            with st.expander(
+                "Mở rộng STING đa chiều: Thang thưa lưới, Subspace CLIQUE & Quantile STING",
+                expanded=False,
+            ):
+                st.caption(
+                    "Đối chiếu ngoài không gian 2D đóng băng (3/4/5/2 vẫn là mô hình chính): "
+                    "mọi biên quantile, lựa chọn đặc trưng 2D/3D và đơn vị dày CLIQUE đều chỉ khớp trên ≤ 2023, "
+                    "đánh giá độc lập trên holdout 2024 và kiểm định ngoài khử hiệu ứng năm."
+                )
+                spar = hd_sum.loc[hd_sum["section"] == "sparsity_ladder"].copy()
+                if not spar.empty:
+                    fig_spar = go.Figure()
+                    for grid_lbl, grp in spar.groupby(spar["method"].str.extract(r"\((.*)\)$")[0]):
+                        sub_s = grp.loc[~grp["verdict"].str.contains("Bùng nổ", na=False)].sort_values("dims_d")
+                        if sub_s.empty:
+                            continue
+                        fig_spar.add_trace(
+                            go.Scatter(
+                                x=sub_s["dims_d"],
+                                y=100.0 * sub_s["noise_ratio"],
+                                mode="lines+markers",
+                                name=str(grid_lbl),
+                            )
+                        )
+                    fig_spar.update_layout(
+                        title="Lời nguyền số chiều: Tỷ lệ nhiễu (%) khi tăng số chiều d trên 8 tiểu chỉ tiêu",
+                        xaxis_title="Số chiều d",
+                        yaxis_title="Tỷ lệ nhiễu (%)",
+                        height=300,
+                        margin={"t": 45, "r": 20, "b": 35, "l": 50},
+                    )
+                    st.plotly_chart(fig_spar, width="stretch")
+
+                comp_hd = hd_sum.loc[
+                    hd_sum["section"].isin(
+                        ["baseline_robustness", "subspace_clique", "adaptive_quantile", "pca_followup"]
+                    )
+                ].copy()
+                comp_hd["Nhiễu (%)"] = (100.0 * comp_hd["noise_ratio"]).round(1)
+                comp_hd["Phủ 2024 (%)"] = comp_hd["holdout_2024_cov"].map(
+                    lambda v: "—" if pd.isna(v) else f"{100.0 * float(v):.1f}%"
+                )
+                comp_hd["Silhouette"] = comp_hd["silhouette_orig"].map(
+                    lambda v: "—" if pd.isna(v) else f"{float(v):.3f}"
+                )
+                comp_hd["p PCI (khử năm)"] = comp_hd["ext_pci_dm_p"].map(
+                    lambda v: "—" if pd.isna(v) else f"{float(v):.4g}"
+                )
+                disp_hd = comp_hd[
+                    [
+                        "section",
+                        "method",
+                        "dims_d",
+                        "n_clusters",
+                        "Nhiễu (%)",
+                        "Silhouette",
+                        "Phủ 2024 (%)",
+                        "p PCI (khử năm)",
+                        "verdict",
+                    ]
+                ].rename(
+                    columns={
+                        "section": "Nhánh",
+                        "method": "Phương pháp / Cấu hình",
+                        "dims_d": "d",
+                        "n_clusters": "k",
+                        "verdict": "Kết luận",
+                    }
+                )
+                st.markdown(disp_hd.to_markdown(index=False))
 
 if regression_tab.open:
     with regression_tab:

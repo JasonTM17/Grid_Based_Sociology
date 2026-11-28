@@ -1,11 +1,11 @@
 # Danh sách kiểm tra trước khi nộp bài cuối kỳ — Topic 6 · STING × PAPI
 
-_Cập nhật ngày 27/11/2026 · Nhóm 15._
+_Cập nhật ngày 28/11/2026 · Nhóm 15._
 
 ## Hồ sơ của đồ án
 
-- [x] **Báo cáo DOCX tiếng Việt** — `reports/Nhom15_BaoCao_STING_PAPI.docx` (bảy chương, có Mục 5.5 mở rộng hồi quy 17 cấu hình / Conformal 90% và Mục 5.8 **Thống kê mô tả và gợi ý rà soát 63 tỉnh**, mục lục và danh mục 13 hình, 16 bảng có số trang đã cập nhật), đồng bộ trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip).
-- [x] **Notebook phân tích thống nhất** — `notebooks/Nhom15_STING_PAPI.ipynb` chạy sạch 20 code cell từ gói giải nén (gộp demo 3×3 giữa kỳ, 240 điểm giả lập, phân cụm PAPI, thống kê bàn giao 63 tỉnh, dự báo, kiểm chứng ngoại lai & phụ lục học phần/mở rộng `E2–E4` cùng hồi quy chuyên sâu). [Kết quả chạy lại](../submissions/verification.json)
+- [x] **Báo cáo DOCX tiếng Việt** — `reports/Nhom15_BaoCao_STING_PAPI.docx` (bảy chương, có Mục 5.4 mở rộng STING đa chiều, Mục 5.5 mở rộng hồi quy 17 cấu hình / Conformal 90% và Mục 5.8 **Thống kê mô tả và gợi ý rà soát 63 tỉnh**, mục lục và danh mục 13 hình, 17 bảng có số trang đã cập nhật), đồng bộ trong [gói thống nhất](../submissions/Nhom15_STING_PAPI.zip).
+- [x] **Notebook phân tích thống nhất** — `notebooks/Nhom15_STING_PAPI.ipynb` chạy sạch 21 code cell từ gói giải nén (gộp demo 3×3 giữa kỳ, 240 điểm giả lập, phân cụm PAPI, thống kê bàn giao 63 tỉnh, dự báo, kiểm chứng ngoại lai & phụ lục học phần/mở rộng `E2–E4`, hồi quy chuyên sâu và STING đa chiều). [Kết quả chạy lại](../submissions/verification.json)
 - [x] **Notebook tiền xử lý PAPI** — `notebooks/Nhom15_TienXuLy_PAPI.ipynb` chạy sạch 9 code cell trực tiếp từ 14 workbook PAPI gốc qua `PREPROCESSING_PIPELINE` 6 bước.
 - [x] **Slide trình bày thống nhất (12 trang)** — `slides/Nhom15_STING_PAPI.pptx` (bảng có thể chỉnh sửa, hai biểu đồ với workbook dữ liệu nhúng; slide 6–7 quan sát 2024, thống kê 63 tỉnh và dịch chuyển; slide 12 kết luận và cảm ơn; sinh bằng `python scripts/deliverables/build_slides.py`).
 - [x] **Dataset thật ≥ 500 × ≥ 10** — panel 882×41 (`data/processed/papi_panel_63_2011_2024.csv`); check: `python scripts/data/check_data.py` → PASS.
@@ -17,6 +17,7 @@ _Cập nhật ngày 27/11/2026 · Nhóm 15._
 - [x] **Bộ tiền xử lý PAPI** — gói `submissions/Nhom15_STING_PAPI.zip` chứa cả `Nhom15_TienXuLy_PAPI.ipynb` ở cấp đầu cùng `src/preprocessing.py` và 14 workbook gốc; báo cáo Word dùng kết quả `results/preprocessing_audit.csv` và `results/preprocessing_sensitivity.csv`.
 - [x] **Classifier học phần (NB, KNN, SVM, cây, RF)** — `scripts/supervised/course_supervised_baselines.py` + `results/course_supervised_baselines.{csv,md}` + `results/figs/course_confusion_matrix.png` (pseudo-label STING; một holdout).
 - [x] **Phân tích hồi quy chuyên sâu (17 cấu hình, AR(1) vs Δ6.1, VIF, Wilcoxon & Conformal 90%)** — `scripts/supervised/regression_deep_analysis.py` + `results/regression_deep_analysis.{csv,md}` + `results/regression_conformal_2024.csv` + `results/figs/regression_diagnostics_deep.png` + sheet `Hồi quy chuyên sâu` trong Excel & Tab 2 trên `app.py`.
+- [x] **Mở rộng STING đa chiều (Thang thưa, Subspace CLIQUE & QuantileSTING)** — `src/high_dim.py` + `scripts/analysis/high_dim_sting.py` + `results/high_dim_sting.{csv,md}` + `results/high_dim_sting_subspaces.csv` + `results/figs/high_dim_sting_analysis.png` + sheet `STING đa chiều` trong Excel, Phụ lục F notebook & Tab 2 trên `app.py`.
 - [x] **Baseline đánh giá nhãn (hoán vị / drift năm)** — `scripts/supervised/classifier_label_baselines.py` + `results/classifier_label_baselines.{csv,md}` (exploratory; không thay bảng primary).
 - [x] **Q&A theo khái niệm bài giảng & phản biện GV** — `reports/on-tap/qa_course_concepts.md`, `qa_midterm.md`, `qa_final.md`.
 
@@ -33,7 +34,7 @@ _Cập nhật ngày 27/11/2026 · Nhóm 15._
 
 ## Rà soát hình thức và nội dung
 
-- Bìa theo mẫu giảng viên cung cấp ngày 27/11/2026; giữ thông tin hai thành viên và đề tài. Các bảng Word dùng nền trắng, chữ và đường viền đen; mục lục và danh mục có 83 mục điều hướng.
+- Bìa theo mẫu giảng viên cung cấp ngày 27/11/2026; giữ thông tin hai thành viên và đề tài. Các bảng Word dùng nền trắng, chữ và đường viền đen; mục lục và danh mục có 84 mục điều hướng.
 - Báo cáo dùng cách diễn đạt học thuật, giải thích CV, MAE, RMSE, AUC và OFAT; giữ khai báo công cụ AI và phân biệt kết quả mô tả với kết luận đã được kiểm chứng.
 - Bộ slide gồm 12 trang với ghi chú, số liệu có nguồn và giới hạn đi cùng kết quả; trang cuối gộp kết luận và hỏi đáp. Kịch bản thuyết trình và tài liệu ôn tập dùng cùng số thứ tự slide.
 - Người nhận có [hướng dẫn sử dụng dashboard](customer_guide.md) và [giải thích bảng bàn giao 2024](ban-giao-khach-hang-2024.md), cùng nằm trong ZIP. Nhóm mô tả và chỉ số thăm dò không được trình bày như xếp hạng chất lượng chính thức.

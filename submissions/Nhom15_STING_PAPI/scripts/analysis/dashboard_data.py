@@ -956,3 +956,16 @@ def load_regression_deep_assets(root: Path = ROOT) -> dict[str, pd.DataFrame] | 
         "summary": pd.read_csv(deep_path, encoding="utf-8-sig"),
         "conformal": pd.read_csv(conf_path, encoding="utf-8-sig"),
     }
+
+
+def load_high_dim_sting_assets(root: Path = ROOT) -> dict[str, pd.DataFrame] | None:
+    """Load optional high-dimensional STING analysis CSVs strictly read-only."""
+    root = Path(root)
+    main_path = root / "results" / "high_dim_sting.csv"
+    sub_path = root / "results" / "high_dim_sting_subspaces.csv"
+    if not main_path.is_file() or not sub_path.is_file():
+        return None
+    return {
+        "summary": pd.read_csv(main_path, encoding="utf-8-sig"),
+        "subspaces": pd.read_csv(sub_path, encoding="utf-8-sig"),
+    }

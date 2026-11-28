@@ -265,6 +265,16 @@ python scripts/supervised/predict_supervised.py   # 3) model ML có giám sát (
      phủ thực tế `94.9%` năm `2024`). Nguồn: `results/regression_deep_analysis.{csv,md}`,
      `results/regression_conformal_2024.csv`, `results/figs/regression_diagnostics_deep.png` và sheet
      `Hồi quy chuyên sâu` trong Excel.
+   - **Mở rộng STING đa chiều (`src/high_dim.py`, `scripts/analysis/high_dim_sting.py`):** giải quyết
+     hạn chế `60,5%` nhiễu ở `8` chiều đều và `k=1` ở `PCA(2) d1–d6` (`results/robustness.csv`) bằng
+     bốn hướng thuần `<= 2023` không rò rỉ holdout `2024`: (i) thang thưa lưới `d=2..8` (`19,6% → 93,9% → 100%` ở `f=4`);
+     (ii) chọn `C(8,2)/C(8,3)` xác nhận cấu trúc 1 lõi chi phối (`0/28` cặp có cụm chính `≤ 90%`);
+     (iii) **Subspace CLIQUE Apriori** đến `5D–6D` (`5D` đều phủ `41,0%`, `4D` Quantile đạt Silhouette `0,772`);
+     và (iv) **QuantileSTING** hiệu chuẩn `n/res^d` (`8D` sàng lọc `mc=7` tách `k=4 [222, 219, 8, 8]`,
+     phủ `56,6%` train / `60,7%` `2024`, PCI khử năm `p = 0,0005`; trên `d1–d8` hạ nhiễu còn `44,7%`, Silh. `+0,161`).
+     Trên lưới mịn `2D 16×16` (`4.2, 6.1`), lưới đều vẫn ưu thế (`19,6%` vs `49,5%`), nên STING `2D`
+     `3/4/5/2` giữ nguyên làm chuẩn chính. Nguồn: `results/high_dim_sting.{csv,md}`,
+     `results/high_dim_sting_subspaces.csv`, `results/figs/high_dim_sting_analysis.png` và sheet `STING đa chiều`.
    - **Phân loại phụ:** dự báo pseudo-label STING cutoff-local cho năm sau, với expanding
      CV theo origin 2017–2022 (warm-up 2011–2016). CV chọn **`random forest (balanced)`**
      (`macro-F1 0.524`, so với `logistic regression (balanced)` `0.486`, `logistic regression` `0.434`,

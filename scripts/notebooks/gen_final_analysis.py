@@ -784,6 +784,30 @@ show_md(reg_deep[reg_deep["section"].isin(["paired_test", "conformal"])].to_mark
 print(f"Độ phủ Conformal 90% trên 59 tỉnh holdout 2024: {reg_conf['covered_conformal_90'].mean():.1%}")
 display(Image(filename=str(ROOT / "results/figs/regression_diagnostics_deep.png")))"""))
 
+    md(nbf.v4.new_markdown_cell("""## Phụ lục F. Mở rộng STING đa chiều (Thang thưa d=2..8, Chọn đặc trưng, Subspace CLIQUE & QuantileSTING)
+
+Tổng hợp nghiên cứu giải quyết giới hạn nhiễu `60,5%` của nhánh 8 chiều đều và trạng thái `k=1` của `PCA(2) d1–d6` trong `results/robustness.csv` từ `scripts/analysis/high_dim_sting.py` và `src/high_dim.py`: (i) thang thưa lưới `d = 2..8`; (ii) rà soát vét cạn tập con `2D/3D` chỉ trên `year <= 2023`; (iii) khai phá không gian con từ dưới lên **Subspace CLIQUE Apriori** (`3D–6D`); (iv) chia lưới thích nghi **QuantileSTING** hiệu chuẩn theo mật độ kỳ vọng `n / res^d` trên cả `8D` sàng lọc (`n=808` train `<=2023`, `n=61` holdout `2024`) và `8D d1..d8` (`2018–2024`, `n=430`), kèm đối chiếu `PCA(2..4)` và kiểm định mô tả `PCI`/`GRDP` khử trung vị theo năm."""))
+
+    cd(nbf.v4.new_code_cell("""hd_sum = pd.read_csv(ROOT / "results/high_dim_sting.csv")
+hd_sub = pd.read_csv(ROOT / "results/high_dim_sting_subspaces.csv")
+print("Tổng hợp mở rộng STING đa chiều (trích các nhánh chính):")
+keep_sec = ["baseline_robustness", "feature_selection", "subspace_clique", "adaptive_quantile", "pca_followup"]
+disp_hd = hd_sum[hd_sum["section"].isin(keep_sec)][[
+    "section", "dataset", "method", "dims_d", "n_clusters", "noise_ratio", "silhouette_orig", "holdout_2024_cov", "ext_pci_dm_p"
+]].copy()
+disp_hd["noise_ratio"] = disp_hd["noise_ratio"].map(lambda v: f"{100*v:.1f}%")
+disp_hd["silhouette_orig"] = disp_hd["silhouette_orig"].map(lambda v: "—" if pd.isna(v) else f"{v:.3f}")
+disp_hd["holdout_2024_cov"] = disp_hd["holdout_2024_cov"].map(lambda v: "—" if pd.isna(v) else f"{100*v:.1f}%")
+disp_hd["ext_pci_dm_p"] = disp_hd["ext_pci_dm_p"].map(lambda v: "—" if pd.isna(v) else f"{v:.4g}")
+show_md(disp_hd.to_markdown(index=False))
+
+top_clq = hd_sub[(hd_sub["kind"] == "clique_subspace") & (hd_sub["n_clusters"] >= 2)].sort_values(
+    ["k_dim", "silhouette_orig"], ascending=[False, False]
+).head(8)
+print("Top 8 không gian con đa cụm nổi bật từ Subspace CLIQUE Apriori:")
+show_md(top_clq[["dataset", "adaptive", "k_dim", "features", "coverage_train", "silhouette_orig", "holdout_2024_cov", "cluster_sizes"]].to_markdown(index=False))
+display(Image(filename=str(ROOT / "results/figs/high_dim_sting_analysis.png")))"""))
+
     nb["cells"] = cells
     nb.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}
     return nb

@@ -344,6 +344,7 @@ def test_submission_notebook_sections_and_key_numbers(submission_notebook: dict)
         "Phụ lục C.",
         "Phụ lục D.",
         "Phụ lục E.",
+        "Phụ lục F.",
     ):
         assert section in md_text, f"Thiếu mục {section}"
     for calculation in ("KMeans(", "DBSCAN(", "build_stakeholder_tables", "PREPROCESSING_PIPELINE"):

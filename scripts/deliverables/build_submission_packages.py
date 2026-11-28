@@ -71,6 +71,7 @@ PACKAGE_SCRIPTS = (
     "analysis/external_validation",
     "analysis/first_real_cluster",
     "analysis/future_work",
+    "analysis/high_dim_sting",
     "analysis/poverty_validation",
     "analysis/predict_demo",
     "analysis/predict_sweep",
@@ -103,6 +104,9 @@ PACKAGE_RESULTS = (
     "future_work_rank.csv",
     "future_work_spatial.csv",
     "future_work_trajectory.csv",
+    "high_dim_sting.csv",
+    "high_dim_sting.md",
+    "high_dim_sting_subspaces.csv",
     "metrics.csv",
     "papi_forecast_2024.json",
     "papi_forecast_cv.csv",
@@ -143,6 +147,7 @@ PACKAGE_FIGURES = (
     "external_poverty_by_cluster",
     "external_wdi_panel",
     "future_work_overview",
+    "high_dim_sting_analysis",
     "kmeans_elbow",
     "map_2020",
     "map_2024",
@@ -170,6 +175,7 @@ PACKAGE_FILES_CATALOG = {
     "DEMO.md": "Kịch bản demo và cách đọc kết quả; đường dẫn tài liệu gốc được đối chiếu trong HUONG_DAN.txt",
     "src/sting.py": "Mã nguồn thuật toán STING cài đặt từ đầu",
     "src/preprocessing.py": "Mã nguồn pipeline tiền xử lý dữ liệu PAPI 6 bước",
+    "src/high_dim.py": "Mã nguồn mở rộng STING đa chiều: QuantileSTING, SubspaceCLIQUE và thang thưa lưới",
     "requirements.txt": "Danh mục thư viện Python cố định để chạy lại",
     **{f"scripts/{name}.py": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard" for name in PACKAGE_SCRIPTS},
     **{
@@ -404,7 +410,7 @@ def verify_report_fields(data: bytes) -> None:
             content = "".join(t.text or "" for t in paragraph.findall(".//w:t", word))
             entries[name].append(content)
     chapters = {m.group(1) for line in entries["TOC1"] if (m := re.match(r"CHƯƠNG (\d+)\.", line))}
-    expected_catalog = (("Hình", 13), ("Bảng", 16))
+    expected_catalog = (("Hình", 13), ("Bảng", 17))
     if chapters != set("1234567") or any(
         sum(line.startswith(label + " ") for line in entries["TableofFigures"]) != count
         for label, count in expected_catalog

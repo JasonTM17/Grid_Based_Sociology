@@ -2,7 +2,7 @@
 
 Toàn bộ bảng số liệu và hình ảnh trong báo cáo/slide được sinh tự động từ các script trong `scripts/`.
 
-Mở [Bảng kết quả STING–PAPI trong Excel](KetQua_STING_PAPI.xlsx) để xem 24 bảng CSV đã được trình bày theo cột (bao gồm sheet **Thống kê khách hàng 2024**). Trang **Mục lục** dẫn đến từng bảng và ghi tên tệp nguồn. Bản Excel hiển thị dữ liệu tại thời điểm xuất.
+Mở [Bảng kết quả STING–PAPI trong Excel](KetQua_STING_PAPI.xlsx) để xem 26 bảng CSV đã được trình bày theo cột (bao gồm sheet **Thống kê khách hàng 2024**, **Hồi quy chuyên sâu** và **STING đa chiều**). Trang **Mục lục** dẫn đến từng bảng và ghi tên tệp nguồn. Bản Excel hiển thị dữ liệu tại thời điểm xuất.
 
 ## Nhóm kết quả chính
 
@@ -17,6 +17,7 @@ Mở [Bảng kết quả STING–PAPI trong Excel](KetQua_STING_PAPI.xlsx) để
 | Khảo sát ứng viên | `model_improvement_candidates.md`, `candidates_clustering.{csv,md}`, `candidates_regression.{csv,md}`, `candidates_classification.{csv,md}` | Kết quả thử nghiệm tham khảo các ứng viên mở rộng mô hình |
 | Hồi kiểm danh sách rà soát | `review_shortlist_backtest.json`, `review_shortlist_ranks.csv` | Hồi kiểm lịch sử ba cách chọn ca rà soát 6.1 và khung chuẩn bị phiếu thẩm định độc lập |
 | Hướng phát triển (đã tích hợp `E2–E4`) | `future_work.md`, `future_work_rank.csv`, `future_work_trajectory.csv`, `future_work_backtest.csv`, `future_work_spatial.csv` | Các nhánh mở rộng: chuẩn hóa hạng trong năm (`E1`, giữ đối chiếu vì phân mảnh `25` cụm / `54,1%` nhiễu), quỹ đạo OLS 63 tỉnh (`E2`), backtest cuốn chiếu `2018–2023` (`E3`), Moran's I (`E4`) & đã áp dụng cân bằng lớp `C3/C1` vào `supervised_metrics.csv` |
+| Mở rộng STING đa chiều | `high_dim_sting.{csv,md}`, `high_dim_sting_subspaces.csv` | Thang thưa lưới `d=2..8`, chọn tập con `2D/3D`, Subspace CLIQUE Apriori (`3D–6D`), QuantileSTING hiệu chuẩn `n/res^d` (`8D` sàng lọc & `d1–d8`), mở rộng `PCA(2–4)` và hình `figs/high_dim_sting_analysis.png` |
 
 ## Biểu đồ đã xuất (`results/figs/`)
 
