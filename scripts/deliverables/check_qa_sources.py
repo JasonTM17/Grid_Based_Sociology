@@ -9,6 +9,7 @@ Chạy từ thư mục gốc repo: python scripts/deliverables/check_qa_sources.
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -114,6 +115,12 @@ def source_refs(text: str) -> tuple[list[str], list[str]]:
 
 
 def main() -> int:
+    for stream in (sys.stdout, sys.stderr):
+        if stream is not None and hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
     errors: list[str] = []
     checked = 0
     for qa in QA_FILES:

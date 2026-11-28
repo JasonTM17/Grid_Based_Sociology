@@ -1,7 +1,7 @@
 {
   "package": "Nhom15_STING_PAPI",
   "status": "PASS",
-  "sha256": "33c72b3f1f0632eaf6555bdca03405fa4ded125e72b9ab2f76bc84ea2cdc6928",
+  "sha256": "74960e505553d86d727ca256650861d7e57268900eb8eebe2ecc77c4814c4120",
   "code_cells": 21,
   "preprocessing_code_cells": 9,
   "isolation_guard": true,
@@ -13,6 +13,6 @@
   "fresh_subprocess_per_notebook": true,
   "input_outputs_cleared": true,
   "manifest_files": 169,
-  "archive_bytes": 27794397,
-  "checked_at": "2026-11-28T01:07:54.657011+00:00"
+  "archive_bytes": 27796800,
+  "checked_at": "2026-11-28T02:04:39.253907+00:00"
 }

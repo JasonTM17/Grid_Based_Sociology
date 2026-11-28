@@ -719,6 +719,12 @@ tiền xử lý 6 bước từ Excel gốc và thống kê bàn giao 63 tỉnh c
 
 
 def main() -> int:
+    for stream in (sys.stdout, sys.stderr):
+        if stream is not None and hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=OUTPUT)
     parser.add_argument("--report-source", type=Path, help="Báo cáo DOCX tùy chọn đóng gói theo tên chuẩn")

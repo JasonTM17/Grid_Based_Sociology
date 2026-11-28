@@ -290,6 +290,12 @@ def update_word(path):
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if stream is not None and hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--path", type=Path, default=DOCX)
     parser.add_argument("--engine", choices=("auto", "word", "libreoffice"), default="auto")

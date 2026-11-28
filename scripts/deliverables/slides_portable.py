@@ -71,10 +71,8 @@ def freeze_template(source: Path, evidence: dict) -> None:
         "authoring_source_sha256": _file_digest(AUTHORING_SOURCE),
         "evidence": _normalized(evidence),
     }
-    SNAPSHOT.write_text(
-        json.dumps(snapshot, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
-        encoding="utf-8",
-    )
+    with SNAPSHOT.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(snapshot, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
 
 
 def export_slides(evidence: dict, output_path: Path) -> Path:
@@ -105,6 +103,12 @@ def export_slides(evidence: dict, output_path: Path) -> Path:
 
 
 def main() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        if stream is not None and hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--freeze", type=Path, required=True,

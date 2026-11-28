@@ -34,9 +34,9 @@ Các kết quả chính cần phân biệt xuyên suốt bài nói:
 | 7 | 7:50–9:30 | Đọc ma trận trên 59 tỉnh, sau đó tính từng trục cho Lạng Sơn năm 2024. Lấy phần nguyên được ô (12, 10) với 12 điểm tham chiếu nên vào Cụm 2. Ô năm 2023 có 2 điểm nên nhãn −1. Trong 7 tỉnh rời vùng dày, 5 nằm phía điểm cao. |
 | 8 | 9:30–10:40 | Ridge giảm MAE nhẹ, còn RMSE của 4.2 tăng. Dự báo điểm phát hiện 0/11 tỉnh ngoài vùng. AUC 0,816 là kết quả hồi cứu; macro-F1 của Naive Bayes đo độ khớp nhãn STING. |
 | 9 | 10:40–11:30 | Nêu một ví dụ đối chiếu PCI và giới hạn của kiểm định khi nhiều quan sát thuộc cùng tỉnh. Các nguồn ngoài bổ sung bối cảnh cho thống kê PAPI. |
-| 10 | 11:30–12:15 | PCA và nhánh tám chiều cho thấy kết quả nhạy với biểu diễn. Hạ ngưỡng số điểm làm tỷ lệ nhiễu giảm trong thử nghiệm 8D, silhouette vẫn âm −0,089. |
+| 10 | 11:30–12:15 | Lưới đều truyền thống (`PCA(2)` `k=1`; `8D d1–d8` `60,5%` nhiễu hoặc `mc=2` silhouette âm `−0,089`) cho thấy độ nhạy khi tăng số chiều. Mở rộng đa chiều (`QuantileSTING`, `Subspace CLIQUE`) hạ nhiễu `8D d1–d8` còn `44,7%` (Silh. `+0,161`) và tách `k=4` trên 8 tiểu chỉ tiêu (phủ `56,6%` train / `60,7%` 2024, `PCI_dm p=0,0005`), còn `2D 16×16` vẫn giữ lưới đều. |
 | 11 | 12:15–14:10 | Đọc tỷ lệ 76,2%, 12,7%, 7,9% và 3,2% trên 63 tỉnh. Đối chiếu 2,235 với 2,032 ở trục 4.2 và 1,787 với 1,963 ở trục 6.1. Nhóm cùng nhãn −1 có thể nằm ở hai phía của phân bố. Trong Cụm 2 vẫn có 7 tỉnh dưới mốc 6.1. |
-| 12 | 14:10–15:00 | Chốt STING truy vết được nhãn theo ô. Báo cáo nhận diện một vùng dày lớn cùng các trường hợp ở ô thưa. Nêu phạm vi hai chỉ tiêu và hướng kiểm tra với dữ liệu mới. |
+| 12 | 14:10–15:00 | Chốt STING 2D truy vết được nhãn theo ô, nhận diện một vùng dày lớn cùng hai nhóm ô thưa. Nêu các mở rộng thăm dò (`QuantileSTING`/`CLIQUE`, hồi quy 17 cấu hình/Conformal, backtest cuốn chiếu, Moran's I, cân bằng lớp) giữ chuẩn 2D `3/4/5/2` và hướng thẩm định trên dữ liệu mới. |
 
 ## Chuẩn bị demo
 
@@ -102,5 +102,9 @@ Chưa có cơ sở kết luận tổng quát. K-means k = 2 có silhouette cao h
 **Kiểm định nguồn ngoài có chứng minh quan hệ nhân quả không?**
 
 Không. Các nguồn ngoài hỗ trợ đối chiếu mô tả. Nhiều quan sát thuộc cùng tỉnh qua các năm nên giả định độc lập bị hạn chế. Cần thiết kế và mô hình phù hợp hơn trước khi suy luận tác động chính sách.
+
+**Vì sao 8D lưới đều nhiễu 60,5% và PCA(2) chỉ còn 1 cụm; mở rộng STING đa chiều xử lý thế nào và có thay bản 2D không?**
+
+Lưới đều mịn `16^d` bùng nổ số ô theo số chiều (`24,1% → 93,9%` ở `d=3` → `100%` ở `d=4`) nên các quan sát bị loãng thành nhiễu, còn `PCA(2)` trên `9×9` chỉ giữ `63,2%` phương sai nên gom vào `1` lõi. Mở rộng [`high_dim_sting.md`](../../results/high_dim_sting.md) giữ chống rò rỉ `<= 2023` và bổ sung hai hướng: (1) `Subspace CLIQUE` tìm không gian con dày từ dưới lên đến `5D` (`41,0%` phủ) và `4D Quantile` (`Silhouette 0,772`, `PCI_dm p = 6,99e-6`); (2) `QuantileSTING` chia ô theo phân vị kết hợp ngưỡng hiệu chuẩn `n/res^d`, hạ nhiễu `8D d1–d8` từ `60,5%` xuống `44,7%` (`Silh. +0,161`) và tách `k=4` trên 8 tiểu chỉ tiêu (phủ `56,6%` train / `60,7%` năm 2024, `PCI_dm p = 0,0005`, vẫn giữ `k=3` sau chuẩn hóa `within-year z`). Ngược lại, trên lưới mịn `2D 16×16` (`4.2, 6.1`), chia quantile cắt vụn vùng lõi (`49,0%` nhiễu vs `19,6%` lưới đều), nên cấu hình chính `2D 3/4/5/2` vẫn giữ nguyên làm chuẩn bàn giao 63 tỉnh.
 
 Ghi người trình bày, thời gian đo được và điểm cần sửa vào [nhật ký luyện tập](rehearsal_log.md). Các câu hỏi chuyên sâu nằm trong [Q&A cuối kỳ](qa_final.md), [Q&A giữa kỳ](qa_midterm.md) và [khái niệm môn học](qa_course_concepts.md).

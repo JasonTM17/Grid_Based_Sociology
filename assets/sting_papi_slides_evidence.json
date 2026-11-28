@@ -2,8 +2,8 @@
   "schema_version": 1,
   "slide_count": 12,
   "evidence_sha256": "3bb673a4209f1046e40a4c0ae0df59fe5020b4752666612a0f8cc2c95fbfd9ea",
-  "template_sha256": "f64e51dfdc7a5ed7a6cdb9a026d6cfa67fe00c77330fe1ffe68e090bc5994c88",
-  "authoring_source_sha256": "9649170bd729886faa515d11ab069a969c10771ebccbd6a68f9c86c71556eeac",
+  "template_sha256": "e0c0181dc1bf32c6b7ae5e408a55a2a7c577ad77d6871a3d92b9a0c86b541ed4",
+  "authoring_source_sha256": "c98238e5f90a3883af4964023c0dbc6deaa124fd9365d00e5fbc762a6e8b6f2b",
   "evidence": {
     "slide_count": 12,
     "config": {
