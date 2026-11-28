@@ -9,7 +9,7 @@
 ## 2. Kết quả chính theo 5 hướng kỹ thuật
 
 ### 2.1. Thang thưa lưới theo số chiều (Curse of Dimensionality, d = 2..8)
-- Với lưới chính thức `f=4, lv=2, mc=5` (`16` ô/trục): ở `d=2` (`256` ô) nhiễu là `19.6%`, nhưng sang `d=3` (`4.096` ô) chỉ còn `9` ô dày và nhiễu nhảy lên **`93.9%`**; tới `d=4` (`65.536` ô) còn **`0` ô dày (nhiễu `100.0%`)**; còn `d=8` cần tới `4,29 × 10^9` ô lá.
+- Với lưới chính thức `f=4, lv=2, mc=5` (`16` ô/trục): ở `d=2` (`256` ô, cặp `sd_1_3+sd_1_4`) nhiễu là `24.1%` (so với `19.6%` trên cặp chuẩn `4.2, 6.1`), nhưng sang `d=3` (`4.096` ô) chỉ còn `9` ô dày và nhiễu nhảy lên **`93.9%`**; tới `d=4` (`65.536` ô) còn **`0` ô dày (nhiễu `100.0%`)**; còn `d=8` cần tới `4,29 × 10^9` ô lá.
 
 ### 2.2. Chọn tập con đặc trưng (train <= 2023: 28 cặp 2D, 56 bộ ba 3D)
 - Rà soát vét cạn chỉ trên `<=2023` cho thấy `23/28` cặp 2D (`f=4, lv=2, mc=5`) đạt `k>=2` và `nhiễu <= 40%`, nhưng `0/28` cặp tách thành hai khối cân bằng (`largest_cluster_share <= 90%`): bản chất phân bố PAPI cấp tỉnh trong không gian 2D–3D là **một vùng lõi dày đặc chiếm ưu thế (>90% điểm thuộc cụm) kèm các túi ngoại lai nhỏ**.
@@ -21,10 +21,11 @@
 ### 2.4. Chia lưới thích nghi QuantileSTING hiệu chuẩn mật độ kỳ vọng n/res^d
 - Trên không gian **8 chiều sàng lọc (`n=808`)** với `L=3, f=2, lv=1` (`2^8 = 256` ô, kỳ vọng `3,16` điểm/ô):
   - **Uniform Equal-Width (`mc=10`)** bị lệch đuôi ngoại lai kéo giãn, gom toàn bộ `580` điểm thành **`k=1` cụm** (không phân tách).
-  - **QuantileSTING (`mc=7`, `2,2×` kỳ vọng)**: cắt theo trung vị train trên cả 8 trục, tách được **`k=4` chế độ** (`[222, 219, 8, 8]`, phủ **`56.6%`** train và **`60.7%`** holdout 2024), phân biệt rõ chỉ số ngoài **PCI khử theo năm (`p = 0.00052`, trung vị `58,66` vs `64,43`)** và **GRDP khử theo năm (`p = 0.0248`)**.
+  - **QuantileSTING (`mc=7`, `2,2×` kỳ vọng)**: cắt theo trung vị train trên cả 8 trục, tách được **`k=4` chế độ** (`[222, 219, 8, 8]`, phủ **`56.6%`** train và **`60.7%`** holdout 2024), phân biệt rõ **PCI đã khử trung vị năm (`KW 4 cụm p = 0.00052`, `MWU C0 vs C1 p = 0.00122`, trung vị `PCI_dm` `-0.02` vs `+0.45`, cụm rìa C2–C3 `-1.57`; trên PCI thô chưa khử năm là `58.66` vs `64.43`)** và **GRDP khử theo năm (`p = 0.0248`)**.
+  - **Kiểm chứng khử xu hướng năm (`8D within-year z <=2023`, `mc=7`)**: ngay cả khi chuẩn hóa riêng trong từng năm để loại toàn bộ dịch chuyển điểm theo thời gian, QuantileSTING vẫn tách **`k=3` cụm** (`[232, 217, 7]`, phủ `56.4%`, `PCI_dm p = 0.00050`), xác nhận đây không chỉ là hiệu ứng năm sớm/muộn.
   - **QuantileSTING (`mc=10`, `3,2×` kỳ vọng)**: tăng Silhouette lên **`0.237`** (`[168, 166, 12, 10]`, `PCI_dm p = 0.00234`), nhiễu `55.9%`.
 - Trên đúng bộ **`8D d1..d8 (2018–2024, n=430)`** của `robustness.csv`, **QuantileSTING (`mc=4`)** hạ nhiễu xuống **`44.7%`** (vượt ngưỡng `<50%` so với `60,5%` của Uniform gốc) đồng thời nâng Silhouette lên **`+0.161`** (so với `-0,089` của nhánh Uniform `mc=2`).
-- **Giới hạn ngược chiều (không tô hồng):** ở lưới mịn **2D `16×16` (`sd_4_2, sd_6_1`)**, Quantile chia đều biên làm vỡ cụm lõi thành 24 mảnh nhỏ và tăng nhiễu lên `49,5%` (kém hơn hẳn Uniform `19,6%`, Silhouette `0,361`). Do đó **STING 2D đóng băng tiếp tục dùng lưới đều**, còn **Quantile & CLIQUE phát huy thế mạnh riêng ở không gian 3D–8D**.
+- **Giới hạn ngược chiều (không tô hồng):** ở lưới mịn **2D `16×16` (`sd_4_2, sd_6_1`)**, Quantile chia đều biên làm vỡ cụm lõi thành `24` mảnh nhỏ và tăng nhiễu lên `49.0%` (kém hơn hẳn Uniform `19.6%`, Silhouette `0.361`). Do đó **STING 2D đóng băng tiếp tục dùng lưới đều**, còn **Quantile & CLIQUE phát huy thế mạnh riêng ở không gian 3D–8D**.
 
 ### 2.5. Mở rộng PCA(2..4) so với baseline PCA(2) k=1
 - Lý giải nguyên nhân sụp 1 cụm của `PCA(2)`: `f=3, lv=2` (`81` ô) quá thô trước đám mây điểm `PCA(2)`. Khi tăng lên `f=4` (`16×16`) hoặc `PCA(3)` (`75,7%–76,1%` phương sai), STING tách được `2–5` cụm phụ nhưng vẫn chỉ là lõi lớn + túi rìa nhỏ và kém khả diễn giải trục so với Subspace CLIQUE / QuantileSTING.

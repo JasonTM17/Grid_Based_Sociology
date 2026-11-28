@@ -301,6 +301,15 @@ def test_tab2_sting_theo_nam_renders_plot_and_table(assets):
     assert f"{counts['filtered_rows']} dòng sau lọc" in text
     assert f"{counts['filtered_noise_rows']} nhiễu" in text
 
+    # High-dimensional STING expander renders both summary and CLIQUE top subspaces cleanly
+    hd = dd.load_high_dim_sting_assets()
+    assert hd is not None
+    assert len(sting.expander) == 1
+    expander_md = "\n".join(m.value for m in sting.markdown)
+    assert "8D Quantile within-year z L=3 f=2 lv=1 mc=7" in expander_md
+    assert "Top không gian con đa cụm (Subspace CLIQUE Apriori)" in expander_md
+    assert "sd_1_4+sd_4_1+sd_4_2+sd_4_3+sd_4_4+sd_6_3" in expander_md
+
 
 def test_tab3_hoi_quy_holdout_table_matches_metrics_csv(assets):
     at = run_app(TAB_REGRESSION)

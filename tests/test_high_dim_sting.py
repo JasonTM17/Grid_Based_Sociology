@@ -46,6 +46,16 @@ def test_quantile_warper_and_quantile_sting_support_and_validation():
     outliers = np.array([[50.0, 50.0, 50.0], [-50.0, -50.0, -50.0]])
     np.testing.assert_array_equal(model.predict(outliers), np.array([-1, -1]))
 
+    # Asymmetric ties must not distort [0, 1] quantile split boundaries
+    X_asym = np.column_stack([
+        np.concatenate([np.zeros(1), np.full(45, 0.2), np.full(4, 0.3), np.ones(50)]),
+        np.linspace(0.0, 1.0, 100),
+    ])
+    q_asym = QuantileSTING(n_levels=2, factor=2, min_count=5).fit(X_asym)
+    w_probe, _ = q_asym.warper_.transform(np.array([[0.3, 0.5]]))
+    idx_probe, _ = q_asym.sting_._assign(w_probe, 2)
+    assert w_probe[0, 0] < 0.5 and int(idx_probe[0, 0]) == 0
+
     with pytest.raises(ValueError):
         QuantileWarper.fit(np.empty((0, 3)))
     with pytest.raises(ValueError):
@@ -82,6 +92,10 @@ def test_subspace_clique_downward_closure_separation_and_prediction():
         info = clq.extract_subspace((1, 3))
         assert info["n_clusters"] == 2
         assert info["silhouette"] > 0.70
+        # Unsorted dims must canonicalize identically instead of silently returning empty
+        info_rev = clq.extract_subspace((3, 1))
+        assert info_rev["dims"] == (1, 3)
+        np.testing.assert_array_equal(info_rev["labels"], info["labels"])
 
         holdout = np.zeros((3, 5))
         holdout[0, [1, 3]] = [-0.75, -0.75]
@@ -90,6 +104,24 @@ def test_subspace_clique_downward_closure_separation_and_prediction():
         pred = clq.predict_subspace((1, 3), holdout)
         assert pred[0] in (0, 1) and pred[1] in (0, 1) and pred[0] != pred[1]
         assert pred[2] == -1
+        np.testing.assert_array_equal(clq.predict_subspace((3, 1), holdout), pred)
+
+        with pytest.raises(ValueError):
+            clq.extract_subspace((1, 1))
+        with pytest.raises(ValueError):
+            clq.extract_subspace((0, 99))
+
+    # Scale-aware edge handling under tiny range (1e-10) and huge constant (1e16)
+    X_tiny = np.column_stack([np.concatenate([np.zeros(90), np.full(10, 1e-10)]), np.linspace(0, 1, 100)])
+    clq_tiny = SubspaceCLIQUE(n_bins=4, tau=0.05, adaptive=True).fit(X_tiny)
+    edges_tiny = clq_tiny.edges_[0][2]
+    assert np.all(np.diff(edges_tiny) > 0)
+    assert len(np.unique(clq_tiny.train_bins_[:, 0])) >= 2
+
+    X_huge = np.column_stack([np.full(100, 1e16), np.linspace(0, 1, 100)])
+    clq_huge = SubspaceCLIQUE(n_bins=4, tau=0.05, adaptive=True).fit(X_huge)
+    assert np.all(np.diff(clq_huge.edges_[0][2]) > 0)
+    assert np.all(clq_huge.train_bins_[:, 0] == 0)
 
 
 def test_high_dim_sparsity_grid_guards_overflow_and_computes_metrics():
@@ -99,6 +131,8 @@ def test_high_dim_sparsity_grid_guards_overflow_and_computes_metrics():
     assert len(rows) == 3
     assert rows[0]["skipped"] is False and 0.0 <= rows[0]["noise_ratio"] <= 1.0
     assert rows[2]["d"] == 8 and rows[2]["skipped"] is True
+    with pytest.raises(ValueError):
+        high_dim_sparsity_grid(X, dims_list=[2], n_levels=2, factor=2, min_count=5, level=2)
 
 
 def _stage_high_dim_tree(dest, panel_df: pd.DataFrame) -> None:
@@ -150,6 +184,11 @@ def test_high_dim_study_does_not_leak_2024_data(tmp_path):
     q_idx = b_train.loc[b_train["method"] == "8D Quantile L=3 f=2 lv=1 mc=7 (2.2x exp)"].index[0]
     assert t_train.loc[q_idx, "holdout_2024_cov"] < b_train.loc[q_idx, "holdout_2024_cov"]
 
+    # Non-noise edge clusters must not be folded into the noise label in ext_plot
+    ep = base["ext_plot"]
+    assert set(ep.loc[ep["cluster"] == -1, "regime_label"]) == {"Nhiễu (-1)"}
+    assert "Nhiễu (-1)" not in set(ep.loc[ep["cluster"] >= 0, "regime_label"])
+
 
 def test_published_high_dim_artifacts_and_excel_sheet_exist():
     csv_main = ROOT / "results/high_dim_sting.csv"
@@ -166,11 +205,31 @@ def test_published_high_dim_artifacts_and_excel_sheet_exist():
     df = pd.read_csv(csv_main)
     assert {"baseline_robustness", "sparsity_ladder", "feature_selection", "subspace_clique", "adaptive_quantile", "pca_followup"} <= set(df["section"])
 
+    # No contradictory overflow verdict (e.g. claiming 6,561 > 10M) and f=3 lv=1 covers d=8
+    overflow_rows = df.loc[df["verdict"].str.contains("Bùng nổ", na=False)]
+    for _, row in overflow_rows.iterrows():
+        assert "leaf=" in str(row["grid_spec"])
+        leaf_count = int(str(row["grid_spec"]).split("leaf=")[1].replace(",", ""))
+        assert leaf_count > 10_000_000
+    row_res3_d8 = df.loc[df["method"] == "Thang thưa d=8 (f=3 lv=1 mc=10 (res=3))"].iloc[0]
+    assert int(row_res3_d8["n_clusters"]) >= 1 and float(row_res3_d8["noise_ratio"]) < 1.0
+
+    # No 1-cluster collapse may claim multi-cluster generalization
+    for _, row in df.iterrows():
+        if int(row["n_clusters"]) < 2:
+            assert "Đa cụm" not in str(row["verdict"]) and "Tổng quát hóa" not in str(row["verdict"])
+
     row_q8 = df.loc[df["method"] == "8D Quantile L=3 f=2 lv=1 mc=7 (2.2x exp)"].iloc[0]
     assert int(row_q8["n_clusters"]) >= 2 and float(row_q8["noise_ratio"]) < 0.50
 
+    row_wy = df.loc[df["method"] == "8D Quantile within-year z L=3 f=2 lv=1 mc=7"].iloc[0]
+    assert int(row_wy["n_clusters"]) >= 2 and float(row_wy["ext_pci_dm_p"]) < 0.01
+
     row_d8_q = df.loc[df["method"] == "8D d1..d8 Quantile L=3 f=2 lv=1 mc=4"].iloc[0]
     assert float(row_d8_q["noise_ratio"]) < 0.50 and float(row_d8_q["silhouette_orig"]) > 0.0
+
+    row_d8_ts = df.loc[df["method"] == "8D d1..d8 Quantile mc=5 (time-split -> 2024)"].iloc[0]
+    assert int(row_d8_ts["n_clusters"]) >= 2 and float(row_d8_ts["silhouette_orig"]) > 0.0 and float(row_d8_ts["holdout_2024_cov"]) > 0.30
 
     wb = openpyxl.load_workbook(xlsx_path, read_only=True)
     assert "STING đa chiều" in wb.sheetnames

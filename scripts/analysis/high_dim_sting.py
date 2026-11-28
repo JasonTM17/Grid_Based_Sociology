@@ -358,7 +358,7 @@ def _make_figure(
         ax.set_title("A. Lời nguyền số chiều: tăng d làm bùng nổ ô rỗng & nhiễu", fontweight="bold")
         ax.set_xlabel("Số chiều d (trên 8 tiểu chỉ tiêu sàng lọc, n=808)")
         ax.set_ylabel("Tỷ lệ nhiễu (%)")
-        ax.set_xticks([2, 3, 4, 5, 6, 8])
+        ax.set_xticks([2, 3, 4, 5, 6, 7, 8])
         ax.set_yticks([0, 20, 40, 60, 80, 100])
         ax.set_ylim(-5, 132)
         ax.grid(True, linestyle=":", alpha=0.45)
@@ -384,13 +384,15 @@ def _make_figure(
         ax.bar(x - w, unif_total, width=w, color=PALETTE["sky"], label="CLIQUE Đều: tổng subspace dày")
         ax.bar(x, unif_multi, width=w, color=PALETTE["blue"], label="CLIQUE Đều: subspace >=2 cụm")
         ax.bar(x + w, quant_multi, width=w, color=PALETTE["orange"], label="CLIQUE Quantile: subspace >=2 cụm")
-        ax.set_title("B. CLIQUE Apriori: không gian con k=2..6D sống sót trong 8D", fontweight="bold")
+        max_b = max(unif_total + unif_multi + quant_multi + [1])
+        ax.set_ylim(0, max_b * 1.24)
+        ax.set_title("B. CLIQUE Apriori (τ=0,05): không gian con k=1..6D sống sót", fontweight="bold")
         ax.set_xlabel("Số chiều không gian con (k_dim)")
         ax.set_ylabel("Số không gian con phát hiện")
         ax.set_xticks(x)
         ax.set_xticklabels([f"{k}D" for k in dims_k])
         ax.grid(True, axis="y", linestyle=":", alpha=0.45)
-        ax.legend(fontsize=8.0)
+        ax.legend(fontsize=7.8, loc="upper right", framealpha=0.95)
 
         # (C) Uniform vs Quantile STING silhouette across key methods & robustness baseline
         ax = axes[1, 0]
@@ -432,9 +434,9 @@ def _make_figure(
         ax.set_yticks(y_pos)
         ax.set_yticklabels([short_names[m] for m in comp_rows["method"]], fontsize=8.5)
         for yi, val, nr in zip(y_pos, vals, comp_rows["noise_ratio"]):
-            text_x = val + 0.015 if val >= 0 else 0.015
+            text_x = val + 0.018 if val >= 0 else 0.022
             ax.text(text_x, yi, f"{val:.3f} (nhiễu {100*nr:.0f}%)", va="center", fontsize=7.8)
-        ax.set_xlim(-0.15, 1.02)
+        ax.set_xlim(-0.18, 1.12)
         ax.set_title("C. Silhouette (không gian gốc) & nhiễu: 2D vs Đa chiều", fontweight="bold")
         ax.set_xlabel("Silhouette trên điểm gán cụm (>=2 cụm)")
         ax.grid(True, axis="x", linestyle=":", alpha=0.45)
@@ -444,6 +446,7 @@ def _make_figure(
         regimes = [
             ("C0: Vùng thấp đa chiều", vermilion),
             ("C1: Vùng cao đa chiều", PALETTE["green"]),
+            ("C2–C3: Cụm rìa nhỏ", PALETTE["orange"]),
             ("Nhiễu (-1)", PALETTE["gray"]),
         ]
         box_data = []
@@ -453,7 +456,8 @@ def _make_figure(
             sub = ext_plot_df.loc[ext_plot_df["regime_label"] == label_txt, "pci_dm"].dropna()
             if len(sub):
                 box_data.append(sub.to_numpy())
-                box_labels.append(f"{label_txt}\n(n={len(sub)})")
+                short_lbl = label_txt.replace(" đa chiều", "\nđa chiều")
+                box_labels.append(f"{short_lbl}\n(n={len(sub)})")
                 box_colors.append(color)
         bp = ax.boxplot(box_data, patch_artist=True, tick_labels=box_labels, showfliers=False)
         for patch, color in zip(bp["boxes"], box_colors):
@@ -637,19 +641,17 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
     sparsity_frames: list[pd.DataFrame] = []
     for n_lv, fac, lv_c, mc_c, spec_label in [
         (3, 4, 2, 5, "f=4 lv=2 mc=5 (res=16)"),
-        (3, 3, 1, 10, "f=3 lv=1 mc=10 (res=3)"),
+        (2, 3, 1, 10, "f=3 lv=1 mc=10 (res=3)"),
         (3, 2, 2, 5, "f=2 lv=2 mc=5 (res=4)"),
         (3, 2, 1, 10, "f=2 lv=1 mc=10 (res=2)"),
     ]:
         lad = pd.DataFrame(
-            high_dim_sparsity_grid(X_tr8, [2, 3, 4, 5, 6, 8], n_lv, fac, mc_c, lv_c)
+            high_dim_sparsity_grid(X_tr8, [2, 3, 4, 5, 6, 7, 8], n_lv, fac, mc_c, lv_c)
         )
         lad["spec"] = spec_label
         sparsity_frames.append(lad)
         for _, r in lad.iterrows():
             d_i = int(r["d"])
-            if d_i not in (2, 3, 4, 8):
-                continue
             if bool(r["skipped"]):
                 summary_rows.append(
                     {
@@ -658,7 +660,7 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
                         "method": f"Thang thưa d={d_i} ({spec_label})",
                         "dims_d": d_i,
                         "features": "+".join(REGRESSION_FEATURES[:d_i]),
-                        "grid_spec": f"res^d={int(r['grid_cells_at_level']):,}",
+                        "grid_spec": f"res^d={int(r['grid_cells_at_level']):,}, leaf={int(r['leaf_cells']):,}",
                         "n_train": len(X_tr8),
                         "n_clusters": 0,
                         "noise_ratio": 1.0,
@@ -672,7 +674,7 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
                         "ext_grdp_dm_p": np.nan,
                         "cluster_sizes": "[]",
                         "verdict": "Bùng nổ ô lưới (>10M)",
-                        "note": f"Số ô lá vượt ngưỡng tính toán (res^d={int(r['grid_cells_at_level']):,}).",
+                        "note": f"Số ô lá vượt ngưỡng tính toán (leaf={int(r['leaf_cells']):,} > 10M).",
                     }
                 )
             else:
@@ -1009,17 +1011,17 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
 
     # --- SECTION 5: Adaptive Quantile STING vs Uniform STING ---
     aq_specs = [
-        ("2D Quantile (4.2, 6.1) L=3 f=4 lv=2 mc=5", [3, 6], True, 3, 4, 2, 5, None, "Phân mảnh vùng lõi 2D", "Trên lưới mịn 16×16 2D, quantile cắt nát vùng lõi thành 24 cụm nhỏ và tăng nhiễu (49,5% vs 19,6% đều)."),
+        ("2D Quantile (4.2, 6.1) L=3 f=4 lv=2 mc=5", [3, 6], True, 3, 4, 2, 5, None, "Phân mảnh vùng lõi 2D", "Trên lưới mịn 16×16 2D, quantile cắt nát vùng lõi thành {k} cụm nhỏ và tăng nhiễu ({noise:.1f}% vs 19,6% đều)."),
         ("3D Uniform (1.3, 4.2, 6.1) f=2 lv=2 mc=19", [0, 3, 6], False, 3, 2, 2, 19, None, "Sụp 1 cụm (Uniform)", "Lưới 4^3=64 ô với ngưỡng 19 gộp toàn bộ 808 điểm lõi vào 1 cụm."),
-        ("3D Quantile (1.3, 4.2, 6.1) f=2 lv=2 mc=19", [0, 3, 6], True, 3, 2, 2, 19, 1.5, "Tách 3 chế độ (sil 0,423)", "Vượt ngưỡng 1,5× kỳ vọng tách [186, 147, 39], phân tách GRDP p=0,0249; nhiễu 54,0%."),
+        ("3D Quantile (1.3, 4.2, 6.1) f=2 lv=2 mc=19", [0, 3, 6], True, 3, 2, 2, 19, 1.5, "Tách 3 chế độ (sil 0,423)", "Vượt ngưỡng 1,5× kỳ vọng tách {sizes}, phân tách GRDP p=0,0249; nhiễu {noise:.1f}%."),
         ("4D Uniform (1.3, 4.2, 6.1, 6.3) f=2 lv=2 mc=7", [0, 3, 6, 7], False, 3, 2, 2, 7, None, "Sụp 1 cụm (Uniform)", "Lưới 4^4=256 ô đều gom hết vùng trung tâm thành 1 khối duy nhất."),
-        ("4D Quantile (1.3, 4.2, 6.1, 6.3) f=2 lv=2 mc=7", [0, 3, 6, 7], True, 3, 2, 2, 7, 2.0, "14 cụm chi tiết (nhiễu 63,6%)", "Nhân đôi kỳ vọng tách được cụm nhỏ nhưng đánh đổi tỷ lệ nhiễu cao 63,6%."),
+        ("4D Quantile (1.3, 4.2, 6.1, 6.3) f=2 lv=2 mc=7", [0, 3, 6, 7], True, 3, 2, 2, 7, 2.0, "14 cụm chi tiết (nhiễu 63,6%)", "Nhân đôi kỳ vọng tách được cụm nhỏ ({k} cụm) nhưng đánh đổi tỷ lệ nhiễu cao {noise:.1f}%."),
         ("8D Uniform L=3 f=2 lv=1 mc=10 (global 8 sd_*)", list(range(8)), False, 3, 2, 1, 10, None, "Sụp 1 cụm (8D Uniform)", "Trong 8D chuẩn hóa, chia đều 2^8=256 ô gom 580 điểm vào 1 siêu khối duy nhất."),
-        ("8D Quantile L=3 f=2 lv=1 mc=7 (2.2x exp)", list(range(8)), True, 3, 2, 1, None, 2.2, "Phân tách tốt nhất 8D (phủ 56,6%)", "Cắt tại trung vị 8 trục với ngưỡng 2,2× kỳ vọng: tách 2 cực [222, 219] + 2 rìa, phủ 60,7% 2024; PCI khử năm p=0,0005."),
-        ("8D Quantile L=3 f=2 lv=1 mc=10 (3.2x exp)", list(range(8)), True, 3, 2, 1, 10, None, "8D sắc nét (sil 0,237)", "Cùng mc=10 như Uniform nhưng tách k=4 [168, 166, 12, 10], sil=0,237, PCI khử năm p=0,0023."),
+        ("8D Quantile L=3 f=2 lv=1 mc=7 (2.2x exp)", list(range(8)), True, 3, 2, 1, None, 2.2, "Phân tách tốt nhất 8D (phủ 56,6%)", "Cắt tại trung vị 8 trục với ngưỡng 2,2× kỳ vọng: tách 2 cực [222, 219] + 2 rìa, phủ {ho_cov:.1f}% 2024; PCI khử năm p=0,0005."),
+        ("8D Quantile L=3 f=2 lv=1 mc=10 (3.2x exp)", list(range(8)), True, 3, 2, 1, 10, None, "8D sắc nét (sil 0,237)", "Cùng mc=10 như Uniform nhưng tách k={k} {sizes}, sil={sil:.3f}, PCI khử năm p=0,0023."),
     ]
     ext_plot_df = pd.DataFrame()
-    for method_a, cols_a, use_q, nl_a, fac_a, lv_a, mc_a, mult_a, verdict_a, note_a in aq_specs:
+    for method_a, cols_a, use_q, nl_a, fac_a, lv_a, mc_a, mult_a, verdict_a, note_tmpl in aq_specs:
         Xtr_sub = X_tr8[:, cols_a]
         Xho_sub = X_ho8[:, cols_a]
         if use_q:
@@ -1036,6 +1038,12 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
             grid_txt = f"Uniform L={nl_a},f={fac_a},lv={lv_a},mc={mc_a}"
         ltr = mdl.cluster(level=lv_a, connectivity=1)
         lho = mdl.predict(Xho_sub)
+        k_a = int(mdl.n_clusters_)
+        sizes_a = sorted([int((ltr == c).sum()) for c in range(k_a)], reverse=True)
+        noise_a = 100.0 * float((ltr == -1).mean())
+        ho_cov_a = 100.0 * float((lho != -1).mean())
+        sil_a = _safe_sil(Xtr_sub, ltr)
+        note_a = note_tmpl.format(k=k_a, sizes=sizes_a, noise=noise_a, ho_cov=ho_cov_a, sil=sil_a)
         feat_str = "+".join(REGRESSION_FEATURES[i] for i in cols_a) if len(cols_a) < 8 else "8_screened_sd"
         summary_rows.append(
             _summarize_clustering(
@@ -1064,8 +1072,33 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
             ext_plot_df["regime_label"] = np.where(
                 ext_plot_df["cluster"] == high_c,
                 "C1: Vùng cao đa chiều",
-                np.where(ext_plot_df["cluster"] == low_c, "C0: Vùng thấp đa chiều", "Nhiễu (-1)"),
+                np.where(
+                    ext_plot_df["cluster"] == low_c,
+                    "C0: Vùng thấp đa chiều",
+                    np.where(ext_plot_df["cluster"] >= 0, "C2–C3: Cụm rìa nhỏ", "Nhiễu (-1)"),
+                ),
             )
+
+    # Verify 8D QuantileSTING on within-year z <=2023 (removes cross-year score trend completely)
+    mq_wy8 = QuantileSTING(n_levels=3, factor=2, density_multiplier=2.2, density_level=1).fit(X_wy8)
+    lq_wy8 = mq_wy8.cluster(level=1, connectivity=1)
+    summary_rows.append(
+        _summarize_clustering(
+            section="adaptive_quantile",
+            dataset="8D sàng lọc wy-z <=2023",
+            method="8D Quantile within-year z L=3 f=2 lv=1 mc=7",
+            dims_d=8,
+            features="8_screened_sd (wy-z)",
+            grid_spec=f"Quantile L=3,f=2,lv=1,mc={mq_wy8.effective_min_count_}",
+            labels_train=lq_wy8,
+            X_eval_train=X_wy8,
+            labels_holdout=None,
+            ref_2d_labels=ref_2d,
+            ext_frame=ext_tr8,
+            verdict="Tách đa cụm sau khử năm",
+            note="Sau chuẩn hóa within-year z (loại hoàn toàn xu hướng năm), mc=7 vẫn tách [232, 217, 7] và phân biệt PCI_dm.",
+        )
+    )
 
     # Also test QuantileSTING directly on 8D d1..d8 within-year z (2018-2024, n=430) vs robustness.csv
     for mc_d8, verdict_d8, note_d8 in [
@@ -1093,24 +1126,49 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
         )
 
     # Strict time-split 8D d1..d8 Quantile (2018-2023 train n=369 -> 2024 holdout n=61)
-    mq_d8_tr = QuantileSTING(n_levels=3, factor=2, density_multiplier=2.5, density_level=1).fit(X_d8_tr)
-    lq_d8_tr = mq_d8_tr.cluster(level=1, connectivity=1)
-    lq_d8_ho = mq_d8_tr.predict(X_d8_ho)
+    mq_d8_tr4 = QuantileSTING(n_levels=3, factor=2, density_multiplier=2.5, density_level=1).fit(X_d8_tr)
+    lq_d8_tr4 = mq_d8_tr4.cluster(level=1, connectivity=1)
+    lq_d8_ho4 = mq_d8_tr4.predict(X_d8_ho)
     summary_rows.append(
         _summarize_clustering(
             section="adaptive_quantile",
             dataset="8D d1..d8 2018–2023",
-            method="8D d1..d8 Quantile (2.5x exp, time-split -> 2024)",
+            method="8D d1..d8 Quantile mc=4 (2.5x exp, time-split)",
             dims_d=8,
             features="+".join(D_FEATURES_8),
-            grid_spec=f"Quantile L=3,f=2,lv=1,mc={mq_d8_tr.effective_min_count_}",
-            labels_train=lq_d8_tr,
+            grid_spec=f"Quantile L=3,f=2,lv=1,mc={mq_d8_tr4.effective_min_count_}",
+            labels_train=lq_d8_tr4,
             X_eval_train=X_d8_tr,
-            labels_holdout=lq_d8_ho,
+            labels_holdout=lq_d8_ho4,
             ref_2d_labels=None,
             ext_frame=ext_d8_tr,
-            verdict="Tổng quát hóa sang 2024",
-            note="Khớp biên quantile hoàn toàn trên 2018–2023 (n=369), suy diễn sang 2024 (n=61).",
+            verdict="Sụp 1 cụm ở mc=4 (n=369)",
+            note="Trên mẫu ngắn 2018–2023 (n=369), ngưỡng mc=4 gộp vùng lõi thành k=1 [204]; cần mc=5 để tách đa cụm.",
+        )
+    )
+    mq_d8_tr5 = QuantileSTING(n_levels=3, factor=2, min_count=5).fit(X_d8_tr)
+    lq_d8_tr5 = mq_d8_tr5.cluster(level=1, connectivity=1)
+    lq_d8_ho5 = mq_d8_tr5.predict(X_d8_ho)
+    sil_d8_tr5 = _safe_sil(X_d8_tr, lq_d8_tr5)
+    ho_cov_d8_tr5 = 100.0 * float((lq_d8_ho5 != -1).mean())
+    summary_rows.append(
+        _summarize_clustering(
+            section="adaptive_quantile",
+            dataset="8D d1..d8 2018–2023",
+            method="8D d1..d8 Quantile mc=5 (time-split -> 2024)",
+            dims_d=8,
+            features="+".join(D_FEATURES_8),
+            grid_spec="Quantile L=3,f=2,lv=1,mc=5",
+            labels_train=lq_d8_tr5,
+            X_eval_train=X_d8_tr,
+            labels_holdout=lq_d8_ho5,
+            ref_2d_labels=None,
+            ext_frame=ext_d8_tr,
+            verdict="Đa cụm & suy diễn sang 2024",
+            note=(
+                f"Khớp hoàn toàn trên 2018–2023 (n=369): tách k={mq_d8_tr5.n_clusters_}, "
+                f"Silhouette +{sil_d8_tr5:.3f}, phủ {ho_cov_d8_tr5:.1f}% holdout 2024 (n=61)."
+            ),
         )
     )
 
@@ -1163,7 +1221,7 @@ def run_study(root: Path = ROOT, write_outputs: bool = True) -> dict:
             ext_plot_df,
             figs_dir / "high_dim_sting_analysis.png",
         )
-        _write_markdown(summary_df, sparsity_df, clique_frontier_df, fs_2d_g, res_dir / "high_dim_sting.md")
+        _write_markdown(summary_df, sparsity_df, clique_frontier_df, fs_2d_g, ext_plot_df, res_dir / "high_dim_sting.md")
         _sync_excel_sheet(summary_df, res_dir / "KetQua_STING_PAPI.xlsx")
 
     return {
@@ -1180,24 +1238,34 @@ def _write_markdown(
     sparsity_df: pd.DataFrame,
     frontier_df: pd.DataFrame,
     fs_2d_g: pd.DataFrame,
+    ext_plot_df: pd.DataFrame,
     out_path: Path,
 ) -> None:
     def _row(method_name: str) -> pd.Series:
         return summary_df.loc[summary_df["method"] == method_name].iloc[0]
 
     r_2d = _row("2D Uniform (4.2, 6.1) L=3 f=4 lv=2 mc=5 (chính thức)")
+    r_2dq = _row("2D Quantile (4.2, 6.1) L=3 f=4 lv=2 mc=5")
     r_d8_base = _row("8D d1..d8 Uniform L=3 f=2 lv=1 mc=10 (robustness gốc)")
     r_d8_mc2 = _row("8D d1..d8 Uniform L=3 f=2 lv=1 mc=2 (OFAT robustness)")
     r_d8_q4 = _row("8D d1..d8 Quantile L=3 f=2 lv=1 mc=4")
     r_q8_mc7 = _row("8D Quantile L=3 f=2 lv=1 mc=7 (2.2x exp)")
+    r_q8_wy = _row("8D Quantile within-year z L=3 f=2 lv=1 mc=7")
     r_q8_mc10 = _row("8D Quantile L=3 f=2 lv=1 mc=10 (3.2x exp)")
     r_cq4 = _row("CLIQUE Quantile 4D (4.1..4.3, 6.3) tau=0.05")
     r_cu5 = _row("CLIQUE Uniform 5D (1.3, 4.1..4.4) tau=0.03")
     r_cu6 = _row("CLIQUE Uniform 6D (1.4, 4.1..4.4, 6.3) tau=0.03")
 
+    d2_f4 = sparsity_df.loc[(sparsity_df["spec"] == "f=4 lv=2 mc=5 (res=16)") & (sparsity_df["d"] == 2)].iloc[0]
     d3_f4 = sparsity_df.loc[(sparsity_df["spec"] == "f=4 lv=2 mc=5 (res=16)") & (sparsity_df["d"] == 3)].iloc[0]
     d4_f4 = sparsity_df.loc[(sparsity_df["spec"] == "f=4 lv=2 mc=5 (res=16)") & (sparsity_df["d"] == 4)].iloc[0]
     n_pass_2d = int(((fs_2d_g["n_clusters"] >= 2) & (fs_2d_g["noise_ratio"] <= 0.40)).sum())
+
+    med_dm = ext_plot_df.groupby("regime_label")["pci_dm"].median().to_dict()
+    med_raw = ext_plot_df.groupby("regime_label")["pci_weighted_score"].median().to_dict()
+    g0_dm = ext_plot_df.loc[ext_plot_df["regime_label"] == "C0: Vùng thấp đa chiều", "pci_dm"].dropna()
+    g1_dm = ext_plot_df.loc[ext_plot_df["regime_label"] == "C1: Vùng cao đa chiều", "pci_dm"].dropna()
+    p_mwu_c0_c1 = float(stats.mannwhitneyu(g0_dm, g1_dm).pvalue)
 
     lines = [
         "# Phân tích mở rộng STING đa chiều trên dữ liệu PAPI (2011–2024)",
@@ -1211,7 +1279,7 @@ def _write_markdown(
         "## 2. Kết quả chính theo 5 hướng kỹ thuật",
         "",
         "### 2.1. Thang thưa lưới theo số chiều (Curse of Dimensionality, d = 2..8)",
-        f"- Với lưới chính thức `f=4, lv=2, mc=5` (`16` ô/trục): ở `d=2` (`256` ô) nhiễu là `{100*r_2d['noise_ratio']:.1f}%`, nhưng sang `d=3` (`4.096` ô) chỉ còn `{int(d3_f4['dense_cells'])}` ô dày và nhiễu nhảy lên **`{100*d3_f4['noise_ratio']:.1f}%`**; tới `d=4` (`65.536` ô) còn **`{int(d4_f4['dense_cells'])}` ô dày (nhiễu `{100*d4_f4['noise_ratio']:.1f}%`)**; còn `d=8` cần tới `4,29 × 10^9` ô lá.",
+        f"- Với lưới chính thức `f=4, lv=2, mc=5` (`16` ô/trục): ở `d=2` (`256` ô, cặp `sd_1_3+sd_1_4`) nhiễu là `{100*d2_f4['noise_ratio']:.1f}%` (so với `{100*r_2d['noise_ratio']:.1f}%` trên cặp chuẩn `4.2, 6.1`), nhưng sang `d=3` (`4.096` ô) chỉ còn `{int(d3_f4['dense_cells'])}` ô dày và nhiễu nhảy lên **`{100*d3_f4['noise_ratio']:.1f}%`**; tới `d=4` (`65.536` ô) còn **`{int(d4_f4['dense_cells'])}` ô dày (nhiễu `{100*d4_f4['noise_ratio']:.1f}%`)**; còn `d=8` cần tới `4,29 × 10^9` ô lá.",
         "",
         "### 2.2. Chọn tập con đặc trưng (train <= 2023: 28 cặp 2D, 56 bộ ba 3D)",
         f"- Rà soát vét cạn chỉ trên `<=2023` cho thấy `{n_pass_2d}/28` cặp 2D (`f=4, lv=2, mc=5`) đạt `k>=2` và `nhiễu <= 40%`, nhưng `0/28` cặp tách thành hai khối cân bằng (`largest_cluster_share <= 90%`): bản chất phân bố PAPI cấp tỉnh trong không gian 2D–3D là **một vùng lõi dày đặc chiếm ưu thế (>90% điểm thuộc cụm) kèm các túi ngoại lai nhỏ**.",
@@ -1223,10 +1291,11 @@ def _write_markdown(
         "### 2.4. Chia lưới thích nghi QuantileSTING hiệu chuẩn mật độ kỳ vọng n/res^d",
         "- Trên không gian **8 chiều sàng lọc (`n=808`)** với `L=3, f=2, lv=1` (`2^8 = 256` ô, kỳ vọng `3,16` điểm/ô):",
         "  - **Uniform Equal-Width (`mc=10`)** bị lệch đuôi ngoại lai kéo giãn, gom toàn bộ `580` điểm thành **`k=1` cụm** (không phân tách).",
-        f"  - **QuantileSTING (`mc=7`, `2,2×` kỳ vọng)**: cắt theo trung vị train trên cả 8 trục, tách được **`k={int(r_q8_mc7['n_clusters'])}` chế độ** (`[222, 219, 8, 8]`, phủ **`{100*r_q8_mc7['coverage_train']:.1f}%`** train và **`{100*r_q8_mc7['holdout_2024_cov']:.1f}%`** holdout 2024), phân biệt rõ chỉ số ngoài **PCI khử theo năm (`p = {r_q8_mc7['ext_pci_dm_p']:.5f}`, trung vị `58,66` vs `64,43`)** và **GRDP khử theo năm (`p = {r_q8_mc7['ext_grdp_dm_p']:.4f}`)**.",
+        f"  - **QuantileSTING (`mc=7`, `2,2×` kỳ vọng)**: cắt theo trung vị train trên cả 8 trục, tách được **`k={int(r_q8_mc7['n_clusters'])}` chế độ** (`[222, 219, 8, 8]`, phủ **`{100*r_q8_mc7['coverage_train']:.1f}%`** train và **`{100*r_q8_mc7['holdout_2024_cov']:.1f}%`** holdout 2024), phân biệt rõ **PCI đã khử trung vị năm (`KW 4 cụm p = {r_q8_mc7['ext_pci_dm_p']:.5f}`, `MWU C0 vs C1 p = {p_mwu_c0_c1:.5f}`, trung vị `PCI_dm` `{med_dm['C0: Vùng thấp đa chiều']:+.2f}` vs `{med_dm['C1: Vùng cao đa chiều']:+.2f}`, cụm rìa C2–C3 `{med_dm['C2–C3: Cụm rìa nhỏ']:+.2f}`; trên PCI thô chưa khử năm là `{med_raw['C0: Vùng thấp đa chiều']:.2f}` vs `{med_raw['C1: Vùng cao đa chiều']:.2f}`)** và **GRDP khử theo năm (`p = {r_q8_mc7['ext_grdp_dm_p']:.4f}`)**.",
+        f"  - **Kiểm chứng khử xu hướng năm (`8D within-year z <=2023`, `mc=7`)**: ngay cả khi chuẩn hóa riêng trong từng năm để loại toàn bộ dịch chuyển điểm theo thời gian, QuantileSTING vẫn tách **`k={int(r_q8_wy['n_clusters'])}` cụm** (`{r_q8_wy['cluster_sizes']}`, phủ `{100*r_q8_wy['coverage_train']:.1f}%`, `PCI_dm p = {r_q8_wy['ext_pci_dm_p']:.5f}`), xác nhận đây không chỉ là hiệu ứng năm sớm/muộn.",
         f"  - **QuantileSTING (`mc=10`, `3,2×` kỳ vọng)**: tăng Silhouette lên **`{r_q8_mc10['silhouette_orig']:.3f}`** (`[168, 166, 12, 10]`, `PCI_dm p = {r_q8_mc10['ext_pci_dm_p']:.5f}`), nhiễu `{100*r_q8_mc10['noise_ratio']:.1f}%`.",
         f"- Trên đúng bộ **`8D d1..d8 (2018–2024, n=430)`** của `robustness.csv`, **QuantileSTING (`mc=4`)** hạ nhiễu xuống **`{100*r_d8_q4['noise_ratio']:.1f}%`** (vượt ngưỡng `<50%` so với `60,5%` của Uniform gốc) đồng thời nâng Silhouette lên **`+{r_d8_q4['silhouette_orig']:.3f}`** (so với `-0,089` của nhánh Uniform `mc=2`).",
-        "- **Giới hạn ngược chiều (không tô hồng):** ở lưới mịn **2D `16×16` (`sd_4_2, sd_6_1`)**, Quantile chia đều biên làm vỡ cụm lõi thành 24 mảnh nhỏ và tăng nhiễu lên `49,5%` (kém hơn hẳn Uniform `19,6%`, Silhouette `0,361`). Do đó **STING 2D đóng băng tiếp tục dùng lưới đều**, còn **Quantile & CLIQUE phát huy thế mạnh riêng ở không gian 3D–8D**.",
+        f"- **Giới hạn ngược chiều (không tô hồng):** ở lưới mịn **2D `16×16` (`sd_4_2, sd_6_1`)**, Quantile chia đều biên làm vỡ cụm lõi thành `{int(r_2dq['n_clusters'])}` mảnh nhỏ và tăng nhiễu lên `{100*r_2dq['noise_ratio']:.1f}%` (kém hơn hẳn Uniform `{100*r_2d['noise_ratio']:.1f}%`, Silhouette `{r_2d['silhouette_orig']:.3f}`). Do đó **STING 2D đóng băng tiếp tục dùng lưới đều**, còn **Quantile & CLIQUE phát huy thế mạnh riêng ở không gian 3D–8D**.",
         "",
         "### 2.5. Mở rộng PCA(2..4) so với baseline PCA(2) k=1",
         "- Lý giải nguyên nhân sụp 1 cụm của `PCA(2)`: `f=3, lv=2` (`81` ô) quá thô trước đám mây điểm `PCA(2)`. Khi tăng lên `f=4` (`16×16`) hoặc `PCA(3)` (`75,7%–76,1%` phương sai), STING tách được `2–5` cụm phụ nhưng vẫn chỉ là lõi lớn + túi rìa nhỏ và kém khả diễn giải trục so với Subspace CLIQUE / QuantileSTING.",

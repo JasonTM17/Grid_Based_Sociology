@@ -803,9 +803,13 @@ show_md(disp_hd.to_markdown(index=False))
 
 top_clq = hd_sub[(hd_sub["kind"] == "clique_subspace") & (hd_sub["n_clusters"] >= 2)].sort_values(
     ["k_dim", "silhouette_orig"], ascending=[False, False]
-).head(8)
+).head(8).copy()
+top_clq["coverage_train"] = top_clq["coverage_train"].map(lambda v: f"{100*v:.1f}%")
+top_clq["silhouette_orig"] = top_clq["silhouette_orig"].map(lambda v: "—" if pd.isna(v) else f"{v:.3f}")
+top_clq["holdout_2024_cov"] = top_clq["holdout_2024_cov"].map(lambda v: "—" if pd.isna(v) else f"{100*v:.1f}%")
+top_clq["ext_pci_dm_p"] = top_clq["ext_pci_dm_p"].map(lambda v: "—" if pd.isna(v) else f"{v:.4g}")
 print("Top 8 không gian con đa cụm nổi bật từ Subspace CLIQUE Apriori:")
-show_md(top_clq[["dataset", "adaptive", "k_dim", "features", "coverage_train", "silhouette_orig", "holdout_2024_cov", "cluster_sizes"]].to_markdown(index=False))
+show_md(top_clq[["dataset", "adaptive", "k_dim", "features", "coverage_train", "silhouette_orig", "holdout_2024_cov", "ext_pci_dm_p", "cluster_sizes"]].to_markdown(index=False))
 display(Image(filename=str(ROOT / "results/figs/high_dim_sting_analysis.png")))"""))
 
     nb["cells"] = cells

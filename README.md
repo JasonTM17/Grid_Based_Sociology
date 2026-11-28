@@ -93,7 +93,7 @@ Grid_Based_Sociology/
 │   ├── raw/                   #   Dữ liệu gốc & PROVENANCE.md từng nguồn (course/ lưu local)
 │   └── processed/             #   Panel PAPI 882×41 & các bảng dữ liệu ngoài đã làm sạch
 ├── models/                    # Model STING (.pkl), scaler JSON và joblib hồi quy/phân loại
-├── results/                   # Kết quả CSV/MD/JSON, KetQua_STING_PAPI.xlsx (25 sheet) & figs/
+├── results/                   # Kết quả CSV/MD/JSON, KetQua_STING_PAPI.xlsx (27 sheet) & figs/
 ├── tests/                     # Bộ kiểm thử pytest toàn dự án
 └── assets/                    # Ảnh bìa repo & mẫu XML trang bìa báo cáo
 ```
@@ -267,12 +267,12 @@ python scripts/supervised/predict_supervised.py   # 3) model ML có giám sát (
      `Hồi quy chuyên sâu` trong Excel.
    - **Mở rộng STING đa chiều (`src/high_dim.py`, `scripts/analysis/high_dim_sting.py`):** giải quyết
      hạn chế `60,5%` nhiễu ở `8` chiều đều và `k=1` ở `PCA(2) d1–d6` (`results/robustness.csv`) bằng
-     bốn hướng thuần `<= 2023` không rò rỉ holdout `2024`: (i) thang thưa lưới `d=2..8` (`19,6% → 93,9% → 100%` ở `f=4`);
+     bốn hướng thuần `<= 2023` không rò rỉ holdout `2024`: (i) thang thưa lưới `d=2..8` (`24,1% → 93,9% → 100%` ở `f=4` trên `sd_1_3..`; `19,6%` trên `4.2, 6.1`);
      (ii) chọn `C(8,2)/C(8,3)` xác nhận cấu trúc 1 lõi chi phối (`0/28` cặp có cụm chính `≤ 90%`);
      (iii) **Subspace CLIQUE Apriori** đến `5D–6D` (`5D` đều phủ `41,0%`, `4D` Quantile đạt Silhouette `0,772`);
      và (iv) **QuantileSTING** hiệu chuẩn `n/res^d` (`8D` sàng lọc `mc=7` tách `k=4 [222, 219, 8, 8]`,
-     phủ `56,6%` train / `60,7%` `2024`, PCI khử năm `p = 0,0005`; trên `d1–d8` hạ nhiễu còn `44,7%`, Silh. `+0,161`).
-     Trên lưới mịn `2D 16×16` (`4.2, 6.1`), lưới đều vẫn ưu thế (`19,6%` vs `49,5%`), nên STING `2D`
+     phủ `56,6%` train / `60,7%` `2024`, PCI khử năm `p = 0,0005`, và giữ `k=3 [232, 217, 7]` ngay cả sau chuẩn hóa `within-year z`; trên `d1–d8` hạ nhiễu còn `44,7%`, Silh. `+0,161`).
+     Trên lưới mịn `2D 16×16` (`4.2, 6.1`), lưới đều vẫn ưu thế (`19,6%` vs `49,0%`), nên STING `2D`
      `3/4/5/2` giữ nguyên làm chuẩn chính. Nguồn: `results/high_dim_sting.{csv,md}`,
      `results/high_dim_sting_subspaces.csv`, `results/figs/high_dim_sting_analysis.png` và sheet `STING đa chiều`.
    - **Phân loại phụ:** dự báo pseudo-label STING cutoff-local cho năm sau, với expanding

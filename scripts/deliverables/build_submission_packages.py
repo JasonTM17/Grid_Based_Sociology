@@ -331,7 +331,7 @@ Sinh viên thực hiện:
 ├── app.py                              Dashboard Streamlit (chạy: streamlit run app.py)
 ├── requirements.txt                    Danh mục thư viện Python cố định
 ├── HUONG_DAN.txt                       Tệp hướng dẫn này
-├── src/                                Mã nguồn lõi STING & tiền xử lý
+├── src/                                Mã nguồn lõi STING, tiền xử lý & mở rộng đa chiều
 ├── scripts/                            Script tái lập panel, phân tích, dự báo & khách hàng
 ├── reports/                            Hướng dẫn khách hàng, nguồn dữ liệu và phân tích bổ sung
 ├── data/                               14 workbook PAPI gốc, Mendeley & nguồn đối chiếu ngoài
@@ -377,9 +377,11 @@ bốn tài liệu chính được chuyển lên cấp đầu để mở thuận 
   notebooks/{ANALYSIS_NOTEBOOK} -> {ANALYSIS_NOTEBOOK}
   notebooks/{PREPROCESSING_NOTEBOOK} -> {PREPROCESSING_NOTEBOOK}
 
-results/future_work.md, bốn CSV future_work_*, hình tổng hợp và mã
-scripts/analysis/future_work.py được kèm để đối chiếu Mục 6.7 và kết luận slide.
-Đây là thực nghiệm thăm dò, không thay thế kết quả chính hay kiểm chứng độc lập.
+results/future_work.md, bốn CSV future_work_*, kết quả hồi quy chuyên sâu
+(regression_deep_analysis.*) và mở rộng STING đa chiều (high_dim_sting.*,
+src/high_dim.py, scripts/analysis/high_dim_sting.py) được kèm để đối chiếu
+Mục 5.4, 5.5, 6.7 và kết luận slide. Đây là thực nghiệm thăm dò, không thay
+thế kết quả chính hay kiểm chứng độc lập.
 Các bản thử nghiệm ứng viên lẻ (`candidates_*.md`), tài liệu ôn tập và phiếu rà soát chuyên viên
 không thuộc gói nộp. Các liên kết tới chúng mở trên repo khi cần đối chiếu.
 

@@ -11,20 +11,20 @@
     },
     {
       "path": "HUONG_DAN.txt",
-      "bytes": 6304,
-      "sha256": "34c3010fb78b97c46f32102c56b562a7c35cae0243e317d2249406dcac801131",
+      "bytes": 6450,
+      "sha256": "e9fc02e377113df5aa1a38ffc0818399c69bd8262af89f7a81a078e0dae8ce33",
       "role": "Hướng dẫn mở và chạy lại đồ án"
     },
     {
       "path": "Nhom15_BaoCao_STING_PAPI.docx",
-      "bytes": 3335180,
-      "sha256": "306b62d69ffaa2d225e78cdf57939ec424b3baf9bbc40793b95df9e87ab122c7",
+      "bytes": 3335402,
+      "sha256": "a81abf4d68a823357e9c50168ff216db151b444c1e501333f46694cd8d905483",
       "role": "Báo cáo đồ án thống nhất (Word có mục lục và danh mục tự động)"
     },
     {
       "path": "Nhom15_STING_PAPI.ipynb",
-      "bytes": 9155640,
-      "sha256": "6bd13e8e8a408cf2383195e3f54e95abacd444dc715f134e2f3d1c34f1f492fa",
+      "bytes": 9178980,
+      "sha256": "7b199fd850e45bf4f019d8e797cd8aa501e97cad52e90317e774faf68e640f05",
       "role": "Notebook phân tích STING × PAPI & Thống kê khách hàng đã lưu kết quả"
     },
     {
@@ -41,8 +41,8 @@
     },
     {
       "path": "app.py",
-      "bytes": 90675,
-      "sha256": "49d703890378cb0cfbcc180867f00fa58fb60b22825f7207cbf45cfc2491b7b3",
+      "bytes": 92516,
+      "sha256": "97f3d1f38c54d2b881a7758c1b7dc0a881eb8b9750fef5c76cda738c5a5d1faa",
       "role": "Ứng dụng dashboard Streamlit tương tác (6 tab, gồm Thống kê khách hàng)"
     },
     {
@@ -371,8 +371,8 @@
     },
     {
       "path": "results/KetQua_STING_PAPI.xlsx",
-      "bytes": 204144,
-      "sha256": "0b208e15681a0e3b1bd73305b96b9e45a10221f6d8ca5e26199fafd71da8a450",
+      "bytes": 205376,
+      "sha256": "e1141e9832a5d2ab1a7b0e5e84cdbf6ecb1d8206b701afeb97f1efd8641e20ef",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -497,8 +497,8 @@
     },
     {
       "path": "results/figs/high_dim_sting_analysis.png",
-      "bytes": 423765,
-      "sha256": "281ea4d5fdbb7318d4faf2341d55835c45eb3fd5e1cb462950f8d4e4bf949219",
+      "bytes": 440369,
+      "sha256": "0e5a9b52ceb40cdb498f4dfbb36ab979fd175220afab53d7c1b168c8804fd220",
       "role": "Hình minh họa trong báo cáo, slide và notebook"
     },
     {
@@ -629,14 +629,14 @@
     },
     {
       "path": "results/high_dim_sting.csv",
-      "bytes": 14837,
-      "sha256": "7d2a4a8e15848de49169b03ad1c6dd12f3a2327c0a3cd23d6d024cb67d8f9fe1",
+      "bytes": 18916,
+      "sha256": "183f21af7caaa315d3f8a69af3ffda647547ed138a126d55ff90f5fc5334a0fb",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
       "path": "results/high_dim_sting.md",
-      "bytes": 5845,
-      "sha256": "db7d52662a2422f2758705ea5e9585154b00c26082279e723574bc9604ae1424",
+      "bytes": 6411,
+      "sha256": "ec62f986b8631cd8a623f4a64c9cfd7f5ce7204dfd034ab725c01e3e88bf80b7",
       "role": "Bảng kết quả thực nghiệm và thống kê bàn giao"
     },
     {
@@ -845,8 +845,8 @@
     },
     {
       "path": "scripts/analysis/high_dim_sting.py",
-      "bytes": 64086,
-      "sha256": "1b52c1324e1f5061dc337878bc5629ae37a8eb9d4eadbcd28b41a4fde85d87dc",
+      "bytes": 68736,
+      "sha256": "17cfe3b29268ef5fe0cfedd8b1818c0e18d5573d9c8778858daa7e434f613515",
       "role": "Mã tái lập dữ liệu, phân tích, hình vẽ và dashboard"
     },
     {
@@ -1001,8 +1001,8 @@
     },
     {
       "path": "src/high_dim.py",
-      "bytes": 18259,
-      "sha256": "d428ead7c4261b2c8638c1ec02cebf96fda833865ee88243acf86a031e6014e5",
+      "bytes": 20815,
+      "sha256": "8729ef9fc76240ce45b7a08e71945386d513fc5bef72512d318c389b6bb6a6b4",
       "role": "Mã nguồn mở rộng STING đa chiều: QuantileSTING, SubspaceCLIQUE và thang thưa lưới"
     },
     {

@@ -121,11 +121,34 @@ class QuantileSTING:
             effective_mc = max(1, int(round(0.02 * n)))
         self.effective_min_count_ = effective_mc
 
-        self.sting_ = STING(
+        max_res = self.factor ** (self.n_levels - 1)
+        grid_cells = max_res ** d
+        if max_res > _MAX_GRID_CELLS or grid_cells > _MAX_GRID_CELLS:
+            raise ValueError(
+                f"lưới quá lớn (res={max_res}, số ô={grid_cells}); "
+                f"giảm n_levels, factor hoặc số chiều (giới hạn {_MAX_GRID_CELLS} ô)"
+            )
+
+        sting = STING(
             n_levels=self.n_levels,
             factor=self.factor,
             min_count=effective_mc,
-        ).fit(warped)
+        )
+        sting.n_samples_, sting.n_dims_ = n, d
+        varying = self.warper_.train_max > self.warper_.train_min
+        sting.bounds_min_ = np.where(varying, 0.0, 0.5)
+        sting.bounds_max_ = np.where(varying, 1.0, 1.5)
+        sting.min_count_ = effective_mc
+        sting.cells_ = {}
+        sting._point_idx_ = {}
+        sting._flat_ = {}
+        for level in range(self.n_levels):
+            res_l = self.factor ** level
+            idx, flat = sting._assign(warped, res_l)
+            sting._point_idx_[level] = idx
+            sting._flat_[level] = flat
+            sting.cells_[level] = sting._accumulate(warped, flat, res_l, level)
+        self.sting_ = sting
         return self
 
     def cluster(self, level: int | None = None, connectivity: int = 1) -> np.ndarray:
@@ -174,16 +197,25 @@ class SubspaceCLIQUE:
 
     def _compute_edges(self, col: np.ndarray) -> tuple[float, float, np.ndarray]:
         lo, hi = float(col.min()), float(col.max())
-        if self.adaptive:
-            edges = np.quantile(col, np.linspace(0.0, 1.0, self.n_bins + 1))
+        if hi <= lo:
+            span = max(1.0, abs(lo) * 1e-6)
+            edges = np.linspace(lo, lo + span, self.n_bins + 1)
             for idx in range(1, len(edges)):
                 if edges[idx] <= edges[idx - 1]:
-                    edges[idx] = edges[idx - 1] + 1e-9
+                    edges[idx] = float(np.nextafter(edges[idx - 1], np.inf))
+            return lo, hi, edges
+        if self.adaptive:
+            edges = np.quantile(col, np.linspace(0.0, 1.0, self.n_bins + 1))
+            span = hi - lo
+            for idx in range(1, len(edges)):
+                if edges[idx] <= edges[idx - 1]:
+                    step = max(span * 1e-9, abs(edges[idx - 1]) * 1e-12, 1e-15)
+                    cand = edges[idx - 1] + step
+                    if cand <= edges[idx - 1]:
+                        cand = float(np.nextafter(edges[idx - 1], np.inf))
+                    edges[idx] = cand
         else:
-            if hi <= lo:
-                edges = np.linspace(lo, lo + 1.0, self.n_bins + 1)
-            else:
-                edges = np.linspace(lo, hi, self.n_bins + 1)
+            edges = np.linspace(lo, hi, self.n_bins + 1)
         return lo, hi, edges
 
     def _digitize(self, X: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -274,6 +306,16 @@ class SubspaceCLIQUE:
             key=lambda item: (len(item), item),
         )
 
+    def _normalize_dims(self, dims: Iterable[int]) -> tuple[int, ...]:
+        dims_list = [int(v) for v in dims]
+        if not dims_list:
+            raise ValueError("dims không được rỗng")
+        if len(set(dims_list)) != len(dims_list):
+            raise ValueError(f"dims chứa chiều trùng lặp: {dims_list}")
+        if any(v < 0 or v >= self.n_dims_ for v in dims_list):
+            raise ValueError(f"dims phải thuộc [0, {self.n_dims_ - 1}], nhận {dims_list}")
+        return tuple(sorted(dims_list))
+
     def extract_subspace(
         self,
         dims: tuple[int, ...] | Iterable[int],
@@ -282,7 +324,15 @@ class SubspaceCLIQUE:
         """Gom cụm các đơn vị dày kề mặt trong không gian con ``dims``."""
         if not hasattr(self, "dense_by_dims_"):
             raise RuntimeError("Hãy gọi fit(X) trước khi extract_subspace()")
-        dims_t = tuple(int(v) for v in dims)
+        dims_t = self._normalize_dims(dims)
+        if X_raw is not None:
+            X_eval = _validate_matrix(X_raw, "X_raw")
+            if X_eval.shape != (self.n_samples_, self.n_dims_):
+                raise ValueError(
+                    f"X_raw cần shape ({self.n_samples_}, {self.n_dims_}), nhận {X_eval.shape}"
+                )
+        else:
+            X_eval = self.train_X_
         cmap = self.dense_by_dims_.get(dims_t, {})
         n = self.n_samples_
         labels = np.full(n, -1, dtype=int)
@@ -336,7 +386,6 @@ class SubspaceCLIQUE:
         mask = labels != -1
         cov = float(mask.mean())
         ncl = len(comp_scored)
-        X_eval = self.train_X_ if X_raw is None else _validate_matrix(X_raw, "X_raw")
         if ncl >= 2 and int(mask.sum()) > ncl:
             sil = float(silhouette_score(X_eval[mask][:, list(dims_t)], labels[mask]))
         else:
@@ -389,6 +438,10 @@ def high_dim_sparsity_grid(
 ) -> list[dict]:
     """Đo độ thưa lưới STING khi tăng dần số chiều d với cấu hình (n_levels, factor, min_count, level)."""
     arr = _validate_matrix(X, "X")
+    if n_levels < 1 or factor < 2 or min_count < 0:
+        raise ValueError("n_levels >= 1, factor >= 2 và min_count >= 0")
+    if not (0 <= level < n_levels):
+        raise ValueError(f"level phải thuộc [0, {n_levels - 1}], nhận {level}")
     max_d = arr.shape[1]
     res = int(factor ** level)
     max_res = int(factor ** (n_levels - 1))

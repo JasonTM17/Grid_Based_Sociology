@@ -547,7 +547,7 @@ with sting_tab:
 
                 comp_hd = hd_sum.loc[
                     hd_sum["section"].isin(
-                        ["baseline_robustness", "subspace_clique", "adaptive_quantile", "pca_followup"]
+                        ["baseline_robustness", "feature_selection", "subspace_clique", "adaptive_quantile", "pca_followup"]
                     )
                 ].copy()
                 comp_hd["Nhiễu (%)"] = (100.0 * comp_hd["noise_ratio"]).round(1)
@@ -582,6 +582,44 @@ with sting_tab:
                     }
                 )
                 st.markdown(disp_hd.to_markdown(index=False))
+
+                hd_sub = high_dim["subspaces"]
+                top_clq = (
+                    hd_sub.loc[(hd_sub["kind"] == "clique_subspace") & (hd_sub["n_clusters"] >= 2)]
+                    .sort_values(["k_dim", "silhouette_orig"], ascending=[False, False])
+                    .head(6)
+                    .copy()
+                )
+                if not top_clq.empty:
+                    st.markdown("**Top không gian con đa cụm (Subspace CLIQUE Apriori)**")
+                    top_clq["Phủ train (%)"] = (100.0 * top_clq["coverage_train"]).round(1)
+                    top_clq["Phủ 2024 (%)"] = top_clq["holdout_2024_cov"].map(
+                        lambda v: "—" if pd.isna(v) else f"{100.0 * float(v):.1f}%"
+                    )
+                    top_clq["Silhouette"] = top_clq["silhouette_orig"].map(
+                        lambda v: "—" if pd.isna(v) else f"{float(v):.3f}"
+                    )
+                    disp_clq = top_clq[
+                        [
+                            "dataset",
+                            "adaptive",
+                            "k_dim",
+                            "features",
+                            "Phủ train (%)",
+                            "Silhouette",
+                            "Phủ 2024 (%)",
+                            "cluster_sizes",
+                        ]
+                    ].rename(
+                        columns={
+                            "dataset": "Tập dữ liệu",
+                            "adaptive": "Quantile",
+                            "k_dim": "d",
+                            "features": "Không gian con",
+                            "cluster_sizes": "Kích thước cụm",
+                        }
+                    )
+                    st.markdown(disp_clq.to_markdown(index=False))
 
 if regression_tab.open:
     with regression_tab:
